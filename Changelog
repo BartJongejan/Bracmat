@@ -1,0 +1,1161 @@
+    9 February 2012
+
+Corrected error in doPosition that was introduced with the latest
+optimizations: the QGETAL bit was checked without also checking the
+IS_OPERATOR bit. Found also an instance of QBREUK were this error
+might have been made. (The MINUS, QBEUK, QGETAL and QNUL bits are
+only valid on leaf nodes.)
+
+     4 February 2012
+
+Discovered that "greater than" relation implemented in the vgl function
+wasn't transitive:
+(1a.)+(10.)      -> (10.)+(1a.)
+(1a.)+(10.)+(2.) -> (1a.)+(2.)+(10.)
+Thus the order of (10.) and (1a.) depends on other terms.
+Now the rule is: 
+1) any number is smaller than any non-number
+2) numbers are compared numerically
+3) non-numbers are compared with strcmp
+
+    25 January 2012
+
+Improved handling of negative positions (positions counted from the end)
+in lists, sums and products.
+
+    24 January 2012
+
+doPosition is buggy
+    a (c,d): ? [-1
+
+expressionLength  counts the wrong way. It must look at the top level operator 
+in the pattern containing the [ and count 1 + the number of this operator 
+until the end of the list. 0 if [ is last in the pattern.
+
+    20 January 2012
+
+The previous change moved the scanning pointer to the point in the subject
+where the rhs pattern starts. The current change moves the end of the
+subject as far as necessary to the right to allow a full match of the rhs
+pattern with last characters of the subject. Of course, this is only possible
+if the final zero byte has not been reached. The calling instance of
+stringmatch defines the end of the subject for the called instance. The called
+instance can propose to move the end. In this way, scanning can move much
+faster if a patterns contains some fixed strings. Speed-up does not work for
+alternations of fixed srings. Speed-up only works for the first pattern
+in a series of patterns connected by :
+
+    7 January 2012
+
+If an non-initial part of a stringpattern is a string, then the scanning
+pointer jumps to the first (or next) occurrence in the subject string after
+the first mismatch.
+
+This changes the behaviour of some patterns, such as in
+@(abXk:(|? b|`) X ?id)
+Before, the match failed, because the 'b' in the pattern did not match the
+'a' in the subject. Now, nowing that the first X occurs in the third position,
+the pattern matcher not even tries to match 'a' and 'b' and so the expression
+succeeds. In many cases the (|? b|`) pattern works as before, though:
+@(abXk:(|? b|`) (X|Y) ?id)
+@(abXk:(|? b|`) () X ?id)    dangerous! Does not work in @(ab:(|? b|`) ())
+@(abXk:(|? b|`) !(=X) ?id)
+X:?x
+@(abXk:(|? b|`) !x ?id)
+
+It is not advisable to use this pattern anymore. It is too much dependent on
+pattern matching not being optimized.
+
+    6 January 2012
+
+Compiled 64 bit version with VS 2008. Had to use _WIN64 and some #defines,
+because longs are 32 bit under VS 2008, whereas longs under gcc are 64 bits.
+Also used the 64 bit versions of ftell and fseek in the VS 2008 case.
+
+For 64 bit I have these preprocessor defines
+NDEBUG;__CONSOLE__;__WIN32__;WIN32;_CONSOLE;_CRT_SECURE_NO_WARNINGS
+
+(Some of these are automatically set in the 32 bit version).
+
+Impression is that the 32 bit version should be used unless you have to deal
+with enormous data (memory, file) or huge numbers (because numerical
+computations are faster and bigger numbers can be factorized quickly using
+exponentiation with a fractional exponent).
+Otherwise, the 64 bit version is significantly slower and has almost three
+times less stack depth.
+
+    2 January 2012
+
+Made stringmatch 'greedy' to an extend that does not change the program's
+behaviour. (That is: all tests in valid.bra go through). Many string
+comparisons now continue past the cutoff position deviding the subject in a
+lhs and a rhs, pushing the devision point to the position where the lhs
+patterns succeeds. Previously this point repeatedly was moved one byte until
+the lhs pattern either succeeded or definitely failed. The optimization is
+turned off for alternating patterns and for all but the first pattern in a
+chain of patterns connected by : operators.
+
+The normal (non-string) match is not optimized. It is questionable whether that
+would be worthwhile. Not many patterns require repeated elongation of the part
+of the subject left of the division point.
+
+However, CUTOFFSUGGEST is set to 0. The overhead does seem to outweigh the
+optimization!
+
+
+    21 December 2011
+
+The last changes had introduced a bug: the [ and ` flags were not (always) printed.
+
+    16 December 2011
+
+Repaired two bugs in doPosition. The first bug made the FENCE flag disappear
+from the result if the program was built in debug mode in VS2008, which made
+the program run as expected, the other bug was that the FENCE flag was
+returned if the first bug was removed.
+
+    14 December 2011
+
+Updated unicode case conversions with data found in the most recent 
+http://unicode.org/Public/UNIDATA/UnicodeData.txt (17-Aug-2010)
+
+    7 December 2011
+
+Introduced lambda. Syntax similar to macro.
+
+                (λx.x)y
+translates to
+                /('(x.$x))$y
+
+    1 December 2011
+
+Rewrote evalmacro to only copy data where necessary.
+Bracmat now tests ok with valid.bra and with REFCOUNTSTRESSTEST set to 1
+
+    30 November 2011
+
+Found and solved bugs in merge() that only became visible with
+REFCOUNTSTRESSTEST set to 1.
+
+    22 November 2011
+
+Rewrote evalmacro to only copy cells where necessary.
+
+    7 November 2011
+
+A result of a macro evaluation nested inside an macro was not visited by the
+macro evaluator because the heading = operator had its READY flag set.
+
+    3 November 2011
+
+Nicified find and getmember calls, collapsing the last three arguments into
+one objectStuff struct.
+
+    2 November 2011
+
+Made better sense of [<> (equivalent to [~) and [~<> (equivalent to [).
+Introduced [% prefix. The expression reigned by [% in a pattern is evaluated.
+The success or failure of the expression is the result of the match.
+This functionality is similar to patterns that are function calls: in both
+cases the current subject is stored in a local variable sjt. In contrast to
+the function call, the expression's evaluated value is not itself matched 
+against the subject.
+Contrary to other uses of the % prefix, [% CAN match a nul object.
+
+    1 November 2011
+
+Changed signature of find, getmember, naamwoord and naamwoord_w. Before, these
+functions returned TRUE or FALSE, while the binding was returned in a
+pointer-to-a-pointer. The program is a bit quicker (approx. 5%).
+
+    30 October 2011
+
+The expression    a^(b*d+c*d)
+                * (a^(b*f+c*f)+a^(e*b+e*c))
+              + -1*(a^((b+c)*(d+e))+a^((b+c)*(d+f)))
+did not evaluate to 0. Solved.
+
+    25 October 2011
+
+After a change in handling the pattern ?^? (20100806) the function fct didn't
+work anymore. The function has been completely reimplemented.
+Also changed sub so it cannot go in infinite regress.
+
+    12 September 2011
+
+Now you can do:
+    (=)=5
+This extension mirrors
+    5:?(=)
+This rather useless extension restores consistency. 
+
+   2 September 2011 
+
+Corrected error in evalmacro. Inserted binary operator nodes where deemed to
+fail when evaluated later on.
+
+   31 August 2011
+
+The escape operator ()$ in patterns can now be used to test for flags on the
+subject, as in (=?a):(=$!|$?). A special case is when the rhs is an empty atom
+with no flags. This pattern only matches subjects with no flags. In all other
+cases, if one or more flags are present in the rhs, the subject must have
+these flags as well, and possibly even more.
+
+If the rhs is an atomic node with a non-empty string, the rhs can only match
+atomic subjects with the same string. (But possibly with flags that are not
+specified in the rhs.)
+
+   29 August 2011
+
+The use of $ as "escape operator" is now taken one step further. One can now
+use $ to escape any operator in a pattern, so that the otherwise problematic
+operators = | & : ' $ _ can be pacified and parsed, as in
+ (=foo$bar):(=$(?functionname$?argument))
+              ^              ^----------------escaped operator
+              ^-------------------------------escape
+
+I decided to go from 'version 4' to 'version 5' to indicate that there are
+some backward incompatabilities:
+    (1)
+The $ operator can no longer be used to glue flags to and atom:
+?$a ---> ?a            (pre-version 5)
+glf'(=?.a) ---> ?a     (version 5)
+The reason is that in patterns, a $ with emtpty lhs is used as escape operator
+and not a function call.
+    (2)
+In order to evaluate the _ operator in macros, it must be headed by a $ 
+operator with empty lhs. Before, the _ operator was always evaluated in a
+macro context.
+
+   23 August 2011
+Inside macros the $ can be used as escape operator to insert a $ with empty
+lhs in the evaluated macro, as in 
+    '('foo ()$($bar) )
+which results in 
+    ='foo ()$bar
+
+Also, the _ operator is from now on left untouched in a macro unless escaped.
+This made it necessary to adapt a few bracmat scripts, e.g. the cat$ function
+defined in bracmat.c.
+
+   19 August 2011
+
+You can now do this: '($(=$x))
+Previously, you had to do this in two steps: flabber=$x & '($flabber)
+You also can do this: '('($(=$b))) which evaluates to ='$b
+
+
+   26 July 2011
+There was a problem with the ! and !! flags in connection with the flg 
+function. In flg$(=!a):(=?X.?Z) the assignment to X wouldn't succeed, because
+in the result (=!.a) of the evaluation of flg$(=!a), the element ! had the
+READY flag set. Now the '!' has the READY flag unset, while the 'a' has it set.
+
+Documented the clk$ function in help (and bracmat.html).
+
+   29 June 2011
+Changed a few ints to long to get rid of type casts.
+
+   21 June 2011
+Converted this source code to UTF-8.
+
+    5 May 2011
+The expression ((==.lst$its).)' tried to list an object that was gone.
+Now it works. The listed object is =.lst$its
+Notice how recursion can be implemented with a 'lambda method' that has access
+to itself ('its'):
+
+( (==a b.!arg:?a_?b&((its.)$!b)_((its.)$!a)|!arg) . ) ' (x y^g (z,8.L))
+
+This recursively swaps lhs and rhs of all operators in the argument
+
+    2 April 2011
+An expression like (x=!x)&!x now results in an endless loop, not a stack
+overflow as before.
+
+    31 March 2011
+Stackoverflow occurred if an uninitialised variable was assigned to the
+variable itself - directly or indirectly. The problem has been solved for
+cases like
+
+    !y a:?x a
+
+where the atom !y has the READY flag set when the assignment is attempted.
+
+The problem can be solved completely, but at a price, namely if
+
+    (=!y):(=?x)
+    
+is made to fail. I consider this price as too high for now.
+
+    16 March 2011
+Arithmetic more complex than adding is now done with much higher radix.
+For small numbers compuations are a little bit slower, because of conversions
+to and from character strings. For large numbers, timings are magnitudes
+better. Multiplication of two 200000 digits numbers is about 100 times faster.
+Computation of the first 1000 decimals of pi is about 20 times faster.
+
+For 32 bit systems, a radix of 10000 is chosen. For 64 bit systems
+a radix of 100000000 is found to be appropriate. 
+
+    27 February 2011
+Removed a lot of dead wood and renamed a few variables to English.
+
+    21 February 2011
+Rewrite of bmalloc, bfree and initialization of memory. Memory now expands
+dynamically: when a there are no more free memory blocks of 1,2 or 3 (4, 5, 6)
+words available, a new pool of memory blocks for the depleted size is created,
+doubling the number of blocks in the already allocated pools for that size.
+Removed a bug that caused (a=7)&!(a*1) to fail.
+
+    11 January 2011
+The @ is again removed from non-nil atoms. Reason: the @ flag is used on a 
+non-nil atom to indicate that backslashes in the atomstring must be
+interpreted litterally, i.e. @"d:\bracmat" is equivalent to "d:\\bracmat"
+
+This change has no consequence for the stringmatch functionality 
+introduced 20101122.
+
+    6 January 2011
+Conditionally (NP) #defined opbnowis()
+Extra parentheses in line 6932
+
+    25 November 2010
+Solved bug in merge().
+
+    22 November 2010
+In stringmatch, the % can be used to force characterwise matching if the
+pattern is a number. For that reason, the % and @ are no longer removed from
+non-nil atoms as superfluous.
+One has to take care with minusses: the patterns %"-20/5" and %-20/5 are
+different. In %"-20/5", the % is superfluous and the pattern matches
+characterwise. In %-20/5, the pattern matches 20/5 and the minus is ignored!
+
+    19 November 2010
+Some tests to check that the position flag is followed by an integer number
+and that the flag % doesn't occur.
+Made sure that mod$ and div$ fail if second argument is zero.
+
+    15 November 2010
+Evaluation of sums and products is now iterative instead of recursive.
+Also, two sums or products are neatly merged instead of appended and thereafter
+bubble sorted. Result: much faster processing of very large sums and products
+and no danger of stack overflow.
+For short sums, the implementation has become a little bit slower, because
+I reverted to older, but simpler code that makes more allocations and
+deallocations.
+
+    8 November 2010
+Made some minor changes such as int -> size_t.
+Most radical change is introduction of function Entry2 which is like Entry,
+only with lower level of indirection. Entry2 replaces Entry in three places.
+
+    3 November 2010
+Improved percolation of filter flags < > # / @ %
+
+    1 November 2010
+The built-in function now returns IMPLIEDFENCE if the subject string in
+a stringmatch is too long or if it cannot be grown to a valid UTF-8
+multibyte sequence. Previously, the FENCE flag was set, but this had
+the side effect that utf$ couldn't easily be used as the lhs of a match.
+
+Change to flt$ : flt$(0,...) now returns 0 instead of failing. Replaced
+get$(...,MEM,VAP): ... with @(...:...).
+
+    27 October 2010
+In bmalloc, all bytes are set to 0, not just the last one.
+Reason: if all elements of size X are in use, bmalloc may return
+a bigger sized element, of which the last four bytes will not be
+used at all. Instead, some earlier bytes must be set to 0.
+
+    22 October 2010
+Trailing closing parentheses were accepted on equal footing with '\0' bytes.
+------------------------------------
+Version  4 build 75 (18 October 2010)
+------------------------------------
+The function expandProduct turned off the READY flag on all processed output,
+even if the result was atomic and therefore ready.
+Consequence: (1+i)*(1+-i) was evaluated to non-ready value 2, which could
+not successfully be used in further computations.
+
+------------------------------------
+Version  4 build 73 (13 September 2010)
+------------------------------------
+A function call in match context not only receives a function argument in 
+"arg", but also the current subject in "sjt" (from sujet or subject)
+Example:
+like=.out$!sjt&sim$(!arg,!sjt):>9/10&?|den$sim$(!sjt,):~<(den$sim$(!arg,0))&`~
+@("Dogs and Cats are my enemies":? (like$mus:?animal) ?)&out$!animal
+@("Dogs and Cats are my enemies":? (like$cat:?animal) ?)&out$!animal
+
+The return value from a failing function call in match context is not compared
+to the subject.
+
+By returning `~ a function can indicate that further attempts with lenghtened
+subjects with the same start position will fail.
+
+6 August 2010
+
+Previously, a pattern with an exponential only matched a subject with an
+exponential. Now, the exponent in the pattern allowing, an exponent 1 is
+assumed.
+
+------------------------------------
+Version  4 build 72 (2 August 2010)
+------------------------------------
+
+Made variable v. So now
+	bracmat put$!v
+says:
+	Bracmat version 4, build 72 (2 August 2010)
+
+23 July 2010
+
+a*b+u*(x+y) was not evaluated correctly in the previous version.
+Now it works again. 
+
+30 June 2010
+Improved error handling if BRACMATEMBEDDED is defined.
+
+22 June 2010
+If Bracmat is running embedded (e.g. as "native code" in a Java environment)
+it may be desirable to make bracmat safer. Here are some defines that shut off
+selected parts of Bracmat:
+#define NO_C_INTERFACE no memory (de)allocation, peek and poke and C-function pointer API
+#define NO_FILE_RENAME no file renaming
+#define NO_FILE_REMOVE no file removal
+#define NO_SYSTEM_CALL no system() call
+#define NO_LOW_LEVEL_FILE_HANDLING 
+                       no file handling other than get$ put$ and lst$
+#define NO_FOPEN       no calls to fopen(). (But you can still get$ put$ and lst$ to memory!)
+
+------------------------------------
+Version  4 build 68 (11 June 2010)
+------------------------------------
+Had to conditionally introduce call to unlink() instead of remove() in case of
+Symbian (Epoc 5).
+
+------------------------------------
+Version 4 build 67 (26 May 2010)
+------------------------------------
+Replaced sizeof(tflags) with offsetof(sk,u.obj), which may be (and normally are,
+on 64 bit platforms at least) different, the latter taking padding into account.
+
+Removed ridiculous costly calls to expressionLength, perhaps using 3/4 of all
+CPU time when repeatedly matching large data structures!
+
+19 April 2010
+Used gprof to find functions to optimize: opaf() (has become op() and af()), splits()
+
+8 April 2010
+The 'its'-member that has been missing since version 3.50 is back again. 
+
+6 April 2010
+Pattern match like a b c:% c did not work as expected
+(should be same as a b c:%? c). Solved. Same goes for @(abc:% c).
+
+30 March 2010
+Added built-in function rmv$ that removes a file.
+
+------------------------------------
+Version 3 build 59 (26 March 2010)
+------------------------------------
+Changed code to make Bracmat compile and run in a 64-bit environment where
+sizeof(int) == 4 and sizeof(long) == 8.
+It is assumed that the platform is 64-bit if LONG_MAX > 2147483647L
+In contrast to 32 bit platforms, the functions x2d and d2x handle 
+numbers up to FFFFFFFFFFFFFFFFF hexadecimal or 18446744073709551615 decimal
+if compiled on 64-bit platforms.
+Another noteworthy difference is that the 64-bit version finds bigger prime
+numbers. Try 123465864564581765^1/2 Answer: 5^1/2*24693172912916353^1/2,
+so 24693172912916353 is prime.
+------------------------------------
+Version 3 build 58 (16 March 2010)
+------------------------------------
+errorStream is not kept open if it is not stderr or strout, so that other
+processes also can write to the errorFile, if necessary. This also ensures
+that the message is written an saved before the program ... uhm ... crashes.
+
+If run with command line options, bracmat's return value is the numerical
+value of the last expression evaluated. If the last evaluated expression
+is not atomic or not a string that can be scanned as an integer number
+using strtol, the exit code is 0.
+Built-in exit codes:
+-1  out of memory
+116 invalid function syntax
+117 string match attempted with non-atomic argument
+In principle, bracmat might just as well continue after the latter two 
+conditions. It is not certain that the error codes 116 and 117 will be retained
+in future versions.
+------------------------------------
+Version 3 build 57 (9 March 2010)
+------------------------------------
+New built-in function arg$. If Bracmat is started with any arguments (argc > 1)
+every argument is evaluated from left to right, unless arguments are consumed
+by calls to arg$. For example,
+    bracmat get$myprog -i c:\documents\input.txt -o d:\html\index.html
+would evaluate 
+    get$myprog
+    -i
+    c:\documents\input.txt
+    -o
+    d:\html\index.html
+in that order. Evaluating the last four arguments is not very meaningful,
+however: the backslashes are interpreted as escapes, which they are not.
+Moreover, the colon and the dot are interpreted as operators. However, the
+bracmat program "myprog" can call the function arg$ four times and in that way
+empty the queue of arguments. arg$ returns an atom containing an exact copy of
+the next program argument. Using string matching the arguments can be parsed,
+if necessary.
+Precautions must be taken if the path or name of the bracmat program contains
+characters that can be mistakenly interpreted. E.g. (in Windows)
+    bracmat "get$@\"c:Program Files\myprog.bra\"" -i c:\documents\input.txt -o d:\html\index.html
+In *N*X the apostrophes surrounding the first argument must be replaced by
+quotes.
+A second form is arg$N, where 0 <= N < argc. arg$0 will normally return the
+command name "bracmat" or a path leading to "bracmat".
+------------------------------------
+Version 3 build 56 (25 February 2010)
+------------------------------------
+upp$ and low$ now handle UTF-8. upp$ is a bit tricky, as some characters 
+occupy more bytes when uppercased. A simple in-place replacement is tried 
+first, and is fine in 99% of all cases. If an overrun is imminent, more space
+is allocated.
+
+sim$(s1,s2) accepts UTF-8. 8-bit Latin-1 is also ok. 
+chr$ fails if argument is > 255
+
+~<> are now effective on patterns headed by $ or ' operator
+b:>(str$a)
+b:~<>(str$A)
+
+~<> uses case insensitive compare on unicode
+
+x2d$   converts hexadecimal number to decimal
+d2x$   converts decimal number to hexadecimal
+Both routines are restricted to decimal numbers 0 ... 4294967295 (hex 0 ... ffffffff)
+Failure if not all characters can be scanned.
+
+Simplified changeCase()
+
+------------------------------------
+Version 3 build 54 (10 February 2010)
+------------------------------------
+abc:?NN & @(!NN:!NN ?x)
+!x evaluated to "abc", not to ""
+
+------------------------------------
+Version 3 build 53 (2 February 2010)
+------------------------------------
+Input scanning stopped at 0x80, as in the utf-8 sequence e2 80 93 
+(Unicode U+2013 (8211) : EN DASH). This is solved now.
+
+------------------------------------
+Version 3 build 52 (27 January 2010)
+------------------------------------
+~@ matches non-atomic matter, both in stringmatch and now also in match.
+
+------------------------------------
+Version 3 build 51 (26 January 2010)
+------------------------------------
+
+@ and % flags are not turned off if combined with < and/or >.
+(Previously, they were seen as "superfluous" if in combination with non-empty object.)
+Handy if you want to skip white space:
+
+@("  \r\n\t  xyz\r\n  ":?a (>@" " ?:?y) ~>%" " ?)
+
+Changed KILOKNOPEN (indicating the minimum amount of working memory)
+back to 10000 
+
+---------------------------------
+Version 3 build 50 (3 July 2009)
+---------------------------------
+Setting #define CODEPAGE850 0 removes all reminiscenses of DOS-codepages.
+
+Unicode (UTF-8) support
+
+chu$number returns a sequence of 1-6 bytes. The highest allowed value of the 
+            number is 2147483647 (7FFFFFFF hex)
+            Notice that RFC 3629 restricts UTF-8 to 4 bytes and that the 
+            highest allowed code point 10FFFF hex.
+
+utf$string returns the code point of the character represented by the UTF-8
+            sequence of bytes.
+            If the string is too short or too long, or if the sequence is an
+            invalid UTF-8 string, the function fails.
+            
+            It is safe to use utf$ in a pattern:
+            @(!txt:(?%c & utf$!c) ?)
+            If txt starts with an valid UTF-8 sequence, bracmat backtracks
+            until c matches the UTF-8 sequence.
+            If txt starts with a sequence that is not UTF-8, bracmat stops
+            backtracking when that fact has been established.
+
+bracmat now evaluates all parameters given to it, from left to right.
+
+command line:bracmat a=1 b=14 out$(!a+!b)
+output:15
+
+Previously, only the first parameter was evaluated.
+As always, if no parameter is specified, bracmat enters interactive mode.
+-------------------------------------
+Version 3 build 49 (11 February 2009)
+-------------------------------------
+Corrected error in flt$. All powers of ten were analysed to 1, for example 
+flt$(100,2) -> 1,00*10E0
+-------------------------------------
+Version 3 build 48 (14 November 2008)
+-------------------------------------
+The 'stop' string also works when writing:
+fil$("file.txt",w)
+fil$(,STR," \n\r\t")
+fil$(,,,"Workers go to strike")
+This writes "Workers" to file.txt
+
+The 'stop' string can also be specified when reading or writing:
+
+fil$(,,"/","Workers go to strike! (For/ higher wages")
+fil$("file.txt",r)
+fil$(,STR)
+fil$(,,".!?,;")
+
+An empty stop string means: write all of the string.
+(Or read to end of file, if file mode is reading).
+In previous versions the default behaviour was to read until the end of
+the line.
+-------------------------------------
+Version 3 build 47 (11 September 2008)
+-------------------------------------
+x^(y*(a+b))+-1*x^(a*y+b*y) returns 0 
+Before, the exponents were regarded as different. If, during comparison, 
+a subtree of lhs has pattern ?*(?+?) and the corresponding subtree of the rhs 
+?+?, the lhs subtree is expanded to a sum (defactorised) and the comparison is
+done on the transformed lhs and the rhs. Notice that the most expensive 
+exponent survives:
+x^(y*(a+b))+x^(a*y+b*y): 2*x^(y*(a+b))
+
+0^-1 succeeded and returned 0, now it fails. (0/7^-1 already failed)
+
+Strings starting with a zero and followed by another figure are not numbers 
+00/7, 098
+
+Input ()k went in endless loop, because the k was interpreted as an operator.
+Now it says "malformed input".
+-------------------------------------
+Version 3 build 46 (11 February 2008)
+-------------------------------------
+whl' now returns built_in_function_ok instead of function_fail. Although the 
+loop exits when the rhs fails and there therefore is nothing meaningful to
+"return", it led to ugly code when a whl' loop always had to be negated
+
+    ... & ~(whl'(...)) & ...
+
+or put into the lhs of an OR
+
+    & ( whl'(...) |  ) &
+    
+til' is commented out. It has no future.    
+------------------------------------
+Version 3 build 45 (4 February 2008)
+------------------------------------
+New version because of 
+(A) introduction of a new flag that makes it possible to write position-aware
+    patterns and 
+(B) introduction of control structures for implementing loops.
+
+Function evalmacro did not unset the ready-bit on an inserted expression 
+consisting of a variable with exclamation mark. It does now.
+
+Introduction of flag [ for acquiring or requiring the current position during
+a (string)match. Examples:
+
+    a b c:? ([-1:[?endpos)
+    
+will assign the length of the subject, 3, to variable endpos.
+
+    a b c d e:? [!endpos ?extramaterial
+    
+will assign d e to extramaterial.
+
+Works in match and stringmatch alike, with some exceptions:
+@(:[0) succeeds, but (:[0) fails. Reason: in the first case, the subject
+is the nil element, but in the second case, the lhs is just an atom,
+although a funny one. In a certain context, this atom plays the role
+of nil element, but not in other contexts.
+
+Found out that stringmatch had a measurable side effect on the subject
+
+subject=abcdef
+@(!subject:? (d & !subject:abcd) ?
+
+This would succeed, because the string had been temporarily cut off after
+the 'd'.
+Now match and string match are much more alike and the problem is solved.
+
+Introduction of two built-in functions: whl and til. whl repeatedly evaluates
+its argument until it fails. whl always returns failure. til repeatedly
+evaluates its argument until it succeeds and returns the result of the last
+evaluation.
+There are no plans to make if...else and switch equivalents in Bracmat.
+It may be that whl and/or til are retracted later. They seem a bit superfluous.
+
+`~a:?b will now assign `~a to b
+@(`~a:?b) will assign a to b. !a will succeed
+As before, this will assign something failing to a variable:
+dummy ~a:dummy ?m
+!m fails
+~!m gives ~a
+
+-----------------------------------
+Version 2 build 42 (3 January 2008)
+-----------------------------------
+
+Better implementation of the evaluation of !(=a).
+It is now possible to construct and run a loop as a datastructure with 
+a closed loop of pointers. Performance-wise nothing is gained, however.
+  (loop= !i+1:<10000000:?i&!(=))
+& '$loop:(=?(loop.)) {Make closed datastructure}
+& ~!loop {loop 10.000.000 times}
+& :?(loop.) {Open the datastructure.(Otherwise you'll have a memory leak when 
+             'loop' goes out of scope.)}
+
+Several functions have been factorised. evalueer() has been restructured.
+
+-----------------------------------
+Version 2 build 41 (2 January 2008)
+-----------------------------------
+
+I've decided that a:(~@(a:a)) means about the same as a:(~@:(a:a)), i.e. it
+fails because a is not not an atom. For the same reason a:(~@(a:b)) fails.
+~@(a:a) in an evaluation context such as x&~@(a:a) succeeds. It merely means
+a:a
+
+Use #define STRINGMATCH_CAN_BE_NEGATED 1 to allow ~@(<subject>:<pattern>)
+as a stringmatch that has its result negated after evaluation.
+
+Use #define STRINGMATCH_CAN_BE_NEGATED 0 to interpret ~@(<subject>:<pattern>)
+as the opposite of stringmatch, i.e. a normal match, the same as 
+(<subject>:<pattern>) with the additional condition that <subject> is not an
+atom. Notice, however, that ~@#(abc:? b ?) succeeds, as the ~ negates #, not @
+(priority /#<>@)
+
+Succeeding tests:
+a b:(~@(? b:a %))
+~@(a b:a ?)
+~@(a:a)
+12/34:@(?x:#?a (~#%@:?y) #?b)&!y:"/"
+
+Failing tests:
+a:(~@(a:a))
+~@(a:b)
+12/34:@(#?a (~#%@:?y) #?b:?x)&!y:"/" 
+    (This fails because the pattern 
+        #?a (~#%@:?y) #?b 
+    is in the match context 12/34:<rhs>, not in a stringmatch context.
+    Remember, the first @ says that subject is an atom, which it is in the 
+    match context, but not in a stringmatch context.)
+@(12/34:@(#?a (~#%@:?y) #?b:?x)&!y:"/") 
+    (This fails because 12/34 is not an atom in a stringmatch context.)
+
+-------------------------------------
+Version 2 build 40 (29 December 2007)
+-------------------------------------
+
+Compilation with Norcroft RISC OS ARM C vsn 3.00 [Jul 12 1989]
+This resulted in some formal corrections (signed vs unsigned int,
+int vs long, too many arguments for format in printf,
+#if BRACMATEMBEDDED changed to #if defined BRACMATEMBEDDED)
+
+The changes of 20071217 were undone, because the solution did not work for
+    ~(&~@(a:a))
+New solution:
+In lex(), undo setting of
+    success == FALSE
+on : node if ~@ flags are attached to this operator.
+This is a special case. In ~@(a:b) the ~ operator must
+not negate the @ but the result of the string match.
+
+I am not convinced that this is the right decision. Perhaps we simply
+should not allow other flags than @ on : if we want it to be interpreted
+as a string match operation.
+
+------------------------------------
+Version 2 build 39 (17 December 2007)
+------------------------------------
+Resolved the following errors: 
+~@(a:b) did not succeed and 
+~@(a:a) did not fail.
+Now they do.
+
+------------------------------------
+Version 2 build 38 (9 October 2007)
+------------------------------------
+Removed test print from getObjectDef.
+
+------------------------------------
+Version 2 build 37 (18 September 2007)
+------------------------------------
+    a b () () 
+evaluated to 
+    a b ()
+instead of
+    a b
+Changed function handleLUCHT to correct this.
+
+------------------------------------
+Version 2 build 36 (20 August 2007)
+------------------------------------
+Broken functionality repaired:
+The pattern (|? " "|`) did not only match a string starting with all blanks.
+It matched any string with a blank. 
+
+Differentiation: Originally, to indicate that a variable x depends on another
+variable p, one wrote x=p, or x=s and s=p. If one wrote (x=), then y\Dx
+resulted in stack overflow. The appropriate way to indicate dependeny is
+dep=(x.p) (....)
+
+The C-function range() has been abolished. Originally the idea was that Bracmat
+not only should handle numbers and symbols, but also ranges. Thus, 2^>3 would
+give >16 and -5*>2 would give <-10. This had to be given up as ranges become
+more and more complicated to express. (>4*~>3 = ?)
+
+Code implementing a string table (COMPILE==1) has been removed
+COMPILE works not faster, but slower (about 10%) and uses more nodes.
+
+The unfinished attempt at implementing objects that can be saved and re-read
+(serialization) has been given up (OBJECTS==1) Flag: [
+
+VAX-specific code removed.
+
+Partly undoing of a change made in 200704:
+There were problems with stringmatches like this one
+@(aaab:((|a) aa) b)
+
+Division by zero in
+
+new$hash:?h
+(h..ISO)$
+(h..insert)$(a.b)
+
+This made a division by zero, because (h..ISO) had rehashed the table
+to a table with zero size. (hashes are born with non-zero size)
+The computation of the loadfactor went wrong.
+
+------------------------------------
+Version 2 build 34 (4 April 2007)
+------------------------------------
+Tail recursion optimisation in complexiteit.
+
+Solved bug in handling of strings with characters > 0x80 in expressions like
+    a å
+
+Solved bug in handling of e^(i*pi)
+
+Solved bug in handling of i:-i
+
+Solved bug in handling of -1*i^1/3
+
+lst$ now lists ALL names. Previously, names starting with character above 0x7f
+were hidden. Som hidden functions that were called from f0, f4 or f5 are
+now declared inside these functions and therefore hidden.
+
+get$ and fil$ first try to open a file interpreting the file name as a path
+relative to the current working directory. If that fails, and if the program
+is started with a fully qualified path+file name, this path is prepended to the
+name of the file to be opened. If opening the file also fails with the new
+path, get$ and fil$ fail. This functionality requires that 
+1) the file mode is "reading"
+2) the file name does not contain an absolute path
+3) the program knows its path
+If the program does not know its path, it may help to start the program with
+a fully qualified path on the command line. This instruction can be put in
+a shell script or batch file.
+This improvement is especially helpful for opening the "help"-file.
+
+In string matching the expression
+    @(abcd:?u (?:%@ %@) (?z & ~))
+now makes sure that the pattern (?:%@ %@) never is presented with more than two
+characters. Before, the @ flag did not really work with string matching and the
+: operator extinguished the cut condition that arises in its rhs.
+This works now within a reasonable time:
+(do=
+  get$(help,STR):?S
+& @( !S
+   :   ?
+       ( ?:(%@:~" ":~",") %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@:?x
+       & '(? ()$x ?):(=?x)
+       )
+       !x
+   )
+& !x);
+!do
+
+
+In a string, characters that also have a meaning as an operator can be escaped:
+nsc\'ere
+is the same as
+"nsc'ere"
+
+The names of cat$'s local variables are now taken from the list of names of
+predefined functions. Consequently, cat$ does not list its own local variables.
+(Previously, listing of these names was circumvented by the rule that names
+starting with high-bit-set characters are kept hidden.)
+
+Defunct ego$ and goe$ are abolished.
+
+------------------------------------
+Version 2 build 26 (18 January 2007)
+------------------------------------
+Corrected error in string matching that caused @(:? ?) to fail.
+Adaptations to let Visual C++ 8.0 behave nice: no warnings against now
+deprecated str... functions and turning Windows API functionality off
+when _CONSOLE is defined.
+
+------------------------------------
+Version 2 build 24 (12 October 2005)
+------------------------------------
+Corrected error in flt$. During rounding, the variable m could become > 10.
+Consequently, the exponent must be increased by one and m must be divided by 10
+in those cases.
+
+------------------------------------
+Version 2 build 23 (7 October 2005)
+------------------------------------
+Changed 'flg' function.
+flg$<flags><atom> now returns ((=<flags>).<atom>)
+This protects the flags from evaluation, so that it now is possible to handle
+the '!'-flag using this function.
+
+------------------------------------
+Version 2 build 22 (18 November 2004)
+------------------------------------
+Changed handling of output of the clock() function (again). Back to the
+assumption that clock_t is long int. When clock() returns -1, it is assumed
+that clock() does not return reliable values (any more).
+bez$ returns (<nodes>.<max nodes>.<max ref>) and does not print to stdout
+anymore. The meaning of these numbers is:
+<nodes> : number of allocated nodes and leaves.
+<max nodes> : the maximum number of allocated nodes and leaves attained during
+this session up to "now".
+<max ref> : the maximum reference count seen on any node or leave during this
+session up to "now". This number has a ceiling dependent on the number of bits
+reserved for reference counting (currently 10).
+epoc version had the problem of not deleting the last typed in character
+when the user pressed the delete key. The delete key emits ascii 8
+(back space). Now, ascii(8) moves the pointer in a newly created input buffer
+one position back, deleting the previous entered character. At the same time,
+the last typed character, which otherwise would still be visible, is wiped
+out. (see mygetc)
+
+------------------------------------
+Version 2 build 21 (9 November 2004)
+------------------------------------
+Changed handling of output of the clock() function. Previously its return
+value was type casted to long int. The program no longer makes any assumption
+of clock_t's size.
+
+------------------------------------
+Version 2 build 20 (4 October 2004)
+------------------------------------
+Added new built-in function flg$ that splits off flags from an expression.
+Changed the meaning of the '~' flag in flag functions when the '~' isn't
+the only flag: ~#$a now evaluates to ~#a. Before, this function call
+just failed.
+Removed flags from variables that get values during string pattern matching.
+Before, flags originating from the subject were inherited by all variables.
+Example:
+@(#~barQfoo:?x Q ?y)
+Before, !x evaluated to ~#bar and !y evaluated to ~#foo. Now !x evaluates 
+to bar and !y evaluates to foo. I'm not sure this change is especially
+handy.
+
+------------------------------------
+Version 2 build 19 (27 September 2004)
+------------------------------------
+Replaced the non-ANSI strrev function with portable code.
+No change in functionality.
+
+------------------------------------
+Version 2 build 18 (21 September 2004)
+------------------------------------
+Fixed memory leak in assignment to variable during string match.
+
+------------------------------------
+Version 2 build 17 (14 September 2004)
+------------------------------------
+Fixed error that caused 'val' to receive value -1 in @("-1":?val). Now the 
+value is "-1".
+
+------------------------------------
+Version 2 build 16 (8 September 2004)
+------------------------------------
+Previously, string matching did not attribute the "NUMBER" flag to
+variables in expressions like @("fasdf-1hhfgls":? #?val ?), which meant
+that !val+1 would be handled like "-1"+1. Now 'val' gets the value minus one.
+
+------------------------------------
+Version 2 build 15 (7 September 2004)
+------------------------------------
+Serious error fixed: a b c:(a b|x) c  and @(a b c:(a b|x) c) failed!
+If the sides of the OR operator where swapped the error would not occur.
+
+
+------------------------------------
+Version 2 build 14 (6 September 2004)
+------------------------------------
+In the combination of ~ and @, the ~ negated the @. In string pattern matching
+the ~ must negate the outcome of the pattern matching. This is now fixed.
+
+
+------------------------------------
+Version 2 build 13 (3 September 2004)
+------------------------------------
+The hash member function 'forall' was unsafe, as it assumed that the contents
+of the hash table would not change during the traversal. This has been fixed.
+The hash table can even be deleted while the table is traversed, but the 
+deletion takes place after the traversal is finished. The 'forall' function
+is exited as soon as the function passed to forall fails.
+Hash tables did grow as the load factor became too high, but never got
+smaller as the load factor became sufficiently low. This has been fixed as 
+well.
+
+------------------------------------
+Version 2 build 12 (31 August 2004)
+------------------------------------
+New function rev$ that reverses the order of characters in a string.
+String-pattern matching much simplified. Now it behaves more like non-string
+pattern matching. Instead of using complicated pre-match functions that try
+to minimise costly substring manipulation, substring manipulation is made
+"lazy". That means that copies of substrings are not allocated until they are
+needed the first time. Until that time, only a bytecount and an offset into
+the complete string are kept.
+
+
+------------------------------------
+Version 2 build 8 (26 February 2004)
+------------------------------------
+Fixed errors with allocation (function "bmalloc") and deallocation (function "fil").
+
+
+------------------------------------
+Version 2 build 7 (23 February 2003)
+------------------------------------
+Introduced case-insenstive string match. The flags ~<> in a pattern (without
+/ and # flags) mean that subject and pattern must be compared without case
+sensitivity. This only applies to ASCII characters and the upper 128 characters
+in the ISO8859 (Latin 1) character set.
+
+The string comparison in the sim$ function, which always has been case
+insensitive in the lower range of the ASCII character set, is now case
+insensitive in all of the Latin 1 character set.
+
+
+------------------------------------
+Version 2 build 6 (16 February 2003)
+------------------------------------
+Changed "#define ARM 1" to "#define ARM". No changes to functionality.
+Created fresh executables for RiscOS and Epoc. (Ericsson MC218, Psion 5mx).
+
+
+------------------------------------
+Version 2 build 5 (24 November 2003)
+------------------------------------
+New functionality: pattern matching inside strings. Previously, to scan a string
+one had first to explode the string into atoms. Now this step is not needed any
+more. Example: find the value of the "width"-attribute in the following piece of 
+HTML code:
+
+ <table class="bgblue" width="600" cellspacing="0" cellpadding="0">
+
+Suppose that this value has been assigned to the variable "string":
+
+"<table class=\"bgblue\" width=\"600\" cellspacing=\"0\" cellpadding=\"0\">":?string;
+
+Old solution:
+
+get$(!string,MEM,VAP):?atoms;   {"Vaporise" the string.}
+
+!atoms:? w i d t h "=" "\"" ?n "\"" ?;  {Find a string of digits delimited by apostrophes.}
+
+str$!n:?N;                  {Stringise the digits into a number.}
+
+out$!N;                     {Show the result.}
+
+New solution:
+
+@(!string:? "width=\"" #?N "\"" ?);     {Use @-flag on the match operator ':' to enable
+                             pattern matching inside the string. Use spaces
+                             to separate elements of the pattern. No need
+                             to stringise the matched substring.}
+
+out$!N;                     {Show the result.}
+
+
+
+
+
+------------------------------------
+Version 1 build 3 (10 November 2003)
+------------------------------------
+The evaluation of tay$((x+3/2)^(x+3/2),x,20):?aans gave a memory exception.
+This was caused by the attempt to treat 'e' as a rational number in the function
+substlog. Added a test.
+
+Removed a serious error that has crippled the pattern matching algorithm since
+June 2001: the code having to do with the bit DONOTSHORTEN on the return value
+of the match function has been removed. The change amounts to setting the
+defined constant KORT to 0. The aim of the introduction of DONOTSHORTEN was to
+shortcut the search for a matching pattern, but it did its job too well: the
+expression
+   a b b:? %?x !x
+would fail.
+
+Added some functions that can be used when debugging (or just tracing) the
+program:
+   * results, reslts, hreslts - like result, reslt, hreslt, but with extra
+     argument 'snijaf' (cutoff). The function results can be used to trace the
+     arguments of the match function.
+   * checksum, getchecksum, setChecksum - can be used to spot out-of-bounds
+     writing of memory allocated with bmalloc.
+   * Changed some loops with constant test (while(1) or while(TRUE)) to loops
+     performing real test. Also removed some 'continue's and 'break's.
+
+
+-------------------------------
+Version 1 build 2 (4 July 2003)
+-------------------------------
+Overhaul of macros:
+   * More comments on each macro's meaning.
+   * MACRO
+      - The macro MACRO is changed to a defined constant
+         (#define MACRO --> #define MACRO 1
+          #ifdef MACRO --> #if MACRO)
+      - It is now only defined if another predefined constant, COMPILE,
+        is not 0.
+   * ALLOCVAR
+      - The macro ALLOCVAR is changed to a defined constant
+         (#define ALLOCVAR --> #define ALLOCVAR 1
+          #ifdef ALLOCVAR --> #if ALLOCVAR)
+      - It is now only defined if another predefined constant, COMPILE,
+        is not 0.
+   * Renamed BIG_ENDIAN to BIGENDIAN (The old name clashed with a predefined
+     name on some systems.)
+   * gcc on linux offers a way to determine the correct value for the constant
+     BIGENDIAN. This is used in build 2.
+
+Added column for notes to the comment explaining flags (flgs) and operators
+(ops).
+
+Added test on validity of the FILE * variable fpo in the function errorprintf.
+Added test on validity of the FILE * variable errorStream in the function
+redirectError.
+
+
+-------------------------------
+Version 1 build 1 (3 June 2003)
+-------------------------------
+Initial version under GPL
+
+

@@ -1,0 +1,386 @@
+{lex.bra
+
+analyse bracmat code for lexicality}
+
+X=
+  new
+=   
+  . ( lex
+    =     Y
+          notreffunc
+          builtins
+          predefs
+          CONTXT
+          pickVars
+          testDeclaration
+          A
+          AA
+          N
+          M
+          Z
+          ZZ
+          definedfuncs
+          globalfuncs
+          globalvars
+          jj
+          notdeclfuncs
+          notdeclvars
+          referencedfuncs
+          reffunc
+          undefinedfuncs
+          unrefs
+          unusedLocals
+          use
+      .       ^
+            + alc
+            + arg
+            + asc
+            + chr
+            + chu
+            + clk
+            + d2x
+            + dbg
+            + den
+            + div
+            + fil
+            + flg
+            + glf
+            + fre
+            + get
+            + low
+            + lst
+            + mem
+            + mod
+            + new
+            + pee
+            + pok
+            + put
+            + ren
+            + rmv
+            + rev
+            + sim
+            + str
+            + swi
+            + sys
+            + tbl
+            + upp
+            + utf
+            + whl
+            + x2d
+            + "?"
+          : ?builtins
+        & cat+cos+flt+out+sin+tay:?predefs
+        &   0
+          : ?notreffunc
+          : ?unusedLocals
+          : ?notdeclfuncs
+          : ?notdeclvars
+          : ?referencedfuncs
+          : ?undefinedfuncs
+          : ?globalvars
+          : ?globalfuncs
+        & :?definedfuncs
+        & ( pickVars
+          =   a b
+            .     !arg:?a_?b
+                & pickVars$!a+pickVars$!b
+              | !arg:~
+              | 0
+          )
+        & (CONTXT=.!arg:!sjt ?&?)
+        & ( testDeclaration
+          =   name vars unrefs A a b Z context contxt
+            .   !arg:(?context.?name.?vars.?unrefs)
+              & ( !name:
+                |     '$vars
+                    : '(? (?.?+#*$name+?) ?)
+                  & (     '$unrefs
+                        :   
+                          ' ( ?A
+                              ( CONTXT$($context):?contxt
+                              . ?a+#*$name+?b
+                              )
+                              ?Z
+                            )
+                      & "Remove function or variable from list of unreferenced functions or variables."
+                      & !A (!contxt.!a+!b) !Z:?unrefs
+                    | 
+                    )
+                )
+              & !unrefs
+          )
+        & ( Y
+          =     c vars unrefs V
+              , name A Z unr context
+              , M AA ZZ C N use lhs rhs
+              , Af Zf aaF zzF
+            .   !arg:(?context.?vars.?unrefs.?arg)
+              & (   !arg:(=?lhs_?rhs)
+                  & (     !arg
+                        : (=$(?$?)|$(?'?))
+                      & "******** FUNCTION CALL (function$parameters or function'parameters) ********"
+                      & (!lhs:~|^):?lhs
+                      & ( !builtins+!predefs:?+!lhs+?
+                        |   (     testDeclaration
+                                $ (!context.!lhs.!vars.!unrefs)
+                              : ?unrefs
+                            | !globalfuncs:?+#*!lhs+?
+                            |   (     !notdeclfuncs
+                                    : ?A+(!context.?M)+?Z
+                                  & !A+(!context.!lhs+!M)+!Z
+                                | !notdeclfuncs+(!context.!lhs)
+                                )
+                              : ?notdeclfuncs
+                            )
+                          & (     !definedfuncs
+                                :   ?A
+                                    ( CONTXT$!context:?C
+                                    . ?AA+#?N*(!lhs.?use)+?ZZ
+                                    )
+                                    ?Z
+                              &     !A
+                                    (!C.!AA+!N*(!lhs.!use+Referenced)+!ZZ)
+                                    !Z
+                                : ?definedfuncs
+                            |   (     !undefinedfuncs
+                                    : ?A+(!context.?M)+?Z
+                                  & !A+(!context.!lhs+!M)+!Z
+                                | !undefinedfuncs+(!context.!lhs)
+                                )
+                              : ?undefinedfuncs
+                            )
+                        )
+                      &   Y$(!context.!vars.!unrefs.'$rhs)
+                        : ?unrefs
+                    |   !arg:(=$(?=?))
+                      & (!lhs:~|^):?lhs
+                      & (   '$rhs:(=?V.?c)
+                          & "******** FUNCTION DEFINITION (function=local vars.definition) ********"
+                          & pickVars$!V:?V
+                          & (     testDeclaration
+                                $ (!context.!lhs.!vars.!unrefs)
+                              : ?unrefs
+                            |   !context:
+                              & !globalfuncs+!lhs:?globalfuncs
+                            |   (     !notdeclfuncs
+                                    : ?A+(!context.?M)+?Z
+                                  & !A+(!context.!lhs+!M)+!Z
+                                | !notdeclfuncs+(!context.!lhs)
+                                )
+                              : ?notdeclfuncs
+                            )
+                          &   (     !definedfuncs
+                                  : ?A (!context.?M) ?Z
+                                & (   !M:?+#*(!lhs.?)+?
+                                    & !definedfuncs
+                                  | !A (!context.(!lhs.0)+!M) !Z
+                                  )
+                              | (!context.!lhs.0) !definedfuncs
+                              )
+                            : ?definedfuncs
+                          &     Y
+                              $ ( !context !lhs
+                                . (!context !lhs.!V) !vars
+                                . (!context !lhs.!V) !unrefs
+                                . '$c
+                                )
+                            : ?unrefs
+                          & (     !unrefs
+                                :   ?
+                                    (!context !lhs.%+?:?unr)
+                                    ?
+                              &   (!context !lhs.!unr)+!unusedLocals
+                                : ?unusedLocals
+                            | 
+                            )
+                        |   "******** VARIABLE DEFINITION (variable=value) ********"
+                          & ( !lhs:^
+                            |     testDeclaration
+                                $ (!context.!lhs.!vars.!unrefs)
+                              : ?unrefs
+                            |   !context:
+                              & !globalvars+!lhs:?globalvars
+                            |   (   !notdeclvars:?A+(!context.?M)+?Z
+                                  & !A+(!context.!lhs+!M)+!Z
+                                | !notdeclvars+(!context.!lhs)
+                                )
+                              : ?notdeclvars
+                            )
+                          &   Y$(!context.!vars.!unrefs.'$rhs)
+                            : ?unrefs
+                        )
+                    |     Y$(!context.!vars.!unrefs.'$lhs)
+                        : ?unrefs
+                      &   Y$(!context.!vars.!unrefs.'$rhs)
+                        : ?unrefs
+                    )
+                |   !arg:(=$!|$?)
+                  &   flg$!arg
+                    : (=?.%?name (|))
+                  & "******** VARIABLE (?var or !var) ********"
+                  & ( !name:(arg|sjt)
+                    |   testDeclaration$(!context.!name.!vars.!unrefs)
+                      : ?unrefs
+                    | !globalvars:?+#*!name+?
+                    |   (     !definedfuncs
+                            :   ?aaF
+                                (CONTXT$!context.?Af+#*!name+?Zf)
+                                ?zzF
+                          &   !aaF (!CONTXT.!Af+!Zf) !zzF
+                            : ?definedfuncs
+                        | 
+                        )
+                      &   (   !notdeclvars:?A+(!context.?M)+?Z
+                            & !A+(!context.!name+!M)+!Z
+                          | !notdeclvars+(!context.!name)
+                          )
+                        : ?notdeclvars
+                    )
+                | 
+                )
+              & !unrefs
+          )
+        & (   '$lex:(=? !arg ?.?)
+            & out$(!arg is local var in lex)
+            & Y$(...'($arg=$(-2$!arg))):?unrefs
+            & -1$!arg
+          | Y$(...'($arg=$!arg)):?unrefs
+          )
+        &   put
+          $ ( "==========================================================
+Lexical analysis. See program code further down this file.
+==========================================================
+
+ ----------------------
+{ Undeclared functions }
+ ----------------------
+"
+            , "lex.txt"
+            , NEW
+            )
+        & lst$(notdeclfuncs,"lex.txt",APP)
+        &   put
+          $ ( "
+ ----------------------
+{ Undeclared variables }
+ ----------------------
+"
+            , "lex.txt"
+            , APP
+            )
+        & lst$(notdeclvars,"lex.txt",APP)
+        & !definedfuncs:?reffunc
+        & 0:?notreffunc
+        &   whl
+          ' ( !reffunc:?A (?M.?AA+#?N*(?jj.0)+?ZZ) ?Z
+            & !notreffunc+(!M !jj):?notreffunc
+            & !A (!M.!AA+!ZZ) !Z:?reffunc
+            )
+        &   put
+          $ ( "
+ ------------------------
+{ Unused local variables }
+ ------------------------
+"
+            , "lex.txt"
+            , APP
+            )
+        & lst$(unusedLocals,"lex.txt",APP)
+        &   put
+          $ ( "
+ ----------------
+{ Not referenced }
+ ----------------
+"
+            , "lex.txt"
+            , APP
+            )
+        & lst$(unrefs,"lex.txt",APP)
+        &   put
+          $ ( "
+ -------------------
+{ Defined functions }
+ -------------------
+"
+            , "lex.txt"
+            , APP
+            )
+        & lst$(definedfuncs,"lex.txt",APP)
+        &   put
+          $ ( "
+ ---------------------
+{ Undefined functions }
+ ---------------------
+"
+            , "lex.txt"
+            , APP
+            )
+        & lst$(undefinedfuncs,"lex.txt",APP)
+        &   put
+          $ ( "
+ ------------------------
+{ Unreferenced functions }
+ ------------------------
+"
+            , "lex.txt"
+            , APP
+            )
+        & lst$(notreffunc,"lex.txt",APP)
+        &   put
+          $ ( "
+ ----------------------
+{ Referenced functions }
+ ----------------------
+"
+            , "lex.txt"
+            , APP
+            )
+        & lst$(reffunc,"lex.txt",APP)
+        &   put
+          $ ( "
+ ------------------
+{ Global variables }
+ ------------------
+"
+            , "lex.txt"
+            , APP
+            )
+        & lst$(globalvars,"lex.txt",APP)
+        &   put
+          $ ( "
+ ------------------
+{ Global functions }
+ ------------------
+"
+            , "lex.txt"
+            , APP
+            )
+        & lst$(globalfuncs,"lex.txt",APP)
+        & put$("
+
+============
+Program code
+============
+","lex.txt",APP)
+        & lst$(!arg,"lex.txt",APP)
+        & "
+===========
+See lex.txt
+==========="
+    );
+
+rr=
+  get'"lex.bra"
+& rmv$(str$(lex ".bak"))
+& ren$("lex.bra".str$(lex ".bak"))
+& put$("{lex.bra
+
+analyse bracmat code for lexicality}
+
+","lex.bra",NEW)
+& lst'(X,"lex.bra",APP)
+& put'(\n,"lex.bra",APP)
+& lst'(rr,"lex.bra",APP)
+& put$(str$("\nnew'" X ";\n"),"lex.bra",APP);
+
+new'X;
