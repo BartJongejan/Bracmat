@@ -36,10 +36,15 @@ Profiling:
     gprof a.out
 */
 
-#define DATUM "9 February 2012"
+#define DATUM "23 February 2012"
 #define VERSION "5"
-#define BUILD "115"
-/*  9 February 2012
+#define BUILD "116"
+/* 23 February 2012
+
+When Bracmat reads a file that is not well-formed, it asks fo a file name where
+it can write what it has understood. This did not work. Now it does.
+
+    9 February 2012
 
 Corrected error in doPosition that was introduced with the latest
 optimizations.
@@ -4949,7 +4954,12 @@ void writeError(psk pkn)
     redMooi = mooi;
     mooi = FALSE;
     redfpo = fpo;
-    errorprintf(" in:\n");
+/*    errorprintf(" in:\n"); 20120223*/
+    fpo = errorStream;
+#if !defined NO_FOPEN
+    if(fpo == NULL && errorFileName != NULL)
+        fpo = fopen(errorFileName,"a");
+#endif
     if(fpo)
         {
         result(pkn);
