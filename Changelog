@@ -1,3 +1,9 @@
+   13 April 2012
+
+The characters @ and % in front of a string now only turn off escaping with
+the \ character inside the string if the string is surrounded by " characters.
+Reason: the \L operator was not recognised if its lhs contained a % or @.
+
     9 February 2012
 
 Corrected error in doPosition that was introduced with the latest

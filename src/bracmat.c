@@ -36,10 +36,16 @@ Profiling:
     gprof a.out
 */
 
-#define DATUM "23 February 2012"
+#define DATUM "13 April 2012"
 #define VERSION "5"
-#define BUILD "116"
-/* 23 February 2012
+#define BUILD "117"
+/* 13 April 2012
+
+The characters @ and % in front of a string now only turn off escaping with the
+\ character inside the string if the string is surrounded by " characters.
+Reason: the \L operator was not recognised if its lhs contained a % or @.
+
+   23 February 2012
 
 When Bracmat reads a file that is not well-formed, it asks fo a file name where
 it can write what it has understood. This did not work. Now it does.
@@ -994,7 +1000,7 @@ TODO list:
    20010821 a () () was evaluated to a (). Removed last ().
    20010903 (a.) () was evaluated to a
 */
-#define DEBUGBRACMAT 0 /* implement dbg'(expression) */
+#define DEBUGBRACMAT 1 /* implement dbg'(expression) */
 #define REFCOUNTSTRESSTEST 0
 #define DOSUMCHECK 0
 #define CHECKALLOCBOUNDS 0 /* only if NDEBUG is false */
@@ -5176,7 +5182,11 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstr,Boolean * err,Boolean * GoO
                         ikar = ikar | 0x80; /* 20070403 */
                     }
                 }
-            else if(ikar == '\\' && !noEscape)
+            else if(  ikar == '\\' 
+                   && (  !noEscape
+          /*20120413*/|| !string /* %\L @\L */
+                      )
+                   )
                 {
                 escape = TRUE;
                 continue;
@@ -10242,13 +10252,14 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     may_Move_Start_Of_Subject = sub;
 #endif
                     /* This code mirrors that of match(). (see below)*/
-                    /* A    divisionPoint=S */
-                    sloc = sub;
-                    /*s.c.sav = *sloc;
-                    *sloc = '\0';*/
-                    /* B    leftResult=0(P):car(P) */
+                    
+                    sloc = sub;                                     /* A    divisionPoint=S */
+                                                                    
 #if CUTOFFSUGGEST
-                    s.c.lmr = stringmatch(ind+1,"I",sub, sloc, pat->LEFT, subkn,pposition,stringLength,&suggested_Cut_Off,mayMoveStartOfSubject);
+                    s.c.lmr = stringmatch(ind+1,"I",sub, sloc       /* B    leftResult=0(P):car(P) */
+                                ,pat->LEFT,subkn,pposition
+                                ,stringLength,&suggested_Cut_Off
+                                ,mayMoveStartOfSubject);
                     if((s.c.lmr & ONCE) && mayMoveStartOfSubject && *mayMoveStartOfSubject > sub)
                         {
                         return ONCE;
@@ -10256,8 +10267,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
 #else
                     s.c.lmr = stringmatch(ind+1,"I",sub, sloc, pat->LEFT, subkn,pposition,stringLength);
 #endif
-                    /**sloc = s.c.sav;*/
-                    /* C    while divisionPoint */
+                    
 #if CUTOFFSUGGEST
                     if(suggested_Cut_Off > sloc)
                         {
@@ -10285,18 +10295,19 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     else
 #endif
                         s.c.lmr &= ~ONCE;
-                    while(sloc < snijaf)
+                    while(sloc < snijaf)                            /* C    while divisionPoint */
                         {
-                    /* D        if leftResult.succes */
-                        if(s.c.lmr & TRUE)
-                    /* E            rightResult=SR:cdr(P) */
+                        if(s.c.lmr & TRUE)                          /* D        if leftResult.succes */
                             {
 #if CUTOFFSUGGEST
                             if(s.c.lmr & ONCE)
                                 may_Move_Start_Of_Subject = 0;
                             else if(may_Move_Start_Of_Subject != 0)
                                 may_Move_Start_Of_Subject = sloc;
-                            s.c.rmr = stringmatch(ind+1,"J",sloc,snijaf, pat->RIGHT, subkn,locpos,stringLength,suggestedCutOff,&may_Move_Start_Of_Subject);
+                            s.c.rmr = stringmatch(ind+1,"J",sloc    /* E            rightResult=SR:cdr(P) */
+                                ,snijaf, pat->RIGHT, subkn
+                                ,locpos,stringLength,suggestedCutOff
+                                ,&may_Move_Start_Of_Subject);
                             if(may_Move_Start_Of_Subject != sloc && may_Move_Start_Of_Subject != 0)
                                 {
                                 assert(may_Move_Start_Of_Subject > sloc);
@@ -10321,92 +10332,38 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                             ++sloc;
                             ++locpos;
                             }
-                    /* F        if(done) */
-                        /* done =  (1) full succes */
-                        if(  (s.c.rmr & TRUE)
-                        /*      or (2) may not be shifted.
-                           ad (2): In the first pass, a position
-                           flag on car(P) counts as criterion for being done. */
-                          || (s.c.lmr & (POSITION_ONCE
-                        /* In all but the first pass, the left and right
-                           results can indicate that the loop is done. */
-                                        | ONCE
-                                        )
-                             )
-                          || (s.c.rmr & (ONCE
-                        /* In all passes a position_max_reached on the
-                           rightResult indicates that the loop is done. */
-                                        |POSITION_MAX_REACHED
-                                        )
+                        if(  (s.c.rmr & TRUE)                       /* F        if(1) full success */
+                          || (s.c.lmr & (POSITION_ONCE                  /*     or (2) may not be shifted. In the first pass, a position flag on car(P) counts as criterion for being done. */
+                                        | ONCE                          
+                                        )                               
+                             )                                          /* In all but the first pass, the left and right */
+                          || (s.c.rmr & (ONCE                           /* results can indicate that the loop is done.   */
+                                        |POSITION_MAX_REACHED           /* In all passes a position_max_reached on the   */
+                                        )                               /* rightResult indicates that the loop is done.  */
                              )
                           )
-                    /* G            return */
-                            {
-                        /* Return true if full success.
-
-                           Also return whether sub has reached max position.*/
-                            /*if(!(s.c.rmr & POSITION_MAX_REACHED))
-                                s.c.rmr &= ~POSITION_ONCE;*/
-                            if(sloc > sub + 1)
-                                s.c.rmr &= ~POSITION_MAX_REACHED; /* This flag is
-                            reason to stop increasing the position of the
-                            division any further, but it must not be signalled
-                            back to the caller if the lhs is not nil ... */
-                            s.c.rmr |= (char)(s.c.lmr & POSITION_MAX_REACHED);
-                            /* ... unless it is the lhs that signals it. */
-                        /* Also return whether the pattern as a whole doesn't
-                           want longer subjects, which can be found out by
-                           looking at the pattern */
-                            if(stringOncePattern(pat))
-                                {
-                                s.c.rmr |= ONCE;
+                            {                                       /* G            return */
+                            if(sloc > sub + 1)                          /* Also return whether sub has reached max position.*/
+                                s.c.rmr &= ~POSITION_MAX_REACHED;       /* This flag is reason to stop increasing the position of the division any further, but it must not be signalled back to the caller if the lhs is not nil ... */
+                            s.c.rmr |= (char)(s.c.lmr & POSITION_MAX_REACHED); /* ... unless it is the lhs that signals it. */
+                            if(stringOncePattern(pat))                  /* Also return whether the pattern as a whole */
+                                {                                       /* doesn't want longer subjects, which can be */
+                                s.c.rmr |= ONCE;                        /* found out by looking at the pattern        */
                                 s.c.rmr |= (char)(pat->v.fl & FENCE);
-                                }
-                        /* or by looking at whether both lhs and rhs results
-                           indicated this, in which case both sides must be
-                           non-zero size subjects. */
-                            else if(!(s.c.lmr & ONCE))
-                                s.c.rmr &= ~ONCE;
-                        /* POSITION_ONCE, on the other hand, requires zero size
-                           subjects. */
-                           /* if(!(s.c.lmr & POSITION_ONCE))
-                                s.c.rmr &= ~POSITION_ONCE;*/
-                        /* Also return the fence flag, if present in rmr.
-                           (This flag in lmr has no influence.)
-                        */
-                            /*s.c.rmr |= (s.c.lmr & FENCE);*/
+                                }                                       /* or by looking at whether both lhs and rhs  */
+                            else if(!(s.c.lmr & ONCE))                  /* results indicated this, in which case both */
+                                s.c.rmr &= ~ONCE;                       /* sides must be non-zero size subjects.      */
                             return s.c.rmr ^ (char)NIKS(pat);
                             }
-                    /* H        SL,SR=shift_right divisionPoint */
-                        /* SL = lhs divisionPoint S, SR = rhs divisionPoint S
-                        */
-                    /* I        leftResult=SL:car(P) */
-                        /*s.c.sav = *sloc;
-                        *sloc = '\0';*/
+                                                                    /* H        SL,SR=shift_right divisionPoint */
+                                                                        /* SL = lhs divisionPoint S, SR = rhs divisionPoint S */
+                                                                    /* I        leftResult=SL:car(P) */
 #if CUTOFFSUGGEST
-#if 1
                         suggested_Cut_Off = sub;
                         s.c.lmr = stringmatch(ind+1,"I",sub,sloc, pat->LEFT, subkn,/* 0 ? */pposition,/* strlen(sub) ? */ stringLength,&suggested_Cut_Off,mayMoveStartOfSubject);
                         if(suggested_Cut_Off > sloc)
                             {
-                            if(snijaf && suggested_Cut_Off > snijaf)
-                                {
-                                /*
-                                if(suggestedCutOff)
-                                    {
-                                    locpos += suggested_Cut_Off - sloc;
-                                printf("Bsnijaf %s -> %s\n",snijaf,suggested_Cut_Off);
-                                    snijaf = sloc = *suggestedCutOff = suggested_Cut_Off;
-                                    }
-                                else
-                                    {
-                                    locpos += snijaf - sloc;
-                                    sloc = snijaf;
-                                    s.c.lmr &= ~TRUE;
-                                    }
-                                */
-                                }
-                            else
+                            if(!(snijaf && suggested_Cut_Off > snijaf))
                                 {
                                 assert(suggested_Cut_Off > sloc);
                                 locpos += suggested_Cut_Off - sloc;
@@ -10414,37 +10371,25 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                                 }
                             }
 #else
-                        s.c.lmr = stringmatch(ind+1,"I",sub,sloc, pat->LEFT, subkn,/* 0 ? */pposition,/* strlen(sub) ? */ stringLength,NULL,0);
-#endif
-#else
                         s.c.lmr = stringmatch(ind+1,"I",sub,sloc, pat->LEFT, subkn,/* 0 ? */pposition,/* strlen(sub) ? */ stringLength);
 #endif
-                        /**sloc = s.c.sav;*/
                         }
-                    /* J    if leftResult.succes */
-                    if(s.c.lmr & TRUE)
-                    /* K        rightResult=0(P):cdr(pat) */
+                    
+                    if(s.c.lmr & TRUE)                              /* J    if leftResult.succes */
                         {
 #if CUTOFFSUGGEST
-                        s.c.rmr = stringmatch(ind+1,"J",sloc,snijaf,pat->RIGHT, subkn,locpos,stringLength,suggestedCutOff,mayMoveStartOfSubject);
+                        s.c.rmr = stringmatch(ind+1,"J",sloc,snijaf /* K        rightResult=0(P):cdr(pat) */
+                            ,pat->RIGHT, subkn,locpos,stringLength
+                            ,suggestedCutOff,mayMoveStartOfSubject);
 #else
                         s.c.rmr = stringmatch(ind+1,"J",sloc,snijaf,pat->RIGHT, subkn,locpos,stringLength);
 #endif
                         s.c.rmr &= ~ONCE;
                         }
                     /* L    return */
-                        /* Return true if full success.
-
-                           Also return whether lhs experienced max position
-                           being reached. */
-                        /* Also return whether the pattern as a whole doesn't
-                           want longer subjects, which can be found out by
-                           looking at the pattern */
                     if(!(s.c.rmr & POSITION_MAX_REACHED))
                         s.c.rmr &= ~POSITION_ONCE;
-                    if(/*(snijaf > sub) &&*/ stringOncePattern(pat))
-                        /* The test snijaf > sub merely avoids that
-                        stringOncePattern is called when it is useless. */
+                    if(/*(snijaf > sub) &&*/ stringOncePattern(pat))    /* The test snijaf > sub merely avoids that stringOncePattern is called when it is useless. */
                         {/* Test:
                          @(abcde:`(a ?x) (?z:d) ? )
                           z=b
@@ -10452,28 +10397,16 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                         s.c.rmr |= ONCE;
                         s.c.rmr |= (char)(pat->v.fl & FENCE);
                         }
-                        /* POSITION_ONCE requires zero size subjects. */
-                    /*if(!(s.c.lmr & POSITION_ONCE))
-                        s.c.rmr &= ~POSITION_ONCE;*/
-                        /* Also return the fence flag, which can be found on
-                           the pattern or in the result of the lhs or the rhs.
-                           (Not necessary that both have this flag.)
-                        */
-/*                    s.c.rmr |= (s.c.lmr & FENCE);*/
-                    return s.c.rmr ^ (char)NIKS(pat);
-                    /* end */
+                    return s.c.rmr ^ (char)NIKS(pat);               /* end */
                     }
                 case STREEP:
-                    /*if(sub[0] && sub[1])*/
                     if(snijaf > sub + 1)
                         {
-                        /*s.c.sav = sub[1];*/
 #if CUTOFFSUGGEST
                         s.c.lmr = stringmatch(ind+1,"M",sub,sub+1,pat->LEFT,subkn,pposition,stringLength,NULL,mayMoveStartOfSubject);
 #else
                         s.c.lmr = stringmatch(ind+1,"M",sub,sub+1,pat->LEFT,subkn,pposition,stringLength);
 #endif
-                        /*sub[1] = s.c.sav;*/
                         if(  (s.c.lmr & TRUE)
 #if CUTOFFSUGGEST
                           && ((s.c.rmr = stringmatch(ind+1,"N",sub+1,snijaf,pat->RIGHT, subkn,pposition,stringLength,suggestedCutOff,mayMoveStartOfSubject)) & TRUE)
@@ -10484,7 +10417,6 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                             {
                             dummy_op = LUCHT;
                             }
-                            /* s.c.lmr != SCHAR_MAX) */
                         s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE));
                         }
                     break;
@@ -10950,7 +10882,6 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                            rightResult indicates that the loop is done. */
                     /* G            return */
                         /* Return true if full success.
-
                            Also return whether lhs experienced max position
                            being reached. */
                         /* Also return whether the pattern as a whole doesn't
@@ -10987,88 +10918,44 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                            (Not necessary that both have this flag.)
                         */
                     /* end */
-                    /* A    divisionPoint=S */
-                    if(SUBJECTNOTNIL(sub,pat))
+                    if(SUBJECTNOTNIL(sub,pat))                      /* A    divisionPoint=S */
                         loc = sub;
                     else
                         loc = NULL;
-                    /* B    leftResult=0(P):car(P) */
-                    s.c.lmr = (char)match(ind+1,nil(pat), pat->LEFT, NULL,pposition,expr,kop(pat));
-                    /*a*b+c*d:?+[1+?*[1*%@?q*?+?            (q = c)
-                      a b c d:? [1 (? [1 %@?q ?) ?          (q = b)
-                      a b c d:? [1  ? [1 %@?q ?  ?          (q = b)
-                    */
-                    s.c.lmr &= ~ONCE;
-                    /* C    while divisionPoint */
-                    while(loc)
+                                                                    /* B    leftResult=0(P):car(P) */
+                    s.c.lmr = (char)match(ind+1,nil(pat),pat->LEFT  /* a*b+c*d:?+[1+?*[1*%@?q*?+?            (q = c) */
+                                         ,NULL,pposition,expr       /* a b c d:? [1 (? [1 %@?q ?) ?          (q = b) */
+                                         ,kop(pat));                /* a b c d:? [1  ? [1 %@?q ?  ?          (q = b) */
+                    s.c.lmr &= ~ONCE;                               
+                    while(loc)                                      /* C    while divisionPoint */  
                         {
-                    /* D        if leftResult.succes */
-                        if(s.c.lmr & TRUE)
-                    /* E            rightResult=SR:cdr(P) */
-                            {
+                        if(s.c.lmr & TRUE)                          /* D        if leftResult.succes */
+                            {                                       /* E            rightResult=SR:cdr(P) */
                             s.c.rmr = match(ind+1,loc,pat->RIGHT,snijaf,locpos,expr,op);
                             if(!(s.c.lmr & ONCE))
                                 s.c.rmr &= ~ONCE;
                             }
-                    /* F        if(done) */
-                        /* done =  (1) full succes */
-                        if(  (s.c.rmr & TRUE)
-                        /*      or (2) may not be shifted.
-                           ad (2): In the first pass, a position
-                           flag on car(P) counts as criterion for being done. */
-                          || (s.c.lmr & (POSITION_ONCE
-                        /* In all but the first pass, the left and right
-                           results can indicate that the loop is done. */
-                                        | ONCE
-                                        )
-                             )
-                          || (s.c.rmr & (ONCE
-                        /* In all passes a position_max_reached on the
-                           rightResult indicates that the loop is done. */
-                                        |POSITION_MAX_REACHED
-                                        )
+                        if(  (s.c.rmr & TRUE)                       /* F        if(1) full success */
+                          || (s.c.lmr & (POSITION_ONCE                  /*     or (2) may not be shifted. In the first pass, a position flag on car(P) counts as criterion for being done. */
+                                        | ONCE                          
+                                        )                               
+                             )                                          /* In all but the first pass, the left and right */
+                          || (s.c.rmr & (ONCE                           /* results can indicate that the loop is done.   */
+                                        |POSITION_MAX_REACHED           /* In all passes a position_max_reached on the   */
+                                        )                               /* rightResult indicates that the loop is done.  */
                              )
                           )
-                    /* G            return */
-                            {
-                        /* Return true if full success.
-
-                           Also return whether sub has reached max position.*/
-                            /*if(!(s.c.rmr & POSITION_MAX_REACHED))
-                                s.c.rmr &= ~POSITION_ONCE;*/
+                            {                                       /* G            return */
                             if(loc != sub)
-                                s.c.rmr &= ~POSITION_MAX_REACHED; /* This flag is
-                            reason to stop increasing the position of the
-                            division any further, but it must not be signalled
-                            back to the caller if the lhs is not nil ... */
-                            s.c.rmr |= (char)(s.c.lmr & POSITION_MAX_REACHED);
-                            /* ... unless it is the lhs that signals it. */
-                        /* Also return whether the pattern as a whole doesn't
-                           want longer subjects, which can be found out by
-                           looking at the pattern */
-                            if(oncePattern(pat))
-                                {
-                                /*
-                                For example,
-                                    a b c d:`(?x ?y) (?z:c) ?
-                                must fail and set x==nil, y==a and z==b
-                                */
-                                s.c.rmr |= ONCE;
-                                s.c.rmr |= (char)(pat->v.fl & FENCE);
+                                s.c.rmr &= ~POSITION_MAX_REACHED;           /* This flag is reason to stop increasing the position of the division any further, but it must not be signalled  back to the caller if the lhs is not nil ... */
+                            s.c.rmr |= (char)(s.c.lmr & POSITION_MAX_REACHED);  /* ... unless it is the lhs that signals it. */
+                            if(oncePattern(pat))                        /* Also return whether the pattern as a whole doesn't want longer subjects, which can be found out by looking at the pattern */ 
+                                {                                       /* For example,                            */ 
+                                s.c.rmr |= ONCE;                        /*     a b c d:`(?x ?y) (?z:c) ?           */ 
+                                s.c.rmr |= (char)(pat->v.fl & FENCE);   /* must fail and set x==nil, y==a and z==b */
                                 }
-                        /* or by looking at whether both lhs and rhs results
-                           indicated this, in which case both sides must be
-                           non-zero size subjects. */
-                            else if(!(s.c.lmr & ONCE))
+                            else if(!(s.c.lmr & ONCE))                  
                                 s.c.rmr &= ~ONCE;
-                        /* POSITION_ONCE, on the other hand, requires zero size
-                           subjects. */
-                        /*    if(!(s.c.lmr & POSITION_ONCE))
-                                s.c.rmr &= ~POSITION_ONCE;
-                                s.c.lmr & POSITION_ONCE has nothing to do with the return value*/
-                        /* Also return the fence flag, if present in rmr.
-                           (This flag in lmr has no influence.)
-                        */
 #if DEBUGBRACMAT
                             if(debug)
                                 {
