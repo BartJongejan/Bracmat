@@ -20,26 +20,78 @@
 email: bartj@hum.ku.dk
 */
 /*
-There is just one source file, no header file needed, apart from some standard
-header files.
+COMPILATION
+-----------
+It is assumed that the hardware is litte-endian, (which has become the most
+common these days).
+
+If you can compile successfully but cannot run the program succesfully,
+try putting -DBIGENDIAN on the command line of the compiler.
+This works of course only if the machine's hardware is big-endian.
+
+The program only utilizes standard libraries.
+
+Until 2012, the source code consisted of a single file, bracmat.c.
+Because XML is becoming more popular, a separate source file, xml.c
+implements reading XML files.
+
 On *N?X, just compile with
 
-    gcc -Wall bracmat.c
+    gcc -Wall -O2 bracmat.c xml.c
+
+(Optimization -O3 generates warnings and Bracmat does not run correctly.)
 
 rename a.out to whatever
 
 Profiling:
 
-    gcc -Wall -c -pg bracmat.c
-    gcc -Wall -pg bracmat.o
+    gcc -Wall -c -pg bracmat.c xml.c
+    gcc -Wall -pg bracmat.o xml.o
     ./a.out 'get$"valid.bra";!r'
     gprof a.out
 */
 
-#define DATUM "23 February 2012"
+#define DATUM "1 June 2012"
 #define VERSION "5"
-#define BUILD "116"
-/* 23 February 2012
+#define BUILD "120"
+/*
+    2 June 2012
+
+xml.c supports reading from stdio (no rewind). Example of use:
+type pr-xml-utf-8.xml | bracmat "put$(get$(,ML),\"pr-xml-utf-8.bra\",NEW)&"
+
+    1 June 2012
+
+Did some finishing, no essential code changes.
+
+    1 May 2012
+
+Added list of HTML entities. These are decoded to unicode codepoints and
+encoded as utf-8 if an option HT is added.
+
+get$("filename.html",HT,ML,TRM)
+
+   29 April 2012
+
+Restructured the (ancient) input function and renamed some identifiers to
+English equivalents.
+Added a source file, xml.c, that reads SGML, HTML and XML files.
+Syntax:
+
+get$(filename,ML)
+get$(filename,ML,TRM)
+get$(string,MEM,ML)
+get$(string,MEM,ML,TRM)
+
+An option HT is made, but does not work yet. Purpose: translate HTML entities.
+
+   13 April 2012
+
+The characters @ and % in front of a string now only turn off escaping with the
+\ character inside the string if the string is surrounded by " characters.
+Reason: the \L operator was not recognised if its lhs contained a % or @.
+
+   23 February 2012
 
 When Bracmat reads a file that is not well-formed, it asks fo a file name where
 it can write what it has understood. This did not work. Now it does.
@@ -133,7 +185,7 @@ times less stack depth.
 Made stringmatch 'greedy' to an extend that does not change the program's
 behaviour. (That is: all tests in valid.bra go through). Many string
 comparisons now continue past the cutoff position deviding the subject in a
-lhs and a rhs, pushing the devision point to the position where the lhs
+lhs and a rhs, pushing the division point to the position where the lhs
 patterns succeeds. Previously this point repeatedly was moved one byte until
 the lhs pattern either succeeded or definitely failed. The optimization is
 turned off for alternating patterns and for all but the first pattern in a
@@ -956,27 +1008,6 @@ You may find the source code difficult to read at some places. You are best
 off if you understand English and Dutch (and perhaps Danish). Only if the
 program arises enough interest I will invest the effort to streamline the
 source text and make it more understandable for the general programmer.
-
-COMPILATION
------------
-To compile an executable you only need this source file, bracmat.c.
-It is assumed that the hardware is litte-endian, (which has become the most
-common these days).
-
-With GNU C, this should be enough to compile and link an executable:
-
-gcc bracmat.c
-
-With HP cc:
-
-cc -Ae bracmat.c
-
-If you can compile successfully but cannot run the program succesfully,
-try putting -DBIGENDIAN on the command line of the compiler, like this:
-
-cc -DBIGENDIAN  bracmat.c
-
-This works of course only if the machine's hardware is big-endian.
 */
 
 /*
@@ -1466,6 +1497,7 @@ typedef struct
 #define GLF O('g','l','f') /* 20050405 The opposite of flg */
 #define GET O('g','e','t')
 /*#define HUM O('H','U','M')*/
+#define HT  O('H','T', 0 )
 #define IM  O('i', 0 , 0 )
 #define KAR O('c','h','r')
 #define KAU O('c','h','u')
@@ -1474,6 +1506,7 @@ typedef struct
 #define REV O('r','e','v') /* 20040830 strrev */
 #define LST O('l','s','t')
 #define MEM O('M','E','M')
+#define ML  O('M','L',0)
 #define MINEEN O('-','1',0)
 #define MMF O('m','e','m')
 #define MOD O('m','o','d')
@@ -1486,6 +1519,7 @@ typedef struct
 #define SIM O('s','i','m')
 #define STG O('S','T','R')
 #define TBL O('t','b','l')
+#define TRM O('T','R','M')
 #define TWEE O('2', 0 , 0 )
 #define TXT O('E','X','P')
 #define UPP O('u','p','p')
@@ -1501,10 +1535,16 @@ typedef struct
 #define SHIFT_VAP 1
 #define SHIFT_MEM 2
 #define SHIFT_ECH 3
+#define SHIFT_ML  4
+#define SHIFT_TRM 5
+#define SHIFT_HT  6
 #define OPT_STR 1
 #define OPT_VAP 2
 #define OPT_MEM 4
 #define OPT_ECH 8
+#define OPT_ML 16
+#define OPT_TRM 32
+#define OPT_HT  64
 
 #if REFCOUNTSTRESSTEST
 #define REF_COUNT_BITS 1
@@ -2092,7 +2132,7 @@ static const char
 hekje1[] = "\1",
 hekje5[] = "\5",
 hekje6[] = "\6",
-onbal[] =
+unbalanced[] =
 "unbalanced",
 
 fct[] = "(fct=f G T P C V I B W H J O.(T=m Z a p r R Q.!arg:(?m.?Z)&0:?R:?Q&"
@@ -2718,17 +2758,6 @@ static unsigned char CodePage850toISO8859(unsigned char kar)
 }
 #endif
 
-typedef struct tConc
-    {
-    unsigned char * mconc;
-    int cutoff:1;
-    int allocated:1;
-    } tConc;
-
-static tConc * Pstart;
-static unsigned char *start,**pstart,*bron;
-
-static psk anker;
 
 
 #ifdef DELAY_DUE_TO_INPUT
@@ -2736,22 +2765,22 @@ static clock_t delayDueToInput = 0;
 #endif
 
 #ifdef __SYMBIAN32__
-/* #define LIJSTLEN 0x100*/ /* If too high you get __chkstk error. Stack = 8K only! */
-/* #define LIJSTLEN 0x7F00*/
-#define LIJSTLEN 0x2000
+/* #define DEFAULT_INPUT_BUFFER_SIZE 0x100*/ /* If too high you get __chkstk error. Stack = 8K only! */
+/* #define DEFAULT_INPUT_BUFFER_SIZE 0x7F00*/
+#define DEFAULT_INPUT_BUFFER_SIZE 0x2000
 #else
 #ifdef _MSC_VER
-#define LIJSTLEN 0x7F00 /* Microsoft C staat 32k automatic data toe */
+#define DEFAULT_INPUT_BUFFER_SIZE 0x7F00 /* Microsoft C staat 32k automatic data toe */
 
 #else
 #ifdef __BORLANDC__
 #if __BORLANDC__ >= 0x500
-#define LIJSTLEN 0x7000
+#define DEFAULT_INPUT_BUFFER_SIZE 0x7000
 #else
-#define LIJSTLEN 0x7FFC
+#define DEFAULT_INPUT_BUFFER_SIZE 0x7FFC
 #endif
 #else
-#define LIJSTLEN 0x7FFC
+#define DEFAULT_INPUT_BUFFER_SIZE 0x7FFC
 #endif
 #endif
 #endif
@@ -2764,12 +2793,21 @@ static clock_t delayDueToInput = 0;
 #endif
 #endif
 
+static psk anker;
 
+typedef struct inputBuffer
+    {
+    unsigned char * buffer;
+    int cutoff:1;    /* Set to true if very long string does not fit in buffer of size DEFAULT_INPUT_BUFFER_SIZE */
+    int allocated:1; /* True if allocated with malloc. Otherwise on stack. */
+    } inputBuffer;
 
+static inputBuffer * InputArray;
+static inputBuffer * InputElement; /* Points to member of InputArray */
+static unsigned char *start,**pstart,*bron;
 static unsigned char * wijzer;
 static unsigned char * maxwijzer; /* wijzer <= maxwijzer,
                             if wijzer == maxwijzer, don't assign to *wijzer */
-static tConc * Conc;
 
 
 /* FUNCTIONS */
@@ -3593,57 +3631,62 @@ static unsigned char *shift_nw(void)
     return start;
     }
 
-static void combineConc(void)
+static void combineInputBuffers(void)
+/*
+Only to be called if the current input buffer is too small to contain
+a complete string (atom) and the content continues in one or more of
+the next buffers. These buffers are combined into one big buffer.
+*/
     {
-    tConc * next = Pstart + 1;
-    tConc * next2;
-    unsigned char * nconc;
+    inputBuffer * nextInputElement = InputElement + 1;
+    inputBuffer * next2;
+    unsigned char * bigBuffer;
     size_t len;
-    while(next->cutoff)
-        ++next;
+    while(nextInputElement->cutoff)
+        ++nextInputElement;
 
-    len = (next - Pstart) * (LIJSTLEN - 1) + 1;
+    len = (nextInputElement - InputElement) * (DEFAULT_INPUT_BUFFER_SIZE - 1) + 1;
 
-    if(next->mconc)
+    if(nextInputElement->buffer)
         {
-        len += strlen((const char *)next->mconc);
+        len += strlen((const char *)nextInputElement->buffer);
         }
 
-    nconc = (unsigned char *)bmalloc(__LINE__,len);
+    bigBuffer = (unsigned char *)bmalloc(__LINE__,len);
 
-    next = Pstart;
+    nextInputElement = InputElement;
 
-    while(next->cutoff)
+    while(nextInputElement->cutoff)
         {
-        strncpy((char *)nconc + (next - Pstart)*(LIJSTLEN - 1),(char *)next->mconc,LIJSTLEN - 1);
-        bfree(next->mconc);
-        ++next;
+        strncpy((char *)bigBuffer + (nextInputElement - InputElement)*(DEFAULT_INPUT_BUFFER_SIZE - 1),(char *)nextInputElement->buffer,DEFAULT_INPUT_BUFFER_SIZE - 1);
+        bfree(nextInputElement->buffer);
+        ++nextInputElement;
         }
 
-    if(next->mconc)
+    if(nextInputElement->buffer)
         {
-        strcpy((char *)nconc + (next - Pstart)*(LIJSTLEN - 1),(char *)next->mconc);
-        if(next->allocated)
+        strcpy((char *)bigBuffer + (nextInputElement - InputElement)*(DEFAULT_INPUT_BUFFER_SIZE - 1),(char *)nextInputElement->buffer);
+        if(nextInputElement->allocated)
             {
-            bfree(next->mconc);
+            bfree(nextInputElement->buffer);
             }
-        ++next;
+        ++nextInputElement;
         }
     else
-        nconc[(next - Pstart)*(LIJSTLEN - 1)] = '\0';
+        bigBuffer[(nextInputElement - InputElement)*(DEFAULT_INPUT_BUFFER_SIZE - 1)] = '\0';
 
-    Pstart->mconc = nconc;
-    Pstart->cutoff = FALSE;
-    Pstart->allocated = TRUE;
+    InputElement->buffer = bigBuffer;
+    InputElement->cutoff = FALSE;
+    InputElement->allocated = TRUE;
 
-    for(next2 = Pstart + 1;next->mconc;++next2,++next)
+    for(next2 = InputElement + 1;nextInputElement->buffer;++next2,++nextInputElement)
         {
-        next2->mconc = next->mconc;
-        next2->cutoff = next->cutoff;
-        next2->allocated = next->allocated;
+        next2->buffer = nextInputElement->buffer;
+        next2->cutoff = nextInputElement->cutoff;
+        next2->allocated = nextInputElement->allocated;
         }
 
-    next2->mconc = NULL;
+    next2->buffer = NULL;
     next2->cutoff = FALSE;
     next2->allocated = FALSE;
     }
@@ -3652,15 +3695,15 @@ static unsigned char * vshift_w(void)
 /* used from bouwboom_w, which receives a list of bmalloc-allocated string
    pointers. The last string pointer must not be deallocated here */
     {
-    if(Pstart->mconc && (++Pstart)->mconc)
+    if(InputElement->buffer && (++InputElement)->buffer)
         {
-        if(Pstart->cutoff)
+        if(InputElement->cutoff)
             {
-                combineConc();
+            combineInputBuffers();
             }
-        bfree(Pstart[-1].mconc);
-        Pstart[-1].allocated = FALSE;
-        start = Pstart->mconc;
+        bfree(InputElement[-1].buffer);
+        InputElement[-1].allocated = FALSE;
+        start = InputElement->buffer;
         }
     return start;
     }
@@ -4752,9 +4795,9 @@ static psk atoom(int Flgs,int opsflgs)
 
 #define lex(NXT,GRENS,FLGS,OPSFLGS) lex(NXT,GRENS,FLGS)
 
-static psk lex(int * nxt,int grens,int Flgs,int opsflgs)
+static psk lex(int * nxt,int priority,int Flgs,int opsflgs)
 /* tbw zoekt een expressie of subexpressie */
-/* returnwaarde is het teken volgend op de expressie */
+/* *nxt (if nxt != 0) is set to the character following the expression. */
     {
     int op_of_0;
     psk pkn;
@@ -4795,7 +4838,7 @@ static psk lex(int * nxt,int grens,int Flgs,int opsflgs)
             /* op_of_0 == een operator */
             psk operatorNode;
             int child_op_of_0;
-            if(optab[op_of_0] < grens) /* 'op_of_0' heeft te lage prioriteit */
+            if(optab[op_of_0] < priority) /* 'op_of_0' heeft te lage prioriteit */
                 {
 #if STRINGMATCH_CAN_BE_NEGATED
                 if(  (Flgs & (NOT|FILTERS)) == (NOT|ATOM)
@@ -4829,7 +4872,7 @@ static psk lex(int * nxt,int grens,int Flgs,int opsflgs)
             /*operatorNode->v.fl ^= Flgs;*/
             operatorNode->LEFT = pkn;
             pkn = operatorNode;/* 'op_of_0' heeft voldoende prioriteit */
-            if(optab[op_of_0] == grens) /* 'op_of_0' heeft zelfde prioriteit */
+            if(optab[op_of_0] == priority) /* 'op_of_0' heeft zelfde prioriteit */
                 {
                 (pkn)->v.fl ^= Flgs; /*19970821*/
                 operatorNode->RIGHT = NULL;
@@ -4858,21 +4901,20 @@ static psk bouwboom_w(psk pkn)
     {
     if(pkn)
         wis(pkn);
-    start = (unsigned char *)Conc[0].mconc;
-    Pstart = Conc;
-    if(Pstart->cutoff)
+    InputElement = InputArray;
+    if(InputElement->cutoff)
         {
-        combineConc();
-        start = Conc->mconc;
+        combineInputBuffers();
         }
+    start = InputElement->buffer;
     shift = vshift_w;
     pkn = lex(NULL,0,0,0);
     shift = shift_nw;
-    if((--Pstart)->allocated)
+    if((--InputElement)->allocated)
         {
-        bfree(Pstart->mconc);
+        bfree(InputElement->buffer);
         }
-    bfree(Conc);
+    bfree(InputArray);
     return pkn;
     }
 
@@ -4880,15 +4922,15 @@ static void lput(int c)
     {
     if(wijzer >= maxwijzer)
         {
-        tConc * nConc;
+        inputBuffer * newInputArray;
         unsigned char * lijst;
         int len;
 
-        for(len = 0;Conc[++len].mconc;)
+        for(len = 0;InputArray[++len].buffer;)
             ;
-        /* len = index of last element in Conc array */
+        /* len = index of last element in InputArray array */
 
-        lijst = Conc[len - 1].mconc;
+        lijst = InputArray[len - 1].buffer;
 
         /* The last string (probably on the stack, not on the heap) */
 
@@ -4898,35 +4940,35 @@ static void lput(int c)
         /* wijzer points at last operator (where string can be split) or at
            the start of the string. */
 
-        nConc = (tConc *)bmalloc(__LINE__,(2 + len) * sizeof(tConc));
+        newInputArray = (inputBuffer *)bmalloc(__LINE__,(2 + len) * sizeof(inputBuffer));
         /* allocate new array one element bigger than the previous. */
 
-        nConc[len + 1].mconc = NULL;
-        nConc[len + 1].cutoff = FALSE;
-        nConc[len + 1].allocated = FALSE;
-        nConc[len].mconc = lijst;
+        newInputArray[len + 1].buffer = NULL;
+        newInputArray[len + 1].cutoff = FALSE;
+        newInputArray[len + 1].allocated = FALSE;
+        newInputArray[len].buffer = lijst;
         /*Printf("lijst %p\n",lijst);*/
-        nConc[len].cutoff = FALSE;
-        nConc[len].allocated = FALSE;
+        newInputArray[len].cutoff = FALSE;
+        newInputArray[len].allocated = FALSE;
 
         if(wijzer == lijst)
             {
             /* copy the full content of lijst to the second last element */
-            nConc[--len].mconc = (unsigned char *)bmalloc(__LINE__,LIJSTLEN);
-            strncpy((char *)nConc[len].mconc,(char *)lijst,LIJSTLEN - 1);
+            newInputArray[--len].buffer = (unsigned char *)bmalloc(__LINE__,DEFAULT_INPUT_BUFFER_SIZE);
+            strncpy((char *)newInputArray[len].buffer,(char *)lijst,DEFAULT_INPUT_BUFFER_SIZE - 1);
             /* Make a notice that the element's string is cut-off */
-            nConc[len].cutoff = TRUE;
-            nConc[len].allocated = TRUE;
+            newInputArray[len].cutoff = TRUE;
+            newInputArray[len].allocated = TRUE;
             }
         else
             {
             ++wijzer; /* wijzer points at first character after the operator */
             /* maxwijzer - wijzer >= 0 */
-            nConc[--len].mconc = (unsigned char *)bmalloc(__LINE__,(size_t)(wijzer - lijst + 1));
-            strncpy((char *)nConc[len].mconc,(char *)lijst,(size_t)(wijzer - lijst));
-            nConc[len].mconc[(unsigned int)(wijzer - lijst)] = 0;
-            nConc[len].cutoff = FALSE;
-            nConc[len].allocated = TRUE;
+            newInputArray[--len].buffer = (unsigned char *)bmalloc(__LINE__,(size_t)(wijzer - lijst + 1));
+            strncpy((char *)newInputArray[len].buffer,(char *)lijst,(size_t)(wijzer - lijst));
+            newInputArray[len].buffer[(unsigned int)(wijzer - lijst)] = 0;
+            newInputArray[len].cutoff = FALSE;
+            newInputArray[len].allocated = TRUE;
 
             /* Now remove the substring up to wijzer from lijst */
             strncpy((char *)lijst,(char *)wijzer,(size_t)(maxwijzer - wijzer));
@@ -4937,14 +4979,30 @@ static void lput(int c)
         while(len)
             {
             --len;
-            nConc[len].mconc = Conc[len].mconc;
-            nConc[len].cutoff = Conc[len].cutoff;
-            nConc[len].allocated = Conc[len].allocated;
+            newInputArray[len].buffer = InputArray[len].buffer;
+            newInputArray[len].cutoff = InputArray[len].cutoff;
+            newInputArray[len].allocated = InputArray[len].allocated;
             }
-        bfree(Conc);
-        Conc = nConc;
+        bfree(InputArray);
+        InputArray = newInputArray;
         }
     *wijzer++ = (unsigned char)c;
+    }
+
+/* referenced from xml.c */
+void putOperatorChar(int c)
+/* c == parenthesis, operator of flag */ 
+    {
+    lput(c);
+    }
+
+/* referenced from xml.c */
+void putLeaveChar(int c)
+/* c == any character that should end as part of an atom (string) */ 
+    {
+    if(c & 0x80)
+        lput(0x7F);
+    lput(c | 0x80);
     }
 
 void writeError(psk pkn)
@@ -4954,7 +5012,6 @@ void writeError(psk pkn)
     redMooi = mooi;
     mooi = FALSE;
     redfpo = fpo;
-/*    errorprintf(" in:\n"); 20120223*/
     fpo = errorStream;
 #if !defined NO_FOPEN
     if(fpo == NULL && errorFileName != NULL)
@@ -5022,38 +5079,48 @@ static int redirectError(char * name)
 /*#endif*/
 
 
-static psk input(FILE * fpi,psk pkn,int echmemvapstr,Boolean * err,Boolean * GoOn)
+static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean * GoOn)
     {
-    int accolades,ikar,hasop,lucht,escape,noEscape,string,haken,error;
+    int braces,ikar,hasop,whiteSpaceSeen,escape,noEscape,inString,parentheses,error;
 #ifdef __SYMBIAN32__
     unsigned char * lijst;
-    lijst = bmalloc(__LINE__,LIJSTLEN);
+    lijst = bmalloc(__LINE__,DEFAULT_INPUT_BUFFER_SIZE);
 #else
-    unsigned char lijst[LIJSTLEN];
+    unsigned char lijst[DEFAULT_INPUT_BUFFER_SIZE];
 #endif
-    maxwijzer = lijst + (LIJSTLEN - 1);/* er moet ruimte zijn voor afsluitende 0 */
-    /*
-    conc = (unsigned char **)bmalloc(__LINE__,2*sizeof(char *));
-    conc[0] = lijst;
-    conc[1] = NULL;
-    */
-    Conc = (tConc *)bmalloc(__LINE__,2*sizeof(tConc));
-    Conc[0].mconc = lijst;
-    Conc[0].cutoff = FALSE;
-    Conc[0].allocated = FALSE;
-    Conc[1].mconc = NULL;
-    Conc[1].cutoff = FALSE;
-    Conc[1].allocated = FALSE;
+    maxwijzer = lijst + (DEFAULT_INPUT_BUFFER_SIZE - 1);/* er moet ruimte zijn voor afsluitende 0 */
+    InputArray = (inputBuffer *)bmalloc(__LINE__,2*sizeof(inputBuffer));
+    InputArray[0].buffer = lijst;
+    InputArray[0].cutoff = FALSE;
+    InputArray[0].allocated = FALSE;
+    InputArray[1].buffer = NULL;
+    InputArray[1].cutoff = FALSE;
+    InputArray[1].allocated = FALSE;
     error = FALSE;
-    accolades = 0;
-    haken = 0;
+    braces = 0;
+    parentheses = 0;
     hasop = TRUE;
-    lucht = FALSE;
+    whiteSpaceSeen = FALSE;
     escape = FALSE;
     noEscape = FALSE; /* @"C:\dir1\bracmat" */
-    string = FALSE;
+    inString = FALSE;
 
-    if(echmemvapstr & (OPT_VAP|OPT_STR))
+    if(echmemvapstrmltrm & OPT_ML)
+        {
+        extern void XMLtext(FILE * fpi,char * bron,int trim,int html);
+        wijzer = lijst;
+        XMLtext(fpi,(char*)bron,(echmemvapstrmltrm & OPT_TRM),(echmemvapstrmltrm & OPT_HT));
+        *wijzer = 0;
+        pkn = bouwboom_w(pkn);
+        if(err) *err = error;
+#ifdef __SYMBIAN32__
+        bfree(lijst);
+#endif
+        if(GoOn)
+            *GoOn = FALSE;
+        return pkn;
+        }
+    else if(echmemvapstrmltrm & (OPT_VAP|OPT_STR))
         {
         for(wijzer = lijst;;)
             {
@@ -5074,9 +5141,9 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstr,Boolean * err,Boolean * GoO
             if(ikar & 0x80)
                  lput(0x7F);
             lput(ikar | 0x80);
-            if(echmemvapstr & OPT_VAP)
+            if(echmemvapstrmltrm & OPT_VAP)
                 {
-                if(echmemvapstr & OPT_STR)
+                if(echmemvapstrmltrm & OPT_STR)
                     lput(' ' | 0x80);
                 else
                     lput(' ');
@@ -5093,44 +5160,55 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstr,Boolean * err,Boolean * GoO
         return pkn;
         }
     for( wijzer = lijst
-       ;
+       ;    
 #if _BRACMATEMBEDDED
-         !error &&
+            !error
+         &&
 #endif
             (ikar = fpi ? mygetc(fpi) : *bron++) != EOF
-         && haken >= 0
+         && ikar
+         && parentheses >= 0
        ;
        )
         {
-        if(echmemvapstr & OPT_ECH)
+        if(echmemvapstrmltrm & OPT_ECH)
             {
-            if(fpi != stdin && ikar)
+            if(fpi != stdin)
                 Printf("%c",ikar);
             if(ikar == '\n')
                 {
-                if(accolades)
+                if(braces)
                     Printf("{com} ");
-                else if(string)
+                else if(inString)
                     Printf("{str} ");
-                else if(haken > 0 || fpi != stdin)
+                else if(parentheses > 0 || fpi != stdin)
                     {
                     int tel;
-                    Printf("{%d} ",haken);
+                    Printf("{%d} ",parentheses);
                     if(fpi == stdin)
-                        for(tel = haken;tel;tel--)
+                        for(tel = parentheses;tel;tel--)
                                 Printf("  ");
                     }
                 }
             }
-        if(!accolades)
+        if(braces)
             {
-            if(ikar & 0x80)
-                {
-                if(lucht && !hasop)
-                    lput(' ');
-                lucht = FALSE;
-                lput(0x7F);
-                }
+            if(ikar == '{')
+                braces++;
+            else if(ikar == '}')
+                braces--;
+            }
+        else if(ikar & 0x80)
+            {
+            if(whiteSpaceSeen && !hasop)
+                lput(' ');
+            whiteSpaceSeen = FALSE;
+            lput(0x7F);
+            lput(ikar);
+            escape = FALSE;
+            }
+        else
+            { 
             if(escape)
                 {
                 escape = FALSE;
@@ -5176,89 +5254,69 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstr,Boolean * err,Boolean * GoO
                         ikar = ikar | 0x80; /* 20070403 */
                     }
                 }
-            else if(ikar == '\\' && !noEscape)
+            else if(  ikar == '\\' 
+                   && (  !noEscape
+          /*20120413*/|| !inString /* %\L @\L */
+                      )
+                   )
                 {
                 escape = TRUE;
                 continue;
                 }
-            }
-        if(string)
-            {
-            if(ikar == '"')
+            if(inString)
                 {
-                string = FALSE;
-                noEscape = FALSE;
+                if(ikar == '"')
+                    {
+                    inString = FALSE;
+                    noEscape = FALSE;
+                    }
+                else
+                    {
+                    lput(ikar | 0x80);
+                    }
                 }
             else
-                lput(ikar | 0x80);
-            }
-        else
-            {
-            switch(ikar)
                 {
-                case '{' :
-                    accolades++;
-                    break;
-                case '}' :
-                    accolades--;
-                    if(accolades < 0)
-                        {
+                switch(ikar)
+                    {
+                    case '{' :
+                        braces = 1;
+                        break;
+                    case '}' :
                         *wijzer = 0;
                         errorprintf(
                         "\n%s brace }",
-                            onbal);
+                            unbalanced);
                         error = TRUE;
-                        accolades = 0;
-                        /*exit(1);*/
-                        }
-                    break;
-                default :
-                    {
-                    if(!accolades)
+                        break;
+                    default :
                         {
-                        if(optab[ikar] == LUCHT
-                        && !(ikar == '\n' && fpi == stdin && !haken))
+                        if(  optab[ikar] == LUCHT
+                          && (  ikar != '\n' 
+                             || fpi != stdin
+                             || parentheses
+                             )
+                          )
                             {
-                            lucht = TRUE;
+                            whiteSpaceSeen = TRUE;
                             noEscape = FALSE; /* Bart 20030331 */
                             }
                         else
                             {
                             switch(ikar)
                                 {
-                                case '"':
-                                    string = TRUE;
-                                    break;
-                                case '@':
-                                case '%': /* These flags are removed if the string
-                                             is non-empty, so using them to
-                                             indicate "do not use escape sequences"
-                                             does no harm.
-                                             Bart 20010322
-                                         */
-                                    noEscape = TRUE;
-                                    break;
-                                case '(':
-                                    haken++;
-                                    break;
-                                case ')':
-                                    noEscape = FALSE;
-                                    haken--;
-                                    break;
-                                case 0 :
                                 case ';' :
-                                    if(haken)
+                                    if(parentheses)
                                         {
                                         *wijzer = 0;
-                                        errorprintf("\n%d %s \"(\"",haken,onbal);
+                                        errorprintf("\n%d %s \"(\"",parentheses,unbalanced);
                                         error = TRUE;
-                                        /*exit(1);*/
                                         }
-                                    if(echmemvapstr & OPT_ECH)
+                                    if(echmemvapstrmltrm & OPT_ECH)
                                         Printf("\n");
-                                    /* doorvallen */
+                                    /* fall through */
                                 case '\n':
-                                    /* alleen met fpi==stdin kom je hier direkt */
+                                    /* You get here only directly if fpi==stdin */
                                     *wijzer = 0;
                                     pkn = bouwboom_w(pkn);
                                     if(error)
@@ -5270,58 +5328,81 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstr,Boolean * err,Boolean * GoO
                                     if(GoOn)
                                         *GoOn = ikar == ';' && !error;
                                     return pkn;
-                                }
-                            if(lucht
-                            && !hasop
-                            && optab[ikar] == NOOP)
-                                lput(' ');
-                            lucht = FALSE;
-                            hasop =
-                                (  (ikar == '(')
-                                || (  (optab[ikar] < NOOP)
-                                   && ikar != ')'
-                                   )
-                                );
+                                default:
+                                    switch(ikar)
+                                        {
+                                        case '"':
+                                            inString = TRUE;
+                                            break;
+                                        case '@':
+                                        case '%': /* These flags are removed if the inString
+                                                     is non-empty, so using them to
+                                                     indicate "do not use escape sequences"
+                                                     does no harm.
+                                                     Bart 20010322
+                                                 */
+                                            noEscape = TRUE;
+                                            break;
+                                        case '(':
+                                            parentheses++;
+                                            break;
+                                        case ')':
+                                            noEscape = FALSE;
+                                            parentheses--;
+                                            break;
+                                        }
 
-                            if(!string)
-                                {
-                                lput(ikar);
-                                if(hasop)
-                                    noEscape = FALSE;
+                                    if(  whiteSpaceSeen
+                                      && !hasop
+                                      && optab[ikar] == NOOP
+                                      )
+                                        lput(' ');
+
+                                    whiteSpaceSeen = FALSE;
+                                    hasop =
+                                        (  (ikar == '(')
+                                        || (  (optab[ikar] < NOOP)
+                                           && ikar != ')'
+                                           )
+                                        );
+
+                                    if(!inString)
+                                        {
+                                        lput(ikar);
+                                        if(hasop)
+                                            noEscape = FALSE;
+                                        }
                                 }
                             }
                         }
                     }
                 }
             }
-        /*if(!(ikar & 0x7F))*/
-        if(!ikar) /*20100202 Scanning stopped at 0x80, as in the utf-8 sequence e2 80 93 (8211 EN DASH )*/
-            break;
         }
     *wijzer = 0;
 #if _BRACMATEMBEDDED
     if(!error)
 #endif
         {
-        if(string)
+        if(inString)
             {
-            errorprintf("\n%s \"",onbal);
+            errorprintf("\n%s \"",unbalanced);
             error = TRUE;
             /*exit(1);*/
             }
-        if(accolades)
+        if(braces)
             {
-            errorprintf("\n%d %s \"{\"",accolades,onbal);
+            errorprintf("\n%d %s \"{\"",braces,unbalanced);
             error = TRUE;
             /*exit(1);*/
             }
-        if(haken > 0)
+        if(parentheses > 0)
             {
-            errorprintf("\n%d %s \"(\"",haken,onbal);
+            errorprintf("\n%d %s \"(\"",parentheses,unbalanced);
             error = TRUE;
             /*exit(1);*/
             }
-        if(haken < 0)
+        if(parentheses < 0)
             {
 #if !defined NO_EXIT_ON_NON_SEVERE_ERRORS
             if(ikar == 'j' || ikar == 'J' || ikar == 'y' || ikar == 'Y')
@@ -5348,15 +5429,14 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstr,Boolean * err,Boolean * GoO
             else
 #endif
                 {
-                errorprintf("\n%d %s \")\"",-haken,onbal);
+                errorprintf("\n%d %s \")\"",-parentheses,unbalanced);
                 error = TRUE;
                 /*exit(1);*/
                 }
             }
-        if(echmemvapstr & OPT_ECH)
+        if(echmemvapstrmltrm & OPT_ECH)
             Printf("\n");
-    /*  if(*conc[0])*/
-        if(*Conc[0].mconc)
+        if(*InputArray[0].buffer)
             {
             pkn = bouwboom_w(pkn);
             if(error)
@@ -5384,13 +5464,13 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstr,Boolean * err,Boolean * GoO
             }
         else
             {
-            bfree(Conc);
+            bfree(InputArray);
             }
         }
 #if _BRACMATEMBEDDED
     else
         {
-        bfree(Conc);
+        bfree(InputArray);
         }
 #endif
     if(err)
@@ -7620,7 +7700,8 @@ static int utf8bytes(unsigned LONG val)
         }
     }
 
-static unsigned char * putCodePoint(unsigned LONG val,unsigned char * s)
+/* extern, is called from xml.c */
+unsigned char * putCodePoint(unsigned LONG val,unsigned char * s)
     {
     /* Converts Unicode character w to 1,2,3 or 4 bytes of UTF8 in s. */
     if(val < 0x80)
@@ -10070,7 +10151,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
         result(pat);
         Printf  (",pos=%ld,sLen=%ld,sugCut=%s,mayMoveStart=%s)"
                 ,pposition
-                ,stringLength
+                ,(long int)stringLength
                 ,suggestedCutOff ? *suggestedCutOff ? *suggestedCutOff : (unsigned char*)"(0)" : (unsigned char*)"0"
                 ,mayMoveStartOfSubject ? *mayMoveStartOfSubject ? *mayMoveStartOfSubject : (unsigned char*)"(0)" : (unsigned char*)"0"
                 );
@@ -10242,13 +10323,14 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     may_Move_Start_Of_Subject = sub;
 #endif
                     /* This code mirrors that of match(). (see below)*/
-                    /* A    divisionPoint=S */
-                    sloc = sub;
-                    /*s.c.sav = *sloc;
-                    *sloc = '\0';*/
-                    /* B    leftResult=0(P):car(P) */
+                    
+                    sloc = sub;                                     /* A    divisionPoint=S */
+                                                                    
 #if CUTOFFSUGGEST
-                    s.c.lmr = stringmatch(ind+1,"I",sub, sloc, pat->LEFT, subkn,pposition,stringLength,&suggested_Cut_Off,mayMoveStartOfSubject);
+                    s.c.lmr = stringmatch(ind+1,"I",sub, sloc       /* B    leftResult=0(P):car(P) */
+                                ,pat->LEFT,subkn,pposition
+                                ,stringLength,&suggested_Cut_Off
+                                ,mayMoveStartOfSubject);
                     if((s.c.lmr & ONCE) && mayMoveStartOfSubject && *mayMoveStartOfSubject > sub)
                         {
                         return ONCE;
@@ -10256,8 +10338,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
 #else
                     s.c.lmr = stringmatch(ind+1,"I",sub, sloc, pat->LEFT, subkn,pposition,stringLength);
 #endif
-                    /**sloc = s.c.sav;*/
-                    /* C    while divisionPoint */
+                    
 #if CUTOFFSUGGEST
                     if(suggested_Cut_Off > sloc)
                         {
@@ -10285,18 +10366,19 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     else
 #endif
                         s.c.lmr &= ~ONCE;
-                    while(sloc < snijaf)
+                    while(sloc < snijaf)                            /* C    while divisionPoint */
                         {
-                    /* D        if leftResult.succes */
-                        if(s.c.lmr & TRUE)
-                    /* E            rightResult=SR:cdr(P) */
+                        if(s.c.lmr & TRUE)                          /* D        if leftResult.succes */
                             {
 #if CUTOFFSUGGEST
                             if(s.c.lmr & ONCE)
                                 may_Move_Start_Of_Subject = 0;
                             else if(may_Move_Start_Of_Subject != 0)
                                 may_Move_Start_Of_Subject = sloc;
-                            s.c.rmr = stringmatch(ind+1,"J",sloc,snijaf, pat->RIGHT, subkn,locpos,stringLength,suggestedCutOff,&may_Move_Start_Of_Subject);
+                            s.c.rmr = stringmatch(ind+1,"J",sloc    /* E            rightResult=SR:cdr(P) */
+                                ,snijaf, pat->RIGHT, subkn
+                                ,locpos,stringLength,suggestedCutOff
+                                ,&may_Move_Start_Of_Subject);
                             if(may_Move_Start_Of_Subject != sloc && may_Move_Start_Of_Subject != 0)
                                 {
                                 assert(may_Move_Start_Of_Subject > sloc);
@@ -10321,92 +10403,38 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                             ++sloc;
                             ++locpos;
                             }
-                    /* F        if(done) */
-                        /* done =  (1) full succes */
-                        if(  (s.c.rmr & TRUE)
-                        /*      or (2) may not be shifted.
-                           ad (2): In the first pass, a position
-                           flag on car(P) counts as criterion for being done. */
-                          || (s.c.lmr & (POSITION_ONCE
-                        /* In all but the first pass, the left and right
-                           results can indicate that the loop is done. */
-                                        | ONCE
-                                        )
-                             )
-                          || (s.c.rmr & (ONCE
-                        /* In all passes a position_max_reached on the
-                           rightResult indicates that the loop is done. */
-                                        |POSITION_MAX_REACHED
-                                        )
+                        if(  (s.c.rmr & TRUE)                       /* F        if(1) full success */
+                          || (s.c.lmr & (POSITION_ONCE                  /*     or (2) may not be shifted. In the first pass, a position flag on car(P) counts as criterion for being done. */
+                                        | ONCE                          
+                                        )                               
+                             )                                          /* In all but the first pass, the left and right */
+                          || (s.c.rmr & (ONCE                           /* results can indicate that the loop is done.   */
+                                        |POSITION_MAX_REACHED           /* In all passes a position_max_reached on the   */
+                                        )                               /* rightResult indicates that the loop is done.  */
                              )
                           )
-                    /* G            return */
-                            {
-                        /* Return true if full success.
-
-                           Also return whether sub has reached max position.*/
-                            /*if(!(s.c.rmr & POSITION_MAX_REACHED))
-                                s.c.rmr &= ~POSITION_ONCE;*/
-                            if(sloc > sub + 1)
-                                s.c.rmr &= ~POSITION_MAX_REACHED; /* This flag is
-                            reason to stop increasing the position of the
-                            division any further, but it must not be signalled
-                            back to the caller if the lhs is not nil ... */
-                            s.c.rmr |= (char)(s.c.lmr & POSITION_MAX_REACHED);
-                            /* ... unless it is the lhs that signals it. */
-                        /* Also return whether the pattern as a whole doesn't
-                           want longer subjects, which can be found out by
-                           looking at the pattern */
-                            if(stringOncePattern(pat))
-                                {
-                                s.c.rmr |= ONCE;
+                            {                                       /* G            return */
+                            if(sloc > sub + 1)                          /* Also return whether sub has reached max position.*/
+                                s.c.rmr &= ~POSITION_MAX_REACHED;       /* This flag is reason to stop increasing the position of the division any further, but it must not be signalled back to the caller if the lhs is not nil ... */
+                            s.c.rmr |= (char)(s.c.lmr & POSITION_MAX_REACHED); /* ... unless it is the lhs that signals it. */
+                            if(stringOncePattern(pat))                  /* Also return whether the pattern as a whole */
+                                {                                       /* doesn't want longer subjects, which can be */
+                                s.c.rmr |= ONCE;                        /* found out by looking at the pattern        */
                                 s.c.rmr |= (char)(pat->v.fl & FENCE);
-                                }
-                        /* or by looking at whether both lhs and rhs results
-                           indicated this, in which case both sides must be
-                           non-zero size subjects. */
-                            else if(!(s.c.lmr & ONCE))
-                                s.c.rmr &= ~ONCE;
-                        /* POSITION_ONCE, on the other hand, requires zero size
-                           subjects. */
-                           /* if(!(s.c.lmr & POSITION_ONCE))
-                                s.c.rmr &= ~POSITION_ONCE;*/
-                        /* Also return the fence flag, if present in rmr.
-                           (This flag in lmr has no influence.)
-                        */
-                            /*s.c.rmr |= (s.c.lmr & FENCE);*/
+                                }                                       /* or by looking at whether both lhs and rhs  */
+                            else if(!(s.c.lmr & ONCE))                  /* results indicated this, in which case both */
+                                s.c.rmr &= ~ONCE;                       /* sides must be non-zero size subjects.      */
                             return s.c.rmr ^ (char)NIKS(pat);
                             }
-                    /* H        SL,SR=shift_right divisionPoint */
-                        /* SL = lhs divisionPoint S, SR = rhs divisionPoint S
-                        */
-                    /* I        leftResult=SL:car(P) */
-                        /*s.c.sav = *sloc;
-                        *sloc = '\0';*/
+                                                                    /* H        SL,SR=shift_right divisionPoint */
+                                                                        /* SL = lhs divisionPoint S, SR = rhs divisionPoint S */
+                                                                    /* I        leftResult=SL:car(P) */
 #if CUTOFFSUGGEST
-#if 1
                         suggested_Cut_Off = sub;
                         s.c.lmr = stringmatch(ind+1,"I",sub,sloc, pat->LEFT, subkn,/* 0 ? */pposition,/* strlen(sub) ? */ stringLength,&suggested_Cut_Off,mayMoveStartOfSubject);
                         if(suggested_Cut_Off > sloc)
                             {
-                            if(snijaf && suggested_Cut_Off > snijaf)
-                                {
-                                /*
-                                if(suggestedCutOff)
-                                    {
-                                    locpos += suggested_Cut_Off - sloc;
-                                printf("Bsnijaf %s -> %s\n",snijaf,suggested_Cut_Off);
-                                    snijaf = sloc = *suggestedCutOff = suggested_Cut_Off;
-                                    }
-                                else
-                                    {
-                                    locpos += snijaf - sloc;
-                                    sloc = snijaf;
-                                    s.c.lmr &= ~TRUE;
-                                    }
-                                */
-                                }
-                            else
+                            if(!(snijaf && suggested_Cut_Off > snijaf))
                                 {
                                 assert(suggested_Cut_Off > sloc);
                                 locpos += suggested_Cut_Off - sloc;
@@ -10414,37 +10442,25 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                                 }
                             }
 #else
-                        s.c.lmr = stringmatch(ind+1,"I",sub,sloc, pat->LEFT, subkn,/* 0 ? */pposition,/* strlen(sub) ? */ stringLength,NULL,0);
-#endif
-#else
                         s.c.lmr = stringmatch(ind+1,"I",sub,sloc, pat->LEFT, subkn,/* 0 ? */pposition,/* strlen(sub) ? */ stringLength);
 #endif
-                        /**sloc = s.c.sav;*/
                         }
-                    /* J    if leftResult.succes */
-                    if(s.c.lmr & TRUE)
-                    /* K        rightResult=0(P):cdr(pat) */
+                    
+                    if(s.c.lmr & TRUE)                              /* J    if leftResult.succes */
                         {
 #if CUTOFFSUGGEST
-                        s.c.rmr = stringmatch(ind+1,"J",sloc,snijaf,pat->RIGHT, subkn,locpos,stringLength,suggestedCutOff,mayMoveStartOfSubject);
+                        s.c.rmr = stringmatch(ind+1,"J",sloc,snijaf /* K        rightResult=0(P):cdr(pat) */
+                            ,pat->RIGHT, subkn,locpos,stringLength
+                            ,suggestedCutOff,mayMoveStartOfSubject);
 #else
                         s.c.rmr = stringmatch(ind+1,"J",sloc,snijaf,pat->RIGHT, subkn,locpos,stringLength);
 #endif
                         s.c.rmr &= ~ONCE;
                         }
                     /* L    return */
-                        /* Return true if full success.
-
-                           Also return whether lhs experienced max position
-                           being reached. */
-                        /* Also return whether the pattern as a whole doesn't
-                           want longer subjects, which can be found out by
-                           looking at the pattern */
                     if(!(s.c.rmr & POSITION_MAX_REACHED))
                         s.c.rmr &= ~POSITION_ONCE;
-                    if(/*(snijaf > sub) &&*/ stringOncePattern(pat))
-                        /* The test snijaf > sub merely avoids that
-                        stringOncePattern is called when it is useless. */
+                    if(/*(snijaf > sub) &&*/ stringOncePattern(pat))    /* The test snijaf > sub merely avoids that stringOncePattern is called when it is useless. */
                         {/* Test:
                          @(abcde:`(a ?x) (?z:d) ? )
                           z=b
@@ -10452,28 +10468,16 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                         s.c.rmr |= ONCE;
                         s.c.rmr |= (char)(pat->v.fl & FENCE);
                         }
-                        /* POSITION_ONCE requires zero size subjects. */
-                    /*if(!(s.c.lmr & POSITION_ONCE))
-                        s.c.rmr &= ~POSITION_ONCE;*/
-                        /* Also return the fence flag, which can be found on
-                           the pattern or in the result of the lhs or the rhs.
-                           (Not necessary that both have this flag.)
-                        */
-/*                    s.c.rmr |= (s.c.lmr & FENCE);*/
-                    return s.c.rmr ^ (char)NIKS(pat);
-                    /* end */
+                    return s.c.rmr ^ (char)NIKS(pat);               /* end */
                     }
                 case STREEP:
-                    /*if(sub[0] && sub[1])*/
                     if(snijaf > sub + 1)
                         {
-                        /*s.c.sav = sub[1];*/
 #if CUTOFFSUGGEST
                         s.c.lmr = stringmatch(ind+1,"M",sub,sub+1,pat->LEFT,subkn,pposition,stringLength,NULL,mayMoveStartOfSubject);
 #else
                         s.c.lmr = stringmatch(ind+1,"M",sub,sub+1,pat->LEFT,subkn,pposition,stringLength);
 #endif
-                        /*sub[1] = s.c.sav;*/
                         if(  (s.c.lmr & TRUE)
 #if CUTOFFSUGGEST
                           && ((s.c.rmr = stringmatch(ind+1,"N",sub+1,snijaf,pat->RIGHT, subkn,pposition,stringLength,suggestedCutOff,mayMoveStartOfSubject)) & TRUE)
@@ -10484,7 +10488,6 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                             {
                             dummy_op = LUCHT;
                             }
-                            /* s.c.lmr != SCHAR_MAX) */
                         s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE));
                         }
                     break;
@@ -10950,7 +10953,6 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                            rightResult indicates that the loop is done. */
                     /* G            return */
                         /* Return true if full success.
-
                            Also return whether lhs experienced max position
                            being reached. */
                         /* Also return whether the pattern as a whole doesn't
@@ -10987,88 +10989,44 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                            (Not necessary that both have this flag.)
                         */
                     /* end */
-                    /* A    divisionPoint=S */
-                    if(SUBJECTNOTNIL(sub,pat))
+                    if(SUBJECTNOTNIL(sub,pat))                      /* A    divisionPoint=S */
                         loc = sub;
                     else
                         loc = NULL;
-                    /* B    leftResult=0(P):car(P) */
-                    s.c.lmr = (char)match(ind+1,nil(pat), pat->LEFT, NULL,pposition,expr,kop(pat));
-                    /*a*b+c*d:?+[1+?*[1*%@?q*?+?            (q = c)
-                      a b c d:? [1 (? [1 %@?q ?) ?          (q = b)
-                      a b c d:? [1  ? [1 %@?q ?  ?          (q = b)
-                    */
-                    s.c.lmr &= ~ONCE;
-                    /* C    while divisionPoint */
-                    while(loc)
+                                                                    /* B    leftResult=0(P):car(P) */
+                    s.c.lmr = (char)match(ind+1,nil(pat),pat->LEFT  /* a*b+c*d:?+[1+?*[1*%@?q*?+?            (q = c) */
+                                         ,NULL,pposition,expr       /* a b c d:? [1 (? [1 %@?q ?) ?          (q = b) */
+                                         ,kop(pat));                /* a b c d:? [1  ? [1 %@?q ?  ?          (q = b) */
+                    s.c.lmr &= ~ONCE;                               
+                    while(loc)                                      /* C    while divisionPoint */  
                         {
-                    /* D        if leftResult.succes */
-                        if(s.c.lmr & TRUE)
-                    /* E            rightResult=SR:cdr(P) */
-                            {
+                        if(s.c.lmr & TRUE)                          /* D        if leftResult.succes */
+                            {                                       /* E            rightResult=SR:cdr(P) */
                             s.c.rmr = match(ind+1,loc,pat->RIGHT,snijaf,locpos,expr,op);
                             if(!(s.c.lmr & ONCE))
                                 s.c.rmr &= ~ONCE;
                             }
-                    /* F        if(done) */
-                        /* done =  (1) full succes */
-                        if(  (s.c.rmr & TRUE)
-                        /*      or (2) may not be shifted.
-                           ad (2): In the first pass, a position
-                           flag on car(P) counts as criterion for being done. */
-                          || (s.c.lmr & (POSITION_ONCE
-                        /* In all but the first pass, the left and right
-                           results can indicate that the loop is done. */
-                                        | ONCE
-                                        )
-                             )
-                          || (s.c.rmr & (ONCE
-                        /* In all passes a position_max_reached on the
-                           rightResult indicates that the loop is done. */
-                                        |POSITION_MAX_REACHED
-                                        )
+                        if(  (s.c.rmr & TRUE)                       /* F        if(1) full success */
+                          || (s.c.lmr & (POSITION_ONCE                  /*     or (2) may not be shifted. In the first pass, a position flag on car(P) counts as criterion for being done. */
+                                        | ONCE                          
+                                        )                               
+                             )                                          /* In all but the first pass, the left and right */
+                          || (s.c.rmr & (ONCE                           /* results can indicate that the loop is done.   */
+                                        |POSITION_MAX_REACHED           /* In all passes a position_max_reached on the   */
+                                        )                               /* rightResult indicates that the loop is done.  */
                              )
                           )
-                    /* G            return */
-                            {
-                        /* Return true if full success.
-
-                           Also return whether sub has reached max position.*/
-                            /*if(!(s.c.rmr & POSITION_MAX_REACHED))
-                                s.c.rmr &= ~POSITION_ONCE;*/
+                            {                                       /* G            return */
                             if(loc != sub)
-                                s.c.rmr &= ~POSITION_MAX_REACHED; /* This flag is
-                            reason to stop increasing the position of the
-                            division any further, but it must not be signalled
-                            back to the caller if the lhs is not nil ... */
-                            s.c.rmr |= (char)(s.c.lmr & POSITION_MAX_REACHED);
-                            /* ... unless it is the lhs that signals it. */
-                        /* Also return whether the pattern as a whole doesn't
-                           want longer subjects, which can be found out by
-                           looking at the pattern */
-                            if(oncePattern(pat))
-                                {
-                                /*
-                                For example,
-                                    a b c d:`(?x ?y) (?z:c) ?
-                                must fail and set x==nil, y==a and z==b
-                                */
-                                s.c.rmr |= ONCE;
-                                s.c.rmr |= (char)(pat->v.fl & FENCE);
+                                s.c.rmr &= ~POSITION_MAX_REACHED;           /* This flag is reason to stop increasing the position of the division any further, but it must not be signalled  back to the caller if the lhs is not nil ... */
+                            s.c.rmr |= (char)(s.c.lmr & POSITION_MAX_REACHED);  /* ... unless it is the lhs that signals it. */
+                            if(oncePattern(pat))                        /* Also return whether the pattern as a whole doesn't want longer subjects, which can be found out by looking at the pattern */ 
+                                {                                       /* For example,                            */ 
+                                s.c.rmr |= ONCE;                        /*     a b c d:`(?x ?y) (?z:c) ?           */ 
+                                s.c.rmr |= (char)(pat->v.fl & FENCE);   /* must fail and set x==nil, y==a and z==b */
                                 }
-                        /* or by looking at whether both lhs and rhs results
-                           indicated this, in which case both sides must be
-                           non-zero size subjects. */
-                            else if(!(s.c.lmr & ONCE))
+                            else if(!(s.c.lmr & ONCE))                  
                                 s.c.rmr &= ~ONCE;
-                        /* POSITION_ONCE, on the other hand, requires zero size
-                           subjects. */
-                        /*    if(!(s.c.lmr & POSITION_ONCE))
-                                s.c.rmr &= ~POSITION_ONCE;
-                                s.c.lmr & POSITION_ONCE has nothing to do with the return value*/
-                        /* Also return the fence flag, if present in rmr.
-                           (This flag in lmr has no influence.)
-                        */
 #if DEBUGBRACMAT
                             if(debug)
                                 {
@@ -12970,11 +12928,11 @@ static int output(ppsk pkn,void (*hoe)(psk k))
 FILE *redfpo;
 psk rknoop,rlknoop,rrknoop,rrrknoop;
 static LONG opts[] =
-{APP,NEW,
- TXT,VAP,
- EXT,MEM,
- CON,LIN,
- 0L};
+    {APP,NEW,
+     TXT,VAP,
+     EXT,MEM,
+     CON,LIN,
+     0L};
 if(kop(rknoop = (*pkn)->RIGHT) == KOMMA)
    {
    redfpo = fpo;
@@ -14275,7 +14233,10 @@ static function_return_type functies(psk pkn)
                 intVal = (zoekopt(rrknoop,ECH) << SHIFT_ECH)
                        + (zoekopt(rrknoop,MEM) << SHIFT_MEM)
                        + (zoekopt(rrknoop,VAP) << SHIFT_VAP)
-                       + (zoekopt(rrknoop,STG) << SHIFT_STR);
+                       + (zoekopt(rrknoop,STG) << SHIFT_STR)
+                       + (zoekopt(rrknoop,ML ) << SHIFT_ML)
+                       + (zoekopt(rrknoop,TRM) << SHIFT_TRM)
+                       + (zoekopt(rrknoop,HT)  << SHIFT_HT);
                 }
             else
                 {
