@@ -1,3 +1,33 @@
+    2 June 2012
+
+xml.c supports reading from stdio (no rewind). Example of use:
+type pr-xml-utf-8.xml | bracmat "put$(get$(,ML),\"pr-xml-utf-8.bra\",NEW)&"
+
+    1 June 2012
+
+Did some finishing, no essential code changes.
+
+    1 May 2012
+
+Added list of HTML entities. These are decoded to unicode codepoints and
+encoded as utf-8 if an option HT is added.
+
+get$("filename.html",HT,ML,TRM)
+
+   29 April 2012
+
+Restructured the (ancient) input function and renamed some identifiers to
+English equivalents.
+Added a source file, xml.c, that reads SGML, HTML and XML files.
+Syntax:
+
+get$(filename,ML)
+get$(filename,ML,TRM)
+get$(string,MEM,ML)
+get$(string,MEM,ML,TRM)
+
+An option HT is made, but does not work yet. Purpose: translate HTML entities.
+
    13 April 2012
 
 The characters @ and % in front of a string now only turn off escaping with
