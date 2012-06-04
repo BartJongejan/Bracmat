@@ -51,10 +51,13 @@ Profiling:
     gprof a.out
 */
 
-#define DATUM "1 June 2012"
+#define DATUM "4 June 2012"
 #define VERSION "5"
-#define BUILD "120"
-/*
+#define BUILD "121"
+/*  4 June 2012
+
+Introduced READMARKUPFAMILY macro to turn xml-stuff on (1) or off (0)
+
     2 June 2012
 
 xml.c supports reading from stdio (no rewind). Example of use:
@@ -1034,6 +1037,7 @@ TODO list:
 #define CODEPAGE850 0
 #define MAXSTACK 0 /* 1: show max stack depth (eval function only)*/
 #define CUTOFFSUGGEST 1
+#define READMARKUPFAMILY 1 /* read SGML, HTML and XML files. (include xml.c in your project!) */
 
 #if MAXSTACK
 static int maxstack = 0;
@@ -1542,9 +1546,13 @@ typedef struct
 #define OPT_VAP 2
 #define OPT_MEM 4
 #define OPT_ECH 8
+
+#if READMARKUPFAMILY
 #define OPT_ML 16
 #define OPT_TRM 32
 #define OPT_HT  64
+extern void XMLtext(FILE * fpi,char * bron,int trim,int html);
+#endif
 
 #if REFCOUNTSTRESSTEST
 #define REF_COUNT_BITS 1
@@ -5105,9 +5113,9 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
     noEscape = FALSE; /* @"C:\dir1\bracmat" */
     inString = FALSE;
 
+#if READMARKUPFAMILY
     if(echmemvapstrmltrm & OPT_ML)
         {
-        extern void XMLtext(FILE * fpi,char * bron,int trim,int html);
         wijzer = lijst;
         XMLtext(fpi,(char*)bron,(echmemvapstrmltrm & OPT_TRM),(echmemvapstrmltrm & OPT_HT));
         *wijzer = 0;
@@ -5120,7 +5128,9 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
             *GoOn = FALSE;
         return pkn;
         }
-    else if(echmemvapstrmltrm & (OPT_VAP|OPT_STR))
+    else
+#endif
+        if(echmemvapstrmltrm & (OPT_VAP|OPT_STR))
         {
         for(wijzer = lijst;;)
             {
