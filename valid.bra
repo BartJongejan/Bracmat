@@ -3880,10 +3880,10 @@ towards operators that are closer to the root of the tree"
           )
           out$498
           (   ( W
-              = whl'(1+!n:?n:~>5300&!W)
+              = whl'(1+!n:?n:~>1100&!W)
               )
             & "Microsoft VC++ 2008 
-						32 bit:		16056 
+						32 bit:		16056 debug: 1119
 						64 bit:	     5384
 			   Borland BC5			 8618
 			   gcc 4.1.2 20080704	23807"
@@ -3894,14 +3894,14 @@ towards operators that are closer to the root of the tree"
           out$499
           (   ( L
               =   ( loop
-                  =   1+!n:?n:~>9000
+                  =   1+!n:?n:~>4000
                     & !L
                     & !loop
                   )
                 & !loop
               )
             & "Microsoft VC++ 2008
-						32 bit:		28546
+						32 bit:		28546 debug: 4016
 						64 bit:	     9231
 		       Borland BC5	        28730
 		       gcc 4.1.2 20080704  157128"
@@ -4111,6 +4111,12 @@ towards operators that are closer to the root of the tree"
             & !h+-1*!g:0
           | Out$523
           )
+          (@(123b:~<124 b)&Out$524|)
+          (@(123b:~<122 b)|Out$525)
+          (@(123b:~<123 b)|Out$526)
+          (@(1b:~<0 b)|Out$527)
+          (@(1b:~<2 b)&Out$528|)
+          (@(1b:~<1 b)|Out$529)
       &   out
         $ ( str
           $ ( "Done. "

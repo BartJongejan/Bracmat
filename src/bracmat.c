@@ -51,10 +51,15 @@ Profiling:
     gprof a.out
 */
 
-#define DATUM "4 June 2012"
+#define DATUM "22 June 2012"
 #define VERSION "5"
-#define BUILD "121"
-/*  4 June 2012
+#define BUILD "122"
+/*  22 June 2012
+
+Correction in scompare(). The expression @(1b:~<1 b) did not evaluate 
+successfully, which it should. Did a clean-up of this function.
+
+    4 June 2012
 
 Introduced READMARKUPFAMILY macro to turn xml-stuff on (1) or off (0)
 
@@ -7920,7 +7925,6 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
 #endif
     {
     int teken;
-    int return_value = 0xDADA;
     unsigned char * P;
 #if CUTOFFSUGGEST
     unsigned char * S = s;
@@ -8255,7 +8259,30 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                         ++s;
                         ++P;
                         }
-                    break;
+                    if(teken > 0)
+                        {
+                        switch(Flgs & (NOT|GREATER_THAN|SMALLER_THAN))
+                            {
+                            case NOT|GREATER_THAN:
+                            case SMALLER_THAN:
+                                return ONCE;
+                            default:
+                                return TRUE;
+                            }
+                        }
+                    else if(teken == 0)
+                        {
+                        switch(Flgs & (NOT|GREATER_THAN|SMALLER_THAN))
+                            {
+                            case NOT|GREATER_THAN:
+                                return TRUE|ONCE;
+                            case SMALLER_THAN:
+                                return ONCE;
+                            default:
+                                return FALSE;
+                            }
+                        }
+                    return TRUE;
                     }
                 case GREATER_THAN:    /* n:>p */
                     {
@@ -8270,6 +8297,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                             *suggestedCutOff = s + 1;
                         break;
                         }
+                    return ONCE;
                     }
                 case NOT|GREATER_THAN|SMALLER_THAN:    /* n:~<>p */
                 case 0:                                /* n:p */
@@ -8299,20 +8327,29 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                         *mayMoveStartOfSubject = (unsigned char *)startpos;
                         return ONCE;
                         }
-                    break;
+
+                    if(teken > 0 || s < snijaf)
+                        {
+                        return ONCE;
+                        }
+                    return FALSE;/*subject too short*/
+                    /*break;*/
                 case NOT|SMALLER_THAN:    /* n:~<p */
-                default:
+                /*default:*/
                     while(((teken = *s - *P) == 0) && *s && *P)
                         {
                         ++s;
                         ++P;
                         }
-                    if(s >= snijaf)
+                    if(teken >= 0)
                         {
-                        *suggestedCutOff = s + 1;
-                        teken = 0;
+                        if(s >= snijaf)
+                            {
+                            *suggestedCutOff = (*P) ? s + 1 : s;
+                            }
+                        return TRUE;
                         }
-                    break;
+                    return ONCE;
                 }
             }
         else
@@ -8365,28 +8402,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
             }
         }
 
-    if(teken > 0)
-        {
-        teken = 0;
-        return_value = ONCE;
-        }
-    else if(teken < 0)
-        {
-        teken = MINUS;
-        if(s < snijaf)
-            {
-            return_value = ONCE;
-            }
-        else
-            {
-            return_value = FALSE; /*subject too short*/
-            }
-        }
-    else
-        {
-        teken = QNUL;
-        return_value = ONCE;
-        }
+
     switch(Flgs & (NOT|GREATER_THAN|SMALLER_THAN))
         {
         case NOT|GREATER_THAN|SMALLER_THAN:    /* n:~<>p */
@@ -8402,22 +8418,15 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                 [n < p]
                     FALSE
 */
-            switch(teken)
+            if(teken == 0)
                 {
-                case QNUL:    /* n == p */
-                    return TRUE|ONCE;
-                case 0:        /* n > p */
-                    return ONCE;
-                default:    /* n < p */
-                    /*
-                    if(return_value == FALSE)
-                        {
-                        Printf(buf);
-                        return ONCE;
-                        }
-*/
-                    return return_value;
+                return TRUE|ONCE;
                 }
+            else if(teken < 0 && s >= snijaf)
+                {
+                return FALSE;
+                }
+            return ONCE;
             }
         case SMALLER_THAN:    /* n:<p */
             {
@@ -8430,14 +8439,11 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                 [n < p]
                     TRUE
 */
-            switch(teken)
+            if(teken >= 0)
                 {
-                case QNUL:    /* n == p */
-                case 0:        /* n > p */
-                    return ONCE;
-                default:    /* n < p */
-                    return TRUE;
+                return ONCE;
                 }
+            return TRUE;
             }
         case GREATER_THAN:    /* n:>p */
             {
@@ -8450,15 +8456,15 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                 [n < p]
                     FALSE
 */
-            switch(teken)
+            if(teken > 0)
                 {
-                case 0:        /* n > p */
-                    return TRUE;
-                case QNUL:        /* n == p */
-                    return FALSE;
-                default:    /* n < p */
-                    return return_value;
+                return TRUE;
                 }
+            else if(teken < 0 && s < snijaf)
+                {
+                return ONCE;
+                }
+            return FALSE;
             }
         case GREATER_THAN|SMALLER_THAN:    /* n:<>p */
         case NOT:                        /* n:~p */
@@ -8474,13 +8480,11 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                     TRUE
 
 */
-            switch(teken)
+            if(teken == 0)
                 {
-                case QNUL:    /* n == p */
-                    return FALSE;
-                default:    /* n < p, n > p */
-                    return TRUE;
+                return FALSE;
                 }
+            return TRUE;
             }
         case NOT|SMALLER_THAN:    /* n:~<p */
             {
@@ -8493,14 +8497,18 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                 [n < p]
                     FALSE
 */
-            switch(teken)
+            if(teken < 0)
                 {
-                case QNUL:    /* n == p */
-                case 0:        /* n > p */
-                    return TRUE;
-                default:    /* n < p */
-                    return return_value;
+                if(s < snijaf)
+                    {
+                    return ONCE;
+                    }
+                else
+                    {
+                    return FALSE;
+                    }
                 }
+            return TRUE;
             }
         case NOT|GREATER_THAN:    /* n:~>p */
             {
@@ -8513,18 +8521,16 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                 [n < p]
                     TRUE
 */
-            switch(teken)
+            if(teken > 0)
                 {
-                case QNUL:    /* n == p */
-                    return TRUE|ONCE;
-                case 0:        /* n > p */
-                    return ONCE;
-                default:    /* n < p */
-                    return TRUE;
+                return ONCE;
                 }
+            else if(teken < 0)
+                {
+                return TRUE;
+                }
+            return TRUE|ONCE;
             }
-        default:
-            return ONCE;
         }
     }
 
