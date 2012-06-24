@@ -8243,6 +8243,9 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
 #if CUTOFFSUGGEST
         if(suggestedCutOff)
             {
+#if DEBUGBRACMAT
+            printf("suggestedCutOff\n");
+#endif
             switch(Flgs & (NOT|GREATER_THAN|SMALLER_THAN))
                 {
                 case NOT|GREATER_THAN:    /* n:~>p */
@@ -10155,6 +10158,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
         redhum = hum;
         mooi = FALSE;
         hum = FALSE;
+        Printf("%s %d%*sstringmatch(%s",wh,ind,ind,"",sub);Printf(":");result(pat);Printf(")");Printf("\n");
 #if 1
         Printf("%d  %.*s|%s",ind,snijaf-sub,sub,snijaf);
         Printf(":");
@@ -10178,7 +10182,6 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
         );
         Printf("\n");
 #endif
-/*        Printf("%s %d%*sstringmatch(%s",wh,ind,ind,"",sub);Printf(":");result(pat);Printf(")");Printf("\n");*/
         mooi = redMooi;
         hum = redhum;
         }
@@ -10335,9 +10338,8 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     /* This code mirrors that of match(). (see below)*/
                     
                     sloc = sub;                                     /* A    divisionPoint=S */
-                                                                    
 #if CUTOFFSUGGEST
-                    s.c.lmr = stringmatch(ind+1,"I",sub, sloc       /* B    leftResult=0(P):car(P) */
+                    s.c.lmr = stringmatch(ind+1,"Ii",sub, sloc       /* B    leftResult=0(P):car(P) */
                                 ,pat->LEFT,subkn,pposition
                                 ,stringLength,&suggested_Cut_Off
                                 ,mayMoveStartOfSubject);
@@ -10346,10 +10348,13 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                         return ONCE;
                         }
 #else
-                    s.c.lmr = stringmatch(ind+1,"I",sub, sloc, pat->LEFT, subkn,pposition,stringLength);
+                    s.c.lmr = stringmatch(ind+1,"Ii",sub, sloc, pat->LEFT, subkn,pposition,stringLength);
 #endif
-                    
+
 #if CUTOFFSUGGEST
+#if DEBUGBRACMAT
+                    printf("suggested_Cut_Off [%s]  sloc [%s]\n",suggested_Cut_Off,sloc);
+#endif
                     if(suggested_Cut_Off > sloc)
                         {
                         if(snijaf && suggested_Cut_Off > snijaf)
@@ -10378,6 +10383,9 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                         s.c.lmr &= ~ONCE;
                     while(sloc < snijaf)                            /* C    while divisionPoint */
                         {
+#if DEBUGBRACMAT
+                        printf("sloc=%s\n",sloc);
+#endif
                         if(s.c.lmr & TRUE)                          /* D        if leftResult.succes */
                             {
 #if CUTOFFSUGGEST
@@ -10405,6 +10413,9 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                             ++sloc;
                             ++locpos;
 #endif
+#if DEBUGBRACMAT
+                            printf("s.c.rmr=%d\n",s.c.rmr);
+#endif
                             if(!(s.c.lmr & ONCE))
                                 s.c.rmr &= ~ONCE;
                             }
@@ -10424,6 +10435,9 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                              )
                           )
                             {                                       /* G            return */
+#if DEBUGBRACMAT
+                            printf("G return\n");
+#endif
                             if(sloc > sub + 1)                          /* Also return whether sub has reached max position.*/
                                 s.c.rmr &= ~POSITION_MAX_REACHED;       /* This flag is reason to stop increasing the position of the division any further, but it must not be signalled back to the caller if the lhs is not nil ... */
                             s.c.rmr |= (char)(s.c.lmr & POSITION_MAX_REACHED); /* ... unless it is the lhs that signals it. */
@@ -10439,6 +10453,9 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                                                                     /* H        SL,SR=shift_right divisionPoint */
                                                                         /* SL = lhs divisionPoint S, SR = rhs divisionPoint S */
                                                                     /* I        leftResult=SL:car(P) */
+#if DEBUGBRACMAT
+                        printf("Calling I stringmatch\n");
+#endif
 #if CUTOFFSUGGEST
                         suggested_Cut_Off = sub;
                         s.c.lmr = stringmatch(ind+1,"I",sub,sloc, pat->LEFT, subkn,/* 0 ? */pposition,/* strlen(sub) ? */ stringLength,&suggested_Cut_Off,mayMoveStartOfSubject);
@@ -10658,6 +10675,16 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                         else
                             {
 #if CUTOFFSUGGEST
+#if DEBUGBRACMAT
+                            printf("before:");
+                            if(suggestedCutOff)
+                                if(*suggestedCutOff)
+                                    printf("*suggestedCutOff [%s]\n",*suggestedCutOff);
+                                else
+                                    printf("*suggestedCutOff null\n");
+                            else
+                                printf("suggestedCutOff null\n");
+#endif
                             s.c.rmr = (char)(/** / ONCE | / **/ scompare("b",(unsigned char *)sub,snijaf, pat
                                                                         , ( (  !(Flgs & ATOM)
                                                                             || ONTKENNING(Flgs, ATOM)
@@ -10668,6 +10695,16 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                                                                         ,mayMoveStartOfSubject
                                                                         )
                                              );
+#if DEBUGBRACMAT
+                            printf("after :");
+                            if(suggestedCutOff)
+                                if(*suggestedCutOff)
+                                    printf("*suggestedCutOff [%s]\n",*suggestedCutOff);
+                                else
+                                    printf("*suggestedCutOff null\n");
+                            else
+                                printf("suggestedCutOff null\n");
+#endif
 #else
                             s.c.rmr = (char)(/** / ONCE | / **/ scompare("b",(unsigned char *)sub,snijaf, pat));
 #endif
@@ -10739,7 +10776,7 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
         }
     if(is_op(pat))
         s.c.rmr ^= (char)NIKS(pat);
-/*
+/* */
 #if DEBUGBRACMAT
     if(debug)
         {
@@ -10753,7 +10790,7 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
         Printf("\n");
         }
 #endif
-*/
+/* */
     if(name)
         wis(name);
     return (char)(s.c.once | s.c.rmr);
