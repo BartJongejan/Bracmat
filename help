@@ -734,7 +734,7 @@ the argument is not valid UTF-8."
     )
   & ( upptxt
     =   T
-      , "upp$(<atom-or-nil>[,DOS])"
+      , "upp$(<atom-or-nil>)"
       , "upp$ converts a string to all-uppercase.
 The characters 'a'-'z' are converted to 'A'-'Z'. Other characters are handled
 as UTF-8 encoded Unicode characters, but default to ISO 8859 (Latin 1) if
