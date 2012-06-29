@@ -2,7 +2,7 @@ help=
   ( streep,verwerk,lusmenu,aanbevelingen,filosofie,colofon
   . syntax,atotxt,evaltxt,gettxt,contxt,binovztxt,patternm
   . savtxt,dumtxt,binprotxt,prostutxt1,prostutxt2,funmactxt
-  . vlagfun,unops,naamloos,algtxt,unpattxt,binmenu,pattxttxt
+  . unops,naamloos,algtxt,unpattxt,binmenu,pattxttxt
   . pattxt,asstxt,unopsmenu,unstuurtxt,varsmenu,funcmenu
   . varmattxt,varprotxt,progsmenu,debugtxt,debugtxt2,debugtxt3
   . inbltmenu,alctxt,aligntxt,asctxt,utftxt,chrtxt
@@ -14,7 +14,7 @@ help=
   . sgntxt,cattxt,gontxt,factxt,subtxt1,show,rmvtxt,macrotxt
   . outtxt,taytxt,newtxt,newobjecttxt,humtxt,objecttxt,hashtxt
   . paragraphs,fname,findtxt,inserttxt,removetxt,Newtxt,Dietxt
-  . DOStxt,ISOtxt,casesensitivetxt,foralltxt,doHTML,clktxt
+  . ISOtxt,casesensitivetxt,foralltxt,doHTML,clktxt
   . lowtxt,upptxt,DOSopttxt,whltxt,argtxt,whtxt,d2xtxt,x2dtxt
   )
 .   ( lusmenu
@@ -24,7 +24,7 @@ help=
 1  pattern matching
 2  grammar
 3  binary operators
-4  flags/unary operators
+4  prefixes/unary operators
 5  strings or atoms
 6  symbols
 7  the four evaluation contexts
@@ -60,16 +60,14 @@ help=
 2  defining functions
 3  nameless functions
 4  lambda abstractions, currying
-5  flag functions
-6  built-in functions
-7  predefined, changeable functions"
+5  built-in functions
+6  predefined, changeable functions"
       ,   (1,funmactxt naamloos macrotxt)
           (2,funtxt1 funtxt3)
-          (3,naamloos macrotxt)
+          (3,naamloos macrotxt escappattxt)
           (4,lambda)
-          (5,vlagfun)
-          (6,inbltmenu)
-          (7,predefmenu)
+          (5,inbltmenu)
+          (6,predefmenu)
     )
   & ( binmenu
     =   M
@@ -93,14 +91,14 @@ help=
     )
   & ( unopsmenu
     =   M
-      , Flags
+      , Prefixes
       , "1  program flow
 2  pattern matching
-3  flags combined with expressions
+3  prefixes combined with expressions
 4  unary operators"
       ,   (1,unstuurtxt)
           (2,unpattxt)
-          (3,vlagfun unpattxt)
+          (3,unpattxt)
           (4,unops)
     )
   & ( varsmenu
@@ -137,8 +135,8 @@ dbg  debugging aid
 den  denominator
 div  quotient
 fil  file I/O (low-level)
-flg  splits expression in flags and flagless expression
-glf  opposite of flg: combines flags and expression
+flg  splits expression in prefixes and expression without prefixes
+glf  opposite of flg: combines prefixes and expression
 fre  return allocated memory (low level)
 get  get input (from file,keyboard or memory)
 low  convert to lower case
@@ -209,20 +207,20 @@ that you type at the keyboard. For example, Bracmat can
 * let you delve into a data structure by means of pattern matching and
 * simplify an algebraic formula,
 * read a file with source text and execute this code in one go,
-* save neatly formatted source text in a file,
+* save neatly formatted source text in a file.
 
 In Bracmat, data and instructions have the same syntax: a mix of parentheses,
-binary operators, operands and flags preceding those operands or parentheses.
-In fact, in many cases you can't tell the difference between the data and
-instructions. Bracmat has a REPL (Read Eval Print Loop), like Lisp and many
-other programming languages. It offers a simple environment for input of both
-data and code. After the prompt {?} you can write. When you hit Enter Bracmat
-evaluates your input and writes the result to the screen following a {!}
-sequence (unless there was no visible result). Under the result follows a line
-that tells whether the evaluation was successful (S) or not (F) (in rare cases
-you may see a \"I\", which, for the time being, you may interpret as failure).
-In the same line the machine shows how much processor time it needed.
-Intermediary results may also appear on the screen.
+binary operators, operands and prefixes preceding those operands or
+parentheses. In fact, in many cases you can't tell the difference between the
+data and instructions. Bracmat has a REPL (Read Eval Print Loop), like Lisp
+and many other programming languages. It offers a simple environment for input
+of both data and code. After the prompt {?} you can write. When you hit Enter
+Bracmat evaluates your input and writes the result to the screen following a
+{!} sequence (unless there was no visible result). Under the result follows a
+line that tells whether the evaluation was successful (S) or not (F) (in rare
+cases you may see a \"I\", which, for the time being, you may interpret as
+failure). In the same line the machine shows how much processor time it
+needed. Intermediary results may also appear on the screen.
 
 Bracmat and calculators have an important common feature: as long as the input
 data are simple enough, the user need (and can) not specify how these data have
@@ -258,13 +256,14 @@ Examples:
 {?} x^(a+x\\L2*1000)
 {?} 5/2 \\L 987654
 {?} y\\D(x\\D((x+y)^-2))"
-          "The only numbers that Bracmat can calculate with are integer and rational
-numbers. There is virtually no limit to their size, but the program is not
-optimised for number crunching.
+          "Bracmat can only do arithmetic operations with integer and rational numbers.
+There is virtually no limit to their size, but the program is not optimised
+for number crunching.
 
-Bracmat handles a non-integer power of an integer if the absolute value of
-this integer is less than 2^32. Likewise, both the numerator and the
-denominator of a rational number should be less than 2^32.
+Bracmat handles non-integer powers of positive rational numbers provided that
+the number (if it is an integer) or the numerator and the denominator (if the
+number is a fraction) are less than 2^32 or 2^64 respectively, depending on
+whether Bracmat is compiled for a 32 or a 64 bit platform.
 
 Bracmat happily adds and multiplies numbers of, say, a few hundred digits.
 There is a pre-defined function, flt$, that represents rational numbers in
@@ -298,7 +297,7 @@ must be separated by semicolons.
 
 You may freely surround binary operators with white-space characters (e.g.
 space, tab, line feed). Take care not to put spaces between the characters
-that make up a rational or negative number, - 1234 / 5678 is not the same
+that make up a fraction or negative number, - 1234 / 5678 is not the same
 as -1234/5678."
           "Bracmat can open and read a text file and execute the instructions as they are
 read. After the last instruction has been executed, the file is closed. The
@@ -350,7 +349,7 @@ recommendations about programming habits:
   opening parenthesis.
 * Check whether Bracmat interprets your code in the way you intended by listing
   your functions without the LIN option.
-* Try to evade the \"not\" flag ~ and the use of arrays."
+* Try to evade the \"not\" prefix ~ and the use of arrays."
     )
   & ( patternm
     =   M
@@ -536,10 +535,10 @@ it is all about tree branches."
       ,   "Note: in long lists the \"|\" is left out.
 <input>           ::= [<expression>] [;<input>]
 <expression>      ::=   <white space> <expression> <white space>
-                      | [<flags>] ( <expression> )
+                      | [<prefixes>] ( <expression> )
                       | <leaf>
                       | <expression> <binop> <expression>
-<leaf>            ::= [<flags>] <atom-or-nil>
+<leaf>            ::= [<prefixes>] <atom-or-nil>
 <atom-or-nil>     ::= <atom> | <nil>
 <atom>            ::= \"<string>\" | <string>
 <string>          ::= <character> [<string>]
@@ -547,11 +546,11 @@ it is all about tree branches."
 <spec>            ::= \\a \\b \\t \\n \\v \\f \\r \\\" \\\\
 <nil>             ::= \"\"   (or nothing at all, such as in \"()\")
 <binop>           ::= = . , | & : <white space> + * ^ \\L \\D ' $ _
-<flags>           ::= <flag> [<flags>]
-<flag>            ::= ~ / # < > % @ ` ? ! !!
+<prefixes>           ::= <prefix> [<prefixes>]
+<prefix>            ::= [ ~ / # < > % @ ` ? ! !!
 <white space>     ::= spaces, tabs, new line and form feed characters"
           "White space (operator/cosmetic measure) almost never leads to confusion. It
-does in (some) cases where a <nil> leaf without flags is adjacent to the white
+does in (some) cases where a <nil> leaf without prefixes is adjacent to the white
 space operator. For example : \"get' out$now\". Bracmat interprets this as :
 \"get'(out$now)\". \"\" or () fixes the problem : \"get'() out$now\".
 Quotation marks are not part of the string they surround. They should be used
@@ -567,7 +566,7 @@ expression as a tree like structure, atoms or strings are to be found in the
 leafs. In Bracmat terminology, an empty leaf is syntactically represented
 by <nil>. <nil> is not an <atom> proper, but an <atom-or-nil>. So not every
 leaf contains an atom. On the other hand, leafs may contain other things
-besides <atoms>, such as flags.
+besides <atoms>, such as prefixes.
 
 In Bracmat, atoms are less accessible than trees. Therefore there are some
 ways to convert atoms to trees and back.
@@ -586,7 +585,7 @@ are used as literals, such as mathematical symbols or text."
 the first seven characters in the ASCII character set are forbidden. These
 characters are used by the system. In most cases you don't need quotation marks
 in order to get a string of characters into an atom. You do need them if you
-want parentheses, operators or flags to be part of an atom. Some special
+want parentheses, operators or prefixes to be part of an atom. Some special
 characters have to be preceded by a back slash:
 
 \\a
@@ -608,7 +607,7 @@ characters have to be preceded by a back slash:
 \\\"
     double quote
 
-If you precede a string with the flag @, then back slashes are treated as
+If you precede a string with the prefix @, then back slashes are treated as
 normal characters. E.g. sys$@\"C:\\dos\\edit\".
 In stead of the tab and new line characters above, you may enter tabs and
 new lines by pressing the tab and the return key, respectively."
@@ -648,12 +647,12 @@ The macro evaluator can only delegate tasks to the expression evaluator.
 The archivist doesn't delegate any tasks to other evaluators.
 
 The cross link is in most cases a binary operator. The exceptions to this rule
-are in the context of the match evaluator: some (combinations of) flags involve
-the expansion of a chain of variable bindings and all but the last subexpansion
-demand the expression evaluator.
+are in the context of the match evaluator: some (combinations of) prefixes
+involve the expansion of a chain of variable bindings and all but the last
+subexpansion demand the expression evaluator.
 In the scheme below, you'll find the \"current\" evaluator in the left column
 and the successor evaluators in the top row. A cross link is represented by the
-relevant operator or flags. If the change of evaluator only applies to the
+relevant operator or prefixes. If the change of evaluator only applies to the
 left (right) operand of the cross link operator, the symbol \"l\" (\"r\") is used.
 If the transition depends on the left operand being <nil>, the symbol \"n\" is
 used."
@@ -680,8 +679,8 @@ ECH present
 ECH not present
     No echo.
 VAP present
-    The characters are read \"as is\". Between the characters extra spaces are
-    inserted. (VAPorised)
+    The (8-bit) characters are read \"as is\". Extra spaces
+    are inserted between the characters. (VAPorised)
 VAP not present
     No extra spaces are added.
 STR present
@@ -727,27 +726,19 @@ characters that can be misunderstood, such as dots, (back) slashes or dollars."
     )
   & ( lowtxt
     =   T
-      , "low$(<atom-or-nil>[,DOS])"
+      , "low$(<atom-or-nil>)"
       , "low$ converts a string to all-lowercase.
-The characters 'A'-'Z' are converted to 'a'-'z'. Other characters are converted
-depending on the presence of the DOS option:
-
-DOS present
-    Characters 128-255 are assumed to be in CodePage 850
-DOS not present
-    Characters 128-255 are assumed to be in ISO 8859 (Latin 1)"
+The characters 'A'-'Z' are converted to 'a'-'z'. Other characters are handled
+as UTF-8 encoded Unicode characters, but default to ISO 8859 (Latin 1) if
+the argument is not valid UTF-8."
     )
   & ( upptxt
     =   T
       , "upp$(<atom-or-nil>[,DOS])"
       , "upp$ converts a string to all-uppercase.
-The characters 'a'-'z' are converted to 'A'-'Z'. Other characters are converted
-depending on the presence of the DOS option:
-
-DOS present
-    Characters 128-255 are assumed to be in CodePage 850
-DOS not present
-    Characters 128-255 are assumed to be in ISO 8859 (Latin 1)"
+The characters 'a'-'z' are converted to 'A'-'Z'. Other characters are handled
+as UTF-8 encoded Unicode characters, but default to ISO 8859 (Latin 1) if
+the argument is not valid UTF-8."
     )
   & ( whltxt
     =   T
@@ -797,7 +788,7 @@ the following considerations:
 "
           "{?} rotate=car,cdr.!arg:(?car,?cdr) & (!cdr,!car)
 {?} rotate$(one,two,three,four)
-{?} rotate$((one,two),(three,four))   { stop! }"
+{?} rotate$((one,two),(three,four))"
           "By combining dots, commas and spaces, one may build any tree-like data structure
 that, thanks to the backtracking mechanism on space-separated lists, make
 the formulation of queries (goals) almost as easy as in Prolog. This is an
@@ -954,9 +945,12 @@ or
 we have to take care not to evaluate John, because that would create or
 overwrite the variables \"length\", \"age\" and \"name\"):
 
-{?} !John:?alias {Wrong}
+{?} !John:?alias {Wrong, (alias=length,age,name);}
 
-{?} '$John : (=?alias) {Right}
+{?} '$John : (=?alias) {Right,  (alias=
+                                  (length=185)
+                                , (age=30)
+                                , (name=(first=John) (family=Bull)));}
 
 Bracmat replaces the expression '$John by the value of John, protected
 against evaluation by a = operator. For that reason, the pattern on the rhs
@@ -1108,12 +1102,12 @@ calls are made from the right hand side of any & or | operator occurring
 in an expression . Even a conventional sequence of instructions (where the
 success or failure of the evaluations of each instruction do not matter) can
 make use of this tail recursion optimisation. In that case one uses the
-pacifier (short cut flag) ` .
+pacifier (short cut prefix) ` .
 
 (`!a & !b)     !b is always evaluated. (sequence)
 (`!a | !b)     !b is not evaluated. (useless in this form)
 
-The pacifier or shortcut flag is inherited by higher levels, it percolates
+The pacifier or shortcut prefix is inherited by higher levels, it percolates
 towards operators that are closer to the root of the tree, until it is
 subsumed in situations like the above ones."
     )
@@ -1134,19 +1128,17 @@ a user defined object. The following methods are defined for hash tables:
 3 remove
 4 New
 5 Die
-6 DOS
-7 ISO
-8 casesensitive
-9 forall"
+6 ISO
+7 casesensitive
+8 forall"
       ,   (1,findtxt)
           (2,inserttxt)
           (3,removetxt)
           (4,Newtxt)
           (5,Dietxt)
-          (6,DOStxt DOSopttxt)
-          (7,ISOtxt)
-          (8,casesensitivetxt)
-          (9,foralltxt)
+          (6,ISOtxt)
+          (7,casesensitivetxt)
+          (8,foralltxt)
     )
   & ( findtxt
     =   T
@@ -1219,11 +1211,6 @@ is created. Example:
 {?} (myhash..remove)$Z:?values;
 {?} :?myhash;                               { Get rid of the hash table. }"
     )
-  & ( DOStxt
-    =   T
-      , "(myhash..DOS)$"
-      , "Make all key access case-insensitive and use DOS codepage 850."
-    )
   & ( DOSopttxt
     =   T
       , "Codepage 850 support$"
@@ -1284,11 +1271,11 @@ Branching to a function is done with the $ and ' operators :
 a $ b (or a'b)       \"evaluate function a with argument b\"
 
 Branching without argument passing and local variables is done with the
-unary operator (flag) ! :
+unary operator (prefix) ! :
 
 !X                   \"do subroutine X\"
 
-but often this flag and its cousin !! are used for the purpose of variable
+but often this prefix and its cousin !! are used for the purpose of variable
 expansion, it just depends on whether a variable is bound to an unevaluated
 or to an evaluated expression :
 
@@ -1362,8 +1349,8 @@ numeric name. There are a few special function names:
   complementary roles. (Forced evaluation of subexpressions in otherwise
   unevaluated expressions, such as patterns)
 * An integral number. (Array indexing.)
-* Only flags. (Flag pasting or influencing success and failure of non-atomic
-  expressions.)
+* Only prefixes. (Prefix pasting or influencing success and failure of non-
+  atomic expressions.)
 
 Function calls are even effective in patterns, as it is fair to assume
 that the $ and ' operators seldom occur in subjects and so need not to be
@@ -1382,7 +1369,7 @@ occurs. The expressions headed by such $ operators are replaced as follows:
     '$$
     
 If the rhs is the $ operator with empty lhs, the macro evaluator replaces the
-exression with the rhs of the heading $, and macro-evaluates the rhs of the
+expression with the rhs of the heading $, and macro-evaluates the rhs of the
 result.
 {?} '(one dollar ($($)))
 {!} =one dollar ()$
@@ -1408,45 +1395,6 @@ More examples:
 {!} =a value z
 {?} '(a ($(=value)) z)
 {!} =a value z"
-    )
-  & ( vlagfun
-    =   T
-      , "<flags>$<expression> and <flags>'<expression>"
-      ,   "Functions that have only flags as their function name can have two effects :
-
-Most flags (/ # @ % < > ?) are added to the flags of the function argument.
-The enriched argument is passed back as the function's return value.
-
-The function named ~ negates success and failure of its argument, which is
-passed back.
-
-In the same way, the function named ` (back-quote) changes failure into
-\"failure that is to be ignored and leaves program flow undisturbed, as if
-there was success\" (outside patterns) or into
-\"failure that cuts off further attempts at matching the failing subpattern
-and forces immediate backtracking to previous matches.\" (inside patterns).
-
-The ! and !! flags cannot occur as function names. A single ! evaluates
-to the answer to the last typed-in expression. A !! tries to expand this
-answer one step further.
-
-{?} (!arg:(smaller,?number) & <'!number | >'!number):?pat
-    { Either \"<!number\" or \">!number\" is bound to pat, postponing the
-      evaluation of !number until !pat is evaluated. }
-
-{?} apple banana tomato grape orange : ?fruits { make a list of fruit names }
-{?} ~$(!fruits : ? raspberry ?) & raspberry !fruits : ?fruits
-    { if \"raspberry\" is NOT in \"fruits\" then put it in front of the list.}
-    { this has the same effect as : }
-{?} condition = !fruits : ? raspberry ?         { bind code to atom }
-{?} ~!condition & raspberry !fruits : ?fruits   { test atom's failure }"
-          "As in every computer language, it's bad practice to use negation if there
-exists a readable and short alternative formulation. The above membership
-checking example has a shorter alternative without negation:
-
-{?} !fruits : ? raspberry ?  |  raspberry !fruits : ?fruits
-    { \"raspberry\" is in \"fruits\" or else it is put in front of the list.}
-"
     )
   & ( unops
     =   T
@@ -1486,26 +1434,10 @@ The transcendental numbers e and pi do not accept arithmetic minus signs.
   & ( naamloos
     =   T
       , "The \"nameless\" functions $<expression> and '<expression>"
-      ,   "These functions play complementary roles.
-Depending on the context, $<expression> can have two effects :
-In the context of a pattern, which is a largely unevaluated expression,
-$<expression> forces an evaluation of <expression> before the match goes on.
-The evaluated <expression> thereby becomes part of the pattern (without the
-$ operator). This is repeated on every retry after backtracking.
-In the following example, a list of numbers is searched for two numbers that
-are followed by a third number that is the sum of the first two:
-
-{?} 41 2 5 8 1 23 12 11 19 : ? `%?A ? `%?B ? ()$(!A+!B) ?
-
-Notice that !A+!B is re-evaluated after each mismatch of the sub-pattern
-()$(!A+!B). This can be used to count the number of trials (do the same
-without the ` flags !!):
-
-{?} 0:?count
-{?} 41 2 5 8 1 23 12 11 19 : ? `%?A ? `%?B ? ()$(!count+1:?count & !A+!B) ?
-{?} found !A and !B after !count trials"
-          "The other context is in a macro. Macro's are mainly used to selectively
-replace late binding by early binding and may thereby improve performance.
+      ,   "Sometimes a variable predictably will evaluate to the same value repeatedly,
+for example in an inner loop or a pattern that repeatedly backtracks. In
+such situations macro substitution can improve performance by replacing the
+variable by its value in an early stage.
 
 In Bracmat, a macro has the general form '<expression>. When '<expression> is
 evaluated, <expression> is searched for sub-expressions headed by the operator
@@ -1519,21 +1451,27 @@ the form =<expression>. The = operator is a safeguard against evaluation of
 Macro substitution makes it possible to dynamically create unevaluated code and
 bind it to a variable.
 
-{?} '($cat):?my-cat-var
-{?} !my-cat-var$(Hello world)
-{?} '($cat):(=?my-cat-alias)
-{?} my-cat-alias$(Hello world)"
+{?} '($out):?my-fun-var
+{?} !my-fun-var$(Hello world)
+{?} '($out):(=?my-fun-alias)
+{?} my-fun-alias$(Hello world)"
           "Pattern matching can sometimes be made more efficient by using macro
 substitution, but the resulting code is harder to understand:
 
-{?} 0:?count
-
-{?} 41 3 5 7 6 23 12 11 19 : ? `%?A ? (`%?B  {Each number pair [A,B] ... }
-{is added only once, giving C.   }    & !A+!B:?C
-{C's value is hard-coded into rem}    & '(? ()$(!count+1:?count & $C) ?) : ?rem
-{which is the remaining pattern. }    ) !rem
-
-{?} found !A and !B after !count trials"
+{?} ( 0:?count
+    &   41 3 5 7 6 23 12 11 19
+      :   ?
+          %?`A
+          ?
+          ( %?`B                            {Each number pair [A,B] ... }
+          & !A+!B:?C                        {is added only once, giving C. }
+          &   '(? ()$(!count+1:?count&C) ?)
+            : (=?rem)                       {C's value is hard-coded into rem}
+          )
+          !rem                              {which is the remaining pattern. }
+    & out$(after !count "trials:" !A "+" !B "=" !C )
+    )   
+after 16 trials: 5 + 7 = 12"
           "In the same way, function code can be pieced together before it is ever
 executed.
 
@@ -1601,7 +1539,7 @@ evaluates to
 The rhs of the '$' operator must be an atom.
 
 In an lambda abstraction
-    ('(x.$x,$y))
+    /('(x.$x,$y))
 
 '$x' is a bound variable and '$y' is a free variable.
 
@@ -1696,9 +1634,9 @@ this may change in later versions of the program."
     )
   & ( unpattxt
     =   T
-      , "Flags and pattern matching"
-      ,   "In patterns, atoms and expressions within parentheses may be preceded by flags
-that control the matching process.
+      , "Prefixes and pattern matching"
+      ,   "In patterns, atoms and expressions within parentheses may be preceded by
+prefixes that control the matching process.
 
 ! and !!
     in front of an non-nil atom or an expression denoting a member of an
@@ -1717,41 +1655,43 @@ that control the matching process.
 ?
     unifies with anything. If ? is followed by a non-nil atom denoting a
     variable or an expression denoting a member of an object, then the matched
-    part of the subject is captured by this variable or member. In other words,
-    pattern matching can have assignment as a side-effect.
+    part of the subject is captured by this variable or member. In other
+    words, pattern matching can have assignment as a side-effect.
 @
     unifies only with atoms.
 %
     causes the match to succeed only with one or more non-trivial elements of
-    the subject-list. (Exception: in combination with [ flag).
+    the subject-list. (Exception: in combination with [ prefix).
 < and >
     unifies only with atoms that are \"less\" or \"greater\" than the atom
-    following the < or > flag.
+    following the < or > prefix.
 #
     unifies only with rational numbers.
 /
     unifies only with non-integer rational numbers.
 ~
     constrains the match to subjects that are not equal to the atom following
-    the ~ flag.
+    the ~ prefix.
 [
-    Position flag. Must be followed by an expression that evaluates to a number
-    (For example [4 or [(!pos+3) ) or by a variable having a question mark as
-    in [?pos. In the first case, the pattern cannot succeed unless the element
-    following the [ element is at the indicated position. The [ element itself
-    does not occupy a position; it sits in front of the indicated position. The
-    second form is for querying the current position. Position 0 is the start
-    of the subject. Positive positions count from the beginning of the subject,
-    negative positions from the end. Position -1 is the position following the
-    last element. (When combined with '%' the meaning is different.)
+    Position prefix. Must be followed by an expression that evaluates to a
+    number (For example [4 or [(!pos+3) ) or by a variable having a question
+    mark as in [?pos. In the first case, the pattern cannot succeed unless the
+    element following the [ element is at the indicated position. The [
+    element itself does not occupy a position; it sits in front of the
+    indicated position. The second form is for querying the current position.
+    Position 0 is the start of the subject. Positive positions count from the
+    beginning of the subject, negative positions from the end. Position -1 is
+    the position following the last element. (When combined with '%' the
+    meaning is different.)
 
-The above flags may be combined. The ordering in which they are input by the
-user is irrelevant; Bracmat keeps flags in this order : ~ / # < > % @ ` ? ! !!
-Repeating flags in front of the same atom does not convey a new meaning to the
-pattern, except for the ! and the ~ flags. More than one ! is interpreted as
-the !! flag. An odd number of ~ is treated as a single ~, an even number
-thereof is treated as none. A ~ in front of other flags negates the first
-of them. The most useful combinations are:
+The above prefixes may be combined. The ordering in which they are input by the
+user is irrelevant; Bracmat keeps prefixes in this order : 
+    [ ~ / # < > % @ ` ? ! !!
+Repeating prefixes in front of the same atom does not convey a new meaning to
+the pattern, except for the ! and the ~ prefixes. More than one ! is
+interpreted as the !! prefix. An odd number of ~ is treated as a single ~, an
+even number thereof is treated as none. A ~ in front of other prefixes negates
+the first of them. The most useful combinations are:
 
 ?!
     in front of an atom causes the atom to be expanded to its binding.
@@ -1789,24 +1729,38 @@ of them. The most useful combinations are:
     backtrack immediately.
 [%
     The current subject is stored in the variable 'sjt' and the expression
-    carrying this flag combination is evaluated. If the evaluation succeeds,
+    carrying this prefix combination is evaluated. If the evaluation succeeds,
     the match succeeds and vice versa. The subject can be a trivial element of
     the subject list.
 
 Many of these combinations can be combined further, e.g. ~/#?!! accepts only
 an integer number and binds it to the indirect binding of the atom following
-the flags."
-          "If you want to match pattern !pat one or more times (in the literature, this
-is often written as {pat}+ ), use the complex pattern (? !pat|`). Likewise,
-if you want to match !pat zero or more times ( {pat}* ), use (|? !pat|`).
-These patterns should not be the last sub-pattern, because their correct
-working depends on repeated backtracking from following sub-patterns. In the
-last resort, you can add a pattern like () or (&) or (|) or (:), which match
-with an empty list only (assuming that the connecting nodes are spaces,
-otherwise use 0 in the case of a sum and 1 in the case of a product).
+the prefixes."
+          "
+If you want to match pattern !pat one or more times (this is often written as
+{pat}+ ), use the complex pattern (? !pat|`). Likewise, if you want to match
+!pat zero or more times ( {pat}* ), use (|? !pat|`).
+These patterns should not be the last sub-pattern or precede a subpattern that
+is static and fixes the end point of the repeating sequence, because the
+correct working of the repeating patterns depends on repeated backtracking
+from following sub-patterns. Bracmat may be optimized to skip such
+backtracking and jump to the 'right' end position if that is fixed by the next
+subpattern. 
+In the last resort, you can add a pattern like () or (&) or (|) or (:), which
+match with an empty list only (assuming that the connecting nodes are spaces,
+otherwise use 0 in the case of a sum and 1 in the case of a product). Such
+patters don't fix the next position.
 Example:
 
-{?} a a a c c:(? a|`) (|? b|`) (? c|`) (&) { {a}+ {b}* {c}+ }"
+{?} a a a c c:(? a|`) (|? b|`) (? c|`) (&) { {a}+ {b}* {c}+ }
+
+The following expression succeeds, because the subpattern doesn't confront the
+substring aaak.
+{?} @(aaakamcccc:(? a|`) m (|? b|`) (? c|`)) (&) 
+
+An empty string before the m has the effect that Bracmat doesn't optimize
+the backtracking process away. 
+{?} @(aaakamcccc:(? a|`) () m (|? b|`) (? c|`)) (&)"
     )
   & ( escappattxt
     =   T
@@ -1942,8 +1896,8 @@ matching in a string of atoms. Use the '@' to instruct the program to look
 inside the atom and use space operators to combine subpatterns. The space
 operator does not itself match any characters. To match a space in an atom,
 use a space in an atom!"
-          "You cannot negate the result of string pattern matching by adding the ~ flag,
-unless there are other flags than @ and ~ present.
+          "You cannot negate the result of string pattern matching by adding the ~ prefix,
+unless there are other prefixes than @ and ~ present.
 
 {?} a b:(~@(? b:a %)) {succeeds, ~@ means:'not an atom'}
 {?} ~@(a b:a ?)       {succeeds, ~@ means: not a string match'}
@@ -1962,7 +1916,8 @@ number.
 You have to take care with minuses: the patterns %\"-20/5\" and %-20/5 are
 different. In %\"-20/5\", the % is superfluous and the pattern matches
 characterwise. In %-20/5, the pattern matches 20/5 and the minus is ignored!
-{?} @(abcd40/10efgh:?a    20/5  ?z)    {succeeds, because 40/10 = 20/5 = 4}
+{?} @(abcd40/10efgh:?a    20/5  ?z)    {succeeds, because 4 = 20/5 = 4}
+{?} @(abcd52/13efgh:?a    20/5  ?z)    {succeeds, because 52/13 = 20/5 = 4}
 {?} @(abcd40/10efgh:?a   %20/5  ?z)    {fails}
 {?} @(abcd-20/5efgh:?a %\"-20/5\" ?z)    {succeeds}
 {?} @(abcd-20/5efgh:?a  %-20/5  ?z)    {succeeds, a = abcd-}
@@ -1983,14 +1938,15 @@ are triggered if a sub-pattern successfully matches (part of) the subject.
 As with the evaluation of other binary operators, the left operand of the \":\"
 operator is evaluated first. The other operand, <pattern>, is not evaluated,
 but in the process of pattern matching (parts of) <pattern> may be evaluated
-several times. This is the case with function calls, atoms with a \"!\" flag
+several times. This is the case with function calls, atoms with a \"!\" prefix
 and all right hand sides of the \"&\" operator. The use of the involved binary
-operators ($ ' &) and flags (! !!) as \"meta operators\" does not restrict the
-range of matchable expressions in a serious way, as these operators and flags
-normally do not occur in evaluated subject expressions. The same is true for
-some other operators (: | _ and =). These operators, too, have a special
-meaning within patterns. All other binary operators occurring in a pattern are
-searched for in the subject expression as part of the pattern matching."
+operators ($ ' &) and prefixes (! !!) as \"meta operators\" does not restrict
+the range of matchable expressions in a serious way, as these operators and
+prefixes normally do not occur in evaluated subject expressions. The same is
+true for some other operators (: | _ and =). These operators, too, have a
+special meaning within patterns. All other binary operators occurring in a
+pattern are searched for in the subject expression as part of the pattern
+matching."
           "Especially the & | and : operators are helpful in formulating complex
 patterns with alternatives, conjunctions and side effects in the form of
 actions. In the following examples, !s stands for the subject expression,
@@ -2071,12 +2027,12 @@ then using : to bind the function definition to the variable \"car\".
     )
   & ( unstuurtxt
     =   T
-      , "Flags and program flow"
+      , "Prefixes and program flow"
       ,   "Unlike other programming languages, Bracmat does not return the value of a
-variable or object member if we type its name. In Bracmat, variables and object
-members have to be told explicitly that we want their value, not their name.
-This is achieved with the ! and the !! flags in front of the variable name or
-object member name.
+variable or object member if we type its name. In Bracmat, variables and
+object members have to be told explicitly that we want their value, not their
+name. This is achieved with the ! and the !! prefixes in front of the variable
+name or object member name.
 
 !<atom>  is replaced by the binding of <atom>
 !!<atom> is replaced by the binding of the binding (after evaluation) of <atom>
@@ -2091,12 +2047,12 @@ a pattern.
 {?} 2+3:?four     { bind 5 to \"four\" }
 {?} !four         { evaluation has already taken place when four is expanded }
 
-{?} 5=2+!four     { numbers are legal names ! 5 is bound to 2 + !four}
+{?} 5=2+!four     { numbers are legal names. 5 is bound to 2 + !four}
 {?} !5            { evaluation takes place immediately after expansion }
 
 {?} sum=%+%       { define pattern \"sum\" }
 {?} a+b+c:!sum    { is a+b+c a sum? After expansion, %+% is not evaluated }"
-          "The !! flag is not used as often as the single !, but comes in handy if you
+          "The !! prefix is not used as often as the single !, but comes in handy if you
 want to pass a variable by name instead of by value.
 
 {?} (check=one,two,criterion
@@ -2117,7 +2073,7 @@ until it has arrived in the function check and the local variables \"one\" and
 operators.
 
 {?} (chack=one,two,criterion
-      .    !arg:(?one,?criterion,?two)
+      .    !arg:(?one,(=?criterion),?two)
          & !criterion
          & TRUE
        | FALSE
@@ -2143,7 +2099,7 @@ same debugging protocol applies as with other programming languages :
 * Errors that are easily made are :
   - Forget that Bracmat may see trivial elements (0 terms, 1 factors, zero
     length words) at places where this is not what you intend. Are all
-    % ` and @ flags in place?
+    % ` and @ prefixes in place?
   - Forget the grouping of operators.
     a b c : ?%x ?%y  is grouped as (a b c):(?%x ?%y) , but
     a,b,c : ?%x,?%y  is grouped as a,b,(c:?%x),?%y
@@ -2240,8 +2196,8 @@ to use its symbol as a literal, the two uses live peacefully together.
       , "Variables are represented by <atom>'s, but not all <atom>'s are variables.
 The context of a symbol determines whether it is a variable or not :
 1 the left operand of the = operator, unless this operand has zero length.
-2 the atom following the ! and !! flags
-3 within a pattern, a non-zero length atom following the ? flag
+2 the atom following the ! and !! prefixes
+3 within a pattern, a non-zero length atom following the ? prefix
 4 the left operand of the $ and ' operators
 5 the right operand of the $ operator in macro constructs (e.g. '(1+$a) )."
     )
@@ -2286,11 +2242,46 @@ characters that can be mistakenly interpreted. E.g. (in Windows)
 
     bracmat \"get$@\\\"c:Program Files\\yourprog.bra\\\"\"
 
-In *N*X the apostrophes surrounding the first argument must be replaced by
+In *N?X the apostrophes surrounding the first argument must be replaced by
 quotes.
 
 A second form is arg$N, where 0 <= N < argc. arg$0 will normally return the
-command name 'bracmat' or a path leading to 'bracmat'."
+command name 'bracmat' or a path leading to 'bracmat'. Here is a simple
+program 'myprog' that demonstrates the two ways of calling the 'arg' function
+
+    { myprog }
+
+    (test=
+      0:?N
+    &   whl
+      ' ( arg$:?argument
+        & out$(The next argument is !argument)
+        )
+    &   whl
+      ' ( arg$!N:?argument
+        & out$(Argument !N is !argument)
+        & 1+!N:?N
+        )
+    );
+        
+    !test;
+
+Now running bracmat with these arguments (example is Windows):
+
+    bracmat get$myprog -i c:\\documents\\input.txt -o d:\\html\\index.html
+
+results in the following output being written to the terminal:
+
+    The next argument is -i
+    The next argument is c:\documents\input.txt
+    The next argument is -o
+    The next argument is d:\html\index.html
+    Argument 0 is bin\bracmat
+    Argument 1 is get$myprog
+    Argument 2 is -i
+    Argument 3 is c:\documents\input.txt
+    Argument 4 is -o
+    Argument 5 is d:\html\index.html"
     )
   & ( whtxt
     =   T
@@ -2326,12 +2317,12 @@ characters used by the operating system. (e.g. an extended ASCII table).
 chr$ fails if <value> equals 0.
 {?} chr$255 {return the last character from the current table of characters
              (assuming a machine with 8-bit characters)}
-{?} tolower=.
-    !arg:~<A:~>Z                  {If arg is in the range A-Z,}
-  & chr$(asc$!arg+-1*asc$A+asc$a) {then return its lower case equivalent,}
-| !arg                            {else return arg unchanged.}
-  {(Works only correctly if the \"distance\" between lower and upper case
-  versions is the same for all characters in the range A-Z.)}
+{?} ( tolower=.
+        !arg:~<A:~>Z                  {If arg is in the range A-Z,}
+      & chr$(asc$!arg+-1*asc$A+asc$a) {then return its lower case equivalent,}
+    | !arg                            {else return arg unchanged.}
+    ) {(Works only correctly if the \"distance\" between lower and upper case
+        versions is the same for all characters in the range A-Z.)}
 {?} tolower$G"
     )
   & ( chutxt
@@ -2424,9 +2415,9 @@ has been evaluated.
 {?} square=.!arg^2 {definition}
 {?} square$5            {call}
 
-{?} swap = a,b            {declare local variables a and b}
-       .   (!arg:(?a,?b)) {dissect arg to find the \"real\" arguments}
-         & (!b,!a)        {swap and return}
+{?} (swap = a,b            {declare local variables a and b}
+        .   (!arg:(?a,?b)) {dissect arg to find the \"real\" arguments}
+         & (!b,!a))        {swap and return}
 {?} swap$(I think,I guess)
 
 In a match context, a function call creates a second local variable,
@@ -2466,12 +2457,12 @@ to try all patterns ?+? ?*? ?$? ?'? etc. The _ operator circumvents this
 problem. It is a dummy operator that matches any other operator and
 expands to the operator with which it matched last time. Thereby preceding
 matches are \"forgotten\" : the _ operator is a global variable.
-
-{?} reverse=l,r
-  .
-        (!arg:?l_?r)              { If arg is a compound expression ...}
-      & (reverse$!r)_(reverse$!l) { ... swap the reversed operands. }
-    | !arg                        { Let atoms as they are. }
+{?} ( reverse
+    =   l,r
+      .     (!arg:?l_?r)              { If arg is a compound expression ...}
+          & (reverse$!r)_(reverse$!l) { ... swap the reversed operands. }
+        | !arg                        { Let atoms as they are. }
+    )
 {?} reverse$(Bill loves sweet Nancy. This is true)"
     )
   & ( lsttxt1
@@ -2657,7 +2648,7 @@ not UTF-8 encoded.
     =   T
       , "<index>$<array name>"
       , "<array name> and <index> should both evaluate to atoms. <array name> may be
-preceded by flags, such as ? or !. Indexing starts at 0 and is done
+preceded by prefixes, such as ? or !. Indexing starts at 0 and is done
 modulo(size-of-array). Negative values count from the upper end of the array.
 The chosen index remains in force until a new indexing function is evaluated.
 
@@ -2672,7 +2663,7 @@ The chosen index remains in force until a new indexing function is evaluated.
   & ( strtxt
     =   T
       , "str$<expression>"
-      , "str$ \"writes\" <expression> into one single atom. All atoms, flags and
+      , "str$ \"writes\" <expression> into one single atom. All atoms, prefixes and
 operators, with the exception of the space-operator, are copied to the
 output string. Main use : pasting of two or more atoms.
 
@@ -2827,10 +2818,12 @@ local variables onto and from a stack.
   & ( flgtxt
     =   T
       , "flg$(=<expression>)"
-      , "flg returns a flagless copy of the expression and a new leaf with the flags of
-the original expression. These two results are coupled with a dot-operator, the
-flags to the left and the flagless expression to the right. The result is
-protected against evaluation by a '=' operator.
+      , "
+flg returns a copy of the expression without prefixes ('flags') and a new
+leaf with the prefixes of the original expression. These two results are
+coupled with a dot-operator, the prefixes to the left and the expression without
+prefixes to the right. The result is protected against evaluation by a '='
+operator.
 
 {?} flg$(=~#<>?%@a)
 {!} (=~#<>%@?).a
@@ -2839,21 +2832,21 @@ Use macro evaluation if the expression to be split is the value of a variable:
 
 {?} X=~(%+%)
 {!} X
-{?} flg$('$X):(=?flags.?expr)
+{?} flg$('$X):(=?prefixes.?expr)
 {!} =~.%+%
-{?} glf$('($flags.%*%))
+{?} glf$('($prefixes.%*%))
 {!} =~(%*%)
 "
     )
   & ( glftxt
     =   T
-      , "glf$(=<flags>.<expression>)"
+      , "glf$(=<prefixes>.<expression>)"
       , "
-glf returns a copy of <expression> with <flags> added to its flags.
-If <expression> has one or more flags also present in <flags>, then glf fails.
-Therefore, glf can be used to test for the presence of one or more flags.
-The result is protected against evaluation by a '=' operator. The function glf
-has an effect that is the opposite of flg.
+glf returns a copy of <expression> with <prefixes> added to its prefixes.
+If <expression> has one or more prefixes also present in <prefixes>, then glf
+fails. Therefore, glf can be used to test for the presence of one or more
+prefixes. The result is protected against evaluation by a '=' operator. 
+The function glf has an effect that is the opposite of flg.
 
 {?} glf$flg$(=?a)
 {!} =?a
@@ -2862,9 +2855,9 @@ Use macro evaluation if the expression to be split is the value of a variable.
 
 {?} X=?!x
 {!} X
-{?} flg$('$X):(=?flags.?expr)
+{?} flg$('$X):(=?prefixes.?expr)
 {!} =?!.x
-{?} glf$('($flags.z))
+{?} glf$('($prefixes.z))
 {!} =?!z
 "
     )
@@ -2969,8 +2962,8 @@ of two elements: the found stop character and the read string (which does not
 contain the stop character).
 
 {?} fil$(\"mytext.txt\",\"rb\")     { Open for reading in binary mode. }
-{?} fil$(,STR)                  { Reading until end-of-line \"\\n\".}
-{?} fil$:(?stop.?line)          { Read the first line. }
+{?} fil$(,STR)                  { Prepare for reading until the next 0-byte.}
+{?} fil$:(?stop.?line)          { Read until the next 0-byte. }
 {?} fil$(,SET,-1)               { Close the file. }
 
   (7) Writing
@@ -3277,7 +3270,7 @@ Topic:")
                     =   a,b,c,d,cnt,br,id
                       .     !arg:(?br.?arg)
                           & @( !arg
-                             :   (|? " "|`)
+                             :   (|? " "|`) ()
                                  "<"
                                  ?id
                                  ">"
@@ -3296,7 +3289,7 @@ Topic:")
                         |   @( !arg
                              :   ?a
                                  \n
-                                 (|? " "|`)
+                                 (|? " "|`) ()
                                  \n
                                  "<"
                                  ?id
@@ -3406,7 +3399,7 @@ Depending on the context, $<expression> can have two effects :"
                                  )
                              )
                           & ( @( !t
-                               :   (|? " "|`)
+                               :   (|? " "|`) ()
                                    ~" "
                                    ?t
                                )
@@ -3426,7 +3419,7 @@ Depending on the context, $<expression> can have two effects :"
                                  )
                              )
                           & ( @( !t
-                               :   (|? " "|`)
+                               :   (|? " "|`) ()
                                    ~" "
                                    ?t
                                )
@@ -3531,7 +3524,7 @@ Depending on the context, $<expression> can have two effects :"
                           & @( !arg
                              :   ?a
                                  (   \n
-                                     (|? " "|`)
+                                     (|? " "|`) ()
                                      \n
                                      ?b
                                      (   \n
@@ -3770,7 +3763,7 @@ accompanies Bracmat, using Bracmat to do the conversion.</i>
 </html>
 ",!fname,APP,LIN)
       )
-  & ( ~&doHTML$"bracmat.html"
+  & ( &doHTML$"bracmat.html"
     |     out
         $ "* Choose from the menus the topics that interest you.
 * Enter the number or character string that precedes your choice.
