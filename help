@@ -679,8 +679,8 @@ ECH present
 ECH not present
     No echo.
 VAP present
-    The characters are read \"as is\". Between the characters extra spaces are
-    inserted. (VAPorised)
+    The (8-bit) characters are read \"as is\". Extra spaces
+    are inserted between the characters. (VAPorised)
 VAP not present
     No extra spaces are added.
 STR present
@@ -726,27 +726,19 @@ characters that can be misunderstood, such as dots, (back) slashes or dollars."
     )
   & ( lowtxt
     =   T
-      , "low$(<atom-or-nil>[,DOS])"
+      , "low$(<atom-or-nil>)"
       , "low$ converts a string to all-lowercase.
-The characters 'A'-'Z' are converted to 'a'-'z'. Other characters are converted
-depending on the presence of the DOS option:
-
-DOS present
-    Characters 128-255 are assumed to be in CodePage 850
-DOS not present
-    Characters 128-255 are assumed to be in ISO 8859 (Latin 1)"
+The characters 'A'-'Z' are converted to 'a'-'z'. Other characters are handled
+as UTF-8 encoded Unicode characters, but default to ISO 8859 (Latin 1) if
+the argument is not valid UTF-8."
     )
   & ( upptxt
     =   T
       , "upp$(<atom-or-nil>[,DOS])"
       , "upp$ converts a string to all-uppercase.
-The characters 'a'-'z' are converted to 'A'-'Z'. Other characters are converted
-depending on the presence of the DOS option:
-
-DOS present
-    Characters 128-255 are assumed to be in CodePage 850
-DOS not present
-    Characters 128-255 are assumed to be in ISO 8859 (Latin 1)"
+The characters 'a'-'z' are converted to 'A'-'Z'. Other characters are handled
+as UTF-8 encoded Unicode characters, but default to ISO 8859 (Latin 1) if
+the argument is not valid UTF-8."
     )
   & ( whltxt
     =   T
@@ -1554,7 +1546,7 @@ evaluates to
 The rhs of the '$' operator must be an atom.
 
 In an lambda abstraction
-    ('(x.$x,$y))
+    /('(x.$x,$y))
 
 '$x' is a bound variable and '$y' is a free variable.
 
@@ -2257,11 +2249,46 @@ characters that can be mistakenly interpreted. E.g. (in Windows)
 
     bracmat \"get$@\\\"c:Program Files\\yourprog.bra\\\"\"
 
-In *N*X the apostrophes surrounding the first argument must be replaced by
+In *N?X the apostrophes surrounding the first argument must be replaced by
 quotes.
 
 A second form is arg$N, where 0 <= N < argc. arg$0 will normally return the
-command name 'bracmat' or a path leading to 'bracmat'."
+command name 'bracmat' or a path leading to 'bracmat'. Here is a simple
+program 'myprog' that demonstrates the two ways of calling the 'arg' function
+
+    { myprog }
+
+    (test=
+      0:?N
+    &   whl
+      ' ( arg$:?argument
+        & out$(The next argument is !argument)
+        )
+    &   whl
+      ' ( arg$!N:?argument
+        & out$(Argument !N is !argument)
+        & 1+!N:?N
+        )
+    );
+        
+    !test;
+
+Now running bracmat with these arguments (example is Windows):
+
+    bracmat get$myprog -i c:\\documents\\input.txt -o d:\\html\\index.html
+
+results in the following output being written to the terminal:
+
+    The next argument is -i
+    The next argument is c:\documents\input.txt
+    The next argument is -o
+    The next argument is d:\html\index.html
+    Argument 0 is bin\bracmat
+    Argument 1 is get$myprog
+    Argument 2 is -i
+    Argument 3 is c:\documents\input.txt
+    Argument 4 is -o
+    Argument 5 is d:\html\index.html"
     )
   & ( whtxt
     =   T
@@ -2297,12 +2324,12 @@ characters used by the operating system. (e.g. an extended ASCII table).
 chr$ fails if <value> equals 0.
 {?} chr$255 {return the last character from the current table of characters
              (assuming a machine with 8-bit characters)}
-{?} tolower=.
-    !arg:~<A:~>Z                  {If arg is in the range A-Z,}
-  & chr$(asc$!arg+-1*asc$A+asc$a) {then return its lower case equivalent,}
-| !arg                            {else return arg unchanged.}
-  {(Works only correctly if the \"distance\" between lower and upper case
-  versions is the same for all characters in the range A-Z.)}
+{?} ( tolower=.
+        !arg:~<A:~>Z                  {If arg is in the range A-Z,}
+      & chr$(asc$!arg+-1*asc$A+asc$a) {then return its lower case equivalent,}
+    | !arg                            {else return arg unchanged.}
+    ) {(Works only correctly if the \"distance\" between lower and upper case
+        versions is the same for all characters in the range A-Z.)}
 {?} tolower$G"
     )
   & ( chutxt
@@ -2395,9 +2422,9 @@ has been evaluated.
 {?} square=.!arg^2 {definition}
 {?} square$5            {call}
 
-{?} swap = a,b            {declare local variables a and b}
-       .   (!arg:(?a,?b)) {dissect arg to find the \"real\" arguments}
-         & (!b,!a)        {swap and return}
+{?} (swap = a,b            {declare local variables a and b}
+        .   (!arg:(?a,?b)) {dissect arg to find the \"real\" arguments}
+         & (!b,!a))        {swap and return}
 {?} swap$(I think,I guess)
 
 In a match context, a function call creates a second local variable,
@@ -2799,7 +2826,7 @@ local variables onto and from a stack.
     =   T
       , "flg$(=<expression>)"
       , "
-flg returns a less copy of the expression without prefixes ('flags') and a new
+flg returns a copy of the expression without prefixes ('flags') and a new
 leaf with the prefixes of the original expression. These two results are
 coupled with a dot-operator, the prefixes to the left and the expression without
 prefixes to the right. The result is protected against evaluation by a '='
@@ -2942,8 +2969,8 @@ of two elements: the found stop character and the read string (which does not
 contain the stop character).
 
 {?} fil$(\"mytext.txt\",\"rb\")     { Open for reading in binary mode. }
-{?} fil$(,STR)                  { Reading until end-of-line \"\\n\".}
-{?} fil$:(?stop.?line)          { Read the first line. }
+{?} fil$(,STR)                  { Prepare for reading until the next 0-byte.}
+{?} fil$:(?stop.?line)          { Read until the next 0-byte. }
 {?} fil$(,SET,-1)               { Close the file. }
 
   (7) Writing
