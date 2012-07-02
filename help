@@ -30,7 +30,7 @@ help=
 7  the four evaluation contexts
 8  programming in Bracmat
 9  functions
-10  data structures
+10 data structures
 11 objects
 12 hash tables
 13 how Bracmat evolved
@@ -3245,42 +3245,6 @@ Topic:")
                           | vsubst2$!arg
                           )
                     )
-                  & ( anchors
-                    =   R z a m z M L t 
-                      .  !arg| ( lastchar
-                          =   "/"
-                            | ~<a:~>z
-                            | ~<A:~>Z
-                            | ~<0:~>9
-                          )
-                        & :?t
-                        & whl'(!arg:?%z ?arg
-                        & :?R
-                        &   whl
-                          ' ( @( !z
-                               :   ?a
-                                   http
-                                   ?m
-                                   (   ( " "
-                                       | \n
-                                       | \r
-                                       | \t
-                                       )
-                                       ?
-                                   | 
-                                   )
-                               : ?z
-                               )
-                            & @(rev$!m:?Z (%@?L:!lastchar) ?M)
-                            & rev$(str$(!L !M)):?m
-                            & str$(rev$!Z !z):?z
-                            &   !R !a "<a href=\"http" !m \">http !m "</a>"
-                              : ?R
-                            )
-                        & !t str$(!R !z):?t
-                        )
-                        & !t
-                    )
                   & ( fput
                     =   a,b,c,e,f,g,par,section,content
                       .   !arg:(?par.?section.?content)
@@ -3291,16 +3255,16 @@ Topic:")
                                     |   !a
                                         ( !par
                                         .   !e
-                                            (!section.!f anchors$!content)
+                                            (!section.!f !content)
                                             !g
                                         )
                                         !c
                                     )
                                 |   !a
-                                    (!par.!b (!section.anchors$!content))
+                                    (!par.!b (!section.!content))
                                     !c
                                 )
-                            | !paragraphs (!par.!section.anchors$!content)
+                            | !paragraphs (!par.!section.!content)
                             )
                           : ?paragraphs
                     )
@@ -3773,6 +3737,40 @@ Depending on the context, $<expression> can have two effects :"
                   & put$(vsubst2$!titel)
                   & out$\"
             )
+          & ( anchors
+            =   R z a m Z M L t lastchar
+              .   ( lastchar
+                  =   "/"
+                    | ~<a:~>z
+                    | ~<A:~>Z
+                    | ~<0:~>9
+                  )
+                & !arg:%?z
+                & :?R
+                &   whl
+                  ' ( @( !z
+                       :   ?a
+                           http
+                           ?m
+                           ( (   ( " "
+                                 | \n
+                                 | \r
+                                 | \t
+                                 )
+                                 ?
+                             | 
+                             )
+                           : ?z
+                           )
+                       )
+                    & @(rev$!m:?Z (%@?L:!lastchar) ?M)
+                    & http rev$(str$(!L !M)):?m
+                    & str$(rev$!Z !z):?z
+                    & !R !a "<a href=\"" !m \"> !m "</a>":?R
+                    )
+                & !R !z:?R
+                & str$!R
+            )
           & ( fputall
             =   l1,l2,l3,parcontent,content,a
               .   ( l1
@@ -3781,7 +3779,7 @@ Depending on the context, $<expression> can have two effects :"
                       =   !parcontent:(?.%?content) ?parcontent
                         & ( l3
                           =   !content:%?a ?content
-                            & put$(!a,!fname,APP,LIN)
+                            & put$(anchors$!a,!fname,APP,LIN)
                             & !l3
                           )
                         & ~!l3
@@ -3824,7 +3822,7 @@ accompanies Bracmat, using Bracmat to do the conversion.</i>
 </html>
 ",!fname,APP,LIN)
       )
-  & ( &doHTML$"bracmat.html"
+  & ( ~&doHTML$"bracmat.html"
     |     out
         $ "* Choose from the menus the topics that interest you.
 * Enter the number or character string that precedes your choice.
