@@ -6,7 +6,7 @@ help=
   . pattxt,asstxt,unopsmenu,unstuurtxt,varsmenu,funcmenu
   . varmattxt,varprotxt,progsmenu,debugtxt,debugtxt2,debugtxt3
   . inbltmenu,alctxt,aligntxt,asctxt,utftxt,chrtxt
-  . chutxt,dbgtxt,dentxt,escappattxt,lambda
+  . chutxt,dbgtxt,dentxt,escappattxt,lambda,morexmlps
   . divtxt,fretxt,funtxt1,funtxt3,lsttxt1,difftxt,pattxt2
   . lsttxt2,lsttxt3,memtxt,modtxt,peetxt,poktxt,Bracmat-name
   . puttxt1,puttxt2,puttxt3,rentxt,revtxt,seltxt,simtxt,strtxt
@@ -34,8 +34,9 @@ help=
 11 objects
 12 hash tables
 13 how Bracmat evolved
-14 why is it called 'Bracmat'?
-15 how to obtain Bracmat"
+14 why the name 'Bracmat'?
+15 how to obtain Bracmat
+16 more example code"
       ,   (0,aanbevelingen)
           (1,patternm)
           (2,syntax)
@@ -52,6 +53,7 @@ help=
           (13,filosofie)
           (14,Bracmat-name)
           (15,colofon)
+          (16,morexmlps)
     )
   & ( funcmenu
     =   M
@@ -504,7 +506,7 @@ convergence."
     )
   & ( Bracmat-name
     =   T
-      , "What does the name 'Bracmat' mean?"
+      , "Why the name 'Bracmat'?"
       ,   "The name Bracmat stems from Ludvig Holbergs novel 'Nicolai Klimii iter
 subterraneum', the history of Niels Klim who visits the planet Nazar and
 comments the habits of its inhabitants. For example, the people of the country
@@ -526,8 +528,22 @@ it is all about tree branches."
   & ( colofon
     =   T
       , "How to obtain Bracmat"
-      , "You can obtain a copy of Bracmat by sending an e-mail to me
+      , "There are e few download options. You can get the last revision from
+https://github.com/BartJongejan/Bracmat.
+
+At http://cst.dk/download/bracmat/ you can follow the history of Bracmat from
+its inception somewhere in the eighties up to the last version. At this site
+you can also find compiled versions for some platforms.
+ 
+Alternatively, you can obtain a copy of Bracmat by sending an e-mail to me
 (Bart Jongejan) at bart[AT]cst.dk. Please state your hardware/OS."
+    )
+  & ( morexmlps
+    =   T
+      , "more example code"
+      , "At http://rosettacode.org/wiki/Category:Bracmat over 100 tasks are solved
+using Bracmat. The site is an excellent way to compare how the same task is
+solved in a great number of programming languages."
     )
   & ( syntax
     =   T
@@ -546,8 +562,8 @@ it is all about tree branches."
 <spec>            ::= \\a \\b \\t \\n \\v \\f \\r \\\" \\\\
 <nil>             ::= \"\"   (or nothing at all, such as in \"()\")
 <binop>           ::= = . , | & : <white space> + * ^ \\L \\D ' $ _
-<prefixes>           ::= <prefix> [<prefixes>]
-<prefix>            ::= [ ~ / # < > % @ ` ? ! !!
+<prefixes>        ::= <prefix> [<prefixes>]
+<prefix>          ::= [ ~ / # < > % @ ` ? ! !!
 <white space>     ::= spaces, tabs, new line and form feed characters"
           "White space (operator/cosmetic measure) almost never leads to confusion. It
 does in (some) cases where a <nil> leaf without prefixes is adjacent to the white
@@ -1213,7 +1229,7 @@ is created. Example:
     )
   & ( DOSopttxt
     =   T
-      , "Codepage 850 support$"
+      , "Codepage 850 support"
       , "As of July 2009 Codepage 850 is not supported, unless bracmat is compiled with
 #define CODEPAGE850 1."
     )
@@ -1469,18 +1485,21 @@ substitution, but the resulting code is harder to understand:
             : (=?rem)                       {C's value is hard-coded into rem}
           )
           !rem                              {which is the remaining pattern. }
-    & out$(after !count "trials:" !A "+" !B "=" !C )
+    & out$(after !count \"trials:\" !A \"+\" !B \"=\" !C )
     )   
 after 16 trials: 5 + 7 = 12"
           "In the same way, function code can be pieced together before it is ever
 executed.
 
-{?} ((!power : two & (=!arg^2)) | (=!arg^3)) : ?abc       {If power=\"two\",
+{?} power=three
+{?} ((!power : two & (=!arg^2)) | (=!arg^3)) : (=?abc)      {If power=\"two\",
     abc is bound to !arg^2 (unevaluated). Otherwise, abc is bound to !arg^3.}
-{?} '(.!arg + -1*$abc + 2) : ?poly {\"poly\" is the name of a new function
+{?} '(.!arg + -1*$abc + 2) : (=?poly) {\"poly\" is the name of a new function
     that will return a value that depends on the current value of arg
     and on the value of power at the time when abc got its binding.}
-{?} lst$poly { show poly's definition }"
+{?} lst$poly { show poly's definition }
+{?} poly$4
+{!} -58"
           "The macro construct '<expr> is useful if an expression has to be executed
 many times while parts of it remain constant, for example in nested loops:
 
@@ -1505,7 +1524,7 @@ Without macro construct (5 X 5 multiplication table) :
                & put$($m X !n \"=\" ()$m*!n \",\")
                               { !m is expanded only 2 times }
                & !inner
-               ) : ?inner     { at each pass through the outer loop
+               ) : (=?inner)  { at each pass through the outer loop
                                 the inner loop \"inner\" is defined anew }
             & put$\\n
             & 0 : ?n
@@ -1513,7 +1532,7 @@ Without macro construct (5 X 5 multiplication table) :
             & !outer)
 {?} !outer"
     )
-  & (lambda
+  & ( lambda
     =   T
       , "Lambda calculus, currying"
       , "The lambda abstraction 
@@ -2273,15 +2292,15 @@ Now running bracmat with these arguments (example is Windows):
 results in the following output being written to the terminal:
 
     The next argument is -i
-    The next argument is c:\documents\input.txt
+    The next argument is c:documentsinput.txt
     The next argument is -o
-    The next argument is d:\html\index.html
+    The next argument is d:htmlindex.html
     Argument 0 is bin\bracmat
     Argument 1 is get$myprog
     Argument 2 is -i
-    Argument 3 is c:\documents\input.txt
+    Argument 3 is c:documentsinput.txt
     Argument 4 is -o
-    Argument 5 is d:\html\index.html"
+    Argument 5 is d:htmlindex.html"
     )
   & ( whtxt
     =   T
@@ -3020,13 +3039,10 @@ An open file is closed by specifying an impossible file position."
     )
   &   ( verwerk
       =   ( tit,topic,pag,experiment,doemenu,ptxt
-          . titel,txt,men,sel,pg,antw,keuze,expr
+          . titel,txt,men,sel,pg,antw,keuze,expr,putout
           )
         .     ( topic
-              =   !arg:%?ptxt
-                & !arg:% ?
-                & !arg:%?ptxt ?Arg
-                & !arg:(~:?ptxt) ?arg
+              =   !arg:(~:?ptxt) ?arg
                 &   !!ptxt
                   : (   (T,?titel,?txt)
                       & !tit
@@ -3131,9 +3147,9 @@ Topic:")
                           $ ( !ptxt
                             . overview
                             .   str
-                              $ ( "&uArr; <a href=\"#"
+                              $ ( "<span class=\"arrow\">&uArr;</span> <a href=\"#"
                                   !overviewref
-                                  \">
+                                  "\" style=\"line-height:12pt\">"
                                   vsubst2$!overviewtitel
                                   "</a>.<br />
 "
@@ -3145,9 +3161,9 @@ Topic:")
                           $ ( !ptxt
                             . back
                             .   str
-                              $ ( "&lArr; <a href=\"#"
+                              $ ( "<span class=\"arrow\">&lArr;</span> <a href=\"#"
                                   !backtoref
-                                  \">
+                                  "\" style=\"line-height:12pt\">"
                                     vsubst2
                                   $ ( !!backtoref:(?,?titl,?)
                                     & !titl
@@ -3162,9 +3178,9 @@ Topic:")
                             $ ( !ptxt
                               . more
                               .   str
-                                $ ( "&rArr; <a href=\"#"
+                                $ ( "<span class=\"arrow\">&rArr;</span> <a href=\"#"
                                     !next
-                                    \">
+                                    "\" style=\"line-height:12pt\">"
                                       vsubst2
                                     $ ( !!next:(?,?titl,?)
                                       & !titl
@@ -3229,6 +3245,42 @@ Topic:")
                           | vsubst2$!arg
                           )
                     )
+                  & ( anchors
+                    =   R z a m z M L t 
+                      .  !arg| ( lastchar
+                          =   "/"
+                            | ~<a:~>z
+                            | ~<A:~>Z
+                            | ~<0:~>9
+                          )
+                        & :?t
+                        & whl'(!arg:?%z ?arg
+                        & :?R
+                        &   whl
+                          ' ( @( !z
+                               :   ?a
+                                   http
+                                   ?m
+                                   (   ( " "
+                                       | \n
+                                       | \r
+                                       | \t
+                                       )
+                                       ?
+                                   | 
+                                   )
+                               : ?z
+                               )
+                            & @(rev$!m:?Z (%@?L:!lastchar) ?M)
+                            & rev$(str$(!L !M)):?m
+                            & str$(rev$!Z !z):?z
+                            &   !R !a "<a href=\"http" !m \">http !m "</a>"
+                              : ?R
+                            )
+                        & !t str$(!R !z):?t
+                        )
+                        & !t
+                    )
                   & ( fput
                     =   a,b,c,e,f,g,par,section,content
                       .   !arg:(?par.?section.?content)
@@ -3239,16 +3291,16 @@ Topic:")
                                     |   !a
                                         ( !par
                                         .   !e
-                                            (!section.!f !content)
+                                            (!section.!f anchors$!content)
                                             !g
                                         )
                                         !c
                                     )
                                 |   !a
-                                    (!par.!b (!section.!content))
+                                    (!par.!b (!section.anchors$!content))
                                     !c
                                 )
-                            | !paragraphs (!par.!section.!content)
+                            | !paragraphs (!par.!section.anchors$!content)
                             )
                           : ?paragraphs
                     )
@@ -3270,7 +3322,8 @@ Topic:")
                     =   a,b,c,d,cnt,br,id
                       .     !arg:(?br.?arg)
                           & @( !arg
-                             :   (|? " "|`) ()
+                             :   (|? " "|`)
+                                 ()
                                  "<"
                                  ?id
                                  ">"
@@ -3289,7 +3342,8 @@ Topic:")
                         |   @( !arg
                              :   ?a
                                  \n
-                                 (|? " "|`) ()
+                                 (|? " "|`)
+                                 ()
                                  \n
                                  "<"
                                  ?id
@@ -3366,7 +3420,7 @@ Depending on the context, $<expression> can have two effects :"
                         | vsubst1$!arg
                     )
                   & ( subul
-                    =   a b c d
+                    =   a b c d e
                       .     (   @(!arg:"  -" ?b "\n  -" ?c)
                               & :?a
                             | @(!arg:?a "\n  -" ?b "\n  -" ?c)
@@ -3399,7 +3453,8 @@ Depending on the context, $<expression> can have two effects :"
                                  )
                              )
                           & ( @( !t
-                               :   (|? " "|`) ()
+                               :   (|? " "|`)
+                                   ()
                                    ~" "
                                    ?t
                                )
@@ -3419,7 +3474,8 @@ Depending on the context, $<expression> can have two effects :"
                                  )
                              )
                           & ( @( !t
-                               :   (|? " "|`) ()
+                               :   (|? " "|`)
+                                   ()
                                    ~" "
                                    ?t
                                )
@@ -3524,7 +3580,8 @@ Depending on the context, $<expression> can have two effects :"
                           & @( !arg
                              :   ?a
                                  (   \n
-                                     (|? " "|`) ()
+                                     (|? " "|`)
+                                     ()
                                      \n
                                      ?b
                                      (   \n
@@ -3541,7 +3598,11 @@ Depending on the context, $<expression> can have two effects :"
                                  & termdefpat$!b:?termer
                                  )
                              )
-                          & vsubst1$!a "</p>\n<dl>" !termer "</dl>\n<p>" chunk2$!c
+                          &   vsubst1$!a
+                              "</p>\n<dl>"
+                              !termer
+                              "</dl>\n<p>"
+                              chunk2$!c
                         |   @( !arg
                              :   ( &:?a
                                  | ?a \n
@@ -3740,7 +3801,7 @@ Depending on the context, $<expression> can have two effects :"
 <head>
 <style type=\"text/css\"><!--
 span.courier {font-family: monospace;}
---></style><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />
+-->span.arrow {line-height: 12pt}</style><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />
 <meta name=\"robots\" content=\"all, index\" />
 <title>Bracmat Help</title>
 </head>
@@ -3773,7 +3834,7 @@ accompanies Bracmat, using Bracmat to do the conversion.</i>
       & verwerk$lusmenu
     );
 
-    help$()
+  ~&get$"lex.bra"&lex$help | help$()
   & (~|lst$(help,"help.bra",NEW))
   & tbl$(help,0)
   & "
