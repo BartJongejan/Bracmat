@@ -40,12 +40,22 @@ attributes can be empty (no =[value])
 #include <stdlib.h>
 #include <assert.h>
 
+#include <limits.h>
+
+#if defined _WIN64
+/*Microsoft*/
+#define LONG long long
+#else
+#define LONG long
+#endif
+
+
 #define TRUE 1
 #define FALSE 0
 
 extern void putOperatorChar(int c);
 extern void putLeaveChar(int c);
-extern unsigned char * putCodePoint(unsigned long val,unsigned char * s);
+extern char * putCodePoint(unsigned LONG val,char * s);
 
 typedef enum {notag,tag,endoftag,endoftag_startoftag} estate;
 static estate (*tagState)(int kar);
@@ -514,21 +524,14 @@ static int charref(char * c)
             rawput('>');
         else if(buf[0] == '#')
             {
-            unsigned long N = 0;
-            unsigned char tmp[22];
-            if(buf[1] == 'x')
-                {
-                N = strtoul(buf+2,NULL,16);
-                }
-            else
-                {
-                N = strtoul(buf+1,NULL,10);
-                }
+            unsigned long N;
+            char tmp[22];
+            N = (buf[1] == 'x') ? strtoul(buf+2,NULL,16) : strtoul(buf+1,NULL,10);
             p = buf;
             xput = Put;
             if(putCodePoint(N,tmp))
                 {
-                return nrawput((char*)tmp);
+                return nrawput(tmp);
                 }
             else
                 return 0;
@@ -548,12 +551,12 @@ static int charref(char * c)
                                         );
                 if (pItem!=NULL)
                     {
-                    unsigned char tmp[22];
+                    char tmp[22];
                     p = buf;
                     xput = Put;
                     if(putCodePoint(pItem->code,tmp))
                         {
-                        return nrawput((char*)tmp);
+                        return nrawput(tmp);
                         }
                     }
                 }
@@ -718,7 +721,7 @@ static estate def(int kar)
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             cbStartMarkUp();
             return tag;
         default:
@@ -731,18 +734,18 @@ static estate lt(int kar)
     switch(kar)
         {
         case '>':
-            tagState = &def;
+            tagState = def;
             return notag;
         case '!':
-            tagState = &markup;
+            tagState = markup;
             return tag;
         case '?':
             startScript = ch;
-            tagState = &script;
+            tagState = script;
             return tag;
         case '/':
             putOperatorChar('.');
-            tagState = &endtag;
+            tagState = endtag;
         case 0xA0:
         case ' ':
         case '\t':
@@ -752,13 +755,13 @@ static estate lt(int kar)
         default:
             if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
                 {
-                tagState = &element;
+                tagState = element;
                 startElementName = ch;
                 return tag;
                 }
             else
                 {
-                tagState = &def;
+                tagState = def;
                 return notag;
                 }
         }
@@ -769,13 +772,13 @@ static estate element(int kar)
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             cbEndElementName();
             putOperatorChar(')');
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             cbEndElementName();
             putOperatorChar(')');
             return endoftag;
@@ -790,20 +793,20 @@ static estate element(int kar)
         case '\n':
         case '\r':
             cbEndElementName();
-            tagState = &atts;
+            tagState = atts;
             return tag;
         case '/':
             cbEndElementName();
             putOperatorChar(',');
             putOperatorChar(')');
-            tagState = &emptytag;
+            tagState = emptytag;
             return tag;
         default:
             if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
                 return tag;
             else
                 {
-                tagState = &def;
+                tagState = def;
                 return notag;
                 }
         }
@@ -814,13 +817,13 @@ static estate elementonly(int kar)
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             cbEndElementName();
             putOperatorChar(')');
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             cbEndElementName();
             putOperatorChar(')');
             return endoftag;
@@ -835,14 +838,14 @@ static estate elementonly(int kar)
         case '\n':
         case '\r':
             cbEndElementName();
-            tagState = &gt;
+            tagState = gt;
             return tag;
         default:
             if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
                 return tag;
             else
                 {
-                tagState = &def;
+                tagState = def;
                 return notag;
                 }
         }
@@ -853,12 +856,12 @@ static estate gt(int kar)
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             putOperatorChar(')');
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             putOperatorChar(')');
             return endoftag;
         case 0xA0:
@@ -868,7 +871,7 @@ static estate gt(int kar)
         case '\r':
             return tag;
         default:
-            tagState = &def;
+            tagState = def;
             return notag;
         }
     }
@@ -878,11 +881,11 @@ static estate emptytag(int kar)
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             return endoftag;
         case 0xA0:
         case ' ':
@@ -891,7 +894,7 @@ static estate emptytag(int kar)
         case '\r':
             return tag;
         default:
-            tagState = &def;
+            tagState = def;
             return notag;
         }
     }
@@ -901,12 +904,12 @@ static estate atts(int kar)
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             putOperatorChar(')');
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             putOperatorChar(')');
             return endoftag;
         case 0xA0:
@@ -918,19 +921,19 @@ static estate atts(int kar)
         case '/':
             putOperatorChar(',');
             putOperatorChar(')');
-            tagState = &emptytag;
+            tagState = emptytag;
             return tag;
         default:
             if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
                 {
                 putOperatorChar('(');
                 startAttributeName = ch;
-                tagState = &name;
+                tagState = name;
                 return tag;
                 }
             else
                 {
-                tagState = &def;
+                tagState = def;
                 return notag;
                 }
         }
@@ -941,14 +944,14 @@ static estate name(int kar)
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             cbEndAttributeName();
             cbEndAttribute();
             putOperatorChar(')');
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             cbEndAttributeName();
             cbEndAttribute();
             putOperatorChar(')');
@@ -964,24 +967,24 @@ static estate name(int kar)
         case '\n':
         case '\r':
             cbEndAttributeName();
-            tagState = &atts_or_value;
+            tagState = atts_or_value;
             return tag;
         case '/':
             cbEndAttributeName();
             cbEndAttribute();
             putOperatorChar(',');
-            tagState = &emptytag;
+            tagState = emptytag;
             return tag;
         case '=':
             cbEndAttributeName();
-            tagState = &value;
+            tagState = value;
             return tag;
         default:
             if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
                 return tag;
             else
                 {
-                tagState = &def;
+                tagState = def;
                 return notag;
                 }
         }
@@ -994,7 +997,7 @@ static estate value(int kar)
         case '>':
         case '/':
         case '=':
-            tagState = &def;
+            tagState = def;
             return notag;
         case 0xA0:
         case ' ':
@@ -1003,21 +1006,21 @@ static estate value(int kar)
         case '\r':
             return tag;
         case '\'':
-            tagState = &singlequotes;
+            tagState = singlequotes;
             return tag;
         case '"':
-            tagState = &doublequotes;
+            tagState = doublequotes;
             return tag;
         default:
             if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
                 {
                 startValue = ch;
-                tagState = &invalue;
+                tagState = invalue;
                 return tag;
                 }
             else
                 {
-                tagState = &def;
+                tagState = def;
                 return notag;
                 }
         }
@@ -1028,13 +1031,13 @@ static estate atts_or_value(int kar)
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             cbEndAttribute();
             putOperatorChar(')');
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             cbEndAttribute();
             putOperatorChar(')');
             return endoftag;
@@ -1042,7 +1045,7 @@ static estate atts_or_value(int kar)
         case '_':
         case ':':
         case '.':
-            tagState = &def;
+            tagState = def;
             return notag;
         case 0xA0:
         case ' ':
@@ -1054,10 +1057,10 @@ static estate atts_or_value(int kar)
             cbEndAttribute();
             putOperatorChar(',');
             putOperatorChar(')');
-            tagState = &emptytag;
+            tagState = emptytag;
             return tag;
         case '=':
-            tagState = &value;
+            tagState = value;
             return tag;
         default:
             if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
@@ -1065,12 +1068,12 @@ static estate atts_or_value(int kar)
                 cbEndAttribute();
                 putOperatorChar('(');
                 startAttributeName = ch;
-                tagState = &name;
+                tagState = name;
                 return tag;
                 }
             else
                 {
-                tagState = &def;
+                tagState = def;
                 return notag;
                 }
         }
@@ -1081,14 +1084,14 @@ static estate invalue(int kar)
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             nxput(startValue,ch);
             cbEndAttribute();
             putOperatorChar(')');
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             nxput(startValue,ch);
             cbEndAttribute();
             putOperatorChar(')');
@@ -1100,7 +1103,7 @@ static estate invalue(int kar)
         case '\r':
             nxput(startValue,ch);
             cbEndAttribute();
-            tagState = &atts;
+            tagState = atts;
             return tag;
         default:
             if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
@@ -1109,7 +1112,7 @@ static estate invalue(int kar)
                 }
             else
                 {
-                tagState = &def;
+                tagState = def;
                 return notag;
                 }
         }
@@ -1123,10 +1126,10 @@ static estate singlequotes(int kar)
         case '\'':
             nxput(startValue,ch);
             cbEndAttribute();
-            tagState = &endvalue;
+            tagState = endvalue;
             return tag;
         default:
-            tagState = &insinglequotedvalue;
+            tagState = insinglequotedvalue;
             return tag;
         }
     }
@@ -1139,10 +1142,10 @@ static estate doublequotes(int kar)
         case '\"':
             nxput(startValue,ch);
             cbEndAttribute();
-            tagState = &endvalue;
+            tagState = endvalue;
             return tag;
         default:
-            tagState = &indoublequotedvalue;
+            tagState = indoublequotedvalue;
             return tag;
         }
     }
@@ -1154,7 +1157,7 @@ static estate insinglequotedvalue(int kar)
         case '\'':
             nxput(startValue,ch);
             cbEndAttribute();
-            tagState = &endvalue;
+            tagState = endvalue;
             return tag;
         default:
             return tag;
@@ -1168,7 +1171,7 @@ static estate indoublequotedvalue(int kar)
         case '\"':
             nxput(startValue,ch);
             cbEndAttribute();
-            tagState = &endvalue;
+            tagState = endvalue;
             return tag;
         default:
             return tag;
@@ -1181,12 +1184,12 @@ static estate endvalue(int kar)
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             putOperatorChar(')');
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             putOperatorChar(')');
             return endoftag;
         case 0xA0:
@@ -1194,15 +1197,15 @@ static estate endvalue(int kar)
         case '\t':
         case '\n':
         case '\r':
-            tagState = &atts;
+            tagState = atts;
             return tag;
         case '/':
             putOperatorChar(',');
             putOperatorChar(')');
-            tagState = &emptytag;
+            tagState = emptytag;
             return tag;
         default:
-            tagState = &def;
+            tagState = def;
             return notag;
         }
     }
@@ -1212,25 +1215,25 @@ static estate markup(int kar) /* <! */
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             cbEndMarkUp();
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             cbEndMarkUp();
             return endoftag;
         case '-':
-            tagState = &h1;
+            tagState = h1;
             return tag;
         case '[':
-            tagState = &CDATA1;
+            tagState = CDATA1;
             return tag;
         case 'D':
-            tagState = &DOCTYPE1;
+            tagState = DOCTYPE1;
             return tag;
         default:
-            tagState = &unknownmarkup;
+            tagState = unknownmarkup;
             return tag;
         }
     }
@@ -1240,12 +1243,12 @@ static estate unknownmarkup(int kar) /* <! */
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             cbEndMarkUp();
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             cbEndMarkUp();
             return endoftag;
         default:
@@ -1258,16 +1261,16 @@ static estate script(int kar)
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             nonTagWithoutEntityUnfolding("?",startScript+1,ch-1);
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             nonTagWithoutEntityUnfolding("?",startScript+1,ch-1);
             return endoftag;
         case '?':
-            tagState = &endscript;
+            tagState = endscript;
             return tag;
         default:
             return tag;
@@ -1279,11 +1282,11 @@ static estate endscript(int kar)
     switch(kar)
         {
         case '>':
-            tagState = &def;
+            tagState = def;
             nonTagWithoutEntityUnfolding("?",startScript+1,ch-1);
             return endoftag;
         default:
-            tagState = &CDATA7;
+            tagState = CDATA7;
             return tag;
         }
     }
@@ -1296,12 +1299,12 @@ static estate DOCTYPE1(int kar) /* <!D */
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             cbStartMarkUp();
             doctypei = 0;
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             doctypei = 0;
             return endoftag;
         default:
@@ -1309,7 +1312,7 @@ static estate DOCTYPE1(int kar) /* <!D */
                 {
                 if(doctypei == sizeof(octype) - 2)
                     {
-                    tagState = &DOCTYPE7;
+                    tagState = DOCTYPE7;
                     }
                 else
                     ++doctypei;
@@ -1318,7 +1321,7 @@ static estate DOCTYPE1(int kar) /* <!D */
             else
                 {
                 doctypei = 0;
-                tagState = &unknownmarkup;
+                tagState = unknownmarkup;
                 return tag;
                 }
         }
@@ -1330,11 +1333,11 @@ static estate DOCTYPE7(int kar) /* <!DOCTYPE */
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             cbEndDOCTYPE();
             return endoftag;
         case ' ':
@@ -1342,10 +1345,10 @@ static estate DOCTYPE7(int kar) /* <!DOCTYPE */
         case '\r':
         case '\n':
             startDOCTYPE = ch+1;
-            tagState = &DOCTYPE8;
+            tagState = DOCTYPE8;
             return tag;
         default:
-            tagState = &unknownmarkup;
+            tagState = unknownmarkup;
             return tag;
         }
     }
@@ -1355,54 +1358,54 @@ static estate DOCTYPE8(int kar) /* <!DOCTYPE S */
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             cbEndDOCTYPE();
             return endoftag;
         case '[':
-            tagState = &DOCTYPE9;
+            tagState = DOCTYPE9;
             return tag;
         default:
             return tag;
         }
     }
 
-static estate DOCTYPE9(int kar)  // <!DOCTYPE S [
+static estate DOCTYPE9(int kar)  /* <!DOCTYPE S [ */
     {
     switch(kar)
         {
         case ']':
-            tagState = &DOCTYPE10;
+            tagState = DOCTYPE10;
             return tag;
         default:
-            tagState = &DOCTYPE9;
+            tagState = DOCTYPE9;
             return tag;
         }
     }
 
-static estate DOCTYPE10(int kar)  // <!DOCTYPE S [ ]
+static estate DOCTYPE10(int kar)  /* <!DOCTYPE S [ ] */
     {
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             cbEndDOCTYPE();
             return endoftag;
         case ' ':
         case '\t':
         case '\r':
         case '\n':
-            tagState = &DOCTYPE10;
+            tagState = DOCTYPE10;
             return tag;
         default:
-            tagState = &markup;
+            tagState = markup;
             return tag;
         }
     }
@@ -1415,12 +1418,12 @@ static estate CDATA1(int kar) /* <![ */
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             cbStartMarkUp();
             cdatai = 0;
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             cdatai = 0;
             return endoftag;
         default:
@@ -1428,7 +1431,7 @@ static estate CDATA1(int kar) /* <![ */
                 {
                 if(cdatai == sizeof(cdata) - 2)
                     {
-                    tagState = &CDATA7;
+                    tagState = CDATA7;
                     startCDATA = ch+1;
                     cdatai = 0;
                     }
@@ -1438,7 +1441,7 @@ static estate CDATA1(int kar) /* <![ */
                 }
             else
                 {
-                tagState = &unknownmarkup;
+                tagState = unknownmarkup;
                 cdatai = 0;
                 return tag;
                 }
@@ -1450,7 +1453,7 @@ static estate CDATA7(int kar) /* <![CDATA[ */
     switch(kar)
         {
         case ']':
-            tagState = &CDATA8;
+            tagState = CDATA8;
             return tag;
         default:
             return tag;
@@ -1462,10 +1465,10 @@ static estate CDATA8(int kar) /* <![CDATA[ ] */
     switch(kar)
         {
         case ']':
-            tagState = &CDATA9;
+            tagState = CDATA9;
             return tag;
         default:
-            tagState = &CDATA7;
+            tagState = CDATA7;
             return tag;
         }
     }
@@ -1475,12 +1478,12 @@ static estate CDATA9(int kar) /* <![CDATA[ ]] */
     switch(kar)
         {
         case '>':  /* <![CDATA[ ]]> */
-            tagState = &def;
+            tagState = def;
             startMarkup = NULL;
             nonTagWithoutEntityUnfolding("![CDATA[",startCDATA,ch-2);
             return endoftag;
         default:
-            tagState = &CDATA7;
+            tagState = CDATA7;
             return tag;
         }
     }
@@ -1491,18 +1494,18 @@ static estate h1(int kar) /* <!- */
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             cbStartMarkUp();
             return notag;
         case '>':
-            tagState = &def;
+            tagState = def;
             return notag;
         case '-':
-            tagState = &h2;
+            tagState = h2;
             startComment = ch+1;
             return tag;
         default:
-            tagState = &unknownmarkup;
+            tagState = unknownmarkup;
             return tag;
         }
     }
@@ -1512,7 +1515,7 @@ static estate h2(int kar) /* <!-- */
     switch(kar)
         {
         case '-':
-            tagState = &h3;
+            tagState = h3;
             return tag;
         default:
             return tag;
@@ -1524,12 +1527,12 @@ static estate h3(int kar) /* <!--  - */
     switch(kar)
         {
         case '-': /* <!-- -- */
-            tagState = &markup;
+            tagState = markup;
             startMarkup = NULL;
             nonTagWithoutEntityUnfolding("!--",startComment,ch-1);
             return tag;
         default:
-            tagState = &h2;
+            tagState = h2;
             return tag;
         }
     }
@@ -1539,12 +1542,12 @@ static estate endtag(int kar)
     switch(kar)
         {
         case '<':
-            tagState = &lt;
+            tagState = lt;
             putOperatorChar(')');
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
-            tagState = &def;
+            tagState = def;
             putOperatorChar(')');
             return endoftag;
         case 0xA0:
@@ -1556,13 +1559,13 @@ static estate endtag(int kar)
         default:
             if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
                 {
-                tagState = &elementonly;
+                tagState = elementonly;
                 startElementName = ch;
                 return tag;
                 }
             else
                 {
-                tagState = &def;
+                tagState = def;
                 return notag;
                 }
         }
@@ -1575,7 +1578,6 @@ int XMLtext(FILE * fpi,char * bron,int trim,int html)
     int inc = 0x10000;
     int incs = 1;
     long filesize;
-    char * alltext = NULL;
     if(fpi)
         {
         if(fpi == stdin)
@@ -1597,20 +1599,14 @@ int XMLtext(FILE * fpi,char * bron,int trim,int html)
         return 0;
     if(filesize > 0)
         {
+        char * alltext;
         doctypei = 0;
         cdatai = 0;
         retval = 1;
         buf = (char*)malloc(BUFSIZE);
         p = buf;
         q = buf;
-        if(fpi || trim)
-            {
-            alltext = (char*)malloc(filesize+1);
-            }
-        else
-            {
-            alltext = bron;
-            }
+        alltext = (fpi || trim) ? (char*)malloc(filesize+1) : bron;
         HT = html;
         if(buf && alltext)
             {
@@ -1714,12 +1710,11 @@ int XMLtext(FILE * fpi,char * bron,int trim,int html)
                     }
                 }
 
-            tagState = &def;
+            tagState = def;
 
             ch = alltext;
 
             curr_pos = alltext;
-            endpos = alltext;
             while(*ch)
                 {
                 while(  *ch 

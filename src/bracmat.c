@@ -37,9 +37,7 @@ implements reading XML files.
 
 On *N?X, just compile with
 
-    gcc -Wall -O2 bracmat.c xml.c
-
-(Optimization -O3 generates warnings and Bracmat does not run correctly.)
+    gcc -Wall -O3 bracmat.c xml.c
 
 rename a.out to whatever
 
@@ -51,10 +49,18 @@ Profiling:
     gprof a.out
 */
 
-#define DATUM "22 June 2012"
-#define VERSION "5"
-#define BUILD "122"
-/*  22 June 2012
+#define DATUM "2 July 2012"
+#define VERSION "6"
+#define BUILD "123"
+/*   2 July 2012
+
+Since build 115 (9 February 2012), the version should have read '6',
+not '5'. (This was the date when bracmat wás brought to GitHub.)
+Changes in bmalloc that makes it possible to compile with -O3.
+Changed 'unsigned char' to 'char' in a lot of places to make some
+warnings go away when compiled with gcc.
+
+    22 June 2012
 
 Correction in scompare(). The expression @(1b:~<1 b) did not evaluate 
 successfully, which it should. Did a clean-up of this function.
@@ -1240,7 +1246,6 @@ Atari : definieer -DATARI i.v.m. BIGENDIAN en extern int _stksize = -1;
 
 
 #if defined sun && !defined __GNUC__
-#define SIGNED_CHAR 1
 #include <unistd.h> /* SEEK_SET, SEEK_CUR */
 #define ALERT 7
 #define strtoul(a,b,c) strtol(a,b,c)
@@ -1298,14 +1303,6 @@ Atari : definieer -DATARI i.v.m. BIGENDIAN en extern int _stksize = -1;
 #endif
 #endif
 #endif
-
-#ifndef SIGNED_CHAR
-#define SIGNED_CHAR 0
-#endif
-
-
-
-
 
 #define LOGWORDLENGTH 2
 /* vlaggen in knoop */
@@ -1429,6 +1426,7 @@ typedef struct
 #define OBJ(p) &((p).u.obj)
 #define LOBJ(p) ((p).u.lobj)
 #define POBJ(p) &((p)->u.obj)
+#define SPOBJ(p) &((p)->u.sobj)
 /*#define PIOBJ(p) ((p)->u.iobj)*/ /* Added. Bart 20031110 */
 #define PLOBJ(p) ((p)->u.lobj)
 
@@ -1676,6 +1674,7 @@ typedef struct sk
                       with short strings that fit into one word in one machine
                       operation, like "\0\0\0\0" or "1\0\0\0" */
         unsigned char obj;
+        char sobj;
         } u;
     } sk;
 
@@ -1873,7 +1872,7 @@ typedef struct stringrefknoop /* 20040606 */
     {
     tFlags v;
     psk kn;
-    unsigned char * str;
+    char * str;
     /*unsigned long length;*/
     size_t length; /*Bart 20070220 unsigned long -> size_t*/
     } stringrefknoop;
@@ -1900,6 +1899,8 @@ typedef union method_or_data
     objectdata d;
     } method_or_data;
 */
+struct Hash;
+
 typedef struct /**/ typedObjectknoop /**/ /* createdWithNew == 1 */
     {
     tFlags v;
@@ -1921,10 +1922,11 @@ typedef struct /**/ typedObjectknoop /**/ /* createdWithNew == 1 */
     unsigned int built_in:1;
     unsigned int createdWithNew:1;
 #endif
-    void * voiddata;
+    /*void * voiddata;*/
+    struct Hash * voiddata; /*20120702*/
     #define HASH(x) (Hash*)x->voiddata
     #define VOID(x) x->voiddata
-    #define PHASH(x) (Hash**)&x->voiddata
+    #define PHASH(x) (Hash**)&(x->voiddata)
     method * vtab; /* The last element n of the array must have vtab[n].name == NULL */
     } typedObjectknoop;
 
@@ -3154,7 +3156,7 @@ static void checkMem(void * p)
             {
             if((((int)s) % 4) == 0)
                 printf("|");
-            if(' ' <= *s && *s < 128)
+            if(' ' <= *s && *s <= 127)
                 printf(" %c",*s);
             else
                 printf("%.2x",(int)((unsigned char)*s));
@@ -3213,7 +3215,7 @@ static void checkAllBounds()
                     char * s = (char *)x;
                     printf("s:[");
                     for(;s <= (char *)x + L;++s)
-                        if(' ' <= *s && *s < 128)
+                        if(' ' <= *s && *s <= 127)
                             printf("%c",*s);
                         else if(*s == 0)
                             printf("Ø");
@@ -3364,6 +3366,50 @@ static void showMemBlocks()
     }
 */
 
+/* 20120702 The newMemBlocks function is introduced because the same code,
+if in-line in bmalloc, and if compiled with -O3, doesn't run. */
+static struct memblock * newMemBlocks(size_t n)
+    {
+    struct memblock * mb;
+    int i,j = 0;
+    struct memblock ** npMemBlocks;
+    mb = initializeMemBlock(allocations[n].elementSize, allocations[n].numberOfElements);
+    if(!mb)
+        return 0;
+    allocations[n].numberOfElements *= 2;
+    mb->previousOfSameLength = allocations[n].memoryBlock;
+    allocations[n].memoryBlock = mb;
+
+    ++NumberOfMemBlocks;
+    npMemBlocks = (struct memblock **)malloc((NumberOfMemBlocks)*sizeof(struct memblock *));
+    for(i = 0;i < NumberOfMemBlocks - 1;++i)
+        {
+        if(mb < pMemBlocks[i])
+            {
+            npMemBlocks[j++] = mb;
+            for(;i < NumberOfMemBlocks - 1;++i)
+                {
+                npMemBlocks[j++] = pMemBlocks[i];
+                }
+            free(pMemBlocks);
+            pMemBlocks = npMemBlocks;
+            /** /
+            showMemBlocks();
+            / **/
+            return mb;
+            }
+        npMemBlocks[j++] = pMemBlocks[i];
+        }
+    npMemBlocks[j] = mb;
+    free(pMemBlocks);
+    pMemBlocks = npMemBlocks;
+    /** /
+    showMemBlocks();
+    / **/
+    return mb;
+    }
+
+
 static void * bmalloc(int lineno,size_t n)
     {
     void * ret;
@@ -3403,42 +3449,10 @@ static void * bmalloc(int lineno,size_t n)
             {
             mb = mb->previousOfSameLength;
             if(!mb)
-                {
-                int i = 0,j = 0;
-                struct memblock ** npMemBlocks;
-                mb = initializeMemBlock(allocations[n].elementSize, allocations[n].numberOfElements);
-                if(!mb)
-                    break;
-                allocations[n].numberOfElements *= 2;
-                mb->previousOfSameLength = allocations[n].memoryBlock;
-                allocations[n].memoryBlock = mb;
-                ret = mb->firstFreeElementBetweenAddresses;
-                ++NumberOfMemBlocks;
-                npMemBlocks = (struct memblock **)malloc(NumberOfMemBlocks*sizeof(struct memblock *));
-                while(i < NumberOfMemBlocks - 1)
-                    {
-                    if(mb < pMemBlocks[i])
-                        {
-                        npMemBlocks[j++] = mb;
-                        break;
-                        }
-                    else
-                        {
-                        npMemBlocks[j++] = pMemBlocks[i++];
-                        }
-                    }
-                while(i < NumberOfMemBlocks - 1)
-                    {
-                    npMemBlocks[j++] = pMemBlocks[i++];
-                    }
-                if(j == i)
-                    npMemBlocks[j] = mb;
-                free(pMemBlocks);
-                pMemBlocks = npMemBlocks;
-                /** /
-                showMemBlocks();
-                / **/
-                }
+                mb = newMemBlocks(n);
+            if(!mb)
+                break; /* 20120702 */
+            ret = mb->firstFreeElementBetweenAddresses;
             }
         if(ret != 0)
             {
@@ -4533,7 +4547,7 @@ static void setend(unsigned char ** punmatched,unsigned char * p,const char * wh
 #define setend(punmatched,p,wh) {if(punmatched)*punmatched=p;}
 #endif
 
-static int numbercheck(unsigned char *begin,unsigned char ** punmatched)
+static int numbercheck(char *begin,char ** punmatched)
 /* If 'punmatched' != NULL and if numbercheck fails, then '*punmatched' points at the
 first character that cannot be accepted. '*punmatched' must be set to NULL
 if the string 'begin' seems to be too short.
@@ -4659,7 +4673,7 @@ if the string 'begin' seems to be too short.
     return check;
     }
 
-static int fullnumbercheck(unsigned char *begin,unsigned char ** punmatched)
+static int fullnumbercheck(char *begin,char ** punmatched)
 /* sets *punmatched to NULL if there are no digits or if there is a digit after a division slash, */
     {
     if(*begin == '-')
@@ -4674,7 +4688,7 @@ static int fullnumbercheck(unsigned char *begin,unsigned char ** punmatched)
         return numbercheck(begin,punmatched);
     }
 
-static int sfullnumbercheck(unsigned char *begin,unsigned char * snijaf,unsigned char ** punmatched)
+static int sfullnumbercheck(char *begin,char * snijaf,char ** punmatched)
     {
     unsigned char sav = *snijaf;
     int ret;
@@ -4785,7 +4799,7 @@ static psk atoom(int Flgs,int opsflgs)
         if(ONTKENNING(Flgs,NUMBER))
             (pkn)->v.fl = (Flgs ^ (READY|SUCCESS));
         else
-            (pkn)->v.fl = (Flgs ^ (READY|SUCCESS)) | (numbercheck(POBJ(pkn),NULL) & ~DEFINITELYNONUMBER);
+            (pkn)->v.fl = (Flgs ^ (READY|SUCCESS)) | (numbercheck(SPOBJ(pkn),NULL) & ~DEFINITELYNONUMBER);
         /* Bart 20010322 : */
 #if 0 /* 20101122 */
         if(  !(Flgs & (UNIFY|SMALLER_THAN|GREATER_THAN)) /* 20100126 */
@@ -5227,11 +5241,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
             if(escape)
                 {
                 escape = FALSE;
-#if SIGNED_CHAR
-                if(ikar >= 0 && ikar < ' ')
-#else
-                if(ikar < ' ')
-#endif
+                if(0 <= ikar && ikar < ' ')
                     break;
                 switch(ikar)
                     {
@@ -7526,7 +7536,7 @@ static int copy_insert(psk name,psk pknoop,psk snijaf)
     return ret;
     }
 
-static psk scopy(unsigned char * str)
+static psk scopy(char * str)
     {
     int nr = fullnumbercheck(str,NULL) & ~DEFINITELYNONUMBER;
     psk kn;
@@ -7544,7 +7554,7 @@ static psk scopy(unsigned char * str)
     return kn;
     }
 
-static int scopy_insert(psk name,unsigned char * str)
+static int scopy_insert(psk name,char * str)
     {
     int ret;
     psk kn;
@@ -7556,14 +7566,14 @@ static int scopy_insert(psk name,unsigned char * str)
 
 static int icopy_insert(psk name,LONG number)
     {
-    unsigned char buf[22];
+    char buf[22];
     sprintf((char*)buf,"%ld",number);
     return scopy_insert(name,buf);
     }
 
-static int string_copy_insert(psk name,psk pknoop,unsigned char * str,unsigned char * snijaf)
+static int string_copy_insert(psk name,psk pknoop,char * str,char * snijaf)
     {
-    unsigned char sav = *snijaf;
+    char sav = *snijaf;
     int ret;
     *snijaf = '\0';
     if((pknoop->v.fl & IDENT) || all_refcount_bits_set(pknoop))
@@ -7619,7 +7629,7 @@ static int string_copy_insert(psk name,psk pknoop,unsigned char * str,unsigned c
     return ret;
     }
 
-static int getCodePoint(const unsigned char ** ps)
+static int getCodePoint(const char ** ps)
     {
     /*
     return values:
@@ -7628,8 +7638,8 @@ static int getCodePoint(const unsigned char ** ps)
     -2:     too short for being UTF-8
     */
     int K;
-    const unsigned char * s = *ps;
-    if((K = *s++) != 0)
+    const char * s = *ps;
+    if((K = (const unsigned char)*s++) != 0)
         {
         if((K & 0xc0) == 0xc0) /* 11bbbbbb */
             {
@@ -7645,7 +7655,7 @@ static int getCodePoint(const unsigned char ** ps)
             k[0] = K;
             for(i = 1;(K << i) & 0x80;++i)
                 {
-                k[i] = *s++;
+                k[i] = (const unsigned char)*s++;
                 if((k[i] & 0xc0) != 0x80) /* 10bbbbbb */
                     {
                     if(k[i])
@@ -7662,7 +7672,7 @@ static int getCodePoint(const unsigned char ** ps)
                 K |= (k[i] & 0x3f) << ((I - i) * 6);
                 --i;
                 }
-            if(K <= 0x7f) /* ASCII, must be a single byte */
+            if(K <= 0x7F) /* ASCII, must be a single byte */
                 {
                 return -1;
                 }
@@ -7676,14 +7686,15 @@ static int getCodePoint(const unsigned char ** ps)
     return K;
     }
 
-static int getCodePoint2(const unsigned char ** ps,int * isutf)
+static int getCodePoint2(const char ** ps,int * isutf)
     {
-    int ks = *isutf ? getCodePoint(ps) : *(*ps)++;
+    int ks = *isutf ? getCodePoint(ps) : (const unsigned char)*(*ps)++;
     if(ks < 0)
         {
         *isutf = 0;
-        ks = *(*ps)++;
+        ks = (const unsigned char)*(*ps)++;
         }
+    assert(ks >= 0);
     return ks;
     }
 
@@ -7716,7 +7727,7 @@ static int utf8bytes(unsigned LONG val)
     }
 
 /* extern, is called from xml.c */
-unsigned char * putCodePoint(unsigned LONG val,unsigned char * s)
+char * putCodePoint(unsigned LONG val,char * s)
     {
     /* Converts Unicode character w to 1,2,3 or 4 bytes of UTF8 in s. */
     if(val < 0x80)
@@ -7769,32 +7780,40 @@ unsigned char * putCodePoint(unsigned LONG val,unsigned char * s)
     return s;
     }
 
-static int strcasecompu(unsigned char ** S, unsigned char ** P,unsigned char * snijaf)
+static int strcasecompu(char ** S, char ** P,char * snijaf)
 /* 20100210 Additional argument snijaf */
     {
     int sutf = 1;
     int putf = 1;
-    unsigned char * s = *S;
-    unsigned char * p = *P;
+    char * s = *S;
+    char * p = *P;
     while(s < snijaf && *s && *p)
         {
-        unsigned char * ns = s;
-        unsigned char * np = p;
-        int ks = getCodePoint2((const unsigned char **)&ns,&sutf);
-        int kp = getCodePoint2((const unsigned char **)&np,&putf);
-        int diff = toLowerUnicode(ks) - toLowerUnicode(kp);
-        if(diff)
+        char * ns = s;
+        char * np = p;
+        int ks = getCodePoint2((const char **)&ns,&sutf);
+        int kp = getCodePoint2((const char **)&np,&putf);
+        if(ks >= 0 && kp >= 0)
+            {
+            int diff = toLowerUnicode(ks) - toLowerUnicode(kp);
+            if(diff)
+                {
+                *S = s;
+                *P = p;
+                return diff;
+                }
+            }
+        else
             {
             *S = s;
             *P = p;
-            return diff;
             }
         s = ns;
         p = np;
         }
     *S = s;
     *P = p;
-    return (s < snijaf ? (int)*s : 0) - (int)*p;
+    return (s < snijaf ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*p;
     }
 
 
@@ -7804,8 +7823,8 @@ static int strcasecomp(const char *s, const char *p)
     int putf = 1;
     while(*s && *p)
         {
-        int ks = getCodePoint2((const unsigned char **)&s,&sutf);
-        int kp = getCodePoint2((const unsigned char **)&p,&putf);
+        int ks = getCodePoint2((const char **)&s,&sutf);
+        int kp = getCodePoint2((const char **)&p,&putf);
         int diff = toLowerUnicode(ks) - toLowerUnicode(kp);
         if(diff)
             {
@@ -7919,17 +7938,17 @@ static int compare(psk s,psk p)
     as a string, not a number.
 */
 #if CUTOFFSUGGEST
-static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p,unsigned char ** suggestedCutOff,unsigned char ** mayMoveStartOfSubject)
+static int scompare(char * wh,char * s,char * snijaf,psk p,char ** suggestedCutOff,char ** mayMoveStartOfSubject)
 #else
 static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
 #endif
     {
-    int teken;
-    unsigned char * P;
+    int teken = 0;
+    char * P;
 #if CUTOFFSUGGEST
-    unsigned char * S = s;
+    char * S = s;
 #endif
-    unsigned char sav;
+    char sav;
     int lessIfMoreDigitsAdded;
     int smallerIfMoreDigitsAdded; /* -1/22 smaller than -1/2 */ /* 1/22 smaller than 1/2 */
     int samesign;
@@ -8002,7 +8021,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                 /* check whether there is a slash followed by non-zero decimal digit coming */
                 if(!RAT_RAT(n))
                     {
-                    unsigned char * t = snijaf;
+                    char * t = snijaf;
                     for(;*t;++t)
                         {
                         if(*t == '/')
@@ -8236,7 +8255,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
         /* Subject is definitely not a number. */
         }
 
-    P = (unsigned char *)POBJ(p);
+    P = (char *)SPOBJ(p);
 
     if((Flgs & (NOT|BREUK|NUMBER|GREATER_THAN|SMALLER_THAN)) == (NOT|GREATER_THAN|SMALLER_THAN))
         { /* 20040223 Case insensitive match: ~<> means "not different" */
@@ -8247,9 +8266,6 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
 #if CUTOFFSUGGEST
         if(suggestedCutOff)
             {
-#if DEBUGBRACMAT
-            printf("suggestedCutOff\n");
-#endif
             switch(Flgs & (NOT|GREATER_THAN|SMALLER_THAN))
                 {
                 case NOT|GREATER_THAN:    /* n:~>p */
@@ -8327,7 +8343,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                                 --startpos;
                             }
                         assert(startpos+strlen((char *)POBJ(p)) >= snijaf);
-                        *mayMoveStartOfSubject = (unsigned char *)startpos;
+                        *mayMoveStartOfSubject = (char *)startpos;
                         return ONCE;
                         }
 
@@ -8371,10 +8387,10 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                         }
                     if(teken != 0 && mayMoveStartOfSubject && *mayMoveStartOfSubject != 0)
                         {
-                        unsigned char * startpos;
-                        unsigned char * ep = POBJ(p) + strlen((char*)POBJ(p));
-                        unsigned char * es = snijaf ? snijaf : S + strlen((char*)S);
-                        while(ep > POBJ(p))
+                        char * startpos;
+                        char * ep = SPOBJ(p) + strlen((char*)POBJ(p));
+                        char * es = snijaf ? snijaf : S + strlen((char*)S);
+                        while(ep > SPOBJ(p))
                             {
                             if(*--ep != *--es)
                                 {
@@ -8385,8 +8401,8 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                         startpos = es;
                         if(Flgs & MINUS)
                             --startpos;
-                        if((unsigned char *)startpos > *mayMoveStartOfSubject)
-                            *mayMoveStartOfSubject = (unsigned char *)startpos;
+                        if((char *)startpos > *mayMoveStartOfSubject)
+                            *mayMoveStartOfSubject = (char *)startpos;
                         return ONCE;
                         }
                         
@@ -8396,7 +8412,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
 #else
                 {
 #endif
-                    while(((teken = (s < snijaf ? *s : 0) - *P) == 0) && *P) /* 20100210 Additional argument snijaf */
+                    while(((teken = (s < snijaf ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*P) == 0) && *P) /* 20100210 Additional argument snijaf */
                         {
                         ++s;
                         ++P;
@@ -8514,6 +8530,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
             return TRUE;
             }
         case NOT|GREATER_THAN:    /* n:~>p */
+        default:
             {
 /*
             n:~>p   n <= p
@@ -8709,7 +8726,7 @@ static LONG caseinsensitivehash(const char * cp)
         hash_temp ^= lowerEquivalent[(const unsigned char)*cp];
         ++cp;
 #else
-        hash_temp ^= toLowerUnicode(getCodePoint2((const unsigned char **)&cp,&isutf));
+        hash_temp ^= toLowerUnicode(getCodePoint2((const char **)&cp,&isutf));
 #endif
         }
     return hash_temp;
@@ -8988,7 +9005,8 @@ static Boolean hashinsert(struct typedObjectknoop * This,ppsk arg)
         psk ret;
         int lf = loadfactor(HASH(This));
         if(lf > 100)
-            rehash(PHASH(This),60);
+            /*rehash(PHASH(This),60);*/
+            rehash((Hash **)(&(This->voiddata)),60);
         ret = inserthash(HASH(This),Arg);
         wis(*arg);
         *arg = zelfde_als_w(ret);
@@ -9844,7 +9862,7 @@ static LONG expressionLength(psk pkn,unsigned int op)
 
 static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,psk expr
 #if CUTOFFSUGGEST
-                      ,unsigned char ** mayMoveStartOfSubject
+                      ,char ** mayMoveStartOfSubject
 #endif
                       ,unsigned int op
                        )
@@ -10049,7 +10067,7 @@ static int atomtest(psk kn)
     return (!is_op(kn) && !HAS_UNOPS(kn)) ? (int)kn->u.obj : -1;
     }
 
-static char sdoEval(unsigned char * sub,unsigned char * snijaf, psk pat, psk subkn)
+static char sdoEval(char * sub,char * snijaf, psk pat, psk subkn)
     {
     char ret;
     psk loc;
@@ -10103,14 +10121,14 @@ static char doEval(psk sub,psk snijaf, psk pat)
 static char stringmatch
         (int ind
         ,char * wh
-        ,unsigned char * sub
-        ,unsigned char * snijaf
+        ,char * sub
+        ,char * snijaf
         , psk pat
         , psk subkn
         , LONG pposition
         ,size_t stringLength
-        ,unsigned char ** suggestedCutOff /*20120102*/
-        ,unsigned char ** mayMoveStartOfSubject /*20120107*/
+        ,char ** suggestedCutOff /*20120102*/
+        ,char ** mayMoveStartOfSubject /*20120107*/
         )
 #else
 static char stringmatch
@@ -10141,7 +10159,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
            bij de andere voor alle behalve de laatste operand in een lijst.)
 */
     psk loc;
-    unsigned char * sloc;
+    char * sloc;
     unsigned int Flgs;
     matchstate s;
     int ci;
@@ -10164,7 +10182,6 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
         redhum = hum;
         mooi = FALSE;
         hum = FALSE;
-        Printf("%s %d%*sstringmatch(%s",wh,ind,ind,"",sub);Printf(":");result(pat);Printf(")");Printf("\n");
 #if 1
         Printf("%d  %.*s|%s",ind,snijaf-sub,sub,snijaf);
         Printf(":");
@@ -10188,6 +10205,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
         );
         Printf("\n");
 #endif
+/*        Printf("%s %d%*sstringmatch(%s",wh,ind,ind,"",sub);Printf(":");result(pat);Printf(")");Printf("\n");*/
         mooi = redMooi;
         hum = redhum;
         }
@@ -10337,15 +10355,16 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     {
                     LONG locpos = pposition;
 #if CUTOFFSUGGEST
-                    unsigned char * suggested_Cut_Off = sub;
-                    unsigned char * may_Move_Start_Of_Subject;
+                    char * suggested_Cut_Off = sub;
+                    char * may_Move_Start_Of_Subject;
                     may_Move_Start_Of_Subject = sub;
 #endif
                     /* This code mirrors that of match(). (see below)*/
                     
                     sloc = sub;                                     /* A    divisionPoint=S */
+                                                                    
 #if CUTOFFSUGGEST
-                    s.c.lmr = stringmatch(ind+1,"Ii",sub, sloc       /* B    leftResult=0(P):car(P) */
+                    s.c.lmr = stringmatch(ind+1,"I",sub, sloc       /* B    leftResult=0(P):car(P) */
                                 ,pat->LEFT,subkn,pposition
                                 ,stringLength,&suggested_Cut_Off
                                 ,mayMoveStartOfSubject);
@@ -10354,13 +10373,10 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                         return ONCE;
                         }
 #else
-                    s.c.lmr = stringmatch(ind+1,"Ii",sub, sloc, pat->LEFT, subkn,pposition,stringLength);
+                    s.c.lmr = stringmatch(ind+1,"I",sub, sloc, pat->LEFT, subkn,pposition,stringLength);
 #endif
-
+                    
 #if CUTOFFSUGGEST
-#if DEBUGBRACMAT
-                    printf("suggested_Cut_Off [%s]  sloc [%s]\n",suggested_Cut_Off,sloc);
-#endif
                     if(suggested_Cut_Off > sloc)
                         {
                         if(snijaf && suggested_Cut_Off > snijaf)
@@ -10389,9 +10405,6 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                         s.c.lmr &= ~ONCE;
                     while(sloc < snijaf)                            /* C    while divisionPoint */
                         {
-#if DEBUGBRACMAT
-                        printf("sloc=%s\n",sloc);
-#endif
                         if(s.c.lmr & TRUE)                          /* D        if leftResult.succes */
                             {
 #if CUTOFFSUGGEST
@@ -10419,9 +10432,6 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                             ++sloc;
                             ++locpos;
 #endif
-#if DEBUGBRACMAT
-                            printf("s.c.rmr=%d\n",s.c.rmr);
-#endif
                             if(!(s.c.lmr & ONCE))
                                 s.c.rmr &= ~ONCE;
                             }
@@ -10441,9 +10451,6 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                              )
                           )
                             {                                       /* G            return */
-#if DEBUGBRACMAT
-                            printf("G return\n");
-#endif
                             if(sloc > sub + 1)                          /* Also return whether sub has reached max position.*/
                                 s.c.rmr &= ~POSITION_MAX_REACHED;       /* This flag is reason to stop increasing the position of the division any further, but it must not be signalled back to the caller if the lhs is not nil ... */
                             s.c.rmr |= (char)(s.c.lmr & POSITION_MAX_REACHED); /* ... unless it is the lhs that signals it. */
@@ -10459,9 +10466,6 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                                                                     /* H        SL,SR=shift_right divisionPoint */
                                                                         /* SL = lhs divisionPoint S, SR = rhs divisionPoint S */
                                                                     /* I        leftResult=SL:car(P) */
-#if DEBUGBRACMAT
-                        printf("Calling I stringmatch\n");
-#endif
 #if CUTOFFSUGGEST
                         suggested_Cut_Off = sub;
                         s.c.lmr = stringmatch(ind+1,"I",sub,sloc, pat->LEFT, subkn,/* 0 ? */pposition,/* strlen(sub) ? */ stringLength,&suggested_Cut_Off,mayMoveStartOfSubject);
@@ -10681,17 +10685,7 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                         else
                             {
 #if CUTOFFSUGGEST
-#if DEBUGBRACMAT
-                            printf("before:");
-                            if(suggestedCutOff)
-                                if(*suggestedCutOff)
-                                    printf("*suggestedCutOff [%s]\n",*suggestedCutOff);
-                                else
-                                    printf("*suggestedCutOff null\n");
-                            else
-                                printf("suggestedCutOff null\n");
-#endif
-                            s.c.rmr = (char)(/** / ONCE | / **/ scompare("b",(unsigned char *)sub,snijaf, pat
+                            s.c.rmr = (char)(/** / ONCE | / **/ scompare("b",(char *)sub,snijaf, pat
                                                                         , ( (  !(Flgs & ATOM)
                                                                             || ONTKENNING(Flgs, ATOM)
                                                                             ) 
@@ -10701,16 +10695,6 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                                                                         ,mayMoveStartOfSubject
                                                                         )
                                              );
-#if DEBUGBRACMAT
-                            printf("after :");
-                            if(suggestedCutOff)
-                                if(*suggestedCutOff)
-                                    printf("*suggestedCutOff [%s]\n",*suggestedCutOff);
-                                else
-                                    printf("*suggestedCutOff null\n");
-                            else
-                                printf("suggestedCutOff null\n");
-#endif
 #else
                             s.c.rmr = (char)(/** / ONCE | / **/ scompare("b",(unsigned char *)sub,snijaf, pat));
 #endif
@@ -10782,7 +10766,7 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
         }
     if(is_op(pat))
         s.c.rmr ^= (char)NIKS(pat);
-/* */
+/*
 #if DEBUGBRACMAT
     if(debug)
         {
@@ -10796,7 +10780,7 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
         Printf("\n");
         }
 #endif
-/* */
+*/
     if(name)
         wis(name);
     return (char)(s.c.once | s.c.rmr);
@@ -11230,7 +11214,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
 #endif
                             )
 #if CUTOFFSUGGEST
-                            s.c.rmr = (char)(stringmatch(ind+1,"U",POBJ(sub),NULL,pat->RIGHT, sub,0,strlen((char*)POBJ(sub)),NULL,0) & TRUE /* TODO stringmatch code doesn't have & TRUE */);
+                            s.c.rmr = (char)(stringmatch(ind+1,"U",SPOBJ(sub),NULL,pat->RIGHT, sub,0,strlen((char*)SPOBJ(sub)),NULL,0) & TRUE /* TODO stringmatch code doesn't have & TRUE */);
 #else
                             s.c.rmr = (char)(stringmatch(ind+1,"U",POBJ(sub),NULL,pat->RIGHT, sub,0,strlen((char*)POBJ(sub))) & TRUE /* TODO stringmatch code doesn't have & TRUE */);
 #endif
@@ -11529,8 +11513,8 @@ static int subroot(ngetal * ag,char *conc[],int *pind)
 
 static int abseen(psk kn)
 {
-unsigned char *pstring;
-pstring = POBJ(kn);
+char *pstring;
+pstring = SPOBJ(kn);
 return(*pstring == '1' && *++pstring == 0);
 }
 
@@ -12658,7 +12642,7 @@ if(kns[1] && kns[1]->u.obj)
             char pos[11];
             sprintf(pos,"%ld",FTELL(fh->fp));
             wis(*pkn);
-            *pkn = scopy((unsigned char *)pos);
+            *pkn = scopy((char *)pos);
             return TRUE;
             }
         else
@@ -13060,21 +13044,21 @@ return TRUE;
 }
 
 static LONG simil
-    (const unsigned char * s1
-    ,const unsigned char * s1end
-    ,const unsigned char * s2
-    ,const unsigned char * s2end
+    (const char * s1
+    ,const char * s1end
+    ,const char * s2
+    ,const char * s2end
     ,int * putf1
     ,int * putf2
     ,LONG * plen1
     ,LONG * plen2
     )
     {
-    const unsigned char * ls1;
-    const unsigned char * s1l = NULL;
-    const unsigned char * s1r = NULL;
-    const unsigned char * s2l = NULL;
-    const unsigned char * s2r = NULL;
+    const char * ls1;
+    const char * s1l = NULL;
+    const char * s1r = NULL;
+    const char * s2l = NULL;
+    const char * s2r = NULL;
     LONG max;
     LONG len1;
     LONG len2 = 0;
@@ -13083,19 +13067,19 @@ static LONG simil
        ;ls1 < s1end
        ;getCodePoint2(&ls1,putf1),++len1)
         {
-        const unsigned char * ls2;
+        const char * ls2;
         /* vergelijk met s2 */
         for(ls2 = s2,len2 = 0;ls2 < s2end;getCodePoint2(&ls2,putf2),++len2)
             {
-            const unsigned char * lls1 = ls1;
-            const unsigned char * lls2 = ls2;
+            const char * lls1 = ls1;
+            const char * lls2 = ls2;
             /* bepaal lengte gelijke stukken */
             LONG len12 = 0;
             for(;;)
                    {
                    if(lls1 < s1end)
                        {
-                       const unsigned char * ns1 = lls1,* ns2 = lls2;
+                       const char * ns1 = lls1,* ns2 = lls2;
                        int K1 = getCodePoint2(&ns1,putf1);
                        int K2 = getCodePoint2(&ns2,putf2);
                        if(convertLetter(K1,u2l) == convertLetter(K2,u2l))
@@ -13143,7 +13127,7 @@ static LONG simil
     return max;
     }
 
-static void Sim(char * klad,unsigned char * str1,unsigned char * str2)
+static void Sim(char * klad,char * str1,char * str2)
     {
     int utf1 = 1;
     int utf2 = 1;
@@ -13472,20 +13456,20 @@ static psk changeCase(psk pkn
 #endif
                       ,int low)
     {
-    const unsigned char * s;
+    const char * s;
     psk kn;
     size_t len;
     kn = zelfde_als_w(pkn);
-    s = POBJ(pkn);
+    s = SPOBJ(pkn);
     len = strlen((const char *)s);
     if(len > 0)
         {
-        unsigned char * d;
-        unsigned char * dwarn;
-        unsigned char * buf = NULL;
-        unsigned char * obuf;
+        char * d;
+        char * dwarn;
+        char * buf = NULL;
+        char * obuf;
         kn = prive(kn);
-        d = POBJ(kn);
+        d = SPOBJ(kn);
         obuf = d;
         dwarn = obuf + strlen((const char*)obuf) - 6;
 #if CODEPAGE850
@@ -13495,14 +13479,14 @@ static psk changeCase(psk pkn
                 {
                 for(;*s;++s)
                     {
-                    *s = ISO8859toCodePage850(lowerEquivalent[(int)*s]);
+                    *s = ISO8859toCodePage850(lowerEquivalent[(int)(const unsigned char)*s]);
                     }
                 }
             else
                 {
                 for(;*s;++s)
                     {
-                    *s = ISO8859toCodePage850(upperEquivalent[(int)*s]);
+                    *s = ISO8859toCodePage850(upperEquivalent[(int)(const unsigned char)*s]);
                     }
                 }
             }
@@ -13523,11 +13507,11 @@ static psk changeCase(psk pkn
                         if(d + nb >= dwarn+6)
                             {
                             /* overrun */
-                            buf = (unsigned char *)bmalloc(__LINE__,2*((dwarn+6) - obuf));
+                            buf = (char *)bmalloc(__LINE__,2*((dwarn+6) - obuf));
                             dwarn = buf + 2*((dwarn+6) - obuf) - 6;
                             memcpy(buf,obuf,d - obuf);
                             d = buf + (d - obuf);
-                            if(obuf != POBJ(kn))
+                            if(obuf != SPOBJ(kn))
                                 bfree(obuf);
                             obuf = buf;
                             }
@@ -13690,7 +13674,7 @@ static function_return_type functies(psk pkn)
             verwerk = pstr;
             bron = POBJ(rlknoop);
             result(rknoop);
-            rlknoop->v.fl = (READY|SUCCESS) | (numbercheck(POBJ(rlknoop),NULL) & ~DEFINITELYNONUMBER);
+            rlknoop->v.fl = (READY|SUCCESS) | (numbercheck(SPOBJ(rlknoop),NULL) & ~DEFINITELYNONUMBER);
             mooi = TRUE;
             hum = 1;/* 15 Dec 1995 */
             verwerk = myputc;
@@ -13731,7 +13715,7 @@ static function_return_type functies(psk pkn)
             pointerToStr(klad,p);
             /*sprintf(klad,"%Iu",p);*/
             wis(pkn);
-            pkn = scopy((unsigned char *)klad);
+            pkn = scopy((char *)klad);
             return functionOk(pkn);
             }
         CASE(FRE) /* fre $ <pointer> */
@@ -13786,7 +13770,7 @@ static function_return_type functies(psk pkn)
                     break;
                 }
             wis(pkn);
-            pkn = scopy((unsigned char *)klad);
+            pkn = scopy((char *)klad);
             return functionOk(pkn);
             }
         CASE(POK) /* pok $ (<pointer>,getal,nbytes) */
@@ -13872,7 +13856,7 @@ static function_return_type functies(psk pkn)
                 return functionFail(pkn); /*not all characters scanned*/
             sprintf(klad,"%lu",val);
             wis(pkn);
-            pkn = scopy((unsigned char *)klad);
+            pkn = scopy((char *)klad);
             return functionOk(pkn);
             }
         CASE(D2X) /* d2x $ decimalnumber */
@@ -13896,7 +13880,7 @@ static function_return_type functies(psk pkn)
                 return functionFail(pkn); /*not all characters scanned*/
             sprintf(klad,"%lX",val);
             wis(pkn);
-            pkn = scopy((unsigned char *)klad);
+            pkn = scopy((char *)klad);
             return functionOk(pkn);
             }
         CASE(KAR) /* chr $ getal */
@@ -13909,7 +13893,7 @@ static function_return_type functies(psk pkn)
             klad[0] = (char)intVal;
             klad[1] = 0;
             wis(pkn);
-            pkn = scopy((unsigned char *)klad);
+            pkn = scopy((char *)klad);
             return functionOk(pkn);
             }
         CASE(KAU) /* chu $ number */
@@ -13918,10 +13902,10 @@ static function_return_type functies(psk pkn)
             if(is_op(rknoop) || !INTEGER_POS(rknoop))
                 return functionFail(pkn);
             val = STRTOUL((char *)POBJ(rknoop),(char **)NULL,10);
-            if(putCodePoint(val,(unsigned char *)klad) == NULL)
+            if(putCodePoint(val,(char *)klad) == NULL)
                 return functionFail(pkn);
             wis(pkn);
-            pkn = scopy((unsigned char *)klad);
+            pkn = scopy((char *)klad);
             return functionOk(pkn);
             }
         CASE(ASC) /* asc $ character */
@@ -13931,7 +13915,7 @@ static function_return_type functies(psk pkn)
                 return functionFail(pkn);
             sprintf(klad,"%d",(int)rknoop->u.obj);
             wis(pkn);
-            pkn = scopy((unsigned char *)klad);
+            pkn = scopy((char *)klad);
             return functionOk(pkn);
             }
         CASE(UTF)
@@ -13947,7 +13931,7 @@ static function_return_type functies(psk pkn)
                 }
             else
                 {
-                const unsigned char * s = (const unsigned char *)POBJ(rknoop);
+                const char * s = (const char *)POBJ(rknoop);
                 intVal = getCodePoint(&s);
                 if(intVal < 0 || *s)
                     {
@@ -13959,7 +13943,7 @@ static function_return_type functies(psk pkn)
                     }
                 sprintf(klad,"%d",intVal);
                 wis(pkn);
-                pkn = scopy((unsigned char *)klad);
+                pkn = scopy((char *)klad);
                 return functionOk(pkn);
                 }
             }
@@ -14193,7 +14177,7 @@ static function_return_type functies(psk pkn)
                 else
                     strcpy(klad,"0");
                 wis(pkn);
-                pkn = scopy((unsigned char *)klad);
+                pkn = scopy((char *)klad);
                 return functionOk(pkn);
                 }
             else
@@ -14240,7 +14224,7 @@ static function_return_type functies(psk pkn)
                 else
                     strcpy(klad,"0");
                 wis(pkn);
-                pkn = scopy((unsigned char *)klad);
+                pkn = scopy((char *)klad);
                 return functionOk(pkn);
                 }
             else
@@ -14261,13 +14245,13 @@ static function_return_type functies(psk pkn)
                 if(val >= ARGC)
                     return functionFail(pkn);
                 wis(pkn);
-                pkn = scopy((unsigned char *)ARGV[val]);
+                pkn = scopy((char *)ARGV[val]);
                 return functionOk(pkn);
                 }
             if(argno < ARGC)
                 {
                 wis(pkn);
-                pkn = scopy((unsigned char *)ARGV[argno++]);
+                pkn = scopy((char *)ARGV[argno++]);
                 return functionOk(pkn);
                 }
             else
@@ -14414,7 +14398,7 @@ static function_return_type functies(psk pkn)
                 else
                     strcpy(klad,"0");
                 wis(pkn);
-                pkn = scopy((unsigned char *)klad);
+                pkn = scopy((char *)klad);
                 return functionOk(pkn);
                 }
             }
@@ -14443,7 +14427,7 @@ static function_return_type functies(psk pkn)
 #endif
             print_clock(klad,time);
             wis(pkn);
-            pkn = scopy((unsigned char *)klad);
+            pkn = scopy((char *)klad);
             return functionOk(pkn);
             }
 
@@ -14453,9 +14437,9 @@ static function_return_type functies(psk pkn)
             && !is_op(rlknoop = rknoop->LEFT)
             && !is_op(rrknoop = rknoop->RIGHT))
                 {
-                Sim(klad,(unsigned char *)POBJ(rlknoop),(unsigned char *)POBJ(rrknoop));
+                Sim(klad,(char *)POBJ(rlknoop),(char *)POBJ(rrknoop));
                 wis(pkn);
-                pkn = scopy((unsigned char *)klad);
+                pkn = scopy((char *)klad);
                 return functionOk(pkn);
                 }
             else
@@ -16407,7 +16391,7 @@ static psk eval(psk pkn)
 #endif
                             {
 #if CUTOFFSUGGEST
-                            if(!is_op(lkn.LEFT) && stringmatch(0,"V",POBJ(lkn.LEFT),NULL,lkn.RIGHT, lkn.LEFT,0,strlen((char*)POBJ(lkn.LEFT)),NULL,0) & TRUE)
+                            if(!is_op(lkn.LEFT) && stringmatch(0,"V",SPOBJ(lkn.LEFT),NULL,lkn.RIGHT, lkn.LEFT,0,strlen((char*)POBJ(lkn.LEFT)),NULL,0) & TRUE)
 #else
                             if(!is_op(lkn.LEFT) && stringmatch(0,"V",POBJ(lkn.LEFT),NULL,lkn.RIGHT, lkn.LEFT,0,strlen((char*)POBJ(lkn.LEFT))) & TRUE)
 #endif
