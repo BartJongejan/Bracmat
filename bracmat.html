@@ -4,7 +4,7 @@
 <head>
 <style type="text/css"><!--
 span.courier {font-family: monospace;}
---></style><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+-->span.arrow {line-height: 12pt}</style><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="robots" content="all, index" />
 <title>Bracmat Help</title>
 </head>
@@ -28,8 +28,9 @@ accompanies Bracmat, using Bracmat to do the conversion.</i>
 <a href="#objecttxt">objects</a><br />
 <a href="#hashtxt">hash tables</a><br />
 <a href="#filosofie">how Bracmat evolved</a><br />
-<a href="#Bracmat-name">why is it called 'Bracmat'?</a><br />
+<a href="#Bracmat-name">why the name 'Bracmat'?</a><br />
 <a href="#colofon">how to obtain Bracmat</a><br />
+<a href="#morexmlps">more example code</a><br />
 
 <br/>
 </p><h1><a name="aanbevelingen">If you haven't seen Bracmat before ..</a></h1>
@@ -189,7 +190,7 @@ recommendations about programming habits: </p><ul> <li> Experiment with the exam
 <li> Try to evade the "not" prefix ~ and the use of arrays.</li>
  </ul><p> 
 </p><p>
-&uArr; <a href="#lusmenu">                       BRACMAT                       </a>.<br />
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="patternm">Pattern matching</a></h1>
 <p>
 The single most outstanding feature of Bracmat is how it can recognise patterns
@@ -238,7 +239,7 @@ North America is reachable from South America
 <a href="#pattxt">Pattern matching in tree structures</a><br />
 
 <br/>
-&uArr; <a href="#lusmenu">                       BRACMAT                       </a>.<br />
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="pattxttxt">Pattern matching in strings</a></h1>
 <p>
 
@@ -263,11 +264,11 @@ unless there are other prefixes than @ and ~ present.
 {?} 12:~/@(?x:#%?a #%?b) {succeeds, ~ negates /, not @, so we have a string
                        match.} </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#patternm">Pattern matching</a>.<br />
-&uArr; <a href="#binovztxt">=.,|&amp;: +*^LD'$_</a>.<br />
-&uArr; <a href="#binmenu">Binary operators</a>.<br />
-&rArr; <a href="#pattxt2">Matching a number in a string</a>.<br />
-&lArr; <a href="#pattxt">Binary operators in pattern matching</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#patternm" style="line-height:12pt">Pattern matching</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#pattxt2" style="line-height:12pt">Matching a number in a string</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#pattxt" style="line-height:12pt">Binary operators in pattern matching</a>.<br />
 </p><h1><a name="pattxt2">Matching a number in a string</a></h1>
 <p>
 In a string match, the % can be used to force characterwise matching if the
@@ -284,11 +285,11 @@ characterwise. In %-20/5, the pattern matches 20/5 and the minus is ignored! </p
 {?} @(abcd-20/5efgh:?a   -20/5  ?z)    {succeeds, a = abcd }
  </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#patternm">Pattern matching</a>.<br />
-&uArr; <a href="#binovztxt">=.,|&amp;: +*^LD'$_</a>.<br />
-&uArr; <a href="#binmenu">Binary operators</a>.<br />
-&lArr; <a href="#pattxttxt">Pattern matching in strings</a>.<br />
-&rArr; <a href="#escappattxt">Escaping operator in patterns</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#patternm" style="line-height:12pt">Pattern matching</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#pattxttxt" style="line-height:12pt">Pattern matching in strings</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#escappattxt" style="line-height:12pt">Escaping operator in patterns</a>.<br />
 </p><h1><a name="pattxt">Binary operators in pattern matching</a></h1>
 <p>
 
@@ -386,15 +387,15 @@ If !s matches with !p, !s is returned. Otherwise, !e is returned.
 If !s matches with either !pa or !pb (in that order), !s is returned. </p><p>
 The possibility that !s might fail further complicates the above examples.
 </p><p>
-&uArr; <a href="#patternm">Pattern matching</a>.<br />
-&uArr; <a href="#binovztxt">=.,|&amp;: +*^LD'$_</a>.<br />
-&uArr; <a href="#binmenu">Binary operators</a>.<br />
-&uArr; <a href="#progsmenu">Programming advice</a>.<br />
-&rArr; <a href="#escappattxt">Escaping operator in patterns</a>.<br />
-&rArr; <a href="#pattxttxt">Pattern matching in strings</a>.<br />
-&rArr; <a href="#unpattxt">Prefixes and pattern matching</a>.<br />
-&lArr; <a href="#prostutxt1">Program flow</a>.<br />
-&lArr; <a href="#asstxt">Assignment to variables</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#patternm" style="line-height:12pt">Pattern matching</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#progsmenu" style="line-height:12pt">Programming advice</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#escappattxt" style="line-height:12pt">Escaping operator in patterns</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#pattxttxt" style="line-height:12pt">Pattern matching in strings</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#unpattxt" style="line-height:12pt">Prefixes and pattern matching</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#prostutxt1" style="line-height:12pt">Program flow</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#asstxt" style="line-height:12pt">Assignment to variables</a>.<br />
 </p><h1><a name="escappattxt">Escaping operator in patterns</a></h1>
 <p>
 Some operators can not be part of a pattern unless 'escaped', because these
@@ -410,14 +411,16 @@ The lhs and rhs of the affected node are matched against the subject in the
 normal way. The escape operator functions with all Bracmat operators, but the
 operators . , whitespace, + * ^ \L and \D should not be escaped normally.
 </p><p>
-&uArr; <a href="#patternm">Pattern matching</a>.<br />
-&uArr; <a href="#binovztxt">=.,|&amp;: +*^LD'$_</a>.<br />
-&uArr; <a href="#binmenu">Binary operators</a>.<br />
-&uArr; <a href="#progsmenu">Programming advice</a>.<br />
-&lArr; <a href="#pattxt">Binary operators in pattern matching</a>.<br />
-&lArr; <a href="#funmactxt">function evaluation</a>.<br />
-&lArr; <a href="#pattxt2">Matching a number in a string</a>.<br />
-&lArr; <a href="#unpattxt">Prefixes and pattern matching</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#patternm" style="line-height:12pt">Pattern matching</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#progsmenu" style="line-height:12pt">Programming advice</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#pattxt" style="line-height:12pt">Binary operators in pattern matching</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#funmactxt" style="line-height:12pt">function evaluation</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#pattxt2" style="line-height:12pt">Matching a number in a string</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#unpattxt" style="line-height:12pt">Prefixes and pattern matching</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#macrotxt" style="line-height:12pt">macro evaluation</a>.<br />
 </p><h1><a name="syntax">The grammar of Bracmat</a></h1>
 <p>
 Note: in long lists the "|" is left out.
@@ -435,8 +438,8 @@ Note: in long lists the "|" is left out.
 &lt;spec&gt;            ::= \a \b \t \n \v \f \r \" \\
 &lt;nil&gt;             ::= ""   (or nothing at all, such as in "()")
 &lt;binop&gt;           ::= = . , | &amp; : &lt;white space&gt; + * ^ \L \D ' $ _
-&lt;prefixes&gt;           ::= &lt;prefix&gt; [&lt;prefixes&gt;]
-&lt;prefix&gt;            ::= [ ~ / # &lt; &gt; % @ ` ? ! !!
+&lt;prefixes&gt;        ::= &lt;prefix&gt; [&lt;prefixes&gt;]
+&lt;prefix&gt;          ::= [ ~ / # &lt; &gt; % @ ` ? ! !!
 &lt;white space&gt;     ::= spaces, tabs, new line and form feed characters
 </pre></blockquote><p>
 
@@ -450,7 +453,7 @@ if necessary, e.g. "in this case" or "he{this is not a comment}re".
 Comments can be written everywhere, except in the middle of a string in
 Quotation marks. Comments are enclosed in {} and may be nested.
 </p><p>
-&uArr; <a href="#lusmenu">                       BRACMAT                       </a>.<br />
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="binmenu">Binary operators</a></h1>
 <p>
 
@@ -465,7 +468,7 @@ Quotation marks. Comments are enclosed in {} and may be nested.
 <a href="#dumtxt"> the dummy operator</a><br />
 
 <br/>
-&uArr; <a href="#lusmenu">                       BRACMAT                       </a>.<br />
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="binovztxt">=.,|&amp;: +*^LD'$_</a></h1>
 <p>
 These are, in order of growing priority, the 15 binary Bracmat operators.
@@ -488,7 +491,7 @@ These are, in order of growing priority, the 15 binary Bracmat operators.
 <a href="#dumtxt">_  operator (dummy)</a><br />
 
 <br/>
-&uArr; <a href="#binmenu">Binary operators</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
 </p><h1><a name="savtxt">The = operator</a></h1>
 <p>
 This operator assures that the right hand operator stays unevaluated. It is
@@ -521,8 +524,8 @@ instruction we have an expression with the <span class="courier">&lt;nil&gt;</sp
 {?} out$(=b+a+$c)
 {?} out$('(b+a+$c)) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#binovztxt">=.,|&amp;: +*^LD'$_</a>.<br />
-&rArr; <a href="#objecttxt">Objects</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#objecttxt" style="line-height:12pt">Objects</a>.<br />
 </p><h1><a name="objecttxt">Objects</a></h1>
 <p>
  <br /> 
@@ -664,12 +667,12 @@ the '=' operator. Therefore, a new '=' node is created each time x is
 evaluated. In (B), the value of x IS evaluated, so no new copies of the
 '=' node are made.
 </p><p>
-&uArr; <a href="#binovztxt">=.,|&amp;: +*^LD'$_</a>.<br />
-&uArr; <a href="#progsmenu">Programming advice</a>.<br />
-&uArr; <a href="#lusmenu">                       BRACMAT                       </a>.<br />
-&lArr; <a href="#savtxt">The = operator</a>.<br />
-&lArr; <a href="#contxt">Construction of data structures</a>.<br />
-&rArr; <a href="#asstxt">Assignment to variables</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#progsmenu" style="line-height:12pt">Programming advice</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
+<span class="arrow">&lArr;</span> <a href="#savtxt" style="line-height:12pt">The = operator</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#contxt" style="line-height:12pt">Construction of data structures</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#asstxt" style="line-height:12pt">Assignment to variables</a>.<br />
 </p><h1><a name="asstxt">Assignment to variables</a></h1>
 <p>
 There are two forms of assignment to a variable:</p>
@@ -691,10 +694,10 @@ then using : to bind the function definition to the variable "car".
 {?} (four five six):(?`%first ?rem) {"`": 0 of 1, "%": 1 or more, together 1}
 {?} The first element is !first and the remainder is !rem. </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#binovztxt">=.,|&amp;: +*^LD'$_</a>.<br />
-&uArr; <a href="#binmenu">Binary operators</a>.<br />
-&lArr; <a href="#objecttxt">Objects</a>.<br />
-&rArr; <a href="#pattxt">Binary operators in pattern matching</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#objecttxt" style="line-height:12pt">Objects</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#pattxt" style="line-height:12pt">Binary operators in pattern matching</a>.<br />
 </p><h1><a name="contxt">Construction of data structures</a></h1>
 <p>
 In Bracmat linear lists can be made by separating the elements with comma,
@@ -792,11 +795,11 @@ be spend in reformulating existing algorithms based on indices. On the other
 hand, the list approach is essentially insensitive to the dimensionality
 of the matrix at hand, and may even be indifferent to the number of indices.
 </p><p>
-&uArr; <a href="#binovztxt">=.,|&amp;: +*^LD'$_</a>.<br />
-&uArr; <a href="#binmenu">Binary operators</a>.<br />
-&uArr; <a href="#progsmenu">Programming advice</a>.<br />
-&uArr; <a href="#lusmenu">                       BRACMAT                       </a>.<br />
-&rArr; <a href="#objecttxt">Objects</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#progsmenu" style="line-height:12pt">Programming advice</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
+<span class="arrow">&rArr;</span> <a href="#objecttxt" style="line-height:12pt">Objects</a>.<br />
 </p><h1><a name="binprotxt">Binary operators in program flow</a></h1>
 <p>
 
@@ -827,10 +830,10 @@ The pacifier or shortcut prefix is inherited by higher levels, it percolates
 towards operators that are closer to the root of the tree, until it is
 subsumed in situations like the above ones.
 </p><p>
-&uArr; <a href="#binovztxt">=.,|&amp;: +*^LD'$_</a>.<br />
-&uArr; <a href="#binmenu">Binary operators</a>.<br />
-&rArr; <a href="#prostutxt1">Program flow</a>.<br />
-&rArr; <a href="#prostutxt2">Some often used control structures</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#prostutxt1" style="line-height:12pt">Program flow</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#prostutxt2" style="line-height:12pt">Some often used control structures</a>.<br />
 </p><h1><a name="prostutxt1">Program flow</a></h1>
 <p>
  <br /> 
@@ -885,11 +888,11 @@ The tilde ~ negates failure and success.
 </pre></blockquote><p>
 
 </p><p>
-&uArr; <a href="#binovztxt">=.,|&amp;: +*^LD'$_</a>.<br />
-&uArr; <a href="#progsmenu">Programming advice</a>.<br />
-&lArr; <a href="#binprotxt">Binary operators in program flow</a>.<br />
-&rArr; <a href="#pattxt">Binary operators in pattern matching</a>.<br />
-&rArr; <a href="#prostutxt2">Some often used control structures</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#progsmenu" style="line-height:12pt">Programming advice</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#binprotxt" style="line-height:12pt">Binary operators in program flow</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#pattxt" style="line-height:12pt">Binary operators in pattern matching</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#prostutxt2" style="line-height:12pt">Some often used control structures</a>.<br />
 </p><h1><a name="algtxt">Algebraic operations</a></h1>
 <p>
 
@@ -927,9 +930,9 @@ Sums and products start with rational numbers, followed by pi, i and e
 not to assume anything about the ordering of these terms and factors, as
 this may change in later versions of the program.
 </p><p>
-&uArr; <a href="#binovztxt">=.,|&amp;: +*^LD'$_</a>.<br />
-&uArr; <a href="#binmenu">Binary operators</a>.<br />
-&lArr; <a href="#difftxt">Differentiation</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#difftxt" style="line-height:12pt">Differentiation</a>.<br />
 </p><h1><a name="difftxt">Differentiation</a></h1>
 <p>
 <span class="courier">&lt;variable&gt;</span><span class="courier">&nbsp;\D&nbsp;<span class="courier">&lt;expr&gt;</span></span> <br />
@@ -969,8 +972,8 @@ And, if you like, you can simplify the result by putting r back in:
 {!} -1*r^-3*y
  </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#binovztxt">=.,|&amp;: +*^LD'$_</a>.<br />
-&rArr; <a href="#algtxt">Algebraic operations</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#algtxt" style="line-height:12pt">Algebraic operations</a>.<br />
 </p><h1><a name="funmactxt">function evaluation</a></h1>
 <p>
  <br /> 
@@ -997,46 +1000,12 @@ the return value of a function is part of the pattern. A function may be
 called several times during one evaluation of a matching expression, due to
 backtracking and retrying.
 </p><p>
-&uArr; <a href="#binovztxt">=.,|&amp;: +*^LD'$_</a>.<br />
-&uArr; <a href="#binmenu">Binary operators</a>.<br />
-&uArr; <a href="#funcmenu">functions</a>.<br />
-&rArr; <a href="#macrotxt">macro evaluation</a>.<br />
-&rArr; <a href="#escappattxt">Escaping operator in patterns</a>.<br />
-&rArr; <a href="#naamloos">vsubst2$(T,The "nameless" functions $<expression> and '<expression>,Sometimes a variable predictably will evaluate to the same value repeatedly,
-for example in an inner loop or a pattern that repeatedly backtracks. In
-such situations macro substitution can improve performance by replacing the
-variable by its value in an early stage.
-
-In Bracmat, a macro has the general form '<expression>. When '<expression> is
-evaluated, <expression> is searched for sub-expressions headed by the operator
-$, with empty lhs. Such sub-expressions are replaced, depending on what is
-found on the rhs of the $ operator.
-
-After macro substitution has taken place, what remains is an expression of
-the form =<expression>. The = operator is a safeguard against evaluation of
-<expression>.
-
-Macro substitution makes it possible to dynamically create unevaluated code and
-bind it to a variable.
-
-{?} '($out):?my-fun-var
-{?} !my-fun-var$(Hello world)
-{?} '($out):(=?my-fun-alias)
-{?} my-fun-alias$(Hello world)Pattern matching can sometimes be made more efficient by using macro
-substitution, but the resulting code is harder to understand:
-
-{?} ( 0:?count
-    &   41 3 5 7 6 23 12 11 19
-      :   ?
-          %?`A
-          ?
-          ( %?`B                            {Each number pair [A,B] ... }
-          & !A+!B:?C                        {is added only once, giving C. }
-          &   '(? ()$(!count+1:?count&C) ?)
-            : (=?rem)                       {C's value is hard-coded into rem}
-          )
-          !rem                              {which is the remaining pattern. }
-    & out$(after !count trials)</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#macrotxt" style="line-height:12pt">macro evaluation</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#escappattxt" style="line-height:12pt">Escaping operator in patterns</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#naamloos" style="line-height:12pt">The "nameless" functions $&lt;expression&gt; and '&lt;expression&gt;</a>.<br />
 </p><h1><a name="macrotxt">macro evaluation</a></h1>
 <p>
 The ' operator with empty lhs is the macro evaluator. The macro evaluator
@@ -1076,8 +1045,12 @@ More examples: </p><blockquote><pre>
 {?} '(a ($(=value)) z)
 {!} =a value z </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#binovztxt">=.,|&amp;: +*^LD'$_</a>.<br />
-&lArr; <a href="#funmactxt">function evaluation</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#funmactxt" style="line-height:12pt">function evaluation</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#naamloos" style="line-height:12pt">The "nameless" functions $&lt;expression&gt; and '&lt;expression&gt;</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#escappattxt" style="line-height:12pt">Escaping operator in patterns</a>.<br />
 </p><h1><a name="dumtxt">The dummy operator "_"</a></h1>
 <p>
  <br /> 
@@ -1105,9 +1078,9 @@ The "_" variable is always expanded BEFORE the left and right hand side
 operands are evaluated. That explains why new assignments in the operands do
 not result in unwanted side effects in the upper node with the "_".
 </p><p>
-&uArr; <a href="#binovztxt">=.,|&amp;: +*^LD'$_</a>.<br />
-&uArr; <a href="#binmenu">Binary operators</a>.<br />
-&rArr; <a href="#funtxt3">Recursion and the "_"-operator</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#funtxt3" style="line-height:12pt">Recursion and the "_"-operator</a>.<br />
 </p><h1><a name="funtxt3">Recursion and the "_"-operator</a></h1>
 <p>
 In Bracmat functions are allowed to call themselves. Often this happens
@@ -1126,11 +1099,11 @@ matches are "forgotten" : the _ operator is a global variable. </p><blockquote><
     )
 {?} reverse$(Bill loves sweet Nancy. This is true) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#binovztxt">=.,|&amp;: +*^LD'$_</a>.<br />
-&uArr; <a href="#binmenu">Binary operators</a>.<br />
-&uArr; <a href="#funcmenu">functions</a>.<br />
-&lArr; <a href="#dumtxt">The dummy operator "_"</a>.<br />
-&lArr; <a href="#funtxt1">&lt;function name&gt;=&lt;var1&gt; [,&lt;var2&gt;, ...].&lt;function body&gt;</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#dumtxt" style="line-height:12pt">The dummy operator "_"</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#funtxt1" style="line-height:12pt">&lt;function name&gt;=&lt;var1&gt; [,&lt;var2&gt;, ...].&lt;function body&gt;</a>.<br />
 </p><h1><a name="prostutxt2">Some often used control structures</a></h1>
 <p>
 In the left column control structures are written in pseudocode, in the right
@@ -1161,10 +1134,102 @@ column the nearest equivalents are written in Bracmat.
 </pre></blockquote><p>
 
 </p><p>
-&uArr; <a href="#binmenu">Binary operators</a>.<br />
-&uArr; <a href="#progsmenu">Programming advice</a>.<br />
-&lArr; <a href="#binprotxt">Binary operators in program flow</a>.<br />
-&lArr; <a href="#prostutxt1">Program flow</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#progsmenu" style="line-height:12pt">Programming advice</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#binprotxt" style="line-height:12pt">Binary operators in program flow</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#prostutxt1" style="line-height:12pt">Program flow</a>.<br />
+</p><h1><a name="naamloos">The "nameless" functions $&lt;expression&gt; and '&lt;expression&gt;</a></h1>
+<p>
+ <br /> 
+Sometimes a variable predictably will evaluate to the same value repeatedly,
+for example in an inner loop or a pattern that repeatedly backtracks. In
+such situations macro substitution can improve performance by replacing the
+variable by its value in an early stage. </p><p>
+
+In Bracmat, a macro has the general form '<span class="courier">&lt;expression&gt;</span>. When '<span class="courier">&lt;expression&gt;</span> is
+evaluated, <span class="courier">&lt;expression&gt;</span> is searched for sub-expressions headed by the operator
+$, with empty lhs. Such sub-expressions are replaced, depending on what is
+found on the rhs of the $ operator. </p><p>
+
+After macro substitution has taken place, what remains is an expression of
+the form =<span class="courier">&lt;expression&gt;</span>. The = operator is a safeguard against evaluation of
+<span class="courier">&lt;expression&gt;</span>. </p><p>
+Macro substitution makes it possible to dynamically create unevaluated code and
+bind it to a variable.
+ </p><blockquote><pre>
+{?} '($out):?my-fun-var
+{?} !my-fun-var$(Hello world)
+{?} '($out):(=?my-fun-alias)
+{?} my-fun-alias$(Hello world) </pre></blockquote><p> 
+</p><p>
+Pattern matching can sometimes be made more efficient by using macro
+substitution, but the resulting code is harder to understand:
+ </p><blockquote><pre>
+{?} ( 0:?count
+    &amp;   41 3 5 7 6 23 12 11 19
+      :   ?
+          %?`A
+          ?
+          ( %?`B                            {Each number pair [A,B] ... }
+          &amp; !A+!B:?C                        {is added only once, giving C. }
+          &amp;   '(? ()$(!count+1:?count&amp;C) ?)
+            : (=?rem)                       {C's value is hard-coded into rem}
+          )
+          !rem                              {which is the remaining pattern. }
+    &amp; out$(after !count "trials:" !A "+" !B "=" !C )
+    )    </pre></blockquote><p> after 16 trials: 5 + 7 = 12
+</p><p>
+In the same way, function code can be pieced together before it is ever
+executed.
+ </p><blockquote><pre>
+{?} power=three
+{?} ((!power : two &amp; (=!arg^2)) | (=!arg^3)) : (=?abc)      {If power="two",
+    abc is bound to !arg^2 (unevaluated). Otherwise, abc is bound to !arg^3.}
+{?} '(.!arg + -1*$abc + 2) : (=?poly) {"poly" is the name of a new function
+    that will return a value that depends on the current value of arg
+    and on the value of power at the time when abc got its binding.}
+{?} lst$poly { show poly's definition }
+{?} poly$4
+{!} -58 </pre></blockquote><p> 
+</p><p>
+ <br /> 
+The macro construct '<span class="courier">&lt;expr&gt;</span> is useful if an expression has to be executed
+many times while parts of it remain constant, for example in nested loops: </p><p>
+Without macro construct (5 X 5 multiplication table) :
+ </p><blockquote><pre>
+{?} 0 : ?m                    { initialise counter of outer loop }
+{?} (outer = 1+!m : &lt;6 : ?m   { code for outer loop : }
+            &amp; put$\n          { start output on new line }
+            &amp; 0 : ?n          { initialise counter of inner loop }
+            &amp; `!inner         { execute inner loop }
+            &amp; !outer)         { loop }
+{?} (inner = 1+!n : &lt;6 : ?n   { code for inner loop : }
+           &amp; put$(!m X !n "=" !m*!n ", ")
+                              { the same !m is expanded 10 times }
+           &amp; !inner)          { loop }
+{?} !outer </pre></blockquote><p> 
+</p><p>
+ <br /> 
+With macro construct : <br />
+ </p><blockquote><pre>
+{?} 0:?m
+{?} (outer = 1+!m : &lt;6 : ?m
+            &amp; '( 1+!n : &lt;6 : ?n
+               &amp; put$($m X !n "=" ()$m*!n ",")
+                              { !m is expanded only 2 times }
+               &amp; !inner
+               ) : (=?inner)  { at each pass through the outer loop
+                                the inner loop "inner" is defined anew }
+            &amp; put$\n
+            &amp; 0 : ?n
+            &amp; `!inner
+            &amp; !outer)
+{?} !outer </pre></blockquote><p> 
+</p><p>
+<span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#funmactxt" style="line-height:12pt">function evaluation</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#macrotxt" style="line-height:12pt">macro evaluation</a>.<br />
 </p><h1><a name="unopsmenu">Prefixes</a></h1>
 <p>
 
@@ -1175,7 +1240,7 @@ column the nearest equivalents are written in Bracmat.
 <a href="#unops"> unary operators</a><br />
 
 <br/>
-&uArr; <a href="#lusmenu">                       BRACMAT                       </a>.<br />
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="unstuurtxt">Prefixes and program flow</a></h1>
 <p>
 Unlike other programming languages, Bracmat does not return the value of a
@@ -1234,7 +1299,7 @@ operators.
 {?} chack$(3,!is-greater-than,15)  { pass by value }
 {?} chack$(3,!is-divisor-of,15) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#unopsmenu">Prefixes</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#unopsmenu" style="line-height:12pt">Prefixes</a>.<br />
 </p><h1><a name="unpattxt">Prefixes and pattern matching</a></h1>
 <p>
 In patterns, atoms and expressions within parentheses may be preceded by
@@ -1347,10 +1412,10 @@ An empty string before the m has the effect that Bracmat doesn't optimize
 the backtracking process away.  </p><blockquote><pre>
 {?} @(aaakamcccc:(? a|`) () m (|? b|`) (? c|`)) (&amp;) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#unopsmenu">Prefixes</a>.<br />
-&uArr; <a href="#progsmenu">Programming advice</a>.<br />
-&lArr; <a href="#pattxt">Binary operators in pattern matching</a>.<br />
-&rArr; <a href="#escappattxt">Escaping operator in patterns</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#unopsmenu" style="line-height:12pt">Prefixes</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#progsmenu" style="line-height:12pt">Programming advice</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#pattxt" style="line-height:12pt">Binary operators in pattern matching</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#escappattxt" style="line-height:12pt">Escaping operator in patterns</a>.<br />
 </p><h1><a name="unops">minus sign</a></h1>
 <p>
  <br /> 
@@ -1393,7 +1458,7 @@ would evaluate to  i,
 The transcendental numbers e and pi do not accept arithmetic minus signs.
 
 </p><p>
-&uArr; <a href="#unopsmenu">Prefixes</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#unopsmenu" style="line-height:12pt">Prefixes</a>.<br />
 </p><h1><a name="atotxt">strings or atoms</a></h1>
 <p>
  <br /> 
@@ -1450,7 +1515,7 @@ Examples: <br />
 {?} "if zero equals one, I hang up" = "1:0&amp;get$(\")y\",MEM)"
 {?} get$(!"if zero equals one, I hang up",MEM) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#lusmenu">                       BRACMAT                       </a>.<br />
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="varsmenu">Symbols</a></h1>
 <p>
 
@@ -1459,7 +1524,7 @@ Examples: <br />
 <a href="#varprotxt"> variables</a><br />
 
 <br/>
-&uArr; <a href="#lusmenu">                       BRACMAT                       </a>.<br />
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="varmattxt">Literals</a></h1>
 <p>
 In Bracmat, symbols have only literal meaning, unless we explicitly state that
@@ -1483,7 +1548,7 @@ to use its symbol as a literal, the two uses live peacefully together.
 {?} 7 = prime { the variable 7 is bound to the literal "prime"}
 {?} 7 is !7 { the symbol 7 is used as both a literal and a variable} </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#varsmenu">Symbols</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#varsmenu" style="line-height:12pt">Symbols</a>.<br />
 </p><h1><a name="varprotxt">Variables</a></h1>
 <p>
 Variables are represented by <span class="courier">&lt;atom&gt;</span>'s, but not all <span class="courier">&lt;atom&gt;</span>'s are variables.
@@ -1494,7 +1559,7 @@ The context of a symbol determines whether it is a variable or not : </p><ol> <l
 <li>the right operand of the $ operator in macro constructs (e.g. '(1+$a) ).</li>
  </ol><p> 
 </p><p>
-&uArr; <a href="#varsmenu">Symbols</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#varsmenu" style="line-height:12pt">Symbols</a>.<br />
 </p><h1><a name="evaltxt">The four evaluators</a></h1>
 <p>
 In Bracmat, a binary operator may have four different effects, depending on
@@ -1537,7 +1602,7 @@ macro       $r
 </pre></blockquote><p>
 archivist
 </p><p>
-&uArr; <a href="#lusmenu">                       BRACMAT                       </a>.<br />
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="progsmenu">Programming advice</a></h1>
 <p>
 
@@ -1548,7 +1613,7 @@ archivist
 <a href="#debugtxt"> debugging</a><br />
 
 <br/>
-&uArr; <a href="#lusmenu">                       BRACMAT                       </a>.<br />
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="debugtxt">Debugging</a></h1>
 <p>
 If a program written in the Bracmat language doesn't work properly, the
@@ -1575,8 +1640,8 @@ same debugging protocol applies as with other programming languages :
  </ul> </li>
  </ul><p> 
 </p><p>
-&uArr; <a href="#progsmenu">Programming advice</a>.<br />
-&rArr; <a href="#debugtxt2">using out$ as debugging aid</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#progsmenu" style="line-height:12pt">Programming advice</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#debugtxt2" style="line-height:12pt">using out$ as debugging aid</a>.<br />
 </p><h1><a name="debugtxt2">using out$ as debugging aid</a></h1>
 <p>
 The best aid in finding out what a program does, is using the out$ function.
@@ -1636,11 +1701,11 @@ avoids multi-word assignments and forces immediate backtracking.
 </pre></blockquote><p>
 
 </p><p>
-&uArr; <a href="#progsmenu">Programming advice</a>.<br />
-&uArr; <a href="#predefmenu">Predefined functions</a>.<br />
-&lArr; <a href="#debugtxt">Debugging</a>.<br />
-&lArr; <a href="#outtxt">out$&lt;expression&gt;</a>.<br />
-&rArr; <a href="#debugtxt3">using dbg' as debugging aid</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#progsmenu" style="line-height:12pt">Programming advice</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#predefmenu" style="line-height:12pt">Predefined functions</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#debugtxt" style="line-height:12pt">Debugging</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#outtxt" style="line-height:12pt">out$&lt;expression&gt;</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#debugtxt3" style="line-height:12pt">using dbg' as debugging aid</a>.<br />
 </p><h1><a name="debugtxt3">using dbg' as debugging aid</a></h1>
 <p>
  <br /> 
@@ -1650,9 +1715,9 @@ With this flag set, suspicious code is warned against. </p><p>
 It is important that the argument is not evaluated before being passed to the
 dbg function.
 </p><p>
-&uArr; <a href="#progsmenu">Programming advice</a>.<br />
-&uArr; <a href="#predefmenu">Predefined functions</a>.<br />
-&lArr; <a href="#debugtxt2">using out$ as debugging aid</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#progsmenu" style="line-height:12pt">Programming advice</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#predefmenu" style="line-height:12pt">Predefined functions</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#debugtxt2" style="line-height:12pt">using out$ as debugging aid</a>.<br />
 </p><h1><a name="funcmenu">functions</a></h1>
 <p>
 
@@ -1665,7 +1730,7 @@ dbg function.
 <a href="#predefmenu"> predefined, changeable functions</a><br />
 
 <br/>
-&uArr; <a href="#lusmenu">                       BRACMAT                       </a>.<br />
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="funtxt1">&lt;function name&gt;=&lt;var1&gt; [,&lt;var2&gt;, ...].&lt;function body&gt;</a></h1>
 <p>
 Definition of a function. <span class="courier">&lt;var1&gt;</span>,<span class="courier">&lt;var2&gt;</span>, etc. are explicitly declared local
@@ -1709,8 +1774,8 @@ code. </p><p>
 It is possible to declare a function inside another function. Always declare
 the name of an embedded function as a local variable.
 </p><p>
-&uArr; <a href="#funcmenu">functions</a>.<br />
-&rArr; <a href="#funtxt3">Recursion and the "_"-operator</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#funtxt3" style="line-height:12pt">Recursion and the "_"-operator</a>.<br />
 </p><h1><a name="lambda">Lambda calculus, currying</a></h1>
 <p>
 The lambda abstraction 
@@ -1749,7 +1814,7 @@ the value 'aap' is bound in ($x), but never assigned to a variable 'x'.</p>
 </pre></blockquote><p>
 
 </p><p>
-&uArr; <a href="#funcmenu">functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
 </p><h1><a name="inbltmenu">Built-in functions</a></h1>
 <p>
 
@@ -1793,7 +1858,7 @@ the value 'aap' is bound in ($x), but never assigned to a variable 'x'.</p>
 <a href="#whtxt">"?"  assign to nameless variable</a><br />
 
 <br/>
-&uArr; <a href="#funcmenu">functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
 </p><h1><a name="seltxt">&lt;index&gt;$&lt;array name&gt;</a></h1>
 <p>
 <span class="courier">&lt;array&nbsp;name&gt;</span><span class="courier">&nbsp;and&nbsp;<span class="courier">&lt;index&gt;</span>&nbsp;should&nbsp;both&nbsp;evaluate&nbsp;to&nbsp;atoms.&nbsp;&lt;array&nbsp;name&gt;&nbsp;may&nbsp;be</span> <br />
@@ -1809,7 +1874,7 @@ The chosen index remains in force until a new indexing function is evaluated.
 {?} 2'!array : 3'!array        { are array[2] and array[3] equal?
                                  Notice use of ' instead of $. } </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="alctxt">alc$&lt;number of bytes&gt;</a></h1>
 <p>
 This function allocates memory and returns the starting address of the
@@ -1820,7 +1885,7 @@ memory heap with the function fre$.
  </p><blockquote><pre>
 {?} alc$1000:?p {allocate 1000 bytes and assign starting address to p} </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="argtxt">arg$ or arg$&lt;number&gt;</a></h1>
 <p>
 If Bracmat is started with any arguments (argc &gt; 1) every argument is
@@ -1904,14 +1969,14 @@ results in the following output being written to the terminal:
 </pre></blockquote><p>
 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="asctxt">asc$&lt;character&gt;</a></h1>
 <p>
 asc$ returns the integer value that corresponds to the character according to
 the current table used by the operating system (e.g. an extended ASCII table). </p><blockquote><pre>
 {?} asc$"+" {return "ASCII" value of character +} </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="chrtxt">chr$&lt;value&gt;</a></h1>
 <p>
 chr$ returns the character at location <span class="courier">&lt;value&gt;</span> in the current table of
@@ -1927,7 +1992,7 @@ chr$ fails if <span class="courier">&lt;value&gt;</span> equals 0. </p><blockquo
         versions is the same for all characters in the range A-Z.)}
 {?} tolower$G </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="chutxt">chu$&lt;value&gt;</a></h1>
 <p>
 chu$ returns the UTF-8 character at Unicode code point <span class="courier">&lt;value&gt;</span>.
@@ -1936,7 +2001,7 @@ chu$ fails if <span class="courier">&lt;value&gt;</span> equals 0 or less or if 
 are illegal. </p><blockquote><pre>
 {?} d2x$utf$chu$x2d$7fffffff </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="clktxt">clk$</a></h1>
 <p>
 clk$ returns the number of CPU seconds that that has been spend on running the
@@ -1945,7 +2010,7 @@ clock ticks and the number of clock ticks per second. </p><blockquote><pre>
 {?} clk$
 {!} 30375/1000 </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="d2xtxt">d2x$&lt;decimal value&gt;</a></h1>
 <p>
 d2x$ converts a decimal number between 0 and 4294967295 (2^32+-1) to an
@@ -1954,7 +2019,7 @@ the upper bound is 18446744073709551615 (2^64+-1). The function fails if the
 argument is not an integer number or if the number is outside this range. </p><blockquote><pre>
 {?} d2x$(2^32+-1) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="dbgtxt">dbg'&lt;expression&gt;</a></h1>
 <p>
 Create warnings in situations that probably are programming errors.
@@ -1963,7 +2028,7 @@ Currently, a warning is generated when a function definition can not be found.
 {?} dbg'(foo$a)
 {?} dbg'((myclass.yourfunc)$X) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="dentxt">den$&lt;rational number&gt;</a></h1>
 <p>
 The denominator of <span class="courier">&lt;rational number&gt;</span> is returned. There is no built-in
@@ -1974,14 +2039,14 @@ numerator extractor function.
 {?} num$22/7
 {?} den$sim$(,monkey)   { return length of word "monkey"} </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="divtxt">div$(&lt;rational number&gt;,&lt;rational number&gt;)</a></h1>
 <p>
 div$ returns the (integral) quotient of its arguments.
  </p><blockquote><pre>
 {?} div$(123/45,67/890) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="filtxt">fil$([[&lt;file name&gt;][,&lt;option&gt;[,&lt;number&gt;[,&lt;value to output&gt;]]]])</a></h1>
 <p>
 fil$ is a multi-purpose low level I/O function.
@@ -2091,7 +2156,7 @@ If <span class="courier">&lt;type&gt;</span> is "CHR" and the length of <span cl
 
 An open file is closed by specifying an impossible file position.
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="flgtxt">flg$(=&lt;expression&gt;)</a></h1>
 <p>
 
@@ -2113,7 +2178,7 @@ Use macro evaluation if the expression to be split is the value of a variable:
 {!} =~(%*%)
  </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="glftxt">glf$(=&lt;prefixes&gt;.&lt;expression&gt;)</a></h1>
 <p>
  <br /> 
@@ -2135,7 +2200,7 @@ Use macro evaluation if the expression to be split is the value of a variable.
 {!} =?!z
  </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="fretxt">fre$&lt;memory address&gt;</a></h1>
 <p>
 fre$ returns a chunk of memory to the memory pool (heap). The only valid
@@ -2146,7 +2211,7 @@ behaviour of the program.
 {?} alc$1000:?p {allocate chunk of 1000 bytes from the memory pool}
 {?} fre$!p      {return this chunk to the memory pool} </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="gettxt">get$(&lt;atom-or-nil&gt;[,MEM][,ECH][,VAP][,STR])</a></h1>
 <p>
 get$ reads and interprets characters in a string (internal memory) or file
@@ -2219,7 +2284,7 @@ input is coming from standard input.
 Take care for putting filenames in double quotes if they contain any
 characters that can be misunderstood, such as dots, (back) slashes or dollars.
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="lowtxt">low$(&lt;atom-or-nil&gt;)</a></h1>
 <p>
  <br /> 
@@ -2228,16 +2293,16 @@ The characters 'A'-'Z' are converted to 'a'-'z'. Other characters are handled
 as UTF-8 encoded Unicode characters, but default to ISO 8859 (Latin 1) if
 the argument is not valid UTF-8.
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
-&rArr; <a href="#DOSopttxt">Codepage 850 support$</a>.<br />
-</p><h1><a name="DOSopttxt">Codepage 850 support$</a></h1>
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#DOSopttxt" style="line-height:12pt">Codepage 850 support</a>.<br />
+</p><h1><a name="DOSopttxt">Codepage 850 support</a></h1>
 <p>
 As of July 2009 Codepage 850 is not supported, unless bracmat is compiled with
 #define CODEPAGE850 1.
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
-&lArr; <a href="#lowtxt">low$(&lt;atom-or-nil&gt;)</a>.<br />
-&lArr; <a href="#upptxt">upp$(&lt;atom-or-nil&gt;)</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#lowtxt" style="line-height:12pt">low$(&lt;atom-or-nil&gt;)</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#upptxt" style="line-height:12pt">upp$(&lt;atom-or-nil&gt;)</a>.<br />
 </p><h1><a name="lsttxt1">lst$(&lt;variable&gt;[,LIN])</a></h1>
 <p>
 Outputs all present bindings of one or more variables to standard output.
@@ -2251,19 +2316,19 @@ The second parameter is optional.
                     unless stdout has been redirected }
 {?} lst$(tay,LIN) { listing without indentations of function tay$ } </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
-&rArr; <a href="#humtxt">option LIN</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#humtxt" style="line-height:12pt">option LIN</a>.<br />
 </p><h1><a name="humtxt">option LIN</a></h1>
 <p>
 
 If LIN is not present, output is very much indented, sometimes making it more
 readable for humans. If LIN is present, output is as compact as possible.
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
-&lArr; <a href="#lsttxt1">lst$(&lt;variable&gt;[,LIN])</a>.<br />
-&lArr; <a href="#puttxt1">put$(&lt;expression&gt;[,LIN])</a>.<br />
-&rArr; <a href="#lsttxt2">lst$(&lt;variable&gt;,MEM [,LIN])</a>.<br />
-&rArr; <a href="#puttxt2">put$(&lt;expression&gt;,MEM [,LIN])</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#lsttxt1" style="line-height:12pt">lst$(&lt;variable&gt;[,LIN])</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#puttxt1" style="line-height:12pt">put$(&lt;expression&gt;[,LIN])</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#lsttxt2" style="line-height:12pt">lst$(&lt;variable&gt;,MEM [,LIN])</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#puttxt2" style="line-height:12pt">put$(&lt;expression&gt;,MEM [,LIN])</a>.<br />
 </p><h1><a name="lsttxt2">lst$(&lt;variable&gt;,MEM [,LIN])</a></h1>
 <p>
 The difference with the preceding form is, that "output" takes place to
@@ -2279,9 +2344,9 @@ very large atoms (such as this help function) do less well. Example:
 {?} { .. celebrate space-saving, until fct$ is needed .. }
 {?} get$(!sleeping-fct,MEM) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
-&lArr; <a href="#humtxt">option LIN</a>.<br />
-&rArr; <a href="#lsttxt3">lst$(&lt;variable&gt;,&lt;file name&gt;,NEW | APP [,LIN])</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#humtxt" style="line-height:12pt">option LIN</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#lsttxt3" style="line-height:12pt">lst$(&lt;variable&gt;,&lt;file name&gt;,NEW | APP [,LIN])</a>.<br />
 </p><h1><a name="lsttxt3">lst$(&lt;variable&gt;,&lt;file name&gt;,NEW | APP [,LIN])</a></h1>
 <p>
 This time, output is sent to the named file instead of standard output.
@@ -2293,9 +2358,9 @@ Code that has been saved with lst$ can be reloaded with get$.
 {?} lst$(tay,taylor,NEW)
     { save function tay$ to file "taylor" in indented format } </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
-&lArr; <a href="#lsttxt2">lst$(&lt;variable&gt;,MEM [,LIN])</a>.<br />
-&rArr; <a href="#newtxt">options NEW and APP</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#lsttxt2" style="line-height:12pt">lst$(&lt;variable&gt;,MEM [,LIN])</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#newtxt" style="line-height:12pt">options NEW and APP</a>.<br />
 </p><h1><a name="newtxt">options NEW and APP</a></h1>
 <p>
 one of the options NEW and APP must be present :
@@ -2303,9 +2368,9 @@ NEW tells the computer to open a new file or overwrite an old one.
 APP directs output to an existing file. If the file does not exist, it is <br /> &nbsp;&nbsp;&nbsp;&nbsp;created&nbsp;first.
 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
-&lArr; <a href="#lsttxt3">lst$(&lt;variable&gt;,&lt;file name&gt;,NEW | APP [,LIN])</a>.<br />
-&lArr; <a href="#puttxt3">put$(&lt;expression&gt;,&lt;file name&gt;,NEW | APP [,LIN])</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#lsttxt3" style="line-height:12pt">lst$(&lt;variable&gt;,&lt;file name&gt;,NEW | APP [,LIN])</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#puttxt3" style="line-height:12pt">put$(&lt;expression&gt;,&lt;file name&gt;,NEW | APP [,LIN])</a>.<br />
 </p><h1><a name="memtxt">mem$[EXT]</a></h1>
 <p>
 mem$ produces a list of all currently existing variables, except those
@@ -2317,14 +2382,14 @@ The predefined function cat$ makes use of mem$. </p><blockquote><pre>
 {?} mem$
 {?} mem$EXT </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="modtxt">mod$(&lt;number&gt;,&lt;divisor&gt;)</a></h1>
 <p>
 mod$ divides <span class="courier">&lt;number&gt;</span> by <span class="courier">&lt;divisor&gt;</span>. The rest is returned.
  </p><blockquote><pre>
 {?} mod$(22,7) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="newobjecttxt">new$&lt;object&gt; or new$(&lt;object&gt;,&lt;args&gt;)</a></h1>
 <p>
 new$ creates a shallow copy of an object and calls the method "new" of the
@@ -2355,7 +2420,7 @@ the object telling the system that the "die" method must be called just
 before deletion of the object. The "die" method, like the "new" method, is
 optional and should be used to do clean-up.
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="peetxt">pee$(&lt;address&gt; [,&lt;size&gt;])</a></h1>
 <p>
 Depending on <span class="courier">&lt;size&gt;</span>, a 1, 2 or 4 byte sized integer allocated at <span class="courier">&lt;address&gt;</span> is
@@ -2373,7 +2438,7 @@ areas.
 {?} pee$(34567,2) {return value at address 34566 (2 bytes)}
 {?} pee$(34567,4) {return value at address 34564 (4 bytes)} </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="poktxt">pok$(&lt;address&gt;,&lt;value&gt; [,&lt;size&gt;])</a></h1>
 <p>
 Depending on <span class="courier">&lt;size&gt;</span>, a 1, 2 or 4 byte sized integer is stored at <span class="courier">&lt;address&gt;</span>.
@@ -2391,7 +2456,7 @@ areas.
 {?} pok$(34567,-1,4) {store 2^32-1 at memory location 34564
                       (assuming 1-complement arithmetic)} </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="puttxt1">put$(&lt;expression&gt;[,LIN])</a></h1>
 <p>
 Sends <span class="courier">&lt;expression&gt;</span> to standard output. The cursor is positioned after the
@@ -2401,8 +2466,8 @@ line.
  </p><blockquote><pre>
 {?} put$("b+a" is after evaluation b+a) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
-&rArr; <a href="#humtxt">option LIN</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#humtxt" style="line-height:12pt">option LIN</a>.<br />
 </p><h1><a name="puttxt2">put$(&lt;expression&gt;,MEM [,LIN])</a></h1>
 <p>
 <span class="courier">&lt;expression&gt;</span><span class="courier">&nbsp;is&nbsp;stringized&nbsp;and&nbsp;placed&nbsp;into&nbsp;an&nbsp;atom,&nbsp;which&nbsp;is&nbsp;the&nbsp;return</span> <br />
@@ -2414,9 +2479,9 @@ including space-operators, to the atom.
 {?} put$!proposition
  </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
-&lArr; <a href="#humtxt">option LIN</a>.<br />
-&rArr; <a href="#puttxt3">put$(&lt;expression&gt;,&lt;file name&gt;,NEW | APP [,LIN])</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#humtxt" style="line-height:12pt">option LIN</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#puttxt3" style="line-height:12pt">put$(&lt;expression&gt;,&lt;file name&gt;,NEW | APP [,LIN])</a>.<br />
 </p><h1><a name="puttxt3">put$(&lt;expression&gt;,&lt;file name&gt;,NEW | APP [,LIN])</a></h1>
 <p>
  <br /> 
@@ -2424,9 +2489,9 @@ Write <span class="courier">&lt;expression&gt;</span> to the named file. <br />
  </p><blockquote><pre>
 {?} put$(tay$(e^x,x,10),"e.out",APP) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
-&lArr; <a href="#puttxt2">put$(&lt;expression&gt;,MEM [,LIN])</a>.<br />
-&rArr; <a href="#newtxt">options NEW and APP</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
+<span class="arrow">&lArr;</span> <a href="#puttxt2" style="line-height:12pt">put$(&lt;expression&gt;,MEM [,LIN])</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#newtxt" style="line-height:12pt">options NEW and APP</a>.<br />
 </p><h1><a name="rentxt">ren$(&lt;oldname&gt;.&lt;newname&gt;)</a></h1>
 <p>
 Renames a file or directory or moves a file.
@@ -2440,7 +2505,7 @@ error at the operating system level, one of the following codes is returned:</p>
 </dl>
 <p>If the command succeeds at the operating system level, the value 0 is returned.
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="rmvtxt">rmv$&lt;file name&gt;</a></h1>
 <p>
 Removes a file.
@@ -2453,7 +2518,7 @@ error at the operating system level, one of the following codes is returned:</p>
 </dl>
 <p>If the command succeeds at the operating system level, the value 0 is returned.
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="revtxt">rev$&lt;atom&gt;</a></h1>
 <p>
  <br /> 
@@ -2461,7 +2526,7 @@ Reverses the order of bytes in an atom. This function can be useful in case of
 a string match that asks for the last occurrence of a pattern. </p><p>
 The rev$ function succeeds on all atoms and fails on all other expressions.
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="simtxt">sim$(&lt;atom-or-nil&gt;,&lt;atom-or-nil&gt;)</a></h1>
 <p>
 sim$ uses the Ratcliff/Obershelp pattern matching algorithm in establishing
@@ -2477,7 +2542,7 @@ not UTF-8 encoded.
 {?} den$sim$(,"this is an easy way to find this string's length")
 {?} div$(sim$("similarity rounded","and in procents")+1/200,1/100) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="strtxt">str$&lt;expression&gt;</a></h1>
 <p>
 str$ "writes" <span class="courier">&lt;expression&gt;</span> into one single atom. All atoms, prefixes and
@@ -2492,7 +2557,7 @@ output string. Main use : pasting of two or more atoms.
 {?} a=x+2*y;b=2*x+y
 {?} put$str$(!a "+" !b " = " !a+!b) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="switxt">swi$(&lt;interrupt number&gt;.&lt;input value&gt;,[&lt;input value&gt;,...])</a></h1>
 <p>
  <br /> 
@@ -2536,7 +2601,7 @@ FLAGS, respectively.
 {?} )
 {?} gotoxy$(0,0) &amp; put$(top left corner) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="systxt">sys$&lt;command line commando&gt;</a></h1>
 <p>
 In most environments, sys$ passes its argument to the command line
@@ -2565,7 +2630,7 @@ error at the operating system level, one of the following codes is returned:</p>
 </dl>
 <p>If the command succeeds at the operating system level, the value 0 is returned.
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="tbltxt">tbl$(&lt;variable&gt;,&lt;array size&gt;)</a></h1>
 <p>
  <br /> 
@@ -2590,7 +2655,7 @@ local variables onto and from a stack.
 {?} tbl$(bigarray,0)      { remove bigarray }
 {?} lst$bigarray </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="upptxt">upp$(&lt;atom-or-nil&gt;)</a></h1>
 <p>
  <br /> 
@@ -2599,8 +2664,8 @@ The characters 'a'-'z' are converted to 'A'-'Z'. Other characters are handled
 as UTF-8 encoded Unicode characters, but default to ISO 8859 (Latin 1) if
 the argument is not valid UTF-8.
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
-&rArr; <a href="#DOSopttxt">Codepage 850 support$</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#DOSopttxt" style="line-height:12pt">Codepage 850 support</a>.<br />
 </p><h1><a name="utftxt">utf$&lt;UTF-8 character&gt;</a></h1>
 <p>
  <br /> 
@@ -2615,14 +2680,14 @@ If txt starts with an valid UTF-8 sequence, bracmat backtracks until c matches t
 If txt starts with a sequence that is not UTF-8, bracmat stops backtracking when that fact has been
 established.
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="whltxt">whl'(expression)</a></h1>
 <p>
 whl' implements a while ... loop. The expression is repeatedly evaluated
 until it fails. whl' always fails. Notice that whl' is slightly faster than
 til' and that both are faster than loops using tail recursion.
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="x2dtxt">x2d$&lt;hexadecimal value</a></h1>
 <p>
 x2d$ converts an hexadecimal number between 0 and FFFFFFFF to a decimal
@@ -2631,13 +2696,13 @@ The function fails if the argument is not a string with a length
 between 1 and 8 only containing the characters 0-9, a-f and A-F. </p><blockquote><pre>
 {?} x2d$ffffffff </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="whtxt">"?"$&lt;expression&gt;</a></h1>
 <p>
 Assigns expression to the unique 'nameless' variable. The inverse operation is
 the solitary '!'.
 </p><p>
-&uArr; <a href="#inbltmenu">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="predefmenu">Predefined functions</a></h1>
 <p>
 Besides hard-coded built-in functions, Bracmat offers a number of soft-coded
@@ -2660,7 +2725,7 @@ visible functions are predefined:
 <a href="#taytxt">tay            Taylor series</a><br />
 
 <br/>
-&uArr; <a href="#funcmenu">functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
 </p><h1><a name="sgntxt">abs$&lt;expression&gt; and sgn$&lt;expression&gt;</a></h1>
 <p>
  <br /> 
@@ -2671,7 +2736,7 @@ abs$<span class="courier">&lt;expression&gt;</span> is defined as sgn$<span clas
 {?} sgn$(-1*i)
 {?} abs$(-7*a) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#predefmenu">Predefined functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#predefmenu" style="line-height:12pt">Predefined functions</a>.<br />
 </p><h1><a name="cattxt">cat$([&lt;include list&gt;][,[&lt;exclude list&gt;][,EXT]])</a></h1>
 <p>
 cat$ is like the built-in function mem$, but offers the possibility to exclude
@@ -2687,14 +2752,14 @@ for later use, e.g. removing all variables that have been created since.
 {?} tbl$(newvar2,100)
 {?} cat$(,!save-state,EXT)   { show the newcomers } </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#predefmenu">Predefined functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#predefmenu" style="line-height:12pt">Predefined functions</a>.<br />
 </p><h1><a name="gontxt">cos$&lt;expression&gt; and sin$&lt;expression&gt;</a></h1>
 <p>
 These functions produce cos(expression) and sin(expression), expressed in
 powers of e. In this way, expressions with goniometric functions can be
 differentiated and, sometimes, simplified.
 </p><p>
-&uArr; <a href="#predefmenu">Predefined functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#predefmenu" style="line-height:12pt">Predefined functions</a>.<br />
 </p><h1><a name="factxt">fct$&lt;expression&gt;</a></h1>
 <p>
 fct$ uses some heuristics in trying to factorise <span class="courier">&lt;expression&gt;</span>.
@@ -2702,7 +2767,7 @@ fct$ uses some heuristics in trying to factorise <span class="courier">&lt;expre
 {?} 1+(2*a^3+6/7*t)*(3*x+4*y+z^-1)+-1:?sum
 {?} fct$!sum </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#predefmenu">Predefined functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#predefmenu" style="line-height:12pt">Predefined functions</a>.<br />
 </p><h1><a name="flttxt">flt$(&lt;rational number&gt;,&lt;number of decimals&gt;)</a></h1>
 <p>
 flt$ converts a rational number to a floating point presentation. The result
@@ -2712,7 +2777,7 @@ floating point numbers itself.
 {?} flt$(123/456,78)
 {?} flt$(sub$(tay$(sin$x,x,40).x.11/7),12) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#predefmenu">Predefined functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#predefmenu" style="line-height:12pt">Predefined functions</a>.<br />
 </p><h1><a name="outtxt">out$&lt;expression&gt;</a></h1>
 <p>
 Uses the built-in function put$ to output <span class="courier">&lt;expression&gt;</span> to the output stream
@@ -2722,8 +2787,8 @@ handles failing arguments in the correct way, contrary to out$. </p><blockquote>
 {?} put$a &amp; put$b
 {?} out$a &amp; out$b </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#predefmenu">Predefined functions</a>.<br />
-&rArr; <a href="#debugtxt2">using out$ as debugging aid</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#predefmenu" style="line-height:12pt">Predefined functions</a>.<br />
+<span class="arrow">&rArr;</span> <a href="#debugtxt2" style="line-height:12pt">using out$ as debugging aid</a>.<br />
 </p><h1><a name="subtxt1">sub$(&lt;expression&gt;.&lt;pattern&gt;.&lt;replacement&gt;)</a></h1>
 <p>
  <br /> 
@@ -2734,7 +2799,7 @@ argument 1 : subject <br />
 argument 2 : pattern <br />
 argument 3 : replacement for subexpressions matched by pattern.
 </p><p>
-&uArr; <a href="#predefmenu">Predefined functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#predefmenu" style="line-height:12pt">Predefined functions</a>.<br />
 </p><h1><a name="taytxt">tay$(&lt;expression&gt;,&lt;variable&gt;,&lt;number of terms&gt;)</a></h1>
 <p>
  <br /> 
@@ -2745,7 +2810,7 @@ The third argument denotes the number of terms, including vanishing terms.
  </p><blockquote><pre>
 {?} tay$((cos$x)^-1,x,20) </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#predefmenu">Predefined functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#predefmenu" style="line-height:12pt">Predefined functions</a>.<br />
 </p><h1><a name="hashtxt">Hash tables</a></h1>
 <p>
 If you need to manage a large data set it may be a good idea to use a hash-
@@ -2767,30 +2832,30 @@ a user defined object. The following methods are defined for hash tables:
 <a href="#foralltxt">forall</a><br />
 
 <br/>
-&uArr; <a href="#lusmenu">                       BRACMAT                       </a>.<br />
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="findtxt">(myhash..find)$key:(?Key.?Value) ?OtherKeyValuePairs</a></h1>
 <p>
 Returns a blank-separated list of key-value pairs, all with the same key.
 </p><p>
-&uArr; <a href="#hashtxt">Hash tables</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#hashtxt" style="line-height:12pt">Hash tables</a>.<br />
 </p><h1><a name="inserttxt">(myhash..insert)$(key.value)</a></h1>
 <p>
 Inserts the key Key with the value Value. Multiple values for the same key are
 possible and the same value can be inserted more than once for the same key.
 </p><p>
-&uArr; <a href="#hashtxt">Hash tables</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#hashtxt" style="line-height:12pt">Hash tables</a>.<br />
 </p><h1><a name="removetxt">(myhash..remove)$key:?KeyValuePairs</a></h1>
 <p>
 Removes the key with all its values and returns a blank-separated list of
 key-value pairs.
 </p><p>
-&uArr; <a href="#hashtxt">Hash tables</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#hashtxt" style="line-height:12pt">Hash tables</a>.<br />
 </p><h1><a name="Newtxt">New</a></h1>
 <p>
 This is a method of the hash class that is called by the system when it
 evaluates 'new$hash'. It cannot be called from user code.
 </p><p>
-&uArr; <a href="#hashtxt">Hash tables</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#hashtxt" style="line-height:12pt">Hash tables</a>.<br />
 </p><h1><a name="Dietxt">Die</a></h1>
 <p>
 This method is called when a hash object is deleted. It is not directly
@@ -2837,7 +2902,7 @@ is created. Example:
 {?} (myhash..remove)$Z:?values;
 {?} :?myhash;                               { Get rid of the hash table. } </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#hashtxt">Hash tables</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#hashtxt" style="line-height:12pt">Hash tables</a>.<br />
 </p><h1><a name="ISOtxt">(myhash..ISO)$</a></h1>
 <p>
 
@@ -2845,12 +2910,12 @@ Make all key access case-insensitive. This applies to the full Unicode table,
 but defaults to ASCII and the upper 128 characters in the ISO8859-1 (Latin 1)
 character set if the characters are not UTF-8 encoded.
 </p><p>
-&uArr; <a href="#hashtxt">Hash tables</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#hashtxt" style="line-height:12pt">Hash tables</a>.<br />
 </p><h1><a name="casesensitivetxt">(myhash..casesensitive)$</a></h1>
 <p>
 Make all key access case sensitive. This the default.
 </p><p>
-&uArr; <a href="#hashtxt">Hash tables</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#hashtxt" style="line-height:12pt">Hash tables</a>.<br />
 </p><h1><a name="foralltxt">(myhash..forall)$&lt;Function&gt;</a></h1>
 <p>
  <br /> 
@@ -2879,7 +2944,7 @@ Example: <br />
     )
  </pre></blockquote><p> 
 </p><p>
-&uArr; <a href="#hashtxt">Hash tables</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#hashtxt" style="line-height:12pt">Hash tables</a>.<br />
 </p><h1><a name="filosofie">How Bracmat evolved</a></h1>
 <p>
 Bracmat originated from a Basic program that was meant (and able) to do some
@@ -2985,8 +3050,8 @@ explicit: <br /> &nbsp;C:
  </ol><p> Every similarity to other computer algebra systems is a matter of evolutionary
 convergence.
 </p><p>
-&uArr; <a href="#lusmenu">                       BRACMAT                       </a>.<br />
-</p><h1><a name="Bracmat-name">What does the name 'Bracmat' mean?</a></h1>
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
+</p><h1><a name="Bracmat-name">Why the name 'Bracmat'?</a></h1>
 <p>
 The name Bracmat stems from Ludvig Holbergs novel 'Nicolai Klimii iter
 subterraneum', the history of Niels Klim who visits the planet Nazar and
@@ -3007,12 +3072,25 @@ the word 'brachiat.'! Whether true or not, this derivation highlights one
 of the most prominent characteristics of the programming language Bracmat:
 it is all about tree branches.
 </p><p>
-&uArr; <a href="#lusmenu">                       BRACMAT                       </a>.<br />
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="colofon">How to obtain Bracmat</a></h1>
 <p>
-You can obtain a copy of Bracmat by sending an e-mail to me
+There are e few download options. You can get the last revision from
+https://github.com/BartJongejan/Bracmat.
+
+At http://cst.dk/download/bracmat/ you can follow the history of Bracmat from
+its inception somewhere in the eighties up to the last version. At this site
+you can also find compiled versions for some platforms. <br /> &nbsp; <br />
+Alternatively, you can obtain a copy of Bracmat by sending an e-mail to me
 (Bart Jongejan) at bart[AT]cst.dk. Please state your hardware/OS.
 </p><p>
-&uArr; <a href="#lusmenu">                       BRACMAT                       </a>.<br />
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
+</p><h1><a name="morexmlps">more example code</a></h1>
+<p>
+At http://rosettacode.org/wiki/Category:Bracmat over 100 tasks are solved
+using Bracmat. The site is an excellent way to compare how the same task is
+solved in a great number of programming languages.
+</p><p>
+<span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 <a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10-blue" alt="Valid XHTML 1.0 Strict" height="31" width="88" /></a></p></body>
 </html>
