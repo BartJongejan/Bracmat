@@ -2295,7 +2295,7 @@ results in the following output being written to the terminal:
     The next argument is c:documentsinput.txt
     The next argument is -o
     The next argument is d:htmlindex.html
-    Argument 0 is bin\bracmat
+    Argument 0 is bin\\bracmat
     Argument 1 is get$myprog
     Argument 2 is -i
     Argument 3 is c:documentsinput.txt
@@ -3822,7 +3822,7 @@ accompanies Bracmat, using Bracmat to do the conversion.</i>
 </html>
 ",!fname,APP,LIN)
       )
-  & ( ~&doHTML$"bracmat.html"
+  & ( &doHTML$"bracmat.html"
     |     out
         $ "* Choose from the menus the topics that interest you.
 * Enter the number or character string that precedes your choice.
