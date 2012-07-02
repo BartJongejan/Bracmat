@@ -1,3 +1,11 @@
+    2 July 2012
+
+Since build 115 (9 February 2012), the version should have read '6',
+not '5'. (This was the date when bracmat wás brought to GitHub.)
+Changes in bmalloc that makes it possible to compile with -O3.
+Changed 'unsigned char' to 'char' in a lot of places to make some
+warnings go away when compiled with gcc.
+
    22 June 2012
 
 Correction in scompare(). The expression @(1b:~<1 b) did not evaluate 
