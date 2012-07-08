@@ -49,10 +49,14 @@ Profiling:
     gprof a.out
 */
 
-#define DATUM "2 July 2012"
+#define DATUM "8 July 2012"
 #define VERSION "6"
-#define BUILD "123"
-/*   2 July 2012
+#define BUILD "124"
+
+/*   8 July 2012
+Added explanation and two small improvements to nextprime()
+
+     2 July 2012
 
 Since build 115 (9 February 2012), the version should have read '6',
 not '5'. (This was the date when bracmat wás brought to GitHub.)
@@ -8911,27 +8915,37 @@ static Hash * newhash(unsigned LONG size)
 
 static unsigned LONG nextprime(unsigned LONG g)
     {
+    /* For primality test, only try divisors that are 2, 3 or 5 or greater
+    numbers that are not multiples of 2, 3 or 5. Candidates below 100 are:
+     2  3  5  7 11 13 17 19 23 29 31 37 41 43
+    47 49 53 59 61 67 71 73 77 79 83 89 91 97
+    Of these 28 candidates, three are not prime:
+    49 (7*7), 77 (7*11) and 91 (7*13) */
     int i;
-    unsigned LONG kleindeler;
+    unsigned LONG smalldivisor;
     static int bijt[12]=
       {1,  2,  2,  4,    2,    4,    2,    4,    6,    2,  6};
     /*2-3,3-5,5-7,7-11,11-13,13-17,17-19,19-23,23-29,29-1,1-7*/
-    unsigned LONG grootdeler;
-    if(g & 1)
-        ++g; /* even -> uneven */
-    kleindeler = 2;
-    i = 0;
-    while((grootdeler = g / kleindeler) >= kleindeler)
+    unsigned LONG bigdivisor;
+    if(!(g & 1))
         {
-        if(grootdeler * kleindeler == g)
+        if(g <= 2)
+            return 2;
+        ++g;
+        }
+    smalldivisor = 2;
+    i = 0;
+    while((bigdivisor = g / smalldivisor) >= smalldivisor)
+        {
+        if(bigdivisor * smalldivisor == g)
             {
-            ++g;
-            kleindeler = 2;
+            g += 2;
+            smalldivisor = 2;
             i = 0;
             }
         else
             {
-            kleindeler += bijt[i];
+            smalldivisor += bijt[i];
             if(++i > 10)
                 i = 3;
             }
@@ -11446,12 +11460,12 @@ b b h h h a b c d:?X (|b c|x) d)
 static int subroot(ngetal * ag,char *conc[],int *pind)
     {
     int macht,i;
-    unsigned LONG g,kleindeler;
+    unsigned LONG g,smalldivisor;
     unsigned LONG ores;
     static int bijt[12]=
         {1,  2,  2,  4,    2,    4,    2,    4,    6,    2,  6};
     /* 2-3,3-5,5-7,7-11,11-13,13-17,17-19,19-23,23-29,29-1,1-7*/
-    unsigned LONG grootdeler;
+    unsigned LONG bigdivisor;
 
 #ifdef ERANGE   /* ANSI C : strtoul() out of range */
     errno = 0;
@@ -11465,14 +11479,14 @@ static int subroot(ngetal * ag,char *conc[],int *pind)
 #endif
     ores = 1;
     macht = 1;
-    kleindeler = 2;
+    smalldivisor = 2;
     i = 0;
-    while((grootdeler = g / kleindeler) >= kleindeler)
+    while((bigdivisor = g / smalldivisor) >= smalldivisor)
         {
-        if(grootdeler * kleindeler == g)
+        if(bigdivisor * smalldivisor == g)
             {
-            g = grootdeler;
-            if(kleindeler != ores)
+            g = bigdivisor;
+            if(smalldivisor != ores)
                 {
                 if(ores != 1)
                     {
@@ -11487,7 +11501,7 @@ static int subroot(ngetal * ag,char *conc[],int *pind)
                     sprintf(conc[(*pind)++],"%lu^(%d*\1)*",ores,macht);
                     }
                 macht = 1;
-                ores = kleindeler;
+                ores = smalldivisor;
                 }
             else
                 {
@@ -11496,7 +11510,7 @@ static int subroot(ngetal * ag,char *conc[],int *pind)
             }
         else
             {
-            kleindeler += bijt[i];
+            smalldivisor += bijt[i];
             if(++i > 10)
                 i = 3;
             }
