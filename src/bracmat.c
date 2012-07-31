@@ -37,7 +37,7 @@ implements reading XML files.
 
 On *N?X, just compile with
 
-    gcc -Wall -O3 bracmat.c xml.c
+    gcc -std=c99 -pedantic -Wall -O3 bracmat.c xml.c
 
 rename a.out to whatever
 
@@ -49,11 +49,17 @@ Profiling:
     gprof a.out
 */
 
-#define DATUM "8 July 2012"
+#define DATUM "31 July 2012"
 #define VERSION "6"
-#define BUILD "124"
+#define BUILD "125"
 
-/*   8 July 2012
+/*  31 July 2012
+Made code gcc -pedantic proof. There are two string constants with a length
+greater than 509, which ISO C89 compilers are required to support. Therefore
+the option -std=c99 is added.
+The LL suffix is replaced by L for non-Microsoft compilers.
+
+     8 July 2012
 Added explanation and two small improvements to nextprime()
 
      2 July 2012
@@ -1783,9 +1789,14 @@ NEWMULT
 #define TEN_LOG_RADIX 4L
 #define HEADROOM 20L
 #else
+#if defined _WIN64
 #define RADIX 100000000LL
-#define TEN_LOG_RADIX 8L
 #define HEADROOM 800LL
+#else
+#define RADIX 100000000L
+#define HEADROOM 800L
+#endif
+#define TEN_LOG_RADIX 8L
 #endif
 
 #define RADIX2 (RADIX * RADIX)
@@ -2817,8 +2828,8 @@ static psk anker;
 typedef struct inputBuffer
     {
     unsigned char * buffer;
-    int cutoff:1;    /* Set to true if very long string does not fit in buffer of size DEFAULT_INPUT_BUFFER_SIZE */
-    int allocated:1; /* True if allocated with malloc. Otherwise on stack. */
+    unsigned int cutoff:1;    /* Set to true if very long string does not fit in buffer of size DEFAULT_INPUT_BUFFER_SIZE */
+    unsigned int allocated:1; /* True if allocated with malloc. Otherwise on stack. */
     } inputBuffer;
 
 static inputBuffer * InputArray;

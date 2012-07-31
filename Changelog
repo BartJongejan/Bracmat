@@ -1,3 +1,12 @@
+   31 July 2012
+Made code gcc -pedantic proof. There are two string constants with a length
+greater than 509, which ISO C89 compilers are required to support. Therefore
+the option -std=c99 is added.
+The LL suffix is replaced by L for non-Microsoft compilers.
+
+     8 July 2012
+Added explanation and two small improvements to nextprime()
+
     2 July 2012
 
 Since build 115 (9 February 2012), the version should have read '6',
