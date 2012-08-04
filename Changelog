@@ -1,3 +1,6 @@
+   4 August 2012
+Removed function "?"$<expr>. The same effect is obtained by <expr>:?!(=)
+
    31 July 2012
 Made code gcc -pedantic proof. There are two string constants with a length
 greater than 509, which ISO C89 compilers are required to support. Therefore

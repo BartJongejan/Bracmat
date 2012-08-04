@@ -49,11 +49,15 @@ Profiling:
     gprof a.out
 */
 
-#define DATUM "31 July 2012"
+#define DATUM "4 August 2012"
 #define VERSION "6"
-#define BUILD "125"
+#define BUILD "126"
 
-/*  31 July 2012
+/*   4 August 2012
+
+Removed function "?"$<expr>. The same effect is obtained by <expr>:?!(=)
+
+    31 July 2012
 Made code gcc -pedantic proof. There are two string constants with a length
 greater than 509, which ISO C89 compilers are required to support. Therefore
 the option -std=c99 is added.
@@ -14436,6 +14440,10 @@ static function_return_type functies(psk pkn)
             else
                 return functionFail(pkn);
             }
+#if 0
+/*
+The same effect is obtained by <expr>:?!(=)
+*/
         CASE(PRV) /* "?"$<expr> */
             {
             if((rknoop->v.fl & SUCCESS)
@@ -14444,6 +14452,7 @@ static function_return_type functies(psk pkn)
             pkn = rechtertak(pkn);
             return functionOk(pkn);
             }
+#endif
         CASE(CLK) /* clk' */
             {
             clock_t time = clock();
@@ -17016,7 +17025,7 @@ int mainlus(int argc,char *argv[])
         "This is free software, and you are welcome to redistribute it\\n"
         "under certain conditions; type `!c' for details.\\n\\n"
         "\\n\\n{?} get$help { tutorial }\\n{?} )        { stop }\"&"
-        "(main=put$\"{?} \"&clk$():?SEC&((\"?\"$(get'):(|?&clk$+-1*!SEC:?SEC&"
+        "(main=put$\"{?} \"&clk$():?SEC&((get':?!(=):(|?&clk$+-1*!SEC:?SEC&"
         "put$\"{!} \"&put$!&put$(\"\\n    S  \" str$(div$(!SEC,1) \",\" (div$(mod$("
         "!SEC*100,100),1):?SEC&!SEC:<10&0|) !SEC) sec))|put$\"\\n    F\")|"
         "put$\"\\n    I\")&"
