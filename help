@@ -15,7 +15,7 @@ help=
   . outtxt,taytxt,newtxt,newobjecttxt,humtxt,objecttxt,hashtxt
   . paragraphs,fname,findtxt,inserttxt,removetxt,Newtxt,Dietxt
   . ISOtxt,casesensitivetxt,foralltxt,doHTML,clktxt
-  . lowtxt,upptxt,DOSopttxt,whltxt,argtxt,whtxt,d2xtxt,x2dtxt
+  . lowtxt,upptxt,DOSopttxt,whltxt,argtxt,d2xtxt,x2dtxt
   )
 .   ( lusmenu
     =   M
@@ -160,8 +160,7 @@ tbl  establish array size
 upp  convert to upper case
 utf  convert UTF-8 character to Unicode codepoint
 whl  while loop
-x2d  convert hexadecimal number to decimal number
-\"?\"  assign to nameless variable"
+x2d  convert hexadecimal number to decimal number"
       ,   (sel,seltxt)
           (alc,alctxt)
           (arg,argtxt)
@@ -198,7 +197,6 @@ x2d  convert hexadecimal number to decimal number
           (utf,utftxt)
           (whl,whltxt)
           (x2d,x2dtxt)
-          (\"?\",whtxt)
     )
   & ( aanbevelingen
     =   T
@@ -2302,12 +2300,6 @@ results in the following output being written to the terminal:
     Argument 4 is -o
     Argument 5 is d:htmlindex.html"
     )
-  & ( whtxt
-    =   T
-      , "\"?\"$<expression>"
-      , "Assigns expression to the unique 'nameless' variable. The inverse operation is
-the solitary '!'."
-    )
   & ( asctxt
     =   T
       , "asc$<character>"
@@ -3822,7 +3814,7 @@ accompanies Bracmat, using Bracmat to do the conversion.</i>
 </html>
 ",!fname,APP,LIN)
       )
-  & ( &doHTML$"bracmat.html"
+  & ( ~&doHTML$"bracmat.html"
     |     out
         $ "* Choose from the menus the topics that interest you.
 * Enter the number or character string that precedes your choice.
