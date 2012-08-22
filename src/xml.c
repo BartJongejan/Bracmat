@@ -131,7 +131,9 @@ struct lowup lu[] =
 
 static char * buf;
 static char * p;
+#if !ALWAYSREPLACEAMP
 static char * q;
+#endif
 static int anychar = FALSE;
 
 static int (*namechar)(int c);
@@ -1577,7 +1579,7 @@ int XMLtext(FILE * fpi,char * bron,int trim,int html)
     int retval = 0;
     int inc = 0x10000;
     int incs = 1;
-    long filesize;
+    LONG filesize;
     if(fpi)
         {
         if(fpi == stdin)
@@ -1605,7 +1607,9 @@ int XMLtext(FILE * fpi,char * bron,int trim,int html)
         retval = 1;
         buf = (char*)malloc(BUFSIZE);
         p = buf;
+#if !ALWAYSREPLACEAMP
         q = buf;
+#endif
         alltext = (fpi || trim) ? (char*)malloc(filesize+1) : bron;
         HT = html;
         if(buf && alltext)
@@ -1700,7 +1704,7 @@ int XMLtext(FILE * fpi,char * bron,int trim,int html)
                     }
                 else
                     {
-                    long result = fread(alltext,1,filesize,fpi);
+                    LONG result = fread(alltext,1,filesize,fpi);
                     assert(result <= filesize); 
                     /* The file is perhaps not opened
                     in binary mode, but in text mode. In that case the number of
