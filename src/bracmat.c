@@ -49,12 +49,33 @@ Profiling:
     gprof a.out
 */
 
-#define DATUM "4 August 2012"
+#define DATUM "22 August 2012"
 #define VERSION "6"
-#define BUILD "126"
+#define BUILD "127"
 
-/*   4 August 2012
+/*  22 August 2012
+Bug removed. The expression
+    ( (=A B)
+    : ?G1
+    : (=(A&X:?(G1.)) B)
+    )
+would not match the 'B' in the pattern with anything valid, because the 
+assignment X:?(G1.) had deleted the original subject. Now the subject is
+temporarily reference-incremented, so the 'B' still matches the old value of
+G1. The expression as a whole evaluates to X. Notice that this bug did not
+affect the very similar
+    ( (G2==A B)
+    & !G2
+    : (=(A&X:?(G2.)) B)
+    )
+Reason: here, the subject is not the object that G1 is bound to, but a copy.
+And that is so because the object that G1 is bound to is headed by an
+unevaluated = (being part of the rhs of an = operator). The expression !G2,
+however, must be evaluated, so it cannot be identical to G2's value.
+Consequently, the reassignment of G2 does not affect the subject of the
+pattern match operation, which is (=A B) at all times.
 
+     4 August 2012
 Removed function "?"$<expr>. The same effect is obtained by <expr>:?!(=)
 
     31 July 2012
@@ -11195,10 +11216,26 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                 case STREEP:
                     if (is_op(sub))
                         {
-                        if(kop(sub) == WORDT && ISBUILTIN((objectknoop*)sub))
+                        if(kop(sub) == WORDT)
                             {
-                            errorprintf("You cannot match an object '=' with '_' if the object is built-in\n");
-                            s.c.rmr = ONCE;
+                            if(ISBUILTIN((objectknoop*)sub))
+                                {
+                                errorprintf("You cannot match an object '=' with '_' if the object is built-in\n");
+                                s.c.rmr = ONCE;
+                                }
+                            else
+                                {
+                                if((s.c.lmr = match(ind+1,sub->LEFT, pat->LEFT, NULL,0,sub->LEFT,12345)) & TRUE)
+                                    {
+                                    loc = zelfde_als_w(sub->RIGHT); /*20120821 Object might change as a side effect!*/
+                                    if((s.c.rmr = match(ind+1,loc, pat->RIGHT, snijaf,0,loc,123)) & TRUE)
+                                        {
+                                        dummy_op = kop(sub);
+                                        dummy_flgs = 0;
+                                        }
+                                    wis(loc);
+                                    }
+                                }
                             }
                         else if(  ((s.c.lmr = match(ind+1,sub->LEFT, pat->LEFT, NULL,0,sub->LEFT,12345)) & TRUE)
                                && ((s.c.rmr = match(ind+1,sub->RIGHT, pat->RIGHT, snijaf,0,sub->RIGHT,123)) & TRUE)
@@ -11405,9 +11442,17 @@ b b h h h a b c d:?X (|b c|x) d)
                         {
                         if(kop(sub) == kop(pat))
                             {
-                            if ((s.c.lmr = match(ind+1,sub->LEFT, pat->LEFT, NULL,0,sub->LEFT,4432)) & TRUE)
-                                s.c.rmr = match(ind+1,sub->RIGHT, pat->RIGHT, NULL,0,sub->RIGHT,2234);
-                            /*if (s.c.lmr != SCHAR_MAX)*/
+                            if((s.c.lmr = match(ind+1,sub->LEFT, pat->LEFT, NULL,0,sub->LEFT,4432)) & TRUE)
+                                {
+                                if(kop(sub) == WORDT)
+                                    {
+                                    loc = zelfde_als_w(sub->RIGHT); /*20120821 Object might change as a side effect!*/
+                                    s.c.rmr = match(ind+1,loc, pat->RIGHT, NULL,0,loc,2234);
+                                    wis(loc);
+                                    }
+                                else                                    
+                                    s.c.rmr = match(ind+1,sub->RIGHT, pat->RIGHT, NULL,0,sub->RIGHT,2234);
+                                }
                             s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE));
                             }
                         }
