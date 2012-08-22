@@ -1952,19 +1952,23 @@ towards operators that are closer to the root of the tree"
           (x2d$0111:273|Out$179)
           out$180
           (x2d$111:273|Out$180)
+          out$181
           (   "Бу́ря мгло́ю не́бо кро́ет,"
             : ~<>"бу́ря мгло́ю не́бо кро́ет,"
           | Out$181
           )
+          out$182
           (   "Бу́ря мгло́ю не́бо кро́ет,"
             : ~<>"БУ́РЯ МГЛО́Ю НЕ́БО КРО́ЕТ,"
           | Out$182
           )
+          out$183
           (     "Бу́ря мгло́ю не́бо кро́ет,"
               : "БУ́РЯ МГЛО́Ю НЕ́БО КРО́ЕТ,"
             & Out$183
           | 
           )
+          out$184
           (   @( "abcБу́ря мгло́ю не́бо кро́ет,xyz"
                : ?A ~<>"бу́ря мгло́ю не́бо кро́ет," ?Z
                )
@@ -1972,6 +1976,7 @@ towards operators that are closer to the root of the tree"
             & !Z:xyz
           | out$(A !A Z !Z)&Out$184
           )
+          out$185
           (   @( "abcБу́ря мгло́ю не́бо кро́ет,xyz"
                : ?A ~<>"БУ́РЯ МГЛО́Ю НЕ́БО КРО́ЕТ," ?Z
                )
@@ -1979,22 +1984,26 @@ towards operators that are closer to the root of the tree"
             & !Z:xyz
           | out$(A !A Z !Z)&Out$185
           )
+          out$186
           (   @( "abcБу́ря мгло́ю не́бо кро́ет,xyz"
                : ?A "БУ́РЯ МГЛО́Ю НЕ́БО КРО́ЕТ," ?Z
                )
             & Out$186
           | 
           )
+          out$187
           (   @(abcGjJjgdsJJHGfxyz:?A ~<>gjjjgdsjjhgf ?Z)
             & !A:abc
             & !Z:xyz
           | out$(A !A Z !Z)&Out$187
           )
+          out$188
           (   @(abcGjJjgdsJJHGfxyz:?A ~<>GJJJGDSJJHGF ?Z)
             & !A:abc
             & !Z:xyz
           | out$(A !A Z !Z)&Out$188
           )
+          out$189
           (   @(abcGjJjgdsJJHGfxyz:?A GJJJGDSJJHGF ?Z)
             & Out$189
           | 
@@ -4117,6 +4126,34 @@ towards operators that are closer to the root of the tree"
           (@(1b:~<0 b)|Out$527)
           (@(1b:~<2 b)&Out$528|)
           (@(1b:~<1 b)|Out$529)
+          (   (=A B)
+            : ?G1
+            : (=(A&X:?(G1.)) B)
+            : (=X)
+          | Out$530
+          )
+          (   (=A B):?G2
+            &   !G2
+              : (=(A&X:?(G2.)) B)
+              : (=X)
+          | Out$531
+          )
+          (   (G3==A B)
+            &   !G3
+              : (=(A&X:?(G3.)) B)
+              : (=A B)
+            & "The value of G3, =A B, is not evaluated. When !G3 is evaluated, 
+               a copy of the = is created, with the READY flag set.
+               The assignment X:?(G3.) assigns to the original, unevaluated,
+               object, dereferencing A, B and the operator connecting them."
+            & A
+            & !loss
+            & "blank operator"
+            & !loss
+            & B
+            & !loss
+          | Out$532
+          )
       &   out
         $ ( str
           $ ( "Done. "
