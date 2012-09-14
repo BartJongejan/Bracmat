@@ -47,6 +47,15 @@ Profiling:
     gcc -Wall -pg bracmat.o xml.o
     ./a.out 'get$"valid.bra";!r'
     gprof a.out
+
+Test coverage:
+(see http://gcc.gnu.org/onlinedocs/gcc/Invoking-Gcov.html#Invoking-Gcov)
+
+    gcc -fprofile-arcs -ftest-coverage bracmat.c xml.c
+    ./a.out
+    gcov bracmat.c
+    gcov xml.c
+
 */
 
 #define DATUM "12 September 2012"
