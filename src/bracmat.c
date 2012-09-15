@@ -58,9 +58,9 @@ Test coverage:
 
 */
 
-#define DATUM "12 September 2012"
+#define DATUM "15 September 2012"
 #define VERSION "6"
-#define BUILD "128"
+#define BUILD "129"
 
 /*  12 September 2012
 Updated u2l and l2u with data from UnicodeData.txt 2011-11-08
