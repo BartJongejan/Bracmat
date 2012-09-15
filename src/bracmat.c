@@ -2279,7 +2279,7 @@ static int hum = 1;
 static int mooi = TRUE;
 static int optab[256];
 static int dummy_op = LUCHT;
-static int dummy_flgs = 0; /* Bart 20021215 */
+/*static int dummy_flgs = 0; 20120915 abolished*/ /* Bart 20021215 */
 #if DEBUGBRACMAT
 static int debug = 0;
 #endif
@@ -4601,7 +4601,7 @@ static LONG toLong(psk kn)
     }
 
 #if DEBUGBRACMAT
-static void setend(unsigned char ** punmatched,unsigned char * p,const char * wh)
+static void setend(char ** punmatched,char * p,const char * wh)
     {
     if(punmatched)
         {
@@ -10268,8 +10268,8 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
         Printf  (",pos=%ld,sLen=%ld,sugCut=%s,mayMoveStart=%s)"
                 ,pposition
                 ,(long int)stringLength
-                ,suggestedCutOff ? *suggestedCutOff ? *suggestedCutOff : (unsigned char*)"(0)" : (unsigned char*)"0"
-                ,mayMoveStartOfSubject ? *mayMoveStartOfSubject ? *mayMoveStartOfSubject : (unsigned char*)"(0)" : (unsigned char*)"0"
+                ,suggestedCutOff ? *suggestedCutOff ? *suggestedCutOff : (char*)"(0)" : (char*)"0"
+                ,mayMoveStartOfSubject ? *mayMoveStartOfSubject ? *mayMoveStartOfSubject : (char*)"(0)" : (char*)"0"
                 );
         Printf("\n");
 #else
@@ -11260,7 +11260,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                                     if((s.c.rmr = match(ind+1,loc, pat->RIGHT, snijaf,0,loc,123)) & TRUE)
                                         {
                                         dummy_op = kop(sub);
-                                        dummy_flgs = 0;
+                                        /*dummy_flgs = 0;*/
                                         }
                                     wis(loc);
                                     }
@@ -11271,7 +11271,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                                ) /* NULL --> snijaf 20031110 */
                             {
                             dummy_op = kop(sub);
-                            dummy_flgs = 0;/*sub->v.fl & VISIBLE_FLAGS;*/
+                            /*dummy_flgs = 0;*//*sub->v.fl & VISIBLE_FLAGS;*/
                             }
                         }
                     if (s.c.lmr != PRISTINE)
@@ -11877,7 +11877,7 @@ static psk evalmacro(psk pkn)
                         wis(h);
                         h = becomes;
                         }
-                    h->v.fl = dummy_op | dummy_flgs | Flgs;
+                    h->v.fl = dummy_op | /*dummy_flgs |*/ Flgs;
                     hh = evalmacro(h->LEFT);
                     if(hh)
                         {
@@ -12052,7 +12052,7 @@ static psk lambda(psk pkn,psk name,psk Arg)
                         wis(h);
                         h = becomes;
                         }
-                    h->v.fl = dummy_op | dummy_flgs | Flgs;
+                    h->v.fl = dummy_op | /*dummy_flgs |*/ Flgs;
                     hh = lambda(h->LEFT,name,Arg);
                     if(hh)
                         {
@@ -13342,7 +13342,7 @@ static function_return_type find_func(psk pkn)
     else if (  (kop(pkn->LEFT) == FUU)
             && (pkn->LEFT->v.fl & BREUK)
             && (kop(pkn->LEFT->RIGHT) == DOT)
-            && (!kop(pkn->LEFT->RIGHT->LEFT))
+            && (!is_op(pkn->LEFT->RIGHT->LEFT))
             )
         {
         psk rknoop;
@@ -14618,18 +14618,13 @@ The same effect is obtained by <expr>:?!(=)
                 if(!HAS_UNOPS(pkn->LEFT))
                     {
                     intVal = pkn->v.fl & UNOPS;/*20101103*/
-                    if(intVal & BREUK)
-                        {
-                        if  (  kop(pkn->RIGHT) == DOT
-                            && !kop(pkn->RIGHT->LEFT)
-                            )
-                            {
-                            return functionOk(pkn);
-                            }
-                        else
-                            {
-                            return functionFail(pkn);
-                            }
+                    if(  intVal == BREUK 
+                      && is_op(pkn->RIGHT)/*20120915 & --> == , is_op test*/
+                      && kop(pkn->RIGHT) == DOT
+                      && !is_op(pkn->RIGHT->LEFT)
+                      )
+                        { /* /('(a.a+2))*/
+                        return functionOk(pkn);
                         }
                     else
                         {
@@ -16580,8 +16575,10 @@ static psk eval(psk pkn)
                         fl = pkn->v.fl & (UNOPS & ~INDIRECT);
                         pkn = __rechtertak(pkn);
                         if(fl)
+                            {
                             pkn = prive(pkn);
-                        pkn->v.fl |= fl; /* {?} (a=b)&<>#@`/%?!('$a) => /#<>%@?`b */
+                            pkn->v.fl |= fl; /* {?} (a=b)&<>#@`/%?!('$a) => /#<>%@?`b */
+                            }
                         break;
 
                         /*                    pkn = pkn->RIGHT;*/
@@ -16726,18 +16723,15 @@ static psk eval(psk pkn)
                         pkn = copyop(pkn);
                         }
                     pkn->v.fl |= READY;
-                    if(  evalueer((pkn->LEFT)) == TRUE
+                    if(  !(lkn.v.fl & INDIRECT)
+                      && evalueer((pkn->LEFT)) == TRUE
                       && evalueer((pkn->RIGHT)) == TRUE
                       )
                         {
                         pkn = substdiff(pkn);
+                        break;
                         }
-                    else
-                        pkn->v.fl ^= SUCCESS;
-                    if(lkn.v.fl & INDIRECT)
-                        {
-                        pkn = evalvar(pkn);
-                        }
+                    pkn->v.fl ^= SUCCESS;
                     break;
                 case FUN :
                 case FUU :
@@ -16784,10 +16778,10 @@ static psk eval(psk pkn)
                     {
                     pkn->v.fl &= (~OPERATOR & ~READY);
                     pkn->ops |= dummy_op;
-                    pkn->v.fl |= dummy_flgs;
+                    pkn->v.fl |= /*dummy_flgs|*/SUCCESS;
                     }
                     if(lkn.v.fl & INDIRECT)
-                        {
+                        {/* (a=b=127)&(.):(_)&!(a_b) */
                         pkn = evalvar(pkn);
                         }
                     break;
@@ -17058,7 +17052,7 @@ int mainlus(int argc,char *argv[])
     char * mainloop;
     const char * ret;
     if(argc > 1)
-        {
+        { /* to get here, e.g.: ./bracmat out$hello */
         ARGC = argc;
         ARGV = argv;
         mainloop = "arg$&whl'(get$(arg$,MEM):?\"?...@#$*~%!\")&!\"?...@#$*~%!\"";
@@ -17176,7 +17170,7 @@ int main(int argc,char *argv[])
     if(!startProc())
         return -1;
     ret = mainlus(argc,argv);
-    endProc();
+    endProc();/* to get here, eg: {?} main=out$bye! */
     if(targetPath)
         free(targetPath);
     return ret;
