@@ -37,13 +37,13 @@ implements reading XML files.
 
 On *N?X, just compile with
 
-    gcc -std=c99 -pedantic -Wall -O3 bracmat.c xml.c
+    gcc -std=c99 -pedantic -Wall -O3 -DNDEBUG bracmat.c xml.c
 
 rename a.out to whatever
 
 Profiling:
 
-    gcc -Wall -c -pg bracmat.c xml.c
+    gcc -Wall -c -pg -DNDEBUG bracmat.c xml.c
     gcc -Wall -pg bracmat.o xml.o
     ./a.out 'get$"valid.bra";!r'
     gprof a.out
@@ -51,18 +51,28 @@ Profiling:
 Test coverage:
 (see http://gcc.gnu.org/onlinedocs/gcc/Invoking-Gcov.html#Invoking-Gcov)
 
-    gcc -fprofile-arcs -ftest-coverage bracmat.c xml.c
+    gcc -fprofile-arcs -ftest-coverage -DNDEBUG bracmat.c xml.c
     ./a.out
     gcov bracmat.c
     gcov xml.c
 
 */
 
-#define DATUM "15 September 2012"
+#define DATUM "19 September 2012"
 #define VERSION "6"
-#define BUILD "129"
+#define BUILD "131"
 
-/*  12 September 2012
+/*  19 September 2012
+Made major changes in Naamwoord, Naamwoord_w and doPosition to make two levels
+of indirection work also in the case that an object is at the first level.
+Handling of two levels of indirection is improved generally.
+
+    16 September 2012
+Using gcov, found some places that are unreachable in merge(), substdiff() and
+evalvar(). Simplified substdiff. Function evalvar now expects that the argument
+is not shared. Deleted code that was never reached.
+
+    12 September 2012
 Updated u2l and l2u with data from UnicodeData.txt 2011-11-08
 (using script uni.bra)
 
@@ -1087,7 +1097,7 @@ TODO list:
    20010821 a () () was evaluated to a (). Removed last ().
    20010903 (a.) () was evaluated to a
 */
-#define DEBUGBRACMAT 0 /* implement dbg'(expression) */
+#define DEBUGBRACMAT 0 /* implement dbg'(expression), see DBGSRC macro */
 #define REFCOUNTSTRESSTEST 0
 #define DOSUMCHECK 0
 #define CHECKALLOCBOUNDS 0 /* only if NDEBUG is false */
@@ -1098,6 +1108,12 @@ TODO list:
 #define CUTOFFSUGGEST 1
 #define READMARKUPFAMILY 1 /* read SGML, HTML and XML files. (include xml.c in your project!) */
 
+#if DEBUGBRACMAT
+#define DBGSRC(code)    if(debug){code}
+#else
+#define DBGSRC(code)
+#endif
+
 #if MAXSTACK
 static int maxstack = 0;
 static int stack = 0;
@@ -1106,12 +1122,6 @@ static int stack = 0;
 #else
 #define ASTACK
 #define ZSTACK
-#endif
-
-#if 1
-#ifndef NDEBUG
-#define NDEBUG /* turns off assert() (*n?x) */
-#endif
 #endif
 
 #include <assert.h>
@@ -2129,7 +2139,7 @@ static const char opchar[16] =
 #define kop(kn) ((kn)->ops & OPERATOR)
 #define kopo(kn) ((kn).ops & OPERATOR)
 #define is_op(kn) ((kn)->ops & IS_OPERATOR)
-#define is_object(kn) (((kn)->ops & (IS_OPERATOR|OPERATOR)) == (IS_OPERATOR|WORDT))
+#define is_object(kn) (((kn)->ops & OPERATOR) == WORDT)
 #define klopcode(kn) (kop(kn) >> OPSH)
 
 #define nil(p) knil[klopcode(p)]
@@ -2142,7 +2152,7 @@ static const char opchar[16] =
 #define QBREUK              (1 << (SHL+4))
 #define LATEBIND            (1 << (SHL+5))
 #define DEFINITELYNONUMBER  (1 << (SHL+6)) /* this is not stored in a node! */
-#define ONE                 (1 << (SHL+NON_REF_COUNT_BITS))
+#define ONE   (unsigned int)(1 << (SHL+NON_REF_COUNT_BITS))
 
 #define ALL_REFCOUNT_BITS_SET \
        ((((unsigned int)(~0)) >> (SHL+NON_REF_COUNT_BITS)) << (SHL+NON_REF_COUNT_BITS))
@@ -2279,7 +2289,6 @@ static int hum = 1;
 static int mooi = TRUE;
 static int optab[256];
 static int dummy_op = LUCHT;
-/*static int dummy_flgs = 0; 20120915 abolished*/ /* Bart 20021215 */
 #if DEBUGBRACMAT
 static int debug = 0;
 #endif
@@ -7317,12 +7326,7 @@ static int vglsub(psk kn1,psk kn2)
 
 static int vgl(psk kn1,psk kn2)
     {
-#if DEBUGBRACMAT
-    if(debug)
-        {
-        Printf("vgl(");result(kn1);Printf(",");result(kn2);Printf(")\n");
-        }
-#endif
+    DBGSRC(Printf("vgl(");result(kn1);Printf(",");result(kn2);Printf(")\n");)
     while(kn1 != kn2)
         {
         int r;
@@ -7671,20 +7675,10 @@ static int string_copy_insert(psk name,psk pknoop,char * str,char * snijaf)
             kn->str = str;
             kn->length = snijaf - str;
             }
-#if DEBUGBRACMAT
-        if(debug)
-            {
-            int redMooi;
-            int redhum;
-            redMooi = mooi;
-            redhum = hum;
-            mooi = FALSE;
-            hum = FALSE;
-            Printf("str [%s] length %lu\n",kn->str,(unsigned LONG int)kn->length);
-            mooi = redMooi;
-            hum = redhum;
-            }
-#endif
+        DBGSRC(int redMooi;int redhum;redMooi = mooi;\
+            redhum = hum;mooi = FALSE;hum = FALSE;\
+            Printf("str [%s] length %lu\n",kn->str,(unsigned LONG int)kn->length);\
+            mooi = redMooi;hum = redhum;)
         ret = insert(name,(psk)kn);
         if(ret)
             dec_refcount((psk)kn);
@@ -8405,13 +8399,19 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                     if(mayMoveStartOfSubject && *mayMoveStartOfSubject != 0)
                         {
                         char * startpos;
+#ifndef NDEBUG
+                        char * pat = (char *)POBJ(p);
+#endif
                         startpos = strstr((char *)S,(char *)POBJ(p));
                         if(startpos != 0)
                             {
                             if(Flgs & MINUS)
                                 --startpos;
                             }
-                        assert(startpos+strlen((char *)POBJ(p)) >= snijaf);
+                        /*assert(  startpos == 0 
+                              || (startpos+strlen((char *)POBJ(p)) < snijaf - 1)
+                              || (startpos+strlen((char *)POBJ(p)) >= snijaf)
+                              );*/
                         *mayMoveStartOfSubject = (char *)startpos;
                         return ONCE;
                         }
@@ -9288,12 +9288,7 @@ typedef struct
 
 static psk getmember(psk name,psk tree,objectStuff * Object)
     {
-#if DEBUGBRACMAT
-if(debug)
-    {
-    Printf("getmember(");result(name);Printf(",");result(tree);Printf(")\n");
-    }
-#endif
+    DBGSRC(Printf("getmember(");result(name);Printf(",");result(tree);Printf(")\n");)
     while(is_op(tree))
         {
         if(kop(tree) == WORDT)
@@ -9380,12 +9375,7 @@ must be equivalent
     {
     vars *navar;
     /* 29 juli 1993 */
-#if DEBUGBRACMAT
-if(debug)
-    {
-    Printf("find(");result(naamknoop);Printf(")\n");
-    }
-#endif
+    DBGSRC(Printf("find(");result(naamknoop);Printf(")\n");)
     if(is_op(naamknoop))
         {
         switch(kop(naamknoop))
@@ -9552,18 +9542,14 @@ static int deleteNode(psk name)
         return FALSE;
     }
 
+static psk Naamwoord_w(psk variabele,int twolevelsofindirection);
+
 /*20111101 changed signature. Before, naamwoord and naamwoord_w returned TRUE
   or FALSE, while the binding was returned in a pointer-to-a-pointer.*/
-static psk Naamwoord(psk variabele,unsigned int *pflags,int *newval)
+static psk Naamwoord(psk variabele,int *newval,int twolevelsofindirection)
 /* *pbinding kan een andere waarde krijgen, ook als de boel faalt */
     {
     psk pbinding;
-    int Flgs;
-    Flgs = variabele->v.fl;
-    *pflags |= (Flgs & ERFENIS); /* {?} (a=b)&(b=c)&<>#@`/%?!!a => /#<>%@?`c */
-    if(ANYNEGATION(Flgs))
-        *pflags |= NOT;
-    *pflags ^= ((Flgs & SUCCESS) ^ SUCCESS);
     if((pbinding = find(variabele,newval,NULL)) != NULL)
         {
         /*
@@ -9574,11 +9560,31 @@ static psk Naamwoord(psk variabele,unsigned int *pflags,int *newval)
         Als dat zo is, moet ik e toekennen aan its.c (e:?(its.c)),
         zodat ik krijg a=b=c=e
         */
-        if(variabele->v.fl & DOUBLY_INDIRECT)
+        if(twolevelsofindirection)
             {
+            psk peval;
+            
+            if(pbinding->v.fl & INDIRECT)
+                {
+                peval = subboomcopie(pbinding);
+                peval = eval(peval);
+                if(  !isSUCCESS(peval)
+                  || (  is_op(peval)
+                     && kop(peval) != WORDT
+                     && kop(peval) != DOT
+                     )
+                  )
+                    {
+                    wis(peval);
+                    return 0;
+                    }
+                if(*newval)
+                    wis(pbinding);
+                *newval = TRUE;
+                pbinding = peval;
+                }
             if(is_op(pbinding))
                 {
-                psk peval;
                 if(is_object(pbinding))
                     {
                     peval = zelfde_als_w(pbinding);
@@ -9613,10 +9619,9 @@ static psk Naamwoord(psk variabele,unsigned int *pflags,int *newval)
                         *newval = FALSE;
                         wis(pbinding);
                         }
-                    if((pbinding = Naamwoord(peval,pflags,newval)) != NULL)
+                    if((pbinding = Naamwoord(peval,newval,(peval->v.fl & DOUBLY_INDIRECT))) != NULL)
                         {
                         wis(peval);
-                        /*ret = TRUE;*/
                         }
                     else
                         {
@@ -9635,7 +9640,7 @@ static psk Naamwoord(psk variabele,unsigned int *pflags,int *newval)
                 int newv = *newval;
                 psk binding;
                 *newval = FALSE;
-                binding = Naamwoord(pbinding,pflags,newval);
+                binding = Naamwoord(pbinding,newval,pbinding->v.fl & DOUBLY_INDIRECT);
                 if(newv)
                     {
                     wis(pbinding);
@@ -9651,22 +9656,33 @@ static psk Naamwoord(psk variabele,unsigned int *pflags,int *newval)
     return pbinding;
     }
 
-static psk Naamwoord_w(psk variabele)
+static psk Naamwoord_w(psk variabele,int twolevelsofindirection)
+/*20120919 twolevelsofindirection because the variable not always can have the
+bangs. Example: 
+  (A==B)  &  a b c:? [?!!A
+first finds (=B), which is an object that should not obtain the flags !! as in
+!!(=B), because that would have a side effect on A as A=!!(=B)
+*/
     {
     psk pbinding;
-    unsigned int flags,flags2;
     int newval;
-    flags = SUCCESS;
     newval = FALSE;
-
-    if((pbinding = Naamwoord(variabele,&flags,&newval)) != NULL)
+    DBGSRC(printf("Naamwoord_w(");result(variabele);printf(")\n");)
+    if((pbinding = Naamwoord(variabele,&newval,twolevelsofindirection)) != NULL)
         {
-        assert(pbinding != NULL);
-        flags2 = (pbinding)->v.fl;
-        flags2 |= (flags & (ERFENIS|NOT));
-        flags2 ^= ((flags & SUCCESS) ^ SUCCESS);
+        unsigned int nameflags,valueflags;
+        nameflags = (variabele->v.fl & (ERFENIS|SUCCESS));
+        if(ANYNEGATION(variabele->v.fl))
+            nameflags |= NOT;
 
-        if((pbinding)->v.fl == flags2)
+        valueflags = (pbinding)->v.fl;
+        valueflags |= (nameflags & (ERFENIS|NOT));
+        valueflags ^= ((nameflags & SUCCESS) ^ SUCCESS);
+
+        assert(pbinding != NULL);
+        DBGSRC(printf("pbinding:");result(pbinding);printf("\n");)
+
+        if(kop(pbinding) == WORDT/*20120918*/ || (pbinding)->v.fl == valueflags)
             {
             if(!newval)
                 {
@@ -9675,15 +9691,18 @@ static psk Naamwoord_w(psk variabele)
             }
         else
             {
+            assert(kop(pbinding) != WORDT);
             if(newval)
                 {
+                DBGSRC(printf("prive\n");)
                 pbinding = prive(pbinding);
                 }
             else
                 {
+                DBGSRC(printf("subboomcopie\n");)
                 pbinding = subboomcopie(pbinding);
                 }
-            (pbinding)->v.fl = flags2 & ~ALL_REFCOUNT_BITS_SET;
+            (pbinding)->v.fl = valueflags & ~ALL_REFCOUNT_BITS_SET;
             }
         }
     else
@@ -9980,18 +9999,40 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
             }
         }
 #endif
+    Flgs = pat->v.fl & (UNIFY|INDIRECT|DOUBLY_INDIRECT);
 
+    DBGSRC(printf("patA:");result(pat);printf("\n");)
     name = subboomcopie(pat);
     name->v.fl |= SUCCESS;
-    s.c.rmr = (char)evalueer(name) & TRUE;/* 20101119 & TRUE added*/
-/*    s.c.rmr ^= (char)NIKS(pat);*/
-    if (!(s.c.rmr))
-        { /* {?}  @(012xyz:? [!TYTR ?) */
-        wis(name);
-        return FALSE;
+    if((Flgs & UNIFY) && (is_op(pat) || (FLGS & INDIRECT)))
+        {
+        name->v.fl &= ~VISIBLE_FLAGS;
+        if(!is_op(name))
+            name->v.fl |= READY;
+        s.c.rmr = (char)evalueer(name) & TRUE;
+
+        if (!(s.c.rmr))
+            {
+            wis(name);
+            return FALSE;
+            }
+        }
+    else
+        {
+        DBGSRC(printf("patA:");result(pat);printf("\n");)
+        s.c.rmr = (char)evalueer(name) & TRUE;
+
+        if (!(s.c.rmr))
+            { 
+            wis(name);
+            return FALSE;
+            }
+
+        Flgs = pat->v.fl & UNIFY;
+        Flgs |= name->v.fl;
         }
     pat = name;
-    Flgs = pat->v.fl;
+    DBGSRC(printf("patB:");result(pat);printf("\n");)
     if(Flgs & UNIFY)
         {
         if (  is_op(pat)
@@ -10001,7 +10042,7 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
             if (Flgs & INDIRECT)        /* ?! of ?!! */
                 {
                 psk loc;
-                if ((loc=Naamwoord_w(pat)) != NULL)
+                if ((loc=Naamwoord_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
                     {
                     if (is_object(loc))
                         s.c.rmr = (char)icopy_insert(loc,pposition);
@@ -10021,6 +10062,7 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
             }
         else
             s.c.rmr = TRUE;
+
         if(name)
             wis(name); /* [?a */
         /*s.c.rmr |= (char)(Flgs & FENCE); 20111216 */
@@ -10040,7 +10082,8 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
                        )
                   | !length
               )
-            & CharacterLength$𝔘𝔫𝔦𝔠𝔬𝔡𝔢:7
+            & CharacterLength$str$(a chu$1000 b chu$100000 c):5
+          )
         */
         return (char)(ONCE | POSITION_ONCE | s.c.rmr);
         }
@@ -10048,12 +10091,7 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
     if( ((pat->v.fl & (SUCCESS|VISIBLE_FLAGS_POS0|IS_OPERATOR)) == (SUCCESS|QGETAL)))
         {
         pos = toLong(pat); /* [20 */
-#if DEBUGBRACMAT
-        if(debug)
-            {
-            Printf("pat:");result(pat);Printf("\n");
-            }
-#endif
+        DBGSRC(Printf("pat:");result(pat);Printf("\n");)
         if(pos < 0)
             pos += (expr == NULL ? (LONG)stringLength : expressionLength(expr,op)) + 1; /* [(20+-1*(!len+1)) -> `-7 */
         if(LESS(pat))
@@ -10252,43 +10290,16 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
         suggestedCutOff = NULL;
         }
 #endif
-#if DEBUGBRACMAT
-    if(debug)
-        {
-        int redMooi;
-        int redhum;
-        redMooi = mooi;
-        redhum = hum;
-        mooi = FALSE;
-        hum = FALSE;
-#if 1
-        Printf("%d  %.*s|%s",ind,snijaf-sub,sub,snijaf);
-        Printf(":");
-        result(pat);
-        Printf  (",pos=%ld,sLen=%ld,sugCut=%s,mayMoveStart=%s)"
-                ,pposition
-                ,(long int)stringLength
-                ,suggestedCutOff ? *suggestedCutOff ? *suggestedCutOff : (char*)"(0)" : (char*)"0"
-                ,mayMoveStartOfSubject ? *mayMoveStartOfSubject ? *mayMoveStartOfSubject : (char*)"(0)" : (char*)"0"
-                );
-        Printf("\n");
-#else
-        Printf("%d%*sstringmatch(%.*s|%s",ind,ind,"",snijaf-sub,sub,snijaf);
-        Printf(":");
-        result(pat);
-        Printf(",pos=%ld,sLen=%ld,sugCut=%s,mayMoveStart=%s)"
-        ,pposition
-        ,stringLength
-        ,suggestedCutOff ? *suggestedCutOff ? *suggestedCutOff : "(0)" : "0"
-        ,mayMoveStartOfSubject ? *mayMoveStartOfSubject ? *mayMoveStartOfSubject : "(0)" : "0"
-        );
-        Printf("\n");
-#endif
-/*        Printf("%s %d%*sstringmatch(%s",wh,ind,ind,"",sub);Printf(":");result(pat);Printf(")");Printf("\n");*/
-        mooi = redMooi;
-        hum = redhum;
-        }
-#endif
+    DBGSRC(int redMooi;int redhum;redMooi = mooi;redhum = hum;mooi = FALSE;\
+        hum = FALSE;Printf("%d  %.*s|%s",ind,snijaf-sub,sub,snijaf);\
+        Printf(":");result(pat);\
+        Printf  (",pos=%ld,sLen=%ld,sugCut=%s,mayMoveStart=%s)"\
+                ,pposition\
+                ,(long int)stringLength\
+                ,suggestedCutOff ? *suggestedCutOff ? *suggestedCutOff : (char*)"(0)" : (char*)"0"\
+                ,mayMoveStartOfSubject ? *mayMoveStartOfSubject ? *mayMoveStartOfSubject : (char*)"(0)" : (char*)"0"\
+                );\
+        Printf("\n");mooi = redMooi;hum = redhum;)
     s.i = (PRISTINE << SHIFT_LMR) + (PRISTINE << SHIFT_RMR);
 
     Flgs = pat->v.fl;
@@ -10374,7 +10385,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                             {
                             if (Flgs & INDIRECT)        /* ?! of ?!! */
                                 {
-                                if ((loc=Naamwoord_w(pat)) != NULL)
+                                if ((loc=Naamwoord_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
                                     {
                                     if (is_object(loc))
                                         /*s.c.rmr = (char)scopy_insert(loc, sub);*/
@@ -10401,7 +10412,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     }
                 else if (Flgs & INDIRECT)        /* ! of !! */
                     {
-                    if ((loc=Naamwoord_w(pat)) != NULL)
+                    if ((loc=Naamwoord_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
                         {
                         cleanOncePattern(loc);
 #if CUTOFFSUGGEST
@@ -10698,21 +10709,6 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                             }
                         }
                     break;
-#if 0
-                    /* & ~ONCE; removed 13 november 1991 */
-/*                    s.c.rmr &= ~(FENCE | ONCE);*/ /* 20040907 s.c.lmr -> s.c.rmr This error made @(abc:(ab|x) c) to fail! */
-                    if(!(s.c.rmr & FENCE))
-                        s.c.rmr &= ~(ONCE|POSITION_ONCE); /* 20040908 */
-#if DEBUGBRACMAT
-                    if(debug)
-                        {
-                        Printf("%d%*s",ind,ind,"");
-                        Printf("OF s.c.lmr %d s.c.rmr %d\n",s.c.lmr,s.c.rmr);
-                        }
-#endif
-                    s.c.rmr |= (char)(s.c.lmr & ONCE);
-                    break;
-#endif
 /*
 20070222 This is now much quicker than previously, because the whole expression
 (|bc|x) is ONCE if the start of the subject does not match the start of any of
@@ -10777,20 +10773,10 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 #else
                             s.c.rmr = (char)(/** / ONCE | / **/ scompare("b",(unsigned char *)sub,snijaf, pat));
 #endif
-#if DEBUGBRACMAT
-                            if(debug)
-                                {
-                                Printf("%s %d%*sscompare(%.*s,",wh,ind,ind,"",snijaf-sub,sub);result(pat);Printf(") ");
-                                if(s.c.rmr & ONCE)
-                                    Printf("ONCE|");
-                                if(s.c.rmr & TRUE)
-                                    Printf("TRUE");
-                                else
-                                    Printf("FALSE");
-                                Printf("\n");
-                                }
-#endif
-
+                            DBGSRC(Printf("%s %d%*sscompare(%.*s,",wh,ind,ind,"",snijaf-sub,sub);result(pat);Printf(") ");\
+                                if(s.c.rmr & ONCE) Printf("ONCE|");\
+                                if(s.c.rmr & TRUE) Printf("TRUE"); else Printf("FALSE");\
+                                Printf("\n");)
                             }
                         }
                     /*
@@ -10799,67 +10785,31 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                     */
                 }
         }
-#if DEBUGBRACMAT
-    if(debug && (s.c.rmr & (FENCE | ONCE)))
-        {
-        Printf("%s %d%*s+",wh,ind,ind,"");if(s.c.rmr & FENCE)Printf(" FENCE ");if(s.c.rmr & ONCE)Printf(" ONCE ");Printf("\n");
-        }
-#endif
+    DBGSRC(if(s.c.rmr & (FENCE | ONCE))\
+        {Printf("%s %d%*s+",wh,ind,ind,"");if(s.c.rmr & FENCE)\
+         Printf(" FENCE ");if(s.c.rmr & ONCE)Printf(" ONCE ");Printf("\n");})
     s.c.rmr |= (char)(pat->v.fl & FENCE);
     if(stringOncePattern(pat) || /* Bart 20070820 @("abXk":(|? b|`) X ?id) must fail*/ (s.c.rmr & (TRUE|FENCE|ONCE)) == FENCE)
         {
         s.c.rmr |= ONCE;
-#if DEBUGBRACMAT
-        if(debug)
-            {
-            int redMooi;
-            int redhum;
-            redMooi = mooi;
-            redhum = hum;
-            mooi = FALSE;
-            hum = FALSE;
-            Printf("%d%*sstringmatch(%.*s",ind,ind,"",snijaf-sub,sub);Printf(":");result(pat);
-            /*Printf("%s %d%*sstringmatch(%s",wh,ind,ind,"",sub);Printf(":");result(pat);*/
-            mooi = redMooi;
-            hum = redhum;
-            Printf(") s.c.rmr %d (B)",s.c.rmr);
-            if(pat->v.fl & POSITION)
-                Printf("POSITION ");
-            if(pat->v.fl & BREUK)
-                Printf("BREUK ");
-            if(pat->v.fl & NUMBER)
-                Printf("NUMBER ");
-            if(pat->v.fl & SMALLER_THAN)
-                Printf("SMALLER_THAN ");
-            if(pat->v.fl & GREATER_THAN)
-                Printf("GREATER_THAN ");
-            if(pat->v.fl & ATOM)
-                Printf("ATOM ");
-            if(pat->v.fl & FENCE)
-                Printf("FENCE ");
-            if(pat->v.fl & IDENT)
-                Printf("IDENT");
-            Printf("\n");
-            }
-#endif
+        DBGSRC(int redMooi;int redhum;redMooi = mooi;redhum = hum;\
+            mooi = FALSE;hum = FALSE;\
+            Printf("%d%*sstringmatch(%.*s",ind,ind,"",snijaf-sub,sub);\
+            Printf(":");result(pat);\
+            mooi = redMooi;hum = redhum;\
+            Printf(") s.c.rmr %d (B)",s.c.rmr);\
+            if(pat->v.fl & POSITION) Printf("POSITION ");\
+            if(pat->v.fl & BREUK)Printf("BREUK ");\
+            if(pat->v.fl & NUMBER)Printf("NUMBER ");\
+            if(pat->v.fl & SMALLER_THAN)Printf("SMALLER_THAN ");\
+            if(pat->v.fl & GREATER_THAN) Printf("GREATER_THAN ");\
+            if(pat->v.fl & ATOM)  Printf("ATOM ");\
+            if(pat->v.fl & FENCE) Printf("FENCE ");\
+            if(pat->v.fl & IDENT) Printf("IDENT");\
+            Printf("\n");)
         }
     if(is_op(pat))
         s.c.rmr ^= (char)NIKS(pat);
-/*
-#if DEBUGBRACMAT
-    if(debug)
-        {
-        Printf("%s %d%*s----------->",wh,ind,ind,"");
-        if(s.c.rmr & TRUE)
-            Printf(" TRUE");
-        if(s.c.rmr & FENCE)
-            Printf(" FENCE");
-        if(s.c.rmr & ONCE)
-            Printf(" ONCE");
-        Printf("\n");
-        }
-#endif
-*/
     if(name)
         wis(name);
     return (char)(s.c.once | s.c.rmr);
@@ -10924,9 +10874,8 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
     psk loc;
     unsigned int Flgs;
     psk name = NULL;
-#if DEBUGBRACMAT
-    if(debug){Printf("%d%*smatch(",ind,ind,"");results(sub,snijaf);Printf(":");result(pat);Printf(")");Printf("\n");}
-#endif
+    DBGSRC(Printf("%d%*smatch(",ind,ind,"");results(sub,snijaf);Printf(":");\
+        result(pat);Printf(")");Printf("\n");)
     if (is_op(sub))
         {
         if(kop(sub) == WORDT)
@@ -10983,7 +10932,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                            )
                             if (Flgs & INDIRECT)        /* ?! of ?!! */
                                 {
-                                if ((loc=Naamwoord_w(pat)) != NULL)
+                                if ((loc=Naamwoord_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
                                     {
                                     if (is_object(loc))
                                         s.c.rmr = (char)copy_insert(loc, sub, snijaf);
@@ -11014,7 +10963,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     }
                 else if (Flgs & INDIRECT)        /* ! of !! */
                     {
-                    if ((loc=Naamwoord_w(pat)) != NULL)
+                    if ((loc=Naamwoord_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
                         {
                         cleanOncePattern(loc);
                         s.c.rmr = (char)(match(ind+1,sub, loc, snijaf,pposition,expr,op) ^ NIKS(pat));
@@ -11143,30 +11092,21 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                                 }
                             else if(!(s.c.lmr & ONCE))                  
                                 s.c.rmr &= ~ONCE;
-#if DEBUGBRACMAT
-                            if(debug)
-                                {
-                                Printf("%d%*smatch(",ind,ind,"");results(sub,snijaf);Printf(":");result(pat);
+                            DBGSRC(Printf("%d%*smatch(",ind,ind,"");\
+                                results(sub,snijaf);Printf(":");result(pat);)
 #ifndef NDEBUG
-                                printMatchState("EXIT-MID",s,pposition,0);/* 20101122 */
+                            DBGSRC(printMatchState("EXIT-MID",s,pposition,0);)
 #endif
-                                if(pat->v.fl & BREUK)
-                                    Printf("BREUK ");
-                                if(pat->v.fl & NUMBER)
-                                    Printf("NUMBER ");
-                                if(pat->v.fl & SMALLER_THAN)
-                                    Printf("SMALLER_THAN ");
-                                if(pat->v.fl & GREATER_THAN)
-                                    Printf("GREATER_THAN ");
-                                if(pat->v.fl & ATOM)
-                                    Printf("ATOM ");
-                                if(pat->v.fl & FENCE)
-                                    Printf("FENCE ");
-                                if(pat->v.fl & IDENT)
-                                    Printf("IDENT");
-                                Printf("\n");
-                                }
-#endif
+                            DBGSRC(if(pat->v.fl & BREUK) Printf("BREUK ");\
+                                if(pat->v.fl & NUMBER) Printf("NUMBER ");\
+                                if(pat->v.fl & SMALLER_THAN)\
+                                    Printf("SMALLER_THAN ");\
+                                if(pat->v.fl & GREATER_THAN)\
+                                    Printf("GREATER_THAN ");\
+                                if(pat->v.fl & ATOM) Printf("ATOM ");\
+                                if(pat->v.fl & FENCE) Printf("FENCE ");\
+                                if(pat->v.fl & IDENT) Printf("IDENT");\
+                                Printf("\n");)
                             return s.c.rmr ^ (char)NIKS(pat);
                             }
                     /* H        SL,SR=shift_right divisionPoint */
@@ -11260,7 +11200,6 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                                     if((s.c.rmr = match(ind+1,loc, pat->RIGHT, snijaf,0,loc,123)) & TRUE)
                                         {
                                         dummy_op = kop(sub);
-                                        /*dummy_flgs = 0;*/
                                         }
                                     wis(loc);
                                     }
@@ -11271,7 +11210,6 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                                ) /* NULL --> snijaf 20031110 */
                             {
                             dummy_op = kop(sub);
-                            /*dummy_flgs = 0;*//*sub->v.fl & VISIBLE_FLAGS;*/
                             }
                         }
                     if (s.c.lmr != PRISTINE)
@@ -11358,13 +11296,8 @@ correct: jk
                             s.c.rmr &= ~(POSITION_MAX_REACHED|POSITION_ONCE);
                             }
                         }
-#if DEBUGBRACMAT
-                    if(debug)
-                        {
-                        Printf("%d%*s",ind,ind,"");
-                        Printf("OF s.c.lmr %d s.c.rmr %d\n",s.c.lmr,s.c.rmr);
-                        }
-#endif
+                    DBGSRC(Printf("%d%*s",ind,ind,"");\
+                        Printf("OF s.c.lmr %d s.c.rmr %d\n",s.c.lmr,s.c.rmr);)
 /*
 :?W:?X:?Y:?Z & dbg'(a b c d:?X (((a ?:?W) & ~`|?Y)|?Z) d) & out$(X !X W !W Y !Y Z !Z)
 erroneous: X a W a b c d Y b c Z
@@ -11507,37 +11440,21 @@ b b h h h a b c d:?X (|b c|x) d)
         {
         s.c.rmr |= (char)(pat->v.fl & FENCE);
         s.c.rmr |= ONCE;
-#if DEBUGBRACMAT
-        if(debug)
-            {
-            Printf("%d%*smatch(",ind,ind,"");
-            results(sub,snijaf);
-            Printf(":");
-            result(pat);
-            Printf(") (B)");
+        DBGSRC(Printf("%d%*smatch(",ind,ind,"");results(sub,snijaf);\
+            Printf(":");result(pat);Printf(") (B)");)
 #ifndef NDEBUG
-            Printf(" rmr t %d o %d p %d m %d f %d ",
-                    s.b.brmr_true,s.b.brmr_once,s.b.brmr_position_once,s.b.brmr_position_max_reached,s.b.brmr_fence);
+        DBGSRC(Printf(" rmr t %d o %d p %d m %d f %d ",\
+                    s.b.brmr_true,s.b.brmr_once,s.b.brmr_position_once,s.b.brmr_position_max_reached,s.b.brmr_fence);)
 #endif
-            if(pat->v.fl & POSITION)
-                Printf("POSITION ");
-            if(pat->v.fl & BREUK)
-                Printf("BREUK ");
-            if(pat->v.fl & NUMBER)
-                Printf("NUMBER ");
-            if(pat->v.fl & SMALLER_THAN)
-                Printf("SMALLER_THAN ");
-            if(pat->v.fl & GREATER_THAN)
-                Printf("GREATER_THAN ");
-            if(pat->v.fl & ATOM)
-                Printf("ATOM ");
-            if(pat->v.fl & FENCE)
-                Printf("FENCE ");
-            if(pat->v.fl & IDENT)
-                Printf("IDENT");
-            Printf("\n");
-            }
-#endif
+        DBGSRC(if(pat->v.fl & POSITION) Printf("POSITION ");\
+            if(pat->v.fl & BREUK) Printf("BREUK ");\
+            if(pat->v.fl & NUMBER) Printf("NUMBER ");\
+            if(pat->v.fl & SMALLER_THAN) Printf("SMALLER_THAN ");\
+            if(pat->v.fl & GREATER_THAN) Printf("GREATER_THAN ");\
+            if(pat->v.fl & ATOM) Printf("ATOM ");\
+            if(pat->v.fl & FENCE) Printf("FENCE ");\
+            if(pat->v.fl & IDENT) Printf("IDENT");\
+            Printf("\n");)
         }
     if(is_op(pat))
         s.c.rmr ^= (char)NIKS(pat);
@@ -11877,7 +11794,7 @@ static psk evalmacro(psk pkn)
                         wis(h);
                         h = becomes;
                         }
-                    h->v.fl = dummy_op | /*dummy_flgs |*/ Flgs;
+                    h->v.fl = dummy_op | Flgs;
                     hh = evalmacro(h->LEFT);
                     if(hh)
                         {
@@ -12052,7 +11969,7 @@ static psk lambda(psk pkn,psk name,psk Arg)
                         wis(h);
                         h = becomes;
                         }
-                    h->v.fl = dummy_op | /*dummy_flgs |*/ Flgs;
+                    h->v.fl = dummy_op | Flgs;
                     hh = lambda(h->LEFT,name,Arg);
                     if(hh)
                         {
@@ -13246,12 +13163,7 @@ static function_return_type find_func(psk pkn)
     objectStuff Object = {0,0,0};
     int nieuw = FALSE;
     adr[1] = NULL;
-#if DEBUGBRACMAT
-    if(debug)
-        {
-        Printf("find_func(");result(pkn);Printf(")\n");
-        }
-#endif
+    DBGSRC(Printf("find_func(");result(pkn);Printf(")\n");)
     adr[1] = find(lknoop,&nieuw,&Object);
     if(adr[1])
         {
@@ -13364,14 +13276,8 @@ static function_return_type find_func(psk pkn)
         }
     else
         {
-#if DEBUGBRACMAT
-        if(debug)
-            {
-            errorprintf("Function not found");
-            writeError(pkn);
-            Printf("\n");
-            }
-#endif
+        DBGSRC(errorprintf("Function not found");writeError(pkn);\
+            Printf("\n");)
         }
     return functionFail(pkn);
     }
@@ -13528,7 +13434,7 @@ static psk getObjectDef(psk source)
 
 
 
-    if((def = Naamwoord_w(source)) != NULL)
+    if((def = Naamwoord_w(source,source->v.fl & DOUBLY_INDIRECT)) != NULL)
         {
         dest = (typedObjectknoop *)bmalloc(__LINE__,sizeof(typedObjectknoop));
         dest->v.fl = WORDT | SUCCESS;
@@ -14618,8 +14524,8 @@ The same effect is obtained by <expr>:?!(=)
                 if(!HAS_UNOPS(pkn->LEFT))
                     {
                     intVal = pkn->v.fl & UNOPS;/*20101103*/
-                    if(  intVal == BREUK 
-                      && is_op(pkn->RIGHT)/*20120915 & --> == , is_op test*/
+                    if(  intVal == BREUK  /*20120915 & --> == */
+                      && is_op(pkn->RIGHT)/*20120915 is_op test */
                       && kop(pkn->RIGHT) == DOT
                       && !is_op(pkn->RIGHT->LEFT)
                       )
@@ -15999,24 +15905,27 @@ static psk merge(psk pkn,int (*comp)(psk,psk),psk (*combine)(psk))
             assert((R == rhead && rtail == NULL) || R->RIGHT == rtail);
             assert((R == rhead && rtail == NULL) || R->LEFT == rhead);
             assert(pkn->RIGHT == R);
+            assert(L->v.fl & READY); /* 20120916 */
+            assert(pkn->RIGHT->v.fl & READY); /* 20120916 */
             if(comp(lhead,rhead) <= 0) /* a * b */
                 {
                 /*printf("<= "); */
                 if(ltail == NULL)   /* a * (b*c) */
                     {
-                    if(pkn->RIGHT->v.fl & READY)
-                        {
+                    assert(pkn->RIGHT->v.fl & READY); /* 20120916 */
+                    /*if(pkn->RIGHT->v.fl & READY)
+                        {*/
                         break;
-                        }
+                        /*}
                     else
-                        {
+                        { / * unreachable * /
                         assert(!shared(pkn));
                         pkn->RIGHT = repol;
                         repol = pkn;
                         pkn = R;
                         L = linkeroperand_and_tail(pkn,&lhead,&ltail);
                         R = rechteroperand_and_tail(pkn,&rhead,&rtail);
-                        }
+                        }*/
                     }
                 else                /* (a*d) * (b*c) */
                     {
@@ -16024,7 +15933,7 @@ static psk merge(psk pkn,int (*comp)(psk,psk),psk (*combine)(psk))
                     assert(!shared(L));
                     if(ltail != L->RIGHT) /*20111130*/
                         {
-                        wis(L->RIGHT); 
+                        wis(L->RIGHT); /* rare, set REFCOUNTSTRESSTEST 1 */
                         ltail = zelfde_als_w(ltail);
                         }
                     L->RIGHT = repol;
@@ -16042,21 +15951,23 @@ static psk merge(psk pkn,int (*comp)(psk,psk),psk (*combine)(psk))
                 /*printf("> "); */
                 pkn = prive(pkn);
                 assert(!shared(pkn));
+                assert(L->v.fl & READY); /* 20120916 */
                 if(rtail == NULL) /* (b*c) * a */
                     {
                     pkn->LEFT = R;
-                    if(L->v.fl & READY)
-                        {
+                    assert(L->v.fl & READY); /* 20120916 */
+                   /* if(L->v.fl & READY)
+                        {*/
                         pkn->RIGHT = L;
                         break;
-                        }
+                        /*}
                     else
-                        {
+                        {/ * unreachable * /
                         pkn->RIGHT = repol;
                         repol = pkn;
                         pkn = L;
                         break;
-                        }
+                        }*/
                     }             /* a * (b*c) */
                 else          /* (b*c) * (a*d)         c * (b*a) */
                     {
@@ -16064,7 +15975,7 @@ static psk merge(psk pkn,int (*comp)(psk,psk),psk (*combine)(psk))
                     assert(!shared(R));
                     if(R->RIGHT != rtail) /*20111130*/
                         {
-                        wis(R->RIGHT);
+                        wis(R->RIGHT); /* rare, set REFCOUNTSTRESSTEST 1 */
                         rtail = zelfde_als_w(rtail);
                         }
                     R->RIGHT = repol;
@@ -16167,8 +16078,9 @@ static psk substlog(psk pkn)
                 {
                                     /* nL(n+m) = 1+nL((n+m)/n) */ /*{?} 7\L(7+9) => 1+7\L16/7 */ /*{!} 1+nL((n+m)/n) */
                 conc[0] = "(1+\1\016";
-                if(lknoop == rknoop)
-                    rknoop = pkn->RIGHT = prive(rknoop);
+                assert(lknoop != rknoop);
+                /*if(lknoop == rknoop)
+                    rknoop = pkn->RIGHT = prive(rknoop);*/
                 adr[1] = lknoop;
                 conc[1] = hekje6;
                 adr[6] = _q_qdeel(rknoop,lknoop);
@@ -16181,8 +16093,9 @@ static psk substlog(psk pkn)
                 {
                                     /* nL(1/m) = -1+nL(n/m) */ /*{?} 7\L1/9 => -2+7\L49/9 */ /*{!} -1+nL(n/m) */
                 conc[0] = "(-1+\1\016";
-                if(lknoop == rknoop)
-                    rknoop = pkn->RIGHT = prive(rknoop);
+                assert(lknoop != rknoop);
+                /*if(lknoop == rknoop)
+                    rknoop = pkn->RIGHT = prive(rknoop);*/
                 adr[1] = lknoop;
                 conc[1] = hekje6;
                 adr[6] = _qmaal(rknoop,lknoop);
@@ -16197,19 +16110,11 @@ static psk substlog(psk pkn)
     }
 
 static psk substdiff(psk pkn)
-    {
-    static const char *conc[] = {NULL,NULL,NULL,NULL};
+    {/*20120916 simplified*/
     psk lknoop,rknoop;
     lknoop = pkn->LEFT;
     rknoop = pkn->RIGHT;
-    if(RATIONAAL_COMP(lknoop) && RATIONAAL_COMP(rknoop))
-        {
-        conc[2] = hekje5;
-        adr[5] = copievan(&nulk);
-        pkn = numboom(pkn,lknoop,conc);
-        wis(adr[5]);
-        }
-    else if(is_constant(lknoop) || is_constant(rknoop))
+    if(is_constant(lknoop) || is_constant(rknoop))
         {
         wis(pkn);
         pkn = copievan(&nulk);
@@ -16228,15 +16133,6 @@ static psk substdiff(psk pkn)
         ;
         }
     else if(!is_op(rknoop))
-        {
-        wis(pkn);
-        pkn = copievan(&nulk);
-        }
-    else if(RATIONAAL_COMP(lknoop) || is_op(lknoop))
-        {
-        ;/*return FALSE;*/
-        }
-    else if(RATIONAAL_COMP(rknoop))
         {
         wis(pkn);
         pkn = copievan(&nulk);
@@ -16388,18 +16284,20 @@ static psk handleKOMMA(psk pkn)
 static psk evalvar(psk pkn)
     {
     psk adr;
-    if((adr = Naamwoord_w(pkn)) != NULL)
+    if((adr = Naamwoord_w(pkn,pkn->v.fl & DOUBLY_INDIRECT)) != NULL)
         {
         wis(pkn);
         pkn = adr;
         }
     else
         {
-        if(shared(pkn))
+        DBGSRC(printf("evalvar(");result(pkn);printf("\n");)
+        assert(!shared(pkn));
+        /*if(shared(pkn))
             {
             dec_refcount(pkn);
             pkn = icopievan(pkn);
-            }
+            }*/
         (pkn)->v.fl |= READY;
         (pkn)->v.fl ^= SUCCESS;
         }
@@ -16451,12 +16349,7 @@ static psk eval(psk pkn)
     Notice the low number of local variables on the stack. This ensures maximal
     utilisation of stack-depth for recursion.
     */
-#if DEBUGBRACMAT
-    if(debug)
-        {
-        Printf("evaluate:");result(pkn);Printf("\n");
-        }
-#endif
+    DBGSRC(Printf("evaluate:");result(pkn);Printf("\n");)
     while(!(pkn->v.fl & READY))
         {
         if(is_op(pkn))
@@ -16480,12 +16373,8 @@ static psk eval(psk pkn)
                         `~a:?b will assign `~a to b
                         */
                         {
-#if DEBUGBRACMAT
-                        if(debug)
-                            {
-                            Printf("before match:");result(&lkn);Printf("\n");
-                            }
-#endif
+                        DBGSRC(Printf("before match:");result(&lkn);\
+                            Printf("\n");)
 #if STRINGMATCH_CAN_BE_NEGATED
                         if(lkn.flgs & ATOM) /*20071229 should other flags be
                                             excluded, including ~ ?*/
@@ -16523,20 +16412,9 @@ static psk eval(psk pkn)
                         {
                         pkn = _linkertak(&lkn);
                         }
-#if DEBUGBRACMAT
-                    if(debug)
-                        {
-                        Printf("after match:");result(pkn);Printf("\n");
-                        if((pkn)->v.fl & SUCCESS)
-                            {
-                            Printf(" SUCCESS\n");
-                            }
-                        else
-                            {
-                            Printf(" FENCE\n");
-                            }
-                        }
-#endif
+                    DBGSRC(Printf("after match:");result(pkn);Printf("\n");\
+                        if((pkn)->v.fl & SUCCESS) Printf(" SUCCESS\n");\
+                        else Printf(" FENCE\n");)
                     break;
                     }
                     /* The operators EN and OF are tail-recursion optimised. */
@@ -16771,15 +16649,11 @@ static psk eval(psk pkn)
                         pkn->LEFT = subboomcopie(old->LEFT);
                         old->RIGHT = Head(old->RIGHT);
                         pkn->RIGHT = subboomcopie(old->RIGHT);
-                        /*pkn->v.fl |= dummy_flgs;*/
                         wis(old);
                         }
-                    /*else*/
-                    {
                     pkn->v.fl &= (~OPERATOR & ~READY);
                     pkn->ops |= dummy_op;
-                    pkn->v.fl |= /*dummy_flgs|*/SUCCESS;
-                    }
+                    pkn->v.fl |= SUCCESS;
                     if(lkn.v.fl & INDIRECT)
                         {/* (a=b=127)&(.):(_)&!(a_b) */
                         pkn = evalvar(pkn);
@@ -16789,6 +16663,7 @@ static psk eval(psk pkn)
             }
         else
             {
+            /*assert(!shared(pkn));*/ /* 20120916 evalvar now expects not shared arg. */
             /* An unevaluated leaf can only be an atom with ! or !!,
             so we don't need to test for this condition.*/
             pkn = evalvar(pkn);
