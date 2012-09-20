@@ -4274,6 +4274,34 @@ towards operators that are closer to the root of the tree"
             & !A:(=B)
           | Out$558
           )
+          (   1100:?I
+            & tbl$(AA,!I)
+            & ( OBJ
+              = 
+              = (=a) (=b) (=c)
+              )
+            &   !OBJ
+              : ( 
+                =   %
+                    %
+                    ( ?mfd
+                    : ?ngh
+                    : ?ofg
+                    : ?pbd
+                    : ?qgg
+                    : ?rcr
+                    : ?sfi
+                    )
+                )
+            &   whl
+              ' ( !I+-1:~<0:?I
+                & !OBJ:(=(% %:?(!I$AA)) ?)
+                )
+            & tbl'(AA,0)
+            &   !OBJ
+              : (=(=a) (=b) (=c))
+          | Out$559
+          )
       &   out
         $ ( str
           $ ( "Done. "

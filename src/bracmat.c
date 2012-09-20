@@ -58,11 +58,15 @@ Test coverage:
 
 */
 
-#define DATUM "19 September 2012"
+#define DATUM "20 September 2012"
 #define VERSION "6"
-#define BUILD "131"
+#define BUILD "132"
+/*  20 September 2012
+Reference counting should now be faster, bigger and better.
+Before, reference counting went to 2^30+1024. Now it goes to 2^30*1023+1
+Test added to valid.bra.
 
-/*  19 September 2012
+    19 September 2012
 Made major changes in Naamwoord, Naamwoord_w and doPosition to make two levels
 of indirection work also in the case that an object is at the first level.
 Handling of two levels of indirection is improved generally.
@@ -1108,6 +1112,31 @@ TODO list:
 #define CUTOFFSUGGEST 1
 #define READMARKUPFAMILY 1 /* read SGML, HTML and XML files. (include xml.c in your project!) */
 
+/* 
+About reference counting.
+Most nodes can be shared by no more than 1024 referers. Copies must be made as needed.
+Objects (nodes with = ('WORDT' in Dutch) are objects and cane be shared by almost 2^40 referers.
+
+small refcounter       large refcounter              comment
+(10 bits, all nodes)   (30 bits, only objects)
+0                      0                             not shared, no test of large refcounter needed.
+1                      0                             shared with one, so totalling two
+2                      0                             shared with two
+..                     ..
+1022                   0
+1023                   0                             totalling 1024, *** max for normal nodes ***
+1                      1                             totalling 1025
+2                      1
+..                     ..
+m                      1
+..                     ..                            totalling 1024+(1-1)*1023+m
+1023                   1                             totalling 1024+1*1023
+..                     ..
+m                      n                             totalling 1024+(n-1)*1023+m or 1+n*1023+m
+1023                   2^30-1                        totalling 1024+(2^30-2)*1023+1023=1 098 437 885 953
+                                                         (or   1+2^30*1023)
+*/
+
 #if DEBUGBRACMAT
 #define DBGSRC(code)    if(debug){code}
 #else
@@ -1994,15 +2023,15 @@ typedef struct /**/ typedObjectknoop /**/ /* createdWithNew == 1 */
     } typedObjectknoop;
 
 #ifdef BUILTIN
-#define INCREFCOUNT(a) (a)->u.s.refcount++
-#define DECREFCOUNT(a) (a)->u.s.refcount--
+#define INCREFCOUNT(a) { ((objectknoop*)a)->u.s.refcount++;(a)->ops &= ((~ALL_REFCOUNT_BITS_SET)|ONE); }
+#define DECREFCOUNT(a) { ((objectknoop*)a)->u.s.refcount--;(a)->ops |= ALL_REFCOUNT_BITS_SET; }
 #define REFCOUNTNONZERO(a) ((a)->u.s.refcount)
 #define ISBUILTIN(a) ((a)->u.s.built_in)
 #define ISCREATEDWITHNEW(a) ((a)->u.s.createdWithNew)
 #define SETCREATEDWITHNEW(a) (a)->u.s.createdWithNew = 1
 #else
-#define INCREFCOUNT(a) (a)->refcount++
-#define DECREFCOUNT(a) (a)->refcount--
+#define INCREFCOUNT(a) { (a)->refcount++;(a)->ops &= ((~ALL_REFCOUNT_BITS_SET)|ONE); }
+#define DECREFCOUNT(a) { (a)->refcount--;(a)->ops |= ALL_REFCOUNT_BITS_SET; }
 #define REFCOUNTNONZERO(a) ((a)->refcount)
 #define ISBUILTIN(a) ((a)->built_in)
 #define SETBUILTIN(a) (a)->built_in = 1
@@ -2160,42 +2189,24 @@ static const char opchar[16] =
 #define shared(kn) ((kn)->ops & ALL_REFCOUNT_BITS_SET)
 #define sharedo(kn) ((kn).ops & ALL_REFCOUNT_BITS_SET)
 
-#if 0
-#define all_refcount_bits_set(kn) (shared(kn) == ALL_REFCOUNT_BITS_SET)
-#define inc_refcount(kn) ((kn)->ops += ONE)
-#define dec_refcount(kn) ((kn)->ops -= ONE)
-#else
 
 static int all_refcount_bits_set(psk kn)
     {
     return (shared(kn) == ALL_REFCOUNT_BITS_SET) && !is_object(kn);
     }
 
-static void inc_refcount(psk kn)
-    {
-    if(shared(kn) == ALL_REFCOUNT_BITS_SET) /* ensure that this can only be the case
-                                            for objectknoop nodes, i.e. test
-                                            with all_refcount_bits_set before calling
-                                            inc_refcount.
-                                            (all_refcount_bits_set must return FALSE)
-                                            */
-        INCREFCOUNT((objectknoop*)kn);
-    else
-        (kn)->ops += ONE;
-    }
-
 static void dec_refcount(psk kn)
     {
-    if(  is_object(kn)
-      && REFCOUNTNONZERO((objectknoop*)kn)
-      )
+    assert(kn->ops & ALL_REFCOUNT_BITS_SET);
+    kn->ops -= ONE;
+    if((kn->ops & (OPERATOR|ALL_REFCOUNT_BITS_SET)) == WORDT)
         {
-        DECREFCOUNT((objectknoop*)kn);
+        if(REFCOUNTNONZERO((objectknoop*)kn))
+            {
+            DECREFCOUNT(kn);
+            }
         }
-    else
-        (kn)->ops -= ONE;
     }
-#endif
 
 #define STRING    1
 #define VAPORIZED 2
@@ -4232,7 +4243,7 @@ static psk zelfde_als_w(psk kn)
         }
     else if(is_object(kn))
         {
-        INCREFCOUNT((objectknoop*)kn);
+        INCREFCOUNT(kn);
         return kn;
         }
     else
@@ -4251,7 +4262,7 @@ static psk zelfde_als_w_2(ppsk pkn)
         }
     else if(is_object(kn))
         {
-        INCREFCOUNT((objectknoop*)kn);
+        INCREFCOUNT(kn);
         return kn;
         }
     else
@@ -7585,23 +7596,56 @@ static int copy_insert(psk name,psk pknoop,psk snijaf)
         {
         return insert(name,pknoop);
         }
-    else if(!all_refcount_bits_set(pknoop) && !all_refcount_bits_set(snijaf))
-        {
-        kn = new_operator_like(pknoop);
-        kn->ops = (pknoop->ops & ~ALL_REFCOUNT_BITS_SET) | LATEBIND;
-        inc_refcount(pknoop);
-        inc_refcount(snijaf);
-        kn->LEFT = pknoop;
-        kn->RIGHT = snijaf;
-        }
     else
         {
-        copyToSnijaf(&kn,pknoop,snijaf); /*{?} a b c:(?z:?x:?y:?a:?b) c => a b c */
-        /*{?} 0:?n&a b c:?abc&whl'(!n+1:?n:<2000&str$(v !n):?v&!abc:?!v c) =>   whl
-' ( !n+1:?n:<2000
-  & str$(v !n):?v
-  & !abc:?!v c
-  ) */
+        assert(!is_object(pknoop));
+        if((shared(pknoop) != ALL_REFCOUNT_BITS_SET) && !all_refcount_bits_set(snijaf))
+            {/* snijaf: either node with headroom in the small refcounter 
+                        or object */
+            DBGSRC(printf("name:[");result(name);printf("] pknoop:[");result(pknoop);printf("] snijaf(%d):[",snijaf->v.fl/ONE);result(snijaf);printf("]\n");)
+            kn = new_operator_like(pknoop);
+            kn->ops = (pknoop->ops & ~ALL_REFCOUNT_BITS_SET) | LATEBIND;
+            pknoop->ops += ONE;
+            if(shared(snijaf) == ALL_REFCOUNT_BITS_SET)
+                {
+/*
+(T=
+  1100:?I
+& tbl$(AA,!I)
+& (OBJ==(=a) (=b) (=c))
+&   !OBJ
+  : (
+    =   %
+        %
+        (?m:?n:?o:?p:?q:?r:?s) { increase refcount of (=c) to 7}
+    )
+&   whl
+  ' ( !I+-1:~<0:?I
+    & !OBJ:(=(% %:?(!I$?AA)) ?)
+    )
+& !I);
+{due to late binding, the refcount of (=c) has just come above 1023, and then
+late binding stops for the last 80 or so iterations. The left hand side of the
+late bound node is not an object, and therefore can only count to 1024. 
+Thereafter copies must be made.}
+*/
+                INCREFCOUNT(snijaf);
+                }
+            else
+                snijaf->ops += ONE;
+
+            kn->LEFT = pknoop;
+            kn->RIGHT = snijaf;
+            }
+        else
+            {
+            copyToSnijaf(&kn,pknoop,snijaf); /*{?} a b c:(?z:?x:?y:?a:?b) c => a b c */
+            /*{?} 0:?n&a b c:?abc&whl'(!n+1:?n:<2000&str$(v !n):?v&!abc:?!v c) =>   whl
+    ' ( !n+1:?n:<2000
+      & str$(v !n):?v
+      & !abc:?!v c
+      ) */
+            }
         }
 
     ret = insert(name,kn);
