@@ -3700,11 +3700,17 @@ static void pskfree(psk p)
     bfree(p);
     }
 
+#if !defined NDEBUG
+static void result(psk wortel);
+#endif
+
 static psk new_operator_like(psk kn)
     {
     if(kop(kn) == WORDT)
         {
-        if(ISBUILTIN((objectknoop*)kn))
+        DBGSRC(printf("new_operator_like:");result(kn);printf("\n");)
+        assert(!ISBUILTIN((objectknoop*)kn));
+/*        if(ISBUILTIN((objectknoop*)kn))
             {
             typedObjectknoop * goal = (typedObjectknoop *)bmalloc(__LINE__,sizeof(typedObjectknoop));
 #ifdef BUILTIN
@@ -3718,7 +3724,7 @@ static psk new_operator_like(psk kn)
             goal->voiddata = NULL;
             return (psk)goal;
             }
-        else
+        else*/
             {
             objectknoop * goal = (objectknoop *)bmalloc(__LINE__,sizeof(objectknoop));
 #ifdef BUILTIN
@@ -4425,7 +4431,7 @@ static void reslts(psk wortel,int nivo,int ind,int space,psk snijaf)
                 return;
                 }
             ouder = kop(wortel);
-            kind = kop(wortel->LEFT);
+             kind = kop(wortel->LEFT);
             if(moetIndent(wortel,ind,nivo))
                 indtel++;
             if(HAS__UNOPS(wortel->LEFT) || ouder >= kind)
@@ -4493,6 +4499,7 @@ if(is_op(wortel))
 #endif
     bewerk(opchar[klopcode(wortel)]);
     ouder = kop(wortel);
+
     kind = kop(wortel->RIGHT);
     if(HAS__UNOPS(wortel->RIGHT) || ouder > kind || (ouder == kind && ouder > MAAL))
         hreslt(wortel->RIGHT,nivo+1,FALSE,LSP);
@@ -7571,6 +7578,7 @@ static int copy_insert(psk name,psk pknoop,psk snijaf)
     psk kn;
     int ret;
     assert((pknoop->RIGHT == 0 && snijaf == 0) || pknoop->RIGHT != snijaf);
+    DBGSRC(printf("copy_insert:");result(pknoop);printf("\n");)
     if(  (pknoop->v.fl & INDIRECT) 
       && (pknoop->v.fl & READY)
         /* 20110331 
@@ -7587,17 +7595,23 @@ static int copy_insert(psk name,psk pknoop,psk snijaf)
         {?} !x
         */
       )
+        {
+        DBGSRC(printf("A\n");)
         return FALSE;
+        }
     else if(pknoop->v.fl & IDENT)
         {
+        DBGSRC(printf("B\n");)
         kn = copievan(pknoop);
         }
     else if(snijaf == NULL)
         {
+        DBGSRC(printf("C\n");)
         return insert(name,pknoop);
         }
     else
         {
+        DBGSRC(printf("D\n");)
         assert(!is_object(pknoop));
         if((shared(pknoop) != ALL_REFCOUNT_BITS_SET) && !all_refcount_bits_set(snijaf))
             {/* snijaf: either node with headroom in the small refcounter 
@@ -7648,6 +7662,7 @@ Thereafter copies must be made.}
             }
         }
 
+    DBGSRC(printf("E\n");)
     ret = insert(name,kn);
     wis(kn);
     return ret;
@@ -10957,6 +10972,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
             if(is_op(pat))
                 {
                 unsigned int saveflgs = Flgs & VISIBLE_FLAGS;
+                DBGSRC(printf("pat:");result(pat);printf("\n");)
                 name = subboomcopie(pat);
                 name->v.fl &= ~VISIBLE_FLAGS;
                 name->v.fl |= SUCCESS;
@@ -11897,22 +11913,32 @@ static psk evalmacro(psk pkn)
                         int Flgs;
                         psk first = NULL;
                         psk * last;
-                        Flgs = pkn->v.fl & (UNOPS);
-                        if(!newval)
-                            h = subboomcopie(h);
-                        if(Flgs)
+                        if((kop(h) == WORDT) && ISBUILTIN((objectknoop *)h))
                             {
-                            h->v.fl |= Flgs;
-                            if(h->v.fl & INDIRECT)
+                            if(!newval)
+                                h = zelfde_als_w(h);
+                            }
+                        else
+                            {
+                            Flgs = pkn->v.fl & (UNOPS);
+                            if(!newval)
+                                {
+                                h = subboomcopie(h);
+                                }
+                            if(Flgs)
+                                {
+                                h->v.fl |= Flgs;
+                                if(h->v.fl & INDIRECT)
+                                    h->v.fl &= ~READY;
+                                }
+                            else if(h->v.fl & INDIRECT)
+                                { /* 20080128 */
                                 h->v.fl &= ~READY;
-                            }
-                        else if(h->v.fl & INDIRECT)
-                            { /* 20080128 */
-                            h->v.fl &= ~READY;
-                            }
-                        else if(is_op(h) && kop(h) == WORDT) /* 20111107 */
-                            { 
-                            h->v.fl &= ~READY;
+                                }
+                            else if(kop(h) == WORDT) /* 20111107 */
+                                { 
+                                h->v.fl &= ~READY;
+                                }
                             }
 
                         wis(tmp);
@@ -13290,8 +13316,10 @@ static function_return_type find_func(psk pkn)
         }
     else if(Object.theMethod)
         {
+        DBGSRC(printf("Object.theMethod\n");)
         if(Object.theMethod((struct typedObjectknoop *)Object.object,&pkn))
             {
+            DBGSRC(printf("functionOk");result(pkn);printf("\n");)
             return functionOk(pkn);
             }
         }
@@ -13368,16 +13396,19 @@ static psk objectcopiesub(psk src)
         {
         if(ISBUILTIN((objectknoop*)src))
             {
+            return zelfde_als_w(src);
+            /*
             goal = (psk)bmalloc(__LINE__,sizeof(typedObjectknoop));
 #ifdef BUILTIN
             ((typedObjectknoop*)goal)->u.Int = BUILTIN;
 #else
             ((typedObjectknoop*)goal)->refcount = 0;
-            UNSETCREATEDWITHNEW((typedObjectknoop*)goal);/*TODO: This line seems to be superfluous*/
+            UNSETCREATEDWITHNEW((typedObjectknoop*)goal);/ *TODO: This line seems to be superfluous* /
             SETBUILTIN((typedObjectknoop*)goal);
 #endif
             ((typedObjectknoop*)goal)->vtab = ((typedObjectknoop*)src)->vtab;
             ((typedObjectknoop*)goal)->voiddata = NULL;
+            */
             }
         else
             {
@@ -13458,7 +13489,8 @@ static psk getObjectDef(psk source)
             dest = (typedObjectknoop *)bmalloc(__LINE__,sizeof(typedObjectknoop));
             dest->v.fl = WORDT | SUCCESS;
             dest->links = zelfde_als_w(&nilk);
-            dest->rechts = zelfde_als_w(&nilk);
+            /*dest->rechts = zelfde_als_w(&nilk);*/
+            dest->rechts = zelfde_als_w(source);
 #ifdef BUILTIN
             dest->u.Int = BUILTIN;
 #else
@@ -14536,7 +14568,7 @@ The same effect is obtained by <expr>:?!(=)
                     return functionFail(pkn);
                 adr[3] = rknoop->RIGHT;
                 if(ISBUILTIN((objectknoop*)adr[2]))
-                    pkn = opb(pkn,"(((\2.New)'\3)|)",NULL);
+                    pkn = opb(pkn,"(((\2.New)'\3)|)&\2",NULL);
     /*                pkn = opb(pkn,"(((\2.New)'\3)&(\2.new)'\3)|)&\2",NULL);*/
     /* We might be able to call 'new' if 'New' had attached the argument
         (containing the definition of a 'new' method) to the rhs of the '='.
@@ -14548,10 +14580,11 @@ The same effect is obtained by <expr>:?!(=)
             else
                 {
                 adr[2] = getObjectDef(rknoop);
+                DBGSRC(printf("adr[2]:");result(adr[2]);printf("\n");)
                 if(!adr[2])
                     return functionFail(pkn);
                 if(ISBUILTIN((objectknoop*)adr[2]))
-                    pkn = opb(pkn,"(((\2.New)')|)",NULL);
+                    pkn = opb(pkn,"(((\2.New)')|)&\2",NULL);
                 /* There cannot be a user-defined 'new' method on a built-in object if there is no way to supply it*/
                 /* 'die' CAN be user-supplied. The built-in function is 'Die' */
                 else
@@ -16484,6 +16517,12 @@ static psk eval(psk pkn)
                     }
                     /* Operators that can occur in evaluated expressions: */
                 case WORDT :
+                    if(ISBUILTIN((objectknoop *)pkn))
+                        {
+                        pkn->v.fl |= READY;
+                        break;
+                        }
+
                     if(  !is_op(pkn->LEFT)
                       && !pkn->LEFT->u.obj
                       && (pkn->v.fl & INDIRECT)

@@ -1,4 +1,4 @@
-{valid.bra}
+{valid.bra}
 Xobject=
   (donit=.)
   ( doit
@@ -4302,6 +4302,37 @@ towards operators that are closer to the root of the tree"
               : (=(=a) (=b) (=c))
           | Out$559
           )
+          ( d2x$(utf$(low$(chu$(x2d$110000)))):110000
+          | Out$560
+          )
+          (   1100:?I
+            & tbl$(AA,!I)
+            & new$hash:?H
+            & '($H ()$H ()$H):?OBJ
+            &   !OBJ
+              : ( 
+                =   %
+                    %
+                    ( ?mfd
+                    : ?ngh
+                    : ?ofg
+                    : ?pbd
+                    : ?qgg
+                    : ?rcr
+                    : ?sfi
+                    )
+                )
+            &   whl
+              ' ( !I+-1:~<0:?I
+                & !OBJ:(=(% %:?(!I$AA)) ?)
+                )
+            & (1000$AA..insert)$(kaal.2500)
+            & tbl'(AA,0)
+            &   !OBJ
+              : (=(=) (=) (=))
+            & (H..find)$kaal:(kaal.2500)
+          | Out$559
+          )
       &   out
         $ ( str
           $ ( "Done. "
@@ -4325,8 +4356,8 @@ r=
 & lst$(r,"valid.bra",APP)
 & put$(\n,"valid.bra",APP)
 & (   666:?aaa
-    & slow:?speed
     & fast:?speed
+    & slow:?speed
     & "LL keeps the '0' alife if 'lost' is incremented"
     & 0:?lost
     & (loss=1+!lost:?lost)
