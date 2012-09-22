@@ -58,10 +58,17 @@ Test coverage:
 
 */
 
-#define DATUM "20 September 2012"
+#define DATUM "22 September 2012"
 #define VERSION "6"
-#define BUILD "132"
-/*  20 September 2012
+#define BUILD "133"
+/*  22 September 2012
+Discovered that built in objects too easily were copied. The new function is
+for that. Worse, the copies were not initialized with a call to New. Also,
+new$hash returned ((=).New)'. Now it returns the object node. Changed the rhs
+of this node to the node that is the argument of the original call to new, so:
+  =hash
+
+    20 September 2012
 Reference counting should now be faster, bigger and better.
 Before, reference counting went to 2^30+1024. Now it goes to 2^30*1023+1
 Test added to valid.bra.
