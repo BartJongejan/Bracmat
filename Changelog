@@ -1,3 +1,33 @@
+    23 September 2012
+Discovered buffer overflow when compiled under fresh installation of Xubuntu 
+gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3 with optimization -O1 and higher.
+Cause: strcpy in some places got the address of a single byte as destination
+and coredumped when that single-byte buffer was overrun, not knowing that
+there was, in fact, allocated memory to house the fulle source. See definition
+of POBJ.
+
+    22 September 2012
+Discovered that built in objects too easily were copied. The new function is
+for that. Worse, the copies were not initialized with a call to New. Also,
+new$hash returned ((=).New)'. Now it returns the object node. Changed the rhs
+of this node to the node that is the argument of the original call to new, so:
+  =hash
+
+    20 September 2012
+Reference counting should now be faster, bigger and better.
+Before, reference counting went to 2^30+1024. Now it goes to 2^30*1023+1
+Test added to valid.bra.
+
+    19 September 2012
+Made major changes in Naamwoord, Naamwoord_w and doPosition to make two levels
+of indirection work also in the case that an object is at the first level.
+Handling of two levels of indirection is improved generally.
+
+    16 September 2012
+Using gcov, found some places that are unreachable in merge(), substdiff() and
+evalvar(). Simplified substdiff. Function evalvar now expects that the argument
+is not shared. Deleted code that was never reached.
+
   12 September 2012
 Updated u2l and l2u with data from UnicodeData.txt 2011-11-08
 (using script uni.bra)

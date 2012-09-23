@@ -37,9 +37,14 @@ implements reading XML files.
 
 On *N?X, just compile with
 
-    gcc -std=c99 -pedantic -Wall -O3 -DNDEBUG bracmat.c xml.c
+    gcc -std=c99 -pedantic -Wall -O3 -static -DNDEBUG -o bracmat bracmat.c xml.c
 
-rename a.out to whatever
+
+The options are not necessary to successfully compile the program just
+
+    gcc *.c
+
+also works and produces the executable a.out.
 
 Profiling:
 
@@ -58,10 +63,19 @@ Test coverage:
 
 */
 
-#define DATUM "22 September 2012"
+#define DATUM "23 September 2012"
 #define VERSION "6"
-#define BUILD "133"
-/*  22 September 2012
+#define BUILD "134"
+
+/*  23 September 2012
+Discovered buffer overflow when compiled under fresh installation of Xubuntu 
+gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3 with optimization -O1 and higher.
+Cause: strcpy in some places got the address of a single byte as destination
+and coredumped when that single-byte buffer was overrun, not knowing that
+there was, in fact, allocated memory to house the fulle source. See definition
+of POBJ.
+
+    22 September 2012
 Discovered that built in objects too easily were copied. The new function is
 for that. Worse, the copies were not initialized with a call to New. Also,
 new$hash returned ((=).New)'. Now it returns the object node. Changed the rhs
@@ -3397,9 +3411,7 @@ static struct memblock * initializeMemBlock(size_t elementSize, size_t numberOfE
     size_t nlongpointers;
     size_t stepSize;
     struct memblock * mb;
-    /*printf("initializeMemBlock(%lu,%lu)\n",elementSize, numberOfElements);*/
     mb = (struct memblock *)malloc(sizeof(struct memblock));
-/*    pMemBlocks[i] = allocations[i].memoryBlock = mb;*/
     mb->sizeOfElement = elementSize;
     mb->previousOfSameLength = 0;
     stepSize = elementSize / sizeof(struct pointerStruct);
@@ -3630,7 +3642,6 @@ static void * bmalloc(int lineno,size_t n)
 int addAllocation(size_t size,int number,int nallocations,struct allocation * allocations)
     {
     int i;
-    /*printf("addAllocation(%lu,%d,%d,..) nallocations=%d\n",size,number,nallocations,nallocations);*/
     for(i = 0;i < nallocations;++i)
         {
         if(allocations[i].elementSize == size)
@@ -3641,7 +3652,6 @@ int addAllocation(size_t size,int number,int nallocations,struct allocation * al
         }
     allocations[nallocations].elementSize = size;
     allocations[nallocations].numberOfElements = number;
-    /*printf("allocations[%d].numberOfElements =%d\n",nallocations,allocations[nallocations].numberOfElements);*/
     return nallocations + 1;
     }
 
@@ -4362,7 +4372,7 @@ if(pknoop->ops & LATEBIND)
         stringrefknoop * ps = (stringrefknoop *)pknoop;
         pknoop = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + ps->length);
         pknoop->ops = (ps->ops & ~ALL_REFCOUNT_BITS_SET & ~LATEBIND);
-        strncpy((char *)POBJ(pknoop),(char *)ps->str,ps->length); /* Bart 20040827 strcpy -> strncpy */
+        strncpy((char *)(pknoop)+sizeof(unsigned LONG),(char *)ps->str,ps->length); /* Bart 20040827 strcpy -> strncpy */
         wis(ps->kn);
         bfree(ps);
         }
@@ -7682,12 +7692,12 @@ static psk scopy(char * str)
     if(nr & MINUS)
         { /* bracmat out$arg$() -123 */
         kn = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + strlen((const char *)str));
-        strcpy((char *)POBJ(kn),(char *)str + 1);
+        strcpy((char *)(kn)+sizeof(unsigned LONG),str + 1);
         }
     else
         {
         kn = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + strlen((const char *)str));
-        strcpy((char *)POBJ(kn),(char *)str);
+        strcpy((char *)(kn)+sizeof(unsigned LONG),str);
         }
     kn->v.fl = READY | SUCCESS | nr;
     return kn;
@@ -12226,7 +12236,7 @@ for(alfabet = 0;alfabet < 256/*0x80*/;alfabet++)
         goal = goal->LEFT =
             (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + strlen((char *)VARNAME(navar)));
         goal->v.fl = (READY|SUCCESS);
-        strcpy((char *)POBJ(goal),(char *)VARNAME(navar));
+        strcpy((char *)(goal)+sizeof(unsigned LONG),(char *)VARNAME(navar));
         pgoal = &(*pgoal)->RIGHT;
         }
     }
@@ -13747,7 +13757,6 @@ static function_return_type functies(psk pkn)
     static char klad[22];
     psk lknoop,rknoop,rrknoop,rlknoop;
     int intVal;
-
     if(is_op(lknoop = pkn->LEFT))
         return find_func(pkn);
         /*return functionOk(*pkn);*/
