@@ -1732,15 +1732,15 @@ towards operators that are closer to the root of the tree"
             : 2*x^(y*(a+b))
           | Out$150
           )
-          (   fil$("file.txt",w)
+          (   fil$("file98741lfn.txt",w)
             & fil$(,STR," \n\r\t")
             & fil$(,,,"Workers lost their jobs.")
-            & fil$("file.txt",r)
+            & fil$("file98741lfn.txt",r)
             & fil$(,STR)
             & fil$(,,".!?,;"):(?str.?stop)
             & !str:Workers
             & !stop:
-            & fil$("file.txt","a+")
+            & fil$("file98741lfn.txt","a+")
             & fil$(,STR)
             &   fil
               $ ( 
@@ -1748,7 +1748,7 @@ towards operators that are closer to the root of the tree"
                 , cv
                 , " of the world, unite! Proletarier aller Länder, vereinigt euch!"
                 )
-            & fil$("file.txt",r)
+            & fil$("file98741lfn.txt",r)
             & fil$(,STR)
             & fil$(,,".!?,;"):(?str.?stop)
             & !str:"Workers of the world"
@@ -1761,6 +1761,7 @@ towards operators that are closer to the root of the tree"
             & !str:"änder, "
             & !stop:
             & ~(fil$(,SET,-1))
+            & rmv$"file98741lfn.txt"
           | Out$151
           )
           (   0:?pos
@@ -1937,6 +1938,7 @@ towards operators that are closer to the root of the tree"
             & lst$(endash,"endash.bra",NEW)
             & :?endash
             & get'"endash.bra"
+            & rmv$"endash.bra"
             & utf$!endash:8211
           | Out$171
           )
@@ -2071,7 +2073,7 @@ towards operators that are closer to the root of the tree"
                 & !n !"LATIN SMALL LETTER S WITH SWASH TAIL" !s:?s
                 )
             & str$!s:?s
-            & put$(str$(!s \n upp$!s),swash,NEW)
+            & (|put$(str$(!s \n upp$!s),swash,NEW))
             & upp$!s:~<>!s
             & @(upp$!s:~<>!s)
           | Out$198
@@ -2090,11 +2092,11 @@ towards operators that are closer to the root of the tree"
           | Out$208
           )
           (chu$(x2d$80000000)&Out$209|)
-          ( d2x$(2^64)&Out$"210 even om 64-bit"
+          ( d2x$(2^64)&Out$"210 even on 64-bit"
           | 
           )
           out$210
-          ( x2d$10000000000000000&Out$"211 even om 64-bit"
+          ( x2d$10000000000000000&Out$"211 even on 64-bit"
           | 
           )
           ( a b c:% c
@@ -4333,7 +4335,70 @@ towards operators that are closer to the root of the tree"
                 = (=hash) (=hash) (=hash)
                 )
             & (H..find)$kaal:(kaal.2500)
-          | Out$559
+          | Out$561
+          )
+          (   x2d$110001:?ii
+            & :?exceptions
+            &   whl
+              ' ( !ii+-1:~<0:?ii
+                & chu$!ii:?kk
+                & (   low$!kk:!kk
+                    & low$(upp$!kk):!kk
+                  |   upp$!kk:!kk
+                    & upp$(low$!kk):!kk
+                  | !ii !exceptions:?exceptions
+                  )
+                )
+            &   !exceptions
+              :   181
+                  304
+                  305
+                  383
+                  453
+                  456
+                  459
+                  498
+                  837
+                  962
+                  976
+                  977
+                  981
+                  982
+                  1008
+                  1009
+                  1012
+                  1013
+                  7835
+                  7838
+                  8126
+                  8486
+                  8490
+                  8491
+            & !ii:0
+          | Out$(562 !ii)
+          )
+          (   100000:?ii
+            & :?buf
+            &   whl
+              ' ( !ii+-1:~<0:?ii
+                & !ii !buf:?buf
+                )
+            & str$!buf:?buf
+            & put$(!buf,bufa76dlw,NEW)
+            & get$bufa76dlw:?buf2
+            & rmv$bufa76dlw
+            & !buf:!buf2
+          | Out$563
+          )
+          (       str
+                $ ( afhadgkfjhgadskfjhgadskjhfgadskjhfgasdkjhfgadksjhgf
+                    \n
+                    hjhkhfsadlfkjasdf
+                  )
+              : ?kk
+            & lst$(kk,haafhdlaggan,NEW)
+            & rmv$haafhdlaggan
+          | Out$564
           )
       &   out
         $ ( str
@@ -4358,8 +4423,8 @@ r=
 & lst$(r,"valid.bra",APP)
 & put$(\n,"valid.bra",APP)
 & (   666:?aaa
-    & fast:?speed
     & slow:?speed
+    & fast:?speed
     & "LL keeps the '0' alife if 'lost' is incremented"
     & 0:?lost
     & (loss=1+!lost:?lost)
