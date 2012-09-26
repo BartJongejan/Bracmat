@@ -2126,10 +2126,16 @@ reads (if <span class="courier">&lt;mode&gt;</span> permitting) <span class="cou
 When reading variable sized records (STR), fil$ returns a dot-separated list
 of two elements: the found stop character and the read string (which does not
 contain the stop character). </p><blockquote><pre>
-{?} fil$("mytext.txt","rb")     { Open for reading in binary mode. }
-{?} fil$(,STR)                  { Prepare for reading until the next 0-byte.}
-{?} fil$:(?stop.?line)          { Read until the next 0-byte. }
-{?} fil$(,SET,-1)               { Close the file. } </pre></blockquote><p> 
+{?} fil$("mytext.txt","rb")               { Open for reading in binary mode. }
+{?} fil$(,STR)                   { Prepare for reading until the next 0-byte.}
+{?} fil$:(?line.?stop)                         { Read until the next 0-byte. }
+{?} fil$(,SET,-1)                                          { Close the file. } </pre></blockquote><p>  </p><blockquote><pre>
+{?} fil$("mytext.txt","rb")               { Open for reading in binary mode. }
+{?} fil$(,STR,"\n \t\r")    { Prepare for reading until the next white space.}
+{?} :?words             { In a moment, accumulate all words in this variable }
+{?} whl'(fil$:(?word.?stop)&amp;!word !words:?words)&amp;          { Read all words. }
+{?} fil$(,SET,-1)                                          { Close the file. }
+{?} !words                              { Show all words, in reversed order. } </pre></blockquote><p> 
 </p><blockquote><pre>
 
   (7) Writing
