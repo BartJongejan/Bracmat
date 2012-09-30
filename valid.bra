@@ -4400,6 +4400,13 @@ towards operators that are closer to the root of the tree"
             & rmv$haafhdlaggan
           | Out$564
           )
+          (   (S="str$(\\a \\b \\v \\n \\f \\r a\\Lb \\t (=\\D))")
+            & get$(!S,MEM):?T
+            & lst$(T,MEM,LIN):?P
+            & !P:"T=\"\\a\\b\\v\\n\\f\\ra\\Lb\\t(=\\D)\";
+"
+          | Out$565
+          )
       &   out
         $ ( str
           $ ( "Done. "
