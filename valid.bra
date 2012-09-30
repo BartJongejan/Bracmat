@@ -4337,7 +4337,11 @@ towards operators that are closer to the root of the tree"
             & (H..find)$kaal:(kaal.2500)
           | Out$561
           )
-          (   x2d$110001:?ii
+          (       x2d
+                $ ( !speed:slow&110001
+                  | 10001
+                  )
+              : ?ii
             & :?exceptions
             &   whl
               ' ( !ii+-1:~<0:?ii
@@ -4406,6 +4410,16 @@ towards operators that are closer to the root of the tree"
             & !P:"T=\"\\a\\b\\v\\n\\f\\ra\\Lb\\t(=\\D)\";
 "
           | Out$565
+          )
+          (   (g=12345\t678)
+            & lst$(g,MEM):"g=
+12345\\t678;
+"
+            & (g="12345	67890")
+            & lst$(g,MEM):"g=
+\"12345	67890\";
+"
+          | Out$566
           )
       &   out
         $ ( str
