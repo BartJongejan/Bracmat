@@ -63,11 +63,15 @@ Test coverage:
 
 */
 
-#define DATUM "23 September 2012"
+#define DATUM "12 October 2012"
 #define VERSION "6"
-#define BUILD "134"
+#define BUILD "135"
 
-/*  23 September 2012
+/*  12 October
+Found some places in plus_samenvoegen_of_sorteren that were never reached,
+commented these.
+
+    23 September 2012
 Discovered buffer overflow when compiled under fresh installation of Xubuntu 
 gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3 with optimization -O1 and higher.
 Cause: strcpy in some places got the address of a single byte as destination
@@ -15059,6 +15063,15 @@ static psk linkeroperand_and_tail(psk pkn,ppsk head,ppsk tail)
     return temp;
     }
 
+#define EXPAND 0
+#if EXPAND
+static psk expandDummy(psk pkn,int * ok)
+    {
+    *ok = FALSE;
+    return pkn;
+    }
+#endif
+
 static psk expandProduct(psk pkn,int * ok)
     {
     switch(kop(pkn))
@@ -15084,6 +15097,8 @@ static psk expandProduct(psk pkn,int * ok)
     *ok = FALSE;
     return pkn;
     }
+
+/*static int level = 0;*/
 
 static psk plus_samenvoegen_of_sorteren(psk pkn)
     {
@@ -15159,6 +15174,7 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
 
     int ok;
 
+/*    printf("%d     :%*s",level,level,"");result(pkn);printf("\n");*/
     if(!is_op(L) && RAT_NUL_COMP(L))
         {
         /* 0+x -> x */
@@ -15193,6 +15209,7 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
         }
     rechteroperand_and_tail(top,&Rterm,&Rtail);
     linkeroperand_and_tail(top,&Lterm,&Ltail);
+    assert(Ltail == NULL);
     if(RATIONAAL_COMP(Lterm))
         {
         if(RATIONAAL_COMP(Rterm))
@@ -15208,44 +15225,56 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
                 /* 4+7 -> 11 */ /*{?} 4+7 => 11 */
                 adr[6] = _qplus(Lterm,Rterm,0);
                 }
-            if(Ltail != NULL)
+            /*if(Ltail != NULL)
                 {
                 adr[5] = Ltail;
                 conc[1] = "+\5";
                 }
-            else
+            else*/
                 conc[1] = NULL;
             conc[2] = NULL;
             if(Rtail != NULL)
                 {
                 adr[4] = Rtail;
-                conc[Ltail == NULL ? 1 : 2] = "+\4";
+                conc[/*Ltail == NULL ?*/ 1 /*: 2*/] = "+\4";
                 }
             pkn = vopb     (top,conc);
             wis(adr[6]);
             }
-        else if(Ltail != NULL)
+        /*else if(Ltail != NULL)
             {
             adr[1] = Lterm;
             adr[2] = Ltail;
             adr[3] = R;
-            pkn = opb     (top,"\1+\2+\3",NULL); /*{?} (1+a)+b => 1+a+b */
-            }
+            pkn = opb     (top,"\1+\2+\3",NULL); / * {?} (1+a)+b => 1+a+b * /
+            }*/
         return pkn;
         }
     else if(RATIONAAL_COMP(Rterm))
         {
         adr[1] = Rterm;
         adr[2] = L;
-        if(Rtail)
-            {
+        assert(Rtail);
+/*        if(Rtail)
+            {*/
+         /* How to get here?
+                (1+a)*(1+b)+c+(1+d)*(1+f)
+         The lhs (1+a)*(1+b) is not expanded before the merge starts
+         Comparing (1+a)*(1+b) with 1, c, d, f and d*f, this product lands
+         after d*f. Thereafter (1+a)*(1+b) is expanded, giving a 
+         numeral 1 in the middle of the expression:
+                1+c+d+f+d*f+(1+a)*(1+b) 
+                1+c+d+f+d*f+1+a+b+a*b
+         Rterm is 1+a+b+a*b
+         Rtail is a+b+a*b
+         */
             adr[3] = Rtail;
             return opb     (top,"\1+\2+\3",NULL);
-            }
+          /*  }
         else
             {
             return opb     (top,"\1+\2",NULL);
-            }
+            }*/
         }
 
     if(  kop(Lterm) == LOG
@@ -15421,11 +15450,11 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
                     }
                 else
                     indx = 1; /*{?} i+-i => 0 */
-                if(Ltail != NULL)
+                /*if(Ltail != NULL)
                     {
-                    adr[5] = Ltail; /*{?} (i+i*x)+-i => i*x */
+                    adr[5] = Ltail; / * {?} (i+i*x)+-i => i*x * /
                     conc[indx++] = "+\5";
-                    }
+                    }*/
                 if(Rtail != NULL)
                     {
                     adr[4] = Rtail; /*{?} -i+-i+i*y => 2*-i+i*y */
@@ -15460,13 +15489,13 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
                 (*loper)->RIGHT = eval((*loper)->RIGHT);
                 return rechtertak(top);          /*{?} i*x+i*y+i*z => i*x+i*y+i*z */
                 }
-            else if(Ltail != NULL) /*{?} (a+c+f)+b+d+g => a+b+c+d+f+g */
+            /*else if(Ltail != NULL) / *{?} (a+c+f)+b+d+g => a+b+c+d+f+g * /
                 {
                 adr[1] = Lterm;
                 adr[2] = Ltail;
                 adr[3] = top->RIGHT;
-                return opb(top,"\1+\2+\3",NULL);      /*{?} (i*x+i*z)+i*y => i*x+i*y+i*z */
-                }
+                return opb(top,"\1+\2+\3",NULL);      / *{?} (i*x+i*z)+i*y => i*x+i*y+i*z * /
+                }*/
             }
         else  /* LtermI != NULL && RtermI == NULL */
             {
@@ -15534,12 +15563,12 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
                     }
                 /* 2*a */
                 }
-            if(Ltail != NULL)
+            /*if(Ltail != NULL)
                 {
                 adr[5] = Ltail;
                 conc[1] = "+\5";
                 }
-            else
+            else*/
                 {
                 conc[1] = NULL;
                 }
@@ -15547,7 +15576,7 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
             if(Rtail != NULL)
                 {
                 adr[4] = Rtail;
-                conc[Ltail == NULL ? 1 : 2] = "+\4";
+                conc[/*Ltail == NULL ?*/ 1 /*: 2*/] = "+\4";
                 }
             (*loper)->RIGHT = vopb((*loper)->RIGHT,conc);
             /*(*loper)->RIGHT = eval(loper->RIGHT);*/
@@ -15578,13 +15607,13 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
             (*loper)->RIGHT = eval((*loper)->RIGHT);
             return rechtertak(top);          /* (1+a+b+c)^30+1 */
             }
-        else if(Ltail != NULL) /*{?} (a+c+f)+b+d+g => a+b+c+d+f+g */
+        /*else if(Ltail != NULL) / *{?} (a+c+f)+b+d+g => a+b+c+d+f+g * /
             {
             adr[1] = Lterm;
             adr[2] = Ltail;
             adr[3] = top->RIGHT;
             return opb(top,"\1+\2+\3",NULL);
-            }
+            }*/
         }
     return pkn;
     }
@@ -15953,19 +15982,40 @@ static int vglmaal(psk kn1,psk kn2)
         }
     }
 
-static psk merge(psk pkn,int (*comp)(psk,psk),psk (*combine)(psk))
+static psk merge
+            (psk pkn
+            ,int (*comp)(psk,psk)
+            ,psk (*combine)(psk)
+#if EXPAND
+            ,psk (*expand)(psk,int*)
+#endif
+            )
     {
     psk lhead,ltail,rhead,rtail;
     psk Repol = &nilk; /* Will contain all evaluated nodes in inverse order.*/
     psk tmp;
+    /*++level;
+    printf("%dMerge:%*s",level,level,"");result(pkn);printf("\n");*/
     for(;;)
         {/* traverse from left to right
             to evaluate left side branches
          */
+#if EXPAND
+        Boolean ok;
+#endif
         pkn = prive(pkn);
         assert(!shared(pkn));
         pkn->v.fl |= READY;
+#if EXPAND
+        do
+            {
+            pkn->LEFT = eval(pkn->LEFT);
+            pkn->LEFT = expand(pkn->LEFT,&ok);
+            }
+            while(ok);
+#else
         pkn->LEFT = eval(pkn->LEFT);
+#endif
         tmp = pkn->RIGHT;
         if(tmp->v.fl & READY)
             {
@@ -15975,13 +16025,24 @@ static psk merge(psk pkn,int (*comp)(psk,psk),psk (*combine)(psk))
           || kop(pkn) != kop(tmp)
           )
             {
+#if EXPAND
+            do
+                {
+                tmp = eval(tmp);
+                tmp = expand(tmp,&ok);
+                }
+                while(ok);
+            pkn->RIGHT = tmp;
+#else
             pkn->RIGHT = eval(tmp);
+#endif
             break;
             }
         pkn->RIGHT = Repol;
         Repol = pkn;
         pkn = tmp;
         }
+    /*printf("%d xxxx:%*s",level,level,"");result(pkn);printf("\n");*/
     for(;;)
         { /* From right to left, prepend sorted elements to result */
         psk repol = &nilk; /*Will contain branches in inverse sorted order*/
@@ -16112,6 +16173,7 @@ static psk merge(psk pkn,int (*comp)(psk,psk),psk (*combine)(psk))
         pkn->v.fl |= READY;
         Repol = tmp;
         }
+    /*--level;*/
     return pkn;
     }
 
@@ -16554,7 +16616,7 @@ static psk eval(psk pkn)
                         if(fl)
                             {
                             pkn = prive(pkn);
-                            pkn->v.fl |= fl; /* {?} (a=b)&<>#@`/%?!('$a) => /#<>%@?`b */
+                            pkn->v.fl |= fl; /* {?} <>#@`/%?!(=b) => /#<>%@?`b */
                             }
                         break;
 
@@ -16631,7 +16693,11 @@ static psk eval(psk pkn)
                         {
                         pkn = copyop(pkn);
                         }
-                    pkn = merge(pkn,vglplus,plus_samenvoegen_of_sorteren);
+                    pkn = merge(pkn,vglplus,plus_samenvoegen_of_sorteren
+#if EXPAND
+                        ,expandProduct
+#endif
+                        );
                     if(lkn.v.fl & INDIRECT)
                         {
                         pkn = evalvar(pkn);
@@ -16647,7 +16713,11 @@ static psk eval(psk pkn)
                     This creates enormous stackdepth && evalueer((pkn->RIGHT)) == TRUE
                     )*/
                     {
-                    pkn = merge(pkn,vglmaal,substmaal);
+                    pkn = merge(pkn,vglmaal,substmaal
+#if EXPAND
+                        ,expandDummy
+#endif
+                        );
                     }
                     if(lkn.v.fl & INDIRECT)
                         {

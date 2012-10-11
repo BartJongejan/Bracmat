@@ -3549,7 +3549,9 @@ towards operators that are closer to the root of the tree"
                 )
           | Out$460
           )
+          out$461
           ((refac=.fct$(1+!arg+-1))|Out$461)
+          out$462
           ( fcttest
           =   expected ans
             .   !arg:(?arg.?expected)
@@ -3561,6 +3563,7 @@ towards operators that are closer to the root of the tree"
           ( refac$((2+a)*(3+b)):6*(1+1/3*b)*(1+1/2*a)
           | Out$462
           )
+          out$463
           (     refac
               $ ( E*r^2*(cos.theta)^2*(sin.theta)^2
                 +   J
@@ -3593,18 +3596,22 @@ towards operators that are closer to the root of the tree"
               + -1/2*Utheta^2*r^4
           | Out$463
           )
+          out$464
           (   refac$((2+a)*(3+b)*(5+c))
             : 30*(1+1/5*c)*(1+1/3*b)*(1+1/2*a)
           | Out$464
           )
+          out$465
           (   refac$(4*(2+a+x)*(3+b*d)*(5+c*y))
             : 120*(1+1/5*c*y)*(1+1/3*b*d)*(1+1/2*a+1/2*x)
           | Out$465
           )
+          out$466
           (   refac$((2+a+x)*(3+b*d*f)*(5+c*y))
             : 30*(1+1/5*c*y)*(1+1/3*b*d*f)*(1+1/2*a+1/2*x)
           | Out$466
           )
+          out$467
           (     refac
               $ ((2+3*a+x)*(3+6*b*d*f)*(5+11*c*y))
             :   30
@@ -3613,10 +3620,12 @@ towards operators that are closer to the root of the tree"
               * (1+3/2*a+1/2*x)
           | Out$467
           )
+          out$468
           (   refac$(h*t+h*s*p+h*t^2+t*s)
             : h*t+h*t^2+h*p*s+s*t
           | Out$468
           )
+          out$469
           ( refac$((2+a)*(3+b)):6*(1+1/3*b)*(1+1/2*a)
           | Out$469
           )
@@ -4415,6 +4424,12 @@ towards operators that are closer to the root of the tree"
             & (g="12345	67890")
             & @(lst$(g,MEM):"g=" ? "\"12345	67890\";" ?)
           | Out$566
+          )
+          (   /#<>%@?`!(=b):?h
+            & flg$('$h):(=?X.b)
+            & lst$(X,MEM,LIN):"X=/#<>%@?`;
+"
+          | Out$567
           )
       &   out
         $ ( str
