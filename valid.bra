@@ -1,4 +1,4 @@
-{valid.bra}
+{valid.bra}
 Xobject=
   (donit=.)
   ( doit
@@ -4429,6 +4429,135 @@ towards operators that are closer to the root of the tree"
             & flg$('$h):(=?X.b)
             & @(lst$(X,MEM,LIN):"X=/#<>%@?`" ?)
           | Out$567
+          )
+          (7^-13:1/96889010407|Out$568)
+          (1/49^1/2:1/7|Out$568)
+          (1/50^1/2:1/5*2^-1/2|Out$569)
+          (1/51^1/2:3^-1/2*17^-1/2|Out$570)
+          (1/52^1/2:1/2*13^-1/2|Out$571)
+          (1/53^1/2:53^-1/2|Out$572)
+          (   tbl$(ajfhas,0)
+            & 2$~ajfhas
+            & Out$573
+          | 
+          )
+          (   tbl$(aa,10)
+            & 0:?i
+            &   whl
+              ' ( !i:<10:?(!i$aa)
+                & !i+1:?i
+                )
+            & :?PP
+            &   whl
+              ' ( !i+-1:>-20:?i
+                & !(!i$aa) !PP:?PP
+                )
+            &   !PP
+              :   1
+                  2
+                  3
+                  4
+                  5
+                  6
+                  7
+                  8
+                  9
+                  0
+                  1
+                  2
+                  3
+                  4
+                  5
+                  6
+                  7
+                  8
+                  9
+                  0
+                  1
+                  2
+                  3
+                  4
+                  5
+                  6
+                  7
+                  8
+                  9
+            & tbl$(aa,0)
+          | Out$574
+          )
+          (5$(a.k)&Out$575|)
+          (   ?'a:?h
+            & flg$('$h):(=?X.a)
+            & @(lst$(X,MEM,LIN):"X=?" ?)
+          | Out$576
+          )
+          (':(=)|Out$577)
+          (   tbl$(poiuyt,0)
+            & new$(poiuyt,678)
+            & Out$578
+          | 
+          )
+          (   new$(hash,-1000)
+            & new$(hash,0)
+            & new$(hash,12345)
+            & new$(hash,9123456789091234567890)
+          | Out$579
+          )
+          (sim$a&Out$580|)
+          (sim$(aaa aa):4/5|Out$581)
+          (sim$(aaa (aa.i))&Out$582)
+          (tbl$10&Out$583|)
+          (sys$&Out$584|)
+          (sys$echo|Out$585|)
+          (arg$:?AArg&out$!AArg|)
+          (   get$(":?adg;2 !adg:?adg;1 !adg:?adg;",MEM)
+            & 1 2:!adg
+          | Out$586
+          )
+          (   upp$(a,DOS "has only effect if CODEPAGE850 is #defined")
+            : A
+          | Out$587
+          )
+          ( upp$(a b,DOS)&Out$588
+          | 
+          )
+          (   low$(A,DOS "has only effect if CODEPAGE850 is #defined")
+            : a
+          | Out$589
+          )
+          ( low$(A B,DOS)&Out$590
+          | 
+          )
+          (rev$ab:ba|Out$591)
+          (rev$(a b)&Out$592|)
+          ( glf$(=?.?exp)&Out$593
+          | 
+          )
+          (   ( glf$(=~.exp):(=?NEXP)
+              | &Out$594
+              )
+            & !NEXP
+            & Out$595
+          | 
+          )
+          ( flg$(=~exp):(=?f.?o)
+          & (!o:exp|Out$596)
+          & (!f&Out$597|)
+          )
+          (   flg$(=~<exp):(=?f.?o)
+            & !f
+            & !o:exp
+          | Out$598
+          )
+          (asc$(a b)&Out$599|)
+          (chr$(50 51)&Out$600|)
+          (chr$50a&Out$601|)
+          (chr$350&Out$602|)
+          (   alc$100:?p
+            & pok$(!p+4,4000,2)
+            & pee$(!p+4,2):4000
+            & fre$!p
+          | Out$603
           )
       &   out
         $ ( str

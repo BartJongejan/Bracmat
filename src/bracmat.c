@@ -63,11 +63,17 @@ Test coverage:
 
 */
 
-#define DATUM "12 October 2012"
+#define DATUM "14 October 2012"
 #define VERSION "6"
-#define BUILD "135"
+#define BUILD "137"
 
-/*  12 October
+/*  14 October 2012
+flg$(=~exp):(=?f.?o)  !f now fails, as it should.
+Relaxed requirement that parameters be separated with comma for function sim.
+new$(hash,1000) gives a hint at the initial size of the hash table.
+Default is 97.
+
+    12 October 2012
 Found some places in plus_samenvoegen_of_sorteren that were never reached,
 commented these.
 
@@ -9211,8 +9217,15 @@ static Boolean hashremove(struct typedObjectknoop * This,ppsk arg)
 
 static Boolean hashnew(struct typedObjectknoop * This,ppsk arg)
     {
-    UNREFERENCED_PARAMETER(arg);
-    VOID(This) = (void *)newhash(97);
+/*    UNREFERENCED_PARAMETER(arg);*/
+    unsigned long N = 97;
+    if(INTEGER_POS_COMP((*arg)->RIGHT))
+        {
+        N = strtoul((char *)POBJ((*arg)->RIGHT),NULL,10);
+        if(N == 0 || N == ULONG_MAX)
+            N = 97;
+        }
+    VOID(This) = (void *)newhash(N);
     return TRUE;
     }
 
@@ -14077,6 +14090,7 @@ static function_return_type functies(psk pkn)
                 }
             if(NIKSF(intVal))
                 {
+                adr[2]->v.fl ^= SUCCESS; /*20121014*/
                 adr[3]->v.fl ^= SUCCESS;
                 }
             sprintf(klad,"=\2.\3");
@@ -14458,7 +14472,7 @@ static function_return_type functies(psk pkn)
 #if !defined NO_SYSTEM_CALL
         CASE(SYS)
             {
-            if(is_op(rknoop))
+            if(is_op(rknoop) || (PLOBJ(rknoop) == '\0'))
                 return functionFail(pkn);
             else
                 {
@@ -14543,7 +14557,7 @@ The same effect is obtained by <expr>:?!(=)
 
         CASE(SIM) /* sim$(<atoom>,<atoom>) , fuzzy compare (percentage) */
             {
-            if(kop(rknoop) == KOMMA
+            if(is_op(rknoop) /*20121014 dropped requirement for comma*/
             && !is_op(rlknoop = rknoop->LEFT)
             && !is_op(rrknoop = rknoop->RIGHT))
                 {
@@ -14699,7 +14713,7 @@ The same effect is obtained by <expr>:?!(=)
         }
     /*return functionOk(pkn); 20 Dec 1995, unreachable code in Borland C */
     }
-
+/*
 static psk numboom(psk pkn,psk lknoop,const char *conc[])
     {
     if(lknoop == pkn->LEFT)
@@ -14711,7 +14725,7 @@ static psk numboom(psk pkn,psk lknoop,const char *conc[])
         return vopb(pkn,conc);
         }
     }
-
+*/
 static psk stapelmacht(psk pkn)
     {
     psk lknoop;
@@ -14769,7 +14783,9 @@ static psk stapelmacht(psk pkn)
                         conc[2] = hekje6;
                         conc[3] = NULL;
                         adr[6] = _q_qdeel(&eenk,lknoop);
-                        pkn = numboom(pkn,lknoop,conc);
+                        /*pkn = numboom(pkn,lknoop,conc);*/
+                        assert(lknoop == pkn->LEFT);
+                        pkn = vopb(pkn,conc+2);
                         wis(adr[6]);
                         return pkn;
                         }
@@ -14880,7 +14896,7 @@ static psk stapelmacht(psk pkn)
                     }
                 else
                     {
-                    /* (a+b)^-n = ((a+b)^n)^-1 */ /*{?} (a+b)^-7 => (a+b)^-7 */
+                    /*{?} 7^-13 => 1/96889010407 */
                     conc[0] = haakhekje1macht;
                     conc[1] = hekje6;
                     adr[6] = _qmaalmineen(rknoop);
@@ -15007,12 +15023,12 @@ static void splitProduct_number_im_rest(psk pknoop,ppsk N,ppsk I,ppsk NNNI)
                 }/* N*NNNI */
             }
         }
-    else if(RATIONAAL_COMP(pknoop))
-        {/* 17 */
+    /*else if(RATIONAAL_COMP(pknoop))
+        {/ * 17 * /
         *N = pknoop;
         *I = NULL;
         *NNNI = NULL;
-        }/* N */
+        }*//* N */
     else if(!is_op(pknoop) && PLOBJ(pknoop) == IM)
         {/* i */
         *N = NULL;
@@ -15318,21 +15334,24 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
                 dif = RtermNNNI == NULL ? 0 : -1;/*{?} i+-i*x => i+-i*x */
                                                  /*{?} i+-i => 0 */
                 }
-            else if(RtermNNNI == NULL)
+            /*else if(RtermNNNI == NULL)
                 {
-                dif = 1; /*{?} i*x+-i => -i+i*x */
-                }
+                dif = 1; / *{?} i*x+-i => -i+i*x * /
+                }*/
             else
                 {
-                while(  (dif = vgl(LtermNNNI,RtermNNNI)) > 0
+                assert(RtermNNNI != NULL);
+                dif = vgl(LtermNNNI,RtermNNNI);
+                assert(dif <= 0 || kop((*loper)->RIGHT) != PLUS);
+                /*while(  (dif = vgl(LtermNNNI,RtermNNNI)) > 0
                      && kop((*loper)->RIGHT) == PLUS
                      )
                     {
-                    loper = &(*loper)->RIGHT; /*{?} i*x+i*y+i*z => i*x+i*y+i*z */
+                    loper = &(*loper)->RIGHT; / *{?} i*x+i*y+i*z => i*x+i*y+i*z * /
                     *loper = prive(*loper);
                     rechteroperand_and_tail((*loper),&Rterm,&Rtail);
                     splitProduct_number_im_rest(Rterm,&RtermN,&RtermI,&RtermNNNI);
-                    }
+                    }*/
                 }
             if(dif == 0)
                 {                        /*{?} i*x+-i*x => 0 */
@@ -15470,25 +15489,28 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
                     }
                 return rechtertak(top);                        /*{?} i*x+-i*x => 0 */
                 }
-            else if(dif > 0) /*{?} b+a => a+b */
+            assert(dif <= 0);
+            assert((*loper) == top);
+            assert(Ltail == NULL);
+/*          else if(dif > 0) / *{?} b+a => a+b * /
                 {
-                adr[1] = Rterm; /*{?} i*x+-i => -i+i*x */
+                adr[1] = Rterm; / *{?} i*x+-i => -i+i*x * /
                 adr[2] = L;
                 (*loper)->RIGHT = opb((*loper)->RIGHT,"\1+\2",NULL);
                 (*loper)->RIGHT->v.fl |= READY;
-                /*
+                / *
                 (*loper)->RIGHT = eval((*loper)->RIGHT);
-                */
+                * / 
                 return rechtertak(top);
                 }
-            else if((*loper) != top) /*{?} b+a+c => a+b+c */
+            else if((*loper) != top) / *{?} b+a+c => a+b+c * /
                 {
                 adr[1] = L;
                 adr[2] = (*loper)->RIGHT;
                 (*loper)->RIGHT = opb((*loper)->RIGHT,"\1+\2",NULL);
                 (*loper)->RIGHT = eval((*loper)->RIGHT);
-                return rechtertak(top);          /*{?} i*x+i*y+i*z => i*x+i*y+i*z */
-                }
+                return rechtertak(top);          / *{?} i*x+i*y+i*z => i*x+i*y+i*z * /
+                }*/
             /*else if(Ltail != NULL) / *{?} (a+c+f)+b+d+g => a+b+c+d+f+g * /
                 {
                 adr[1] = Lterm;
@@ -15563,6 +15585,7 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
                     }
                 /* 2*a */
                 }
+            assert(Ltail == NULL);
             /*if(Ltail != NULL)
                 {
                 adr[5] = Ltail;
@@ -15607,6 +15630,7 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
             (*loper)->RIGHT = eval((*loper)->RIGHT);
             return rechtertak(top);          /* (1+a+b+c)^30+1 */
             }
+        assert(Ltail == NULL);
         /*else if(Ltail != NULL) / *{?} (a+c+f)+b+d+g => a+b+c+d+f+g * /
             {
             adr[1] = Lterm;
