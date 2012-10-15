@@ -4559,6 +4559,33 @@ towards operators that are closer to the root of the tree"
             & fre$!p
           | Out$603
           )
+          (   tbl$(notanobject,0)
+            & new$notanobject
+            & Out$604
+          | 
+          )
+          (   rmv$FOPENTEST
+            & (rmv$FOPENTEST:ENOENT|Out$605)
+            & (get$FOPENTEST&Out$606|)
+            & ( get$(FOPENTEST,STR)&Out$607
+              | 
+              )
+          | Out$608
+          )
+          ( get$(hel,3.STR)&Out$609
+          | 
+          )
+          ( rmv$(REMOVETEST1,REMOVETEST2)&Out$610
+          | 
+          )
+          (   ren$(RENAMETEST1 RENAMETEST2 RENAMETEST3)
+            & Out$611
+          | 
+          )
+          ( ren$(REMOVETEST1,RENAMETEST1):ENOENT
+          | Out$612
+          )
+          (glf$(=!,l)&Out$613|)
       &   out
         $ ( str
           $ ( "Done. "

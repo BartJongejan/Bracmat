@@ -63,11 +63,15 @@ Test coverage:
 
 */
 
-#define DATUM "14 October 2012"
+#define DATUM "15 October 2012"
 #define VERSION "6"
-#define BUILD "137"
+#define BUILD "138"
 
-/*  14 October 2012
+/*  15 October 2012
+Added 8 byte peek and poke (pee, pok) (perhaps not on all 32 bit platforms).
+Default is now 1 byte.
+
+    14 October 2012
 flg$(=~exp):(=?f.?o)  !f now fails, as it should.
 Relaxed requirement that parameters be separated with comma for function sim.
 new$(hash,1000) gives a hint at the initial size of the hash table.
@@ -1379,6 +1383,10 @@ Atari : definieer -DATARI i.v.m. BIGENDIAN en extern int _stksize = -1;
 
 #include <limits.h>
 
+#if defined _WIN64 || defined _WIN32
+typedef unsigned __int32 UINT32_T; /* pre VS2010 has no int32_t */
+#endif
+
 #if defined _WIN64
 /*Microsoft*/
 #define WORD32  0
@@ -1390,6 +1398,10 @@ Atari : definieer -DATARI i.v.m. BIGENDIAN en extern int _stksize = -1;
 #define FSEEK _fseeki64
 #define FTELL _ftelli64
 #else
+#if !defined NO_C_INTERFACE && !defined _WIN32
+#include <inttypes.h>
+typedef unsigned int32_t UINT32_T;
+#endif
 #if LONG_MAX <= 2147483647L
 #define WORD32  1
 #define _4      1
@@ -13821,7 +13833,7 @@ static function_return_type functies(psk pkn)
 /*#endif*/
 #endif
 #if !defined NO_C_INTERFACE
-        CASE(ALC)  /* alc $ <aantal bytes> */
+        CASE(ALC)  /* alc $ <number of bytes> */
             {
             void *p;
             if(is_op(rknoop)
@@ -13829,9 +13841,7 @@ static function_return_type functies(psk pkn)
             || (p = bmalloc(__LINE__,(int)strtoul((char *)POBJ(rknoop),(char **)NULL,10)))
                   == NULL)
                 return functionFail(pkn);
-/*            sprintf(pc,"%ld",(LONG)p);*/
             pointerToStr(klad,p);
-            /*sprintf(klad,"%Iu",p);*/
             wis(pkn);
             pkn = scopy((char *)klad);
             return functionOk(pkn);
@@ -13842,12 +13852,10 @@ static function_return_type functies(psk pkn)
             if(is_op(rknoop) || !INTEGER_POS(rknoop))
                 return functionFail(pkn);
             p = strToPointer((char *)POBJ(rknoop));
-            /*sscanf((char *)POBJ(rknoop),"%Iu",&p);*/
             pskfree((psk)p);
-            /*pskfree((void*)strtoul((char *)POBJ(rknoop),(char **)NULL,10));*/
             return functionOk(pkn);
             }
-        CASE(PEE) /* pee $ (<pointer>,type) (1,2,4)*/
+        CASE(PEE) /* pee $ (<pointer>[,<number of bytes>]) (1,2,4,8)*/
             {
             void *p;
             intVal = 1;
@@ -13871,27 +13879,28 @@ static function_return_type functies(psk pkn)
             if(is_op(rlknoop) || !INTEGER_POS(rlknoop))
                 return functionFail(pkn);
             p = strToPointer((char *)POBJ(rlknoop));
-            /*sscanf((char *)POBJ(rlknoop),"%Iu",&p);*/
             p = (void*)((char *)p - (ptrdiff_t)((size_t)p % intVal));
-            /*            p = (void*)strtoul((char *)POBJ(rlknoop),(char **)NULL,10);
-            p = (void*)((char *)p - (unsigned)((unsigned LONG)p % aantal));*/
             switch(intVal)
                 {
-                case 1:
-                    sprintf(klad,"%u",(int)*(unsigned char *)p);
-                    break;
                 case 2:
                     sprintf(klad,"%hu",*(short unsigned int*)p);
                     break;
+                case 4:
+                    sprintf(klad,"%lu",(unsigned long)*(UINT32_T*)p);
+                    break;
+                case 8:
+                    sprintf(klad,"%llu",*(unsigned LONG*)p);
+                    break;
+                case 1:
                 default:
-                    sprintf(klad,"%lu",*(unsigned LONG *)p);
+                    sprintf(klad,"%u",(int)*(unsigned char *)p);
                     break;
                 }
             wis(pkn);
             pkn = scopy((char *)klad);
             return functionOk(pkn);
             }
-        CASE(POK) /* pok $ (<pointer>,getal,nbytes) */
+        CASE(POK) /* pok $ (<pointer>,<number>[,<number of bytes>]) */
             {
             psk rrlknoop;
             void *p;
@@ -13914,6 +13923,12 @@ static function_return_type functies(psk pkn)
                             break;
                         case '4':
                             intVal = 4;
+                            break;
+                        case '8':
+                            intVal = 8;
+                            break;
+                        default:
+                            ;
                         }
                 }
             else
@@ -13926,14 +13941,18 @@ static function_return_type functies(psk pkn)
             val = toLong(rrlknoop);
             switch(intVal)
                 {
-                case 1:
-                    *(unsigned char *)p = (unsigned char)val;
-                    break;
                 case 2:
                     *(unsigned short int*)p = (unsigned short int)val;
                     break;
+                case 4:
+                    *(UINT32_T*)p = (UINT32_T)val;
+                    break;
+                case 8:
+                    *(unsigned LONG*)p = (unsigned LONG)val;
+                    break;
+                case 1:
                 default:
-                    *(LONG*)p = val;
+                    *(unsigned char *)p = (unsigned char)val;
                     break;
                 }
             return functionOk(pkn);
