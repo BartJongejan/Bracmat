@@ -1404,7 +1404,7 @@ typedef unsigned __int32 UINT32_T; /* pre VS2010 has no int32_t */
 #if !defined NO_C_INTERFACE && !defined _WIN32
 #if UINT_MAX == 4294967295
 typedef unsigned int UINT32_T;
-#else if ULONG_MAX == 4294967295
+#elif ULONG_MAX == 4294967295
 typedef unsigned long UINT32_T;
 #endif
 #endif
@@ -13895,7 +13895,7 @@ static function_return_type functies(psk pkn)
                     sprintf(klad,"%lu",(unsigned long)*(UINT32_T*)p);
                     break;
                 case 8:
-                    sprintf(klad,"%llu",*(unsigned LONG*)p);
+                    sprintf(klad,"%llu",*(unsigned long long*)p);
                     break;
                 case 1:
                 default:
