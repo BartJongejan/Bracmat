@@ -1402,8 +1402,11 @@ typedef unsigned __int32 UINT32_T; /* pre VS2010 has no int32_t */
 #define FTELL _ftelli64
 #else
 #if !defined NO_C_INTERFACE && !defined _WIN32
-#include <inttypes.h>
-typedef unsigned int32_t UINT32_T;
+#if UINT_MAX == 4294967295
+typedef unsigned int UINT32_T;
+#else if ULONG_MAX == 4294967295
+typedef unsigned long UINT32_T;
+#endif
 #endif
 #if LONG_MAX <= 2147483647L
 #define WORD32  1
