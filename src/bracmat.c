@@ -16490,12 +16490,13 @@ static psk evalvar(psk pkn)
     else
         {
         DBGSRC(printf("evalvar(");result(pkn);printf("\n");)
-        assert(!shared(pkn));
-        /*if(shared(pkn))
+        if(shared(pkn))
             {
+            /*You can get here if a !variable is unitialized*/
             dec_refcount(pkn);
             pkn = icopievan(pkn);
-            }*/
+            }
+        assert(!shared(pkn));
         (pkn)->v.fl |= READY;
         (pkn)->v.fl ^= SUCCESS;
         }
