@@ -63,11 +63,14 @@ Test coverage:
 
 */
 
-#define DATUM "15 October 2012"
+#define DATUM "17 October 2012"
 #define VERSION "6"
-#define BUILD "138"
+#define BUILD "139"
 
-/*  15 October 2012
+/*  17 October 2012
+In evalvar, the assumption that shared = false is false.
+
+    15 October 2012
 Added 8 byte peek and poke (pee, pok) (perhaps not on all 32 bit platforms).
 Default is now 1 byte.
 
