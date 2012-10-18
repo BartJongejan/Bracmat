@@ -79,7 +79,7 @@ The file looks like this:
 
     new$X;
 
-When you issue the !r command, three things happen:
+When you issue the !r command, four things happen:
 * hello.bra is read again
 * the hello.bra that is on disk is renamed to hello.bak
   If hello.bak already existed it is replaced
@@ -170,7 +170,7 @@ Both member variables are consulted.
 
        ...
     X=
-      (geoentity=world)
+      (geoentity=)
       (version=1.0)
       (do-it=.out$(hello !(its.geoentity)))
       ( new
@@ -180,7 +180,7 @@ Both member variables are consulted.
           (~
           |   0:?i
             &   whl
-              ' (!i+1:<10:?i&(its.do-it)$)    )
+              ' (!i+1:<10:?i&str$(!i (!i:1&st|!i:2&nd|!i:3&d|th)) world:?(its.geoentity)&(its.do-it)$)    )
       );
        ...
 
@@ -189,15 +189,15 @@ command:
 
     {?} !r
     1.0
-    hello world
-    hello world
-    hello world
-    hello world
-    hello world
-    hello world
-    hello world
-    hello world
-    hello world
+    hello 1st world
+    hello 2nd world
+    hello 3d world
+    hello 4th world
+    hello 5th world
+    hello 6th world
+    hello 7th world
+    hello 8th world
+    hello 9th world
     {!}
     new'X;
 
@@ -205,7 +205,7 @@ The source code now looks like this:
 
        ...
     X=
-      (geoentity=world)
+      (geoentity=)
       (version=1.0)
       (do-it=.out$(hello !(its.geoentity)))
       ( new
@@ -214,9 +214,21 @@ The source code now looks like this:
           & ( ~
             |   0:?i
               &   whl
-                ' (!i+1:<10:?i&(its.do-it)$)
+                ' ( !i+1:<10:?i
+                  &       str
+                        $ ( !i
+                            ( !i:1&st
+                            | !i:2&nd
+                            | !i:3&d
+                            | th
+                            )
+                          )
+                        world
+                    : ?(its.geoentity)
+                  & (its.do-it)$
+                  )
             )
-      );
+      ); 
        ...
 
 If you make a mistake by not correctly matching opening and closing parentheses
