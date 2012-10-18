@@ -258,3 +258,19 @@ several examples in the source code above. If you are not sure whether
 parentheses are needed to group some expresions, use them and then wait and see
 what Bracmat does to them.
 
+The comments that you might write in your program code get lost when using the
+approach describe above. Comments are always discarded by Bracmat upon reading,
+so there is no way to get them back in. The comment at the top of the program
+code is recreated each time when you do the !r command from the contents of
+a string near the bottom. If you want to change the comment, you should do that
+in the string representation near the bottom of the file, not in the comment
+itself. If you really need to comment a piece of code, you can put some text
+in a string that sits somewhere in the code without being of any programmatical
+use. Do not overuse this, because the evaluation of such strings eats some
+cycles and slows the program a bit.
+
+    & ...
+    & "This is my comment."
+    & ...
+    
+    
