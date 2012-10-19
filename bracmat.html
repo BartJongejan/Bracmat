@@ -13,7 +13,7 @@ accompanies Bracmat, using Bracmat to do the conversion.</i>
 </p><h1><a name="lusmenu">                       BRACMAT                       </a></h1>
 <p>
 
-<br />
+</p>
 <dl><dt><a href="#aanbevelingen"> starting with Bracmat</a></dt>
 <dt><a href="#patternm"> pattern matching</a></dt>
 <dt><a href="#syntax"> grammar</a></dt>
@@ -32,7 +32,7 @@ accompanies Bracmat, using Bracmat to do the conversion.</i>
 <dt><a href="#colofon">how to obtain Bracmat</a></dt>
 <dt><a href="#morexmlps">more example code</a></dt>
 </dl>
-<br />
+<p>
 </p><h1><a name="aanbevelingen">If you haven't seen Bracmat before ..</a></h1>
 <p>
 Bracmat is an interpreted programming language that will evaluate instructions
@@ -235,11 +235,11 @@ Europe is reachable from Asia <br />
 
 Africa is reachable from Asia <br />
 North America is reachable from South America
-<br />
+</p>
 <dl><dt><a href="#pattxttxt">Pattern matching in character strings</a></dt>
 <dt><a href="#pattxt">Pattern matching in tree structures</a></dt>
 </dl>
-<br />
+<p>
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="pattxttxt">Pattern matching in strings</a></h1>
 <p>
@@ -458,7 +458,7 @@ Quotation marks. Comments are enclosed in {} and may be nested.
 </p><h1><a name="binmenu">Binary operators</a></h1>
 <p>
 
-<br />
+</p>
 <dl><dt><a href="#binovztxt"> choose a specific binary operator</a></dt>
 <dt><a href="#algtxt"> algebraic operations</a></dt>
 <dt><a href="#binprotxt"> program flow</a></dt>
@@ -468,7 +468,7 @@ Quotation marks. Comments are enclosed in {} and may be nested.
 <dt><a href="#funmactxt"> functions and macros</a></dt>
 <dt><a href="#dumtxt"> the dummy operator</a></dt>
 </dl>
-<br />
+<p>
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="binovztxt">=.,|&amp;: +*^LD'$_</a></h1>
 <p>
@@ -476,24 +476,24 @@ These are the 15 binary Bracmat operators. The higher in the list, the lower
 in the order of operations. Use parentheses to force an operator to a higher
 position in the order of operations.
 
-<br />
+</p>
 <dl><dt><a href="#savtxt">&nbsp;=&nbsp;</a></dt><dd>assignment:&nbsp;<code>(x=7)</code>&nbsp;&nbsp;<code>(square=.!arg^2)</code>&nbsp;<br />object member definition:&nbsp;<code>(myobject=(place=Copenhagen) (setPlace=.!arg:?(its.place)))</code>&nbsp;</dd>
 <dt><a href="#contxt">&nbsp;.&nbsp;</a></dt><dd>fixed data structure:&nbsp;<code>(Palme.Olof.Sweden)</code>&nbsp;<br />object member referencing:&nbsp;<code>(myhash..insert)$(xxx.998743)</code>&nbsp;</dd>
 <dt><a href="#contxt">&nbsp;,&nbsp;</a></dt><dd>list with autostretch:&nbsp;<code>(ham,(bread,butter),jam):(ham,bread,butter,jam)</code>&nbsp;</dd>
 <dt><a href="#binprotxt">&nbsp;|&nbsp;</a></dt><dd>or else:&nbsp;<code>get$myfile | out$"Cannot read myfile"</code>&nbsp;</dd>
-<dt><a href="#binprotxt">&nbsp;&amp;&nbsp;</a></dt><dd>and then:&nbsp;<code>out$"alomost done" & Done</code>&nbsp;</dd>
+<dt><a href="#binprotxt">&nbsp;&amp;&nbsp;</a></dt><dd>and then:&nbsp;<code>out$"alomost done" &amp; Done</code>&nbsp;</dd>
 <dt><a href="#asstxt">&nbsp;:&nbsp;</a></dt><dd>match subject with pattern:&nbsp;<code>Meeting at 4 in room 24:? ?#hour ? ?#room ?</code>&nbsp;</dd>
-<dt><a href="#contxt">[blank]</a></dt><dd>sentence, neutral element "":&nbsp;<code>Oh well this can go on and on:?a Oh ?z & !a:""</code>&nbsp;</dd>
-<dt><a href="#algtxt">&nbsp;+&nbsp;</a></dt><dd>add, neutral term 0:&nbsp;<code>(a+6+b+a+10), (a+b:?x+a+?y & !x:0)</code>&nbsp;</dd>
-<dt><a href="#algtxt">&nbsp;*&nbsp;</a></dt><dd>multiply, neutral factor 1:&nbsp;<code>(46546*647547564), (a*b:?x*a*?y & !x:1)</code>&nbsp;</dd>
-<dt><a href="#algtxt">&nbsp;^&nbsp;</a></dt><dd>raise to a power, neutral exponent 1:&nbsp;<code>(9975^332), (45:?n^?exp & !exp:1)</code>&nbsp;</dd>
+<dt><a href="#contxt">[blank]</a></dt><dd>sentence, neutral element "":&nbsp;<code>Oh well this can go on and on:?a Oh ?z &amp; !a:""</code>&nbsp;</dd>
+<dt><a href="#algtxt">&nbsp;+&nbsp;</a></dt><dd>add, neutral term 0:&nbsp;<code>(a+6+b+a+10), (a+b:?x+a+?y &amp; !x:0)</code>&nbsp;</dd>
+<dt><a href="#algtxt">&nbsp;*&nbsp;</a></dt><dd>multiply, neutral factor 1:&nbsp;<code>(46546*647547564), (a*b:?x*a*?y &amp; !x:1)</code>&nbsp;</dd>
+<dt><a href="#algtxt">&nbsp;^&nbsp;</a></dt><dd>raise to a power, neutral exponent 1:&nbsp;<code>(9975^332), (45:?n^?exp &amp; !exp:1)</code>&nbsp;</dd>
 <dt><a href="#algtxt">&nbsp;\L</a></dt><dd>take logarithm:&nbsp;<code>10\L1050</code>&nbsp;</dd>
 <dt><a href="#difftxt">&nbsp;\D</a></dt><dd>differentiate:&nbsp;<code>x\D(x^10)</code>&nbsp;</dd>
 <dt><a href="#funmactxt">&nbsp;'&nbsp;</a></dt><dd>function evaluation (does not evaluate rhs):&nbsp;<code>str'(b+a):"b+a"</code>&nbsp;<br />macro:&nbsp;<code>()'(my name is ()$name)</code>&nbsp;</dd>
 <dt><a href="#funmactxt">&nbsp;$&nbsp;</a></dt><dd>function evaluation (evaluates rhs):&nbsp;<code>str$(b+a):"a+b"</code>&nbsp;<br />variable in macro:&nbsp;<code>()'(my name is ()$name)</code>&nbsp;</dd>
-<dt><a href="#dumtxt">&nbsp;_&nbsp;</a></dt><dd>dummy:&nbsp;<code> !expr:?lhs_?rhs & (do$!lhs)_(do$!rhs)</code>&nbsp;</dd>
+<dt><a href="#dumtxt">&nbsp;_&nbsp;</a></dt><dd>dummy:&nbsp;<code> !expr:?lhs_?rhs &amp; (do$!lhs)_(do$!rhs)</code>&nbsp;</dd>
 </dl>
-<br />
+<p>
 <span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
 </p><h1><a name="savtxt">The = operator</a></h1>
 <p>
@@ -1236,13 +1236,13 @@ With macro construct : <br />
 </p><h1><a name="unopsmenu">Prefixes</a></h1>
 <p>
 
-<br />
+</p>
 <dl><dt><a href="#unstuurtxt"> program flow</a></dt>
 <dt><a href="#unpattxt"> pattern matching</a></dt>
 <dt><a href="#unpattxt"> prefixes combined with expressions</a></dt>
 <dt><a href="#unops"> unary operators</a></dt>
 </dl>
-<br />
+<p>
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="unstuurtxt">Prefixes and program flow</a></h1>
 <p>
@@ -1522,11 +1522,11 @@ Examples: <br />
 </p><h1><a name="varsmenu">Symbols</a></h1>
 <p>
 
-<br />
+</p>
 <dl><dt><a href="#varmattxt"> literals</a></dt>
 <dt><a href="#varprotxt"> variables</a></dt>
 </dl>
-<br />
+<p>
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="varmattxt">Literals</a></h1>
 <p>
@@ -1609,13 +1609,13 @@ archivist
 </p><h1><a name="progsmenu">Programming advice</a></h1>
 <p>
 
-<br />
+</p>
 <dl><dt><a href="#prostutxt1"> program flow</a></dt>
 <dt><a href="#pattxt"> pattern matching</a></dt>
 <dt><a href="#contxt"> data structures</a></dt>
 <dt><a href="#debugtxt"> debugging</a></dt>
 </dl>
-<br />
+<p>
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="debugtxt">Debugging</a></h1>
 <p>
@@ -1724,7 +1724,7 @@ dbg function.
 </p><h1><a name="funcmenu">functions</a></h1>
 <p>
 
-<br />
+</p>
 <dl><dt><a href="#funmactxt"> function evaluation</a></dt>
 <dt><a href="#funtxt1"> defining functions</a></dt>
 <dt><a href="#naamloos"> nameless functions</a></dt>
@@ -1732,7 +1732,7 @@ dbg function.
 <dt><a href="#inbltmenu"> built-in functions</a></dt>
 <dt><a href="#predefmenu"> predefined, changeable functions</a></dt>
 </dl>
-<br />
+<p>
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="funtxt1">&lt;function name&gt;=&lt;var1&gt; [,&lt;var2&gt;, ...].&lt;function body&gt;</a></h1>
 <p>
@@ -1821,45 +1821,45 @@ the value 'aap' is bound in ($x), but never assigned to a variable 'x'.</p>
 </p><h1><a name="inbltmenu">Built-in functions</a></h1>
 <p>
 
-<br />
-<dl><dt><a href="#seltxt">sel access array element</a></dt>
-<dt><a href="#alctxt">alc  allocate memory (low level)</a></dt>
-<dt><a href="#argtxt">arg  return program (command line) argument</a></dt>
-<dt><a href="#asctxt">asc  convert character to internal representation</a></dt>
-<dt><a href="#chrtxt">chr  convert internal representation to character</a></dt>
-<dt><a href="#chutxt">chu  convert Unicode codepoint to UTF-8 character</a></dt>
-<dt><a href="#clktxt">clk  CPU seconds since start of session</a></dt>
-<dt><a href="#d2xtxt">d2x  convert decimal number to hexadecimal number</a></dt>
-<dt><a href="#dbgtxt">dbg  debugging aid</a></dt>
-<dt><a href="#dentxt">den  denominator</a></dt>
-<dt><a href="#divtxt">div  quotient</a></dt>
-<dt><a href="#filtxt">fil  file I/O (low-level)</a></dt>
-<dt><a href="#flgtxt">flg  splits expression in prefixes and expression without prefixes</a></dt>
-<dt><a href="#glftxt">glf  opposite of flg: combines prefixes and expression</a></dt>
-<dt><a href="#fretxt">fre  return allocated memory (low level)</a></dt>
-<dt><a href="#gettxt">get  get input (from file,keyboard or memory)</a></dt>
-<dt><a href="#lowtxt">low  convert to lower case</a></dt>
-<dt><a href="#lsttxt1">lst  list un-evaluated value of variable(s)</a></dt>
-<dt><a href="#memtxt">mem  list existing variable names</a></dt>
-<dt><a href="#modtxt">mod  remainder</a></dt>
-<dt><a href="#newobjecttxt">new  create new object as a copy of another object</a></dt>
-<dt><a href="#peetxt">pee  get value from address (peek) (low level)</a></dt>
-<dt><a href="#poktxt">pok  put value at address (poke) (low level)</a></dt>
-<dt><a href="#puttxt1">put  write output</a></dt>
-<dt><a href="#rentxt">ren  rename file or directory or move file</a></dt>
-<dt><a href="#rmvtxt">rmv  remove file</a></dt>
-<dt><a href="#revtxt">rev  string reverse</a></dt>
-<dt><a href="#simtxt">sim  similarity between two atoms</a></dt>
-<dt><a href="#strtxt">str  stringize expression into atom</a></dt>
-<dt><a href="#switxt">swi  software interrupt (low level)</a></dt>
-<dt><a href="#systxt">sys  command line shell</a></dt>
-<dt><a href="#tbltxt">tbl  establish array size</a></dt>
-<dt><a href="#upptxt">upp  convert to upper case</a></dt>
-<dt><a href="#utftxt">utf  convert UTF-8 character to Unicode codepoint</a></dt>
-<dt><a href="#whltxt">whl  while loop</a></dt>
-<dt><a href="#x2dtxt">x2d  convert hexadecimal number to decimal number</a></dt>
+</p>
+<dl><dt><a href="#seltxt">&nbsp;&lt;N&gt;&nbsp;</a></dt><dd>access array element:&nbsp;<code>!(12$a):?(11$a)</code>&nbsp;</dd>
+<dt><a href="#alctxt">alc</a></dt><dd>allocate memory (low level):&nbsp;<code>alc$100</code>&nbsp;</dd>
+<dt><a href="#argtxt">arg</a></dt><dd>return program (command line) argument:&nbsp;<code>(arg$0:?programName) ((arg$:?o1)&amp;(arg$:?o2))</code>&nbsp;</dd>
+<dt><a href="#asctxt">asc</a></dt><dd>convert character to internal representation:&nbsp;<code>asc$y:121</code>&nbsp;</dd>
+<dt><a href="#chrtxt">chr</a></dt><dd>convert internal representation to character:  chr$121:y</dd>
+<dt><a href="#chutxt">chu</a></dt><dd>convert Unicode codepoint to UTF-8 character:&nbsp;<code>chu$2000</code>&nbsp;</dd>
+<dt><a href="#clktxt">clk</a></dt><dd>CPU seconds since start of session:  clk$:?t0</dd>
+<dt><a href="#d2xtxt">d2x</a></dt><dd>convert decimal number to hexadecimal number:&nbsp;<code>d2x$73083734:45B2B56</code>&nbsp;</dd>
+<dt><a href="#dbgtxt">dbg</a></dt><dd>debugging aid:  dbg'(a b c:? b ?)</dd>
+<dt><a href="#dentxt">den</a></dt><dd>denominator:&nbsp;<code>den$22/7:7</code>&nbsp;</dd>
+<dt><a href="#divtxt">div</a></dt><dd>quotient:&nbsp;<code>div$(22.7):1</code>&nbsp;</dd>
+<dt><a href="#filtxt">fil</a></dt><dd>file I/O (low-level)  </dd>
+<dt><a href="#flgtxt">flg</a></dt><dd>splits expression in prefixes and expression without prefixes</dd>
+<dt><a href="#glftxt">glf</a></dt><dd>opposite of flg: combines prefixes and expression</dd>
+<dt><a href="#fretxt">fre</a></dt><dd>return allocated memory (low level)</dd>
+<dt><a href="#gettxt">get</a></dt><dd>get input (from file,keyboard or memory)</dd>
+<dt><a href="#lowtxt">low</a></dt><dd>convert to lower case</dd>
+<dt><a href="#lsttxt1">lst</a></dt><dd>list un-evaluated value of variable(s)</dd>
+<dt><a href="#memtxt">mem</a></dt><dd>list existing variable names</dd>
+<dt><a href="#modtxt">mod</a></dt><dd>remainder</dd>
+<dt><a href="#newobjecttxt">new</a></dt><dd>create new object as a copy of another object</dd>
+<dt><a href="#peetxt">pee</a></dt><dd>get value from address (peek) (low level)</dd>
+<dt><a href="#poktxt">pok</a></dt><dd>put value at address (poke) (low level)</dd>
+<dt><a href="#puttxt1">put</a></dt><dd>write output</dd>
+<dt><a href="#rentxt">ren</a></dt><dd>rename file or directory or move file</dd>
+<dt><a href="#rmvtxt">rev</a></dt><dd>string reverse</dd>
+<dt><a href="#revtxt">rmv</a></dt><dd>remove file</dd>
+<dt><a href="#simtxt">sim</a></dt><dd>similarity between two atoms</dd>
+<dt><a href="#strtxt">str</a></dt><dd>stringize expression into atom</dd>
+<dt><a href="#switxt">swi</a></dt><dd>software interrupt (low level)</dd>
+<dt><a href="#systxt">sys</a></dt><dd>command line shell</dd>
+<dt><a href="#tbltxt">tbl</a></dt><dd>establish array size</dd>
+<dt><a href="#upptxt">upp</a></dt><dd>convert to upper case</dd>
+<dt><a href="#utftxt">utf</a></dt><dd>convert UTF-8 character to Unicode codepoint</dd>
+<dt><a href="#whltxt">whl</a></dt><dd>while loop</dd>
+<dt><a href="#x2dtxt">x2d</a></dt><dd>convert hexadecimal number to decimal number&nbsp;<code>x2d$BABEFACE:3133078222</code>&nbsp;<br /></dd>
 </dl>
-<br />
+<p>
 <span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
 </p><h1><a name="seltxt">&lt;index&gt;$&lt;array name&gt;</a></h1>
 <p>
@@ -2051,13 +2051,26 @@ div$ returns the (integral) quotient of its arguments.
 <span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
 </p><h1><a name="filtxt">fil$([[&lt;file name&gt;][,&lt;option&gt;[,&lt;number&gt;[,&lt;value to output&gt;]]]])</a></h1>
 <p>
-fil$ is a multi-purpose low level I/O function.
+ <br /> 
+fil$ is a multi-purpose low level I/O function. <br />
 
-  (1) opening a file
+</p>
+<dl><dt><a href="#modetxt">Set file mode, open a file in a file mode</a></dt><dd>fil$([&lt;file name&gt;],&lt;mode&gt;)  </dd>
+<dt><a href="#fixdtxt">Prepare for reading or writing fixed sized records</a></dt><dd>fil$([&lt;file name&gt;],&lt;type&gt;,&lt;size&gt;[,&lt;number&gt;])</dd>
+<dt><a href="#varitxt">Prepare for reading or writing variable sized record</a></dt><dd>fil$([&lt;file name&gt;],STR[,&lt;stop&gt;])</dd>
+<dt><a href="#positiontxt">Telling position inside file</a></dt><dd>fil$(&lt;file name&gt;,TEL)</dd>
+<dt><a href="#filesettxt">Go to file position</a></dt><dd>fil$(&lt;file name&gt;,&lt;whence&gt;,&lt;offset&gt;)</dd>
+<dt><a href="#readtxt">Read from file</a></dt><dd>fil$([&lt;file name&gt;][,,&lt;number&gt;])</dd>
+<dt><a href="#writetxt">Write to file</a></dt><dd>fil$([&lt;file name&gt;],,&lt;number&gt;,&lt;value&gt;)</dd>
+<dt><a href="#closetxt">Close  a file</a></dt><dd>fil$([&lt;file name&gt;],SET,-1)</dd>
+</dl>
+<p>
+<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
+</p><h1><a name="modetxt">  fil$([&lt;file name&gt;],&lt;mode&gt;)  </a></h1>
+<p>
+Set file mode, open file in file mode.
 
-  fil$([<span class="courier">&lt;file name&gt;</span>],<span class="courier">&lt;mode&gt;</span>)
-
-Option <span class="courier">&lt;mode&gt;</span> is one of the following :</p>
+Option <span class="courier">&lt;mode&gt;</span> is one of the following:</p>
 <dl><dt>r</dt><dd>    open text file for reading</dd>
 <dt>w</dt><dd>    create text file for writing, or truncate to zero length</dd>
 <dt>a</dt><dd>    append; open text file or create for writing at eof</dd>
@@ -2071,9 +2084,12 @@ Option <span class="courier">&lt;mode&gt;</span> is one of the following :</p>
 <dt>"w+b" or "wb+"</dt><dd>    create binary file for update, or truncate to zero length</dd>
 <dt>"a+b" or "ab+"</dt><dd>    append; open binary file or create for update, writing at eof</dd>
 </dl>
-<p>  (2) Prepare for reading or writing fixed sized records
-
-  fil$([<span class="courier">&lt;file name&gt;</span>],<span class="courier">&lt;type&gt;</span>,<span class="courier">&lt;size&gt;</span>[,<span class="courier">&lt;number&gt;</span>])
+<p>
+</p><p>
+<span class="arrow">&uArr;</span> <a href="#filtxt" style="line-height:12pt">fil$([[&lt;file name&gt;][,&lt;option&gt;[,&lt;number&gt;[,&lt;value to output&gt;]]]])</a>.<br />
+</p><h1><a name="fixdtxt">  fil$([&lt;file name&gt;],&lt;type&gt;,&lt;size&gt;[,&lt;number&gt;])  </a></h1>
+<p>
+Prepare for reading or writing fixed sized records.
 
 Option <span class="courier">&lt;type&gt;</span> is one of the following :</p>
 <dl><dt>CHR</dt><dd>    character or string I/O</dd>
@@ -2088,27 +2104,31 @@ not portable between implementations with different byte order. The optional
 performed. If <span class="courier">&lt;type&gt;</span> is "DEC", the product of <span class="courier">&lt;size&gt;</span> and <span class="courier">&lt;number&gt;</span> may not be
 greater than 4. If a number is read or written in 2 or more chunks, the least
 significant bytes or 16 bit words are read or written first (little endian).
-
-  (3) Prepare for reading or writing variable sized record
-
-  fil$([<span class="courier">&lt;file name&gt;</span>],STR[,<span class="courier">&lt;stop&gt;</span>])
-
+</p><p>
+<span class="arrow">&uArr;</span> <a href="#filtxt" style="line-height:12pt">fil$([[&lt;file name&gt;][,&lt;option&gt;[,&lt;number&gt;[,&lt;value to output&gt;]]]])</a>.<br />
+</p><h1><a name="varitxt">  fil$([&lt;file name&gt;],STR[,&lt;stop&gt;])  </a></h1>
+<p>
+ <br /> 
+Prepare for reading or writing variable sized record </p><p>
 Option <span class="courier">&lt;stop&gt;</span> is a string of characters. If the read character or the character
 to be written is equal to one of the characters in the stop string, reading or
 writing stops. The default is not to stop until the end of the file (reading)
 or the end of the string (writing).
+</p><p>
+<span class="arrow">&uArr;</span> <a href="#filtxt" style="line-height:12pt">fil$([[&lt;file name&gt;][,&lt;option&gt;[,&lt;number&gt;[,&lt;value to output&gt;]]]])</a>.<br />
+</p><h1><a name="positiontxt">  fil$(&lt;file name&gt;,TEL)  </a></h1>
+<p>
+ <br /> 
+Telling the position inside the file. <br />
 
-  (4) Telling the position inside the file
+Returns the current value of the file position indicator.
+</p><p>
+<span class="arrow">&uArr;</span> <a href="#filtxt" style="line-height:12pt">fil$([[&lt;file name&gt;][,&lt;option&gt;[,&lt;number&gt;[,&lt;value to output&gt;]]]])</a>.<br />
+</p><h1><a name="filesettxt">  fil$(&lt;file name&gt;,&lt;whence&gt;,&lt;offset&gt;)  </a></h1>
+<p>
+Go to file position.
 
-  fil$(<span class="courier">&lt;file name&gt;</span>,TEL)
-
-returns the current value of the file position indicator.
-
-  (5) Go to file position
-
-  fil$(<span class="courier">&lt;file name&gt;</span>,<span class="courier">&lt;whence&gt;</span>,<span class="courier">&lt;offset&gt;</span>)
-
-sets the current value of the file position indicator to an <span class="courier">&lt;offset&gt;</span> based
+Sets the current value of the file position indicator to an <span class="courier">&lt;offset&gt;</span> based
 on the value of <span class="courier">&lt;whence&gt;</span>.
 
 Option <span class="courier">&lt;whence&gt;</span> is one of the following:</p>
@@ -2118,17 +2138,18 @@ Option <span class="courier">&lt;whence&gt;</span> is one of the following:</p>
 </dl>
 <p>For a text file, <span class="courier">&lt;offset&gt;</span> must be 0, or the value returned from a call to
 fil$(<span class="courier">&lt;file name&gt;</span>,TEL), in which case <span class="courier">&lt;whence&gt;</span> must be SET.
-</p><blockquote><pre>
+</p><p>
+<span class="arrow">&uArr;</span> <a href="#filtxt" style="line-height:12pt">fil$([[&lt;file name&gt;][,&lt;option&gt;[,&lt;number&gt;[,&lt;value to output&gt;]]]])</a>.<br />
+</p><h1><a name="readtxt">  fil$([&lt;file name&gt;][,,&lt;number&gt;])  </a></h1>
+<p>
+ <br /> 
+Reading from a file. <br />
 
-  (6) Reading
-
-  fil$([&lt;file name&gt;][,,&lt;number&gt;])
-</pre></blockquote><p>
-
-reads (if <span class="courier">&lt;mode&gt;</span> permitting) <span class="courier">&lt;number&gt;</span> chunks of <span class="courier">&lt;size&gt;</span> bytes.
+Reads (if <span class="courier">&lt;mode&gt;</span> permitting) <span class="courier">&lt;number&gt;</span> chunks of <span class="courier">&lt;size&gt;</span> bytes.
 When reading variable sized records (STR), fil$ returns a dot-separated list
 of two elements: the found stop character and the read string (which does not
-contain the stop character). </p><blockquote><pre>
+contain the stop character).
+ </p><blockquote><pre>
 {?} fil$("mytext.txt","rb")               { Open for reading in binary mode. }
 {?} fil$(,STR)                   { Prepare for reading until the next 0-byte.}
 {?} fil$:(?line.?stop)                         { Read until the next 0-byte. }
@@ -2139,12 +2160,12 @@ contain the stop character). </p><blockquote><pre>
 {?} whl'(fil$:(?word.?stop)&amp;!word !words:?words)&amp;          { Read all words. }
 {?} fil$(,SET,-1)                                          { Close the file. }
 {?} !words                              { Show all words, in reversed order. } </pre></blockquote><p> 
-</p><blockquote><pre>
-
-  (7) Writing
-
-  fil$([&lt;file name&gt;],,&lt;number&gt;,&lt;value&gt;)
-</pre></blockquote><p>
+</p><p>
+<span class="arrow">&uArr;</span> <a href="#filtxt" style="line-height:12pt">fil$([[&lt;file name&gt;][,&lt;option&gt;[,&lt;number&gt;[,&lt;value to output&gt;]]]])</a>.<br />
+</p><h1><a name="writetxt">  fil$([&lt;file name&gt;],,&lt;number&gt;,&lt;value&gt;)  </a></h1>
+<p>
+ <br /> 
+Writing to a file <br />
 
 writes (if <span class="courier">&lt;mode&gt;</span> permitting) <span class="courier">&lt;number&gt;</span> chunks of <span class="courier">&lt;size&gt;</span> bytes from <span class="courier">&lt;value&gt;</span>.
 If <span class="courier">&lt;type&gt;</span> is "DEC", <span class="courier">&lt;number&gt;</span>*<span class="courier">&lt;size&gt;</span> must be 1,2,3 or 4. <span class="courier">&lt;value&gt;</span> must be an
@@ -2155,16 +2176,16 @@ are output first. In machines with little-endian byte-order, only the
 product <span class="courier">&lt;number&gt;</span>*<span class="courier">&lt;size&gt;</span> matters.
 If <span class="courier">&lt;type&gt;</span> is "CHR" and the length of <span class="courier">&lt;value&gt;</span> is shorter than <span class="courier">&lt;number&gt;</span>*<span class="courier">&lt;size&gt;</span>,
 <span class="courier">&lt;value&gt;</span> is padded with spaces (to the right).
-</p><blockquote><pre>
-
-  (8) Closing the file
-
-  fil$([&lt;file name&gt;],SET,-1)
-</pre></blockquote><p>
+</p><p>
+<span class="arrow">&uArr;</span> <a href="#filtxt" style="line-height:12pt">fil$([[&lt;file name&gt;][,&lt;option&gt;[,&lt;number&gt;[,&lt;value to output&gt;]]]])</a>.<br />
+</p><h1><a name="closetxt">  fil$([&lt;file name&gt;],SET,-1)  </a></h1>
+<p>
+ <br /> 
+Closing a file. <br />
 
 An open file is closed by specifying an impossible file position.
 </p><p>
-<span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#filtxt" style="line-height:12pt">fil$([[&lt;file name&gt;][,&lt;option&gt;[,&lt;number&gt;[,&lt;value to output&gt;]]]])</a>.<br />
 </p><h1><a name="flgtxt">flg$(=&lt;expression&gt;)</a></h1>
 <p>
 
@@ -2716,7 +2737,7 @@ been drilled to leave these names out when the user asks for a list of variable
 names (lst$ or mem$), so you will not notice their existence. The following
 visible functions are predefined:
 
-<br />
+</p>
 <dl><dt><a href="#sgntxt">abs (and sgn)  absolute value and sign</a></dt>
 <dt><a href="#cattxt">cat            list existing variable names selectively</a></dt>
 <dt><a href="#gontxt">cos (and sin)  cosine and sine</a></dt>
@@ -2726,7 +2747,7 @@ visible functions are predefined:
 <dt><a href="#subtxt1">sub            substitution</a></dt>
 <dt><a href="#taytxt">tay            Taylor series</a></dt>
 </dl>
-<br />
+<p>
 <span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
 </p><h1><a name="sgntxt">abs$&lt;expression&gt; and sgn$&lt;expression&gt;</a></h1>
 <p>
@@ -2832,7 +2853,7 @@ can suggest the size of the table to Bracmat, but this is not necessary:
 
 This tells Bracmat to start off with a million bins. </p><p>
 The following methods are defined for hash tables:
-<br />
+</p>
 <dl><dt><a href="#findtxt">find</a></dt>
 <dt><a href="#inserttxt">insert</a></dt>
 <dt><a href="#removetxt">remove</a></dt>
@@ -2842,7 +2863,7 @@ The following methods are defined for hash tables:
 <dt><a href="#casesensitivetxt">casesensitive</a></dt>
 <dt><a href="#foralltxt">forall</a></dt>
 </dl>
-<br />
+<p>
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="findtxt">(myhash..find)$key:(?Key.?Value) ?OtherKeyValuePairs</a></h1>
 <p>

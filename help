@@ -125,78 +125,115 @@ help=
   & ( inbltmenu
     =   M
       , "Built-in functions"
-      , "sel access array element
-alc  allocate memory (low level)
-arg  return program (command line) argument
-asc  convert character to internal representation
-chr  convert internal representation to character
-chu  convert Unicode codepoint to UTF-8 character
-clk  CPU seconds since start of session
-d2x  convert decimal number to hexadecimal number
-dbg  debugging aid
-den  denominator
-div  quotient
-fil  file I/O (low-level)
-flg  splits expression in prefixes and expression without prefixes
-glf  opposite of flg: combines prefixes and expression
-fre  return allocated memory (low level)
-get  get input (from file,keyboard or memory)
-low  convert to lower case
-lst  list un-evaluated value of variable(s)
-mem  list existing variable names
-mod  remainder
-new  create new object as a copy of another object
-pee  get value from address (peek) (low level)
-pok  put value at address (poke) (low level)
-put  write output
-ren  rename file or directory or move file
-rev  string reverse
-rmv  remove file
-sim  similarity between two atoms
-str  stringize expression into atom
-swi  software interrupt (low level)
-sys  command line shell
-tbl  establish array size
-upp  convert to upper case
-utf  convert UTF-8 character to Unicode codepoint
-whl  while loop
-x2d  convert hexadecimal number to decimal number"
-      ,   (sel,seltxt)
-          (alc,alctxt)
-          (arg,argtxt)
-          (asc,asctxt)
-          (chr,chrtxt)
-          (chu,chutxt)
-          (clk,clktxt)
-          (d2x,d2xtxt)
-          (dbg,dbgtxt)
-          (den,dentxt)
-          (div,divtxt)
-          (fil,filtxt)
-          (flg,flgtxt)
-          (glf,glftxt)
-          (fre,fretxt)
-          (get,gettxt)
-          (low,lowtxt DOSopttxt)
-          (lst,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt)
-          (mem,memtxt)
-          (mod,modtxt)
-          (new,newobjecttxt)
-          (pee,peetxt)
-          (pok,poktxt)
-          (put,puttxt1 humtxt puttxt2 puttxt3 newtxt)
-          (ren,rentxt)
-          (rmv,rmvtxt)
-          (rev,revtxt)
-          (sim,simtxt)
-          (str,strtxt)
-          (swi,switxt)
-          (sys,systxt)
-          (tbl,tbltxt)
-          (upp,upptxt DOSopttxt)
-          (utf,utftxt)
-          (whl,whltxt)
-          (x2d,x2dtxt)
+      , "1 <N>
+    access array element:  !(12$a):?(11$a)  
+2 alc
+    allocate memory (low level):  alc$100  
+3 arg
+    return program (command line) argument:  (arg$0:?programName) ((arg$:?o1)&(arg$:?o2))  
+4 asc
+    convert character to internal representation:  asc$y:121  
+5 chr
+    convert internal representation to character:  chr$121:y
+6 chu
+    convert Unicode codepoint to UTF-8 character:  chu$2000  
+7 clk
+    CPU seconds since start of session:  clk$:?t0
+8 d2x
+    convert decimal number to hexadecimal number:  d2x$73083734:45B2B56  
+9 dbg
+    debugging aid:  dbg'(a b c:? b ?)
+10 den
+    denominator:  den$22/7:7  
+11 div
+    quotient:  div$(22.7):1  
+12 fil
+    file I/O (low-level)  
+13 flg
+    splits expression in prefixes and expression without prefixes
+14 glf
+    opposite of flg: combines prefixes and expression
+15 fre
+    return allocated memory (low level)
+16 get
+    get input (from file,keyboard or memory)
+17 low
+    convert to lower case
+18 lst
+    list un-evaluated value of variable(s)
+19 mem
+    list existing variable names
+20 mod
+    remainder
+21 new
+    create new object as a copy of another object
+22 pee
+    get value from address (peek) (low level)
+23 pok
+    put value at address (poke) (low level)
+24 put
+    write output
+25 ren
+    rename file or directory or move file
+26 rev
+    string reverse
+27 rmv
+    remove file
+28 sim
+    similarity between two atoms
+29 str
+    stringize expression into atom
+30 swi
+    software interrupt (low level)
+31 sys
+    command line shell
+32 tbl
+    establish array size
+33 upp
+    convert to upper case
+34 utf
+    convert UTF-8 character to Unicode codepoint
+35 whl
+    while loop
+36 x2d
+    convert hexadecimal number to decimal number  x2d$BABEFACE:3133078222  
+"
+      ,   (1,seltxt)
+          (2,alctxt)
+          (3,argtxt)
+          (4,asctxt)
+          (5,chrtxt)
+          (6,chutxt)
+          (7,clktxt)
+          (8,d2xtxt)
+          (9,dbgtxt)
+          (10,dentxt)
+          (11,divtxt)
+          (12,filtxt)
+          (13,flgtxt)
+          (14,glftxt)
+          (15,fretxt)
+          (16,gettxt)
+          (17,lowtxt DOSopttxt)
+          (18,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt)
+          (19,memtxt)
+          (20,modtxt)
+          (21,newobjecttxt)
+          (22,peetxt)
+          (23,poktxt)
+          (24,puttxt1 humtxt puttxt2 puttxt3 newtxt)
+          (25,rentxt)
+          (26,rmvtxt)
+          (27,revtxt)
+          (28,simtxt)
+          (29,strtxt)
+          (30,switxt)
+          (31,systxt)
+          (32,tbltxt)
+          (33,upptxt DOSopttxt)
+          (34,utftxt)
+          (35,whltxt)
+          (36,x2dtxt)
     )
   & ( aanbevelingen
     =   T
@@ -676,7 +713,8 @@ used."
 expression                   :r               n'r              =r 'r
 match       &r $ 'l ?! !!                     n'r              =r 'r
 macro       $r
-archivist"
+archivist
+"
     )
   & ( gettxt
     =   T
@@ -2906,15 +2944,41 @@ Use macro evaluation if the expression to be split is the value of a variable.
 "
     )
   & ( filtxt
-    =   T
+    =   M
       , "fil$([[<file name>][,<option>[,<number>[,<value to output>]]]])"
       , "fil$ is a multi-purpose low level I/O function.
 
-  (1) opening a file
+1 Set file mode, open a file in a file mode
+    fil$([<file name>],<mode>)  
+2 Prepare for reading or writing fixed sized records
+    fil$([<file name>],<type>,<size>[,<number>])
+3 Prepare for reading or writing variable sized record
+    fil$([<file name>],STR[,<stop>])
+4 Telling position inside file
+    fil$(<file name>,TEL)
+5 Go to file position
+    fil$(<file name>,<whence>,<offset>)
+6 Read from file
+    fil$([<file name>][,,<number>])
+7 Write to file
+    fil$([<file name>],,<number>,<value>)
+8 Close  a file
+    fil$([<file name>],SET,-1)"
+      ,   (1,modetxt)
+          (2,fixdtxt)
+          (3,varitxt)
+          (4,positiontxt)
+          (5,filesettxt)
+          (6,readtxt)
+          (7,writetxt)
+          (8,closetxt)
+    )
+  & ( modetxt
+    =   T
+      , "  fil$([<file name>],<mode>)  "
+      , "Set file mode, open file in file mode.
 
-  fil$([<file name>],<mode>)
-
-Option <mode> is one of the following :
+Option <mode> is one of the following:
 
 r
     open text file for reading
@@ -2940,10 +3004,12 @@ ab
     create binary file for update, or truncate to zero length
 \"a+b\" or \"ab+\"
     append; open binary file or create for update, writing at eof
-
-  (2) Prepare for reading or writing fixed sized records
-
-  fil$([<file name>],<type>,<size>[,<number>])
+"
+    )
+  & ( fixdtxt
+    =   T
+      , "  fil$([<file name>],<type>,<size>[,<number>])  "
+      , "Prepare for reading or writing fixed sized records.
 
 Option <type> is one of the following :
 
@@ -2960,28 +3026,31 @@ not portable between implementations with different byte order. The optional
 <number> tells how many read or write operations of size <size> have to be
 performed. If <type> is \"DEC\", the product of <size> and <number> may not be
 greater than 4. If a number is read or written in 2 or more chunks, the least
-significant bytes or 16 bit words are read or written first (little endian).
-
-  (3) Prepare for reading or writing variable sized record
-
-  fil$([<file name>],STR[,<stop>])
+significant bytes or 16 bit words are read or written first (little endian)."
+    )
+  & ( varitxt
+    =   T
+      , "  fil$([<file name>],STR[,<stop>])  "
+      , "Prepare for reading or writing variable sized record
 
 Option <stop> is a string of characters. If the read character or the character
 to be written is equal to one of the characters in the stop string, reading or
 writing stops. The default is not to stop until the end of the file (reading)
-or the end of the string (writing).
+or the end of the string (writing)."
+    )
+  & ( positiontxt
+    =   T
+      , "  fil$(<file name>,TEL)  "
+      , "Telling the position inside the file.
 
-  (4) Telling the position inside the file
+Returns the current value of the file position indicator."
+    )
+  & ( filesettxt
+    =   T
+      , "  fil$(<file name>,<whence>,<offset>)  "
+      , "Go to file position.
 
-  fil$(<file name>,TEL)
-
-returns the current value of the file position indicator.
-
-  (5) Go to file position
-
-  fil$(<file name>,<whence>,<offset>)
-
-sets the current value of the file position indicator to an <offset> based
+Sets the current value of the file position indicator to an <offset> based
 on the value of <whence>.
 
 Option <whence> is one of the following:
@@ -2994,13 +3063,14 @@ END
     end of file. (In some implementations, binary files may not handle END).
 
 For a text file, <offset> must be 0, or the value returned from a call to
-fil$(<file name>,TEL), in which case <whence> must be SET.
+fil$(<file name>,TEL), in which case <whence> must be SET."
+    )
+  & ( readtxt
+    =   T
+      , "  fil$([<file name>][,,<number>])  "
+      , "Reading from a file.
 
-  (6) Reading
-
-  fil$([<file name>][,,<number>])
-
-reads (if <mode> permitting) <number> chunks of <size> bytes.
+Reads (if <mode> permitting) <number> chunks of <size> bytes.
 When reading variable sized records (STR), fil$ returns a dot-separated list
 of two elements: the found stop character and the read string (which does not
 contain the stop character).
@@ -3015,12 +3085,12 @@ contain the stop character).
 {?} :?words             { In a moment, accumulate all words in this variable }
 {?} whl'(fil$:(?word.?stop)&!word !words:?words)&          { Read all words. }
 {?} fil$(,SET,-1)                                          { Close the file. }
-{?} !words                              { Show all words, in reversed order. }
-
-
-  (7) Writing
-
-  fil$([<file name>],,<number>,<value>)
+{?} !words                              { Show all words, in reversed order. }"
+    )
+  & ( writetxt
+    =   T
+      , "  fil$([<file name>],,<number>,<value>)  "
+      , "Writing to a file
 
 writes (if <mode> permitting) <number> chunks of <size> bytes from <value>.
 If <type> is \"DEC\", <number>*<size> must be 1,2,3 or 4. <value> must be an
@@ -3030,11 +3100,12 @@ If <number> is greater than 1, the byte(s) with the least significant digits
 are output first. In machines with little-endian byte-order, only the
 product <number>*<size> matters.
 If <type> is \"CHR\" and the length of <value> is shorter than <number>*<size>,
-<value> is padded with spaces (to the right).
-
-  (8) Closing the file
-
-  fil$([<file name>],SET,-1)
+<value> is padded with spaces (to the right)."
+    )
+  & ( closetxt
+    =   T
+      , "  fil$([<file name>],SET,-1)  "
+      , "Closing a file.
 
 An open file is closed by specifying an impossible file position."
     )
@@ -3226,13 +3297,26 @@ Topic:")
                         )
                     )
                   & (asCode2=."<span class=\"courier\">" !arg "</span>")
-                  & (codeexamples=codeexample.@(str$!arg:? ((%@:~" ") ?:?arg))
-                    & (codeexample=A Z example.@(!arg:?A "  " ?example "  " ?Z)
-                    & (!example:& !A " " !Z |!A "&nbsp;<code>" !example "</code>&nbsp;" codeexample$!Z)
-                    | !arg
-                    )
-                    & codeexample$!arg
-                    | !arg
+                  & ( codeexamples
+                    =   codeexample
+                      .     @( str$(vsubst2$(str$!arg))
+                             : ? ((%@:~" ") ?:?arg)
+                             )
+                          & ( codeexample
+                            =   A Z example
+                              .     @(!arg:?A "  " ?example "  " ?Z)
+                                  & (   !example:
+                                      & !A " " !Z
+                                    |   !A
+                                        "&nbsp;<code>"
+                                        !example
+                                        "</code>&nbsp;"
+                                        codeexample$!Z
+                                    )
+                                | !arg
+                            )
+                          & codeexample$!arg
+                        | !arg
                     )
                   & ( topic2
                     =   !arg:(~:?ptxt) ?arg
@@ -3249,7 +3333,11 @@ Topic:")
                               $ ( !ptxt
                                 . text
                                 .   str
-                                  $ (chunk2$!txt "\n<br />\n<dl>" !menu "</dl>\n<br />\n")
+                                  $ ( chunk2$!txt
+                                      \n</p>\n<dl>
+                                      !menu
+                                      "</dl>\n<p>\n"
+                                    )
                                 )
                             & !refs
                             & doemenu$(!sel.!menutekst)
@@ -3716,8 +3804,8 @@ Depending on the context, $<expression> can have two effects :"
                         | 
                     )
                   & ( listmenu2
-                    =   men sel tekst a b term definition
-                       ,ddlines padded
+                    =     men sel tekst a b term definition
+                        , ddlines padded
                       .     !arg:(?men.?sel)
                           & !sel:
                           & !men
@@ -3733,7 +3821,9 @@ Depending on the context, $<expression> can have two effects :"
                                          : ?tekst
                                        )
                                      )
-                                     ((\n (@%:~" ") ?|):?b)
+                                     ( (\n (%@:~" ") ?|)
+                                     : ?b
+                                     )
                                  )
                               & str$(!a !b):?men
                             |     out
@@ -3748,32 +3838,41 @@ Depending on the context, $<expression> can have two effects :"
                                   )
                               & get'
                             )
-                          & (padded=. (@(!arg:(%@|"&" ? ";")) & "&nbsp;" !arg "&nbsp;" | @(!arg:%@ %@) & "&nbsp;" !arg | !arg)
+                          & ( padded
+                            =   
+                              .     @(!arg:(%@|"&" ? ";"))
+                                  & "&nbsp;" !arg "&nbsp;"
+                                |   @(!arg:%@ %@)
+                                  & "&nbsp;" !arg
+                                | !arg
                             )
-                          & (ddlines=.@(!arg:?line \n ?arg) & codeexamples$!line "<br />" ddlines$!arg|codeexamples$!arg
+                          & ( ddlines
+                            =   
+                              .     @(!arg:?line \n ?arg)
+                                  &   codeexamples$!line
+                                      "<br />"
+                                      ddlines$!arg
+                                | codeexamples$!arg
                             )
                           &     !menu
-                               ( @(!tekst:?term \n ?definition)
-                               
-                               &
-                                  str
-                                $ ( "<dt><a href=\"#"
-                                    first$!keuze
-                                    \">
-                                    padded$str$vsubst2$!term
-                                    "</a></dt><dd>" ddlines$!definition "</dd>
-"
-                                  )
-                               | 
-                                  str
-                                $ ( "<dt><a href=\"#"
-                                    first$!keuze
-                                    \">
-                                    padded$str$vsubst2$!tekst
-                                    "</a></dt>
-"
-                                  )
-                               )
+                                (   @(!tekst:?term \n ?definition)
+                                  &   str
+                                    $ ( "<dt><a href=\"#"
+                                        first$!keuze
+                                        \">
+                                        padded$(str$(vsubst2$!term))
+                                        "</a></dt><dd>"
+                                        ddlines$!definition
+                                        "</dd>\n"
+                                      )
+                                |   str
+                                  $ ( "<dt><a href=\"#"
+                                      first$!keuze
+                                      \">
+                                      padded$(str$(vsubst2$!tekst))
+                                      "</a></dt>\n"
+                                    )
+                                )
                             : ?menu
                           & !menutekst !tekst:?menutekst
                           & listmenu2$(!men.!sel)
@@ -3890,10 +3989,3 @@ accompanies Bracmat, using Bracmat to do the conversion.</i>
   Bracmat will evaluate. Only pressing <return> pages through the information."
       & verwerk$lusmenu
     );
-
-  ~&get$"lex.bra"&lex$help | help$()
-  & (~|lst$(help,"help.bra",NEW))
-  & tbl$(help,0)
-  & "
-_________________________________________________________________________
-";
