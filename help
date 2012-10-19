@@ -368,9 +368,11 @@ recursive invocations of pattern matching and other operations. Examples:
 
 {?} S=(|0 !S|1 !T);T=(0 !T|1 !S); { Regular grammar }
 {?} 0 1 0 1 0:!S { Check whether subject contains an even number of 1's. }
+
 {?} P=(|0 ?x 1 & !x:!P); { context free grammar }
 {?} 0 0 0 1 1 1:!P { Check whether subject consist of a row of 0's
                      followed by a row of 1's of the same length. }
+                     
 {?} connected=(\"South America\".\"North America\") (Africa.Asia) (Asia.Europe);
 {?} (reachable = a b f
     .     !arg:(?a.?b.?f)
@@ -856,23 +858,44 @@ of the matrix at hand, and may even be indifferent to the number of indices."
   & ( binovztxt
     =   M
       , "=.,|&: +*^LD'$_"
-      , "These are, in order of growing priority, the 15 binary Bracmat operators.
+      , "These are the 15 binary Bracmat operators. The higher in the list, the lower
+in the order of operations. Use parentheses to force an operator to a higher
+position in the order of operations.
 
-1  =  operator (assignment)
-2  .  operator (lists)
-3  ,  operator (lists with \"unwrinkling\")
-4  |  operator (OR ELSE)
-5  &  operator (AND THEN)
-6  :  operator (match subject with pattern)
-7  [blank] operator (word lists)
-8  +  operator (addition)
-9  *  operator (multiplication)
-10 ^  operator (exponentiation)
-11 L  operator (logarithm)
-12 D  operator (differentiation)
-13 '  operator (function, macro)
-14 $  operator (function, macro)
-15 _  operator (dummy)"
+1 =
+    assignment:  (x=7)    (square=.!arg^2)  
+    object member definition:  (myobject=(place=Copenhagen) (setPlace=.!arg:?(its.place)))  
+2 .
+    fixed data structure:  (Palme.Olof.Sweden)  
+    object member referencing:  (myhash..insert)$(xxx.998743)  
+3 ,
+    list with autostretch:  (ham,(bread,butter),jam):(ham,bread,butter,jam)  
+4 |
+    or else:  get$myfile | out$\"Cannot read myfile\"  
+5 &
+    and then:  out$\"alomost done\" & Done  
+6 :
+    match subject with pattern:  Meeting at 4 in room 24:? ?#hour ? ?#room ?  
+7 [blank]
+    sentence, neutral element \"\":  Oh well this can go on and on:?a Oh ?z & !a:\"\"  
+8 +
+    add, neutral term 0:  (a+6+b+a+10), (a+b:?x+a+?y & !x:0)  
+9 *
+    multiply, neutral factor 1:  (46546*647547564), (a*b:?x*a*?y & !x:1)  
+10 ^
+    raise to a power, neutral exponent 1:  (9975^332), (45:?n^?exp & !exp:1)  
+11 \\L
+    take logarithm:  10\\L1050  
+12 \\D
+    differentiate:  x\\D(x^10)  
+13 '
+    function evaluation (does not evaluate rhs):  str'(b+a):\"b+a\"  
+    macro:  ()'(my name is ()$name)  
+14 $
+    function evaluation (evaluates rhs):  str$(b+a):\"a+b\"  
+    variable in macro:  ()'(my name is ()$name)  
+15 _
+    dummy:   !expr:?lhs_?rhs & (do$!lhs)_(do$!rhs)  "
       ,   (1,savtxt objecttxt asstxt)
           (2,contxt objecttxt)
           (3,contxt)
@@ -1128,7 +1151,7 @@ subsumed in situations like the above ones."
   & ( hashtxt
     =   M
       , "Hash tables"
-      , "If you need to manage a large data set it may be a good idea to use a hash-
+      , "If you need to manage a large data set it, may be a good idea to use a hash-
 table instead of a list. Storing, retrieving and deleting are costly processes
 in lists, but cheap in hash tables. Handling hash tables in Bracmat is very
 simple. You create a hash table as follows
@@ -1136,7 +1159,17 @@ simple. You create a hash table as follows
 {?} new$hash:?myhash
 
 Hereafter, 'myhash' refers to a hash table and is treated in the same way as
-a user defined object. The following methods are defined for hash tables:
+a user defined object. Bracmat keeps the load factor between 50 and 100,
+rehashing as necessary.
+
+If you know the hash table is going to be much bigger than about 100 bins, you
+can suggest the size of the table to Bracmat, but this is not necessary:
+
+{?} new$(hash,1000000):?mybiggerhash
+
+This tells Bracmat to start off with a million bins.
+
+The following methods are defined for hash tables:
 1 find
 2 insert
 3 remove
@@ -3138,7 +3171,7 @@ Topic:")
                 . keuze,expr,fput,menu,menutekst,menutitel,titl
                 .   break2 indented2 asCode2 vsubst1
                   , vsubst2 vsubst3 vsubst4
-                .   breaks2 ol2 ul2 subul
+                .   breaks2 ol2 ul2 subul codeexamples
                   , chunk2 nbsp2 first next spaced
                 )
               .     ( refs
@@ -3193,6 +3226,14 @@ Topic:")
                         )
                     )
                   & (asCode2=."<span class=\"courier\">" !arg "</span>")
+                  & (codeexamples=codeexample.@(str$!arg:? ((%@:~" ") ?:?arg))
+                    & (codeexample=A Z example.@(!arg:?A "  " ?example "  " ?Z)
+                    & (!example:& !A " " !Z |!A "&nbsp;<code>" !example "</code>&nbsp;" codeexample$!Z)
+                    | !arg
+                    )
+                    & codeexample$!arg
+                    | !arg
+                    )
                   & ( topic2
                     =   !arg:(~:?ptxt) ?arg
                       &   !!ptxt
@@ -3208,7 +3249,7 @@ Topic:")
                               $ ( !ptxt
                                 . text
                                 .   str
-                                  $ (chunk2$!txt \n<br />\n !menu \n<br />\n)
+                                  $ (chunk2$!txt "\n<br />\n<dl>" !menu "</dl>\n<br />\n")
                                 )
                             & !refs
                             & doemenu$(!sel.!menutekst)
@@ -3675,7 +3716,8 @@ Depending on the context, $<expression> can have two effects :"
                         | 
                     )
                   & ( listmenu2
-                    =   men,sel,tekst,a,b
+                    =   men sel tekst a b term definition
+                       ,ddlines padded
                       .     !arg:(?men.?sel)
                           & !sel:
                           & !men
@@ -3691,7 +3733,7 @@ Depending on the context, $<expression> can have two effects :"
                                          : ?tekst
                                        )
                                      )
-                                     ((\n ?|):?b)
+                                     ((\n (@%:~" ") ?|):?b)
                                  )
                               & str$(!a !b):?men
                             |     out
@@ -3706,15 +3748,32 @@ Depending on the context, $<expression> can have two effects :"
                                   )
                               & get'
                             )
+                          & (padded=. (@(!arg:(%@|"&" ? ";")) & "&nbsp;" !arg "&nbsp;" | @(!arg:%@ %@) & "&nbsp;" !arg | !arg)
+                            )
+                          & (ddlines=.@(!arg:?line \n ?arg) & codeexamples$!line "<br />" ddlines$!arg|codeexamples$!arg
+                            )
                           &     !menu
+                               ( @(!tekst:?term \n ?definition)
+                               
+                               &
                                   str
-                                $ ( "<a href=\"#"
+                                $ ( "<dt><a href=\"#"
                                     first$!keuze
                                     \">
-                                    vsubst2$!tekst
-                                    "</a><br />
+                                    padded$str$vsubst2$!term
+                                    "</a></dt><dd>" ddlines$!definition "</dd>
 "
                                   )
+                               | 
+                                  str
+                                $ ( "<dt><a href=\"#"
+                                    first$!keuze
+                                    \">
+                                    padded$str$vsubst2$!tekst
+                                    "</a></dt>
+"
+                                  )
+                               )
                             : ?menu
                           & !menutekst !tekst:?menutekst
                           & listmenu2$(!men.!sel)
@@ -3822,7 +3881,7 @@ accompanies Bracmat, using Bracmat to do the conversion.</i>
 </html>
 ",!fname,APP,LIN)
       )
-  & ( ~&doHTML$"bracmat.html"
+  & ( &doHTML$"bracmat.html"
     |     out
         $ "* Choose from the menus the topics that interest you.
 * Enter the number or character string that precedes your choice.

@@ -13,26 +13,26 @@ accompanies Bracmat, using Bracmat to do the conversion.</i>
 </p><h1><a name="lusmenu">                       BRACMAT                       </a></h1>
 <p>
 
-<br/>
-<a href="#aanbevelingen"> starting with Bracmat</a><br />
-<a href="#patternm"> pattern matching</a><br />
-<a href="#syntax"> grammar</a><br />
-<a href="#binmenu"> binary operators</a><br />
-<a href="#unopsmenu"> prefixes/unary operators</a><br />
-<a href="#atotxt"> strings or atoms</a><br />
-<a href="#varsmenu"> symbols</a><br />
-<a href="#evaltxt"> the four evaluation contexts</a><br />
-<a href="#progsmenu"> programming in Bracmat</a><br />
-<a href="#funcmenu"> functions</a><br />
-<a href="#contxt">data structures</a><br />
-<a href="#objecttxt">objects</a><br />
-<a href="#hashtxt">hash tables</a><br />
-<a href="#filosofie">how Bracmat evolved</a><br />
-<a href="#Bracmat-name">why the name 'Bracmat'?</a><br />
-<a href="#colofon">how to obtain Bracmat</a><br />
-<a href="#morexmlps">more example code</a><br />
-
-<br/>
+<br />
+<dl><dt><a href="#aanbevelingen"> starting with Bracmat</a></dt>
+<dt><a href="#patternm"> pattern matching</a></dt>
+<dt><a href="#syntax"> grammar</a></dt>
+<dt><a href="#binmenu"> binary operators</a></dt>
+<dt><a href="#unopsmenu"> prefixes/unary operators</a></dt>
+<dt><a href="#atotxt"> strings or atoms</a></dt>
+<dt><a href="#varsmenu"> symbols</a></dt>
+<dt><a href="#evaltxt"> the four evaluation contexts</a></dt>
+<dt><a href="#progsmenu"> programming in Bracmat</a></dt>
+<dt><a href="#funcmenu"> functions</a></dt>
+<dt><a href="#contxt">data structures</a></dt>
+<dt><a href="#objecttxt">objects</a></dt>
+<dt><a href="#hashtxt">hash tables</a></dt>
+<dt><a href="#filosofie">how Bracmat evolved</a></dt>
+<dt><a href="#Bracmat-name">why the name 'Bracmat'?</a></dt>
+<dt><a href="#colofon">how to obtain Bracmat</a></dt>
+<dt><a href="#morexmlps">more example code</a></dt>
+</dl>
+<br />
 </p><h1><a name="aanbevelingen">If you haven't seen Bracmat before ..</a></h1>
 <p>
 Bracmat is an interpreted programming language that will evaluate instructions
@@ -206,10 +206,11 @@ relational database. But it doesn't stop here, because Bracmat supports
 recursive invocations of pattern matching and other operations. Examples:
  </p><blockquote><pre>
 {?} S=(|0 !S|1 !T);T=(0 !T|1 !S); { Regular grammar }
-{?} 0 1 0 1 0:!S { Check whether subject contains an even number of 1's. }
+{?} 0 1 0 1 0:!S { Check whether subject contains an even number of 1's. } </pre></blockquote><p>  </p><blockquote><pre>
 {?} P=(|0 ?x 1 &amp; !x:!P); { context free grammar }
 {?} 0 0 0 1 1 1:!P { Check whether subject consist of a row of 0's
                      followed by a row of 1's of the same length. }
+                     
 {?} connected=("South America"."North America") (Africa.Asia) (Asia.Europe);
 {?} (reachable = a b f
     .     !arg:(?a.?b.?f)
@@ -234,11 +235,11 @@ Europe is reachable from Asia <br />
 
 Africa is reachable from Asia <br />
 North America is reachable from South America
-<br/>
-<a href="#pattxttxt">Pattern matching in character strings</a><br />
-<a href="#pattxt">Pattern matching in tree structures</a><br />
-
-<br/>
+<br />
+<dl><dt><a href="#pattxttxt">Pattern matching in character strings</a></dt>
+<dt><a href="#pattxt">Pattern matching in tree structures</a></dt>
+</dl>
+<br />
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="pattxttxt">Pattern matching in strings</a></h1>
 <p>
@@ -457,40 +458,42 @@ Quotation marks. Comments are enclosed in {} and may be nested.
 </p><h1><a name="binmenu">Binary operators</a></h1>
 <p>
 
-<br/>
-<a href="#binovztxt"> choose a specific binary operator</a><br />
-<a href="#algtxt"> algebraic operations</a><br />
-<a href="#binprotxt"> program flow</a><br />
-<a href="#pattxt"> pattern matching</a><br />
-<a href="#contxt"> data structures</a><br />
-<a href="#asstxt"> assignment</a><br />
-<a href="#funmactxt"> functions and macros</a><br />
-<a href="#dumtxt"> the dummy operator</a><br />
-
-<br/>
+<br />
+<dl><dt><a href="#binovztxt"> choose a specific binary operator</a></dt>
+<dt><a href="#algtxt"> algebraic operations</a></dt>
+<dt><a href="#binprotxt"> program flow</a></dt>
+<dt><a href="#pattxt"> pattern matching</a></dt>
+<dt><a href="#contxt"> data structures</a></dt>
+<dt><a href="#asstxt"> assignment</a></dt>
+<dt><a href="#funmactxt"> functions and macros</a></dt>
+<dt><a href="#dumtxt"> the dummy operator</a></dt>
+</dl>
+<br />
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="binovztxt">=.,|&amp;: +*^LD'$_</a></h1>
 <p>
-These are, in order of growing priority, the 15 binary Bracmat operators.
+These are the 15 binary Bracmat operators. The higher in the list, the lower
+in the order of operations. Use parentheses to force an operator to a higher
+position in the order of operations.
 
-<br/>
-<a href="#savtxt"> =  operator (assignment)</a><br />
-<a href="#contxt"> .  operator (lists)</a><br />
-<a href="#contxt"> ,  operator (lists with "unwrinkling")</a><br />
-<a href="#binprotxt"> |  operator (OR ELSE)</a><br />
-<a href="#binprotxt"> &amp;  operator (AND THEN)</a><br />
-<a href="#asstxt"> :  operator (match subject with pattern)</a><br />
-<a href="#contxt"> [blank] operator (word lists)</a><br />
-<a href="#algtxt"> +  operator (addition)</a><br />
-<a href="#algtxt"> *  operator (multiplication)</a><br />
-<a href="#algtxt">^  operator (exponentiation)</a><br />
-<a href="#algtxt">L  operator (logarithm)</a><br />
-<a href="#difftxt">D  operator (differentiation)</a><br />
-<a href="#funmactxt">'  operator (function, macro)</a><br />
-<a href="#funmactxt">$  operator (function, macro)</a><br />
-<a href="#dumtxt">_  operator (dummy)</a><br />
-
-<br/>
+<br />
+<dl><dt><a href="#savtxt">&nbsp;=&nbsp;</a></dt><dd>assignment:&nbsp;<code>(x=7)</code>&nbsp;&nbsp;<code>(square=.!arg^2)</code>&nbsp;<br />object member definition:&nbsp;<code>(myobject=(place=Copenhagen) (setPlace=.!arg:?(its.place)))</code>&nbsp;</dd>
+<dt><a href="#contxt">&nbsp;.&nbsp;</a></dt><dd>fixed data structure:&nbsp;<code>(Palme.Olof.Sweden)</code>&nbsp;<br />object member referencing:&nbsp;<code>(myhash..insert)$(xxx.998743)</code>&nbsp;</dd>
+<dt><a href="#contxt">&nbsp;,&nbsp;</a></dt><dd>list with autostretch:&nbsp;<code>(ham,(bread,butter),jam):(ham,bread,butter,jam)</code>&nbsp;</dd>
+<dt><a href="#binprotxt">&nbsp;|&nbsp;</a></dt><dd>or else:&nbsp;<code>get$myfile | out$"Cannot read myfile"</code>&nbsp;</dd>
+<dt><a href="#binprotxt">&nbsp;&amp;&nbsp;</a></dt><dd>and then:&nbsp;<code>out$"alomost done" & Done</code>&nbsp;</dd>
+<dt><a href="#asstxt">&nbsp;:&nbsp;</a></dt><dd>match subject with pattern:&nbsp;<code>Meeting at 4 in room 24:? ?#hour ? ?#room ?</code>&nbsp;</dd>
+<dt><a href="#contxt">[blank]</a></dt><dd>sentence, neutral element "":&nbsp;<code>Oh well this can go on and on:?a Oh ?z & !a:""</code>&nbsp;</dd>
+<dt><a href="#algtxt">&nbsp;+&nbsp;</a></dt><dd>add, neutral term 0:&nbsp;<code>(a+6+b+a+10), (a+b:?x+a+?y & !x:0)</code>&nbsp;</dd>
+<dt><a href="#algtxt">&nbsp;*&nbsp;</a></dt><dd>multiply, neutral factor 1:&nbsp;<code>(46546*647547564), (a*b:?x*a*?y & !x:1)</code>&nbsp;</dd>
+<dt><a href="#algtxt">&nbsp;^&nbsp;</a></dt><dd>raise to a power, neutral exponent 1:&nbsp;<code>(9975^332), (45:?n^?exp & !exp:1)</code>&nbsp;</dd>
+<dt><a href="#algtxt">&nbsp;\L</a></dt><dd>take logarithm:&nbsp;<code>10\L1050</code>&nbsp;</dd>
+<dt><a href="#difftxt">&nbsp;\D</a></dt><dd>differentiate:&nbsp;<code>x\D(x^10)</code>&nbsp;</dd>
+<dt><a href="#funmactxt">&nbsp;'&nbsp;</a></dt><dd>function evaluation (does not evaluate rhs):&nbsp;<code>str'(b+a):"b+a"</code>&nbsp;<br />macro:&nbsp;<code>()'(my name is ()$name)</code>&nbsp;</dd>
+<dt><a href="#funmactxt">&nbsp;$&nbsp;</a></dt><dd>function evaluation (evaluates rhs):&nbsp;<code>str$(b+a):"a+b"</code>&nbsp;<br />variable in macro:&nbsp;<code>()'(my name is ()$name)</code>&nbsp;</dd>
+<dt><a href="#dumtxt">&nbsp;_&nbsp;</a></dt><dd>dummy:&nbsp;<code> !expr:?lhs_?rhs & (do$!lhs)_(do$!rhs)</code>&nbsp;</dd>
+</dl>
+<br />
 <span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
 </p><h1><a name="savtxt">The = operator</a></h1>
 <p>
@@ -1233,13 +1236,13 @@ With macro construct : <br />
 </p><h1><a name="unopsmenu">Prefixes</a></h1>
 <p>
 
-<br/>
-<a href="#unstuurtxt"> program flow</a><br />
-<a href="#unpattxt"> pattern matching</a><br />
-<a href="#unpattxt"> prefixes combined with expressions</a><br />
-<a href="#unops"> unary operators</a><br />
-
-<br/>
+<br />
+<dl><dt><a href="#unstuurtxt"> program flow</a></dt>
+<dt><a href="#unpattxt"> pattern matching</a></dt>
+<dt><a href="#unpattxt"> prefixes combined with expressions</a></dt>
+<dt><a href="#unops"> unary operators</a></dt>
+</dl>
+<br />
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="unstuurtxt">Prefixes and program flow</a></h1>
 <p>
@@ -1519,11 +1522,11 @@ Examples: <br />
 </p><h1><a name="varsmenu">Symbols</a></h1>
 <p>
 
-<br/>
-<a href="#varmattxt"> literals</a><br />
-<a href="#varprotxt"> variables</a><br />
-
-<br/>
+<br />
+<dl><dt><a href="#varmattxt"> literals</a></dt>
+<dt><a href="#varprotxt"> variables</a></dt>
+</dl>
+<br />
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="varmattxt">Literals</a></h1>
 <p>
@@ -1606,13 +1609,13 @@ archivist
 </p><h1><a name="progsmenu">Programming advice</a></h1>
 <p>
 
-<br/>
-<a href="#prostutxt1"> program flow</a><br />
-<a href="#pattxt"> pattern matching</a><br />
-<a href="#contxt"> data structures</a><br />
-<a href="#debugtxt"> debugging</a><br />
-
-<br/>
+<br />
+<dl><dt><a href="#prostutxt1"> program flow</a></dt>
+<dt><a href="#pattxt"> pattern matching</a></dt>
+<dt><a href="#contxt"> data structures</a></dt>
+<dt><a href="#debugtxt"> debugging</a></dt>
+</dl>
+<br />
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="debugtxt">Debugging</a></h1>
 <p>
@@ -1721,15 +1724,15 @@ dbg function.
 </p><h1><a name="funcmenu">functions</a></h1>
 <p>
 
-<br/>
-<a href="#funmactxt"> function evaluation</a><br />
-<a href="#funtxt1"> defining functions</a><br />
-<a href="#naamloos"> nameless functions</a><br />
-<a href="#lambda"> lambda abstractions, currying</a><br />
-<a href="#inbltmenu"> built-in functions</a><br />
-<a href="#predefmenu"> predefined, changeable functions</a><br />
-
-<br/>
+<br />
+<dl><dt><a href="#funmactxt"> function evaluation</a></dt>
+<dt><a href="#funtxt1"> defining functions</a></dt>
+<dt><a href="#naamloos"> nameless functions</a></dt>
+<dt><a href="#lambda"> lambda abstractions, currying</a></dt>
+<dt><a href="#inbltmenu"> built-in functions</a></dt>
+<dt><a href="#predefmenu"> predefined, changeable functions</a></dt>
+</dl>
+<br />
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="funtxt1">&lt;function name&gt;=&lt;var1&gt; [,&lt;var2&gt;, ...].&lt;function body&gt;</a></h1>
 <p>
@@ -1818,45 +1821,45 @@ the value 'aap' is bound in ($x), but never assigned to a variable 'x'.</p>
 </p><h1><a name="inbltmenu">Built-in functions</a></h1>
 <p>
 
-<br/>
-<a href="#seltxt">sel access array element</a><br />
-<a href="#alctxt">alc  allocate memory (low level)</a><br />
-<a href="#argtxt">arg  return program (command line) argument</a><br />
-<a href="#asctxt">asc  convert character to internal representation</a><br />
-<a href="#chrtxt">chr  convert internal representation to character</a><br />
-<a href="#chutxt">chu  convert Unicode codepoint to UTF-8 character</a><br />
-<a href="#clktxt">clk  CPU seconds since start of session</a><br />
-<a href="#d2xtxt">d2x  convert decimal number to hexadecimal number</a><br />
-<a href="#dbgtxt">dbg  debugging aid</a><br />
-<a href="#dentxt">den  denominator</a><br />
-<a href="#divtxt">div  quotient</a><br />
-<a href="#filtxt">fil  file I/O (low-level)</a><br />
-<a href="#flgtxt">flg  splits expression in prefixes and expression without prefixes</a><br />
-<a href="#glftxt">glf  opposite of flg: combines prefixes and expression</a><br />
-<a href="#fretxt">fre  return allocated memory (low level)</a><br />
-<a href="#gettxt">get  get input (from file,keyboard or memory)</a><br />
-<a href="#lowtxt">low  convert to lower case</a><br />
-<a href="#lsttxt1">lst  list un-evaluated value of variable(s)</a><br />
-<a href="#memtxt">mem  list existing variable names</a><br />
-<a href="#modtxt">mod  remainder</a><br />
-<a href="#newobjecttxt">new  create new object as a copy of another object</a><br />
-<a href="#peetxt">pee  get value from address (peek) (low level)</a><br />
-<a href="#poktxt">pok  put value at address (poke) (low level)</a><br />
-<a href="#puttxt1">put  write output</a><br />
-<a href="#rentxt">ren  rename file or directory or move file</a><br />
-<a href="#rmvtxt">rmv  remove file</a><br />
-<a href="#revtxt">rev  string reverse</a><br />
-<a href="#simtxt">sim  similarity between two atoms</a><br />
-<a href="#strtxt">str  stringize expression into atom</a><br />
-<a href="#switxt">swi  software interrupt (low level)</a><br />
-<a href="#systxt">sys  command line shell</a><br />
-<a href="#tbltxt">tbl  establish array size</a><br />
-<a href="#upptxt">upp  convert to upper case</a><br />
-<a href="#utftxt">utf  convert UTF-8 character to Unicode codepoint</a><br />
-<a href="#whltxt">whl  while loop</a><br />
-<a href="#x2dtxt">x2d  convert hexadecimal number to decimal number</a><br />
-
-<br/>
+<br />
+<dl><dt><a href="#seltxt">sel access array element</a></dt>
+<dt><a href="#alctxt">alc  allocate memory (low level)</a></dt>
+<dt><a href="#argtxt">arg  return program (command line) argument</a></dt>
+<dt><a href="#asctxt">asc  convert character to internal representation</a></dt>
+<dt><a href="#chrtxt">chr  convert internal representation to character</a></dt>
+<dt><a href="#chutxt">chu  convert Unicode codepoint to UTF-8 character</a></dt>
+<dt><a href="#clktxt">clk  CPU seconds since start of session</a></dt>
+<dt><a href="#d2xtxt">d2x  convert decimal number to hexadecimal number</a></dt>
+<dt><a href="#dbgtxt">dbg  debugging aid</a></dt>
+<dt><a href="#dentxt">den  denominator</a></dt>
+<dt><a href="#divtxt">div  quotient</a></dt>
+<dt><a href="#filtxt">fil  file I/O (low-level)</a></dt>
+<dt><a href="#flgtxt">flg  splits expression in prefixes and expression without prefixes</a></dt>
+<dt><a href="#glftxt">glf  opposite of flg: combines prefixes and expression</a></dt>
+<dt><a href="#fretxt">fre  return allocated memory (low level)</a></dt>
+<dt><a href="#gettxt">get  get input (from file,keyboard or memory)</a></dt>
+<dt><a href="#lowtxt">low  convert to lower case</a></dt>
+<dt><a href="#lsttxt1">lst  list un-evaluated value of variable(s)</a></dt>
+<dt><a href="#memtxt">mem  list existing variable names</a></dt>
+<dt><a href="#modtxt">mod  remainder</a></dt>
+<dt><a href="#newobjecttxt">new  create new object as a copy of another object</a></dt>
+<dt><a href="#peetxt">pee  get value from address (peek) (low level)</a></dt>
+<dt><a href="#poktxt">pok  put value at address (poke) (low level)</a></dt>
+<dt><a href="#puttxt1">put  write output</a></dt>
+<dt><a href="#rentxt">ren  rename file or directory or move file</a></dt>
+<dt><a href="#rmvtxt">rmv  remove file</a></dt>
+<dt><a href="#revtxt">rev  string reverse</a></dt>
+<dt><a href="#simtxt">sim  similarity between two atoms</a></dt>
+<dt><a href="#strtxt">str  stringize expression into atom</a></dt>
+<dt><a href="#switxt">swi  software interrupt (low level)</a></dt>
+<dt><a href="#systxt">sys  command line shell</a></dt>
+<dt><a href="#tbltxt">tbl  establish array size</a></dt>
+<dt><a href="#upptxt">upp  convert to upper case</a></dt>
+<dt><a href="#utftxt">utf  convert UTF-8 character to Unicode codepoint</a></dt>
+<dt><a href="#whltxt">whl  while loop</a></dt>
+<dt><a href="#x2dtxt">x2d  convert hexadecimal number to decimal number</a></dt>
+</dl>
+<br />
 <span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
 </p><h1><a name="seltxt">&lt;index&gt;$&lt;array name&gt;</a></h1>
 <p>
@@ -2713,17 +2716,17 @@ been drilled to leave these names out when the user asks for a list of variable
 names (lst$ or mem$), so you will not notice their existence. The following
 visible functions are predefined:
 
-<br/>
-<a href="#sgntxt">abs (and sgn)  absolute value and sign</a><br />
-<a href="#cattxt">cat            list existing variable names selectively</a><br />
-<a href="#gontxt">cos (and sin)  cosine and sine</a><br />
-<a href="#factxt">fct            factorising</a><br />
-<a href="#flttxt">flt            floating point notation of numbers</a><br />
-<a href="#outtxt">out            output to screen</a><br />
-<a href="#subtxt1">sub            substitution</a><br />
-<a href="#taytxt">tay            Taylor series</a><br />
-
-<br/>
+<br />
+<dl><dt><a href="#sgntxt">abs (and sgn)  absolute value and sign</a></dt>
+<dt><a href="#cattxt">cat            list existing variable names selectively</a></dt>
+<dt><a href="#gontxt">cos (and sin)  cosine and sine</a></dt>
+<dt><a href="#factxt">fct            factorising</a></dt>
+<dt><a href="#flttxt">flt            floating point notation of numbers</a></dt>
+<dt><a href="#outtxt">out            output to screen</a></dt>
+<dt><a href="#subtxt1">sub            substitution</a></dt>
+<dt><a href="#taytxt">tay            Taylor series</a></dt>
+</dl>
+<br />
 <span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
 </p><h1><a name="sgntxt">abs$&lt;expression&gt; and sgn$&lt;expression&gt;</a></h1>
 <p>
@@ -2812,25 +2815,34 @@ The third argument denotes the number of terms, including vanishing terms.
 <span class="arrow">&uArr;</span> <a href="#predefmenu" style="line-height:12pt">Predefined functions</a>.<br />
 </p><h1><a name="hashtxt">Hash tables</a></h1>
 <p>
-If you need to manage a large data set it may be a good idea to use a hash-
+If you need to manage a large data set it, may be a good idea to use a hash-
 table instead of a list. Storing, retrieving and deleting are costly processes
 in lists, but cheap in hash tables. Handling hash tables in Bracmat is very
 simple. You create a hash table as follows
  </p><blockquote><pre>
-{?} new$hash:?myhash </pre></blockquote><p> 
-Hereafter, 'myhash' refers to a hash table and is treated in the same way as
-a user defined object. The following methods are defined for hash tables:
-<br/>
-<a href="#findtxt">find</a><br />
-<a href="#inserttxt">insert</a><br />
-<a href="#removetxt">remove</a><br />
-<a href="#Newtxt">New</a><br />
-<a href="#Dietxt">Die</a><br />
-<a href="#ISOtxt">ISO</a><br />
-<a href="#casesensitivetxt">casesensitive</a><br />
-<a href="#foralltxt">forall</a><br />
+{?} new$hash:?myhash </pre></blockquote><p>  <br /> 
 
-<br/>
+Hereafter, 'myhash' refers to a hash table and is treated in the same way as
+a user defined object. Bracmat keeps the load factor between 50 and 100,
+rehashing as necessary. </p><p>
+If you know the hash table is going to be much bigger than about 100 bins, you
+can suggest the size of the table to Bracmat, but this is not necessary:
+ </p><blockquote><pre>
+{?} new$(hash,1000000):?mybiggerhash </pre></blockquote><p>  <br /> 
+
+This tells Bracmat to start off with a million bins. </p><p>
+The following methods are defined for hash tables:
+<br />
+<dl><dt><a href="#findtxt">find</a></dt>
+<dt><a href="#inserttxt">insert</a></dt>
+<dt><a href="#removetxt">remove</a></dt>
+<dt><a href="#Newtxt">New</a></dt>
+<dt><a href="#Dietxt">Die</a></dt>
+<dt><a href="#ISOtxt">ISO</a></dt>
+<dt><a href="#casesensitivetxt">casesensitive</a></dt>
+<dt><a href="#foralltxt">forall</a></dt>
+</dl>
+<br />
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 </p><h1><a name="findtxt">(myhash..find)$key:(?Key.?Value) ?OtherKeyValuePairs</a></h1>
 <p>
