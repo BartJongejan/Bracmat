@@ -21,7 +21,7 @@ help=
     =   M
       , "                       BRACMAT                       "
       , "0  starting with Bracmat
-1  pattern matchingf
+1  pattern matching
 2  grammar
 3  binary operators
 4  prefixes/unary operators
@@ -129,77 +129,77 @@ save reformat and save this file"
   & ( inbltmenu
     =   M
       , "Built-in functions"
-      , "1 <N>
+      , "1 <N>_|
     access array element:|_!(12$a):?(11$a)_|
-2 alc
+2 |_alc_|
     allocate memory (low level):|_alc$100_|
-3 arg
+3 |_arg_|
     return program (command line) argument:|_(arg$0:?programName)_||_((arg$:?o1)&(arg$:?o2))_|
-4 asc
+4 |_asc_|
     convert character to internal representation:|_asc$y:121_|
-5 chr
+5 |_chr_|
     convert internal representation to character:|_chr$121:y_|
-6 chu
+6 |_chu_|
     convert Unicode codepoint to UTF-8 character:|_chu$2000_|
-7 clk
+7 |_clk_|
     CPU seconds since start of session:|_clk$:?t0_|
-8 d2x
+8 |_d2x_|
     convert decimal number to hexadecimal number:|_d2x$73083734:45B2B56_|
-9 dbg
+9 |_dbg_|
     debugging aid:|_dbg'(a b c:? b ?)_|
-10 den
+10 |_den_|
     denominator:|_den$22/7:7_|
-11 div
+11 |_div_|
     quotient:|_div$(22.7):1_|
-12 fil
+12 |_fil_|
     file I/O (low-level)
-13 flg
+13 |_flg_|
     splits expression in prefixes and expression without prefixes
-14 glf
+14 |_glf_|
     opposite of flg: combines prefixes and expression
-15 fre
+15 |_fre_|
     return allocated memory (low level)
-16 get
+16 |_get_|
     get input (from file,keyboard or memory)
-17 low
+17 |_low_|
     convert to lower case
-18 lst
+18 |_lst_|
     list un-evaluated value of variable(s)
-19 mem
+19 |_mem_|
     list existing variable names
-20 mod
+20 |_mod_|
     remainder
-21 new
+21 |_new_|
     create new object as a copy of another object
-22 pee
+22 |_pee_|
     get value from address (peek) (low level)
-23 pok
+23 |_pok_|
     put value at address (poke) (low level)
-24 put
+24 |_put_|
     write output
-25 ren
+25 |_ren_|
     rename file or directory or move file
-26 rev
+26 |_rev_|
     string reverse
-27 rmv
+27 |_rmv_|
     remove file
-28 sim
+28 |_sim_|
     similarity between two atoms
-29 str
+29 |_str_|
     stringize expression into atom
-30 swi
+30 |_swi_|
     software interrupt (low level)
-31 sys
+31 |_sys_|
     command line shell
-32 tbl
+32 |_tbl_|
     create array, remove array/variable
-33 upp
+33 |_upp_|
     convert to upper case
-34 utf
+34 |_utf_|
     convert UTF-8 character to Unicode codepoint
-35 whl
+35 |_whl_|
     while loop
-36 x2d
+36 |_x2d_|
     convert hexadecimal number to decimal number|_x2d$BABEFACE:3133078222_|
 "
       ,   (1,seltxt)
@@ -899,45 +899,45 @@ of the matrix at hand, and may even be indifferent to the number of indices."
     )
   & ( binovztxt
     =   M
-      , "=.,|&: +*^LD'$_"
+      , "=.,|&: +*^\\L\\D'$_"
       , "These are the 15 binary Bracmat operators. The higher in the list, the lower
 in the order of operations. Use parentheses to force an operator to a higher
 position in the order of operations.
 
-1 =
+1 |_=_|
     assignment:|_(x=7)_||_(square=.!arg^2)_|
     object member definition:|_(myobject=(place=Copenhagen) (setPlace=.!arg:?(its.place)))_|
-2 .
+2 |_._|
     fixed data structure:|_(Palme.Olof.Sweden)_|
     object member referencing:|_(myhash..insert)$(xxx.998743)_|
-3 ,
+3 |_,_|
     list with autostretch:|_(ham,(bread,butter),jam):(ham,bread,butter,jam)_|
-4 |
+4 |_|_|
     or else:|_get$myfile | out$\"Cannot read myfile\"_|
-5 &
+5 |_&_|
     and then:|_out$\"alomost done\" & Done_|
-6 :
+6 |_:_|
     match subject with pattern:|_Meeting at 4 in room 24:? ?#hour ? ?#room ?_|
 7 [blank]
     sentence, neutral element \"\":|_Oh well this can go on and on:?a Oh ?z & !a:\"\"_|
-8 +
+8 |_+_|
     add, neutral term 0:|_(a+6+b+a+10)_|,|_(a+b:?x+a+?y & !x:0)_|
-9 *
+9 |_*_|
     multiply, neutral factor 1:|_(46546*647547564)_|,|_(a*b:?x*a*?y & !x:1)_|
-10 ^
+10 |_^_|
     raise to a power, neutral exponent 1:|_(9975^332)_|,|_(45:?n^?exp & !exp:1)_|
-11 \\L
+11 |_\\L_|
     take logarithm:|_10\\L1050_|
-12 \\D
+12 |_\\D_|
     differentiate:|_x\\D(x^10)_|
-13 '
+13 |_'_|
     function evaluation (does not evaluate rhs):|_str'(b+a):\"b+a\"_|
     macro:|_()'(my name is ()$name)_|
-14 $
+14 |_$_|
     function evaluation (evaluates rhs):|_str$(b+a):\"a+b\"_|
     variable in macro:|_()'(my name is ()$name)_|
-15 _
-    dummy:   !expr:?lhs_?rhs & (do$!lhs)_(do$!rhs)  "
+15 |___|
+    dummy:   |_!expr:?lhs_?rhs & (do$!lhs)_(do$!rhs)_|  "
       ,   (1,savtxt objecttxt asstxt)
           (2,contxt objecttxt)
           (3,contxt)
@@ -1212,14 +1212,22 @@ can suggest the size of the table to Bracmat, but this is not necessary:
 This tells Bracmat to start off with a million bins.
 
 The following methods are defined for hash tables:
-1 find
-2 insert
-3 remove
-4 New
-5 Die
-6 ISO
-7 casesensitive
-8 forall"
+1 |_find_|
+    find all values for a given key
+2 |_insert_|
+    insert a value for a key
+3 |_remove_|
+    remove a key and all its values
+4 |_New_|
+    creates a hash table, cannot be called programmatically
+5 |_Die_|
+    cleans up a hash table, cannot be called programmatically
+6 |_ISO_|
+    make all key access case-insensitive
+7 |_casesensitive_|
+    make all key access case sensitive. (Default)
+8 |_forall_|
+    apply a function to all key-value pairs"
       ,   (1,findtxt)
           (2,inserttxt)
           (3,removetxt)
@@ -1730,97 +1738,102 @@ this may change in later versions of the program."
       ,   "In patterns, atoms and expressions within parentheses may be preceded by
 prefixes that control the matching process.
 
-! and !!
+
+|_!_| and |_!!_|
     in front of an non-nil atom or an expression denoting a member of an
     object causes expansion of the atom or the member to its direct or
     indirect binding. This binding is matched with the subject.
-`
+|_`_|
     causes backtracking if the pattern did not successfully unify with a 
     non-trivial element of the subject-list. A list is an expression
-    consisting of terms (+ operator), factors (* operator) or words
+    consisting of terms (|_+_| operator), factors (|_*_| operator) or words
     (white-space operator). Trivial elements are 0 in a sum, 1 in a product
     and a word without characters in a list of words. In non-sophisticated
-    patterns, ` means simply : unify with at most one non-trivial element.
+    patterns, |_`_| means simply : unify with at most one non-trivial element.
     Zero non-trivial elements are allowed, in which case unification takes
     place with an implicit trivial element: Bracmat sees 0's everywhere in a
     sum, 1's in a product and zero length words in a sentence.
-?
+|_?_|
     unifies with anything. If ? is followed by a non-nil atom denoting a
     variable or an expression denoting a member of an object, then the matched
     part of the subject is captured by this variable or member. In other
     words, pattern matching can have assignment as a side-effect.
-@
+|_@_|
     unifies only with atoms.
-%
+|_%_|
     causes the match to succeed only with one or more non-trivial elements of
-    the subject-list. (Exception: in combination with [ prefix).
-< and >
-    unifies only with atoms that are \"less\" or \"greater\" than the atom
-    following the < or > prefix.
-#
+    the subject-list. (Exception: in combination with |_[_| prefix).
+|_<_|
+    unifies only with atoms that are \"less\" than the atom following the |_<_| 
+    prefix.
+|_>_|
+    unifies only with atoms that are \"greater\" than the atom following the |_>_|
+    prefix.
+|_#_|
     unifies only with rational numbers.
-/
+|_/_|
     unifies only with non-integer rational numbers.
-~
+|_~_|
     constrains the match to subjects that are not equal to the atom following
     the ~ prefix.
-[
+|_[_|
     Position prefix. Must be followed by an expression that evaluates to a
-    number (For example [4 or [(!pos+3) ) or by a variable having a question
-    mark as in [?pos. In the first case, the pattern cannot succeed unless the
-    element following the [ element is at the indicated position. The [
+    number (For example |_[4_| or |_[(!pos+3)_| ) or by a variable having a question
+    mark as in |_[?pos_|. In the first case, the pattern cannot succeed unless the
+    element following the [ element is at the indicated position. The |_[_|
     element itself does not occupy a position; it sits in front of the
     indicated position. The second form is for querying the current position.
     Position 0 is the start of the subject. Positive positions count from the
     beginning of the subject, negative positions from the end. Position -1 is
-    the position following the last element. (When combined with '%' the
+    the position following the last element. (When combined with |_%_| the
     meaning is different.)
+
 
 The above prefixes may be combined. The ordering in which they are input by the
 user is irrelevant; Bracmat keeps prefixes in this order : 
-    [ ~ / # < > % @ ` ? ! !!
+    |_[ ~ / # < > % @ ` ? ! !!_|
 Repeating prefixes in front of the same atom does not convey a new meaning to
-the pattern, except for the ! and the ~ prefixes. More than one ! is
-interpreted as the !! prefix. An odd number of ~ is treated as a single ~, an
-even number thereof is treated as none. A ~ in front of other prefixes negates
+the pattern, except for the |_!_| and the |_~_| prefixes. More than one |_!_| is
+interpreted as the |_!!_| prefix. An odd number of |_~_| is treated as a single |_~_|, an
+even number thereof is treated as none. A |_~_| in front of other prefixes negates
 the first of them. The most useful combinations are:
 
-?!
+|_?!_|
     in front of an atom causes the atom to be expanded to its binding.
     This binding is treated as a variable name.
-?!!
+|_?!!_|
     is like ?!, but expands two levels deep (with an evaluation of the
     first level expansion), instead of one.
-<>
+|_<>_|
     is like a solitary ~.
-/<>5/6
+|_/<>5/6_|
     unifies only with non-integer rational numbers unequal to 5/6.
-~<
+|_~<_|
     means \"greater or equal\" (\"not less\").
-~>
+|_~>_|
     means \"less or equal\".
-~<>
+|_~<>_|
     means \"not different\", i.e. \"the same, in some sense\". Strings
     are compared case insensitive. This applies to the full Unicode
     table, but defaults to ASCII and the upper 128 characters in the
     ISO8859-1 (Latin 1) character set if the characters are not UTF-8
     encoded.
-~#
+|_~#_|
     does not unify with rational numbers.
-~/
+|_~/_|
     does not unify with non-integer rational numbers.
-~/#
+|_~/#_|
     unifies only with integer numbers.
-~/#<9
+|_~/#<9_|
     unifies only with integer numbers less than 9.
-~/#<>0
+|_~/#<>0_|
     unifies only with non-zero integer numbers.
-~@
+|_~@_|
     unifies only with non-atomic expressions.
-~`
+|_~`_|
     backtrack immediately.
-[%
-    The current subject is stored in the variable 'sjt' and the expression
+|_[%_|
+    The current subject is stored in the variable |_sjt_| and the expression
     carrying this prefix combination is evaluated. If the evaluation succeeds,
     the match succeeds and vice versa. The subject can be a trivial element of
     the subject list.
@@ -1882,22 +1895,36 @@ been drilled to leave these names out when the user asks for a list of variable
 names (lst$ or mem$), so you will not notice their existence. The following
 visible functions are predefined:
 
-0 abs (and sgn)  absolute value and sign
-1 cat            list existing variable names selectively
-2 cos (and sin)  cosine and sine
-3 fct            factorising
-4 flt            floating point notation of numbers
-5 out            output to screen
-6 sub            substitution
-7 tay            Taylor series"
+0 |_abs_|
+    absolute value
+1 |_cat_|
+    list existing variable names selectively
+2 |_cos_|
+    cosine formula
+3 |_fct_|
+    factorisation
+4 |_flt_|
+    floating point notation of numbers
+5 |_out_|
+    output to screen, then new line
+6 |_sgn_|
+    sign
+7 |_sin_|
+    sine formula
+8 |_sub_|
+    substitution
+9 |_tay_|
+    Taylor series development"
       ,   (0,sgntxt)
           (1,cattxt)
           (2,gontxt)
           (3,factxt)
           (4,flttxt)
           (5,outtxt debugtxt2 debugtxt3)
-          (6,subtxt1)
-          (7,taytxt)
+          (6,sgntxt)
+          (7,gontxt)
+          (8,subtxt1)
+          (9,taytxt)
     )
   & ( flttxt
     =   T
@@ -2440,7 +2467,7 @@ argument is not an integer number or if the number is outside this range.
     )
   & ( x2dtxt
     =   T
-      , "x2d$<hexadecimal value"
+      , "x2d$<hexadecimal value>"
       , "x2d$ converts an hexadecimal number between 0 and FFFFFFFF to a decimal
 number. On 64-bit platforms the upper bound is FFFFFFFFFFFFFFFF.
 The function fails if the argument is not a string with a length
@@ -2950,26 +2977,24 @@ Use macro evaluation if the expression to be split is the value of a variable.
   & ( filtxt
     =   M
       , "fil$([[<file name>][,<option>[,<number>[,<value to output>]]]])"
-      ,     "fil$ is a multi-purpose low level I/O function.
+      , "fil$ is a multi-purpose low level I/O function.
 
-1 Set file mode, open a file in a file mode
-    |_fil$([<file name>],<mode>)_|
-2 Prepare for reading or writing fixed sized records
-    |_fil$([<file name>],<type>,<size>[,<number>])_|
-3 Prepare for reading or writing variable sized record
-    |_fil$([<file name>],STR[,<stop>])_|
-4 Telling position inside file
-    |_fil$(<file name>,TEL)_|
-5 Go to file position
-    |_fil$(<file name>,<whence>,<offset>)_|
-6 Read from file
-    |_fil$([<file name>][,,<number>])_|
-7 Write to file
-    |_fil$([<file name>],,<number>,<value>)_|
-8 Close  a file
-    |_fil$([<file name>],SET,-1)"
-          _ 
-        | 
+1 |_fil$([<file name>],<mode>)_|
+    Set file mode, open a file in a file mode
+2 |_fil$([<file name>],<type>,<size>[,<number>])_|
+    Prepare for reading or writing fixed sized records
+3 |_fil$([<file name>],STR[,<stop>])_|
+    Prepare for reading or writing variable sized record    
+4 |_fil$(<file name>,TEL)_|
+    Telling position inside file    
+5 |_fil$(<file name>,<whence>,<offset>)_|
+    Go to file position    
+6 |_fil$([<file name>][,,<number>])_|
+    Read from file    
+7 |_fil$([<file name>],,<number>,<value>)_|
+    Write to file    
+8 |_fil$([<file name>],SET,-1)_|
+    Close  a file"
       ,   (1,modetxt)
           (2,fixdtxt)
           (3,varitxt)
@@ -2986,29 +3011,29 @@ Use macro evaluation if the expression to be split is the value of a variable.
 
 Option <mode> is one of the following:
 
-r
+|_r_|
     open text file for reading
-w
+|_w_|
     create text file for writing, or truncate to zero length
-a
+|_a_|
     append; open text file or create for writing at eof
-rb
+|_rb_|
     open binary file for reading
-wb
+|_wb_|
     create binary file for writing, or truncate to zero length
-ab
+|_ab_|
     append; open binary file or create for writing at eof
-\"r+\"
+|_\"r+\"_|
     open text file for update (reading and writing)
-\"w+\"
+|_\"w+\"_|
     create text file for update, or truncate to zero length
-\"a+\"
+|_\"a+\"_|
     append; open text file or create for update, writing at eof
-\"r+b\" or \"rb+\"
+|_\"r+b\"_| or |_\"rb+\"_|
     open binary file for update (reading and writing)
-\"w+b\" or \"wb+\"
+|_\"w+b\"_| or |_\"wb+\"_|
     create binary file for update, or truncate to zero length
-\"a+b\" or \"ab+\"
+|_\"a+b\"_| or |_\"ab+\"_|
     append; open binary file or create for update, writing at eof
 "
     )
@@ -3223,7 +3248,11 @@ An open file is closed by specifying an impossible file position."
 ~  last topic
 
 Topic:")
-                          & get':?antw:~:~html:~save
+                          &   get'
+                            : ?antw
+                            : ~
+                            : ~html
+                            : ~save
                           & (   !sel:? (`!antw,?keuze) ?
                               & verwerk$!keuze
                             | out$(!antw " is an invalid choice")
@@ -3247,7 +3276,7 @@ Topic:")
                 . backtoref,txt,men,sel,pg,antw,topic2,ptxt
                 . keuze,expr,fput,menu,menutekst,menutitel,titl
                 .   break2 indented2 asCode2 vsubst1
-                  , vsubst2 vsubst3 vsubst4
+                  , vsubst2 vsubst3 vsubst4 codeexample
                 .   breaks2 ol2 ul2 subul codeexamples
                   , chunk2 nbsp2 first next spaced
                 )
@@ -3303,24 +3332,23 @@ Topic:")
                         )
                     )
                   & (asCode2=."<span class=\"courier\">" !arg "</span>")
+                  & ( codeexample
+                    =   A Z example
+                      .     @(!arg:?A "|_" ?example "_|" ?Z)
+                          & ( !example:&!A " " !Z
+                            |   !A
+                                "&nbsp;<code>"
+                                !example
+                                "</code>&nbsp;"
+                                codeexample$!Z
+                            )
+                        | !arg
+                    )
                   & ( codeexamples
-                    =   codeexample
+                    =   
                       .     @( str$(vsubst2$(str$!arg))
                              : ? ((%@:~" ") ?:?arg)
                              )
-                          & ( codeexample
-                            =   A Z example
-                              .     @(!arg:?A "|_" ?example "_|" ?Z)
-                                  & (   !example:
-                                      & !A " " !Z
-                                    |   !A
-                                        "&nbsp;<code>"
-                                        !example
-                                        "</code>&nbsp;"
-                                        codeexample$!Z
-                                    )
-                                | !arg
-                            )
                           & codeexample$!arg
                         | !arg
                     )
@@ -3374,8 +3402,11 @@ Topic:")
                     =   a m
                       .   str
                         $ (   @(!arg:?a "<" ?m ">" ?arg)
+                            & str$("&lt;" vsubst2$!m "&gt;"):?m
                             &   vsubst2$!a
-                                asCode2$(str$("&lt;" vsubst2$!m "&gt;"))
+                                ( @(!m:? \n ?)
+                                | asCode2$!m
+                                )
                                 vsubst1$!arg
                           | vsubst2$!arg
                           )
@@ -3660,9 +3691,9 @@ Depending on the context, $<expression> can have two effects :"
                                        (?DeF \n:!defpat)
                                        ( ?arg
                                        &     "<dt>"
-                                             vsubst1$!TeRm
+                                             codeexample$(vsubst1$!TeRm)
                                              "</dt><dd>"
-                                             vsubst1$!DeF
+                                             codeexample$(vsubst1$!DeF)
                                              "</dd>\n"
                                          : ?E
                                        &   (     !arg
@@ -3679,15 +3710,19 @@ Depending on the context, $<expression> can have two effects :"
                           & @( !arg
                              :   ?a
                                  (   \n
-                                     (|? " "|`)
+                                     ( 
+                                     | ? (" "|\r)
+                                     | `
+                                     )
                                      ()
                                      \n
                                      ?b
                                      (   \n
                                          ( 
-                                         | ? " "
+                                         | ? (" "|\r)
                                          | `
                                          )
+                                         ()
                                          \n
                                          ?c
                                      |   (\n|)
@@ -3780,6 +3815,62 @@ Depending on the context, $<expression> can have two effects :"
                           )
                         & ~!l1
                     )
+                  & ( codes
+                    =   cds code A K L Z
+                      .   ( code
+                          =   a z E A Z aa zz
+                            .     @( str$!arg
+                                   :   ?a
+                                       ( ( "$"
+                                         | "`"
+                                         | "|"
+                                         | "&"
+                                         | "%"
+                                         | "\\"
+                                         | "@"
+                                         | "#"
+                                         | "{"
+                                         | "}"
+                                         | "["
+                                         | "]"
+                                         | "~"
+                                         | "^"
+                                         | "*"
+                                         | "+"
+                                         )
+                                       : ?E
+                                       )
+                                       ?z
+                                   )
+                                & @( rev$!a
+                                   :   ?Z
+                                       ( " " ?A
+                                       | &:?A
+                                       )
+                                   )
+                                & @( !z
+                                   :   ?aa
+                                       ( " " ?zz
+                                       | &:?zz
+                                       )
+                                   )
+                                &   rev$!A
+                                    (,rev$!Z !E !aa)
+                                    code$!zz
+                              | !arg
+                          )
+                        & code$!arg:?cds
+                        &   whl
+                          ' (   !cds
+                              : ?A (,?K) (,?L) ?Z
+                            & !A (,!K !L) !Z:?cds
+                            )
+                        &   whl
+                          ' ( !cds:?A (,?K) ?Z
+                            & !A " <code>" !K "</code> " !Z:?cds
+                            )
+                        & str$!cds
+                    )
                   & ( tit
                     =   put$\n\n
                       & out$!titel
@@ -3790,7 +3881,7 @@ Depending on the context, $<expression> can have two effects :"
                             $ ( "</p><h1><a name=\""
                                 !ptxt
                                 \">
-                                vsubst2$!titel
+                                codes$(vsubst2$!titel)
                                 "</a></h1>
 <p>
 "
@@ -3861,12 +3952,13 @@ Depending on the context, $<expression> can have two effects :"
                                 | codeexamples$!arg
                             )
                           &     !menu
-                                (   @(!tekst:?term \n ?definition)
+                                ( !keuze:
+                                |   @(!tekst:?term \n ?definition)
                                   &   str
                                     $ ( "<dt><a href=\"#"
                                         first$!keuze
                                         \">
-                                        padded$(str$(vsubst2$!term))
+                                        codeexample$(str$(vsubst2$!term))
                                         "</a></dt><dd>"
                                         ddlines$!definition
                                         "</dd>\n"
@@ -3875,7 +3967,7 @@ Depending on the context, $<expression> can have two effects :"
                                   $ ( "<dt><a href=\"#"
                                       first$!keuze
                                       \">
-                                      padded$(str$(vsubst2$!tekst))
+                                      codeexample$(str$(vsubst2$!tekst))
                                       "</a></dt>\n"
                                     )
                                 )
@@ -3986,33 +4078,32 @@ accompanies Bracmat, using Bracmat to do the conversion.</i>
 </html>
 ",!fname,APP,LIN)
       )
-  & (     out
-        $ "* Choose from the menus the topics that interest you.
+  &   out
+    $ "* Choose from the menus the topics that interest you.
 * Enter the number or character string that precedes your choice.
 * Press <return> to return to the previous menu or to leave this tutor.
 * If the {?} prompt appears without a menu, you can enter expressions that
   Bracmat will evaluate. Only pressing <return> pages through the information."
-      & verwerk$lusmenu:(html
-      & doHTML$"bracmat.html"
-      | save & lst$(help,"help.bra",NEW) & put$( 
-"      
+  &   verwerk$lusmenu
+    : ( html&doHTML$"bracmat.html"
+      |   save
+        & lst$(help,"help.bra",NEW)
+        &   put
+          $ ( "      
   ~&get$\"lex.bra\"&lex$help | help$()
   & tbl$(help,0)
   & \"
 _________________________________________________________________________
-\";
-","help.bra",APP)
-      
-      
-      
-      
+\"
+"
+            , "help.bra"
+            , APP
+            )
       | ?
-      )
-     
-    );
-
+      );
+      
   ~&get$"lex.bra"&lex$help | help$()
   & tbl$(help,0)
   & "
 _________________________________________________________________________
-";
+"

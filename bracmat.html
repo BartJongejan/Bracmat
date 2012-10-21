@@ -15,7 +15,7 @@ accompanies Bracmat, using Bracmat to do the conversion.</i>
 
 </p>
 <dl><dt><a href="#aanbevelingen"> starting with Bracmat</a></dt>
-<dt><a href="#patternm"> pattern matchingf</a></dt>
+<dt><a href="#patternm"> pattern matching</a></dt>
 <dt><a href="#syntax"> grammar</a></dt>
 <dt><a href="#binmenu"> binary operators</a></dt>
 <dt><a href="#unopsmenu"> prefixes/unary operators</a></dt>
@@ -31,8 +31,6 @@ accompanies Bracmat, using Bracmat to do the conversion.</i>
 <dt><a href="#Bracmat-name">why the name 'Bracmat'?</a></dt>
 <dt><a href="#colofon">how to obtain Bracmat</a></dt>
 <dt><a href="#morexmlps">more example code</a></dt>
-<dt><a href="#">html transform this file to HTML</a></dt>
-<dt><a href="#">save reformat and save this file</a></dt>
 </dl>
 <p>
 </p><h1><a name="aanbevelingen">If you haven't seen Bracmat before ..</a></h1>
@@ -267,7 +265,7 @@ unless there are other prefixes than @ and ~ present.
                        match.} </pre></blockquote><p> 
 </p><p>
 <span class="arrow">&uArr;</span> <a href="#patternm" style="line-height:12pt">Pattern matching</a>.<br />
-<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^\L\D'$_</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
 <span class="arrow">&rArr;</span> <a href="#pattxt2" style="line-height:12pt">Matching a number in a string</a>.<br />
 <span class="arrow">&lArr;</span> <a href="#pattxt" style="line-height:12pt">Binary operators in pattern matching</a>.<br />
@@ -288,7 +286,7 @@ characterwise. In %-20/5, the pattern matches 20/5 and the minus is ignored! </p
  </pre></blockquote><p> 
 </p><p>
 <span class="arrow">&uArr;</span> <a href="#patternm" style="line-height:12pt">Pattern matching</a>.<br />
-<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^\L\D'$_</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
 <span class="arrow">&lArr;</span> <a href="#pattxttxt" style="line-height:12pt">Pattern matching in strings</a>.<br />
 <span class="arrow">&rArr;</span> <a href="#escappattxt" style="line-height:12pt">Escaping operator in patterns</a>.<br />
@@ -390,7 +388,7 @@ If !s matches with either !pa or !pb (in that order), !s is returned. </p><p>
 The possibility that !s might fail further complicates the above examples.
 </p><p>
 <span class="arrow">&uArr;</span> <a href="#patternm" style="line-height:12pt">Pattern matching</a>.<br />
-<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^\L\D'$_</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#progsmenu" style="line-height:12pt">Programming advice</a>.<br />
 <span class="arrow">&rArr;</span> <a href="#escappattxt" style="line-height:12pt">Escaping operator in patterns</a>.<br />
@@ -414,7 +412,7 @@ normal way. The escape operator functions with all Bracmat operators, but the
 operators . , whitespace, + * ^ \L and \D should not be escaped normally.
 </p><p>
 <span class="arrow">&uArr;</span> <a href="#patternm" style="line-height:12pt">Pattern matching</a>.<br />
-<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^\L\D'$_</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#progsmenu" style="line-height:12pt">Programming advice</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
@@ -471,28 +469,28 @@ Quotation marks. Comments are enclosed in {} and may be nested.
 </dl>
 <p>
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
-</p><h1><a name="binovztxt"> <code>=.,|&amp;:+*^LD'$_</code> </a></h1>
+</p><h1><a name="binovztxt"> <code>=.,|&amp;:+*^\L\D'$_</code> </a></h1>
 <p>
 These are the 15 binary Bracmat operators. The higher in the list, the lower
 in the order of operations. Use parentheses to force an operator to a higher
 position in the order of operations.
 
 </p>
-<dl><dt><a href="#savtxt">&nbsp;=&nbsp;</a></dt><dd>assignment:&nbsp;<code>(x=7)</code>&nbsp;&nbsp;<code>(square=.!arg^2)</code>&nbsp;<br />object member definition:&nbsp;<code>(myobject=(place=Copenhagen) (setPlace=.!arg:?(its.place)))</code>&nbsp;</dd>
-<dt><a href="#contxt">&nbsp;.&nbsp;</a></dt><dd>fixed data structure:&nbsp;<code>(Palme.Olof.Sweden)</code>&nbsp;<br />object member referencing:&nbsp;<code>(myhash..insert)$(xxx.998743)</code>&nbsp;</dd>
-<dt><a href="#contxt">&nbsp;,&nbsp;</a></dt><dd>list with autostretch:&nbsp;<code>(ham,(bread,butter),jam):(ham,bread,butter,jam)</code>&nbsp;</dd>
-<dt><a href="#binprotxt">&nbsp;|&nbsp;</a></dt><dd>or else:&nbsp;<code>get$myfile | out$"Cannot read myfile"</code>&nbsp;</dd>
-<dt><a href="#binprotxt">&nbsp;&amp;&nbsp;</a></dt><dd>and then:&nbsp;<code>out$"alomost done" &amp; Done</code>&nbsp;</dd>
-<dt><a href="#asstxt">&nbsp;:&nbsp;</a></dt><dd>match subject with pattern:&nbsp;<code>Meeting at 4 in room 24:? ?#hour ? ?#room ?</code>&nbsp;</dd>
+<dl><dt><a href="#savtxt">&nbsp;<code>=</code>&nbsp;</a></dt><dd>assignment:&nbsp;<code>(x=7)</code>&nbsp;&nbsp;<code>(square=.!arg^2)</code>&nbsp;<br />object member definition:&nbsp;<code>(myobject=(place=Copenhagen) (setPlace=.!arg:?(its.place)))</code>&nbsp;</dd>
+<dt><a href="#contxt">&nbsp;<code>.</code>&nbsp;</a></dt><dd>fixed data structure:&nbsp;<code>(Palme.Olof.Sweden)</code>&nbsp;<br />object member referencing:&nbsp;<code>(myhash..insert)$(xxx.998743)</code>&nbsp;</dd>
+<dt><a href="#contxt">&nbsp;<code>,</code>&nbsp;</a></dt><dd>list with autostretch:&nbsp;<code>(ham,(bread,butter),jam):(ham,bread,butter,jam)</code>&nbsp;</dd>
+<dt><a href="#binprotxt">&nbsp;<code>|</code>&nbsp;</a></dt><dd>or else:&nbsp;<code>get$myfile | out$"Cannot read myfile"</code>&nbsp;</dd>
+<dt><a href="#binprotxt">&nbsp;<code>&amp;</code>&nbsp;</a></dt><dd>and then:&nbsp;<code>out$"alomost done" &amp; Done</code>&nbsp;</dd>
+<dt><a href="#asstxt">&nbsp;<code>:</code>&nbsp;</a></dt><dd>match subject with pattern:&nbsp;<code>Meeting at 4 in room 24:? ?#hour ? ?#room ?</code>&nbsp;</dd>
 <dt><a href="#contxt">[blank]</a></dt><dd>sentence, neutral element "":&nbsp;<code>Oh well this can go on and on:?a Oh ?z &amp; !a:""</code>&nbsp;</dd>
-<dt><a href="#algtxt">&nbsp;+&nbsp;</a></dt><dd>add, neutral term 0:&nbsp;<code>(a+6+b+a+10)</code>&nbsp;,&nbsp;<code>(a+b:?x+a+?y &amp; !x:0)</code>&nbsp;</dd>
-<dt><a href="#algtxt">&nbsp;*&nbsp;</a></dt><dd>multiply, neutral factor 1:&nbsp;<code>(46546*647547564)</code>&nbsp;,&nbsp;<code>(a*b:?x*a*?y &amp; !x:1)</code>&nbsp;</dd>
-<dt><a href="#algtxt">&nbsp;^&nbsp;</a></dt><dd>raise to a power, neutral exponent 1:&nbsp;<code>(9975^332)</code>&nbsp;,&nbsp;<code>(45:?n^?exp &amp; !exp:1)</code>&nbsp;</dd>
-<dt><a href="#algtxt">&nbsp;\L</a></dt><dd>take logarithm:&nbsp;<code>10\L1050</code>&nbsp;</dd>
-<dt><a href="#difftxt">&nbsp;\D</a></dt><dd>differentiate:&nbsp;<code>x\D(x^10)</code>&nbsp;</dd>
-<dt><a href="#funmactxt">&nbsp;'&nbsp;</a></dt><dd>function evaluation (does not evaluate rhs):&nbsp;<code>str'(b+a):"b+a"</code>&nbsp;<br />macro:&nbsp;<code>()'(my name is ()$name)</code>&nbsp;</dd>
-<dt><a href="#funmactxt">&nbsp;$&nbsp;</a></dt><dd>function evaluation (evaluates rhs):&nbsp;<code>str$(b+a):"a+b"</code>&nbsp;<br />variable in macro:&nbsp;<code>()'(my name is ()$name)</code>&nbsp;</dd>
-<dt><a href="#dumtxt">&nbsp;_&nbsp;</a></dt><dd>dummy:   !expr:?lhs_?rhs &amp; (do$!lhs)_(do$!rhs)  </dd>
+<dt><a href="#algtxt">&nbsp;<code>+</code>&nbsp;</a></dt><dd>add, neutral term 0:&nbsp;<code>(a+6+b+a+10)</code>&nbsp;,&nbsp;<code>(a+b:?x+a+?y &amp; !x:0)</code>&nbsp;</dd>
+<dt><a href="#algtxt">&nbsp;<code>*</code>&nbsp;</a></dt><dd>multiply, neutral factor 1:&nbsp;<code>(46546*647547564)</code>&nbsp;,&nbsp;<code>(a*b:?x*a*?y &amp; !x:1)</code>&nbsp;</dd>
+<dt><a href="#algtxt">&nbsp;<code>^</code>&nbsp;</a></dt><dd>raise to a power, neutral exponent 1:&nbsp;<code>(9975^332)</code>&nbsp;,&nbsp;<code>(45:?n^?exp &amp; !exp:1)</code>&nbsp;</dd>
+<dt><a href="#algtxt">&nbsp;<code>\L</code>&nbsp;</a></dt><dd>take logarithm:&nbsp;<code>10\L1050</code>&nbsp;</dd>
+<dt><a href="#difftxt">&nbsp;<code>\D</code>&nbsp;</a></dt><dd>differentiate:&nbsp;<code>x\D(x^10)</code>&nbsp;</dd>
+<dt><a href="#funmactxt">&nbsp;<code>'</code>&nbsp;</a></dt><dd>function evaluation (does not evaluate rhs):&nbsp;<code>str'(b+a):"b+a"</code>&nbsp;<br />macro:&nbsp;<code>()'(my name is ()$name)</code>&nbsp;</dd>
+<dt><a href="#funmactxt">&nbsp;<code>$</code>&nbsp;</a></dt><dd>function evaluation (evaluates rhs):&nbsp;<code>str$(b+a):"a+b"</code>&nbsp;<br />variable in macro:&nbsp;<code>()'(my name is ()$name)</code>&nbsp;</dd>
+<dt><a href="#dumtxt">&nbsp;<code>_</code>&nbsp;</a></dt><dd>dummy:   &nbsp;<code>!expr:?lhs_?rhs &amp; (do$!lhs)_(do$!rhs)</code>&nbsp;  </dd>
 </dl>
 <p>
 <span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
@@ -528,7 +526,7 @@ instruction we have an expression with the <span class="courier">&lt;nil&gt;</sp
 {?} out$(=b+a+$c)
 {?} out$('(b+a+$c)) </pre></blockquote><p> 
 </p><p>
-<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^\L\D'$_</a>.<br />
 <span class="arrow">&rArr;</span> <a href="#objecttxt" style="line-height:12pt">Objects</a>.<br />
 </p><h1><a name="objecttxt">Objects</a></h1>
 <p>
@@ -671,7 +669,7 @@ the '=' operator. Therefore, a new '=' node is created each time x is
 evaluated. In (B), the value of x IS evaluated, so no new copies of the
 '=' node are made.
 </p><p>
-<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^\L\D'$_</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#progsmenu" style="line-height:12pt">Programming advice</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
 <span class="arrow">&lArr;</span> <a href="#savtxt" style="line-height:12pt">The = operator</a>.<br />
@@ -698,7 +696,7 @@ then using : to bind the function definition to the variable "car".
 {?} (four five six):(?`%first ?rem) {"`": 0 of 1, "%": 1 or more, together 1}
 {?} The first element is !first and the remainder is !rem. </pre></blockquote><p> 
 </p><p>
-<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^\L\D'$_</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
 <span class="arrow">&lArr;</span> <a href="#objecttxt" style="line-height:12pt">Objects</a>.<br />
 <span class="arrow">&rArr;</span> <a href="#pattxt" style="line-height:12pt">Binary operators in pattern matching</a>.<br />
@@ -799,7 +797,7 @@ be spend in reformulating existing algorithms based on indices. On the other
 hand, the list approach is essentially insensitive to the dimensionality
 of the matrix at hand, and may even be indifferent to the number of indices.
 </p><p>
-<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^\L\D'$_</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#progsmenu" style="line-height:12pt">Programming advice</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
@@ -834,7 +832,7 @@ The pacifier or shortcut prefix is inherited by higher levels, it percolates
 towards operators that are closer to the root of the tree, until it is
 subsumed in situations like the above ones.
 </p><p>
-<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^\L\D'$_</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
 <span class="arrow">&rArr;</span> <a href="#prostutxt1" style="line-height:12pt">Program flow</a>.<br />
 <span class="arrow">&rArr;</span> <a href="#prostutxt2" style="line-height:12pt">Some often used control structures</a>.<br />
@@ -892,7 +890,7 @@ The tilde ~ negates failure and success.
 </pre></blockquote><p>
 
 </p><p>
-<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^\L\D'$_</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#progsmenu" style="line-height:12pt">Programming advice</a>.<br />
 <span class="arrow">&lArr;</span> <a href="#binprotxt" style="line-height:12pt">Binary operators in program flow</a>.<br />
 <span class="arrow">&rArr;</span> <a href="#pattxt" style="line-height:12pt">Binary operators in pattern matching</a>.<br />
@@ -934,7 +932,7 @@ Sums and products start with rational numbers, followed by pi, i and e
 not to assume anything about the ordering of these terms and factors, as
 this may change in later versions of the program.
 </p><p>
-<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^\L\D'$_</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
 <span class="arrow">&lArr;</span> <a href="#difftxt" style="line-height:12pt">Differentiation</a>.<br />
 </p><h1><a name="difftxt">Differentiation</a></h1>
@@ -976,7 +974,7 @@ And, if you like, you can simplify the result by putting r back in:
 {!} -1*r^-3*y
  </pre></blockquote><p> 
 </p><p>
-<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^\L\D'$_</a>.<br />
 <span class="arrow">&rArr;</span> <a href="#algtxt" style="line-height:12pt">Algebraic operations</a>.<br />
 </p><h1><a name="funmactxt">function evaluation</a></h1>
 <p>
@@ -1004,7 +1002,7 @@ the return value of a function is part of the pattern. A function may be
 called several times during one evaluation of a matching expression, due to
 backtracking and retrying.
 </p><p>
-<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^\L\D'$_</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
 <span class="arrow">&rArr;</span> <a href="#macrotxt" style="line-height:12pt">macro evaluation</a>.<br />
@@ -1049,7 +1047,7 @@ More examples: </p><blockquote><pre>
 {?} '(a ($(=value)) z)
 {!} =a value z </pre></blockquote><p> 
 </p><p>
-<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^\L\D'$_</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
 <span class="arrow">&lArr;</span> <a href="#funmactxt" style="line-height:12pt">function evaluation</a>.<br />
@@ -1082,7 +1080,7 @@ The "_" variable is always expanded BEFORE the left and right hand side
 operands are evaluated. That explains why new assignments in the operands do
 not result in unwanted side effects in the upper node with the "_".
 </p><p>
-<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^\L\D'$_</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
 <span class="arrow">&rArr;</span> <a href="#funtxt3" style="line-height:12pt">Recursion and the "_"-operator</a>.<br />
 </p><h1><a name="funtxt3">Recursion and the "_"-operator</a></h1>
@@ -1103,7 +1101,7 @@ matches are "forgotten" : the _ operator is a global variable. </p><blockquote><
     )
 {?} reverse$(Bill loves sweet Nancy. This is true) </pre></blockquote><p> 
 </p><p>
-<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^LD'$_</a>.<br />
+<span class="arrow">&uArr;</span> <a href="#binovztxt" style="line-height:12pt">=.,|&amp;: +*^\L\D'$_</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#binmenu" style="line-height:12pt">Binary operators</a>.<br />
 <span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
 <span class="arrow">&lArr;</span> <a href="#dumtxt" style="line-height:12pt">The dummy operator "_"</a>.<br />
@@ -1308,82 +1306,75 @@ operators.
 <p>
 In patterns, atoms and expressions within parentheses may be preceded by
 prefixes that control the matching process.
-
-! and !!
-    in front of an non-nil atom or an expression denoting a member of an
+</p>
+<dl><dt>&nbsp;<code>!</code>&nbsp; and &nbsp;<code>!!</code>&nbsp;</dt><dd>    in front of an non-nil atom or an expression denoting a member of an
     object causes expansion of the atom or the member to its direct or
-    indirect binding. This binding is matched with the subject.
-`
-    causes backtracking if the pattern did not successfully unify with a 
+    indirect binding. This binding is matched with the subject.</dd>
+<dt>&nbsp;<code>`</code>&nbsp;</dt><dd>    causes backtracking if the pattern did not successfully unify with a 
     non-trivial element of the subject-list. A list is an expression
-    consisting of terms (+ operator), factors (* operator) or words
+    consisting of terms (&nbsp;<code>+</code>&nbsp; operator), factors (&nbsp;<code>*</code>&nbsp; operator) or words
     (white-space operator). Trivial elements are 0 in a sum, 1 in a product
     and a word without characters in a list of words. In non-sophisticated
-    patterns, ` means simply : unify with at most one non-trivial element.
+    patterns, &nbsp;<code>`</code>&nbsp; means simply : unify with at most one non-trivial element.
     Zero non-trivial elements are allowed, in which case unification takes
     place with an implicit trivial element: Bracmat sees 0's everywhere in a
-    sum, 1's in a product and zero length words in a sentence.
-?
-    unifies with anything. If ? is followed by a non-nil atom denoting a
+    sum, 1's in a product and zero length words in a sentence.</dd>
+<dt>&nbsp;<code>?</code>&nbsp;</dt><dd>    unifies with anything. If ? is followed by a non-nil atom denoting a
     variable or an expression denoting a member of an object, then the matched
     part of the subject is captured by this variable or member. In other
-    words, pattern matching can have assignment as a side-effect.
-@
-    unifies only with atoms.
-%
-    causes the match to succeed only with one or more non-trivial elements of
-    the subject-list. (Exception: in combination with [ prefix).
-<span class="courier">&lt; and &gt;</span>
-    unifies only with atoms that are "less" or "greater" than the atom
-    following the <span class="courier">&lt; or &gt;</span> prefix.
-#
-    unifies only with rational numbers.
-/
-    unifies only with non-integer rational numbers.
-~
-    constrains the match to subjects that are not equal to the atom following
-    the ~ prefix.
-[
-    Position prefix. Must be followed by an expression that evaluates to a
-    number (For example [4 or [(!pos+3) ) or by a variable having a question
-    mark as in [?pos. In the first case, the pattern cannot succeed unless the
-    element following the [ element is at the indicated position. The [
+    words, pattern matching can have assignment as a side-effect.</dd>
+<dt>&nbsp;<code>@</code>&nbsp;</dt><dd>    unifies only with atoms.</dd>
+<dt>&nbsp;<code>%</code>&nbsp;</dt><dd>    causes the match to succeed only with one or more non-trivial elements of
+    the subject-list. (Exception: in combination with &nbsp;<code>[</code>&nbsp; prefix).</dd>
+<dt>&nbsp;<code>&lt;</code>&nbsp;</dt><dd>    unifies only with atoms that are "less" than the atom following the &nbsp;<code>&lt;</code>&nbsp; 
+    prefix.</dd>
+<dt>&nbsp;<code>&gt;</code>&nbsp;</dt><dd>    unifies only with atoms that are "greater" than the atom following the &nbsp;<code>&gt;</code>&nbsp;
+    prefix.</dd>
+<dt>&nbsp;<code>#</code>&nbsp;</dt><dd>    unifies only with rational numbers.</dd>
+<dt>&nbsp;<code>/</code>&nbsp;</dt><dd>    unifies only with non-integer rational numbers.</dd>
+<dt>&nbsp;<code>~</code>&nbsp;</dt><dd>    constrains the match to subjects that are not equal to the atom following
+    the ~ prefix.</dd>
+<dt>&nbsp;<code>[</code>&nbsp;</dt><dd>    Position prefix. Must be followed by an expression that evaluates to a
+    number (For example &nbsp;<code>[4</code>&nbsp; or &nbsp;<code>[(!pos+3)</code>&nbsp; ) or by a variable having a question
+    mark as in &nbsp;<code>[?pos</code>&nbsp;. In the first case, the pattern cannot succeed unless the
+    element following the [ element is at the indicated position. The &nbsp;<code>[</code>&nbsp;
     element itself does not occupy a position; it sits in front of the
     indicated position. The second form is for querying the current position.
     Position 0 is the start of the subject. Positive positions count from the
     beginning of the subject, negative positions from the end. Position -1 is
-    the position following the last element. (When combined with '%' the
-    meaning is different.)
-
+    the position following the last element. (When combined with &nbsp;<code>%</code>&nbsp; the
+    meaning is different.)</dd>
+</dl>
+<p>
 The above prefixes may be combined. The ordering in which they are input by the
 user is irrelevant; Bracmat keeps prefixes in this order : 
-    [ ~ / # <span class="courier">&lt; &gt;</span> % @ ` ? ! !!
+    |_[ ~ / # <span class="courier">&lt; &gt;</span> % @ ` ? ! !!_|
 Repeating prefixes in front of the same atom does not convey a new meaning to
-the pattern, except for the ! and the ~ prefixes. More than one ! is
-interpreted as the !! prefix. An odd number of ~ is treated as a single ~, an
-even number thereof is treated as none. A ~ in front of other prefixes negates
+the pattern, except for the |_!_| and the |_~_| prefixes. More than one |_!_| is
+interpreted as the |_!!_| prefix. An odd number of |_~_| is treated as a single |_~_|, an
+even number thereof is treated as none. A |_~_| in front of other prefixes negates
 the first of them. The most useful combinations are:</p>
-<dl><dt>?!</dt><dd>    in front of an atom causes the atom to be expanded to its binding.
+<dl><dt>&nbsp;<code>?!</code>&nbsp;</dt><dd>    in front of an atom causes the atom to be expanded to its binding.
     This binding is treated as a variable name.</dd>
-<dt>?!!</dt><dd>    is like ?!, but expands two levels deep (with an evaluation of the
+<dt>&nbsp;<code>?!!</code>&nbsp;</dt><dd>    is like ?!, but expands two levels deep (with an evaluation of the
     first level expansion), instead of one.</dd>
-<dt><span class="courier">&lt;&gt;</span></dt><dd>    is like a solitary ~.</dd>
-<dt>/<span class="courier">&lt;&gt;</span>5/6</dt><dd>    unifies only with non-integer rational numbers unequal to 5/6.</dd>
-<dt>~&lt;</dt><dd>    means "greater or equal" ("not less").</dd>
-<dt>~&gt;</dt><dd>    means "less or equal".</dd>
-<dt>~<span class="courier">&lt;&gt;</span></dt><dd>    means "not different", i.e. "the same, in some sense". Strings
+<dt>&nbsp;<code><span class="courier">&lt;&gt;</span></code>&nbsp;</dt><dd>    is like a solitary ~.</dd>
+<dt>&nbsp;<code>/<span class="courier">&lt;&gt;</span>5/6</code>&nbsp;</dt><dd>    unifies only with non-integer rational numbers unequal to 5/6.</dd>
+<dt>&nbsp;<code>~&lt;</code>&nbsp;</dt><dd>    means "greater or equal" ("not less").</dd>
+<dt>&nbsp;<code>~&gt;</code>&nbsp;</dt><dd>    means "less or equal".</dd>
+<dt>&nbsp;<code>~<span class="courier">&lt;&gt;</span></code>&nbsp;</dt><dd>    means "not different", i.e. "the same, in some sense". Strings
     are compared case insensitive. This applies to the full Unicode
     table, but defaults to ASCII and the upper 128 characters in the
     ISO8859-1 (Latin 1) character set if the characters are not UTF-8
     encoded.</dd>
-<dt>~#</dt><dd>    does not unify with rational numbers.</dd>
-<dt>~/</dt><dd>    does not unify with non-integer rational numbers.</dd>
-<dt>~/#</dt><dd>    unifies only with integer numbers.</dd>
-<dt>~/#&lt;9</dt><dd>    unifies only with integer numbers less than 9.</dd>
-<dt>~/#<span class="courier">&lt;&gt;</span>0</dt><dd>    unifies only with non-zero integer numbers.</dd>
-<dt>~@</dt><dd>    unifies only with non-atomic expressions.</dd>
-<dt>~`</dt><dd>    backtrack immediately.</dd>
-<dt>[%</dt><dd>    The current subject is stored in the variable 'sjt' and the expression
+<dt>&nbsp;<code>~#</code>&nbsp;</dt><dd>    does not unify with rational numbers.</dd>
+<dt>&nbsp;<code>~/</code>&nbsp;</dt><dd>    does not unify with non-integer rational numbers.</dd>
+<dt>&nbsp;<code>~/#</code>&nbsp;</dt><dd>    unifies only with integer numbers.</dd>
+<dt>&nbsp;<code>~/#&lt;9</code>&nbsp;</dt><dd>    unifies only with integer numbers less than 9.</dd>
+<dt>&nbsp;<code>~/#<span class="courier">&lt;&gt;</span>0</code>&nbsp;</dt><dd>    unifies only with non-zero integer numbers.</dd>
+<dt>&nbsp;<code>~@</code>&nbsp;</dt><dd>    unifies only with non-atomic expressions.</dd>
+<dt>&nbsp;<code>~`</code>&nbsp;</dt><dd>    backtrack immediately.</dd>
+<dt>&nbsp;<code>[%</code>&nbsp;</dt><dd>    The current subject is stored in the variable &nbsp;<code>sjt</code>&nbsp; and the expression
     carrying this prefix combination is evaluated. If the evaluation succeeds,
     the match succeeds and vice versa. The subject can be a trivial element of
     the subject list.</dd>
@@ -1823,42 +1814,42 @@ the value 'aap' is bound in ($x), but never assigned to a variable 'x'.</p>
 <p>
 
 </p>
-<dl><dt><a href="#seltxt">&nbsp;&lt;N&gt;&nbsp;</a></dt><dd>access array element:&nbsp;<code>!(12$a):?(11$a)</code>&nbsp;</dd>
-<dt><a href="#alctxt">alc</a></dt><dd>allocate memory (low level):&nbsp;<code>alc$100</code>&nbsp;</dd>
-<dt><a href="#argtxt">arg</a></dt><dd>return program (command line) argument:&nbsp;<code>(arg$0:?programName)</code>&nbsp;&nbsp;<code>((arg$:?o1)&amp;(arg$:?o2))</code>&nbsp;</dd>
-<dt><a href="#asctxt">asc</a></dt><dd>convert character to internal representation:&nbsp;<code>asc$y:121</code>&nbsp;</dd>
-<dt><a href="#chrtxt">chr</a></dt><dd>convert internal representation to character:&nbsp;<code>chr$121:y</code>&nbsp;</dd>
-<dt><a href="#chutxt">chu</a></dt><dd>convert Unicode codepoint to UTF-8 character:&nbsp;<code>chu$2000</code>&nbsp;</dd>
-<dt><a href="#clktxt">clk</a></dt><dd>CPU seconds since start of session:&nbsp;<code>clk$:?t0</code>&nbsp;</dd>
-<dt><a href="#d2xtxt">d2x</a></dt><dd>convert decimal number to hexadecimal number:&nbsp;<code>d2x$73083734:45B2B56</code>&nbsp;</dd>
-<dt><a href="#dbgtxt">dbg</a></dt><dd>debugging aid:&nbsp;<code>dbg'(a b c:? b ?)</code>&nbsp;</dd>
-<dt><a href="#dentxt">den</a></dt><dd>denominator:&nbsp;<code>den$22/7:7</code>&nbsp;</dd>
-<dt><a href="#divtxt">div</a></dt><dd>quotient:&nbsp;<code>div$(22.7):1</code>&nbsp;</dd>
-<dt><a href="#filtxt">fil</a></dt><dd>file I/O (low-level)</dd>
-<dt><a href="#flgtxt">flg</a></dt><dd>splits expression in prefixes and expression without prefixes</dd>
-<dt><a href="#glftxt">glf</a></dt><dd>opposite of flg: combines prefixes and expression</dd>
-<dt><a href="#fretxt">fre</a></dt><dd>return allocated memory (low level)</dd>
-<dt><a href="#gettxt">get</a></dt><dd>get input (from file,keyboard or memory)</dd>
-<dt><a href="#lowtxt">low</a></dt><dd>convert to lower case</dd>
-<dt><a href="#lsttxt1">lst</a></dt><dd>list un-evaluated value of variable(s)</dd>
-<dt><a href="#memtxt">mem</a></dt><dd>list existing variable names</dd>
-<dt><a href="#modtxt">mod</a></dt><dd>remainder</dd>
-<dt><a href="#newobjecttxt">new</a></dt><dd>create new object as a copy of another object</dd>
-<dt><a href="#peetxt">pee</a></dt><dd>get value from address (peek) (low level)</dd>
-<dt><a href="#poktxt">pok</a></dt><dd>put value at address (poke) (low level)</dd>
-<dt><a href="#puttxt1">put</a></dt><dd>write output</dd>
-<dt><a href="#rentxt">ren</a></dt><dd>rename file or directory or move file</dd>
-<dt><a href="#rmvtxt">rev</a></dt><dd>string reverse</dd>
-<dt><a href="#revtxt">rmv</a></dt><dd>remove file</dd>
-<dt><a href="#simtxt">sim</a></dt><dd>similarity between two atoms</dd>
-<dt><a href="#strtxt">str</a></dt><dd>stringize expression into atom</dd>
-<dt><a href="#switxt">swi</a></dt><dd>software interrupt (low level)</dd>
-<dt><a href="#systxt">sys</a></dt><dd>command line shell</dd>
-<dt><a href="#tbltxt">tbl</a></dt><dd>create array, remove array/variable</dd>
-<dt><a href="#upptxt">upp</a></dt><dd>convert to upper case</dd>
-<dt><a href="#utftxt">utf</a></dt><dd>convert UTF-8 character to Unicode codepoint</dd>
-<dt><a href="#whltxt">whl</a></dt><dd>while loop</dd>
-<dt><a href="#x2dtxt">x2d</a></dt><dd>convert hexadecimal number to decimal number&nbsp;<code>x2d$BABEFACE:3133078222</code>&nbsp;<br /></dd>
+<dl><dt><a href="#seltxt">&lt;N&gt;_|</a></dt><dd>access array element:&nbsp;<code>!(12$a):?(11$a)</code>&nbsp;</dd>
+<dt><a href="#alctxt">&nbsp;<code>alc</code>&nbsp;</a></dt><dd>allocate memory (low level):&nbsp;<code>alc$100</code>&nbsp;</dd>
+<dt><a href="#argtxt">&nbsp;<code>arg</code>&nbsp;</a></dt><dd>return program (command line) argument:&nbsp;<code>(arg$0:?programName)</code>&nbsp;&nbsp;<code>((arg$:?o1)&amp;(arg$:?o2))</code>&nbsp;</dd>
+<dt><a href="#asctxt">&nbsp;<code>asc</code>&nbsp;</a></dt><dd>convert character to internal representation:&nbsp;<code>asc$y:121</code>&nbsp;</dd>
+<dt><a href="#chrtxt">&nbsp;<code>chr</code>&nbsp;</a></dt><dd>convert internal representation to character:&nbsp;<code>chr$121:y</code>&nbsp;</dd>
+<dt><a href="#chutxt">&nbsp;<code>chu</code>&nbsp;</a></dt><dd>convert Unicode codepoint to UTF-8 character:&nbsp;<code>chu$2000</code>&nbsp;</dd>
+<dt><a href="#clktxt">&nbsp;<code>clk</code>&nbsp;</a></dt><dd>CPU seconds since start of session:&nbsp;<code>clk$:?t0</code>&nbsp;</dd>
+<dt><a href="#d2xtxt">&nbsp;<code>d2x</code>&nbsp;</a></dt><dd>convert decimal number to hexadecimal number:&nbsp;<code>d2x$73083734:45B2B56</code>&nbsp;</dd>
+<dt><a href="#dbgtxt">&nbsp;<code>dbg</code>&nbsp;</a></dt><dd>debugging aid:&nbsp;<code>dbg'(a b c:? b ?)</code>&nbsp;</dd>
+<dt><a href="#dentxt">&nbsp;<code>den</code>&nbsp;</a></dt><dd>denominator:&nbsp;<code>den$22/7:7</code>&nbsp;</dd>
+<dt><a href="#divtxt">&nbsp;<code>div</code>&nbsp;</a></dt><dd>quotient:&nbsp;<code>div$(22.7):1</code>&nbsp;</dd>
+<dt><a href="#filtxt">&nbsp;<code>fil</code>&nbsp;</a></dt><dd>file I/O (low-level)</dd>
+<dt><a href="#flgtxt">&nbsp;<code>flg</code>&nbsp;</a></dt><dd>splits expression in prefixes and expression without prefixes</dd>
+<dt><a href="#glftxt">&nbsp;<code>glf</code>&nbsp;</a></dt><dd>opposite of flg: combines prefixes and expression</dd>
+<dt><a href="#fretxt">&nbsp;<code>fre</code>&nbsp;</a></dt><dd>return allocated memory (low level)</dd>
+<dt><a href="#gettxt">&nbsp;<code>get</code>&nbsp;</a></dt><dd>get input (from file,keyboard or memory)</dd>
+<dt><a href="#lowtxt">&nbsp;<code>low</code>&nbsp;</a></dt><dd>convert to lower case</dd>
+<dt><a href="#lsttxt1">&nbsp;<code>lst</code>&nbsp;</a></dt><dd>list un-evaluated value of variable(s)</dd>
+<dt><a href="#memtxt">&nbsp;<code>mem</code>&nbsp;</a></dt><dd>list existing variable names</dd>
+<dt><a href="#modtxt">&nbsp;<code>mod</code>&nbsp;</a></dt><dd>remainder</dd>
+<dt><a href="#newobjecttxt">&nbsp;<code>new</code>&nbsp;</a></dt><dd>create new object as a copy of another object</dd>
+<dt><a href="#peetxt">&nbsp;<code>pee</code>&nbsp;</a></dt><dd>get value from address (peek) (low level)</dd>
+<dt><a href="#poktxt">&nbsp;<code>pok</code>&nbsp;</a></dt><dd>put value at address (poke) (low level)</dd>
+<dt><a href="#puttxt1">&nbsp;<code>put</code>&nbsp;</a></dt><dd>write output</dd>
+<dt><a href="#rentxt">&nbsp;<code>ren</code>&nbsp;</a></dt><dd>rename file or directory or move file</dd>
+<dt><a href="#rmvtxt">&nbsp;<code>rev</code>&nbsp;</a></dt><dd>string reverse</dd>
+<dt><a href="#revtxt">&nbsp;<code>rmv</code>&nbsp;</a></dt><dd>remove file</dd>
+<dt><a href="#simtxt">&nbsp;<code>sim</code>&nbsp;</a></dt><dd>similarity between two atoms</dd>
+<dt><a href="#strtxt">&nbsp;<code>str</code>&nbsp;</a></dt><dd>stringize expression into atom</dd>
+<dt><a href="#switxt">&nbsp;<code>swi</code>&nbsp;</a></dt><dd>software interrupt (low level)</dd>
+<dt><a href="#systxt">&nbsp;<code>sys</code>&nbsp;</a></dt><dd>command line shell</dd>
+<dt><a href="#tbltxt">&nbsp;<code>tbl</code>&nbsp;</a></dt><dd>create array, remove array/variable</dd>
+<dt><a href="#upptxt">&nbsp;<code>upp</code>&nbsp;</a></dt><dd>convert to upper case</dd>
+<dt><a href="#utftxt">&nbsp;<code>utf</code>&nbsp;</a></dt><dd>convert UTF-8 character to Unicode codepoint</dd>
+<dt><a href="#whltxt">&nbsp;<code>whl</code>&nbsp;</a></dt><dd>while loop</dd>
+<dt><a href="#x2dtxt">&nbsp;<code>x2d</code>&nbsp;</a></dt><dd>convert hexadecimal number to decimal number&nbsp;<code>x2d$BABEFACE:3133078222</code>&nbsp;<br /></dd>
 </dl>
 <p>
 <span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
@@ -2056,14 +2047,14 @@ div$ returns the (integral) quotient of its arguments.
 fil$ is a multi-purpose low level I/O function. <br />
 
 </p>
-<dl><dt><a href="#modetxt">Set file mode, open a file in a file mode</a></dt><dd>&nbsp;<code>fil$([&lt;file name&gt;],&lt;mode&gt;)</code>&nbsp;</dd>
-<dt><a href="#fixdtxt">Prepare for reading or writing fixed sized records</a></dt><dd>&nbsp;<code>fil$([&lt;file name&gt;],&lt;type&gt;,&lt;size&gt;[,&lt;number&gt;])</code>&nbsp;</dd>
-<dt><a href="#varitxt">Prepare for reading or writing variable sized record</a></dt><dd>&nbsp;<code>fil$([&lt;file name&gt;],STR[,&lt;stop&gt;])</code>&nbsp;</dd>
-<dt><a href="#positiontxt">Telling position inside file</a></dt><dd>&nbsp;<code>fil$(&lt;file name&gt;,TEL)</code>&nbsp;</dd>
-<dt><a href="#filesettxt">Go to file position</a></dt><dd>&nbsp;<code>fil$(&lt;file name&gt;,&lt;whence&gt;,&lt;offset&gt;)</code>&nbsp;</dd>
-<dt><a href="#readtxt">Read from file</a></dt><dd>&nbsp;<code>fil$([&lt;file name&gt;][,,&lt;number&gt;])</code>&nbsp;</dd>
-<dt><a href="#writetxt">Write to file</a></dt><dd>&nbsp;<code>fil$([&lt;file name&gt;],,&lt;number&gt;,&lt;value&gt;)</code>&nbsp;</dd>
-<dt><a href="#closetxt">Close  a file</a></dt><dd>&nbsp;<code>fil$([&lt;file name&gt;],SET,-1)</code>&nbsp;</dd>
+<dl><dt><a href="#modetxt">&nbsp;<code>fil$([&lt;file name&gt;],&lt;mode&gt;)</code>&nbsp;</a></dt><dd>Set file mode, open a file in a file mode</dd>
+<dt><a href="#fixdtxt">&nbsp;<code>fil$([&lt;file name&gt;],&lt;type&gt;,&lt;size&gt;[,&lt;number&gt;])</code>&nbsp;</a></dt><dd>Prepare for reading or writing fixed sized records</dd>
+<dt><a href="#varitxt">&nbsp;<code>fil$([&lt;file name&gt;],STR[,&lt;stop&gt;])</code>&nbsp;</a></dt><dd>Prepare for reading or writing variable sized record    </dd>
+<dt><a href="#positiontxt">&nbsp;<code>fil$(&lt;file name&gt;,TEL)</code>&nbsp;</a></dt><dd>Telling position inside file    </dd>
+<dt><a href="#filesettxt">&nbsp;<code>fil$(&lt;file name&gt;,&lt;whence&gt;,&lt;offset&gt;)</code>&nbsp;</a></dt><dd>Go to file position    </dd>
+<dt><a href="#readtxt">&nbsp;<code>fil$([&lt;file name&gt;][,,&lt;number&gt;])</code>&nbsp;</a></dt><dd>Read from file    </dd>
+<dt><a href="#writetxt">&nbsp;<code>fil$([&lt;file name&gt;],,&lt;number&gt;,&lt;value&gt;)</code>&nbsp;</a></dt><dd>Write to file    </dd>
+<dt><a href="#closetxt">&nbsp;<code>fil$([&lt;file name&gt;],SET,-1)</code>&nbsp;</a></dt><dd>Close  a file</dd>
 </dl>
 <p>
 <span class="arrow">&uArr;</span> <a href="#inbltmenu" style="line-height:12pt">Built-in functions</a>.<br />
@@ -2072,18 +2063,18 @@ fil$ is a multi-purpose low level I/O function. <br />
 Set file mode, open file in file mode.
 
 Option <span class="courier">&lt;mode&gt;</span> is one of the following:</p>
-<dl><dt>r</dt><dd>    open text file for reading</dd>
-<dt>w</dt><dd>    create text file for writing, or truncate to zero length</dd>
-<dt>a</dt><dd>    append; open text file or create for writing at eof</dd>
-<dt>rb</dt><dd>    open binary file for reading</dd>
-<dt>wb</dt><dd>    create binary file for writing, or truncate to zero length</dd>
-<dt>ab</dt><dd>    append; open binary file or create for writing at eof</dd>
-<dt>"r+"</dt><dd>    open text file for update (reading and writing)</dd>
-<dt>"w+"</dt><dd>    create text file for update, or truncate to zero length</dd>
-<dt>"a+"</dt><dd>    append; open text file or create for update, writing at eof</dd>
-<dt>"r+b" or "rb+"</dt><dd>    open binary file for update (reading and writing)</dd>
-<dt>"w+b" or "wb+"</dt><dd>    create binary file for update, or truncate to zero length</dd>
-<dt>"a+b" or "ab+"</dt><dd>    append; open binary file or create for update, writing at eof</dd>
+<dl><dt>&nbsp;<code>r</code>&nbsp;</dt><dd>    open text file for reading</dd>
+<dt>&nbsp;<code>w</code>&nbsp;</dt><dd>    create text file for writing, or truncate to zero length</dd>
+<dt>&nbsp;<code>a</code>&nbsp;</dt><dd>    append; open text file or create for writing at eof</dd>
+<dt>&nbsp;<code>rb</code>&nbsp;</dt><dd>    open binary file for reading</dd>
+<dt>&nbsp;<code>wb</code>&nbsp;</dt><dd>    create binary file for writing, or truncate to zero length</dd>
+<dt>&nbsp;<code>ab</code>&nbsp;</dt><dd>    append; open binary file or create for writing at eof</dd>
+<dt>&nbsp;<code>"r+"</code>&nbsp;</dt><dd>    open text file for update (reading and writing)</dd>
+<dt>&nbsp;<code>"w+"</code>&nbsp;</dt><dd>    create text file for update, or truncate to zero length</dd>
+<dt>&nbsp;<code>"a+"</code>&nbsp;</dt><dd>    append; open text file or create for update, writing at eof</dd>
+<dt>&nbsp;<code>"r+b"</code>&nbsp; or &nbsp;<code>"rb+"</code>&nbsp;</dt><dd>    open binary file for update (reading and writing)</dd>
+<dt>&nbsp;<code>"w+b"</code>&nbsp; or &nbsp;<code>"wb+"</code>&nbsp;</dt><dd>    create binary file for update, or truncate to zero length</dd>
+<dt>&nbsp;<code>"a+b"</code>&nbsp; or &nbsp;<code>"ab+"</code>&nbsp;</dt><dd>    append; open binary file or create for update, writing at eof</dd>
 </dl>
 <p>
 </p><p>
@@ -2739,14 +2730,16 @@ names (lst$ or mem$), so you will not notice their existence. The following
 visible functions are predefined:
 
 </p>
-<dl><dt><a href="#sgntxt">abs (and sgn)  absolute value and sign</a></dt>
-<dt><a href="#cattxt">cat            list existing variable names selectively</a></dt>
-<dt><a href="#gontxt">cos (and sin)  cosine and sine</a></dt>
-<dt><a href="#factxt">fct            factorising</a></dt>
-<dt><a href="#flttxt">flt            floating point notation of numbers</a></dt>
-<dt><a href="#outtxt">out            output to screen</a></dt>
-<dt><a href="#subtxt1">sub            substitution</a></dt>
-<dt><a href="#taytxt">tay            Taylor series</a></dt>
+<dl><dt><a href="#sgntxt">&nbsp;<code>abs</code>&nbsp;</a></dt><dd>absolute value</dd>
+<dt><a href="#cattxt">&nbsp;<code>cat</code>&nbsp;</a></dt><dd>list existing variable names selectively</dd>
+<dt><a href="#gontxt">&nbsp;<code>cos</code>&nbsp;</a></dt><dd>cosine formula</dd>
+<dt><a href="#factxt">&nbsp;<code>fct</code>&nbsp;</a></dt><dd>factorisation</dd>
+<dt><a href="#flttxt">&nbsp;<code>flt</code>&nbsp;</a></dt><dd>floating point notation of numbers</dd>
+<dt><a href="#outtxt">&nbsp;<code>out</code>&nbsp;</a></dt><dd>output to screen, then new line</dd>
+<dt><a href="#sgntxt">&nbsp;<code>sgn</code>&nbsp;</a></dt><dd>sign</dd>
+<dt><a href="#gontxt">&nbsp;<code>sin</code>&nbsp;</a></dt><dd>sine formula</dd>
+<dt><a href="#subtxt1">&nbsp;<code>sub</code>&nbsp;</a></dt><dd>substitution</dd>
+<dt><a href="#taytxt">&nbsp;<code>tay</code>&nbsp;</a></dt><dd>Taylor series development</dd>
 </dl>
 <p>
 <span class="arrow">&uArr;</span> <a href="#funcmenu" style="line-height:12pt">functions</a>.<br />
@@ -2855,14 +2848,14 @@ can suggest the size of the table to Bracmat, but this is not necessary:
 This tells Bracmat to start off with a million bins. </p><p>
 The following methods are defined for hash tables:
 </p>
-<dl><dt><a href="#findtxt">find</a></dt>
-<dt><a href="#inserttxt">insert</a></dt>
-<dt><a href="#removetxt">remove</a></dt>
-<dt><a href="#Newtxt">New</a></dt>
-<dt><a href="#Dietxt">Die</a></dt>
-<dt><a href="#ISOtxt">ISO</a></dt>
-<dt><a href="#casesensitivetxt">casesensitive</a></dt>
-<dt><a href="#foralltxt">forall</a></dt>
+<dl><dt><a href="#findtxt">&nbsp;<code>find</code>&nbsp;</a></dt><dd>find all values for a given key</dd>
+<dt><a href="#inserttxt">&nbsp;<code>insert</code>&nbsp;</a></dt><dd>insert a value for a key</dd>
+<dt><a href="#removetxt">&nbsp;<code>remove</code>&nbsp;</a></dt><dd>remove a key and all its values</dd>
+<dt><a href="#Newtxt">&nbsp;<code>New</code>&nbsp;</a></dt><dd>creates a hash table, cannot be called programmatically</dd>
+<dt><a href="#Dietxt">&nbsp;<code>Die</code>&nbsp;</a></dt><dd>cleans up a hash table, cannot be called programmatically</dd>
+<dt><a href="#ISOtxt">&nbsp;<code>ISO</code>&nbsp;</a></dt><dd>make all key access case-insensitive</dd>
+<dt><a href="#casesensitivetxt">&nbsp;<code>casesensitive</code>&nbsp;</a></dt><dd>make all key access case sensitive. (Default)</dd>
+<dt><a href="#foralltxt">&nbsp;<code>forall</code>&nbsp;</a></dt><dd>apply a function to all key-value pairs</dd>
 </dl>
 <p>
 <span class="arrow">&uArr;</span> <a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a>.<br />
