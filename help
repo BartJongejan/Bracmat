@@ -21,7 +21,7 @@ help=
     =   M
       , "                       BRACMAT                       "
       , "0  starting with Bracmat
-1  pattern matching
+1  pattern matchingf
 2  grammar
 3  binary operators
 4  prefixes/unary operators
@@ -36,7 +36,9 @@ help=
 13 how Bracmat evolved
 14 why the name 'Bracmat'?
 15 how to obtain Bracmat
-16 more example code"
+16 more example code
+html transform this file to HTML
+save reformat and save this file"
       ,   (0,aanbevelingen)
           (1,patternm)
           (2,syntax)
@@ -54,6 +56,8 @@ help=
           (14,Bracmat-name)
           (15,colofon)
           (16,morexmlps)
+          (html,)
+          (save,)
     )
   & ( funcmenu
     =   M
@@ -126,29 +130,29 @@ help=
     =   M
       , "Built-in functions"
       , "1 <N>
-    access array element:  !(12$a):?(11$a)  
+    access array element:|_!(12$a):?(11$a)_|
 2 alc
-    allocate memory (low level):  alc$100  
+    allocate memory (low level):|_alc$100_|
 3 arg
-    return program (command line) argument:  (arg$0:?programName) ((arg$:?o1)&(arg$:?o2))  
+    return program (command line) argument:|_(arg$0:?programName)_||_((arg$:?o1)&(arg$:?o2))_|
 4 asc
-    convert character to internal representation:  asc$y:121  
+    convert character to internal representation:|_asc$y:121_|
 5 chr
-    convert internal representation to character:  chr$121:y
+    convert internal representation to character:|_chr$121:y_|
 6 chu
-    convert Unicode codepoint to UTF-8 character:  chu$2000  
+    convert Unicode codepoint to UTF-8 character:|_chu$2000_|
 7 clk
-    CPU seconds since start of session:  clk$:?t0
+    CPU seconds since start of session:|_clk$:?t0_|
 8 d2x
-    convert decimal number to hexadecimal number:  d2x$73083734:45B2B56  
+    convert decimal number to hexadecimal number:|_d2x$73083734:45B2B56_|
 9 dbg
-    debugging aid:  dbg'(a b c:? b ?)
+    debugging aid:|_dbg'(a b c:? b ?)_|
 10 den
-    denominator:  den$22/7:7  
+    denominator:|_den$22/7:7_|
 11 div
-    quotient:  div$(22.7):1  
+    quotient:|_div$(22.7):1_|
 12 fil
-    file I/O (low-level)  
+    file I/O (low-level)
 13 flg
     splits expression in prefixes and expression without prefixes
 14 glf
@@ -188,7 +192,7 @@ help=
 31 sys
     command line shell
 32 tbl
-    establish array size
+    create array, remove array/variable
 33 upp
     convert to upper case
 34 utf
@@ -196,7 +200,7 @@ help=
 35 whl
     while loop
 36 x2d
-    convert hexadecimal number to decimal number  x2d$BABEFACE:3133078222  
+    convert hexadecimal number to decimal number|_x2d$BABEFACE:3133078222_|
 "
       ,   (1,seltxt)
           (2,alctxt)
@@ -409,7 +413,7 @@ recursive invocations of pattern matching and other operations. Examples:
 {?} P=(|0 ?x 1 & !x:!P); { context free grammar }
 {?} 0 0 0 1 1 1:!P { Check whether subject consist of a row of 0's
                      followed by a row of 1's of the same length. }
-                     
+
 {?} connected=(\"South America\".\"North America\") (Africa.Asia) (Asia.Europe);
 {?} (reachable = a b f
     .     !arg:(?a.?b.?f)
@@ -860,7 +864,7 @@ tracking mechanism."
 two or more categories (odd, even, prime). The findings are to be
 printed to the screen.
 
-{?} ( !M                                     
+{?} ( !M
     :   ?                                   { skip 0 or more rows ---               }
         (?c1,?row)                          { ---fetch (number type, number row)--- }
         ?                                   { ---skip 0 or more rows ---            }
@@ -870,9 +874,9 @@ printed to the screen.
             & !row:? !el ?                  { does number occur in earlier row ?    }
             & out$(!el is both !c1 and !c2) { yes?  show result                     }
             & ~                             { not satisfied yet: fail and backtrack }
-            )                               
+            )
             ?                               { ...skip rest of numbers---            }
-        )                                   
+        )
         ?                                   { ---skip rest of rows                  }
     )
 
@@ -901,37 +905,37 @@ in the order of operations. Use parentheses to force an operator to a higher
 position in the order of operations.
 
 1 =
-    assignment:  (x=7)    (square=.!arg^2)  
-    object member definition:  (myobject=(place=Copenhagen) (setPlace=.!arg:?(its.place)))  
+    assignment:|_(x=7)_||_(square=.!arg^2)_|
+    object member definition:|_(myobject=(place=Copenhagen) (setPlace=.!arg:?(its.place)))_|
 2 .
-    fixed data structure:  (Palme.Olof.Sweden)  
-    object member referencing:  (myhash..insert)$(xxx.998743)  
+    fixed data structure:|_(Palme.Olof.Sweden)_|
+    object member referencing:|_(myhash..insert)$(xxx.998743)_|
 3 ,
-    list with autostretch:  (ham,(bread,butter),jam):(ham,bread,butter,jam)  
+    list with autostretch:|_(ham,(bread,butter),jam):(ham,bread,butter,jam)_|
 4 |
-    or else:  get$myfile | out$\"Cannot read myfile\"  
+    or else:|_get$myfile | out$\"Cannot read myfile\"_|
 5 &
-    and then:  out$\"alomost done\" & Done  
+    and then:|_out$\"alomost done\" & Done_|
 6 :
-    match subject with pattern:  Meeting at 4 in room 24:? ?#hour ? ?#room ?  
+    match subject with pattern:|_Meeting at 4 in room 24:? ?#hour ? ?#room ?_|
 7 [blank]
-    sentence, neutral element \"\":  Oh well this can go on and on:?a Oh ?z & !a:\"\"  
+    sentence, neutral element \"\":|_Oh well this can go on and on:?a Oh ?z & !a:\"\"_|
 8 +
-    add, neutral term 0:  (a+6+b+a+10), (a+b:?x+a+?y & !x:0)  
+    add, neutral term 0:|_(a+6+b+a+10)_|,|_(a+b:?x+a+?y & !x:0)_|
 9 *
-    multiply, neutral factor 1:  (46546*647547564), (a*b:?x*a*?y & !x:1)  
+    multiply, neutral factor 1:|_(46546*647547564)_|,|_(a*b:?x*a*?y & !x:1)_|
 10 ^
-    raise to a power, neutral exponent 1:  (9975^332), (45:?n^?exp & !exp:1)  
+    raise to a power, neutral exponent 1:|_(9975^332)_|,|_(45:?n^?exp & !exp:1)_|
 11 \\L
-    take logarithm:  10\\L1050  
+    take logarithm:|_10\\L1050_|
 12 \\D
-    differentiate:  x\\D(x^10)  
+    differentiate:|_x\\D(x^10)_|
 13 '
-    function evaluation (does not evaluate rhs):  str'(b+a):\"b+a\"  
-    macro:  ()'(my name is ()$name)  
+    function evaluation (does not evaluate rhs):|_str'(b+a):\"b+a\"_|
+    macro:|_()'(my name is ()$name)_|
 14 $
-    function evaluation (evaluates rhs):  str$(b+a):\"a+b\"  
-    variable in macro:  ()'(my name is ()$name)  
+    function evaluation (evaluates rhs):|_str$(b+a):\"a+b\"_|
+    variable in macro:|_()'(my name is ()$name)_|
 15 _
     dummy:   !expr:?lhs_?rhs & (do$!lhs)_(do$!rhs)  "
       ,   (1,savtxt objecttxt asstxt)
@@ -1452,7 +1456,7 @@ returns the rhs unchanged, except where the $ operator (also with empty lhs)
 occurs. The expressions headed by such $ operators are replaced as follows:
 
     '$$
-    
+
 If the rhs is the $ operator with empty lhs, the macro evaluator replaces the
 expression with the rhs of the heading $, and macro-evaluates the rhs of the
 result.
@@ -1462,7 +1466,7 @@ result.
 {!} =two dollars ()$($)
 
     '$_
-    
+
 If the rhs is headed by the _ operator, the expression is replaced by the rhs,
 where the dummy operator is evaluated to its current value.
 {?} (=a^b):(=?_?) & '(dummy (a_b) power ($(a_b)))
@@ -1555,7 +1559,7 @@ substitution, but the resulting code is harder to understand:
           )
           !rem                              {which is the remaining pattern. }
     & out$(after !count \"trials:\" !A \"+\" !B \"=\" !C )
-    )   
+    )
 after 16 trials: 5 + 7 = 12"
           "In the same way, function code can be pieced together before it is ever
 executed.
@@ -1606,7 +1610,7 @@ Without macro construct (5 X 5 multiplication table) :
       , "Lambda calculus, currying"
       , "The lambda abstraction 
       (λx.x)y
-      
+
 translates to 
     /('(x.$x))$y
 
@@ -2351,7 +2355,7 @@ program 'myprog' that demonstrates the two ways of calling the 'arg' function
         & 1+!N:?N
         )
     );
-        
+
     !test;
 
 Now running bracmat with these arguments (example is Windows):
@@ -2946,24 +2950,26 @@ Use macro evaluation if the expression to be split is the value of a variable.
   & ( filtxt
     =   M
       , "fil$([[<file name>][,<option>[,<number>[,<value to output>]]]])"
-      , "fil$ is a multi-purpose low level I/O function.
+      ,     "fil$ is a multi-purpose low level I/O function.
 
 1 Set file mode, open a file in a file mode
-    fil$([<file name>],<mode>)  
+    |_fil$([<file name>],<mode>)_|
 2 Prepare for reading or writing fixed sized records
-    fil$([<file name>],<type>,<size>[,<number>])
+    |_fil$([<file name>],<type>,<size>[,<number>])_|
 3 Prepare for reading or writing variable sized record
-    fil$([<file name>],STR[,<stop>])
+    |_fil$([<file name>],STR[,<stop>])_|
 4 Telling position inside file
-    fil$(<file name>,TEL)
+    |_fil$(<file name>,TEL)_|
 5 Go to file position
-    fil$(<file name>,<whence>,<offset>)
+    |_fil$(<file name>,<whence>,<offset>)_|
 6 Read from file
-    fil$([<file name>][,,<number>])
+    |_fil$([<file name>][,,<number>])_|
 7 Write to file
-    fil$([<file name>],,<number>,<value>)
+    |_fil$([<file name>],,<number>,<value>)_|
 8 Close  a file
-    fil$([<file name>],SET,-1)"
+    |_fil$([<file name>],SET,-1)"
+          _ 
+        | 
       ,   (1,modetxt)
           (2,fixdtxt)
           (3,varitxt)
@@ -3142,20 +3148,10 @@ An open file is closed by specifying an impossible file position."
         & out$\n
     )
   &   ( verwerk
-      =   ( tit,topic,pag,experiment,doemenu,ptxt
+      =   ( tit,pag,experiment,ptxt
           . titel,txt,men,sel,pg,antw,keuze,expr,putout
           )
-        .     ( topic
-              =   !arg:(~:?ptxt) ?arg
-                &   !!ptxt
-                  : (   (T,?titel,?txt)
-                      & !tit
-                      & ~!pag
-                    | (M,?titel,?men,?sel)&!doemenu
-                    )
-                & !topic
-              )
-            & ( pag
+        .     ( pag
               =   !txt:%?pg ?txt
                 & put$!pg
                 & !experiment
@@ -3213,25 +3209,35 @@ An open file is closed by specifying an impossible file position."
                     )
                   & !experiment
               )
-            & ( doemenu
-              =   !tit
-                & putout$(!men "
+            & :?antw
+            &   whl
+              ' ( !arg:(~:?ptxt) ?arg
+                &   !!ptxt
+                  : (   (T,?titel,?txt)
+                      & !tit
+                      & ~!pag
+                    |   (M,?titel,?men,?sel)
+                      &   whl
+                        ' ( !tit
+                          & putout$(!men "
 ~  last topic
 
 Topic:")
-                & ( get':?antw:
-                  |   (   !sel:? (`!antw,?keuze) ?
-                        & verwerk$!keuze
-                      | out$(!antw " is an invalid choice")
-                      )
-                    & !doemenu
-                  )
-              )
-            & !topic
+                          & get':?antw:~:~html:~save
+                          & (   !sel:? (`!antw,?keuze) ?
+                              & verwerk$!keuze
+                            | out$(!antw " is an invalid choice")
+                            )
+                          )
+                    )
+                )
+            & !antw
           |   put$\nexit
             & put$" \""
             & put$!titel
             & out$\"
+            & out$(antw !antw)
+            & !antw
       )
       ( doHTML
       =   writeHTML,fputall
@@ -3304,7 +3310,7 @@ Topic:")
                              )
                           & ( codeexample
                             =   A Z example
-                              .     @(!arg:?A "  " ?example "  " ?Z)
+                              .     @(!arg:?A "|_" ?example "_|" ?Z)
                                   & (   !example:
                                       & !A " " !Z
                                     |   !A
@@ -3980,12 +3986,33 @@ accompanies Bracmat, using Bracmat to do the conversion.</i>
 </html>
 ",!fname,APP,LIN)
       )
-  & ( &doHTML$"bracmat.html"
-    |     out
+  & (     out
         $ "* Choose from the menus the topics that interest you.
 * Enter the number or character string that precedes your choice.
 * Press <return> to return to the previous menu or to leave this tutor.
 * If the {?} prompt appears without a menu, you can enter expressions that
   Bracmat will evaluate. Only pressing <return> pages through the information."
-      & verwerk$lusmenu
+      & verwerk$lusmenu:(html
+      & doHTML$"bracmat.html"
+      | save & lst$(help,"help.bra",NEW) & put$( 
+"      
+  ~&get$\"lex.bra\"&lex$help | help$()
+  & tbl$(help,0)
+  & \"
+_________________________________________________________________________
+\";
+","help.bra",APP)
+      
+      
+      
+      
+      | ?
+      )
+     
     );
+
+  ~&get$"lex.bra"&lex$help | help$()
+  & tbl$(help,0)
+  & "
+_________________________________________________________________________
+";

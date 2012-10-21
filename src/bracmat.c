@@ -63,11 +63,13 @@ Test coverage:
 
 */
 
-#define DATUM "17 October 2012"
+#define DATUM "21 October 2012"
 #define VERSION "6"
-#define BUILD "139"
+#define BUILD "140"
+/*  21 October 2012
+Made sure that put$ cannot write to a file that is still open in get$.
 
-/*  17 October 2012
+    17 October 2012
 In evalvar, the assumption that shared = false is false.
 
     15 October 2012
@@ -2097,11 +2099,13 @@ static char * errorFileName = NULL;
 static FILE * errorStream = NULL;
 /*#endif*/
 
-#if !defined NO_LOW_LEVEL_FILE_HANDLING
+#if !defined NO_FOPEN
 typedef struct filehendel
     {
     char *naam;
     FILE *fp;
+    struct filehendel *next;
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
     LONG filepos; /* Normally -1. If >= 0, then the file is closed.
                 When reopening, filepos is used to find the position
                 before the file was closed. */
@@ -2111,8 +2115,8 @@ typedef struct filehendel
     LONG getal;
     LONG tijd;
     int written;
-    struct filehendel *next;
     char * stop; /* contains characters to stop reading at, default NULL */
+#endif
     } filehendel;
 
 static filehendel *fh0 = NULL;
@@ -2952,7 +2956,7 @@ typedef struct inputBuffer
     {
     unsigned char * buffer;
     unsigned int cutoff:1;    /* Set to true if very long string does not fit in buffer of size DEFAULT_INPUT_BUFFER_SIZE */
-    unsigned int allocated:1; /* True if allocated with malloc. Otherwise on stack. */
+    unsigned int mallocallocated:1; /* True if allocated with malloc. Otherwise on stack (except EPOC). */
     } inputBuffer;
 
 static inputBuffer * InputArray;
@@ -3833,7 +3837,7 @@ the next buffers. These buffers are combined into one big buffer.
     if(nextInputElement->buffer)
         {
         strcpy((char *)bigBuffer + (nextInputElement - InputElement)*(DEFAULT_INPUT_BUFFER_SIZE - 1),(char *)nextInputElement->buffer);
-        if(nextInputElement->allocated)
+        if(nextInputElement->mallocallocated)
             {
             bfree(nextInputElement->buffer);
             }
@@ -3844,18 +3848,18 @@ the next buffers. These buffers are combined into one big buffer.
 
     InputElement->buffer = bigBuffer;
     InputElement->cutoff = FALSE;
-    InputElement->allocated = TRUE;
+    InputElement->mallocallocated = TRUE;
 
     for(next2 = InputElement + 1;nextInputElement->buffer;++next2,++nextInputElement)
         {
         next2->buffer = nextInputElement->buffer;
         next2->cutoff = nextInputElement->cutoff;
-        next2->allocated = nextInputElement->allocated;
+        next2->mallocallocated = nextInputElement->mallocallocated;
         }
 
     next2->buffer = NULL;
     next2->cutoff = FALSE;
-    next2->allocated = FALSE;
+    next2->mallocallocated = FALSE;
     }
 
 static unsigned char * vshift_w(void)
@@ -3868,8 +3872,9 @@ static unsigned char * vshift_w(void)
             {
             combineInputBuffers();
             }
+	assert(InputElement[-1].mallocallocated);
         bfree(InputElement[-1].buffer);
-        InputElement[-1].allocated = FALSE;
+        InputElement[-1].mallocallocated = FALSE;
         start = InputElement->buffer;
         }
     return start;
@@ -5078,7 +5083,7 @@ static psk bouwboom_w(psk pkn)
     shift = vshift_w;
     pkn = lex(NULL,0,0,0);
     shift = shift_nw;
-    if((--InputElement)->allocated)
+    if((--InputElement)->mallocallocated)
         {
         bfree(InputElement->buffer);
         }
@@ -5092,19 +5097,19 @@ static void lput(int c)
         {
         inputBuffer * newInputArray;
         unsigned char * lijst;
+        unsigned char * dest;
         int len;
+	size_t L;
 
         for(len = 0;InputArray[++len].buffer;)
             ;
         /* len = index of last element in InputArray array */
 
         lijst = InputArray[len - 1].buffer;
-
         /* The last string (probably on the stack, not on the heap) */
 
         while(wijzer > lijst && optab[*--wijzer] == NOOP)
             ;
-
         /* wijzer points at last operator (where string can be split) or at
            the start of the string. */
 
@@ -5113,34 +5118,43 @@ static void lput(int c)
 
         newInputArray[len + 1].buffer = NULL;
         newInputArray[len + 1].cutoff = FALSE;
-        newInputArray[len + 1].allocated = FALSE;
+        newInputArray[len + 1].mallocallocated = FALSE;
         newInputArray[len].buffer = lijst;
-        /*Printf("lijst %p\n",lijst);*/
-        newInputArray[len].cutoff = FALSE;
-        newInputArray[len].allocated = FALSE;
+	/*The buffer pointers with lower index are copied further down.*/
 
+        /*Printf("lijst %p\n",lijst);*/
+
+        newInputArray[len].cutoff = FALSE;
+        newInputArray[len].mallocallocated = FALSE;
+        /*The active buffer is still the one declared in input(),
+	  so on the stack (except under EPOC).*/
+        --len; /* point at the second last element, the one that got filled up. */
         if(wijzer == lijst)
             {
             /* copy the full content of lijst to the second last element */
-            newInputArray[--len].buffer = (unsigned char *)bmalloc(__LINE__,DEFAULT_INPUT_BUFFER_SIZE);
-            strncpy((char *)newInputArray[len].buffer,(char *)lijst,DEFAULT_INPUT_BUFFER_SIZE - 1);
+            dest = newInputArray[len].buffer = (unsigned char *)bmalloc(__LINE__,DEFAULT_INPUT_BUFFER_SIZE);
+            strncpy((char *)dest,(char *)lijst,DEFAULT_INPUT_BUFFER_SIZE - 1);
+	    dest[DEFAULT_INPUT_BUFFER_SIZE - 1] = '\0';
             /* Make a notice that the element's string is cut-off */
             newInputArray[len].cutoff = TRUE;
-            newInputArray[len].allocated = TRUE;
+            newInputArray[len].mallocallocated = TRUE;
             }
         else
             {
             ++wijzer; /* wijzer points at first character after the operator */
             /* maxwijzer - wijzer >= 0 */
-            newInputArray[--len].buffer = (unsigned char *)bmalloc(__LINE__,(size_t)(wijzer - lijst + 1));
-            strncpy((char *)newInputArray[len].buffer,(char *)lijst,(size_t)(wijzer - lijst));
-            newInputArray[len].buffer[(unsigned int)(wijzer - lijst)] = 0;
+	    L = (size_t)(wijzer - lijst);
+            dest = newInputArray[len].buffer = (unsigned char *)bmalloc(__LINE__,L + 1);
+            strncpy((char *)dest,(char *)lijst,L);
+            dest[L] = '\0';
             newInputArray[len].cutoff = FALSE;
-            newInputArray[len].allocated = TRUE;
+            newInputArray[len].mallocallocated = TRUE;
 
             /* Now remove the substring up to wijzer from lijst */
-            strncpy((char *)lijst,(char *)wijzer,(size_t)(maxwijzer - wijzer));
-            wijzer = lijst + (size_t)(maxwijzer - wijzer);
+	    L = (size_t)(maxwijzer - wijzer);
+            strncpy((char *)lijst,(char *)wijzer,L);
+	    lijst[L] = '\0';
+            wijzer = lijst + L;
             }
 
         /* Copy previous element's fields */
@@ -5149,11 +5163,12 @@ static void lput(int c)
             --len;
             newInputArray[len].buffer = InputArray[len].buffer;
             newInputArray[len].cutoff = InputArray[len].cutoff;
-            newInputArray[len].allocated = InputArray[len].allocated;
+            newInputArray[len].mallocallocated = InputArray[len].mallocallocated;
             }
         bfree(InputArray);
         InputArray = newInputArray;
         }
+    assert(wijzer <= maxwijzer);
     *wijzer++ = (unsigned char)c;
     }
 
@@ -5249,7 +5264,7 @@ static int redirectError(char * name)
 
 static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean * GoOn)
     {
-    int braces,ikar,hasop,whiteSpaceSeen,escape,noEscape,inString,parentheses,error;
+    int braces,ikar,hasop,whiteSpaceSeen,escape,backslashesAreEscaped,inString,parentheses,error;
 #ifdef __SYMBIAN32__
     unsigned char * lijst;
     lijst = bmalloc(__LINE__,DEFAULT_INPUT_BUFFER_SIZE);
@@ -5257,20 +5272,22 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
     unsigned char lijst[DEFAULT_INPUT_BUFFER_SIZE];
 #endif
     maxwijzer = lijst + (DEFAULT_INPUT_BUFFER_SIZE - 1);/* er moet ruimte zijn voor afsluitende 0 */
+    /* Array of pointers to inputbuffers. Initially 2 elements,
+       large enough for small inputs (< DEFAULT_INPUT_BUFFER_SIZE)*/
     InputArray = (inputBuffer *)bmalloc(__LINE__,2*sizeof(inputBuffer));
     InputArray[0].buffer = lijst;
     InputArray[0].cutoff = FALSE;
-    InputArray[0].allocated = FALSE;
+    InputArray[0].mallocallocated = FALSE;
     InputArray[1].buffer = NULL;
     InputArray[1].cutoff = FALSE;
-    InputArray[1].allocated = FALSE;
+    InputArray[1].mallocallocated = FALSE;
     error = FALSE;
     braces = 0;
     parentheses = 0;
     hasop = TRUE;
     whiteSpaceSeen = FALSE;
     escape = FALSE;
-    noEscape = FALSE; /* @"C:\dir1\bracmat" */
+    backslashesAreEscaped = TRUE; /* but false in @"C:\dir1\bracmat" */
     inString = FALSE;
 
 #if READMARKUPFAMILY
@@ -5421,7 +5438,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
                     }
                 }
             else if(  ikar == '\\' 
-                   && (  !noEscape
+                   && (  backslashesAreEscaped
           /*20120413*/|| !inString /* %\L @\L */
                       )
                    )
@@ -5434,7 +5451,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
                 if(ikar == '"')
                     {
                     inString = FALSE;
-                    noEscape = FALSE;
+                    backslashesAreEscaped = TRUE;
                     }
                 else
                     {
@@ -5465,7 +5482,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
                           )
                             {
                             whiteSpaceSeen = TRUE;
-                            noEscape = FALSE; /* Bart 20030331 */
+                            backslashesAreEscaped = TRUE; /* Bart 20030331 */
                             }
                         else
                             {
@@ -5501,19 +5518,19 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
                                             inString = TRUE;
                                             break;
                                         case '@':
-                                        case '%': /* These flags are removed if the inString
+                                        case '%': /* These flags are removed if the string
                                                      is non-empty, so using them to
                                                      indicate "do not use escape sequences"
                                                      does no harm.
                                                      Bart 20010322
                                                  */
-                                            noEscape = TRUE;
+                                            backslashesAreEscaped = FALSE;
                                             break;
                                         case '(':
                                             parentheses++;
                                             break;
                                         case ')':
-                                            noEscape = FALSE;
+                                            backslashesAreEscaped = TRUE;
                                             parentheses--;
                                             break;
                                         }
@@ -5536,7 +5553,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
                                         {
                                         lput(ikar);
                                         if(hasop)
-                                            noEscape = FALSE;
+                                            backslashesAreEscaped = TRUE;
                                         }
                                 }
                             }
@@ -12352,38 +12369,101 @@ static LONG someopt(psk kn,LONG opt[])
     return 0L;
     }
 
-FILE * myfopen(const char * filename,const char * mode)
+static filehendel * findFilehendelByName(const char * name)
     {
-#if !defined NO_FOPEN
+    filehendel * fh;
+    for(fh = fh0
+       ; fh
+       ; fh = fh->next
+       )
+        if(!strcmp(fh->naam,name))
+            return fh;
+    return NULL;
+    }
+
+static filehendel * allocateFilehendel(const char * name,FILE * fp)
+    {
+    filehendel * fh = (filehendel*)bmalloc(__LINE__,sizeof(filehendel));
+    fh->naam = (char *)bmalloc(__LINE__,strlen(name) + 1);
+    strcpy(fh->naam,name);
+    fh->fp = fp;
+    fh->next = fh0;
+    fh0 = fh;
+    return fh0;
+    }
+
+static void deallocateFilehendel(filehendel * fh)
+    {
+    filehendel * fhvorig, * fhh;
+    for(fhvorig = NULL,fhh = fh0
+	;fhh != fh
+	;fhvorig = fhh,fhh = fhh->next
+	)
+	;
+    if(fhvorig)
+	fhvorig->next = fh->next;
+    else
+	fh0 = fh->next;
+    if(fh->fp)
+        fclose(fh->fp);
+    bfree(fh->naam);
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
+    if(fh->stop)
+#ifdef BMALLLOC
+	bfree(fh->stop);
+#else
+	free(fh->stop);
+#endif
+#endif
+    bfree(fh);
+    }
+
+filehendel * mygetfilehendel(const char * filename,const char * mode)
+    {
     FILE * fp = fopen(filename,mode);
     if(fp)
-        return fp;
-    else if(targetPath && strchr(mode,'r'))
         {
-        const char * p = filename;
-        char * q;
-        size_t len;
-        while(*p)
+        filehendel * fh = allocateFilehendel(filename,fp);
+        return fh;
+        }
+    return NULL;
+    }
+
+filehendel * myfopen(const char * filename,const char * mode)
+    {
+#if !defined NO_FOPEN
+    if(findFilehendelByName(filename))
+        return NULL;
+    else
+        {
+        filehendel * fh = mygetfilehendel(filename,mode);
+        if(!fh && targetPath && strchr(mode,'r'))
             {
-            if(*p == '\\' || *p == '/')
+            const char * p = filename;
+            char * q;
+            size_t len;
+            while(*p)
                 {
-                if(p == filename)
+                if(*p == '\\' || *p == '/')
+                    {
+                    if(p == filename)
+                        return NULL;
+                    break;
+                    }
+                else if((*p == ':') && (p == filename + 1))
                     return NULL;
-                break;
+                ++p;
                 }
-            else if((*p == ':') && (p == filename + 1))
-                return NULL;
-            ++p;
+            q = (char *)malloc((len = strlen(targetPath)) + strlen(filename) + 1);
+            if(q)
+                {
+                strcpy(q,targetPath);
+                strcpy(q+len,filename);
+                fh = mygetfilehendel(q,mode);
+                free(q);
+                }
             }
-        q = (char *)malloc((len = strlen(targetPath)) + strlen(filename) + 1);
-        if(q)
-            {
-            strcpy(q,targetPath);
-            strcpy(q+len,filename);
-            fp = fopen(q,mode);
-            free(q);
-            }
-        return fp;
+        return fh;
         }
 #endif
     return NULL;
@@ -12400,23 +12480,19 @@ static int allOpenCount = 0;
 static void sluitfile(filehendel *fh)
 {
 fh->filepos = FTELL(fh->fp);
+/* fh->filepos != -1 means that the file is closed */
 fclose(fh->fp);
-/* fh->pos != -1 means that the file is closed,
-   so it is not necessary to set fh->fp to 0
-*/
+fh->fp = NULL;
 /*--openCount;
 Printf("--OPEN %d (%d %d)\n",openCount,maxOpenCount,allOpenCount);
 */
 }
 
-static FILE *bfopen(char *naam,char *mode)
-{
-FILE *fp;
-filehendel *fh,*fhmin;
-if((fp=myfopen(naam,mode)) == NULL)
+static int closeAFile()
     {
+    filehendel *fh,*fhmin;
     if(fh0 == NULL)
-        return NULL;
+        return FALSE;
     for(fh = fh0,fhmin = fh0;
         fh != NULL;
         fh = fh->next)
@@ -12425,10 +12501,19 @@ if((fp=myfopen(naam,mode)) == NULL)
             fhmin = fh;
         }
     if(fhmin == NULL)/* test added 12 Aug 1996 */
-        return NULL;
+        return FALSE;
     sluitfile(fhmin);
-    if((fp=myfopen(naam,mode)) == NULL)
-        return NULL;
+    return TRUE;
+    }
+
+static filehendel * bfopen(char *naam,char *mode)
+{
+/*FILE *fp;*/
+filehendel *fh;
+if((fh=myfopen(naam,mode)) == NULL)
+    {
+    if(closeAFile())
+        fh=myfopen(naam,mode);
     }
 /*
 ++openCount;
@@ -12437,7 +12522,17 @@ if(openCount > maxOpenCount)
     maxOpenCount = openCount;
 Printf("++OPEN %d (%d %d)\n",openCount,maxOpenCount,allOpenCount);
 */
-return fp;
+return fh;
+}
+
+static FILE * brefopen(filehendel * fh)
+{
+if((fh->fp = fopen(fh->naam,(char *)&(fh->mode))) == NULL)
+    {
+    if(closeAFile())
+        fh->fp = fopen(fh->naam,(char *)&(fh->mode));
+    }
+return fh->fp;
 }
 
 static filehendel * preparefp(filehendel * fh,char * naam,LONG mode)
@@ -12454,7 +12549,7 @@ static filehendel * preparefp(filehendel * fh,char * naam,LONG mode)
         }
     else if(fh->filepos > 0L)
         {
-        if((fh->fp = bfopen(naam,(char *)&(fh->mode))) == NULL)
+        if(brefopen(fh) == NULL)
             return NULL;
         fh->written = FALSE;
         FSEEK(fh->fp,fh->filepos,SEEK_SET);
@@ -12606,24 +12701,18 @@ if(kns[1] && kns[1]->u.obj)
             fh = zoekfp(naam,mode.l);
         if(fh == NULL)
             {
-            if((fp=bfopen(naam,(char *)&mode)) == NULL)
+            if((fh=bfopen(naam,(char *)&mode)) == NULL)
                 {
                 return FALSE;
                 }
-            fh = (filehendel*)bmalloc(__LINE__,sizeof(filehendel));
-            fh->naam = (char *)bmalloc(__LINE__,strlen(naam) + 1);
-            strcpy(fh->naam,naam);
-            fh->fp = fp;
-            fh->filepos = -1L;
+	    fh->filepos = -1L;
             fh->mode = mode.l;
             fh->type = CHR;
             fh->size = 1;
             fh->getal = 1;
             fh->tijd = tijdnr++;
             fh->written = FALSE;
-            fh->next = fh0;
             fh->stop = NULL;
-            fh0 = fh;
             }
         return TRUE;
         }
@@ -12750,25 +12839,8 @@ if(kns[1] && kns[1]->u.obj)
                             : whence == END ? SEEK_END
                                             : SEEK_CUR))
                 {
-                filehendel * fhvorig, * fhh;
-                sluitfile(fh);
-                for(fhvorig = NULL,fhh = fh0
-                   ;fhh != fh
-                   ;fhvorig = fhh,fhh = fhh->next
-                   )
-                   ;
-                if(fhvorig)
-                    fhvorig->next = fh->next;
-                else
-                    fh0 = fh->next;
-                bfree(fh->naam);
-                if(fh->stop)
-#ifdef BMALLLOC
-                    bfree(fh->stop);
-#else
-                    free(fh->stop);
-#endif
-                bfree(fh);
+                /*sluitfile(fh);*/
+		deallocateFilehendel(fh);
                 fh = NULL;
                 return FALSE;
                 }
@@ -13150,9 +13222,10 @@ if(kop(rknoop = (*pkn)->RIGHT) == KOMMA)
          && !is_op(rrknoop->LEFT)
          && allopts((rrrknoop = rrknoop->RIGHT),opts))
         {
-        fpo = myfopen((char *)POBJ(rrknoop->LEFT),
+        filehendel * fh = 
+            myfopen((char *)POBJ(rrknoop->LEFT),
                     zoekopt(rrrknoop,NEW) ? "w" : "a");
-        if(fpo == NULL)
+        if(fh == NULL)
             {
             errorprintf("cannot open %s\n",POBJ(rrknoop->LEFT));
             fpo = redfpo;
@@ -13161,8 +13234,9 @@ if(kop(rknoop = (*pkn)->RIGHT) == KOMMA)
             }
         else
             {
+            fpo = fh->fp;
             (*hoe)(rlknoop);
-            fclose(fpo);
+            deallocateFilehendel(fh);
             fpo = redfpo;
             adr[2] = rlknoop;
             }
@@ -14444,21 +14518,25 @@ static function_return_type functies(psk pkn)
                     {
                     FILE *red;
                     int err;
+                    filehendel * fh;
                     red = fpi;
-                    fpi = myfopen((char *)POBJ(rlknoop),"r");
-                    if(fpi == NULL)
+                    fh = myfopen((char *)POBJ(rlknoop),"r");
+                    if(fh == NULL)
                         {
                         fpi = red;
                         return functionFail(pkn);
                         }
-                    for(;;)
+                    else
+                        fpi = fh->fp;
+		    for(;;)
                         {
                         pkn = input(fpi,pkn,intVal,&err,&GoOn);
                         if(!GoOn || err)
                             break;
                         pkn = eval(pkn);
                         }
-                    fclose(fpi);
+                    /*fclose(fpi);*/
+                    deallocateFilehendel(fh);
                     fpi = red;
                     }
                 else
