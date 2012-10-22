@@ -16,6 +16,14 @@ help=
   . paragraphs,fname,findtxt,inserttxt,removetxt,Newtxt,Dietxt
   . ISOtxt,casesensitivetxt,foralltxt,doHTML,clktxt
   . lowtxt,upptxt,DOSopttxt,whltxt,argtxt,d2xtxt,x2dtxt
+  .   closetxt
+      filesettxt
+      fixdtxt
+      modetxt
+      positiontxt
+      readtxt
+      varitxt
+      writetxt
   )
 .   ( lusmenu
     =   M
@@ -38,7 +46,8 @@ help=
 15 how to obtain Bracmat
 16 more example code
 html transform this file to HTML
-save reformat and save this file"
+save reformat and save this file
+lex lexical analysis of help file"
       ,   (0,aanbevelingen)
           (1,patternm)
           (2,syntax)
@@ -57,6 +66,7 @@ save reformat and save this file"
           (15,colofon)
           (16,morexmlps)
           (html,)
+          (lex,)
           (save,)
     )
   & ( funcmenu
@@ -3189,7 +3199,7 @@ An open file is closed by specifying an impossible file position."
                     & 0:?n
                     & ( wr
                       =   
-                        .     !n+1:<20:?n
+                        .     !n+1:<200:?n
                             & out$!arg
                           |   0:?n
                             & put$!arg
@@ -3253,6 +3263,7 @@ Topic:")
                             : ~
                             : ~html
                             : ~save
+                            : ~lex
                           & (   !sel:? (`!antw,?keuze) ?
                               & verwerk$!keuze
                             | out$(!antw " is an invalid choice")
@@ -3269,12 +3280,160 @@ Topic:")
             & !antw
       )
       ( doHTML
-      =   writeHTML,fputall
-        .   ( writeHTML
-            =   ( refs,tit,doemenu,listmenu2,pag2,titel
+      =   writeHTML,fputall anchors convert2html
+        .   ( convert2html
+            =   xml file Ent atts ent entn write
+              .   !arg:(?xml.?file)
+                & put$(,!file,NEW)
+                & ( Ent
+                  =   a c x y
+                    .     @( !arg
+                           :   ?a
+                               ( ( "<"
+                                 | "&"
+                                 | ">"
+                                 | \"
+                                 | "'"
+                                 )
+                               : ?c
+                               )
+                               ?arg
+                           )
+                        &   !a
+                            "&"
+                            ( !c:"<"&lt
+                            |   !c:"&"
+                              & (   @(!arg:?x ";" ?y)
+                                  & (   @(!x:? ~>%" " ?)
+                                      & amp
+                                    | !y:?arg&!x
+                                    )
+                                | amp
+                                )
+                            | !c:">"&gt
+                            | !c:\"&quot
+                            | apos
+                            )
+                            ";"
+                            Ent$!arg
+                      | !arg
+                  )
+                & ( ent
+                  =   a c x y
+                    .     (   @(!arg:? left-angle-bracket ?)
+                            & out$!arg
+                          | 
+                          )
+                        & @( !arg
+                           :   ?a
+                               ( ("<"|"&"|">")
+                               : ?c
+                               )
+                               ?arg
+                           )
+                        &   !a
+                            "&"
+                            ( !c:"<"&lt
+                            |   !c:"&"
+                              & (   @(!arg:?x ";" ?y)
+                                  & (   @(!x:? ~>%" " ?)
+                                      & amp
+                                    |   @(!x:? "&" ?)
+                                      & amp
+                                    | !y:?arg&!x
+                                    )
+                                | amp
+                                )
+                            | gt
+                            )
+                            ";"
+                            ent$!arg
+                      | !arg
+                  )
+                & ( entn
+                  =   A
+                    .     !arg:%?A ?arg
+                        & ent$!A entn$!arg
+                      | !arg
+                  )
+                & ( atts
+                  =   a v
+                    .     !arg:(?a.?v) ?arg
+                        & " " ent$!a "=\"" Ent$!v \" atts$!arg
+                      | 
+                  )
+                & ( write
+                  =   xml car A B C att
+                    .   !arg:?xml
+                      &   whl
+                        ' ( !xml:%?car ?xml
+                          & (   !car:(?A.?B)
+                              & (   !B:(?att,?C)
+                                  & (   !C:
+                                      &   put
+                                        $ ( str$("<" !A atts$!att " />")
+                                          , !file
+                                          , APP
+                                          )
+                                    |     put
+                                        $ ( str$("<" !A atts$!att ">")
+                                          , !file
+                                          , APP
+                                          )
+                                      & write$!C
+                                      &   put
+                                        $ (str$("</" !A ">"),!file,APP)
+                                    )
+                                |   !A
+                                  : (   
+                                      & !B:(?B.)
+                                      &   put
+                                        $ ( str$("</" ent$!B ">")
+                                          , !file
+                                          , APP
+                                          )
+                                    |   "!"
+                                      &   put
+                                        $ (str$("<!" !B ">"),!file,APP)
+                                    |   "!--"
+                                      &   put
+                                        $ (str$("<!--" !B "-->"),!file,APP)
+                                    |   "?"
+                                      &   put
+                                        $ (str$("<?" !B "?>"),!file,APP)
+                                    |   "![CDATA["
+                                      &   put
+                                        $ ( str$("<![CDATA[" !B "]]>")
+                                          , !file
+                                          , APP
+                                          )
+                                    |   "!DOCTYPE"
+                                      &   put
+                                        $ ( str$("<!DOCTYPE" !B ">")
+                                          , !file
+                                          , APP
+                                          )
+                                    |   ?
+                                      &   put
+                                        $ ( str$("<" !A atts$!B ">")
+                                          , !file
+                                          , APP
+                                          )
+                                    )
+                                )
+                            | put$(str$(entn$!car),!file,APP)
+                            )
+                          )
+                  )
+                & lst$(arg,"arg.lst",NEW)
+                & write$!xml
+                & ok
+            )
+          & ( writeHTML
+            =   ( refs,tit,doemenu,listmenu2,pag2,titel,codes
                 . topictitel,overviewtitel,overviewref,backtotitel
                 . backtoref,txt,men,sel,pg,antw,topic2,ptxt
-                . keuze,expr,fput,menu,menutekst,menutitel,titl
+                . keuze,fput,menu,menutekst,menutitel,titl
                 .   break2 indented2 asCode2 vsubst1
                   , vsubst2 vsubst3 vsubst4 codeexample
                 .   breaks2 ol2 ul2 subul codeexamples
@@ -3449,7 +3608,7 @@ Topic:")
                         | vsubst1$!arg
                     )
                   & ( break2
-                    =   a,b,c,d,cnt,br,id
+                    =   a,b,c,d,br,id
                       .     !arg:(?br.?arg)
                           & @( !arg
                              :   (|? " "|`)
@@ -3594,7 +3753,7 @@ Depending on the context, $<expression> can have two effects :"
                         | 
                     )
                   & ( ul2
-                    =   n,s,t,bullet
+                    =   t,bullet
                       .     !arg:(?bullet.?arg)
                           & @( str$!arg
                              :   !bullet
@@ -3616,7 +3775,7 @@ Depending on the context, $<expression> can have two effects :"
                     )
                   & (breaks2=.break2$(" <br /> ".!arg))
                   & ( chunk2
-                    =     a b c d e f g h s x y
+                    =     a b c d e f g s x y
                         , termpat defline defpat termdefpat termer
                       .     @(!arg:?a \n1 %?`s ?b \n2 !s ?c)
                           &   breaks2$!a
@@ -3944,7 +4103,7 @@ Depending on the context, $<expression> can have two effects :"
                                 | !arg
                             )
                           & ( ddlines
-                            =   
+                            =   line
                               .     @(!arg:?line \n ?arg)
                                   &   codeexamples$!line
                                       "<br />"
@@ -3994,7 +4153,7 @@ Depending on the context, $<expression> can have two effects :"
                   & out$\"
             )
           & ( anchors
-            =   R z a m Z M L t lastchar
+            =   R z a m Z M L lastchar
               .   ( lastchar
                   =   "/"
                     | ~<a:~>z
@@ -4085,14 +4244,17 @@ accompanies Bracmat, using Bracmat to do the conversion.</i>
 * If the {?} prompt appears without a menu, you can enter expressions that
   Bracmat will evaluate. Only pressing <return> pages through the information."
   &   verwerk$lusmenu
-    : ( html&doHTML$"bracmat.html"
+    : (   html
+        & out$HTML
+        & doHTML$"bracmat.html"
+      | lex&get$"lex.bra"&lex$help
       |   save
         & lst$(help,"help.bra",NEW)
         &   put
           $ ( "      
-  ~&get$\"lex.bra\"&lex$help | help$()
-  & tbl$(help,0)
-  & \"
+  help$()
+& tbl$(help,0)
+& \"
 _________________________________________________________________________
 \"
 "
@@ -4102,8 +4264,8 @@ _________________________________________________________________________
       | ?
       );
       
-  ~&get$"lex.bra"&lex$help | help$()
-  & tbl$(help,0)
-  & "
+  help$()
+& tbl$(help,0)
+& "
 _________________________________________________________________________
 "
