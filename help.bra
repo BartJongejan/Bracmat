@@ -2770,7 +2770,7 @@ not UTF-8 encoded.
   & ( seltxt
     =   T
       , "<index>$<array name>"
-      , "<array name> and <index> should both evaluate to atoms. <array name> may be
+      , "Both <array name> and <index> should evaluate to atoms. <array name> may be
 preceded by prefixes, such as ? or !. Indexing starts at 0 and is done
 modulo(size-of-array). Negative values count from the upper end of the array.
 The chosen index remains in force until a new indexing function is evaluated.
@@ -3183,9 +3183,8 @@ An open file is closed by specifying an impossible file position."
         & out$\n
     )
   &   ( verwerk
-      =   ( tit,pag,experiment,ptxt
-          . titel,txt,men,sel,pg,antw,keuze,expr,putout
-          )
+      =     tit pag experiment ptxt
+          , titel txt men sel pg antw keuze expr putout
         .     ( pag
               =   !txt:%?pg ?txt
                 & put$!pg
@@ -3427,14 +3426,13 @@ Topic:")
             )
           & (entCP=.get$(!arg,MEM,HT,ML))
           & ( writeHTML
-            =   ( refs,tit,doemenu,listmenu2,pag2,titel,codes
-                . topictitel,overviewtitel,overviewref,backtotitel
-                . backtoref,txt,men,sel,pg,antw,topic2,ptxt
-                . keuze,fput,menu,menutekst,menutitel,titl
-                . break2 indented2 asCode2 vsubst1,codeexample
-                .   breaks2 ol2 ul2 subul codeexamples
-                  , chunk2 nbsp2 first next spaced
-                )
+            =     refs tit doemenu listmenu2 pag2 titel codes
+                , topictitel overviewtitel overviewref backtotitel
+                , backtoref txt men sel antw topic2 ptxt
+                , keuze fput menu menutekst menutitel titl
+                , break2 indented2 asCode2 inline1 inline1
+                , breaks2 ol2 ul2 subul
+                , chunk2 nbsp2 first next spaced
               .     ( refs
                     =   ( :!overviewtitel
                         |   fput
@@ -3482,21 +3480,6 @@ Topic:")
                         )
                     )
                   & (asCode2=.span.(class.courier),!arg)
-                  & ( codeexample
-                    =   A Z example
-                      .     !arg:@(?:?A "|_" ?example "_|" ?Z)
-                          & ( !example:&!A !Z
-                            | !A (code.,!example) codeexample$!Z
-                            )
-                        | !arg
-                    )
-                  & ( codeexamples
-                    =   
-                      .       !arg
-                            : @(?:? ((%@:~" ") ?:?arg))
-                          & codeexample$!arg
-                        | !arg
-                    )
                   & ( topic2
                     =   !arg:(~:?ptxt) ?arg
                       &   !!ptxt
@@ -3517,17 +3500,138 @@ Topic:")
                       & !ptxt:?backtoref
                       & !topic2
                     )
-                  & ( vsubst1
+                  & ( angbrack
                     =   a m
                       .     @(!arg:?a "<" ?m ">" ?arg)
                           &   !a
-                              "<"
-                              ( @(!m:? \n ?)
-                              | asCode2$!m
+                              (   @(!m:? \n ?)
+                                & "<" !m ">"
+                              | (i.,!m)
                               )
-                              ">"
-                              vsubst1$!arg
+                              angbrack$!arg
                         | !arg
+                    )
+                  & ( codes
+                    =   e a cds sdc dc code A K L Z
+                      .   ( code
+                          =     a e z ZA AA
+                              , az zz S seps P n A
+                            .     @( str$!arg
+                                   :   ?a
+                                       %@( ( "$"
+                                           | "`"
+                                           | "|"
+                                           | "&"
+                                           | "%"
+                                           | "\\"
+                                           | "@"
+                                           | "#"
+                                           | "{"
+                                           | "}"
+                                           | "["
+                                           | "]"
+                                           | "~"
+                                           | "^"
+                                           | "*"
+                                           | "+"
+                                           )
+                                         : ?e
+                                         )
+                                       ?z
+                                   )
+                                & :?seps
+                                & " ":?S
+                                &   rev$!a
+                                  : ?A ((\n ?|):?P)
+                                & @( !A
+                                   :   ?ZA
+                                       (   %@( !S
+                                             |   ">"
+                                               &   ("<":?S) !seps
+                                                 : ?seps
+                                               & ~
+                                             |   ")"
+                                               &   ("(":?S) !seps
+                                                 : ?seps
+                                               & ~
+                                             )
+                                           ( ?AA
+                                           & (   !seps:
+                                               & str$(!ZA !S):?ZA
+                                             |   !seps:%?S ?seps
+                                               & ~
+                                             )
+                                           )
+                                       | :?AA
+                                       )
+                                   )
+                                & :?seps
+                                & " ":?S
+                                &   !z
+                                  : ?z ((\n ?|):?n)
+                                & @( !z
+                                   :   ?az
+                                       (   %@( !S
+                                             |   "<"
+                                               &   (">":?S) !seps
+                                                 : ?seps
+                                               & ~
+                                             |   "("
+                                               &   (")":?S) !seps
+                                                 : ?seps
+                                               & ~
+                                             )
+                                           ( ?zz
+                                           & (   !seps:
+                                               & !az !S:?az
+                                             |   !seps:%?S ?seps
+                                               & ~
+                                             )
+                                           )
+                                       | :?zz
+                                       )
+                                   )
+                                &   str$(rev$!P rev$!AA)
+                                    (code.,str$(rev$!ZA !e !az))
+                                    code$(str$(!zz !n))
+                              | !arg
+                          )
+                        & code$!arg:?cds
+                        &   whl
+                          ' (   !cds
+                              :   ?A
+                                  (code.,?K)
+                                  (code.,?L)
+                                  ?Z
+                            &   !A (code.,str$(!K !L)) !Z
+                              : ?cds
+                            )
+                        & :?sdc
+                        &   whl
+                          ' ( !cds:%?dc ?cds
+                            & !dc !sdc:?sdc
+                            )
+                        &   whl
+                          ' ( !sdc:%?dc ?sdc
+                            &     (   !dc:@
+                                    & angbrack$!dc
+                                  |   !dc:(?e.?a,?dc)
+                                    & (!e.!a,angbrack$!dc)
+                                  )
+                                  !cds
+                              : ?cds
+                            )
+                        & !cds
+                    )
+                  & ( inline1
+                    =   a m
+                      .     @(!arg:?a "|_" ?m "_|" ?arg)
+                          &   codes$!a
+                              ( !m:
+                              | (code.,angbrack$!m)
+                              )
+                              inline1$!arg
+                        | codes$!arg
                     )
                   & ( fput
                     =   a,b,c,e,f,g,par,section,content
@@ -3563,8 +3667,8 @@ Topic:")
                   & ( nbsp2
                     =   a
                       .     @(!arg:?a " " ?arg)
-                          & vsubst1$!a entCP$"&nbsp;" nbsp2$!arg
-                        | vsubst1$!arg
+                          & inline1$!a entCP$"&nbsp;" nbsp2$!arg
+                        | inline1$!arg
                     )
                   & ( break2
                     =   a,b,c,d,br,id
@@ -3601,7 +3705,7 @@ Topic:")
                           & "Definition of a function. <var1>,<var2>, etc. are explicitly declared local
 variables. A function is called by
 <function name>$<argument expression> or"
-                          &   vsubst1$!a
+                          &   inline1$!a
                               (br.,)
                               asCode2$("<" indented2$!id ">")
                               (   @( !b
@@ -3641,7 +3745,7 @@ variables. A function is called by
                           & "Pascal:
  locally defined functions and routines
  Lisp:"
-                          &   vsubst1$!a
+                          &   inline1$!a
                               (br.,)
                               entCP$"&nbsp;"
                               (   @( !b
@@ -3659,7 +3763,7 @@ variables. A function is called by
 Depending on the context, $<expression> can have two effects :"
                           &   !br
                               \n
-                              vsubst1$!a
+                              inline1$!a
                               (br.,)
                               break2$(.!b)
                         |   @( !arg
@@ -3674,11 +3778,11 @@ Depending on the context, $<expression> can have two effects :"
                           & "empty line between texts"
                           &   !br
                               \n
-                              vsubst1$!a
+                              inline1$!a
                               (br.,)
                               (br.,)
                               break2$(.!b)
-                        | vsubst1$!arg
+                        | inline1$!arg
                     )
                   & ( subul
                     =   a b c d e
@@ -3698,7 +3802,7 @@ Depending on the context, $<expression> can have two effects :"
                                     chunk2$!e
                               | (ul.,ul2$("  -"."  -" !b \n "  -" !c))
                               )
-                        | vsubst1$!arg
+                        | inline1$!arg
                     )
                   & ( ol2
                     =   n,s,t
@@ -3747,17 +3851,17 @@ Depending on the context, $<expression> can have two effects :"
                     )
                   & (breaks2=.break2$((br.,).!arg))
                   & ( chunk2
-                    =     a b c d e f g s x y
+                    =     a b c d ee f g s x y
                         , termpat defline defpat termdefpat termer
                       .     @(!arg:?a \n1 %?`s ?b \n2 !s ?c)
                           &   breaks2$!a
                               (   @( !c
                                    :   ?d
                                        \n
-                                       ((%@:~" ":~#) ?:?e)
+                                       ((%@:~" ":~#) ?:?ee)
                                    )
                                 &   (ol.,ol2$(1 !s !b \n 2 !s !d))
-                                    (p.,chunk2$!e)
+                                    (p.,chunk2$!ee)
                               | (ol.,ol2$(1 !s !b \n 2 !s !c))
                               )
                         |   (   @(!arg:"*" ?b "\n*" ?c)
@@ -3769,10 +3873,10 @@ Depending on the context, $<expression> can have two effects :"
                               (   @( !c
                                    :   ?d
                                        \n
-                                       ((%@:~" ":~"*") ?:?e)
+                                       ((%@:~" ":~"*") ?:?ee)
                                    )
                                 &   (ul.,ul2$("*"."*" !b \n "*" !d))
-                                    chunk2$!e
+                                    chunk2$!ee
                               | (ul.,ul2$("*"."*" !b \n "*" !c))
                               )
                         |   @(!arg:?a \n "{?}" ?c)
@@ -3780,20 +3884,20 @@ Depending on the context, $<expression> can have two effects :"
                               (   @( !c
                                    :   ?d
                                        \n
-                                       ((%@:~"{":~" ") ?:?e)
+                                       ((%@:~"{":~" ") ?:?ee)
                                    )
                                 &   (blockquote.,(pre.,"\n{?}" !d))
-                                    chunk2$!e
+                                    chunk2$!ee
                               | (blockquote.,(pre.,"\n{?}" !c))
                               )
                         |   @(!arg:"{?}" ?c)
                           & (   @( !c
                                  :   ?d
                                      \n
-                                     ((%@:~"{":~" ") ?:?e)
+                                     ((%@:~"{":~" ") ?:?ee)
                                  )
                               &   (blockquote.,(pre.,"\n{?}" !d))
-                                  chunk2$!e
+                                  chunk2$!ee
                             | (blockquote.,(pre.,"\n{?}" !c))
                             )
                         |   ( termpat
@@ -3811,13 +3915,8 @@ Depending on the context, $<expression> can have two effects :"
                                    :   (?TeRm \n:!termpat)
                                        (?DeF \n:!defpat)
                                        ( ?arg
-                                       &     ( dt
-                                             .   
-                                               , codeexample$(vsubst1$!TeRm)
-                                             )
-                                             ( dd
-                                             . ,codeexample$(vsubst1$!DeF)
-                                             )
+                                       &     (dt.,inline1$!TeRm)
+                                             (dd.,inline1$!DeF)
                                          : ?E
                                        &   (     !arg
                                                : (|\n)
@@ -3855,7 +3954,7 @@ Depending on the context, $<expression> can have two effects :"
                                  & termdefpat$!b:?termer
                                  )
                              )
-                          & vsubst1$!a (dl.,!termer) chunk2$!c
+                          & inline1$!a (dl.,!termer) chunk2$!c
                         |   @( !arg
                              :   ( &:?a
                                  | ?a \n
@@ -3863,7 +3962,7 @@ Depending on the context, $<expression> can have two effects :"
                                  ( %?c \n ?d
                                  & @(!c:?x "  " ?y)
                                  & @( !d
-                                    :   ?e
+                                    :   ?ee
                                         (   \n
                                             ( ?f
                                             & ( @( !f
@@ -3888,7 +3987,7 @@ Depending on the context, $<expression> can have two effects :"
                                  )
                              )
                           &   breaks2$!a
-                              (blockquote.,(pre.,!c \n !e))
+                              (blockquote.,(pre.,!c \n !ee))
                               (   !f !g:~
                                 &   chunk2
                                   $ ( str
@@ -3903,87 +4002,29 @@ Depending on the context, $<expression> can have two effects :"
                         |   @(!arg:?a "\n " ?b "\n " ?c)
                           &   breaks2$!a
                               (   @( !c
-                                   : ?d \n ((%@:~" ") ?:?e)
+                                   : ?d \n ((%@:~" ") ?:?ee)
                                    )
                                 &   (blockquote.,(pre.,\n !b "\n " !d))
-                                    chunk2$!e
+                                    chunk2$!ee
                               | (blockquote.,(pre.,\n !b "\n " !c))
                               )
                         | breaks2$!arg
                     )
                   & ( pag2
-                    =   l1
-                      .   ( l1
-                          =   !arg:%?pg ?arg
-                            & chunk2$!pg:?pg
-                            &   fput
-                              $ ( !ptxt
-                                . text
-                                .   !pg
-                                    \n
-                                    (br.,)
-                                    (br.,)
-                                    \n
-                                )
-                            & !l1
+                    =   pg
+                      .   whl
+                        ' ( !arg:%?pg ?arg
+                          & chunk2$!pg:?pg
+                          &   fput
+                            $ ( !ptxt
+                              . text
+                              .   !pg
+                                  \n
+                                  (br.,)
+                                  (br.,)
+                                  \n
+                              )
                           )
-                        & ~!l1
-                    )
-                  & ( codes
-                    =   cds code A K L Z
-                      .   ( code
-                          =   a z E A Z aa zz
-                            .     @( str$!arg
-                                   :   ?a
-                                       ( ( "$"
-                                         | "`"
-                                         | "|"
-                                         | "&"
-                                         | "%"
-                                         | "\\"
-                                         | "@"
-                                         | "#"
-                                         | "{"
-                                         | "}"
-                                         | "["
-                                         | "]"
-                                         | "~"
-                                         | "^"
-                                         | "*"
-                                         | "+"
-                                         )
-                                       : ?E
-                                       )
-                                       ?z
-                                   )
-                                & @( rev$!a
-                                   :   ?Z
-                                       ( " " ?A
-                                       | &:?A
-                                       )
-                                   )
-                                & @( !z
-                                   :   ?aa
-                                       ( " " ?zz
-                                       | &:?zz
-                                       )
-                                   )
-                                &   rev$!A
-                                    (,rev$!Z !E !aa)
-                                    code$!zz
-                              | !arg
-                          )
-                        & code$!arg:?cds
-                        &   whl
-                          ' (   !cds
-                              : ?A (,?K) (,?L) ?Z
-                            & !A (,!K !L) !Z:?cds
-                            )
-                        &   whl
-                          ' ( !cds:?A (,?K) ?Z
-                            & !A (code.,!K) !Z:?cds
-                            )
-                        & !cds
                     )
                   & ( tit
                     =   put$\n\n
@@ -4053,10 +4094,10 @@ Depending on the context, $<expression> can have two effects :"
                           & ( ddlines
                             =   line
                               .     @(!arg:?line \n ?arg)
-                                  &   codeexamples$!line
+                                  &   inline1$!line
                                       (br.,)
                                       ddlines$!arg
-                                | codeexamples$!arg
+                                | inline1$!arg
                             )
                           &     !menu
                                 ( !keuze:
@@ -4065,7 +4106,7 @@ Depending on the context, $<expression> can have two effects :"
                                       .   
                                         , ( a
                                           .   (href."#" first$!keuze)
-                                            , codeexample$!term
+                                            , inline1$!term
                                           )
                                       )
                                       (dd.,ddlines$!definition)
@@ -4074,7 +4115,7 @@ Depending on the context, $<expression> can have two effects :"
                                     .   
                                       , ( a
                                         .   (href."#" first$!keuze)
-                                          , codeexample$!tekst
+                                          , inline1$!tekst
                                         )
                                     )
                                     \n
@@ -4166,6 +4207,31 @@ Depending on the context, $<expression> can have two effects :"
           & writeHTML$(..Bracmat.lusmenu)
           & :?helpbody
           & fputall$
+          & ( removeEmpty
+            =   A M Z z e a p es
+              .   !arg:(?Z.?es)
+                & :?z
+                & whl'(!Z:%?A ?Z&!A !z:?z)
+                &   whl
+                  ' ( !z:%?A ?z
+                    &     (   !A:(?e.?a,?M)
+                            &   (!e.!a,removeEmpty$(!M.!es):?M)
+                              : ?A
+                            & (   !M:
+                                & !es:? !e ?
+                                & 
+                              | !A
+                              )
+                          | !A
+                          )
+                          !Z
+                      : ?Z
+                    )
+                & !Z
+            )
+          & ( ~
+            | removeEmpty$(!helpbody.code i):?helpbody
+            )
           &     ( "!DOCTYPE"
                 . " html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\""
                 )
