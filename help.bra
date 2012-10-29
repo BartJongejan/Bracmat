@@ -139,7 +139,7 @@ lex lexical analysis of help file"
   & ( inbltmenu
     =   M
       , "Built-in functions"
-      , "1 <N>_|
+      , "1 <N>
     access array element:|_!(12$a):?(11$a)_|
 2 |_alc_|
     allocate memory (low level):|_alc$100_|
@@ -269,19 +269,19 @@ of both data and code. After the prompt {?} you can write. When you hit Enter
 Bracmat evaluates your input and writes the result to the screen following a
 {!} sequence (unless there was no visible result). Under the result follows a
 line that tells whether the evaluation was successful (S) or not (F) (in rare
-cases you may see a \"I\", which, for the time being, you may interpret as
+cases you may see a |_I_|, which, for the time being, you may interpret as
 failure). In the same line the machine shows how much processor time it
 needed. Intermediary results may also appear on the screen.
 
 Bracmat and calculators have an important common feature: as long as the input
 data are simple enough, the user need (and can) not specify how these data have
 to be processed. Calculators handle basic calculations in a predictable,
-unchangeable way, e.g. \"4+7\" will always result in \"11\", and not in, say,
-\"10\" or \"23-12\". That is because the manufacturer had good reasons to think
-that \"11\" is what the user expects and nothing else. In the same way, Bracmat
+unchangeable way, e.g. |_4+7_| will always result in |_11_|, and not in, say,
+|_10_| or |_23-12_|. That is because the manufacturer had good reasons to think
+that |_11_| is what the user expects and nothing else. In the same way, Bracmat
 handles basic \"calculations\" with a much wider variety of data: rational
-numbers, symbols, words and collections thereof. For example, \"a+b+a\" becomes
-\"2*a+b\" and not, say, \"x.a\" or \"b+2*a\". Again, Bracmat takes decisions
+numbers, symbols, words and collections thereof. For example, |_a+b+a_| becomes
+|_2*a+b_| and not, say, |_x.a_| or |_b+2*a_|. Again, Bracmat takes decisions
 that you can't easily circumvent. However, the more complex the data are, the
 better are the chances that not all results, although defendable, have an
 appearance that suits you. It is here that programming comes in: Bracmat leaves
@@ -292,12 +292,19 @@ sub-answers.
 First and foremost Bracmat was developed with symbolic algebra in mind. You may
 add, multiply, take powers and logarithms and differentiate. Oddly enough,
 Bracmat has no operators for subtraction and division. This reduces the amount
-of arbitrariness in the presentation of formulae. \"a-b\" must be written as
-\"a+-1*b\" and \"a/b\" must be written as \"a*b^-1\".
+of arbitrariness in the presentation of formulae. 
+    a-b
+must be written as
+    a+-1*b
+and
+    a/b
+must be written as
+    a*b^-1
+    
 Calculations are always exact. Number expressions for which no rational
 representation exists are not further evaluated. Bracmat knows how to handle
-the special symbols i, e and pi, but it offers no numerical representation for
-e and pi.
+the special symbols |_i_|, |_e_| and |_pi_|, but it offers no numerical representation for
+|_e_| and |_pi_|.
 Examples:
 
 {?} a+b+-1*a                 { this is how you subtract in Bracmat }
@@ -341,7 +348,7 @@ comment when pressing <return>, the next line starts with {str} or {com},
 respectively.
 
 If you want to enter several instructions on the same line, you should write
-a semicolon \";\" between the instructions. These instructions are executed
+a semicolon |_;_| between the instructions. These instructions are executed
 in the same order. If you do not want to see the result of a calculation, you
 may write a semicolon after the last instruction. Instructions in a text file
 must be separated by semicolons.
@@ -353,21 +360,21 @@ as -1234/5678."
           "Bracmat can open and read a text file and execute the instructions as they are
 read. After the last instruction has been executed, the file is closed. The
 program that currently produces this information, is read from the file named
-\"help\". The instruction for reading a file \"myprog\" and executing the
-instructions therein is \"get$myprog\". The \"$\" is a binary operator that
-has to do with function evaluation. \"get\" is the function name of one of
+|_help_|. The instruction for reading a file |_myprog_| and executing the
+instructions therein is |_get$myprog_|. The |_$_| is a binary operator that
+has to do with function evaluation. |_get_| is the function name of one of
 the few built-in functions.
 
 The result of the last executed instruction in a file is written to the screen.
-For better control over screen output one may use the built-in function \"put\",
+For better control over screen output one may use the built-in function |_put_|,
 which writes from the current cursor position to the right, or the pre-defined
-(but changeable) function \"out\", which writes an extra line feed after its
+(but changeable) function |_out_|, which writes an extra line feed after its
 argument has been written to the screen.
 
 {?} put$(x*x);put$(y+y)"
           "Often you will need the result of the last evaluated instruction in the
-next one. You can use the exclamation mark \"!\" instead of re-entering
-the result. (Because Bracmat is still evaluating the instruction \"get$help\",
+next one. You can use the exclamation mark |_!_| instead of re-entering
+the result. (Because Bracmat is still evaluating the instruction |_get$help_|,
 this trick is of no use in the context of this program.) Example (try later):
 {?} 1+1
 {?} !^!^!^!"
@@ -376,12 +383,12 @@ external text editor. You can enter small programs directly at the Bracmat
 prompt {?}, but a small change in an instruction can only be done by re-
 entering the whole instruction. You may save instructions that are still
 held in memory (which is only possible if they are bound to variables),
-by the built-in \"lst\" function. This function takes a number of optional
+by the built-in |_lst_| function. This function takes a number of optional
 parameters that tell the system whether the instruction has to be written in a
 compact and barely readable form, or in a more pretty form, with lots of
 indentations. Comments are never written, as they are ignored at input time.
 As an example, you can write the definition of the pre-defined factorisation
-function \"fct\" to a file \"factorise\" by entering the following instruction:
+function |_fct_| to a file |_factorise_| by entering the following instruction:
 
 {?} lst$(fct,factorise,NEW) {NEW:replace old file with same name}"
           "At first sight, a Bracmat program doesn't look like programs written in other
@@ -399,7 +406,7 @@ recommendations about programming habits:
 * Write parentheses in a BEGIN-END-style, the closing parenthesis below the
   opening parenthesis.
 * Check whether Bracmat interprets your code in the way you intended by listing
-  your functions without the LIN option.
+  your functions without the |_LIN_| option.
 * Try to evade the \"not\" prefix ~ and the use of arrays."
     )
   & ( patternm
@@ -523,7 +530,7 @@ step you retrieve, by means of pattern matching, all those parts of the data
 that you want to keep. The second step is building the new data from the
 retrieved parts, together with new pieces. Creation of complex data structures
 from parts is straightforward in Bracmat. For example, the variable Row is a
-list of three words. We want to change the second word into the word \"cat\":
+list of three words. We want to change the second word into the word |_cat_|:
 {?} the dog runs:?Row     {initial creation}
 {?} !Row:%?one % %?three  {step 1: retrieval of 1st and 3rd word}
 {?} !one cat !three:?Row  {step 2: reconstruction}
@@ -579,7 +586,7 @@ it is all about tree branches."
   & ( colofon
     =   T
       , "How to obtain Bracmat"
-      , "There are e few download options. You can get the last revision from
+      , "There are a few download options. You can get the last revision from
 https://github.com/BartJongejan/Bracmat.
 
 At http://cst.dk/download/bracmat/ you can follow the history of Bracmat from
@@ -618,10 +625,10 @@ solved in a great number of programming languages."
 <white space>     ::= spaces, tabs, new line and form feed characters"
           "White space (operator/cosmetic measure) almost never leads to confusion. It
 does in (some) cases where a <nil> leaf without prefixes is adjacent to the white
-space operator. For example : \"get' out$now\". Bracmat interprets this as :
-\"get'(out$now)\". \"\" or () fixes the problem : \"get'() out$now\".
+space operator. For example : |_get' out$now_|. Bracmat interprets this as :
+|_get'(out$now)_|. |_\"\"_| or |_()_| fixes the problem : |_get'() out$now_|.
 Quotation marks are not part of the string they surround. They should be used
-if necessary, e.g. \"in this case\" or \"he{this is not a comment}re\".
+if necessary, e.g. |_in this case_| or |_he{this is not a comment}re_|.
 Comments can be written everywhere, except in the middle of a string in
 Quotation marks. Comments are enclosed in {} and may be nested."
     )
@@ -723,11 +730,11 @@ relevant operator or prefixes. If the change of evaluator only applies to the
 left (right) operand of the cross link operator, the symbol \"l\" (\"r\") is used.
 If the transition depends on the left operand being <nil>, the symbol \"n\" is
 used."
-          "            expression       match            macro            archivist
-expression                   :r               n'r              =r 'r
-match       &r $ 'l ?! !!                     n'r              =r 'r
-macro       $r
-archivist
+          "             expression       match            macro            archivist
+ expression                   :r               n'r              =r 'r
+ match       &r $ 'l ?! !!                     n'r              =r 'r
+ macro       $r
+ archivist
 "
     )
   & ( gettxt
@@ -738,33 +745,33 @@ archivist
 
 options :
 
-MEM present
+|_MEM_| present
     The name of the first parameter is the source of the characters. (MEMory)
-MEM not present
+|_MEM_| not present
     A file with the name of the first parameter is the source.
-ECH present
+|_ECH_| present
     The characters are echoed to the screen as they are read.
-ECH not present
+|_ECH_| not present
     No echo.
-VAP present
+|_VAP_| present
     The (8-bit) characters are read \"as is\". Extra spaces
     are inserted between the characters. (VAPorised)
-VAP not present
+|_VAP_| not present
     No extra spaces are added.
-STR present
+|_STR_| present
     The characters are read into one string.
-STR not present
+|_STR_| not present
     The characters are interpreted as parts of a Bracmat expression and
     evaluated after the whole expression has been read.
 
-The VAP option is evaluated before the STR option."
+The |_VAP_| option is evaluated before the |_STR_| option."
           "Applications :
 
-  get'(matrix,ECH)
+  get'(matrix,|_ECH_|)
 
 Read file \"matrix\" and evaluate the expressions (delimited by semicolons)
 therein. If the system finds a syntax error in a multiple expression file,
-the ECH option makes it easier to locate the error."
+the |_ECH_| option makes it easier to locate the error."
           "  get'(matrix,STR):?intern
 
 Read file \"matrix\" into a string called \"intern\". If this file contains
@@ -773,7 +780,7 @@ Bracmat instructions, they hereafter exist in a \"sleeping\" state in memory."
 
 !intern is, in this example, expanded to an atom with a very long name, namely
 all of the text of file \"matrix\". The sleeping expressions are evaluated one
-after the other, just as if \"get'matrix\" was evaluated."
+after the other, just as if |_get'matrix_| was evaluated."
           "  get'(,VAP):?space-list
 
 Read characters from standard input (normally keyboard) until next line feed
@@ -781,13 +788,13 @@ character. Put each character into an atom. Put all atoms into a linear list
 with space operators. Bind this list to the name \"space-list\"."
           "  get'(\")y\",MEM)
 
-Read the sleeping \"expression\" \")y\" from memory. The lexical scanner
+Read the sleeping \"expression\" |_)y_| from memory. The lexical scanner
 will find an unbalanced right parenthesis, which could mean that this Bracmat
-session should stop. The \"y\" confirms this assumption and the program will
-come to an end immediately. If the \"y\" hadn't been present, Bracmat would
-ask \"end Bracmat session ? (y/n)\" after which the user has to choose. This
+session should stop. The |_y_| confirms this assumption and the program will
+come to an end immediately. If the |_y_| hadn't been present, Bracmat would
+ask |_end Bracmat session ? (y/n)_| after which the user has to choose. This
 trick is useful in batch processing."
-          "If the first parameter is <nil> or \"stdin\" and the MEM option is not used,
+          "If the first parameter is <nil> or |_stdin_| and the |_MEM_| option is not used,
 input is coming from standard input.
 Take care for putting filenames in double quotes if they contain any
 characters that can be misunderstood, such as dots, (back) slashes or dollars."
@@ -810,10 +817,9 @@ the argument is not valid UTF-8."
     )
   & ( whltxt
     =   T
-      , "whl'(expression)"
-      , "whl' implements a while ... loop. The expression is repeatedly evaluated
-until it fails. whl' always fails. Notice that whl' is slightly faster than
-til' and that both are faster than loops using tail recursion."
+      , "|_whl'(<expression>)_|"
+      , "whl' implements a |_while <expression>_| loop. The expression is repeatedly evaluated
+until it fails. |_whl'_| always succeeds. Notice that |_whl'_| is faster than loops using tail recursion."
     )
   & ( contxt
     =   T
@@ -897,7 +903,7 @@ This prints
     7 is both odd and prime
     2 is both even and prime
 
-and finally fails when backtracking (induced by the ~) has found all answers
+and finally fails when backtracking (induced by the |_~_|) has found all answers
 to the query."
           "Experimentation with the implementation of matrices in Bracmat has learned
 that lists (of lists (of lists..)) lead to smaller and faster programs than
@@ -1013,9 +1019,9 @@ reassemble the whole expression. Such expressions are objects. An object member
 member's name, preceded by the objects name. The name of the object and the
 name of the member must be separated by a dot operator.
 
-In the example below an object named \"John\" is created with the members
-\"length\", \"age\" and \"name\". The \"name\" member has two sub-members
-\"first\" and \"family\":
+In the example below an object named |_John_| is created with the members
+|_length_|, |_age_| and |_name_|. The |_name_| member has two sub-members
+|_first_| and |_family_|:
 
 {?} John = (length = 180),(age = 30),(name = (first=John) (family=Bull))
 
@@ -1031,8 +1037,8 @@ or
 {?} 185 : ?(John.length)
 "
           "The same object can be assigned to another variable, creating an alias, but
-we have to take care not to evaluate John, because that would create or
-overwrite the variables \"length\", \"age\" and \"name\"):
+we have to take care not to evaluate |_John_|, because that would create or
+overwrite the variables |_length_|, |_age_| and |_name_|):
 
 {?} !John:?alias {Wrong, (alias=length,age,name);}
 
@@ -1044,12 +1050,12 @@ overwrite the variables \"length\", \"age\" and \"name\"):
 Bracmat replaces the expression '$John by the value of John, protected
 against evaluation by a = operator. For that reason, the pattern on the rhs
 of the match operator : contains a = operator as well. Now we can change John's
-age by operating on the variable \"alias\":
+age by operating on the variable |_alias_|:
 
 {?} alias.age = 31
 
 To see that the above expression indeed has the wanted (side-)effect, we can
-inspect John:
+inspect |_John_|:
 
 {?} lst$John
  (John=
@@ -1057,7 +1063,7 @@ inspect John:
  , (age=30)
  , (name=(first=John) (family=Bull)));
 
-Alternatively, we can also just show the field \"age\" in John:
+Alternatively, we can also just show the field |_age_| in |_John_|:
 
 {?} !(John.age)
 {!} 31
@@ -1085,8 +1091,8 @@ change his family name in this way:
 
 {?} x=(header=blabla) (=(a=1) (b=2))
 
-Here, a and b are fields in a \"nameless\" sub-object of x. We can ask for the
-value of b:
+Here, |_a_| and |_b_| are fields in a \"nameless\" sub-object of |_x_|. We can ask for the
+value of |_b_|:
 
 {?} !(x..b)
 {!} 2
@@ -1103,7 +1109,7 @@ To retrieve the whole sub-object:
 {?} x=(a=) (b=) (c=) (d=)
 {?} '$x:(=(a=) ?alias (d=))
 
-Now 'alias' only shares the members x.b and x.c with x. The same result follows
+Now |_alias_| only shares the members |_x.b_| and |_x.c_| with |_x_|. The same result follows
 from
 
 {?} '$x:(=? ((b=) (c=):?alias) ?)
@@ -1117,35 +1123,35 @@ of the contributing objects:
           "Evaluation of an expression that contains '=' operators can have
 unexpected side effects, as the following example shows.
 
-First suppose that x (containing one record with one anonymous field) is
+First suppose that |_x_| (containing one record with one anonymous field) is
 unevaluated (case A) and assigned to two other variables:
 
 {?} x=(=)
 {?} !x:?y
 {?} !x:?z
 
-In this case, x, y and z are different objects. For example does
+In this case, |_x_|, |_y_| and |_z_| are different objects. For example does
 
 {?} 2:?(y.)
 
-not affect x and z. Do the assignment again, but this time evaluating x only
+not affect |_x_| and |_z_|. Do the assignment again, but this time evaluating |_x_| only
 once:
 
 {?} !x:?y:?z
 
-Now y and z are the same object, but still different from x.
-A change made to y affects z but does not affect x."
-          "Suppose that x IS evaluated (case B):
+Now |_y_| and |_z_| are the same object, but still different from |_x_|.
+A change made to |_y_| affects |_z_| but does not affect |_x_|."
+          "Suppose that |_x_| IS evaluated (case B):
 
 {?} (=):?x
 {?} !x:?y
 {?} !x:?z
 
-Now x, y and z are the same object.
+Now |_x_|, |_y_| and |_z_| are the same object.
 
-Explanation: in (A) the value of x is not evaluated, especially the lhs of
-the '=' operator. Therefore, a new '=' node is created each time x is
-evaluated. In (B), the value of x IS evaluated, so no new copies of the
+Explanation: in (A) the value of |_x_| is not evaluated, especially the lhs of
+the '=' operator. Therefore, a new '=' node is created each time |_x_| is
+evaluated. In (B), the value of |_x_| IS evaluated, so no new copies of the
 '=' node are made."
     )
   & ( dumtxt
@@ -1164,7 +1170,7 @@ outside a pattern is either \"giving\" or left unchanged. Try this :
 {?} x^y:?_? & a_b   { _ gets bound to ^. Thus a_b evaluates to a^b }"
           "A \"_\" is evaluated by the expression evaluator, but also by the macro
 evaluator. The latter is useful if the \"_\" has matched an operator that is
-very volatile, such as \"&\" and \"|\".
+very volatile, such as |_&_| and |_|_|.
 {?} (=!a:!b&!c):(=?left_?right) {match the \"&\"}
 {?} '_
 {!} =&              { It worked, the \"_\" is replaced by a \"&\". }
@@ -1177,11 +1183,12 @@ not result in unwanted side effects in the upper node with the \"_\"."
   & ( binprotxt
     =   T
       , "Binary operators in program flow"
-      , "<exprA> & <exprB>  (\"<exprA> and then <exprB>\")
-<exprB> is only evaluated if <exprA> succeeds,
-
-<exprA> | <exprB>  (\"<exprA> or else <exprB>\")
-<exprB> is only evaluated if <exprA> does not succeed.
+      , "<exprA> & <exprB>
+    (\"<exprA> and then <exprB>\")
+    <exprB> is only evaluated if <exprA> succeeds,
+<exprA> | <exprB>
+    (\"<exprA> or else <exprB>\")
+    <exprB> is only evaluated if <exprA> does not succeed.
 
 In both cases <exprA> is always evaluated and <exprB> conditionally.
 If <exprB> is to be evaluated, <exprA> and the & or | operator have served
@@ -1210,7 +1217,7 @@ simple. You create a hash table as follows
 
 {?} new$hash:?myhash
 
-Hereafter, 'myhash' refers to a hash table and is treated in the same way as
+Hereafter, |_myhash_| refers to a hash table and is treated in the same way as
 a user defined object. Bracmat keeps the load factor between 50 and 100,
 rehashing as necessary.
 
@@ -1249,13 +1256,13 @@ The following methods are defined for hash tables:
     )
   & ( findtxt
     =   T
-      , "(myhash..find)$key:(?Key.?Value) ?OtherKeyValuePairs"
+      , "|_(myhash..find)$key:(?Key.?Value) ?OtherKeyValuePairs_|"
       , "Returns a blank-separated list of key-value pairs, all with the same key."
     )
   & ( inserttxt
     =   T
-      , "(myhash..insert)$(key.value)"
-      , "Inserts the key Key with the value Value. Multiple values for the same key are
+      , "(myhash..insert)$(Key.Value)"
+      , "Inserts the key |_Key_| with the value |_Value_|. Multiple values for the same key are
 possible and the same value can be inserted more than once for the same key."
     )
   & ( removetxt
@@ -1268,14 +1275,14 @@ key-value pairs."
     =   T
       , New
       , "This is a method of the hash class that is called by the system when it
-evaluates 'new$hash'. It cannot be called from user code."
+evaluates new$hash. It cannot be called from user code."
     )
   & ( Dietxt
     =   T
       , Die
       , "This method is called when a hash object is deleted. It is not directly
 called from user code. (Compare with a C++ destructor). You can add your own
-clean up code by writing a 'die' method and adding it to a hash object once it
+clean up code by writing a |_die_| method and adding it to a hash object once it
 is created. Example:
 
 {?} new$hash:?myhash; { create a hash table myhash }
@@ -1506,17 +1513,17 @@ More examples:
   & ( unops
     =   T
       , "minus sign"
-      , "The minus sign \"-\" has only its normal arithmetic meaning when used as an
-unary operator in front of a rational number or the imaginary number \"i\".
+      , "The minus sign |_-_| has only its normal arithmetic meaning when used as an
+unary operator in front of a rational number or the imaginary number |_i_|.
 
-If a product contains both a rational number and the number \"i\", the \"i\"
+If a product contains both a rational number and the number |_i_|, the |_i_|
 takes precedence in accepting a minus sign:
 
                    -7*i*a
 
 is evaluated to    7*-i*a.
 
-The advantage of having both \"i\" and \"-i\" becomes clear by considering
+The advantage of having both |_i_| and |_-i_| becomes clear by considering
 the following:
 
                    (-1*i)^1/3
@@ -1527,15 +1534,15 @@ which is written as -i^1/3. As expected, this is the complex conjugate of
 
                     i^1/3.
 
-If Bracmat did not have a separate representation for -i, then
+If Bracmat did not have a separate representation for |_-i_|, then
 
                    (-1*i)^1/3
-would evaluate to  i,
+would evaluate to |_i_|,
 
-(because i^3 is equal to -i),which means that Bracmat would not consider
+(because i^3 is equal to |_-i_|),which means that Bracmat would not consider
 (-1*i)^1/3 and i^1/3 as complex conjugates.
 
-The transcendental numbers e and pi do not accept arithmetic minus signs.
+The transcendental numbers |_e_| and |_pi_| do not accept arithmetic minus signs.
 "
     )
   & ( naamloos
@@ -1639,21 +1646,21 @@ substitution. The expression
 evaluates to itself, not to something like
     /(=(x.foo))
 
-(assuming that the variable x had the value 'foo'). In contrast, the same
+(assuming that the variable |_x_| had the value |_foo_|). In contrast, the same
 expression without the leading slash
     ('(x.$x))
 
 evaluates to
     =x.foo
 
-The rhs of the '$' operator must be an atom.
+The rhs of the $ operator must be an atom.
 
 In an lambda abstraction
     /('(x.$x,$y))
 
-'$x' is a bound variable and '$y' is a free variable.
+$x is a bound variable and $y is a free variable.
 
-The expression '$x' is only replaced by a value if x is the variable in the
+The expression $x is only replaced by a value if |_x_| is the variable in the
 lambda abstraction or a lambda abstraction that contains the lambda
 abstraction, as in
     /('(x.(/('(y.($x) ($y)))$aap)))$noot
@@ -1661,15 +1668,14 @@ abstraction, as in
 which evaluates to
     noot aap
 
-No Bracmat variables come into play, not even 'arg'. Thus, in the example above
-the value 'aap' is bound in ($x), but never assigned to a variable 'x'.
+No Bracmat variables come into play, not even |_arg_|. Thus, in the example above
+the value |_aap_| is bound in |_($x)_|, but never assigned to a variable |_x_|.
 
 The expression
     /('(x.(/('(x.($x) ($x)))$aap)))$noot
 
 evaluates to
-    aap aap
-    "
+    aap aap"
     )
   & ( difftxt
     =   T
@@ -1686,8 +1692,8 @@ Example:
 {!} 0
 "
           "The last example gives zero, which in many applications isn't what we want.
-Often, with y we express the y-component of a vector with length r, and r
-consequently is a function of y (and the other components). We can solve this
+Often, with |_y_| we express the <y>-component of a vector with length <r>, and <r>
+consequently is a function of <y> (and the other components). We can solve this
 as follows:
 
 {?} dep=(r.x) (r.y) (r.z) {'dep' is a special variable}
@@ -1695,14 +1701,14 @@ as follows:
 {!} y\\Dr
 "
           "Now the expression is just left unevaluated. Later, you can substitute an
-expression for r in terms of its components
+expression for |_r_| in terms of its components
 
 {?} y\\D(r^-1):?derivative
 {!} -1*r^-2*y\Dr
 {?} sub$(!derivative.r.(x^2+y^2+z^2)^1/2):?derivative
 {!} -1*y*(x^2+y^2+z^2)^-3/2
 "
-          "And, if you like, you can simplify the result by putting r back in:
+          "And, if you like, you can simplify the result by putting |_r_| back in:
 
 {?} sub$(!derivative.x^2+y^2+z^2.r^2):?derivative
 {!} -1*r^-3*y
@@ -1711,15 +1717,20 @@ expression for r in terms of its components
   & ( algtxt
     =   T
       , "Algebraic operations"
-      ,   "<term> + <term>         addition
-<factor> * <factor>     multiplication
-<base> ^ <exponent>     exponentiation
-<base> \\L <expr>        logarithm
-<variable> \\D <expr>    differentiation
+      ,   "addition
+    <term> + <term>
+multiplication
+    <factor> * <factor>
+exponentiation
+    <base> ^ <exponent>
+logarithm
+    <base> \\L <expr>
+differentiation
+    <variable> \\D <expr>
 
 Subtraction and division are treated as special forms of addition and
 multiplication. Therefore there are no binary operators for subtraction and
-division. (The minus sign - and the slash / can be used in numbers, however.)
+division. (The minus sign |_-_| and the slash |_/_| can be used in numbers, however.)
 
 If one operand of an algebraic operator is evaluated then the other one is
 normally evaluated as well, even if this may seem unnecessary (multiplication
@@ -1731,13 +1742,20 @@ like the logical & operator."
           "Bracmat gives the user practically NO control over the format of evaluated
 algebraic expressions, such as the order of terms or factors. Bracmat tries to
 present algebraic objects in a unique (canonical) form. This is in many cases
-an unattainable goal : the forms (a+b)*(c+d) and a*c+a*d+b*c+b*d are both
-stable expressions. On the other hand, (a+b)*(c+d)+e becomes e+a*c+a*d+b*c+b*d.
+an unattainable goal : the forms
+    (a+b)*(c+d)
+and
+    a*c+a*d+b*c+b*d
+are both stable expressions. On the other hand,
+    (a+b)*(c+d)+e
+becomes
+    e+a*c+a*d+b*c+b*d
+    
 Bracmat keeps \"expensive\" completely factorised expressions, but does not
 automatically factorise factorisable expressions. Another domain of duality
 are expressions with logarithms.
 
-Sums and products start with rational numbers, followed by pi, i and e
+Sums and products start with rational numbers, followed by |_pi_|, |_i_| and |_e_|
 (if present, that is). Then follow other terms and factors. It is recommended
 not to assume anything about the ordering of these terms and factors, as
 this may change in later versions of the program."
@@ -1801,7 +1819,7 @@ prefixes that control the matching process.
 
 The above prefixes may be combined. The ordering in which they are input by the
 user is irrelevant; Bracmat keeps prefixes in this order : 
-    |_[ ~ / # < > % @ ` ? ! !!_|
+    [ ~ / # < > % @ ` ? ! !!
 Repeating prefixes in front of the same atom does not convey a new meaning to
 the pattern, except for the |_!_| and the |_~_| prefixes. More than one |_!_| is
 interpreted as the |_!!_| prefix. An odd number of |_~_| is treated as a single |_~_|, an
@@ -1853,15 +1871,15 @@ an integer number and binds it to the indirect binding of the atom following
 the prefixes."
           "
 If you want to match pattern !pat one or more times (this is often written as
-{pat}+ ), use the complex pattern (? !pat|`). Likewise, if you want to match
-!pat zero or more times ( {pat}* ), use (|? !pat|`).
+{pat}+ ), use the complex pattern |_(? !pat|`)_|. Likewise, if you want to match
+!pat zero or more times ( {pat}* ), use |_(|? !pat|`)_|.
 These patterns should not be the last sub-pattern or precede a subpattern that
 is static and fixes the end point of the repeating sequence, because the
 correct working of the repeating patterns depends on repeated backtracking
 from following sub-patterns. Bracmat may be optimized to skip such
 backtracking and jump to the 'right' end position if that is fixed by the next
 subpattern. 
-In the last resort, you can add a pattern like () or (&) or (|) or (:), which
+In the last resort, you can add a pattern like |_()_| or |_(&)_| or |_(|)_| or |_(:)_|, which
 match with an empty list only (assuming that the connecting nodes are spaces,
 otherwise use 0 in the case of a sum and 1 in the case of a product). Such
 patters don't fix the next position.
@@ -1950,9 +1968,9 @@ floating point numbers itself.
     =   T
       , "abs$<expression> and sgn$<expression>"
       , "sgn$ determines the sign of the numerical factor of <expression>. If the sign
-is \"-\", then sgn returns -1. In all other cases the returned value is 1.
+is |_-_|, then |_sgn_| returns |_-1_|. In all other cases the returned value is 1.
 
-abs$<expression> is defined as sgn$<expression>*<expression>.
+abs$<expression> is defined as |_sgn$<expression>*<expression>_|.
 
 {?} sgn$(-1*i)
 {?} abs$(-7*a)"
@@ -1977,7 +1995,7 @@ for later use, e.g. removing all variables that have been created since.
     =   T
       , "cos$<expression> and sin$<expression>"
       , "These functions produce cos(expression) and sin(expression), expressed in
-powers of e. In this way, expressions with goniometric functions can be
+powers of |_e_|. In this way, expressions with goniometric functions can be
 differentiated and, sometimes, simplified."
     )
   & ( factxt
@@ -2103,29 +2121,20 @@ The next example combines these operators in a grammar-like expression:
        | !pb         & !ab       \"fire\", actions !aa, !ab and !ac, respectively
        | (!pc1:!pc2) & !ac       are triggered.
        )"
-          "Take care for the grouping of the : & and | operators :
+          "Take care for the grouping of the |_: &_| and |_|_| operators :
 
-(!s:!pa):!pb and !s:(!pa:!pb) have, accidentally, the same effect, but the
+(!s:!pa):!pb and !s:(!pa:!pb) have, incidentally, the same effect, but the
 following expressions are very different :
 
-    (!s:!p)&!e
- or  !s:!p&!e
-
-If !s matches with !p, !e is returned.
-
-    !s:(!p&!a)
-
-If !s matches with !p, !a is evaluated, but the expression as a
-whole returns !s.
-
-    (!s:!p)|!e
- or !s:!p|!e
-
-If !s matches with !p, !s is returned. Otherwise, !e is returned.
-
-    !s:(!pa|!pb)
-
-If !s matches with either !pa or !pb (in that order), !s is returned.
+(!s:!p)&!e or !s:!p&!e
+    If !s matches with !p, !e is returned.
+!s:(!p&!a)
+    If !s matches with !p, !a is evaluated, but the expression as a whole
+    returns !s.
+(!s:!p)|!e or !s:!p|!e
+    If !s matches with !p, !s is returned. Otherwise, !e is returned.
+!s:(!pa|!pb)
+    If !s matches with either !pa or !pb (in that order), !s is returned.
 
 The possibility that !s might fail further complicates the above examples."
     )
@@ -2142,11 +2151,11 @@ The possibility that !s might fail further complicates the above examples."
 The = operator is used to bind (still) unevaluated expressions such as
 patterns and functions to variables.
 
-Assignment with the \":\" makes use of pattern matching with a universally
+Assignment with the |_:_| makes use of pattern matching with a universally
 unifying pattern. This way of assignment is very powerful and can even be
 used to assign unevaluated expressions, by preceding the subject with an
 = or an ' operator. Example: define Lisp's car-function, first using = and
-then using : to bind the function definition to the variable \"car\".
+then using : to bind the function definition to the variable |_car_|.
 
 {?} car=.!arg:(?%arg ?)&!arg          { one may freely reuse arg ! }
 {?} (=(.!arg:(?%arg ?)&!arg)):(=?car) { another way to define car }
@@ -2163,8 +2172,10 @@ object members have to be told explicitly that we want their value, not their
 name. This is achieved with the ! and the !! prefixes in front of the variable
 name or object member name.
 
-!<atom>  is replaced by the binding of <atom>
-!!<atom> is replaced by the binding of the binding (after evaluation) of <atom>
+!<atom>
+    is replaced by the binding of <atom>
+!!<atom>
+    is replaced by the binding of the binding (after evaluation) of <atom>
 
 Likewise !(<object name>.<member name>) is replaced by the binding
 of <object name>.<member name>
@@ -2230,9 +2241,9 @@ same debugging protocol applies as with other programming languages :
     length words) at places where this is not what you intend. Are all
     % ` and @ prefixes in place?
   - Forget the grouping of operators.
-    a b c : ?%x ?%y  is grouped as (a b c):(?%x ?%y) , but
-    a,b,c : ?%x,?%y  is grouped as a,b,(c:?%x),?%y
-    Remember that = and . have very low priorities, often making a pair of
+    |_a b c : ?%x ?%y_|  is grouped as |_(a b c):(?%x ?%y)_| , but
+    |_a,b,c : ?%x,?%y_|  is grouped as |_a,b,(c:?%x),?%y_|
+    Remember that |_=_| and |_._| have very low priorities, often making a pair of
     parentheses necessary.
   - A misconceived idea about the Bracmat's backtracking mechanism. Unlike
     other languages with backtracking capabilities, Bracmat does not offer
@@ -2253,7 +2264,7 @@ The following code is part of a function that computes n! .
 Outside patterns out$ is most easily used. Inside patterns, if you want to
 inspect a variable that has just been assigned a new value, you use the &
 operator to temporarily escape into the non-pattern world. If you want to add
-extra text to the output, remember that all of out$'s argument is returned.
+extra text to the output, remember that the atgument to out$ is returned.
 
   loop = out$!k+1 : (?k & out$(k is !k)) {show k before and after increment}
                   : <!n                  {but before comparison with n}
@@ -2265,8 +2276,8 @@ sentence. This expression succeeds, but finds nothing:
 
   (He loves her and she loves him : (? ?a ? !a ?) & out$(!a is occurring twice))
 
-Check what is unified with \"? ?a\". To do so, put a variable after the first
-\"?\" and insert an output action after each sub-pattern.
+Check what is unified with |_? ?a_|. To do so, put a variable after the first
+|_?_| and insert an output action after each sub-pattern.
 
   (He loves her and she loves him
       : ((?x & out$(x is !x))   {output x after unification}
@@ -2288,13 +2299,13 @@ avoids multi-word assignments and forces immediate backtracking.
     )
   & ( debugtxt3
     =   T
-      , "using dbg' as debugging aid"
-      , "Some programming errors may be found with the built-in dbg function. The
-argument of the dbg function is evaluated with an internal debugging flag set.
+      , "using |_dbg'_| as debugging aid"
+      , "Some programming errors may be found with the built-in |_dbg_| function. The
+argument of the |_dbg_| function is evaluated with an internal debugging flag set.
 With this flag set, suspicious code is warned against.
 
 It is important that the argument is not evaluated before being passed to the
-dbg function."
+|_dbg_| function."
     )
   & ( varmattxt
     =   T
@@ -2428,9 +2439,10 @@ is an invalid UTF-8 string.
 
 It is safe to use utf$ in a pattern:
 @(!txt:(?%c & utf$!c) ?)
-If txt starts with an valid UTF-8 sequence, bracmat backtracks until c matches the UTF-8 sequence.
-If txt starts with a sequence that is not UTF-8, bracmat stops backtracking when that fact has been
-established."
+If the value of |_txt_| starts with an valid UTF-8 sequence, bracmat backtracks
+until the value of |_c_| matches the UTF-8 sequence.
+If |_txt_| starts with a sequence that is not UTF-8, bracmat stops backtracking
+when that fact has been established."
     )
   & ( chrtxt
     =   T
@@ -2486,7 +2498,7 @@ between 1 and 8 only containing the characters 0-9, a-f and A-F.
     )
   & ( dbgtxt
     =   T
-      , "dbg'<expression>"
+      , "|_dbg'<expression>_|"
       , "Create warnings in situations that probably are programming errors.
 Currently, a warning is generated when a function definition can not be found.
 
@@ -2544,7 +2556,7 @@ has been evaluated.
 {?} swap$(I think,I guess)
 
 In a match context, a function call creates a second local variable,
-\"sjt\", the current subject. The value returned from a function in a match
+|_sjt_|, the current subject. The value returned from a function in a match
 context is interpreted as a pattern by the match evaluator. However, if the
 function call fails, the pattern match is not attempted and fails as well.
 If the returned value is negated the behaviour is not defined.
@@ -2620,7 +2632,7 @@ very large atoms (such as this help function) do less well. Example:
     )
   & ( lsttxt3
     =   T
-      , "lst$(<variable>,<file name>,NEW | APP [,LIN])"
+      , "|_lst$(<variable>,<file name>,NEW | APP [,LIN])_|"
       , "This time, output is sent to the named file instead of standard output.
 The third argument is explained below.
 Code that has been saved with lst$ can be reloaded with get$.
@@ -2644,18 +2656,20 @@ The predefined function cat$ makes use of mem$.
     )
   & ( newtxt
     =   T
-      , "options NEW and APP"
-      , "one of the options NEW and APP must be present :
-NEW tells the computer to open a new file or overwrite an old one.
-APP directs output to an existing file. If the file does not exist, it is
+      , "options |_NEW_| and |_APP_|"
+      , "one of the options |_NEW_| and |_APP_| must be present :
+|_NEW_|
+    tells the computer to open a new file or overwrite an old one.
+|_APP_|
+    directs output to an existing file. If the file does not exist, it is
     created first."
     )
   & ( humtxt
     =   T
-      , "option LIN"
+      , "option |_LIN_|"
       , "
-If LIN is not present, output is very much indented, sometimes making it more
-readable for humans. If LIN is present, output is as compact as possible."
+If |_LIN_| is not present, output is very much indented, sometimes making it more
+readable for humans. If |_LIN_| is present, output is as compact as possible."
     )
   & ( modtxt
     =   T
@@ -2746,7 +2760,7 @@ including space-operators, to the atom.
     )
   & ( puttxt3
     =   T
-      , "put$(<expression>,<file name>,NEW | APP [,LIN])"
+      , "|_put$(<expression>,<file name>,NEW | APP [,LIN])_|"
       , "Write <expression> to the named file.
 
 {?} put$(tay$(e^x,x,10),\"e.out\",APP)"
@@ -2844,13 +2858,13 @@ FLAGS, respectively."
 The ren$ function succeeds, unless a syntactic error was made. If there is an
 error at the operating system level, one of the following codes is returned:
 
-EACCES
+|_EACCES_|
     File or directory specified by newname already exists or could not be
     created (invalid path); or oldname is a directory and newname specifies
     a different path.
-ENOENT
+|_ENOENT_|
     File or path specified by oldname not found.
-EINVAL
+|_EINVAL_|
     Name contains invalid characters.
 
 If the command succeeds at the operating system level, the value 0 is returned."
@@ -2862,10 +2876,10 @@ If the command succeeds at the operating system level, the value 0 is returned."
 The rmv$ function succeeds, unless a syntactic error was made. If there is an
 error at the operating system level, one of the following codes is returned:
 
-EACCES
+|_EACCES_|
     Indicates that the path specifies a read-only file or that the file
     is open.
-ENOENT
+|_ENOENT_|
     Indicates that the filename or path was not found or that the path
     specifies a directory.
 
@@ -2900,13 +2914,13 @@ constructing an argument for sys$ :
           "The sys$ function succeeds, unless a syntactic error was made. If there is an
 error at the operating system level, one of the following codes is returned:
 
-E2BIG
+|_E2BIG_|
     Argument list (which is system-dependent) is too big.
-ENOENT
+|_ENOENT_|
     Command interpreter cannot be found.
-ENOEXEC
+|_ENOEXEC_|
     Command-interpreter file has invalid format and is not executable.
-ENOMEM
+|_ENOMEM_|
     Not enough memory is available to execute command; or available memory
     has been corrupted; or invalid block exists, indicating that process
     making call was not allocated properly.
@@ -2929,7 +2943,7 @@ possible to declare arrays locally.
 
 Bracmat never accesses arrays as a whole; there is always just one element that
 is in focus. By issuing an instruction of the form <index>$<array name> or
-<index>'<array name> you can explicitly tell Bracmat to put focus on some
+|_<index>'<array name>_| you can explicitly tell Bracmat to put focus on some
 element. Bracmat does this automatically in the case of pushing and popping
 local variables onto and from a stack.
 
@@ -3054,18 +3068,18 @@ Option <mode> is one of the following:
 
 Option <type> is one of the following :
 
-CHR
+|_CHR_|
     character or string I/O
-DEC
+|_DEC_|
     number I/O
 
 Option <size> must be a non-negative integer and determines the number of
 bytes that are read or written as one chunk during a future call to fil$.
-If <type> is \"DEC\", only values 1,2 and 4 are valid, corresponding to 1, 2
+If <type> is |_DEC_|, only values 1,2 and 4 are valid, corresponding to 1, 2
 and 4 byte sized integers, respectively. Notice that 2 and 4 byte integers are
 not portable between implementations with different byte order. The optional
 <number> tells how many read or write operations of size <size> have to be
-performed. If <type> is \"DEC\", the product of <size> and <number> may not be
+performed. If <type> is |_DEC_|, the product of <size> and <number> may not be
 greater than 4. If a number is read or written in 2 or more chunks, the least
 significant bytes or 16 bit words are read or written first (little endian)."
     )
@@ -3112,7 +3126,7 @@ fil$(<file name>,TEL), in which case <whence> must be SET."
       , "Reading from a file.
 
 Reads (if <mode> permitting) <number> chunks of <size> bytes.
-When reading variable sized records (STR), fil$ returns a dot-separated list
+When reading variable sized records (|_STR_|), fil$ returns a dot-separated list
 of two elements: the found stop character and the read string (which does not
 contain the stop character).
 
@@ -3134,13 +3148,13 @@ contain the stop character).
       , "Writing to a file
 
 writes (if <mode> permitting) <number> chunks of <size> bytes from <value>.
-If <type> is \"DEC\", <number>*<size> must be 1,2,3 or 4. <value> must be an
+If <type> is |_DEC_|, <number>*<size> must be 1,2,3 or 4. <value> must be an
 integer value and is cast to a binary number with at most <number>*<size>*8
 bits. This number is stored in <number>*<size> bytes, which in turn are output.
 If <number> is greater than 1, the byte(s) with the least significant digits
 are output first. In machines with little-endian byte-order, only the
 product <number>*<size> matters.
-If <type> is \"CHR\" and the length of <value> is shorter than <number>*<size>,
+If <type> is |_CHR_| and the length of <value> is shorter than <number>*<size>,
 <value> is padded with spaces (to the right)."
     )
   & ( closetxt
@@ -3426,29 +3440,43 @@ Topic:")
             )
           & (entCP=.get$(!arg,MEM,HT,ML))
           & ( writeHTML
-            =     refs tit doemenu listmenu2 pag2 titel codes
-                , topictitel overviewtitel overviewref backtotitel
-                , backtoref txt men sel antw topic2 ptxt
-                , keuze fput menu menutekst menutitel titl
+            =     refs Tit doMenuItems listmenu2 pag2 titel codes
+                , topictitel overviewtitref backtotitref
+                , txt men sel antw ptxt
+                ,   keuze
+                    addContent2paragraphs
+                    menu
+                    menutekst
+                    menutitel
+                    titl
                 , break2 indented2 asCode2 inline1 inline1
-                , breaks2 ol2 ul2 subul
+                , breaks2 ol2 ul2 subul trim blocklevel
                 , chunk2 nbsp2 first next spaced
-              .     ( refs
-                    =   ( :!overviewtitel
-                        |   fput
+              .   ( refs
+                  =     ptxt titl next nextptxts
+                      , overviewtitel overviewref
+                      , backtotitel backtoref
+                    .     !arg
+                        : ( ?ptxt
+                          . (?overviewtitel.?overviewref)
+                          . (?backtotitel.?backtoref)
+                          . ?nextptxts
+                          )
+                      & ( :!overviewtitel
+                        |   addContent2paragraphs
                           $ ( !ptxt
                             . overview
                             .   (span.(class.arrow),entCP$"&uArr;")
                                 ( a
                                 .     (href."#" !overviewref)
                                       (style."line-height:12pt")
-                                  , !overviewtitel
+                                  , inline1$!overviewtitel
                                 )
                                 (br.,)
                             )
                         )
                       & ( :!backtotitel
-                        |   fput
+                        |   addContent2paragraphs
                           $ ( !ptxt
                             . back
                             .   (span.(class.arrow),entCP$"&lArr;")
@@ -3456,13 +3484,13 @@ Topic:")
                                 .     (href."#" !backtoref)
                                       (style."line-height:12pt")
                                   ,   !!backtoref:(?,?titl,?)
-                                    & !titl
+                                    & inline1$!titl
                                 )
                                 (br.,)
                             )
                         )
-                      & (   !arg:%?next ?
-                          &   fput
+                      & (   !nextptxts:%?next ?
+                          &   addContent2paragraphs
                             $ ( !ptxt
                               . more
                               .   ( span
@@ -3472,207 +3500,242 @@ Topic:")
                                   .     (href."#" !next)
                                         (style."line-height:12pt")
                                     ,   !!next:(?,?titl,?)
-                                      & !titl
+                                      & inline1$!titl
                                   )
                                   (br.,)
                               )
                         | 
                         )
-                    )
-                  & (asCode2=.span.(class.courier),!arg)
-                  & ( topic2
-                    =   !arg:(~:?ptxt) ?arg
-                      &   !!ptxt
-                        : (   (T,?titel,?txt)
-                            & !tit
-                            & pag2$!txt
-                            & !refs
-                          |   (M,?titel,?men,?sel)
-                            & !tit
-                            & :?menu:?menutekst
-                            & listmenu2$(!men.!sel):?txt
-                            &   fput
-                              $ (!ptxt.text.chunk2$!txt (dl.,!menu))
-                            & !refs
-                            & doemenu$(!sel.!menutekst)
-                          )
-                      & !topictitel:?backtotitel
-                      & !ptxt:?backtoref
-                      & !topic2
-                    )
-                  & ( angbrack
-                    =   a m
-                      .     @(!arg:?a "<" ?m ">" ?arg)
-                          &   !a
-                              (   @(!m:? \n ?)
-                                & "<" !m ">"
-                              | (i.,!m)
-                              )
-                              angbrack$!arg
-                        | !arg
-                    )
-                  & ( codes
-                    =   e a cds sdc dc code A K L Z
-                      .   ( code
-                          =     a e z ZA AA
-                              , az zz S seps P n A
-                            .     @( str$!arg
-                                   :   ?a
-                                       %@( ( "$"
-                                           | "`"
-                                           | "|"
-                                           | "&"
-                                           | "%"
-                                           | "\\"
-                                           | "@"
-                                           | "#"
-                                           | "{"
-                                           | "}"
-                                           | "["
-                                           | "]"
-                                           | "~"
-                                           | "^"
-                                           | "*"
-                                           | "+"
-                                           )
-                                         : ?e
+                  )
+                & (asCode2=.span.(class.courier),!arg)
+                & ( angbrack
+                  =   a m
+                    .     @(!arg:?a "<" ?m ">" ?arg)
+                        &   !a
+                            ( @(!m:? \n ?)&"<" !m ">"
+                            | (i.,!m)
+                            )
+                            angbrack$!arg
+                      | !arg
+                  )
+                & ( codes
+                  =   e a cds sdc dc code codev A K L Z
+                    .   ( code
+                        =     a e z ZA AA
+                            , az zz S seps P n A
+                          .     @( str$!arg
+                                 :   ?a
+                                     %@( ( "$"
+                                         | "`"
+                                         | "|"
+                                         | "&"
+                                         | "%"
+                                         | "\\"
+                                         | "@"
+                                         | "#"
+                                         | "{"
+                                         | "}"
+                                         | "["
+                                         | "]"
+                                         | "~"
+                                         | "^"
+                                         | "*"
+                                         | "+"
+                                         | "="
                                          )
-                                       ?z
-                                   )
-                                & :?seps
-                                & " ":?S
-                                &   rev$!a
-                                  : ?A ((\n ?|):?P)
-                                & @( !A
-                                   :   ?ZA
-                                       (   %@( !S
-                                             |   ">"
-                                               &   ("<":?S) !seps
-                                                 : ?seps
-                                               & ~
-                                             |   ")"
-                                               &   ("(":?S) !seps
-                                                 : ?seps
-                                               & ~
-                                             )
-                                           ( ?AA
-                                           & (   !seps:
-                                               & str$(!ZA !S):?ZA
-                                             |   !seps:%?S ?seps
-                                               & ~
-                                             )
-                                           )
-                                       | :?AA
+                                       : ?e
                                        )
+                                     ?z
+                                 )
+                              & (S=" "|\n)
+                              & " ":?seps
+                              & @( rev$!a
+                                 : ( ?A ((\n|\r) ?:?P)
+                                   | ?A&:?P
                                    )
-                                & :?seps
-                                & " ":?S
-                                &   !z
-                                  : ?z ((\n ?|):?n)
-                                & @( !z
-                                   :   ?az
-                                       (   %@( !S
-                                             |   "<"
-                                               &   (">":?S) !seps
-                                                 : ?seps
-                                               & ~
-                                             |   "("
-                                               &   (")":?S) !seps
-                                                 : ?seps
-                                               & ~
-                                             )
-                                           ( ?zz
-                                           & (   !seps:
-                                               & !az !S:?az
-                                             |   !seps:%?S ?seps
-                                               & ~
-                                             )
+                                 )
+                              & @( !A
+                                 :   ?ZA
+                                     (   %@( !S
+                                           |   ">"
+                                             &   ("<":?S) !seps
+                                               : ?seps
+                                             & ~
+                                           |   ")"
+                                             &   ("(":?S) !seps
+                                               : ?seps
+                                             & ~
                                            )
-                                       | :?zz
-                                       )
-                                   )
-                                &   str$(rev$!P rev$!AA)
-                                    (code.,str$(rev$!ZA !e !az))
-                                    code$(str$(!zz !n))
-                              | !arg
-                          )
-                        & code$!arg:?cds
-                        &   whl
-                          ' (   !cds
-                              :   ?A
-                                  (code.,?K)
-                                  (code.,?L)
-                                  ?Z
-                            &   !A (code.,str$(!K !L)) !Z
-                              : ?cds
-                            )
-                        & :?sdc
-                        &   whl
-                          ' ( !cds:%?dc ?cds
-                            & !dc !sdc:?sdc
-                            )
-                        &   whl
-                          ' ( !sdc:%?dc ?sdc
-                            &     (   !dc:@
-                                    & angbrack$!dc
-                                  |   !dc:(?e.?a,?dc)
-                                    & (!e.!a,angbrack$!dc)
+                                         ( ?AA
+                                         & ( !seps:% ?seps
+                                           | 
+                                           )
+                                         & (   !seps:
+                                             & str$(!ZA !S):?ZA
+                                           |   !seps:%?S ?seps
+                                             & ~
+                                           )
+                                         )
+                                     | :?AA
+                                     )
+                                 )
+                              & " ":?seps
+                              & " ":?S
+                              & @( !z
+                                 : ?z ((\n ?|):?n)
+                                 )
+                              & @( !z
+                                 :   ?az
+                                     (   %@( !S
+                                           |   (   "<"
+                                                 &   (">":?S) !seps
+                                                   : ?seps
+                                               |   "("
+                                                 &   (")":?S) !seps
+                                                   : ?seps
+                                               )
+                                             & ~
+                                           )
+                                         ( ?zz
+                                         & ( !seps:% ?seps
+                                           | 
+                                           )
+                                         & (   !seps:
+                                             & !az !S:?az
+                                           |   !seps:%?S ?seps
+                                             & ~
+                                           )
+                                         )
+                                     | :?zz
+                                     )
+                                 )
+                              &   codev$(str$(rev$!P rev$!AA))
+                                  ( code
+                                  .   (AAA.aaa)
+                                    , str$(rev$!ZA !e !az)
                                   )
-                                  !cds
-                              : ?cds
-                            )
-                        & !cds
-                    )
-                  & ( inline1
-                    =   a m
-                      .     @(!arg:?a "|_" ?m "_|" ?arg)
-                          &   codes$!a
-                              ( !m:
-                              | (code.,angbrack$!m)
-                              )
-                              inline1$!arg
-                        | codes$!arg
-                    )
-                  & ( fput
-                    =   a,b,c,e,f,g,par,section,content
-                      .   !arg:(?par.?section.?content)
-                        &   (   !paragraphs:?a (!par.?b) ?c
-                              & (   !b:?e (!section.?f) ?g
-                                  & (   !f:? !content ?
-                                      & !paragraphs
-                                    |   !a
-                                        ( !par
-                                        .   !e
-                                            (!section.!f !content)
-                                            !g
-                                        )
-                                        !c
-                                    )
-                                |   !a
-                                    (!par.!b (!section.!content))
-                                    !c
+                                  code$(str$(!zz !n))
+                            | codev$!arg
+                        )
+                      & ( codev
+                        =   a e z,az zz S seps n
+                          .     @( str$!arg
+                                 : ( ?a " !" ?z&" !":?e
+                                   | ?a " ?" ?z&" ?":?e
+                                   )
+                                 )
+                              & :?seps
+                              & " ":?S
+                              & @( !z
+                                 :   ?z
+                                     ( ( (\n|\r) ?
+                                       | 
+                                       )
+                                     : ?n
+                                     )
+                                 )
+                              & @( !z
+                                 :   ?az
+                                     (   %@( !S
+                                           |   "<"
+                                             &   (">":?S) !seps
+                                               : ?seps
+                                             & ~
+                                           |   "("
+                                             &   (")":?S) !seps
+                                               : ?seps
+                                             & ~
+                                           )
+                                         ( ?zz
+                                         & (   !seps:
+                                             & !az !S:?az
+                                           |   !seps:%?S ?seps
+                                             & ~
+                                           )
+                                         )
+                                     | :?zz
+                                     )
+                                 )
+                              &   str$!a
+                                  (code.(BBB.bbb),str$(!e !az))
+                                  codev$(str$(!zz !n))
+                            | !arg
+                        )
+                      & code$!arg:?cds
+                      &   whl
+                        ' (   !cds
+                            :   ?A
+                                (code.(CCC.ccc),?K)
+                                (code.(DDD.ddd),?L)
+                                ?Z
+                          &     !A
+                                (code.(EEE.eee),str$(!K !L))
+                                !Z
+                            : ?cds
+                          )
+                      & :?sdc
+                      &   whl
+                        ' ( !cds:%?dc ?cds
+                          & !dc !sdc:?sdc
+                          )
+                      &   whl
+                        ' ( !sdc:%?dc ?sdc
+                          &     ( !dc:@&angbrack$!dc
+                                |   !dc:(?e.?a,?dc)
+                                  & (!e.!a,angbrack$!dc)
                                 )
-                            | !paragraphs (!par.!section.!content)
+                                !cds
+                            : ?cds
+                          )
+                      & !cds
+                  )
+                & ( inline1
+                  =   a m
+                    .     @(!arg:?a "|_" ?m "_|" ?arg)
+                        &   codes$!a
+                            ( !m:
+                            | (code.(FFF.fff),angbrack$!m)
                             )
-                          : ?paragraphs
-                    )
-                  & ( indented2
-                    =   a
-                      .     !arg:%?a %?arg
-                          & indented2$!a indented2$!arg
-                        |   @(!arg:?a \n ?arg)
-                          & nbsp2$!a (br.,) indented2$!arg
-                        | nbsp2$!arg
-                    )
-                  & ( nbsp2
-                    =   a
-                      .     @(!arg:?a " " ?arg)
-                          & inline1$!a entCP$"&nbsp;" nbsp2$!arg
-                        | inline1$!arg
-                    )
-                  & ( break2
-                    =   a,b,c,d,br,id
-                      .     !arg:(?br.?arg)
+                            inline1$!arg
+                      | codes$!arg
+                  )
+                & ( addContent2paragraphs
+                  =   a,b,c,e,f,g,par,section,content
+                    .   !arg:(?par.?section.?content)
+                      &   (   !paragraphs:?a (!par.?b) ?c
+                            & (   !b:?e (!section.?f) ?g
+                                & (   !f:? !content ?
+                                    & !paragraphs
+                                  |   !a
+                                      ( !par
+                                      . !e (!section.!f !content) !g
+                                      )
+                                      !c
+                                  )
+                              | !a (!par.!b (!section.!content)) !c
+                              )
+                          | !paragraphs (!par.!section.!content)
+                          )
+                        : ?paragraphs
+                  )
+                & ( indented2
+                  =   a
+                    .     !arg:%?a %?arg
+                        & indented2$!a indented2$!arg
+                      |   @(!arg:?a \n ?arg)
+                        & nbsp2$!a (br.,) indented2$!arg
+                      | nbsp2$!arg
+                  )
+                & ( nbsp2
+                  =   a
+                    .     @(!arg:?a " " ?arg)
+                        & inline1$!a entCP$"&nbsp;" nbsp2$!arg
+                      | inline1$!arg
+                  )
+                & ( break2
+                  =   a,b,c,d,br,id
+                    .   !arg:(?br.?arg)
+                      & (   ~
                           & @( !arg
                              :   (|? " "|`)
                                  ()
@@ -3691,7 +3754,8 @@ Topic:")
                                     break2$(.!d)
                               | asCode2$(indented2$!b)
                               )
-                        |   @( !arg
+                        |   ~
+                          & @( !arg
                              :   ?a
                                  \n
                                  (|? " "|`)
@@ -3783,213 +3847,247 @@ Depending on the context, $<expression> can have two effects :"
                               (br.,)
                               break2$(.!b)
                         | inline1$!arg
-                    )
-                  & ( subul
-                    =   a b c d e
-                      .     (   @(!arg:"  -" ?b "\n  -" ?c)
-                              & :?a
-                            | @(!arg:?a "\n  -" ?b "\n  -" ?c)
-                            )
-                          &   !a
-                              (   @( !c
-                                   :   ?d
-                                       \n
-                                       ((%@:~" ":~"*") ?:?e)
-                                   )
-                                &   ( ul
-                                    . ,ul2$("  -"."  -" !b \n "  -" !d)
-                                    )
-                                    chunk2$!e
-                              | (ul.,ul2$("  -"."  -" !b \n "  -" !c))
-                              )
-                        | inline1$!arg
-                    )
-                  & ( ol2
-                    =   n,s,t
-                      .     @( str$!arg
-                             :   #%?n
-                                 %?`s
-                                 ?t
-                                 (   \n
-                                     ( (=.!n+1)$() !s ?
-                                     : ?arg
-                                     )
-                                 | :?arg
-                                 )
-                             )
-                          & ( @( !t
-                               :   (|? " "|`)
-                                   ()
-                                   ~" "
-                                   ?t
-                               )
-                            | 
-                            )
-                          & (li.,subul$!t) ol2$!arg
-                        | 
-                    )
-                  & ( ul2
-                    =   t,bullet
-                      .     !arg:(?bullet.?arg)
-                          & @( str$!arg
-                             :   !bullet
-                                 ?t
-                                 ( \n (!bullet ?:?arg)
-                                 | :?arg
-                                 )
-                             )
-                          & ( @( !t
-                               :   (|? " "|`)
-                                   ()
-                                   ~" "
-                                   ?t
-                               )
-                            | 
-                            )
-                          & (li.,subul$!t) ul2$(!bullet.!arg)
-                        | 
-                    )
-                  & (breaks2=.break2$((br.,).!arg))
-                  & ( chunk2
-                    =     a b c d ee f g s x y
-                        , termpat defline defpat termdefpat termer
-                      .     @(!arg:?a \n1 %?`s ?b \n2 !s ?c)
-                          &   breaks2$!a
-                              (   @( !c
-                                   :   ?d
-                                       \n
-                                       ((%@:~" ":~#) ?:?ee)
-                                   )
-                                &   (ol.,ol2$(1 !s !b \n 2 !s !d))
-                                    (p.,chunk2$!ee)
-                              | (ol.,ol2$(1 !s !b \n 2 !s !c))
-                              )
-                        |   (   @(!arg:"*" ?b "\n*" ?c)
-                              & :?a
-                            |   @(!arg:?a "\n*" ?b "\n*" ?c)
-                              & breaks2$!a:?a
-                            )
-                          &   !a
-                              (   @( !c
-                                   :   ?d
-                                       \n
-                                       ((%@:~" ":~"*") ?:?ee)
-                                   )
-                                &   (ul.,ul2$("*"."*" !b \n "*" !d))
-                                    chunk2$!ee
-                              | (ul.,ul2$("*"."*" !b \n "*" !c))
-                              )
-                        |   @(!arg:?a \n "{?}" ?c)
-                          &   chunk2$!a
-                              (   @( !c
-                                   :   ?d
-                                       \n
-                                       ((%@:~"{":~" ") ?:?ee)
-                                   )
-                                &   (blockquote.,(pre.,"\n{?}" !d))
-                                    chunk2$!ee
-                              | (blockquote.,(pre.,"\n{?}" !c))
-                              )
-                        |   @(!arg:"{?}" ?c)
-                          & (   @( !c
+                        )
+                  )
+                & ( subul
+                  =   a b c d e
+                    .     (   @(!arg:"  -" ?b "\n  -" ?c)
+                            & :?a
+                          | @(!arg:?a "\n  -" ?b "\n  -" ?c)
+                          )
+                        &   !a
+                            (   @( !c
                                  :   ?d
                                      \n
-                                     ((%@:~"{":~" ") ?:?ee)
+                                     ((%@:~" ":~"*") ?:?e)
                                  )
-                              &   (blockquote.,(pre.,"\n{?}" !d))
-                                  chunk2$!ee
-                            | (blockquote.,(pre.,"\n{?}" !c))
+                              &   (ul.,ul2$("  -"."  -" !b \n "  -" !d))
+                                  chunk2$!e
+                            | (ul.,ul2$("  -"."  -" !b \n "  -" !c))
                             )
-                        |   ( termpat
-                            = (%@:>" ") ? \n&`
+                      | inline1$!arg
+                  )
+                & ( ol2
+                  =   n,s,t
+                    .     @( str$!arg
+                           :   #%?n
+                               %?`s
+                               ?t
+                               (   \n
+                                   ((=.!n+1)$() !s ?:?arg)
+                               | :?arg
+                               )
+                           )
+                        & ( @( !t
+                             :   (|? " "|`)
+                                 ()
+                                 ~" "
+                                 ?t
+                             )
+                          | 
+                          )
+                        & (li.,subul$!t) ol2$!arg
+                      | 
+                  )
+                & ( ul2
+                  =   t,bullet
+                    .     !arg:(?bullet.?arg)
+                        & @( str$!arg
+                           :   !bullet
+                               ?t
+                               ( \n (!bullet ?:?arg)
+                               | :?arg
+                               )
+                           )
+                        & ( @( !t
+                             :   (|? " "|`)
+                                 ()
+                                 ~" "
+                                 ?t
+                             )
+                          | 
+                          )
+                        & (li.,subul$!t) ul2$(!bullet.!arg)
+                      | 
+                  )
+                & (breaks2=.break2$((br.,).!arg))
+                & ( trim
+                  =   a b
+                    .   rev$!arg:?arg
+                      &   whl
+                        ' ( @(!arg:?a \n \t ?b)
+                          & str$(!a \n !b):?arg
+                          )
+                      &   whl
+                        ' ( @(!arg:?a \n " " ?b)
+                          & str$(!a \n !b):?arg
+                          )
+                      &   whl
+                        ' ( @(!arg:?a \r ?b)
+                          & str$(!a !b):?arg
+                          )
+                      &   whl
+                        ' ( @(!arg:?a \n\n\n ?b)
+                          & str$(!a \n\n !b):?arg
+                          )
+                      & whl'@(!arg:\n ?arg)
+                      & rev$!arg
+                  )
+                & ( chunk2
+                  =     a b c d ee f g s x y
+                      , termpat defline defpat termdefpat termer
+                    .     @(!arg:\n ?c)
+                        & (br.(PECH.PECH),) chunk2$!c
+                      |   @(!arg:?a \n\n ?c)
+                        &   chunk2$!a
+                            (br.,)
+                            (br.,)
+                            chunk2$!c
+                      |   @(!arg:"{" %@ "}" ?:?c)
+                        & ( @(!c:?b \n (%@(~"{":~" ") ?:?c))
+                          | (!c.):(?b.?c)
+                          )
+                        &   (br.(ex.EX),)
+                            blocklevel$!b
+                            (br.(ex.ENDEX),)
+                            chunk2$!c
+                      |   @(!arg:?a \n ("{" %@ "}" ?:?c))
+                        & ( @(!c:?b \n (%@(~"{":~" ") ?:?c))
+                          | (!c.):(?b.?c)
+                          )
+                        &   chunk2$!a
+                            (br.(ex.EX),)
+                            blocklevel$!b
+                            (br.(ex.ENDEX),)
+                            chunk2$!c
+                      |   (br.(ex.EX2),)
+                          blocklevel$!arg
+                          (br.(ex.ENDEX2),)
+                  )
+                & ( definitionList
+                  =   T dt n dt dd dds dl
+                    .   !arg:?T
+                      & @(!T:?dt "\n " ?)
+                      & @(!dt:~:~(" " ?):~(? \n ?))
+                      & 0:?n
+                      & :?dl:?dds
+                      &   whl
+                        ' ( @(!T:?dt \n ?T)
+                          & @(!dt:~:~(" " ?))
+                          & ( :!dds
+                            |     !dl (dd.,inline1$(str$!dds))
+                                : ?dl
+                              & :?dds
                             )
-                          & ( defline
-                            = " " ? (%@:>" ") ? \n&`
-                            )
-                          & ( defpat
-                            = !defline (|!defpat)
-                            )
-                          & ( termdefpat
-                            =   TeRm DeF L E
-                              .   @( !arg
-                                   :   (?TeRm \n:!termpat)
-                                       (?DeF \n:!defpat)
-                                       ( ?arg
-                                       &     (dt.,inline1$!TeRm)
-                                             (dd.,inline1$!DeF)
-                                         : ?E
-                                       &   (     !arg
-                                               : (|\n)
-                                             & !E
-                                           |   termdefpat$!arg:?L
-                                             & !E !L
-                                           )
-                                         : ?L
-                                       )
-                                   )
-                                & !L
-                            )
-                          & @( !arg
-                             :   ?a
-                                 (   \n
-                                     ( 
-                                     | ? (" "|\r)
-                                     | `
-                                     )
-                                     ()
+                          & !dl (dt.,inline1$!dt):?dl
+                          & 1+!n:?n
+                          & @(!T:" " ?dd \n ?T)
+                          & !dd:?dds
+                          &   whl
+                            ' ( @(!T:" " ?dd \n ?T)
+                              & !dds \n !dd:?dds
+                              )
+                          )
+                      & !n:>1
+                      & @( !T
+                         : ( 
+                           |   " "
+                               ( ?dd
+                               &     !dl
+                                     (dd.,inline1$(str$(!dds \n !dd)))
+                                 : ?dl
+                               )
+                           )
+                         )
+                      & (dl.(DEF.def),!dl)
+                  )
+                & ( blocklevel
+                  =     a b c d ee f g s x y
+                      , termpat defline defpat termdefpat termer
+                    .     @(!arg:?a \n1 %?`s ?b \n2 !s ?c)
+                        &   breaks2$!a
+                            (   @( !c
+                                 :   ?d
                                      \n
-                                     ?b
-                                     (   \n
-                                         ( 
-                                         | ? (" "|\r)
-                                         | `
-                                         )
-                                         ()
-                                         \n
-                                         ?c
-                                     |   (\n|)
-                                       & :?c
-                                     )
-                                 & str$(!b \n):?b
-                                 & termdefpat$!b:?termer
+                                     ((%@:~" ":~#) ?:?ee)
                                  )
-                             )
-                          & inline1$!a (dl.,!termer) chunk2$!c
-                        |   @( !arg
-                             :   ( &:?a
-                                 | ?a \n
+                              &   (ol.,ol2$(1 !s !b \n 2 !s !d))
+                                  (p.,chunk2$!ee)
+                            | (ol.,ol2$(1 !s !b \n 2 !s !c))
+                            )
+                      |   (   @(!arg:"*" ?b "\n*" ?c)
+                            & :?a
+                          |   @(!arg:?a "\n*" ?b "\n*" ?c)
+                            & breaks2$!a:?a
+                          )
+                        &   !a
+                            (   @( !c
+                                 :   ?d
+                                     \n
+                                     ((%@:~" ":~"*") ?:?ee)
                                  )
-                                 ( %?c \n ?d
-                                 & @(!c:?x "  " ?y)
-                                 & @( !d
-                                    :   ?ee
-                                        (   \n
-                                            ( ?f
-                                            & ( @( !f
-                                                 :   ?f
-                                                     \n
-                                                     ( ( \n ?
-                                                       | ~(? \n ?)
-                                                       )
-                                                     : ?g
+                              &   (ul.,ul2$("*"."*" !b \n "*" !d))
+                                  chunk2$!ee
+                            | (ul.,ul2$("*"."*" !b \n "*" !c))
+                            )
+                      |   @(!arg:"{?}" ?)
+                        & (blockquote.(pech.EXAMPL),(pre.,!arg))
+                      | definitionList$!arg
+                      |   @(!arg:?a "\n " ?b)
+                        &   blocklevel$!a
+                            (   @(!b:?b \n ?c)
+                              &   ( blockquote
+                                  . (good.GOOD1),(pre.,!b)
+                                  )
+                                  blocklevel$!c
+                            | ( blockquote
+                              . (good.GOOD2),(pre.,!b)
+                              )
+                            )
+                      |   @(!arg:" " ?b)
+                        & (   @(!b:?b \n ?c)
+                            &   ( blockquote
+                                . (good.GOOD3),(pre.,!b)
+                                )
+                                blocklevel$!c
+                          | (blockquote.(good.GOOD4),(pre.,!b))
+                          )
+                      |   @( !arg
+                           :   ( &:?a
+                               | ?a \n
+                               )
+                               ( %?c \n ?d
+                               & @(!c:?x "  " ?y)
+                               & @( !d
+                                  :   ?ee
+                                      (   \n
+                                          ( ?f
+                                          & ( @( !f
+                                               :   ?f
+                                                   \n
+                                                   ( ( \n ?
+                                                     | ~(? \n ?)
                                                      )
-                                                 )
-                                              | :?g
-                                              )
-                                            & ~( 
-                                               & @(!f:? "  " ?)
+                                                   : ?g
+                                                   )
                                                )
+                                            | :?g
                                             )
-                                        |   
-                                          & :?f:?g
-                                        )
-                                    )
-                                 )
-                             )
-                          &   breaks2$!a
-                              (blockquote.,(pre.,!c \n !ee))
-                              (   !f !g:~
-                                &   chunk2
+                                          & ~( 
+                                             & @(!f:? "  " ?)
+                                             )
+                                          )
+                                      | &:?f:?g
+                                      )
+                                  )
+                               )
+                           )
+                        &   breaks2$!a
+                            ( blockquote
+                            . (pech.C),(pre.,!c \n !ee)
+                            )
+                            (   !f !g:~
+                              &     chunk2
                                   $ ( str
                                     $ ( !f
                                         ( !g:~&\n !g
@@ -3997,64 +4095,59 @@ Depending on the context, $<expression> can have two effects :"
                                         )
                                       )
                                     )
-                              | 
-                              )
-                        |   @(!arg:?a "\n " ?b "\n " ?c)
-                          &   breaks2$!a
-                              (   @( !c
-                                   : ?d \n ((%@:~" ") ?:?ee)
-                                   )
-                                &   (blockquote.,(pre.,\n !b "\n " !d))
-                                    chunk2$!ee
-                              | (blockquote.,(pre.,\n !b "\n " !c))
-                              )
-                        | breaks2$!arg
-                    )
-                  & ( pag2
-                    =   pg
-                      .   whl
-                        ' ( !arg:%?pg ?arg
+                                  (p.(F.f),!f)
+                                  (p.(G.g),!g)
+                            | 
+                            )
+                      | inline1$!arg
+                      | breaks2$!arg
+                  )
+                & ( pag2
+                  =   pg ptxt pgs
+                    .   !arg:(?ptxt.?pgs)
+                      &   whl
+                        ' ( !pgs:%?pg ?pgs
+                          & trim$!pg:?pg
                           & chunk2$!pg:?pg
-                          &   fput
+                          &   addContent2paragraphs
                             $ ( !ptxt
                               . text
-                              .   !pg
-                                  \n
-                                  (br.,)
-                                  (br.,)
-                                  \n
+                              . !pg (br.,) (br.,)
                               )
                           )
-                    )
-                  & ( tit
-                    =   put$\n\n
+                  )
+                & ( Tit
+                  =   titel ptxt
+                    .   !arg:(?ptxt.?titel)
+                      & put$\n\n
                       & out$!titel
-                      &   fput
+                      &   addContent2paragraphs
                         $ ( !ptxt
                           . titel
                           . h1
                           . ,(a.(name.!ptxt),codes$!titel)
                           )
                       & streep$!titel
-                    )
-                  & ( spaced
-                    =   a
-                      .     !arg:%?a %?arg
-                          & !a " " spaced$!arg
-                        | !arg
-                    )
-                  & ( first
-                    =   
-                      .   !arg:%?arg ?&!arg
-                        | 
-                    )
-                  & ( listmenu2
-                    =     men sel tekst a b term definition
-                        , ddlines padded
-                      .     !arg:(?men.?sel)
-                          & !sel:
-                          & !men
-                        |   !sel:(?antw,?keuze) ?sel
+                  )
+                & ( spaced
+                  =   a
+                    .     !arg:%?a %?arg
+                        & !a " " spaced$!arg
+                      | !arg
+                  )
+                & ( first
+                  =   
+                    .   !arg:%?arg ?&!arg
+                      | 
+                  )
+                & ( listmenu2
+                  =     men sel tekst a b term definition
+                      , ddlines padded menu menutekst
+                    .   !arg:(?men.?sel)
+                      & :?menu:?menutekst
+                      &   whl
+                        ' ( !sel:(?antw,?keuze) ?sel
+                          & out$(listmenuitem !antw !keuze)
                           & (   @( !men
                                  :   ( !antw&:?a
                                      | ?a \n !antw
@@ -4122,25 +4215,51 @@ Depending on the context, $<expression> can have two effects :"
                                 )
                             : ?menu
                           & !menutekst !tekst:?menutekst
-                          & listmenu2$(!men.!sel)
+                          )
+                      & (!men.!menu.!menutekst)
+                  )
+                & ( doMenuItems
+                  =   sel menutekst antw keuze menutitel
+                    .   !arg:(?sel.?menutekst)
+                      &   whl
+                        ' ( !sel:(?antw,?keuze) ?sel
+                          & out$(doMenuItem !antw !keuze)
+                          & ( !keuze:
+                            |   !menutekst:%?menutitel ?menutekst
+                              &   writeHTML
+                                $ ((!titel.!ptxt).!menutitel.!keuze)
+                            )
+                          )
+                      & out$(doMenuItems done)
+                  )
+                & (.):?backtotitref
+                & !arg:(?overviewtitref.?topictitel.?arg)
+                &   whl
+                  ' ( !arg:(~:?ptxt) ?arg
+                    &   !!ptxt
+                      : (   (T,?titel,?txt)
+                          & Tit$(!ptxt.!titel)
+                          & pag2$(!ptxt.!txt)
+                          &   refs
+                            $ (!ptxt.!overviewtitref.!backtotitref.!arg)
+                        |   (M,?titel,?men,?sel)
+                          & Tit$(!ptxt.!titel)
+                          & :?menu:?menutekst
+                          &   listmenu2$(!men.!sel)
+                            : (?txt.?menu.?menutekst)
+                          &   addContent2paragraphs
+                            $ (!ptxt.text.chunk2$!txt (dl.,!menu))
+                          &   refs
+                            $ (!ptxt.!overviewtitref.!backtotitref.!arg)
+                          & doMenuItems$(!sel.!menutekst)
+                        )
+                    & (!topictitel.!ptxt):?backtotitref
                     )
-                  & ( doemenu
-                    =   sel,menutekst
-                      .     !arg:(?sel.?menutekst)
-                          & !sel:
-                        |   !sel:(?antw,?keuze) ?sel
-                          & !menutekst:%?menutitel ?menutekst
-                          & writeHTML$(!titel.!ptxt.!menutitel.!keuze)
-                          & doemenu$(!sel.!menutekst)
-                    )
-                  & :?backtotitel
-                  &   !arg
-                    : (?overviewtitel.?overviewref.?topictitel.?arg)
-                  & !topic2
-                |   put$\nexit
-                  & put$" \""
-                  & put$!titel
-                  & out$\"
+                & out$(writeHTML loop done)
+                & put$\nexit
+                & put$" \""
+                & put$!titel
+                & out$\"
             )
           & ( anchors
             =   R z a m Z M L lastchar E A acc
@@ -4204,7 +4323,7 @@ Depending on the context, $<expression> can have two effects :"
             )
           & !arg:?fname
           & :?paragraphs
-          & writeHTML$(..Bracmat.lusmenu)
+          & writeHTML$((.).Bracmat.lusmenu)
           & :?helpbody
           & fputall$
           & ( removeEmpty
@@ -4229,8 +4348,67 @@ Depending on the context, $<expression> can have two effects :"
                     )
                 & !Z
             )
+          & ( compactBlockquotes
+            =   A B M Z z e a p
+              .   !arg:?Z
+                & :?z
+                &   whl
+                  ' ( !Z:%?A ?Z
+                    & (!A:\n|!A !z:?z)
+                    )
+                &   whl
+                  ' ( !z:%?A ?z
+                    &     (   !A:(~blockquote:?e.?a,?M)
+                            & (!e.!a,compactBlockquotes$!M)
+                          | !A
+                          )
+                          !Z
+                      : ?Z
+                    )
+                &   whl
+                  ' (   !Z
+                      :   ?a
+                          (blockquote.(pech.F),(pre.,?A))
+                          (blockquote.(pech.G),(pre.,?B))
+                          ?z
+                    &     !a
+                          ( blockquote
+                          . (pech.H),(pre.,!A \n !B)
+                          )
+                          !z
+                      : ?Z
+                    )
+                &   whl
+                  ' (   !Z
+                      :   ?a
+                          (br.,)
+                          (br.,)
+                          (blockquote.(pech.I),(pre.,?A))
+                          ?z
+                    &     !a
+                          (br.,)
+                          (blockquote.(pech.J),(pre.,!A))
+                          !z
+                      : ?Z
+                    )
+                &   whl
+                  ' (   !Z
+                      :   ?a
+                          (blockquote.(pech.K),(pre.,?A))
+                          (br.,)
+                          (br.,)
+                          ?z
+                    &     !a
+                          (blockquote.(pech.L),(pre.,!A))
+                          (br.,)
+                          !z
+                      : ?Z
+                    )
+                & !Z
+            )
           & ( ~
-            | removeEmpty$(!helpbody.code i):?helpbody
+            |   removeEmpty$(!helpbody.code i):?helpbody
+              & compactBlockquotes$!helpbody:?helpbody
             )
           &     ( "!DOCTYPE"
                 . " html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\""
