@@ -544,21 +544,23 @@ programming languages. It is not declarative, like Prolog, nor deeply object
 oriented, like Smalltalk, but it is more or less procedural, like the majority
 of languages. Below, I have tried to make the origin of some details more
 explicit:
- C:
-1) conditional execution of right operands of \"and\" and \"or\"
-2) parameter passing (only \"by value\")
-Pascal:
- locally defined functions and routines
- Lisp:
-1) implementation of expressions in binary trees
-2) weak type checking
-3) late binding
- Logo:
- different notations for the same variable, depending on whether it
- produces or receives a value
- Snobol,Icon :
-1) a well developed pattern matching apparatus including backtracking
-2) dual results of evaluations : both value and success/failure
+
+C
+    * conditional execution of right operands of \"and\" and \"or\"
+    * parameter passing (only \"by value\")
+Pascal
+    * locally defined functions and routines
+Lisp
+    * implementation of expressions in binary trees
+    * weak type checking
+    * late binding
+Logo
+    * different notations for the same variable, depending on whether it
+      produces or receives a value
+Snobol,Icon
+    * a well developed pattern matching apparatus including backtracking
+    * dual results of evaluations : both value and success/failure
+
 Every similarity to other computer algebra systems is a matter of evolutionary
 convergence."
     )
@@ -3472,7 +3474,7 @@ Topic:")
                                       (style."line-height:12pt")
                                   , inline1$!overviewtitel
                                 )
-                                (br.,)
+                                (br.(a.A),)
                             )
                         )
                       & ( :!backtotitel
@@ -3486,7 +3488,7 @@ Topic:")
                                   ,   !!backtoref:(?,?titl,?)
                                     & inline1$!titl
                                 )
-                                (br.,)
+                                (br.(b.B),)
                             )
                         )
                       & (   !nextptxts:%?next ?
@@ -3502,7 +3504,7 @@ Topic:")
                                     ,   !!next:(?,?titl,?)
                                       & inline1$!titl
                                   )
-                                  (br.,)
+                                  (br.(c.D),)
                               )
                         | 
                         )
@@ -3657,7 +3659,7 @@ Topic:")
                                      )
                                  )
                               &   str$!a
-                                  (code.(BBB.bbb),str$(!e !az))
+                                  (code.,str$(!e !az))
                                   codev$(str$(!zz !n))
                             | !arg
                         )
@@ -3665,12 +3667,10 @@ Topic:")
                       &   whl
                         ' (   !cds
                             :   ?A
-                                (code.(CCC.ccc),?K)
-                                (code.(DDD.ddd),?L)
+                                (code.,?K)
+                                (code.,?L)
                                 ?Z
-                          &     !A
-                                (code.(EEE.eee),str$(!K !L))
-                                !Z
+                          &   !A (code.,str$(!K !L)) !Z
                             : ?cds
                           )
                       & :?sdc
@@ -3694,7 +3694,7 @@ Topic:")
                     .     @(!arg:?a "|_" ?m "_|" ?arg)
                         &   codes$!a
                             ( !m:
-                            | (code.(FFF.fff),angbrack$!m)
+                            | (code.,angbrack$!m)
                             )
                             inline1$!arg
                       | codes$!arg
@@ -3722,8 +3722,6 @@ Topic:")
                   =   a
                     .     !arg:%?a %?arg
                         & indented2$!a indented2$!arg
-                      |   @(!arg:?a \n ?arg)
-                        & nbsp2$!a (br.,) indented2$!arg
                       | nbsp2$!arg
                   )
                 & ( nbsp2
@@ -3746,106 +3744,27 @@ Topic:")
                              )
                           & "<expression> : ?<variable>"
                           &   asCode2$("<" indented2$!id ">")
-                              (   @( !b
-                                   : ?c \n ((%@:~" ") ?:?d)
-                                   )
-                                &   asCode2$(indented2$!c)
-                                    (br.,)
-                                    break2$(.!d)
-                              | asCode2$(indented2$!b)
-                              )
-                        |   ~
-                          & @( !arg
-                             :   ?a
-                                 \n
-                                 (|? " "|`)
-                                 ()
-                                 \n
-                                 "<"
-                                 ?id
-                                 ">"
-                                 ?b
-                             )
-                          & "Definition of a function. <var1>,<var2>, etc. are explicitly declared local
-variables. A function is called by
-<function name>$<argument expression> or"
-                          &   inline1$!a
-                              (br.,)
-                              asCode2$("<" indented2$!id ">")
-                              (   @( !b
-                                   : ?c \n ((%@:~" ") ?:?d)
-                                   )
-                                &   asCode2$(indented2$!c)
-                                    (br.,)
-                                    break2$(.!d)
-                              | asCode2$(indented2$!b)
-                              )
+                              asCode2$(indented2$!b)
                         |   @(!arg:(?b \n ?|?b))
                           & @(!b:? "  " ?)
                           & "{?} chr$pee$34567  {return value at address 34567 (1 byte) as a character}"
-                          &   !br
-                              (   @(!arg:?b \n ?d)
-                                &   asCode2$(indented2$!b)
-                                    (br.,)
-                                    break2$(.!d)
-                              | asCode2$(indented2$!arg) \n
-                              )
+                          & !br asCode2$(indented2$!arg) \n
                         |   @( !arg
                              : ( " " ?
                                |   (?a \n ?|?a)
                                  & @(!a:? "  " ?)
                                )
                              )
-                          &   !br
-                              (   @( !arg
-                                   : ?c \n ((%@:~" ") ?:?d)
-                                   )
-                                &   nbsp2$!c
-                                    (br.,)
-                                    break2$(.!d)
-                              | nbsp2$!arg \n
-                              )
+                          & !br nbsp2$!arg \n
                         |   @(!arg:?a \n " " ?b)
                           & "Pascal:
  locally defined functions and routines
  Lisp:"
                           &   inline1$!a
-                              (br.,)
+                              (br.(k.K),)
                               entCP$"&nbsp;"
-                              (   @( !b
-                                   : ?c \n ((%@:~" ") ?:?d)
-                                   )
-                                &   nbsp2$!c
-                                    (br.,)
-                                    break2$(.!d)
-                              | nbsp2$!b \n
-                              )
-                        |   @(!arg:?a \n ?b)
-                          & den$(sim$(,!a)):<50
-                          & "Short first lines"
-                          & "These functions play complementary roles.
-Depending on the context, $<expression> can have two effects :"
-                          &   !br
+                              nbsp2$!b
                               \n
-                              inline1$!a
-                              (br.,)
-                              break2$(.!b)
-                        |   @( !arg
-                             :   ?a
-                                 \n
-                                 ( ? (" "|\t|\r)
-                                 | `
-                                 )
-                                 \n
-                                 ?b
-                             )
-                          & "empty line between texts"
-                          &   !br
-                              \n
-                              inline1$!a
-                              (br.,)
-                              (br.,)
-                              break2$(.!b)
                         | inline1$!arg
                         )
                   )
@@ -3910,7 +3829,9 @@ Depending on the context, $<expression> can have two effects :"
                         & (li.,subul$!t) ul2$(!bullet.!arg)
                       | 
                   )
-                & (breaks2=.break2$((br.,).!arg))
+                & ( breaks2
+                  = .break2$((br.(p.P),).!arg)
+                  )
                 & ( trim
                   =   a b
                     .   rev$!arg:?arg
@@ -3936,13 +3857,9 @@ Depending on the context, $<expression> can have two effects :"
                 & ( chunk2
                   =     a b c d ee f g s x y
                       , termpat defline defpat termdefpat termer
-                    .     @(!arg:\n ?c)
-                        & (br.(PECH.PECH),) chunk2$!c
+                    .   @(!arg:\n ?c)&chunk2$!c
                       |   @(!arg:?a \n\n ?c)
-                        &   chunk2$!a
-                            (br.,)
-                            (br.,)
-                            chunk2$!c
+                        & chunk2$!a chunk2$!c
                       |   @(!arg:"{" %@ "}" ?:?c)
                         & ( @(!c:?b \n (%@(~"{":~" ") ?:?c))
                           | (!c.):(?b.?c)
@@ -4086,19 +4003,6 @@ Depending on the context, $<expression> can have two effects :"
                             ( blockquote
                             . (pech.C),(pre.,!c \n !ee)
                             )
-                            (   !f !g:~
-                              &     chunk2
-                                  $ ( str
-                                    $ ( !f
-                                        ( !g:~&\n !g
-                                        | 
-                                        )
-                                      )
-                                    )
-                                  (p.(F.f),!f)
-                                  (p.(G.g),!g)
-                            | 
-                            )
                       | inline1$!arg
                       | breaks2$!arg
                   )
@@ -4109,11 +4013,7 @@ Depending on the context, $<expression> can have two effects :"
                         ' ( !pgs:%?pg ?pgs
                           & trim$!pg:?pg
                           & chunk2$!pg:?pg
-                          &   addContent2paragraphs
-                            $ ( !ptxt
-                              . text
-                              . !pg (br.,) (br.,)
-                              )
+                          & addContent2paragraphs$(!ptxt.text.!pg)
                           )
                   )
                 & ( Tit
@@ -4188,7 +4088,7 @@ Depending on the context, $<expression> can have two effects :"
                             =   line
                               .     @(!arg:?line \n ?arg)
                                   &   inline1$!line
-                                      (br.,)
+                                      (br.(u.U),)
                                       ddlines$!arg
                                 | inline1$!arg
                             )
@@ -4381,12 +4281,12 @@ Depending on the context, $<expression> can have two effects :"
                 &   whl
                   ' (   !Z
                       :   ?a
-                          (br.,)
-                          (br.,)
+                          (br.(v.V),)
+                          (br.(w.W),)
                           (blockquote.(pech.I),(pre.,?A))
                           ?z
                     &     !a
-                          (br.,)
+                          (br.(x.X),)
                           (blockquote.(pech.J),(pre.,!A))
                           !z
                       : ?Z
@@ -4395,12 +4295,12 @@ Depending on the context, $<expression> can have two effects :"
                   ' (   !Z
                       :   ?a
                           (blockquote.(pech.K),(pre.,?A))
-                          (br.,)
-                          (br.,)
+                          (br.(y.Y),)
+                          (br.(z.Z),)
                           ?z
                     &     !a
                           (blockquote.(pech.L),(pre.,!A))
-                          (br.,)
+                          (br.(aa.AA),)
                           !z
                       : ?Z
                     )
