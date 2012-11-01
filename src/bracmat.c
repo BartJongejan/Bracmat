@@ -63,10 +63,14 @@ Test coverage:
 
 */
 
-#define DATUM "21 October 2012"
+#define DATUM "1 November 2012"
 #define VERSION "6"
-#define BUILD "140"
-/*  21 October 2012
+#define BUILD "141"
+/*  1 November 2012
+Function someopt() conditionally excluded with 
+  #if !defined NO_LOW_LEVEL_FILE_HANDLING
+
+    21 October 2012
 Made sure that put$ cannot write to a file that is still open in get$.
 
     17 October 2012
@@ -12352,6 +12356,7 @@ static void lst(psk kn)
     }
 
 
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
 static LONG someopt(psk kn,LONG opt[])
     {
     int i;
@@ -12368,6 +12373,7 @@ static LONG someopt(psk kn,LONG opt[])
             return opt[i];
     return 0L;
     }
+#endif
 
 static filehendel * findFilehendelByName(const char * name)
     {
