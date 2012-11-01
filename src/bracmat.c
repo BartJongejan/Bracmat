@@ -12355,26 +12355,6 @@ static void lst(psk kn)
     lstsub(kn);
     }
 
-
-#if !defined NO_LOW_LEVEL_FILE_HANDLING
-static LONG someopt(psk kn,LONG opt[])
-    {
-    int i;
-    while(is_op(kn))
-        {
-        /* return someopt(kn->LEFT,opt) || someopt(kn->RIGHT,opt);
-        18 Maart 1997 */
-        if(someopt(kn->LEFT,opt))
-            return TRUE;
-        kn = kn->RIGHT;
-        }
-    for(i=0;opt[i];i++)
-        if(PLOBJ(kn) == opt[i])
-            return opt[i];
-    return 0L;
-    }
-#endif
-
 static filehendel * findFilehendelByName(const char * name)
     {
     filehendel * fh;
@@ -12476,6 +12456,23 @@ filehendel * myfopen(const char * filename,const char * mode)
     }
 
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
+static LONG someopt(psk kn,LONG opt[])
+    {
+    int i;
+    while(is_op(kn))
+        {
+        /* return someopt(kn->LEFT,opt) || someopt(kn->RIGHT,opt);
+        18 Maart 1997 */
+        if(someopt(kn->LEFT,opt))
+            return TRUE;
+        kn = kn->RIGHT;
+        }
+    for(i=0;opt[i];i++)
+        if(PLOBJ(kn) == opt[i])
+            return opt[i];
+    return 0L;
+    }
+
 static LONG tijdnr = 0L;
 /*
 static int openCount = 0;
