@@ -355,8 +355,8 @@ must be separated by semicolons.
 
 You may freely surround binary operators with white-space characters (e.g.
 space, tab, line feed). Take care not to put spaces between the characters
-that make up a fraction or negative number, - 1234 / 5678 is not the same
-as -1234/5678."
+that make up a fraction or negative number, |_- 1234 / 5678_| is not the same
+as |_-1234/5678_|."
           "Bracmat can open and read a text file and execute the instructions as they are
 read. After the last instruction has been executed, the file is closed. The
 program that currently produces this information, is read from the file named
@@ -401,12 +401,9 @@ recommendations about programming habits:
   to line numbers.
 * Use meaningful names. There is no limit to their length and you may use the
   minus-sign as separator in multiple-word-names.
-* Write comments if variable names do not tell enough.
-* Feel free to write parentheses if that clarifies the program structure.
-* Write parentheses in a BEGIN-END-style, the closing parenthesis below the
-  opening parenthesis.
-* Check whether Bracmat interprets your code in the way you intended by listing
-  your functions without the |_LIN_| option.
+* Let Bracmat indent your code: regularly save your code, read it in Bracmat,
+  save it from bracmat using the |_lst_| function to the file you are editing
+  and reread the file in your editor.
 * Try to evade the \"not\" prefix ~ and the use of arrays."
     )
   & ( patternm
@@ -449,10 +446,12 @@ recursive invocations of pattern matching and other operations. Examples:
         )
         ?
     );    { pattern using second order logic }
-Europe is reachable from Africa
-Europe is reachable from Asia
-Africa is reachable from Asia
-North America is reachable from South America
+    
+    Europe is reachable from Africa
+    Europe is reachable from Asia
+    Africa is reachable from Asia
+    North America is reachable from South America
+    
 1 Pattern matching in character strings
 2 Pattern matching in tree structures"
       , (1,pattxttxt pattxt2) (2,pattxt escappattxt)
@@ -2045,12 +2044,13 @@ matching in a string of atoms. Use the '@' to instruct the program to look
 inside the atom and use space operators to combine subpatterns. The space
 operator does not itself match any characters. To match a space in an atom,
 use a space in an atom!"
-          "You cannot negate the result of string pattern matching by adding the ~ prefix,
-unless there are other prefixes than @ and ~ present.
+          "You cannot negate the result of string pattern matching by adding the ~ prefix.
 
 {?} a b:(~@(? b:a %)) {succeeds, ~@ means:'not an atom'}
-{?} ~@(a b:a ?)       {succeeds, ~@ means: not a string match'}
-{?} ~@(a:a)           {succeeds, same reason}
+{?} ~@(a b:a ?)       {succeeds, ~@ means: 'not a string match'}
+{?} @(a b:a ?)        {illegal, lhs of string match operator must be atomic}
+{?} ~@(a:b)           {fails, pattern matching}
+{?} @(a:b)            {fails, string pattern matching}
 {?} 12/34:@(?x:#?a (~#%@:?y) #?b) {succeeds, ?x matches the atom 12/34,
                        while #?a (~#%@:?y) #?b matches 12/34 as a string.}
 {?} 12:~/@(?x:#%?a #%?b) {succeeds, ~ negates /, not @, so we have a string
@@ -2064,7 +2064,7 @@ subject is a number and the pattern otherwise would have been treated as a
 number.
 You have to take care with minuses: the patterns %\"-20/5\" and %-20/5 are
 different. In %\"-20/5\", the % is superfluous and the pattern matches
-characterwise. In %-20/5, the pattern matches 20/5 and the minus is ignored!
+characterwise. In %-20/5, the pattern matches |_20/5_| and the minus is ignored!
 {?} @(abcd40/10efgh:?a    20/5  ?z)    {succeeds, because 4 = 20/5 = 4}
 {?} @(abcd52/13efgh:?a    20/5  ?z)    {succeeds, because 52/13 = 20/5 = 4}
 {?} @(abcd40/10efgh:?a   %20/5  ?z)    {fails}
@@ -2099,9 +2099,9 @@ matching."
           "Especially the & | and : operators are helpful in formulating complex
 patterns with alternatives, conjunctions and side effects in the form of
 actions. In the following examples, !s stands for the subject expression,
-the expressions in parentheses are patterns and !p, !pa, !pb, etc. are
-sub-patterns therein. !a, !aa, etc. stands for an action (a part of the
-pattern that is conditionally evaluated).
+the expressions in parentheses are patterns and |_!p_|, |_!pa_|, |_!pb_|,
+etc. are sub-patterns therein. !a, !aa, etc. stands for an action
+(a part of the pattern that is conditionally evaluated).
 
     !s:(!p&!a)
 
@@ -2119,13 +2119,13 @@ If pattern !pa matches with !s, then pattern !pb is also tried.
 
 The next example combines these operators in a grammar-like expression:
 
-    !s:( !pa         & !aa       If either !pa, or !pb or both of !pc1 and !pc2
-       | !pb         & !ab       \"fire\", actions !aa, !ab and !ac, respectively
-       | (!pc1:!pc2) & !ac       are triggered.
-       )"
+ !s:( !pa         & !A    { If either !pa, or !pb or both of !pc1 and !pc2 }
+    | !pb         & !B    { \"fire\", actions !A, !B and !C, respectively  }
+    | (!pc1:!pc2) & !C    { are triggered.                                 }
+    )"
           "Take care for the grouping of the |_: &_| and |_|_| operators :
 
-(!s:!pa):!pb and !s:(!pa:!pb) have, incidentally, the same effect, but the
+|_(!s:!pa):!pb_| and |_!s:(!pa:!pb)_| have, incidentally, the same effect, but the
 following expressions are very different :
 
 (!s:!p)&!e or !s:!p&!e
@@ -3629,28 +3629,22 @@ Topic:")
                               & :?seps
                               & " ":?S
                               & @( !z
-                                 :   ?z
-                                     ( ( (\n|\r) ?
-                                       | 
-                                       )
-                                     : ?n
-                                     )
+                                 : ?z ((\n ?|):?n)
                                  )
                               & @( !z
                                  :   ?az
                                      (   %@( !S
-                                           |   "<"
-                                             &   (">":?S) !seps
-                                               : ?seps
-                                             & ~
-                                           |   "("
-                                             &   (")":?S) !seps
-                                               : ?seps
+                                           |   (   "<"
+                                                 & !S !seps:?seps
+                                                 & ">":?S
+                                               |   "("
+                                                 & !S !seps:?seps
+                                                 & ")":?S
+                                               )
                                              & ~
                                            )
                                          ( ?zz
-                                         & (   !seps:
-                                             & !az !S:?az
+                                         & ( !seps:
                                            |   !seps:%?S ?seps
                                              & ~
                                            )
@@ -3659,7 +3653,7 @@ Topic:")
                                      )
                                  )
                               &   str$!a
-                                  (code.,str$(!e !az))
+                                  (code.(A.a),str$(!e !az !S))
                                   codev$(str$(!zz !n))
                             | !arg
                         )
@@ -3667,10 +3661,12 @@ Topic:")
                       &   whl
                         ' (   !cds
                             :   ?A
-                                (code.,?K)
-                                (code.,?L)
+                                (code.(B.b),?K)
+                                (code.(C.c),?L)
                                 ?Z
-                          &   !A (code.,str$(!K !L)) !Z
+                          &     !A
+                                (code.(D.d),str$(!K !L))
+                                !Z
                             : ?cds
                           )
                       & :?sdc
@@ -3694,7 +3690,7 @@ Topic:")
                     .     @(!arg:?a "|_" ?m "_|" ?arg)
                         &   codes$!a
                             ( !m:
-                            | (code.,angbrack$!m)
+                            | (code.(E.e),angbrack$!m)
                             )
                             inline1$!arg
                       | codes$!arg
