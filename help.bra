@@ -142,27 +142,27 @@ lex lexical analysis of help file"
     =   M
       , "Built-in functions"
       , "1 <N>
-    access array element:|_!(12$a):?(11$a)_|
+    access array element: !(12$a):?(11$a)
 2 |_alc_|
-    allocate memory (low level):|_alc$100_|
+    allocate memory (low level): alc$100
 3 |_arg_|
-    return program (command line) argument:|_(arg$0:?programName)_||_((arg$:?o1)&(arg$:?o2))_|
+    return program (command line) argument: (arg$0:?programName) ((arg$:?o1)&(arg$:?o2))
 4 |_asc_|
-    convert character to internal representation:|_asc$y:121_|
+    convert character to internal representation: asc$y:121
 5 |_chr_|
-    convert internal representation to character:|_chr$121:y_|
+    convert internal representation to character: chr$121:y
 6 |_chu_|
-    convert Unicode codepoint to UTF-8 character:|_chu$2000_|
+    convert Unicode codepoint to UTF-8 character: chu$2000
 7 |_clk_|
-    CPU seconds since start of session:|_clk$:?t0_|
+    CPU seconds since start of session: clk$:?t0
 8 |_d2x_|
-    convert decimal number to hexadecimal number:|_d2x$73083734:45B2B56_|
+    convert decimal number to hexadecimal number: d2x$73083734:45B2B56
 9 |_dbg_|
-    debugging aid:|_dbg'(a b c:? b ?)_|
+    debugging aid: |_dbg'(a b c:? b ?)_|
 10 |_den_|
-    denominator:|_den$22/7:7_|
+    denominator: den$22/7:7
 11 |_div_|
-    quotient:|_div$(22.7):1_|
+    quotient: div$(22.7):1
 12 |_fil_|
     file I/O (low-level)
 13 |_flg_|
@@ -212,7 +212,7 @@ lex lexical analysis of help file"
 35 |_whl_|
     while loop
 36 |_x2d_|
-    convert hexadecimal number to decimal number|_x2d$BABEFACE:3133078222_|
+    convert hexadecimal number to decimal number x2d$BABEFACE:3133078222
 "
       ,   (1,seltxt)
           (2,alctxt)
@@ -278,12 +278,12 @@ time it needed. Intermediary results may also appear on the screen.
 Bracmat and calculators have an important common feature: as long as the input
 data are simple enough, the user need (and can) not specify how these data have
 to be processed. Calculators handle basic calculations in a predictable,
-unchangeable way, e.g. |_4+7_| will always result in |_11_|, and not in, say,
+unchangeable way, e.g. 4+7 will always result in |_11_|, and not in, say,
 |_10_| or |_23-12_|. That is because the manufacturer had good reasons to think
 that |_11_| is what the user expects and nothing else. In the same way, Bracmat
 handles basic \"calculations\" with a much wider variety of data: rational
-numbers, symbols, words and collections thereof. For example, |_a+b+a_| becomes
-|_2*a+b_| and not, say, |_x.a_| or |_b+2*a_|. Again, Bracmat takes decisions
+numbers, symbols, words and collections thereof. For example, a+b+a becomes
+2*a+b and not, say, |_x.a_| or |_b+2*a_|. Again, Bracmat takes decisions
 that you can't easily circumvent. However, the more complex the data are, the
 better are the chances that not all results, although defendable, have an
 appearance that suits you. It is here that programming comes in: Bracmat leaves
@@ -317,12 +317,23 @@ the special symbols |_i_|, |_e_| and |_pi_|, but it offers no numerical represen
 Examples:
 
 {?} a+b+-1*a                 { this is how you subtract in Bracmat }
+{!} b
+
 {?} 1+(1+i)*(1+-1*i)+-1      { the leading and trailing terms force
                                Bracmat to expand the product }
-{?} -12345/54321 ^ 1/2       { the square root of -12345/54321 }
-{?} x^(a+x\\L2*1000)
+{!} 2
+
+{?} 12345/54321 ^ 1/2        { the square root of 12345/54321 }
+{!} 5^1/2*19^-1/2*823^1/2*953^-1/2
+
+{?} x^(a+x\\L2*100)
+{!} 1267650600228229401496703205376*x^a
+
 {?} 5/2 \\L 987654
-{?} y\\D(x\\D((x+y)^-2))"
+{!} 15+5/2\\L32363446272/30517578125
+
+{?} y\\D(x\\D((x+y)^-2))
+{!} 6*(x+y)^-4"
           "Bracmat can only do arithmetic operations with integer and rational numbers.
 There is virtually no limit to their size, but the program is not optimised
 for number crunching.
@@ -333,15 +344,16 @@ number is a fraction) are less than 2^32 or 2^64 respectively, depending on
 whether Bracmat is compiled for a 32 or a 64 bit platform.
 
 Bracmat happily adds and multiplies numbers of, say, a few hundred digits.
-There is a pre-defined function, flt$, that represents rational numbers in
-a \"scientific\" floating point notation, but Bracmat cannot do calculations
-with these \"reals\", unless you write a function to convert them back to
-rational numbers."
+There is a pre-defined function, flt$, that represents rational numbers in a
+scientific floating point notation, but Bracmat cannot do calculations with
+these floating point numbers, unless you write a function to convert them back
+to rational numbers."
           "The binary operators have an ordering of precedence. Of the mathematical
 operators, + has the lowest precedence and \\D the highest (+ * ^ \\L \\D).
-You may use parentheses to overrule this ordering:
+You may use parentheses to overrule this ordering, as in:
 
-{?} (a+b)*(a+c)+a^(-1*d^2+(d+1)*(d+-1))"
+{?} (a+b)*(a+c)+a^(-1*d^2+(d+1)*(d+-1))
+{!} a^-1+a^2+a*b+a*c+b*c"
           "When instructions are entered from the keyboard, the program waits until all
 of the conditions below are fulfilled:
 * <return> (or <enter>) is the last key that has been pressed
@@ -357,7 +369,7 @@ comment when pressing <return>, the next line starts with {str} or {com},
 respectively.
 
 If you want to enter several instructions on the same line, you should write
-a semicolon |_;_| between the instructions. These instructions are executed
+a semicolon ; between the instructions. These instructions are executed
 in the same order. If you do not want to see the result of a calculation, you
 may write a semicolon after the last instruction. Instructions in a text file
 must be separated by semicolons.
@@ -367,12 +379,14 @@ space, tab, line feed). Take care not to put spaces between the characters
 that make up a fraction or negative number, |_- 1234 / 5678_| is not the same
 as |_-1234/5678_|."
           "Bracmat can open and read a text file and execute the instructions as they are
-read. After the last instruction has been executed, the file is closed. The
-program that currently produces this information, is read from the file named
-|_help_|. The instruction for reading a file |_myprog_| and executing the
-instructions therein is |_get$myprog_|. The |_$_| is a binary operator that
-has to do with function evaluation. |_get_| is the function name of one of
-the few built-in functions.
+read. After the last instruction has been executed, the file is closed. For
+example, the program that produces the text you are reading just now, is read
+from a file named |_help_| and immediately executed.
+
+The instruction for reading a file |_myprog_| and executing the instructions
+therein is |_get$myprog_|. The $ is a binary operator that initiates
+function evaluation. |_get_| is the function name of one of the few built-in
+functions.
 
 The result of the last executed instruction in a file is written to the screen.
 For better control over screen output one may use the built-in function |_put_|,
@@ -380,13 +394,16 @@ which writes from the current cursor position to the right, or the pre-defined
 (but changeable) function |_out_|, which writes an extra line feed after its
 argument has been written to the screen.
 
-{?} put$(x*x);put$(y+y)"
+{?} put$(x*x);put$(y+y)
+x^22*y{!} 2*y"
           "Often you will need the result of the last evaluated instruction in the
-next one. You can use the exclamation mark |_!_| instead of re-entering
+next one. You can use the exclamation mark ! instead of re-entering
 the result. (Because Bracmat is still evaluating the instruction |_get$help_|,
 this trick is of no use in the context of this program.) Example (try later):
 {?} 1+1
-{?} !^!^!^!"
+{!} 2
+{?} !^!^!^!
+{!} 65536"
           "When you write programs in the Bracmat language you will normally use an
 external text editor. You can enter small programs directly at the Bracmat
 prompt {?}, but a small change in an instruction can only be done by re-
@@ -399,7 +416,8 @@ indentations. Comments are never written, as they are ignored at input time.
 As an example, you can write the definition of the pre-defined factorisation
 function |_fct_| to a file |_factorise_| by entering the following instruction:
 
-{?} lst$(fct,factorise,NEW) {NEW:replace old file with same name}"
+{?} lst$(fct,factorise,NEW) {NEW:replace old file with same name}
+{!} fct"
           "At first sight, a Bracmat program doesn't look like programs written in other
 languages. This may even become a permanent impression. So here are some
 recommendations about programming habits:
@@ -432,11 +450,15 @@ recursive invocations of pattern matching and other operations. Examples:
 
 {?} S=(|0 !S|1 !T);T=(0 !T|1 !S); { Regular grammar }
 {?} 0 1 0 1 0:!S { Check whether subject contains an even number of 1's. }
-
+{!} 0 1 0 1 0
+    S   0,00 sec
+    
 {?} P=(|0 ?x 1 & !x:!P); { context free grammar }
 {?} 0 0 0 1 1 1:!P { Check whether subject consist of a row of 0's
                      followed by a row of 1's of the same length. }
-
+{!} 0 0 0 1 1 1
+    S   0,00 sec
+    
 {?} connected=(\"South America\".\"North America\") (Africa.Asia) (Asia.Europe);
 {?} (reachable = a b f
     .     !arg:(?a.?b.?f)
@@ -614,7 +636,7 @@ solved in a great number of programming languages."
   & ( syntax
     =   T
       , "The grammar of Bracmat"
-      ,   "Note: in long lists the vertical bar |_|_| is left out.
+      ,   "Note: in long lists the vertical bar | is left out.
 <input>           ::= [<expression>] [;<input>]
 <expression>      ::=   <white space> <expression> <white space>
                       | [<prefixes>] ( <expression> )
@@ -790,7 +812,7 @@ Read file |_matrix_| into a string called |_intern_|. If this file contains
 Bracmat instructions, they hereafter exist in a sleeping state in memory."
           "  get$(!intern,MEM)
 
-|_!intern_| is, in this example, expanded to an atom with a very long name, namely
+!intern is, in this example, expanded to an atom with a very long name, namely
 all of the text of file |_matrix_|. The sleeping expressions are evaluated one
 after the other, just as if |_get'matrix_| was evaluated."
           "  get'(,VAP):?space-list
@@ -915,7 +937,7 @@ This prints
     7 is both odd and prime
     2 is both even and prime
 
-and finally fails when backtracking (induced by the |_~_|) has found all answers
+and finally fails when backtracking (induced by the ~) has found all answers
 to the query."
           "Experimentation with the implementation of matrices in Bracmat has learned
 that lists (of lists (of lists..)) lead to smaller and faster programs than
@@ -932,39 +954,39 @@ of the matrix at hand, and may even be indifferent to the number of indices."
 in the order of operations. Use parentheses to force an operator to a higher
 position in the order of operations.
 
-1 |_=_|
-    assignment:|_(x=7)_||_(square=.!arg^2)_|
-    object member definition:|_(myobject=(place=Copenhagen) (setPlace=.!arg:?(its.place)))_|
-2 |_._|
+1 =
+    assignment: (x=7) (square=.!arg^2)
+    object member definition: (myobject=(place=Copenhagen) (setPlace=.!arg:?(its.place)))
+2 .
     fixed data structure:|_(Palme.Olof.Sweden)_|
-    object member referencing:|_(myhash..insert)$(xxx.998743)_|
-3 |_,_|
+    object member referencing: (myhash..insert)$(xxx.998743)
+3 ,
     list with autostretch:|_(ham,(bread,butter),jam):(ham,bread,butter,jam)_|
-4 |_|_|
-    or else:|_get$myfile | out$\"Cannot read myfile\"_|
-5 |_&_|
+4 |
+    or else: |_get$myfile | out$\"Cannot read myfile\"_|
+5 &
     and then:|_out$\"alomost done\" & Done_|
-6 |_:_|
+6 :
     match subject with pattern:|_Meeting at 4 in room 24:? ?#hour ? ?#room ?_|
 7 [blank]
     sentence, neutral element |_Oh well this can go on and on:?a Oh ?z & !a:_|
-8 |_+_|
+8 +
     add, neutral term 0:|_(a+6+b+a+10)_|,|_(a+b:?x+a+?y & !x:0)_|
-9 |_*_|
+9 *
     multiply, neutral factor 1:|_(46546*647547564)_|,|_(a*b:?x*a*?y & !x:1)_|
-10 |_^_|
+10 ^
     raise to a power, neutral exponent 1:|_(9975^332)_|,|_(45:?n^?exp & !exp:1)_|
-11 |_\\L_|
-    take logarithm:|_10\\L1050_|
-12 |_\\D_|
-    differentiate:|_x\\D(x^10)_|
-13 |_'_|
+11 \\L
+    take logarithm: 10\\L1050
+12 \\D
+    differentiate: x\\D(x^10)
+13 '
     function evaluation (does not evaluate rhs):|_str'(b+a):\"b+a\"_|
     macro:|_()'(my name is ()$name)_|
-14 |_$_|
-    function evaluation (evaluates rhs):|_str$(b+a):\"a+b\"_|
+14 $
+    function evaluation (evaluates rhs): str$(b+a):\"a+b\"
     variable in macro:|_()'(my name is ()$name)_|
-15 |___|
+15 _
     dummy:   |_!expr:?lhs_?rhs & (do$!lhs)_(do$!rhs)_|  "
       ,   (1,savtxt objecttxt asstxt)
           (2,contxt objecttxt)
@@ -997,10 +1019,21 @@ out by removing the binding between <expression> and its name, <atom>. This
 has, in turn, no influence on the copies made earlier.
 
 {?} a=2    { create binding }
+{!} a
+    S
 {?} !a:?b  { bind copy to b }
+{!} 2
+    S
 {?} !b     { show b's value }
+{!} 2
+    S
 {?} a=3    { remove a's binding to 2}
-{?} !b     { show b's value }"
+{!} a
+    S
+{?} !b     { show b's value }
+{!} 2
+    S
+"
           "There is a second way of using the = operator, with a slightly different
 syntax :
 
@@ -1182,7 +1215,7 @@ outside a pattern is either giving or left unchanged. Try this :
 {?} x^y:?_? & a_b   { _ gets bound to ^. Thus a_b evaluates to a^b }"
           "A _ is evaluated by the expression evaluator, but also by the macro
 evaluator. The latter is useful if the _ has matched an operator that is
-very volatile, such as |_&_| and |_|_|.
+very volatile, such as & and |_|_|.
 {?} (=!a:!b&!c):(=?left_?right) {match the &}
 {?} '_
 {!} =&              { It worked, the _ is replaced by a &. }
@@ -1268,7 +1301,7 @@ The following methods are defined for hash tables:
     )
   & ( findtxt
     =   T
-      , "|_(myhash..find)$key:(?Key.?Value) ?OtherKeyValuePairs_|"
+      , "(myhash..find)$key:(?Key.?Value) ?OtherKeyValuePairs"
       , "Returns a blank-separated list of key-value pairs, all with the same key."
     )
   & ( inserttxt
@@ -1394,19 +1427,20 @@ operators, comma and white space.
 
 Branching to a function is done with the $ and ' operators :
 
-|_a $ b_| (or |_a'b_|)       evaluate function |_a_| with argument |_b_|
+a$b (or |_a'b_|)       evaluate function |_a_| with argument |_b_|
 
-Branching without argument passing and local variables is done with the
-unary operator (prefix) ! :
+Branching without argument passing and local variables is done with the unary
+operator (prefix) ! but often this prefix and its cousin !! are used for the
+purpose of variable expansion, it just depends on whether a variable is bound
+to an unevaluated or to an evaluated expression :
 
-|_!X_|                   do subroutine X
-
-but often this prefix and its cousin !! are used for the purpose of variable
-expansion, it just depends on whether a variable is bound to an unevaluated
-or to an evaluated expression :
-
-!X                   expand X
-!!Y                  expand expansion of Y (two !'s is the maximum)"
+!X
+    do subroutine X
+!X
+    expand X
+!!Y
+    expand expansion of Y (two !'s is the maximum)
+"
           "Conditional evaluation is decided by the success or failure of subexpressions.
 Every (sub)expression has two kinds of value: a visible value and a
 success(S)/failure(F)/ignore(I) value. Success and failure are primarily
@@ -1415,50 +1449,66 @@ is generated if a failing expression is back-quoted. The & and | operators
 are sensitive to the S/F/I value of the left operand (where I counts as S).
 Often this left operand is a matching expression.
 
-!a & !b               if !a succeeds do !b
-!a | !b               if !a fails do !b
-!subject : !pattern   try to prove that !pattern describes !subject
+!a & !b
+    if !a succeeds do !b
+!a | !b
+    if !a fails do !b
+!subject : !pattern
+    try to prove that !pattern describes !subject
 
 The back quote ` can be used to overrule the failure of a subexpression.
 The tilde ~ negates failure and success.
 
-`!p & !q              do !p and then do !q
-!a:!p & `!b | !c      if !a matches !p do !b else do !c
-~!a                   succeed if !a fails and fail if !a succeeds
+`!p & !q
+    do !p and then do !q
+!a:!p & `!b | !c
+    if !a matches !p do !b else do !c
+~!a
+    succeeds if !a fails and fails if !a succeeds
 "
     )
   & ( prostutxt2
     =   T
       , "Some often used control structures"
-      , "In the left column control structures are written in pseudocode, in the right
-column the nearest equivalents are written in Bracmat.
+      , "Here are the nearest equivalents of some traditional control structures.
 
 Sequence:
 
-    a; b;                                  `!a & !b { !b must be evaluated, even if !a fails }
+a; b;
+    `!a&!b
+    !a !b
+    !a,!b
+    !a.!b
 
 Repetition:
 
-    WHILE a DO b;                           whl'(!a & !b);
-    DO b WHILE a;                           whl'(!b & !a);
-    DO b UNTIL a;                           whl'(`!b & ~!a);
-    FOR i := m TO n DO b;                   !m:?i & whl'(!i:~>!n & `!b & 1+!i:?i);
+WHILE a DO b;
+    whl'(!a&`!b)
+DO b WHILE a;
+    whl'(`!b&!a)
+DO b UNTIL a;
+    whl'(`!b&~!a)
+FOR i := m TO n DO b;
+    !m+-1:?i&whl'(1+!i:~>!n:?i&`!b);
 
 Selection:
 
-    IF a THEN b ELSE c;                    !a & `!b | !c;
-    v := IF a THEN b ELSE c;               (!a & `!b | `!c) : ?v  {works even if !c fails}
-    SELECT  a                              !a : (!c1 & `!b1 | !c2 & `!b2 |? & !bx);
-    WHEN  c1 : b1
-    WHEN  c2 : b2
-    OTHERWISE  bx;                         { the ? matches anything }
+IF a THEN b ELSE c;
+    !a&`!b|!c;
+v := IF a THEN b ELSE c;
+    (!a&`!b|`!c):?v  
+    (works even if !c fails)
+SELECT  a WHEN  c1 : b1 WHEN  c2 : b2 OTHERWISE  bx;
+    !a:(!c1&`!b1|!c2&`!b2|?&!bx);
 
 Branching:
 
-    CALL a;                                !a;
-    CALL b(x,y,z);                         b$(x,y,z);
-    v := b(x,y,z);                         b$(x,y,z) : ?v;
-
+CALL a;
+    !a;
+CALL b(x,y,z);
+    b$(x,y,z);
+v := b(x,y,z);
+    b$(x,y,z):?v;
 "
     )
   & ( funmactxt
@@ -1928,8 +1978,13 @@ of a pattern. These operators are = | & : ' $ _"
           "The normal role of these operators is ignored by the pattern matching
 evaluator if they are escaped with a $ node with an empty lhs.
 {?} (=foo'bar):(=$(foo'bar))
+{!} =foo'bar
+    S   0,00
+    
 {?} (=foo'bar):(=$(?f'?x)) & !f !x
 {!} foo bar
+    S   0,00 sec
+
 The escape operator only affects the top node of the escape operator's rhs.
 The lhs and rhs of the affected node are matched against the subject in the
 normal way. The escape operator functions with all Bracmat operators, but the
@@ -2072,14 +2127,49 @@ in an atom!"
           "You cannot negate the result of string pattern matching by adding the ~ prefix.
 
 {?} a b:(~@(? b:a %)) {succeeds, ~@ means:'not an atom'}
+{!} a b
+    S
+    
 {?} ~@(a b:a ?)       {succeeds, ~@ means: 'not a string match'}
+{!} a b
+    S
+    
 {?} @(a b:a ?)        {illegal, lhs of string match operator must be atomic}
+    (Bracmat exits)
+
 {?} ~@(a:b)           {fails, pattern matching}
+
+    F
+    
 {?} @(a:b)            {fails, string pattern matching}
+
+    F
+    
 {?} 12/34:@(?x:#?a (~#%@:?y) #?b) {succeeds, ?x matches the atom 12/34,
                        while #?a (~#%@:?y) #?b matches 12/34 as a string.}
+{!} 12/34
+    S
+{?} !a
+{!} 12
+    S
+{?} !b
+{!} 34
+    S
+        
 {?} 12:~/@(?x:#%?a #%?b) {succeeds, ~ negates /, not @, so we have a string
-                       match.}"
+                       match.}
+{!} 12
+    S
+{?} !x
+{!} 12
+    S
+{?} !a
+{!} 1
+    S
+{?} !b
+{!} 2
+    S
+"
     )
   & ( pattxt2
     =   T
@@ -2091,11 +2181,43 @@ You have to take care with minuses: the patterns %\"-20/5\" and %-20/5 are
 different. In %\"-20/5\", the % is superfluous and the pattern matches
 characterwise. In %-20/5, the pattern matches |_20/5_| and the minus is ignored!
 {?} @(abcd40/10efgh:?a    20/5  ?z)    {succeeds, because 4 = 20/5 = 4}
+{!} abcd40/10efgh
+    S   0,00 sec
+{?} !a !z
+{!} abcd 0/10efgh
+    S   0,00 sec
+
 {?} @(abcd52/13efgh:?a    20/5  ?z)    {succeeds, because 52/13 = 20/5 = 4}
+{!} abcd52/13efgh
+    S   0,00 sec
+{?} !a !z
+{!} abcd efgh
+    S   0,00 sec
+
 {?} @(abcd40/10efgh:?a   %20/5  ?z)    {fails}
+
+    F
+    
 {?} @(abcd-20/5efgh:?a %\"-20/5\" ?z)    {succeeds}
+{!} abcd-20/5efgh
+    S   0,00 sec
+{?} !a !z
+{!} abcd efgh
+    S   0,00 sec
+    
 {?} @(abcd-20/5efgh:?a  %-20/5  ?z)    {succeeds, a = abcd-}
+{!} abcd-20/5efgh
+    S   0,00 sec
+{?} !a !z
+{!} abcd- efgh
+    S   0,00 sec
+
 {?} @(abcd-20/5efgh:?a   -20/5  ?z)    {succeeds, a = abcd }
+{!} abcd-20/5efgh
+    S   0,00 sec
+{?} !a !z
+{!} abcd efgh
+    S   0,00 sec
 "
     )
   & ( pattxt
@@ -3578,6 +3700,19 @@ Topic:")
                                          | "*"
                                          | "+"
                                          | "="
+                                         | "_"
+                                         |   ( "."
+                                             | ","
+                                             | "!"
+                                             | "?"
+                                             | ":"
+                                             | ";"
+                                             | "'"
+                                             )
+                                           & ( !a:
+                                             | @(!a:? " ")
+                                             | @(!a:? \n)
+                                             )
                                          )
                                        : ?e
                                        )
