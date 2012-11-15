@@ -4,7 +4,23 @@ bracmat: bracmat.c xml.c
 bracmatsafe: bracmat.c xml.c
 	gcc -std=c99 -pedantic -Wall -O3 -static -DNDEBUG -DNO_C_INTERFACE -DNO_FILE_RENAME -DNO_FILE_REMOVE -DNO_SYSTEM_CALL -DNO_LOW_LEVEL_FILE_HANDLING -o bracmatsafe bracmat.c xml.c
 
-all: bracmat bracmatsafe
+profiling:
+	gcc -Wall -c -pg -DNDEBUG bracmat.c xml.c
+	gcc -Wall -pg bracmat.o xml.o
+	cp ../valid.bra .
+	./a.out "get'\"valid.bra\";!r" 
+	gprof a.out > bracmat.prof
+	rm a.out
+
+coverage:
+	gcc -fprofile-arcs -ftest-coverage -DNDEBUG bracmat.c xml.c
+	cp ../valid.bra .
+	./a.out "get'\"../valid.bra\";!r"
+	gcov bracmat.c
+	gcov xml.c
+	rm a.out
+
+all: bracmat bracmatsafe profiling coverage
 
 clean:
 	rm bracmat

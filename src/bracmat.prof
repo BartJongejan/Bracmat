@@ -1,0 +1,2285 @@
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total           
+ time   seconds   seconds    calls   s/call   s/call  name    
+ 12.04      0.26     0.26   529222     0.00     0.00  match
+  6.25      0.40     0.14  2367627     0.00     0.00  bfree
+  6.02      0.53     0.13   226697     0.00     0.00  convertLetter
+  5.56      0.65     0.12   934726     0.00     0.00  find
+  4.63      0.74     0.10  2393350     0.00     0.00  bmalloc
+  4.40      0.84     0.10  3460614     0.00     0.00  wis
+  4.17      0.93     0.09  5139499     0.00     0.00  dec_refcount
+  3.24      1.00     0.07  3128804     0.00     0.00  oncePattern
+  3.24      1.07     0.07   240723     0.00     0.00  nndeel
+  2.78      1.13     0.06  4496203     0.00     0.00  zelfde_als_w
+  2.78      1.19     0.06   928621     0.00     0.00  Naamwoord_w
+  2.78      1.25     0.06   532973     0.00     0.00  zoeknaam
+  2.78      1.31     0.06   373412     0.00     0.00  nplus
+  2.78      1.37     0.06   373412     0.00     0.00  numberNode2
+  2.78      1.43     0.06   291109     0.00     0.00  iaf2
+  2.31      1.48     0.05   761682     0.00     0.00  splits
+  2.31      1.53     0.05   655979     0.00     0.00  eval
+  2.31      1.58     0.05   380732     0.00     0.00  _qplus
+  1.85      1.62     0.04   627140     0.00     0.00  _copyop
+  1.39      1.65     0.03   373412     0.00     0.00  opaffinal
+  1.39      1.68     0.03   228772     0.00     0.00  getCodePoint
+  0.93      1.70     0.02   932364     0.00     0.00  privatized
+  0.93      1.72     0.02   519029     0.00     0.00  _linkertak
+  0.93      1.74     0.02   477586     0.00     0.00  compare
+  0.93      1.76     0.02   462939     0.00     0.00  insert
+  0.93      1.78     0.02   279033     0.00     0.00  functies
+  0.93      1.80     0.02   258476     0.00     0.00  icopievan
+  0.93      1.82     0.02   226112     0.00     0.00  eindknoop
+  0.93      1.84     0.02   225703     0.00     0.00  haalaan
+  0.93      1.86     0.02   197622     0.00     0.00  changeCase
+  0.93      1.88     0.02   194820     0.00     0.00  merge
+  0.93      1.90     0.02   106495     0.00     0.00  handleLUCHT
+  0.93      1.92     0.02     7559     0.00     0.00  reslt
+  0.93      1.94     0.02       30     0.00     0.00  input
+  0.69      1.96     0.01  1422699     0.00     0.00  Entry
+  0.46      1.97     0.01   951049     0.00     0.00  Head
+  0.46      1.98     0.01   754129     0.00     0.00  mygetc
+  0.46      1.99     0.01   607251     0.00     0.00  lput
+  0.46      2.00     0.01   606526     0.00     0.00  copyop
+  0.46      2.00     0.01   453173     0.00     0.00  indent
+  0.46      2.02     0.01   430298     0.00     0.00  prive
+  0.46      2.02     0.01   390893     0.00     0.00  rechteroperand_and_tail
+  0.46      2.04     0.01   263712     0.00     0.00  scopy
+  0.46      2.04     0.01   201059     0.00     0.00  stringOncePattern
+  0.46      2.06     0.01   186776     0.00     0.00  vshift_nw
+  0.46      2.06     0.01    39980     0.00     0.00  convert2binary
+  0.46      2.08     0.01    33963     0.00     0.00  deleteNode
+  0.46      2.08     0.01    26685     0.00     0.00  nmaal
+  0.46      2.10     0.01    26258     0.00     0.00  atoom
+  0.46      2.10     0.01    22236     0.00     0.00  complexiteit
+  0.46      2.12     0.01     9453     0.00     0.00  _qndeel
+  0.46      2.12     0.01     6937     0.00     0.00  pop
+  0.46      2.13     0.01        6     0.00     0.00  addAllocation
+  0.23      2.14     0.01  1585542     0.00     0.00  pskfree
+  0.23      2.15     0.01   639247     0.00     0.00  new_operator_like
+  0.23      2.15     0.01   300792     0.00     0.00  macht2
+  0.23      2.15     0.01        7     0.00     0.00  fireBuiltInFunc
+  0.23      2.16     0.01                             errorprintf
+  0.00      2.16     0.00   928621     0.00     0.00  Naamwoord
+  0.00      2.16     0.00   712105     0.00     0.00  bewerk
+  0.00      2.16     0.00   642672     0.00     0.00  evalvar
+  0.00      2.16     0.00   627140     0.00     0.00  zelfde_als_w_2
+  0.00      2.16     0.00   618947     0.00     0.00  myputc
+  0.00      2.16     0.00   611241     0.00     0.00  pstr
+  0.00      2.16     0.00   611241     0.00     0.00  tstr
+  0.00      2.16     0.00   449784     0.00     0.00  copy_insert
+  0.00      2.16     0.00   393045     0.00     0.00  linkeroperand_and_tail
+  0.00      2.16     0.00   373412     0.00     0.00  skipnullen
+  0.00      2.16     0.00   361822     0.00     0.00  af
+  0.00      2.16     0.00   344933     0.00     0.00  _rechtertak
+  0.00      2.16     0.00   291501     0.00     0.00  numbercheck
+  0.00      2.16     0.00   279940     0.00     0.00  cleanOncePattern
+  0.00      2.16     0.00   270971     0.00     0.00  putCodePoint
+  0.00      2.16     0.00   265742     0.00     0.00  fullnumbercheck
+  0.00      2.16     0.00   236174     0.00     0.00  subboomcopie
+  0.00      2.16     0.00   228952     0.00     0.00  printflags
+  0.00      2.16     0.00   228720     0.00     0.00  getCodePoint2
+  0.00      2.16     0.00   225340     0.00     0.00  hreslt
+  0.00      2.16     0.00   221337     0.00     0.00  moetIndent
+  0.00      2.16     0.00   199573     0.00     0.00  _qvergelijk
+  0.00      2.16     0.00   197628     0.00     0.00  utf8bytes
+  0.00      2.16     0.00   197064     0.00     0.00  setflgs
+  0.00      2.16     0.00   191028     0.00     0.00  plus_samenvoegen_of_sorteren
+  0.00      2.16     0.00   191028     0.00     0.00  vglplus
+  0.00      2.16     0.00   185875     0.00     0.00  lex
+  0.00      2.16     0.00   184478     0.00     0.00  vopb
+  0.00      2.16     0.00   184478     0.00     0.00  vopbnowis
+  0.00      2.16     0.00   127493     0.00     0.00  rechtsbrengen
+  0.00      2.16     0.00    91739     0.00     0.00  scompare
+  0.00      2.16     0.00    68413     0.00     0.00  _fencelinkertak
+  0.00      2.16     0.00    48837     0.00     0.00  getal_graad
+  0.00      2.16     0.00    42916     0.00     0.00  copievan
+  0.00      2.16     0.00    38299     0.00     0.00  Entry2
+  0.00      2.16     0.00    33536     0.00     0.00  flags
+  0.00      2.16     0.00    26453     0.00     0.00  vgl
+  0.00      2.16     0.00    25369     0.00     0.00  splitProduct_number_im_rest
+  0.00      2.16     0.00    18989     0.00     0.00  toLowerUnicode
+  0.00      2.16     0.00    17997     0.00     0.00  numlength
+  0.00      2.16     0.00    17983     0.00     0.00  iconvert2decimal
+  0.00      2.16     0.00    16466     0.00     0.00  psh
+  0.00      2.16     0.00    15446     0.00     0.00  rechteroperand
+  0.00      2.16     0.00    15446     0.00     0.00  substmaal
+  0.00      2.16     0.00    15446     0.00     0.00  vglmaal
+  0.00      2.16     0.00    15381     0.00     0.00  _flinkertak
+  0.00      2.16     0.00    14969     0.00     0.00  expandProduct
+  0.00      2.16     0.00    11590     0.00     0.00  op
+  0.00      2.16     0.00    11267     0.00     0.00  all_refcount_bits_set
+  0.00      2.16     0.00    11229     0.00     0.00  dopb
+  0.00      2.16     0.00    10092     0.00     0.00  linkertak
+  0.00      2.16     0.00     8925     0.00     0.00  nn2q
+  0.00      2.16     0.00     7320     0.00     0.00  inplus
+  0.00      2.16     0.00     7320     0.00     0.00  iopaffinal
+  0.00      2.16     0.00     6129     0.00     0.00  iaf
+  0.00      2.16     0.00     5670     0.00     0.00  find_func
+  0.00      2.16     0.00     5350     0.00     0.00  isplits
+  0.00      2.16     0.00     5299     0.00     0.00  rechtertak
+  0.00      2.16     0.00     4775     0.00     0.00  result
+  0.00      2.16     0.00     4257     0.00     0.00  handleKOMMA
+  0.00      2.16     0.00     2884     0.00     0.00  toLong
+  0.00      2.16     0.00     2305     0.00     0.00  _qmaal
+  0.00      2.16     0.00     2026     0.00     0.00  _qdema
+  0.00      2.16     0.00     1843     0.00     0.00  stapelmacht
+  0.00      2.16     0.00     1691     0.00     0.00  copyToSnijaf
+  0.00      2.16     0.00     1655     0.00     0.00  string_copy_insert
+  0.00      2.16     0.00     1581     0.00     0.00  shift_nw
+  0.00      2.16     0.00     1454     0.00     0.00  atomtest
+  0.00      2.16     0.00     1370     0.00     0.00  opb
+  0.00      2.16     0.00     1338     0.00     0.00  tryq
+  0.00      2.16     0.00     1191     0.00     0.00  iop
+  0.00      2.16     0.00      937     0.00     0.00  inumberNode
+  0.00      2.16     0.00      730     0.00     0.00  doPosition
+  0.00      2.16     0.00      657     0.00     0.00  backbone
+  0.00      2.16     0.00      415     0.00     0.00  evalmacro
+  0.00      2.16     0.00      393     0.00     0.00  output
+  0.00      2.16     0.00      375     0.00     0.00  sfullnumbercheck
+  0.00      2.16     0.00      350     0.00     0.00  flush
+  0.00      2.16     0.00      347     0.00     0.00  Sim
+  0.00      2.16     0.00      347     0.00     0.00  simil
+  0.00      2.16     0.00      339     0.00     0.00  abseen
+  0.00      2.16     0.00      321     0.00     0.00  stringmatch
+  0.00      2.16     0.00      290     0.00     0.00  is_constant
+  0.00      2.16     0.00      239     0.00     0.00  _q_qdeel
+  0.00      2.16     0.00      213     0.00     0.00  _qdenominator
+  0.00      2.16     0.00      213     0.00     0.00  numberNode
+  0.00      2.16     0.00      198     0.00     0.00  strcasecompu
+  0.00      2.16     0.00      167     0.00     0.00  getmember
+  0.00      2.16     0.00      145     0.00     0.00  substdiff
+  0.00      2.16     0.00      139     0.00     0.00  zoekopt
+  0.00      2.16     0.00      138     0.00     0.00  plak
+  0.00      2.16     0.00      138     0.00     0.00  tel
+  0.00      2.16     0.00      131     0.00     0.00  _qheeldeel
+  0.00      2.16     0.00      126     0.00     0.00  __rechtertak
+  0.00      2.16     0.00      113     0.00     0.00  lineToLong
+  0.00      2.16     0.00       75     0.00     0.00  substlog
+  0.00      2.16     0.00       74     0.00     0.00  allopts
+  0.00      2.16     0.00       70     0.00     0.00  _qmodulo
+  0.00      2.16     0.00       65     0.00     0.00  sdoEval
+  0.00      2.16     0.00       60     0.00     0.00  vglsub
+  0.00      2.16     0.00       59     0.00     0.00  icopy_insert
+  0.00      2.16     0.00       59     0.00     0.00  scopy_insert
+  0.00      2.16     0.00       44     0.00     0.00  expressionLength
+  0.00      2.16     0.00       44     0.00     0.00  myprintf
+  0.00      2.16     0.00       40     0.00     0.00  mygetfilehendel
+  0.00      2.16     0.00       39     0.00     0.00  subroot
+  0.00      2.16     0.00       38     0.00     0.00  findFilehendelByName
+  0.00      2.16     0.00       38     0.00     0.00  myfopen
+  0.00      2.16     0.00       38     0.00     0.00  vshift_w
+  0.00      2.16     0.00       36     0.00     0.00  allocateFilehendel
+  0.00      2.16     0.00       36     0.00     0.00  deallocateFilehendel
+  0.00      2.16     0.00       32     0.00     0.00  lambda
+  0.00      2.16     0.00       29     0.00     0.00  _qmaalmineen
+  0.00      2.16     0.00       29     0.00     0.00  objectcopiesub
+  0.00      2.16     0.00       28     0.00     0.00  findBuiltInMethod
+  0.00      2.16     0.00       28     0.00     0.00  update
+  0.00      2.16     0.00       26     0.00     0.00  bouwboom_w
+  0.00      2.16     0.00       25     0.00     0.00  is_afhankelyk_van
+  0.00      2.16     0.00       24     0.00     0.00  setmember
+  0.00      2.16     0.00       18     0.00     0.00  lst
+  0.00      2.16     0.00       18     0.00     0.00  lstsub
+  0.00      2.16     0.00       17     0.00     0.00  someopt
+  0.00      2.16     0.00       16     0.00     0.00  fil
+  0.00      2.16     0.00       16     0.00     0.00  getObjectDef
+  0.00      2.16     0.00       13     0.00     0.00  hasSubObject
+  0.00      2.16     0.00       13     0.00     0.00  objectcopiesub2
+  0.00      2.16     0.00       12     0.00     0.00  casesensitivehash
+  0.00      2.16     0.00       11     0.00     0.00  initializeMemBlock
+  0.00      2.16     0.00        9     0.00     0.00  loadfactor
+  0.00      2.16     0.00        9     0.00     0.00  preparefp
+  0.00      2.16     0.00        9     0.00     0.00  print_clock
+  0.00      2.16     0.00        9     0.00     0.00  strcasecomp
+  0.00      2.16     0.00        8     0.00     0.00  freehash
+  0.00      2.16     0.00        8     0.00     0.00  hashinsert
+  0.00      2.16     0.00        8     0.00     0.00  inserthash
+  0.00      2.16     0.00        8     0.00     0.00  newhash
+  0.00      2.16     0.00        7     0.00     0.00  findhash
+  0.00      2.16     0.00        7     0.00     0.00  hashdie
+  0.00      2.16     0.00        7     0.00     0.00  hashfind
+  0.00      2.16     0.00        7     0.00     0.00  hashnew
+  0.00      2.16     0.00        7     0.00     0.00  objectcopie
+  0.00      2.16     0.00        5     0.00     0.00  newMemBlocks
+  0.00      2.16     0.00        5     0.00     0.00  setStop
+  0.00      2.16     0.00        4     0.00     0.00  caseinsensitivehash
+  0.00      2.16     0.00        4     0.00     0.00  mmf
+  0.00      2.16     0.00        4     0.00     0.00  strToPointer
+  0.00      2.16     0.00        3     0.00     0.00  doEval
+  0.00      2.16     0.00        3     0.00     0.00  not_a_number
+  0.00      2.16     0.00        3     0.00     0.33  stringEval
+  0.00      2.16     0.00        2     0.00     0.00  pointerToStr
+  0.00      2.16     0.00        1     0.00     0.00  bfopen
+  0.00      2.16     0.00        1     0.00     0.00  combiflags
+  0.00      2.16     0.00        1     0.00     0.00  combineInputBuffers
+  0.00      2.16     0.00        1     0.00     0.33  endProc
+  0.00      2.16     0.00        1     0.00     0.00  flinkertak
+  0.00      2.16     0.00        1     0.00     0.00  hashISO
+  0.00      2.16     0.00        1     0.00     0.00  hashremove
+  0.00      2.16     0.00        1     0.00     0.00  init_opcode
+  0.00      2.16     0.00        1     0.00     0.01  init_ruimte
+  0.00      2.16     0.00        1     0.00     0.33  mainlus
+  0.00      2.16     0.00        1     0.00     0.00  nextprime
+  0.00      2.16     0.00        1     0.00     0.00  rehash
+  0.00      2.16     0.00        1     0.00     0.00  removeFromHash
+  0.00      2.16     0.00        1     0.00     1.50  startProc
+  0.00      2.16     0.00        1     0.00     0.00  startboom_w
+  0.00      2.16     0.00        1     0.00     0.00  stringreverse
+  0.00      2.16     0.00        1     0.00     0.00  zoekfp
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
+
+calls      the number of times this function was invoked, if
+           this function is profiled, else blank.
+ 
+ self      the average number of milliseconds spent in this
+ms/call    function per call, if this function is profiled,
+	   else blank.
+
+ total     the average number of milliseconds spent in this
+ms/call    function and its descendents per call, if this 
+	   function is profiled, else blank.
+
+name       the name of the function.  This is the minor sort
+           for this listing. The index shows the location of
+	   the function in the gprof listing. If the index is
+	   in parenthesis it shows where it would appear in
+	   the gprof listing if it were to be printed.
+
+		     Call graph (explanation follows)
+
+
+granularity: each sample hit covers 4 byte(s) for 0.46% of 2.16 seconds
+
+index % time    self  children    called     name
+                                                 <spontaneous>
+[1]     99.8    0.00    2.16                 main [1]
+                0.00    1.50       1/1           startProc [3]
+                0.00    0.33       1/1           mainlus [8]
+                0.00    0.33       1/1           endProc [7]
+-----------------------------------------------
+[2]     99.3    0.78    1.36      13+12741873 <cycle 2 as a whole> [2]
+                0.26    0.33  529222+2740290     match <cycle 2> [5]
+                0.10    0.14 3460614+644278      wis <cycle 2> [11]
+                0.02    0.20  197622             changeCase <cycle 2> [12]
+                0.00    0.21  191028             plus_samenvoegen_of_sorteren <cycle 2> [13]
+                0.05    0.14  655979+1515484     eval <cycle 2> [14]
+                0.12    0.01  934726+152         find <cycle 2> [19]
+                0.02    0.07  462939             insert <cycle 2> [25]
+                0.06    0.03  928621             Naamwoord_w <cycle 2> [26]
+                0.00    0.05  225340+2940        hreslt <cycle 2> [35]
+                0.00    0.04   15446             substmaal <cycle 2> [38]
+                0.02    0.02      30             input <cycle 2> [40]
+                0.02    0.02  194820             merge <cycle 2> [42]
+                0.02    0.01  279033             functies <cycle 2> [43]
+                0.02    0.01    7559+4116        reslt <cycle 2> [44]
+                0.00    0.03  184478             vopb <cycle 2> [52]
+                0.02    0.00  106495             handleLUCHT <cycle 2> [57]
+                0.02    0.00  519029             _linkertak <cycle 2> [58]
+                0.01    0.01   33963             deleteNode <cycle 2> [61]
+                0.01    0.00  951049             Head <cycle 2> [67]
+                0.00    0.01     321+201483      stringmatch <cycle 2> [68]
+                0.01    0.00    6937+19607       pop <cycle 2> [75]
+                0.00    0.01   91739             scompare <cycle 2> [78]
+                0.00    0.01   16466+19607       psh <cycle 2> [80]
+                0.00    0.01    1843             stapelmacht <cycle 2> [81]
+                0.00    0.01  449784             copy_insert <cycle 2> [82]
+                0.01    0.00       7             fireBuiltInFunc <cycle 2> [87]
+                0.00    0.00   26453+14321       vgl <cycle 2> [93]
+                0.00    0.00       8             hashinsert <cycle 2> [95]
+                0.00    0.00       7             hashfind <cycle 2> [97]
+                0.00    0.00      75             substlog <cycle 2> [100]
+                0.00    0.00   15381             _flinkertak <cycle 2> [101]
+                0.00    0.00   10092             linkertak <cycle 2> [102]
+                0.00    0.00   11229             dopb <cycle 2> [105]
+                0.00    0.00    5299             rechtertak <cycle 2> [107]
+                0.00    0.00    1370             opb <cycle 2> [110]
+                0.00    0.00       4             mmf <cycle 2> [111]
+                0.00    0.00    1655             string_copy_insert <cycle 2> [112]
+                0.00    0.00    1338             tryq <cycle 2> [113]
+                0.00    0.00     415+302         evalmacro <cycle 2> [116]
+                0.00    0.00    4257             handleKOMMA <cycle 2> [117]
+                0.00    0.00     657             backbone <cycle 2> [118]
+                0.00    0.00     730             doPosition <cycle 2> [119]
+                0.00    0.00  344933             _rechtertak <cycle 2> [121]
+                0.00    0.00     126             __rechtertak <cycle 2> [122]
+                0.00    0.00     145             substdiff <cycle 2> [123]
+                0.00    0.00   68413             _fencelinkertak <cycle 2> [125]
+                0.00    0.00     393             output <cycle 2> [126]
+                0.00    0.00      26             bouwboom_w <cycle 2> [128]
+                0.00    0.00      59             scopy_insert <cycle 2> [130]
+                0.00    0.00      16             getObjectDef <cycle 2> [132]
+                0.00    0.00      28             update <cycle 2> [133]
+                0.00    0.00      65             sdoEval <cycle 2> [140]
+                0.00    0.00      32+245         lambda <cycle 2> [141]
+                0.00    0.00      18             lstsub <cycle 2> [142]
+                0.00    0.00       8             freehash <cycle 2> [144]
+                0.00    0.00      24+45          setmember <cycle 2> [146]
+                0.00    0.00    5670             find_func <cycle 2> [148]
+                0.00    0.00      16             fil <cycle 2> [153]
+                0.00    0.00  928621+9           Naamwoord <cycle 2> [155]
+                0.00    0.00       3             doEval <cycle 2> [157]
+                0.00    0.00       1             rehash <cycle 2> [158]
+                0.00    0.00       1             flinkertak <cycle 2> [160]
+                0.00    0.00       1             hashremove <cycle 2> [161]
+                0.00    0.00  642672             evalvar <cycle 2> [165]
+                0.00    0.00  191028             vglplus <cycle 2> [178]
+                0.00    0.00   15446             vglmaal <cycle 2> [185]
+                0.00    0.00   14969             expandProduct <cycle 2> [186]
+                0.00    0.00    4775             result <cycle 2> [190]
+                0.00    0.00     167+153         getmember <cycle 2> [199]
+                0.00    0.00      60             vglsub <cycle 2> [205]
+                0.00    0.00      59             icopy_insert <cycle 2> [206]
+                0.00    0.00      25             is_afhankelyk_van <cycle 2> [211]
+                0.00    0.00      18             lst <cycle 2> [212]
+                0.00    0.00       7             hashdie <cycle 2> [220]
+                0.00    0.00       1             hashISO <cycle 2> [225]
+-----------------------------------------------
+                0.00    1.50       1/1           main [1]
+[3]     69.2    0.00    1.50       1         startProc [3]
+                0.36    0.63       6/13          opb <cycle 2> [110]
+                0.00    0.33       1/3           stringEval [4]
+                0.06    0.10       1/13          eval <cycle 2> [14]
+                0.00    0.01       1/1           init_ruimte [77]
+                0.00    0.00       1/1           startboom_w [154]
+                0.00    0.00       1/1           init_opcode [226]
+-----------------------------------------------
+                0.00    0.33       1/3           startProc [3]
+                0.00    0.33       1/3           endProc [7]
+                0.00    0.33       1/3           mainlus [8]
+[4]     45.8    0.00    0.99       3         stringEval [4]
+                0.18    0.31       3/13          input <cycle 2> [40]
+                0.18    0.31       3/13          eval <cycle 2> [14]
+-----------------------------------------------
+                             2740290             match <cycle 2> [5]
+                               18782             expandProduct <cycle 2> [186]
+                              510440             eval <cycle 2> [14]
+[5]     27.3    0.26    0.33  529222+2740290 match <cycle 2> [5]
+                0.02    0.24  477586/477586      compare [9]
+                0.07    0.00 3128804/3128804     oncePattern [29]
+                0.00    0.00    4355/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00    2237/4708703     subboomcopie <cycle 1> [54]
+                0.00    0.00     144/197064      setflgs [127]
+                0.00    0.00  277993/279940      cleanOncePattern [173]
+                0.00    0.00     371/1454        atomtest [193]
+                              449781             copy_insert <cycle 2> [82]
+                              290585             wis <cycle 2> [11]
+                              283993             Naamwoord_w <cycle 2> [26]
+                               15925             Head <cycle 2> [67]
+                                9926             eval <cycle 2> [14]
+                                 336             psh <cycle 2> [80]
+                                 336             deleteNode <cycle 2> [61]
+                                 144             vgl <cycle 2> [93]
+                                  95             doPosition <cycle 2> [119]
+                                   3             doEval <cycle 2> [157]
+                                   1             stringmatch <cycle 2> [68]
+                             2740290             match <cycle 2> [5]
+-----------------------------------------------
+                0.00    0.00       3/380732      stapelmacht <cycle 2> [81]
+                0.00    0.00      70/380732      _qmodulo [94]
+                0.00    0.00     131/380732      _qheeldeel [103]
+                0.02    0.18  180955/380732      plus_samenvoegen_of_sorteren <cycle 2> [13]
+                0.03    0.20  199573/380732      _qvergelijk [10]
+[6]     20.0    0.05    0.38  380732         _qplus [6]
+                0.01    0.14    7320/9453        _qndeel [15]
+                0.06    0.05  373412/373412      nplus [21]
+                0.06    0.00  373412/373412      numberNode2 [30]
+                0.05    0.00  761464/761682      splits [34]
+                0.01    0.00   21960/26685       nmaal [64]
+                0.01    0.00   29280/39980       convert2binary [63]
+                0.00    0.00   58560/2367627     bfree [18]
+                0.00    0.00    7320/7320        inplus [108]
+-----------------------------------------------
+                0.00    0.33       1/1           main [1]
+[7]     15.3    0.00    0.33       1         endProc [7]
+                0.00    0.33       1/3           stringEval [4]
+-----------------------------------------------
+                0.00    0.33       1/1           main [1]
+[8]     15.3    0.00    0.33       1         mainlus [8]
+                0.00    0.33       1/3           stringEval [4]
+-----------------------------------------------
+                0.02    0.24  477586/477586      match <cycle 2> [5]
+[9]     12.0    0.02    0.24  477586         compare [9]
+                0.00    0.24  197639/199573      _qvergelijk [10]
+                0.00    0.00       5/9           strcasecomp [83]
+-----------------------------------------------
+                0.00    0.00      57/199573      scompare <cycle 2> [78]
+                0.00    0.00     150/199573      stapelmacht <cycle 2> [81]
+                0.00    0.00     167/199573      substlog <cycle 2> [100]
+                0.00    0.00    1560/199573      vgl <cycle 2> [93]
+                0.00    0.24  197639/199573      compare [9]
+[10]    11.1    0.00    0.24  199573         _qvergelijk [10]
+                0.03    0.20  199573/380732      _qplus [6]
+                0.00    0.01  199573/1585542     pskfree [24]
+-----------------------------------------------
+                              644278             wis <cycle 2> [11]
+                                   1             update <cycle 2> [133]
+                                   1             hashremove <cycle 2> [161]
+                                   1             eval <cycle 2> [14]
+                                   3             doEval <cycle 2> [157]
+                                   4             freehash <cycle 2> [144]
+                                   4             mmf <cycle 2> [111]
+                                   4             getObjectDef <cycle 2> [132]
+                                   5             hashfind <cycle 2> [97]
+                                   6             Naamwoord <cycle 2> [155]
+                                   8             hashinsert <cycle 2> [95]
+                                   8             fil <cycle 2> [153]
+                                  12             output <cycle 2> [126]
+                                  18             bouwboom_w <cycle 2> [128]
+                                  24             setmember <cycle 2> [146]
+                                  25             is_afhankelyk_van <cycle 2> [211]
+                                  37             substlog <cycle 2> [100]
+                                  57             scompare <cycle 2> [78]
+                                  59             scopy_insert <cycle 2> [130]
+                                  60             vglsub <cycle 2> [205]
+                                  65             sdoEval <cycle 2> [140]
+                                  77             find_func <cycle 2> [148]
+                                  95             substdiff <cycle 2> [123]
+                                  99             __rechtertak <cycle 2> [122]
+                                 127             backbone <cycle 2> [118]
+                                 168             lambda <cycle 2> [141]
+                                 656             stapelmacht <cycle 2> [81]
+                                 695             doPosition <cycle 2> [119]
+                                 979             evalmacro <cycle 2> [116]
+                                1208             opb <cycle 2> [110]
+                                1338             tryq <cycle 2> [113]
+                                1350             Head <cycle 2> [67]
+                                2575             substmaal <cycle 2> [38]
+                                3547             stringmatch <cycle 2> [68]
+                                4314             psh <cycle 2> [80]
+                               11229             dopb <cycle 2> [105]
+                               15381             _flinkertak <cycle 2> [101]
+                               33963             deleteNode <cycle 2> [61]
+                               52360             copy_insert <cycle 2> [82]
+                               68413             _fencelinkertak <cycle 2> [125]
+                              180976             plus_samenvoegen_of_sorteren <cycle 2> [13]
+                              184478             vopb <cycle 2> [52]
+                              197572             changeCase <cycle 2> [12]
+                              290585             match <cycle 2> [5]
+                              344933             _rechtertak <cycle 2> [121]
+                              445073             functies <cycle 2> [43]
+                              456360             insert <cycle 2> [25]
+                              519029             _linkertak <cycle 2> [58]
+                              642632             evalvar <cycle 2> [165]
+[11]    11.0    0.10    0.14 3460614+644278  wis <cycle 2> [11]
+                0.00    0.08 1368295/1585542     pskfree [24]
+                0.06    0.00 3379999/5139499     dec_refcount [27]
+                                  14             opb <cycle 2> [110]
+                                  14             eval <cycle 2> [14]
+                                   7             fireBuiltInFunc <cycle 2> [87]
+                              644278             wis <cycle 2> [11]
+-----------------------------------------------
+                              197622             functies <cycle 2> [43]
+[12]    10.0    0.02    0.20  197622         changeCase <cycle 2> [12]
+                0.12    0.00  205400/226697      convertLetter [20]
+                0.00    0.03  205400/228720      getCodePoint2 [49]
+                0.01    0.01  197572/263712      scopy [56]
+                0.01    0.00  197572/2367627     bfree [18]
+                0.00    0.01  197622/430298      prive [55]
+                0.01    0.00  197572/2393350     bmalloc [22]
+                0.00    0.00  197622/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00  205400/270971      putCodePoint [174]
+                0.00    0.00  197628/197628      utf8bytes [177]
+                              197572             wis <cycle 2> [11]
+-----------------------------------------------
+                              191028             merge <cycle 2> [42]
+[13]     9.8    0.00    0.21  191028         plus_samenvoegen_of_sorteren <cycle 2> [13]
+                0.02    0.18  180955/380732      _qplus [6]
+                0.00    0.00  189181/390893      rechteroperand_and_tail [71]
+                0.00    0.00      21/2305        _qmaal [36]
+                0.00    0.00     341/430298      prive [55]
+                0.00    0.00  188840/393045      linkeroperand_and_tail [170]
+                0.00    0.00   11957/25369       splitProduct_number_im_rest [181]
+                              181353             vopb <cycle 2> [52]
+                              180976             wis <cycle 2> [11]
+                               14969             expandProduct <cycle 2> [186]
+                                6135             vgl <cycle 2> [93]
+                                1604             rechtertak <cycle 2> [107]
+                                 345             opb <cycle 2> [110]
+                                 304             linkertak <cycle 2> [102]
+                                 245             eval <cycle 2> [14]
+-----------------------------------------------
+                             1515484             eval <cycle 2> [14]
+                                   2             Naamwoord <cycle 2> [155]
+                                   3             doEval <cycle 2> [157]
+                                  14             wis <cycle 2> [11]
+                                  25             is_afhankelyk_van <cycle 2> [211]
+                                  60             vglsub <cycle 2> [205]
+                                  65             sdoEval <cycle 2> [140]
+                                 245             plus_samenvoegen_of_sorteren <cycle 2> [13]
+                                 426             evalmacro <cycle 2> [116]
+                                 693             doPosition <cycle 2> [119]
+                                1338             tryq <cycle 2> [113]
+                                1600             stringmatch <cycle 2> [68]
+                                5599             find_func <cycle 2> [148]
+                                8909             handleKOMMA <cycle 2> [117]
+                                9926             match <cycle 2> [5]
+                              178505             functies <cycle 2> [43]
+                              219034             merge <cycle 2> [42]
+                              229531             handleLUCHT <cycle 2> [57]
+                0.06    0.10       1/13          startProc [3]
+                0.18    0.31       3/13          stringEval [4]
+[14]     8.7    0.05    0.14  655979+1515484 eval <cycle 2> [14]
+                0.02    0.08  932364/932364      privatized [23]
+                0.01    0.03  592803/606526      copyop [39]
+                0.00    0.00       2/4708703     subboomcopie <cycle 1> [54]
+                0.00    0.00       1/430298      prive [55]
+                0.00    0.00       1/2393350     bmalloc [22]
+                              642672             evalvar <cycle 2> [165]
+                              510440             match <cycle 2> [5]
+                              508937             _linkertak <cycle 2> [58]
+                              339634             _rechtertak <cycle 2> [121]
+                              279033             functies <cycle 2> [43]
+                              194820             merge <cycle 2> [42]
+                              106495             handleLUCHT <cycle 2> [57]
+                               68413             _fencelinkertak <cycle 2> [125]
+                               15380             _flinkertak <cycle 2> [101]
+                                7011             linkertak <cycle 2> [102]
+                                7010             insert <cycle 2> [25]
+                                4257             handleKOMMA <cycle 2> [117]
+                                1843             stapelmacht <cycle 2> [81]
+                                 320             stringmatch <cycle 2> [68]
+                                 145             substdiff <cycle 2> [123]
+                                 126             __rechtertak <cycle 2> [122]
+                                  75             substlog <cycle 2> [100]
+                                   2             update <cycle 2> [133]
+                                   1             flinkertak <cycle 2> [160]
+                                   1             Head <cycle 2> [67]
+                                   1             wis <cycle 2> [11]
+                             1515484             eval <cycle 2> [14]
+-----------------------------------------------
+                0.00    0.00     107/9453        _q_qdeel [84]
+                0.00    0.04    2026/9453        _qdema [37]
+                0.01    0.14    7320/9453        _qplus [6]
+[15]     8.7    0.01    0.18    9453         _qndeel [15]
+                0.07    0.08  240592/240723      nndeel [17]
+                0.03    0.00  481184/2367627     bfree [18]
+                0.00    0.00    8925/8925        nn2q [106]
+                0.00    0.00     525/42916       copievan [85]
+                0.00    0.00       3/3           not_a_number [152]
+-----------------------------------------------
+[16]     7.3    0.10    0.06 4708703+1277954 <cycle 1 as a whole> [16]
+                0.04    0.03  627140             _copyop <cycle 1> [28]
+                0.06    0.00 4496203             zelfde_als_w <cycle 1> [31]
+                0.00    0.03  236174             subboomcopie <cycle 1> [54]
+                0.00    0.00  627140             zelfde_als_w_2 <cycle 1> [166]
+-----------------------------------------------
+                0.00    0.00     131/240723      _qheeldeel [103]
+                0.07    0.08  240592/240723      _qndeel [15]
+[17]     6.9    0.07    0.08  240723         nndeel [17]
+                0.06    0.00  291109/291109      iaf2 [33]
+                0.02    0.00  481446/2393350     bmalloc [22]
+-----------------------------------------------
+                0.00    0.00       1/2367627     removeFromHash [162]
+                0.00    0.00       2/2367627     vshift_w [156]
+                0.00    0.00       4/2367627     input <cycle 2> [40]
+                0.00    0.00      14/2367627     combineInputBuffers [145]
+                0.00    0.00      16/2367627     lput [69]
+                0.00    0.00      20/2367627     freehash <cycle 2> [144]
+                0.00    0.00      27/2367627     bouwboom_w <cycle 2> [128]
+                0.00    0.00      46/2367627     stapelmacht <cycle 2> [81]
+                0.00    0.00      72/2367627     deallocateFilehendel [131]
+                0.00    0.00     793/2367627     Head <cycle 2> [67]
+                0.00    0.00     956/2367627     _q_qdeel [84]
+                0.00    0.00    1048/2367627     _qheeldeel [103]
+                0.00    0.00    2133/2367627     psh <cycle 2> [80]
+                0.00    0.00    4052/2367627     _qdema [37]
+                0.00    0.00    5057/2367627     numberNode2 [30]
+                0.00    0.00    9631/2367627     _qmaal [36]
+                0.00    0.00   20897/2367627     deleteNode <cycle 2> [61]
+                0.00    0.00   58560/2367627     _qplus [6]
+                0.01    0.00  197572/2367627     changeCase <cycle 2> [12]
+                0.03    0.00  481184/2367627     _qndeel [15]
+                0.09    0.00 1585542/2367627     pskfree [24]
+[18]     6.2    0.14    0.00 2367627         bfree [18]
+-----------------------------------------------
+                                 152             find <cycle 2> [19]
+                                 426             evalmacro <cycle 2> [116]
+                                5670             find_func <cycle 2> [148]
+                              928630             Naamwoord <cycle 2> [155]
+[19]     6.1    0.12    0.01  934726+152     find <cycle 2> [19]
+                0.01    0.00  934582/1422699     Entry [60]
+                0.00    0.00     176/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00       7/28          findBuiltInMethod [210]
+                              934622             Head <cycle 2> [67]
+                                 167             getmember <cycle 2> [199]
+                                 152             find <cycle 2> [19]
+-----------------------------------------------
+                0.00    0.00    2308/226697      simil [92]
+                0.01    0.00   18989/226697      toLowerUnicode [66]
+                0.12    0.00  205400/226697      changeCase <cycle 2> [12]
+[20]     6.0    0.13    0.00  226697         convertLetter [20]
+-----------------------------------------------
+                0.06    0.05  373412/373412      _qplus [6]
+[21]     4.9    0.06    0.05  373412         nplus [21]
+                0.00    0.03  361822/361822      af [50]
+                0.02    0.00  373412/2393350     bmalloc [22]
+                0.00    0.00   11590/11590       op [99]
+                0.00    0.00  373412/373412      skipnullen [171]
+-----------------------------------------------
+                0.00    0.00       1/2393350     combineInputBuffers [145]
+                0.00    0.00       1/2393350     evalmacro <cycle 2> [116]
+                0.00    0.00       1/2393350     eval <cycle 2> [14]
+                0.00    0.00       3/2393350     objectcopie [137]
+                0.00    0.00       8/2393350     inserthash [96]
+                0.00    0.00      11/2393350     getObjectDef <cycle 2> [132]
+                0.00    0.00      12/2393350     subroot [151]
+                0.00    0.00      12/2393350     output <cycle 2> [126]
+                0.00    0.00      13/2393350     objectcopiesub2 <cycle 3> [150]
+                0.00    0.00      16/2393350     newhash [147]
+                0.00    0.00      20/2393350     objectcopiesub <cycle 3> [139]
+                0.00    0.00      29/2393350     _qmaalmineen [143]
+                0.00    0.00      30/2393350     input <cycle 2> [40]
+                0.00    0.00      32/2393350     lput [69]
+                0.00    0.00      34/2393350     stapelmacht <cycle 2> [81]
+                0.00    0.00      72/2393350     allocateFilehendel [136]
+                0.00    0.00     213/2393350     numberNode [124]
+                0.00    0.00     793/2393350     Head <cycle 2> [67]
+                0.00    0.00     937/2393350     inumberNode [114]
+                0.00    0.00    1655/2393350     string_copy_insert <cycle 2> [112]
+                0.00    0.00    2602/2393350     functies <cycle 2> [43]
+                0.00    0.00    4358/2393350     mmf <cycle 2> [111]
+                0.00    0.00    5057/2393350     numberNode2 [30]
+                0.00    0.00    6553/2393350     insert <cycle 2> [25]
+                0.00    0.00    7320/2393350     inplus [108]
+                0.00    0.00    8530/2393350     nn2q [106]
+                0.00    0.00   16497/2393350     psh <cycle 2> [80]
+                0.00    0.00   26258/2393350     atoom [65]
+                0.00    0.00   26685/2393350     nmaal [64]
+                0.00    0.00   31752/2393350     lex [51]
+                0.00    0.00   39980/2393350     convert2binary [63]
+                0.01    0.00  197572/2393350     changeCase <cycle 2> [12]
+                0.01    0.00  258476/2393350     icopievan [46]
+                0.01    0.00  263712/2393350     scopy [56]
+                0.02    0.00  373412/2393350     nplus [21]
+                0.02    0.00  481446/2393350     nndeel [17]
+                0.03    0.00  639247/2393350     new_operator_like [45]
+[22]     4.6    0.10    0.00 2393350         bmalloc [22]
+                0.00    0.00       5/5           newMemBlocks [221]
+-----------------------------------------------
+                0.02    0.08  932364/932364      eval <cycle 2> [14]
+[23]     4.6    0.02    0.08  932364         privatized [23]
+                0.04    0.02 1860908/4708703     zelfde_als_w <cycle 1> [31]
+                0.02    0.00  930454/5139499     dec_refcount [27]
+                0.00    0.00    1910/1585542     pskfree [24]
+-----------------------------------------------
+                0.00    0.00       1/1585542     flinkertak <cycle 2> [160]
+                0.00    0.00       2/1585542     functies <cycle 2> [43]
+                0.00    0.00      99/1585542     __rechtertak <cycle 2> [122]
+                0.00    0.00     131/1585542     _qheeldeel [103]
+                0.00    0.00     140/1585542     _qmodulo [94]
+                0.00    0.00    1910/1585542     privatized [23]
+                0.00    0.00    5299/1585542     rechtertak <cycle 2> [107]
+                0.00    0.00   10092/1585542     linkertak <cycle 2> [102]
+                0.00    0.01  199573/1585542     _qvergelijk [10]
+                0.00    0.08 1368295/1585542     wis <cycle 2> [11]
+[24]     4.4    0.01    0.09 1585542         pskfree [24]
+                0.09    0.00 1585542/2367627     bfree [18]
+-----------------------------------------------
+                                  59             scopy_insert <cycle 2> [130]
+                                1655             string_copy_insert <cycle 2> [112]
+                                4431             psh <cycle 2> [80]
+                                7010             eval <cycle 2> [14]
+                              449784             copy_insert <cycle 2> [82]
+[25]     4.3    0.02    0.07  462939         insert <cycle 2> [25]
+                0.05    0.00  462908/532973      zoeknaam [32]
+                0.01    0.01  462913/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00  456355/1422699     Entry [60]
+                0.00    0.00    6553/2393350     bmalloc [22]
+                              456360             wis <cycle 2> [11]
+                                  26             update <cycle 2> [133]
+-----------------------------------------------
+                                   3             doPosition <cycle 2> [119]
+                                   6             getObjectDef <cycle 2> [132]
+                                1947             stringmatch <cycle 2> [68]
+                              283993             match <cycle 2> [5]
+                              642672             evalvar <cycle 2> [165]
+[26]     4.2    0.06    0.03  928621         Naamwoord_w <cycle 2> [26]
+                0.02    0.01  921805/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00    6649/4708703     subboomcopie <cycle 1> [54]
+                0.00    0.00     103/430298      prive [55]
+                              928621             Naamwoord <cycle 2> [155]
+-----------------------------------------------
+                0.00    0.00      27/5139499     __rechtertak <cycle 2> [122]
+                0.00    0.00    1655/5139499     string_copy_insert <cycle 2> [112]
+                0.00    0.00  220838/5139499     prive [55]
+                0.01    0.00  606526/5139499     copyop [39]
+                0.02    0.00  930454/5139499     privatized [23]
+                0.06    0.00 3379999/5139499     wis <cycle 2> [11]
+[27]     4.2    0.09    0.00 5139499         dec_refcount [27]
+-----------------------------------------------
+                               20614             subboomcopie <cycle 1> [54]
+                0.01    0.01  606526/4708703     copyop [39]
+[28]     3.3    0.04    0.03  627140         _copyop <cycle 1> [28]
+                0.00    0.03  627140/639247      new_operator_like [45]
+                              627140             zelfde_als_w_2 <cycle 1> [166]
+                              627140             zelfde_als_w <cycle 1> [31]
+-----------------------------------------------
+                              101076             oncePattern [29]
+                0.07    0.00 3128804/3128804     match <cycle 2> [5]
+[29]     3.2    0.07    0.00 3128804+101076  oncePattern [29]
+                              101076             oncePattern [29]
+-----------------------------------------------
+                0.06    0.00  373412/373412      _qplus [6]
+[30]     2.8    0.06    0.00  373412         numberNode2 [30]
+                0.00    0.00    5057/2367627     bfree [18]
+                0.00    0.00    5057/2393350     bmalloc [22]
+-----------------------------------------------
+                              627140             _copyop <cycle 1> [28]
+                0.00    0.00       1/4708703     update <cycle 2> [133]
+                0.00    0.00       2/4708703     Naamwoord <cycle 2> [155]
+                0.00    0.00       3/4708703     objectcopie [137]
+                0.00    0.00       4/4708703     mmf <cycle 2> [111]
+                0.00    0.00       5/4708703     hashfind <cycle 2> [97]
+                0.00    0.00       8/4708703     inserthash [96]
+                0.00    0.00       8/4708703     hashinsert <cycle 2> [95]
+                0.00    0.00      18/4708703     getObjectDef <cycle 2> [132]
+                0.00    0.00      24/4708703     setmember <cycle 2> [146]
+                0.00    0.00      27/4708703     __rechtertak <cycle 2> [122]
+                0.00    0.00      40/4708703     objectcopiesub <cycle 3> [139]
+                0.00    0.00     176/4708703     find <cycle 2> [19]
+                0.00    0.00     431/4708703     evalmacro <cycle 2> [116]
+                0.00    0.00    1598/4708703     stringmatch <cycle 2> [68]
+                0.00    0.00    1655/4708703     string_copy_insert <cycle 2> [112]
+                0.00    0.00    4186/4708703     copyToSnijaf [109]
+                0.00    0.00    4355/4708703     match <cycle 2> [5]
+                0.00    0.00   11229/4708703     dopb <cycle 2> [105]
+                0.00    0.00   31744/4708703     psh <cycle 2> [80]
+                0.00    0.00  178932/4708703     functies <cycle 2> [43]
+                0.00    0.00  191369/4708703     lex [51]
+                0.00    0.00  197622/4708703     changeCase <cycle 2> [12]
+                0.01    0.01  462913/4708703     insert <cycle 2> [25]
+                0.02    0.01  921805/4708703     Naamwoord_w <cycle 2> [26]
+                0.04    0.02 1860908/4708703     privatized [23]
+[31]     2.8    0.06    0.00 4496203         zelfde_als_w <cycle 1> [31]
+                                3059             subboomcopie <cycle 1> [54]
+-----------------------------------------------
+                0.00    0.00      24/532973      update <cycle 2> [133]
+                0.00    0.00   33963/532973      deleteNode <cycle 2> [61]
+                0.00    0.00   36078/532973      psh <cycle 2> [80]
+                0.05    0.00  462908/532973      insert <cycle 2> [25]
+[32]     2.8    0.06    0.00  532973         zoeknaam [32]
+-----------------------------------------------
+                0.06    0.00  291109/291109      nndeel [17]
+[33]     2.8    0.06    0.00  291109         iaf2 [33]
+-----------------------------------------------
+                0.00    0.00       5/761682      stapelmacht <cycle 2> [81]
+                0.00    0.00     213/761682      _qdenominator [120]
+                0.05    0.00  761464/761682      _qplus [6]
+[34]     2.3    0.05    0.00  761682         splits [34]
+-----------------------------------------------
+                                2940             hreslt <cycle 2> [35]
+                              225340             reslt <cycle 2> [44]
+[35]     2.2    0.00    0.05  225340+2940    hreslt <cycle 2> [35]
+                0.02    0.02  225418/226112      eindknoop [41]
+                0.01    0.00  234004/453173      indent [62]
+                0.00    0.00    2862/221337      moetIndent [89]
+                0.00    0.00    5720/618947      myputc [167]
+                0.00    0.00    2862/228952      printflags [176]
+                0.00    0.00    2862/712105      bewerk [164]
+                0.00    0.00       2/611241      pstr [168]
+                0.00    0.00       2/611241      tstr [169]
+                                2784             reslt <cycle 2> [44]
+                                 329             Head <cycle 2> [67]
+                                2940             hreslt <cycle 2> [35]
+-----------------------------------------------
+                0.00    0.00      14/2305        substlog <cycle 2> [100]
+                0.00    0.00      21/2305        plus_samenvoegen_of_sorteren <cycle 2> [13]
+                0.00    0.00      70/2305        _qmodulo [94]
+                0.00    0.04    2200/2305        substmaal <cycle 2> [38]
+[36]     2.0    0.00    0.04    2305         _qmaal [36]
+                0.00    0.04    1894/2026        _qdema [37]
+                0.00    0.00    4610/5350        isplits [90]
+                0.00    0.00    9631/2367627     bfree [18]
+                0.00    0.00     411/26685       nmaal [64]
+                0.00    0.00     411/937         inumberNode [114]
+-----------------------------------------------
+                0.00    0.00     132/2026        _q_qdeel [84]
+                0.00    0.04    1894/2026        _qmaal [36]
+[37]     2.0    0.00    0.04    2026         _qdema [37]
+                0.00    0.04    2026/9453        _qndeel [15]
+                0.00    0.00    4052/26685       nmaal [64]
+                0.00    0.00    4052/2367627     bfree [18]
+-----------------------------------------------
+                               15446             merge <cycle 2> [42]
+[38]     1.9    0.00    0.04   15446         substmaal <cycle 2> [38]
+                0.00    0.04    2200/2305        _qmaal [36]
+                0.00    0.00     351/42916       copievan [85]
+                0.00    0.00      81/430298      prive [55]
+                0.00    0.00      24/29          _qmaalmineen [143]
+                0.00    0.00   17588/48837       getal_graad [179]
+                0.00    0.00   15446/15446       rechteroperand [184]
+                                9381             vgl <cycle 2> [93]
+                                2806             vopb <cycle 2> [52]
+                                2575             wis <cycle 2> [11]
+                                2561             linkertak <cycle 2> [102]
+                                 941             rechtertak <cycle 2> [107]
+                                 620             opb <cycle 2> [110]
+-----------------------------------------------
+                0.00    0.00     382/606526      handleKOMMA <cycle 2> [117]
+                0.00    0.00   13341/606526      handleLUCHT <cycle 2> [57]
+                0.01    0.03  592803/606526      eval <cycle 2> [14]
+[39]     1.9    0.01    0.03  606526         copyop [39]
+                0.01    0.01  606526/4708703     _copyop <cycle 1> [28]
+                0.01    0.00  606526/5139499     dec_refcount [27]
+-----------------------------------------------
+                                   8             fil <cycle 2> [153]
+                                  19             functies <cycle 2> [43]
+                0.18    0.31       3/13          stringEval [4]
+[40]     1.9    0.02    0.02      30         input <cycle 2> [40]
+                0.01    0.00  607251/607251      lput [69]
+                0.01    0.00  754129/754129      mygetc [70]
+                0.00    0.00      30/2393350     bmalloc [22]
+                0.00    0.00       4/2367627     bfree [18]
+                                  26             bouwboom_w <cycle 2> [128]
+-----------------------------------------------
+                0.00    0.00     694/226112      reslt <cycle 2> [44]
+                0.02    0.02  225418/226112      hreslt <cycle 2> [35]
+[41]     1.9    0.02    0.02  226112         eindknoop [41]
+                0.02    0.00  225685/225703      haalaan [59]
+                0.00    0.00  506490/611241      pstr [168]
+                0.00    0.00  506490/611241      tstr [169]
+                0.00    0.00  490768/712105      bewerk [164]
+                0.00    0.00  226090/228952      printflags [176]
+                0.00    0.00   38225/618947      myputc [167]
+                0.00    0.00      68/113         lineToLong [203]
+                0.00    0.00      52/138         plak [201]
+                0.00    0.00      52/138         tel [202]
+-----------------------------------------------
+                              194820             eval <cycle 2> [14]
+[42]     1.7    0.02    0.02  194820         merge <cycle 2> [42]
+                0.01    0.01  215188/430298      prive [55]
+                0.01    0.00  201712/390893      rechteroperand_and_tail [71]
+                0.00    0.00  204205/393045      linkeroperand_and_tail [170]
+                              219034             eval <cycle 2> [14]
+                              191028             vglplus <cycle 2> [178]
+                              191028             plus_samenvoegen_of_sorteren <cycle 2> [13]
+                               15446             vglmaal <cycle 2> [185]
+                               15446             substmaal <cycle 2> [38]
+-----------------------------------------------
+                              279033             eval <cycle 2> [14]
+[43]     1.6    0.02    0.01  279033         functies <cycle 2> [43]
+                0.00    0.00  178932/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00   66081/263712      scopy [56]
+                0.00    0.00     347/347         Sim [91]
+                0.00    0.00      12/70          _qmodulo [94]
+                0.00    0.00    2602/2393350     bmalloc [22]
+                0.00    0.00      15/131         _qheeldeel [103]
+                0.00    0.00     213/213         _qdenominator [120]
+                0.00    0.00      96/228772      getCodePoint [48]
+                0.00    0.00      14/430298      prive [55]
+                0.00    0.00       6/38          myfopen [135]
+                0.00    0.00       4/36          deallocateFilehendel [131]
+                0.00    0.00       2/1585542     pskfree [24]
+                0.00    0.00       1/1           combiflags [163]
+                0.00    0.00   65571/270971      putCodePoint [174]
+                0.00    0.00    2241/2884        toLong [191]
+                0.00    0.00    2185/291501      numbercheck [172]
+                0.00    0.00      49/139         zoekopt [200]
+                0.00    0.00       9/9           print_clock [219]
+                0.00    0.00       4/4           strToPointer [223]
+                0.00    0.00       2/2           pointerToStr [224]
+                0.00    0.00       1/1           stringreverse [228]
+                              445073             wis <cycle 2> [11]
+                              197622             changeCase <cycle 2> [12]
+                              178505             eval <cycle 2> [14]
+                                5670             find_func <cycle 2> [148]
+                                4370             result <cycle 2> [190]
+                                2241             rechtertak <cycle 2> [107]
+                                2110             psh <cycle 2> [80]
+                                 415             evalmacro <cycle 2> [116]
+                                 393             output <cycle 2> [126]
+                                  27             opb <cycle 2> [110]
+                                  19             input <cycle 2> [40]
+                                  16             fil <cycle 2> [153]
+                                  16             getObjectDef <cycle 2> [132]
+                                   4             mmf <cycle 2> [111]
+-----------------------------------------------
+                                4116             reslt <cycle 2> [44]
+                                2784             hreslt <cycle 2> [35]
+                                4775             result <cycle 2> [190]
+[44]     1.5    0.02    0.01    7559+4116    reslt <cycle 2> [44]
+                0.00    0.00  219169/453173      indent [62]
+                0.00    0.00  218475/221337      moetIndent [89]
+                0.00    0.00     694/226112      eindknoop [41]
+                0.00    0.00  218475/712105      bewerk [164]
+                              225340             hreslt <cycle 2> [35]
+                                  15             Head <cycle 2> [67]
+                                4116             reslt <cycle 2> [44]
+-----------------------------------------------
+                0.00    0.00    2495/639247      copyToSnijaf [109]
+                0.00    0.00    9612/639247      copy_insert <cycle 2> [82]
+                0.00    0.03  627140/639247      _copyop <cycle 1> [28]
+[45]     1.5    0.01    0.03  639247         new_operator_like [45]
+                0.03    0.00  639247/2393350     bmalloc [22]
+-----------------------------------------------
+                0.00    0.00   42916/258476      copievan [85]
+                0.02    0.01  215560/258476      subboomcopie <cycle 1> [54]
+[46]     1.4    0.02    0.01  258476         icopievan [46]
+                0.01    0.00  258476/2393350     bmalloc [22]
+-----------------------------------------------
+                0.00    0.00   11590/373412      op [99]
+                0.03    0.00  361822/373412      af [50]
+[47]     1.4    0.03    0.00  373412         opaffinal [47]
+-----------------------------------------------
+                0.00    0.00      96/228772      functies <cycle 2> [43]
+                0.03    0.00  228676/228772      getCodePoint2 [49]
+[48]     1.4    0.03    0.00  228772         getCodePoint [48]
+-----------------------------------------------
+                0.00    0.00       9/228720      caseinsensitivehash [129]
+                0.00    0.00    4331/228720      simil [92]
+                0.00    0.00    7914/228720      strcasecomp [83]
+                0.00    0.00   11066/228720      strcasecompu [79]
+                0.00    0.03  205400/228720      changeCase <cycle 2> [12]
+[49]     1.4    0.00    0.03  228720         getCodePoint2 [49]
+                0.03    0.00  228676/228772      getCodePoint [48]
+-----------------------------------------------
+                0.00    0.03  361822/361822      nplus [21]
+[50]     1.3    0.00    0.03  361822         af [50]
+                0.03    0.00  361822/373412      opaffinal [47]
+-----------------------------------------------
+                               39030             lex [51]
+                0.00    0.00       1/185875      startboom_w [154]
+                0.00    0.00      26/185875      bouwboom_w <cycle 2> [128]
+                0.00    0.00    1370/185875      opb <cycle 2> [110]
+                0.00    0.03  184478/185875      vopbnowis [53]
+[51]     1.3    0.00    0.03  185875+39030   lex [51]
+                0.01    0.00   26258/26258       atoom [65]
+                0.01    0.00  186776/186776      vshift_nw [73]
+                0.00    0.00  191369/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00   31752/2393350     bmalloc [22]
+                0.00    0.00      38/38          vshift_w [156]
+                0.00    0.00   33536/33536       flags [180]
+                0.00    0.00    1581/1581        shift_nw [192]
+                               39030             lex [51]
+-----------------------------------------------
+                                   4             fil <cycle 2> [153]
+                                  31             substlog <cycle 2> [100]
+                                 284             stapelmacht <cycle 2> [81]
+                                2806             substmaal <cycle 2> [38]
+                              181353             plus_samenvoegen_of_sorteren <cycle 2> [13]
+[52]     1.3    0.00    0.03  184478         vopb <cycle 2> [52]
+                0.00    0.03  184478/184478      vopbnowis [53]
+                              184478             wis <cycle 2> [11]
+-----------------------------------------------
+                0.00    0.03  184478/184478      vopb <cycle 2> [52]
+[53]     1.3    0.00    0.03  184478         vopbnowis [53]
+                0.00    0.03  184478/185875      lex [51]
+                0.00    0.00  184478/197064      setflgs [127]
+-----------------------------------------------
+                                   1             zelfde_als_w_2 <cycle 1> [166]
+                                3059             zelfde_als_w <cycle 1> [31]
+                0.00    0.00       1/4708703     find_func <cycle 2> [148]
+                0.00    0.00       2/4708703     Naamwoord <cycle 2> [155]
+                0.00    0.00       2/4708703     stringmatch <cycle 2> [68]
+                0.00    0.00       2/4708703     eval <cycle 2> [14]
+                0.00    0.00       3/4708703     doEval <cycle 2> [157]
+                0.00    0.00      62/4708703     lambda <cycle 2> [141]
+                0.00    0.00      65/4708703     sdoEval <cycle 2> [140]
+                0.00    0.00     439/4708703     evalmacro <cycle 2> [116]
+                0.00    0.00     692/4708703     doPosition <cycle 2> [119]
+                0.00    0.00     784/4708703     backbone <cycle 2> [118]
+                0.00    0.00    1338/4708703     tryq <cycle 2> [113]
+                0.00    0.00    2237/4708703     match <cycle 2> [5]
+                0.00    0.00    6649/4708703     Naamwoord_w <cycle 2> [26]
+                0.00    0.00  220838/4708703     prive [55]
+[54]     1.2    0.00    0.03  236174         subboomcopie <cycle 1> [54]
+                0.02    0.01  215560/258476      icopievan [46]
+                               20614             _copyop <cycle 1> [28]
+-----------------------------------------------
+                0.00    0.00       1/430298      combiflags [163]
+                0.00    0.00       1/430298      eval <cycle 2> [14]
+                0.00    0.00      14/430298      _linkertak <cycle 2> [58]
+                0.00    0.00      14/430298      functies <cycle 2> [43]
+                0.00    0.00      16/430298      stapelmacht <cycle 2> [81]
+                0.00    0.00      81/430298      substmaal <cycle 2> [38]
+                0.00    0.00      99/430298      __rechtertak <cycle 2> [122]
+                0.00    0.00     103/430298      Naamwoord_w <cycle 2> [26]
+                0.00    0.00     130/430298      setflgs [127]
+                0.00    0.00     178/430298      _fencelinkertak <cycle 2> [125]
+                0.00    0.00     341/430298      plus_samenvoegen_of_sorteren <cycle 2> [13]
+                0.00    0.00     348/430298      _rechtertak <cycle 2> [121]
+                0.00    0.00     788/430298      rechtsbrengen [115]
+                0.00    0.00   15374/430298      _flinkertak <cycle 2> [101]
+                0.00    0.01  197622/430298      changeCase <cycle 2> [12]
+                0.01    0.01  215188/430298      merge <cycle 2> [42]
+[55]     1.0    0.01    0.01  430298         prive [55]
+                0.00    0.00  220838/4708703     subboomcopie <cycle 1> [54]
+                0.00    0.00  220838/5139499     dec_refcount [27]
+-----------------------------------------------
+                0.00    0.00      59/263712      scopy_insert <cycle 2> [130]
+                0.00    0.00   66081/263712      functies <cycle 2> [43]
+                0.01    0.01  197572/263712      changeCase <cycle 2> [12]
+[56]     1.0    0.01    0.01  263712         scopy [56]
+                0.01    0.00  263712/2393350     bmalloc [22]
+                0.00    0.00  263712/265742      fullnumbercheck [175]
+-----------------------------------------------
+                              106495             eval <cycle 2> [14]
+[57]     1.0    0.02    0.00  106495         handleLUCHT <cycle 2> [57]
+                0.00    0.00   13341/606526      copyop [39]
+                0.00    0.00  122841/127493      rechtsbrengen [115]
+                              229531             eval <cycle 2> [14]
+                                 163             rechtertak <cycle 2> [107]
+                                  35             linkertak <cycle 2> [102]
+-----------------------------------------------
+                               10092             linkertak <cycle 2> [102]
+                              508937             eval <cycle 2> [14]
+[58]     0.9    0.02    0.00  519029         _linkertak <cycle 2> [58]
+                0.00    0.00      14/430298      prive [55]
+                              519029             wis <cycle 2> [11]
+-----------------------------------------------
+                0.00    0.00      18/225703      lstsub <cycle 2> [142]
+                0.02    0.00  225685/225703      eindknoop [41]
+[59]     0.9    0.02    0.00  225703         haalaan [59]
+                0.00    0.00      45/113         lineToLong [203]
+-----------------------------------------------
+                0.00    0.00      18/1422699     lstsub <cycle 2> [142]
+                0.00    0.00   31744/1422699     psh <cycle 2> [80]
+                0.00    0.00  456355/1422699     insert <cycle 2> [25]
+                0.01    0.00  934582/1422699     find <cycle 2> [19]
+[60]     0.9    0.01    0.00 1422699         Entry [60]
+                0.00    0.00  207853/300792      macht2 [86]
+-----------------------------------------------
+                                   3             doEval <cycle 2> [157]
+                                  53             stringmatch <cycle 2> [68]
+                                  65             sdoEval <cycle 2> [140]
+                                 336             match <cycle 2> [5]
+                                1338             tryq <cycle 2> [113]
+                                5624             find_func <cycle 2> [148]
+                               26544             pop <cycle 2> [75]
+[61]     0.7    0.01    0.01   33963         deleteNode <cycle 2> [61]
+                0.00    0.00   33963/532973      zoeknaam [32]
+                0.00    0.00   20897/2367627     bfree [18]
+                0.00    0.00   29537/300792      macht2 [86]
+                0.00    0.00   33963/38299       Entry2 [104]
+                               33963             wis <cycle 2> [11]
+-----------------------------------------------
+                0.00    0.00  219169/453173      reslt <cycle 2> [44]
+                0.01    0.00  234004/453173      hreslt <cycle 2> [35]
+[62]     0.7    0.01    0.01  453173         indent [62]
+                0.01    0.00   12548/22236       complexiteit [74]
+                0.00    0.00   68883/618947      myputc [167]
+-----------------------------------------------
+                0.00    0.00   10700/39980       isplits [90]
+                0.01    0.00   29280/39980       _qplus [6]
+[63]     0.5    0.01    0.00   39980         convert2binary [63]
+                0.00    0.00   39980/2393350     bmalloc [22]
+-----------------------------------------------
+                0.00    0.00     262/26685       _qheeldeel [103]
+                0.00    0.00     411/26685       _qmaal [36]
+                0.00    0.00    4052/26685       _qdema [37]
+                0.01    0.00   21960/26685       _qplus [6]
+[64]     0.5    0.01    0.00   26685         nmaal [64]
+                0.00    0.00   26685/2393350     bmalloc [22]
+-----------------------------------------------
+                0.01    0.00   26258/26258       lex [51]
+[65]     0.5    0.01    0.00   26258         atoom [65]
+                0.00    0.00   26258/2393350     bmalloc [22]
+                0.00    0.00   23574/291501      numbercheck [172]
+-----------------------------------------------
+                0.00    0.00       9/18989       caseinsensitivehash [129]
+                0.00    0.00    7914/18989       strcasecomp [83]
+                0.00    0.01   11066/18989       strcasecompu [79]
+[66]     0.5    0.00    0.01   18989         toLowerUnicode [66]
+                0.01    0.00   18989/226697      convertLetter [20]
+-----------------------------------------------
+                                   1             eval <cycle 2> [14]
+                                   3             getObjectDef <cycle 2> [132]
+                                  15             reslt <cycle 2> [44]
+                                  18             lstsub <cycle 2> [142]
+                                 136             getmember <cycle 2> [199]
+                                 329             hreslt <cycle 2> [35]
+                               15925             match <cycle 2> [5]
+                              934622             find <cycle 2> [19]
+[67]     0.5    0.01    0.00  951049         Head <cycle 2> [67]
+                0.00    0.00     557/1691        copyToSnijaf [109]
+                0.00    0.00     793/2367627     bfree [18]
+                0.00    0.00     793/2393350     bmalloc [22]
+                                1350             wis <cycle 2> [11]
+-----------------------------------------------
+                              201483             stringmatch <cycle 2> [68]
+                                   1             match <cycle 2> [5]
+                                 320             eval <cycle 2> [14]
+[68]     0.5    0.00    0.01     321+201483  stringmatch <cycle 2> [68]
+                0.01    0.00  201059/201059      stringOncePattern [72]
+                0.00    0.00    1598/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00       2/4708703     subboomcopie <cycle 1> [54]
+                0.00    0.00       5/197064      setflgs [127]
+                0.00    0.00    1947/279940      cleanOncePattern [173]
+                0.00    0.00     210/375         sfullnumbercheck [195]
+                               91739             scompare <cycle 2> [78]
+                                3547             wis <cycle 2> [11]
+                                1947             Naamwoord_w <cycle 2> [26]
+                                1600             eval <cycle 2> [14]
+                                1590             string_copy_insert <cycle 2> [112]
+                                 635             doPosition <cycle 2> [119]
+                                  65             sdoEval <cycle 2> [140]
+                                  53             psh <cycle 2> [80]
+                                  53             deleteNode <cycle 2> [61]
+                                   5             vgl <cycle 2> [93]
+                              201483             stringmatch <cycle 2> [68]
+-----------------------------------------------
+                0.01    0.00  607251/607251      input <cycle 2> [40]
+[69]     0.5    0.01    0.00  607251         lput [69]
+                0.00    0.00      32/2393350     bmalloc [22]
+                0.00    0.00      16/2367627     bfree [18]
+-----------------------------------------------
+                0.01    0.00  754129/754129      input <cycle 2> [40]
+[70]     0.5    0.01    0.00  754129         mygetc [70]
+-----------------------------------------------
+                0.00    0.00  189181/390893      plus_samenvoegen_of_sorteren <cycle 2> [13]
+                0.01    0.00  201712/390893      merge <cycle 2> [42]
+[71]     0.5    0.01    0.00  390893         rechteroperand_and_tail [71]
+-----------------------------------------------
+                               56325             stringOncePattern [72]
+                0.01    0.00  201059/201059      stringmatch <cycle 2> [68]
+[72]     0.5    0.01    0.00  201059+56325   stringOncePattern [72]
+                               56325             stringOncePattern [72]
+-----------------------------------------------
+                0.01    0.00  186776/186776      lex [51]
+[73]     0.5    0.01    0.00  186776         vshift_nw [73]
+-----------------------------------------------
+                               69534             complexiteit [74]
+                0.00    0.00    9688/22236       moetIndent [89]
+                0.01    0.00   12548/22236       indent [62]
+[74]     0.5    0.01    0.00   22236+69534   complexiteit [74]
+                               69534             complexiteit [74]
+-----------------------------------------------
+                               19607             pop <cycle 2> [75]
+                                1338             tryq <cycle 2> [113]
+                                5599             find_func <cycle 2> [148]
+[75]     0.5    0.01    0.00    6937+19607   pop <cycle 2> [75]
+                               26544             deleteNode <cycle 2> [61]
+                               19607             pop <cycle 2> [75]
+-----------------------------------------------
+                0.01    0.00       6/6           init_ruimte [77]
+[76]     0.5    0.01    0.00       6         addAllocation [76]
+-----------------------------------------------
+                0.00    0.01       1/1           startProc [3]
+[77]     0.5    0.00    0.01       1         init_ruimte [77]
+                0.01    0.00       6/6           addAllocation [76]
+                0.00    0.00       6/11          initializeMemBlock [216]
+-----------------------------------------------
+                               91739             stringmatch <cycle 2> [68]
+[78]     0.4    0.00    0.01   91739         scompare <cycle 2> [78]
+                0.00    0.01     198/198         strcasecompu [79]
+                0.00    0.00      57/199573      _qvergelijk [10]
+                0.00    0.00     165/375         sfullnumbercheck [195]
+                                  57             opb <cycle 2> [110]
+                                  57             wis <cycle 2> [11]
+-----------------------------------------------
+                0.00    0.01     198/198         scompare <cycle 2> [78]
+[79]     0.4    0.00    0.01     198         strcasecompu [79]
+                0.00    0.01   11066/18989       toLowerUnicode [66]
+                0.00    0.00   11066/228720      getCodePoint2 [49]
+-----------------------------------------------
+                               19607             psh <cycle 2> [80]
+                                   3             doEval <cycle 2> [157]
+                                  53             stringmatch <cycle 2> [68]
+                                  65             sdoEval <cycle 2> [140]
+                                 336             match <cycle 2> [5]
+                                2110             functies <cycle 2> [43]
+                                2676             tryq <cycle 2> [113]
+                               11223             find_func <cycle 2> [148]
+[80]     0.3    0.00    0.01   16466+19607   psh <cycle 2> [80]
+                0.00    0.00   36078/532973      zoeknaam [32]
+                0.00    0.00   31744/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00   16497/2393350     bmalloc [22]
+                0.00    0.00   31647/300792      macht2 [86]
+                0.00    0.00   31744/1422699     Entry [60]
+                0.00    0.00    2133/2367627     bfree [18]
+                0.00    0.00    4314/38299       Entry2 [104]
+                                4431             insert <cycle 2> [25]
+                                4314             wis <cycle 2> [11]
+                               19607             psh <cycle 2> [80]
+-----------------------------------------------
+                                1843             eval <cycle 2> [14]
+[81]     0.3    0.00    0.01    1843         stapelmacht <cycle 2> [81]
+                0.00    0.00     222/239         _q_qdeel [84]
+                0.00    0.00      58/70          _qmodulo [94]
+                0.00    0.00      46/131         _qheeldeel [103]
+                0.00    0.00     150/199573      _qvergelijk [10]
+                0.00    0.00     322/42916       copievan [85]
+                0.00    0.00       3/380732      _qplus [6]
+                0.00    0.00      46/2367627     bfree [18]
+                0.00    0.00      34/2393350     bmalloc [22]
+                0.00    0.00      16/430298      prive [55]
+                0.00    0.00      39/39          subroot [151]
+                0.00    0.00       5/761682      splits [34]
+                0.00    0.00       5/29          _qmaalmineen [143]
+                0.00    0.00     339/339         abseen [197]
+                                 656             wis <cycle 2> [11]
+                                 346             tryq <cycle 2> [113]
+                                 284             vopb <cycle 2> [52]
+                                 181             linkertak <cycle 2> [102]
+                                 165             opb <cycle 2> [110]
+-----------------------------------------------
+                                   3             doEval <cycle 2> [157]
+                              449781             match <cycle 2> [5]
+[82]     0.3    0.00    0.01  449784         copy_insert <cycle 2> [82]
+                0.00    0.00   41614/42916       copievan [85]
+                0.00    0.00    9612/639247      new_operator_like [45]
+                0.00    0.00    1134/1691        copyToSnijaf [109]
+                0.00    0.00    9612/11267       all_refcount_bits_set [187]
+                              449784             insert <cycle 2> [25]
+                               52360             wis <cycle 2> [11]
+-----------------------------------------------
+                0.00    0.00       2/9           inserthash [96]
+                0.00    0.00       2/9           findhash [98]
+                0.00    0.00       5/9           compare [9]
+[83]     0.3    0.00    0.01       9         strcasecomp [83]
+                0.00    0.00    7914/18989       toLowerUnicode [66]
+                0.00    0.00    7914/228720      getCodePoint2 [49]
+-----------------------------------------------
+                0.00    0.00      17/239         substlog <cycle 2> [100]
+                0.00    0.00     222/239         stapelmacht <cycle 2> [81]
+[84]     0.2    0.00    0.01     239         _q_qdeel [84]
+                0.00    0.00     132/2026        _qdema [37]
+                0.00    0.00     107/9453        _qndeel [15]
+                0.00    0.00     478/5350        isplits [90]
+                0.00    0.00     956/2367627     bfree [18]
+-----------------------------------------------
+                0.00    0.00       3/42916       not_a_number [152]
+                0.00    0.00       6/42916       substlog <cycle 2> [100]
+                0.00    0.00      95/42916       substdiff <cycle 2> [123]
+                0.00    0.00     322/42916       stapelmacht <cycle 2> [81]
+                0.00    0.00     351/42916       substmaal <cycle 2> [38]
+                0.00    0.00     525/42916       _qndeel [15]
+                0.00    0.00   41614/42916       copy_insert <cycle 2> [82]
+[85]     0.2    0.00    0.01   42916         copievan [85]
+                0.00    0.00   42916/258476      icopievan [46]
+-----------------------------------------------
+                0.00    0.00   29537/300792      deleteNode <cycle 2> [61]
+                0.00    0.00   31647/300792      psh <cycle 2> [80]
+                0.00    0.00   31755/300792      Entry2 [104]
+                0.00    0.00  207853/300792      Entry [60]
+[86]     0.2    0.01    0.00  300792         macht2 [86]
+-----------------------------------------------
+                                   7             wis <cycle 2> [11]
+[87]     0.2    0.01    0.00       7         fireBuiltInFunc <cycle 2> [87]
+                                   7             hashdie <cycle 2> [220]
+-----------------------------------------------
+                                                 <spontaneous>
+[88]     0.2    0.01    0.00                 errorprintf [88]
+-----------------------------------------------
+                0.00    0.00    2862/221337      hreslt <cycle 2> [35]
+                0.00    0.00  218475/221337      reslt <cycle 2> [44]
+[89]     0.2    0.00    0.00  221337         moetIndent [89]
+                0.00    0.00    9688/22236       complexiteit [74]
+-----------------------------------------------
+                0.00    0.00     262/5350        _qheeldeel [103]
+                0.00    0.00     478/5350        _q_qdeel [84]
+                0.00    0.00    4610/5350        _qmaal [36]
+[90]     0.1    0.00    0.00    5350         isplits [90]
+                0.00    0.00   10700/39980       convert2binary [63]
+-----------------------------------------------
+                0.00    0.00     347/347         functies <cycle 2> [43]
+[91]     0.1    0.00    0.00     347         Sim [91]
+                0.00    0.00     347/347         simil [92]
+-----------------------------------------------
+                                  92             simil [92]
+                0.00    0.00     347/347         Sim [91]
+[92]     0.1    0.00    0.00     347+92      simil [92]
+                0.00    0.00    2308/226697      convertLetter [20]
+                0.00    0.00    4331/228720      getCodePoint2 [49]
+                                  92             simil [92]
+-----------------------------------------------
+                               14321             vgl <cycle 2> [93]
+                                   5             stringmatch <cycle 2> [68]
+                                  25             is_afhankelyk_van <cycle 2> [211]
+                                  36             setmember <cycle 2> [146]
+                                  60             vglsub <cycle 2> [205]
+                                  75             substlog <cycle 2> [100]
+                                  82             substdiff <cycle 2> [123]
+                                 115             lambda <cycle 2> [141]
+                                 144             match <cycle 2> [5]
+                                 187             getmember <cycle 2> [199]
+                                3522             vglmaal <cycle 2> [185]
+                                6135             plus_samenvoegen_of_sorteren <cycle 2> [13]
+                                6686             vglplus <cycle 2> [178]
+                                9381             substmaal <cycle 2> [38]
+[93]     0.1    0.00    0.00   26453+14321   vgl <cycle 2> [93]
+                0.00    0.00    1560/199573      _qvergelijk [10]
+                                  60             vglsub <cycle 2> [205]
+                               14321             vgl <cycle 2> [93]
+-----------------------------------------------
+                0.00    0.00      12/70          functies <cycle 2> [43]
+                0.00    0.00      58/70          stapelmacht <cycle 2> [81]
+[94]     0.1    0.00    0.00      70         _qmodulo [94]
+                0.00    0.00      70/2305        _qmaal [36]
+                0.00    0.00      70/131         _qheeldeel [103]
+                0.00    0.00      70/380732      _qplus [6]
+                0.00    0.00     140/1585542     pskfree [24]
+-----------------------------------------------
+                                   8             find_func <cycle 2> [148]
+[95]     0.1    0.00    0.00       8         hashinsert <cycle 2> [95]
+                0.00    0.00       8/8           inserthash [96]
+                0.00    0.00       8/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00       8/9           loadfactor [217]
+                                   8             wis <cycle 2> [11]
+-----------------------------------------------
+                0.00    0.00       8/8           hashinsert <cycle 2> [95]
+[96]     0.1    0.00    0.00       8         inserthash [96]
+                0.00    0.00       2/9           strcasecomp [83]
+                0.00    0.00       3/4           caseinsensitivehash [129]
+                0.00    0.00       8/2393350     bmalloc [22]
+                0.00    0.00       8/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00       5/12          casesensitivehash [215]
+-----------------------------------------------
+                                   7             find_func <cycle 2> [148]
+[97]     0.1    0.00    0.00       7         hashfind <cycle 2> [97]
+                0.00    0.00       7/7           findhash [98]
+                0.00    0.00       5/4708703     zelfde_als_w <cycle 1> [31]
+                                   5             wis <cycle 2> [11]
+-----------------------------------------------
+                0.00    0.00       7/7           hashfind <cycle 2> [97]
+[98]     0.1    0.00    0.00       7         findhash [98]
+                0.00    0.00       2/9           strcasecomp [83]
+                0.00    0.00       1/4           caseinsensitivehash [129]
+                0.00    0.00       6/12          casesensitivehash [215]
+-----------------------------------------------
+                0.00    0.00   11590/11590       nplus [21]
+[99]     0.0    0.00    0.00   11590         op [99]
+                0.00    0.00   11590/373412      opaffinal [47]
+-----------------------------------------------
+                                  75             eval <cycle 2> [14]
+[100]    0.0    0.00    0.00      75         substlog <cycle 2> [100]
+                0.00    0.00      17/239         _q_qdeel [84]
+                0.00    0.00      14/2305        _qmaal [36]
+                0.00    0.00     167/199573      _qvergelijk [10]
+                0.00    0.00       6/42916       copievan [85]
+                                  75             vgl <cycle 2> [93]
+                                  37             wis <cycle 2> [11]
+                                  31             vopb <cycle 2> [52]
+                                   4             tryq <cycle 2> [113]
+                                   1             opb <cycle 2> [110]
+-----------------------------------------------
+                                   1             flinkertak <cycle 2> [160]
+                               15380             eval <cycle 2> [14]
+[101]    0.0    0.00    0.00   15381         _flinkertak <cycle 2> [101]
+                0.00    0.00   15374/430298      prive [55]
+                               15381             wis <cycle 2> [11]
+-----------------------------------------------
+                                  35             handleLUCHT <cycle 2> [57]
+                                 181             stapelmacht <cycle 2> [81]
+                                 304             plus_samenvoegen_of_sorteren <cycle 2> [13]
+                                2561             substmaal <cycle 2> [38]
+                                7011             eval <cycle 2> [14]
+[102]    0.0    0.00    0.00   10092         linkertak <cycle 2> [102]
+                0.00    0.00   10092/1585542     pskfree [24]
+                               10092             _linkertak <cycle 2> [58]
+-----------------------------------------------
+                0.00    0.00      15/131         functies <cycle 2> [43]
+                0.00    0.00      46/131         stapelmacht <cycle 2> [81]
+                0.00    0.00      70/131         _qmodulo [94]
+[103]    0.0    0.00    0.00     131         _qheeldeel [103]
+                0.00    0.00     262/5350        isplits [90]
+                0.00    0.00     131/380732      _qplus [6]
+                0.00    0.00     262/26685       nmaal [64]
+                0.00    0.00     131/240723      nndeel [17]
+                0.00    0.00    1048/2367627     bfree [18]
+                0.00    0.00     131/1585542     pskfree [24]
+                0.00    0.00     131/937         inumberNode [114]
+-----------------------------------------------
+                0.00    0.00      22/38299       update <cycle 2> [133]
+                0.00    0.00    4314/38299       psh <cycle 2> [80]
+                0.00    0.00   33963/38299       deleteNode <cycle 2> [61]
+[104]    0.0    0.00    0.00   38299         Entry2 [104]
+                0.00    0.00   31755/300792      macht2 [86]
+-----------------------------------------------
+                                  31             output <cycle 2> [126]
+                               11198             find_func <cycle 2> [148]
+[105]    0.0    0.00    0.00   11229         dopb <cycle 2> [105]
+                0.00    0.00   11229/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00   11229/197064      setflgs [127]
+                               11229             wis <cycle 2> [11]
+-----------------------------------------------
+                0.00    0.00    8925/8925        _qndeel [15]
+[106]    0.0    0.00    0.00    8925         nn2q [106]
+                0.00    0.00    8530/2393350     bmalloc [22]
+                0.00    0.00     395/937         inumberNode [114]
+                0.00    0.00   17060/17997       numlength [182]
+                0.00    0.00   17060/17983       iconvert2decimal [183]
+-----------------------------------------------
+                                 163             handleLUCHT <cycle 2> [57]
+                                 350             output <cycle 2> [126]
+                                 941             substmaal <cycle 2> [38]
+                                1604             plus_samenvoegen_of_sorteren <cycle 2> [13]
+                                2241             functies <cycle 2> [43]
+[107]    0.0    0.00    0.00    5299         rechtertak <cycle 2> [107]
+                0.00    0.00    5299/1585542     pskfree [24]
+                                5299             _rechtertak <cycle 2> [121]
+-----------------------------------------------
+                0.00    0.00    7320/7320        _qplus [6]
+[108]    0.0    0.00    0.00    7320         inplus [108]
+                0.00    0.00    7320/2393350     bmalloc [22]
+                0.00    0.00    6129/6129        iaf [189]
+                0.00    0.00    1191/1191        iop [194]
+-----------------------------------------------
+                0.00    0.00     557/1691        Head <cycle 2> [67]
+                0.00    0.00    1134/1691        copy_insert <cycle 2> [82]
+[109]    0.0    0.00    0.00    1691         copyToSnijaf [109]
+                0.00    0.00    4186/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00    2495/639247      new_operator_like [45]
+-----------------------------------------------
+                                   1             substlog <cycle 2> [100]
+                                  14             wis <cycle 2> [11]
+                                  25             is_afhankelyk_van <cycle 2> [211]
+                                  27             functies <cycle 2> [43]
+                                  50             substdiff <cycle 2> [123]
+                                  57             scompare <cycle 2> [78]
+                                  60             vglsub <cycle 2> [205]
+                                 165             stapelmacht <cycle 2> [81]
+                                 345             plus_samenvoegen_of_sorteren <cycle 2> [13]
+                                 620             substmaal <cycle 2> [38]
+                0.36    0.63       6/13          startProc [3]
+[110]    0.0    0.00    0.00    1370         opb <cycle 2> [110]
+                0.00    0.00    1370/185875      lex [51]
+                0.00    0.00    1208/197064      setflgs [127]
+                                1208             wis <cycle 2> [11]
+-----------------------------------------------
+                                   4             functies <cycle 2> [43]
+[111]    0.0    0.00    0.00       4         mmf <cycle 2> [111]
+                0.00    0.00    4358/2393350     bmalloc [22]
+                0.00    0.00       4/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00       4/139         zoekopt [200]
+                                   4             wis <cycle 2> [11]
+-----------------------------------------------
+                                  65             sdoEval <cycle 2> [140]
+                                1590             stringmatch <cycle 2> [68]
+[112]    0.0    0.00    0.00    1655         string_copy_insert <cycle 2> [112]
+                0.00    0.00    1655/2393350     bmalloc [22]
+                0.00    0.00    1655/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00    1655/5139499     dec_refcount [27]
+                0.00    0.00    1655/11267       all_refcount_bits_set [187]
+                0.00    0.00    1655/265742      fullnumbercheck [175]
+                                1655             insert <cycle 2> [25]
+-----------------------------------------------
+                                   4             substlog <cycle 2> [100]
+                                 346             stapelmacht <cycle 2> [81]
+                                 988             expandProduct <cycle 2> [186]
+[113]    0.0    0.00    0.00    1338         tryq <cycle 2> [113]
+                0.00    0.00    1338/4708703     subboomcopie <cycle 1> [54]
+                                2676             psh <cycle 2> [80]
+                                1338             eval <cycle 2> [14]
+                                1338             pop <cycle 2> [75]
+                                1338             wis <cycle 2> [11]
+                                1338             deleteNode <cycle 2> [61]
+-----------------------------------------------
+                0.00    0.00     131/937         _qheeldeel [103]
+                0.00    0.00     395/937         nn2q [106]
+                0.00    0.00     411/937         _qmaal [36]
+[114]    0.0    0.00    0.00     937         inumberNode [114]
+                0.00    0.00     937/2393350     bmalloc [22]
+                0.00    0.00     937/17997       numlength [182]
+                0.00    0.00     923/17983       iconvert2decimal [183]
+-----------------------------------------------
+                0.00    0.00    4652/127493      handleKOMMA <cycle 2> [117]
+                0.00    0.00  122841/127493      handleLUCHT <cycle 2> [57]
+[115]    0.0    0.00    0.00  127493         rechtsbrengen [115]
+                0.00    0.00     788/430298      prive [55]
+-----------------------------------------------
+                                 302             evalmacro <cycle 2> [116]
+                                 415             functies <cycle 2> [43]
+[116]    0.0    0.00    0.00     415+302     evalmacro <cycle 2> [116]
+                0.00    0.00     439/4708703     subboomcopie <cycle 1> [54]
+                0.00    0.00     431/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00       1/2393350     bmalloc [22]
+                0.00    0.00     723/1454        atomtest [193]
+                                 979             wis <cycle 2> [11]
+                                 520             backbone <cycle 2> [118]
+                                 426             eval <cycle 2> [14]
+                                 426             find <cycle 2> [19]
+                                 302             evalmacro <cycle 2> [116]
+-----------------------------------------------
+                                4257             eval <cycle 2> [14]
+[117]    0.0    0.00    0.00    4257         handleKOMMA <cycle 2> [117]
+                0.00    0.00     382/606526      copyop [39]
+                0.00    0.00    4652/127493      rechtsbrengen [115]
+                                8909             eval <cycle 2> [14]
+-----------------------------------------------
+                                 137             lambda <cycle 2> [141]
+                                 520             evalmacro <cycle 2> [116]
+[118]    0.0    0.00    0.00     657         backbone <cycle 2> [118]
+                0.00    0.00     784/4708703     subboomcopie <cycle 1> [54]
+                                 127             wis <cycle 2> [11]
+-----------------------------------------------
+                                  95             match <cycle 2> [5]
+                                 635             stringmatch <cycle 2> [68]
+[119]    0.0    0.00    0.00     730         doPosition <cycle 2> [119]
+                0.00    0.00     692/4708703     subboomcopie <cycle 1> [54]
+                0.00    0.00     642/2884        toLong [191]
+                0.00    0.00      44/44          expressionLength [207]
+                                 695             wis <cycle 2> [11]
+                                 693             eval <cycle 2> [14]
+                                  59             icopy_insert <cycle 2> [206]
+                                   3             Naamwoord_w <cycle 2> [26]
+-----------------------------------------------
+                0.00    0.00     213/213         functies <cycle 2> [43]
+[120]    0.0    0.00    0.00     213         _qdenominator [120]
+                0.00    0.00     213/761682      splits [34]
+                0.00    0.00     213/213         numberNode [124]
+-----------------------------------------------
+                                5299             rechtertak <cycle 2> [107]
+                              339634             eval <cycle 2> [14]
+[121]    0.0    0.00    0.00  344933         _rechtertak <cycle 2> [121]
+                0.00    0.00     348/430298      prive [55]
+                              344933             wis <cycle 2> [11]
+-----------------------------------------------
+                                 126             eval <cycle 2> [14]
+[122]    0.0    0.00    0.00     126         __rechtertak <cycle 2> [122]
+                0.00    0.00      99/1585542     pskfree [24]
+                0.00    0.00      99/430298      prive [55]
+                0.00    0.00      27/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00      27/5139499     dec_refcount [27]
+                                  99             wis <cycle 2> [11]
+-----------------------------------------------
+                                 145             eval <cycle 2> [14]
+[123]    0.0    0.00    0.00     145         substdiff <cycle 2> [123]
+                0.00    0.00      95/42916       copievan [85]
+                0.00    0.00     290/290         is_constant [198]
+                                  95             wis <cycle 2> [11]
+                                  82             vgl <cycle 2> [93]
+                                  50             opb <cycle 2> [110]
+                                  25             is_afhankelyk_van <cycle 2> [211]
+-----------------------------------------------
+                0.00    0.00     213/213         _qdenominator [120]
+[124]    0.0    0.00    0.00     213         numberNode [124]
+                0.00    0.00     213/2393350     bmalloc [22]
+-----------------------------------------------
+                               68413             eval <cycle 2> [14]
+[125]    0.0    0.00    0.00   68413         _fencelinkertak <cycle 2> [125]
+                0.00    0.00     178/430298      prive [55]
+                               68413             wis <cycle 2> [11]
+-----------------------------------------------
+                                 393             functies <cycle 2> [43]
+[126]    0.0    0.00    0.00     393         output <cycle 2> [126]
+                0.00    0.00      31/36          deallocateFilehendel [131]
+                0.00    0.00      31/38          myfopen [135]
+                0.00    0.00      12/2393350     bmalloc [22]
+                0.00    0.00     350/350         flush [196]
+                0.00    0.00      86/139         zoekopt [200]
+                0.00    0.00      74/74          allopts [204]
+                                 387             result <cycle 2> [190]
+                                 350             rechtertak <cycle 2> [107]
+                                  31             dopb <cycle 2> [105]
+                                  18             lst <cycle 2> [212]
+                                  12             wis <cycle 2> [11]
+-----------------------------------------------
+                0.00    0.00       5/197064      stringmatch <cycle 2> [68]
+                0.00    0.00     144/197064      match <cycle 2> [5]
+                0.00    0.00    1208/197064      opb <cycle 2> [110]
+                0.00    0.00   11229/197064      dopb <cycle 2> [105]
+                0.00    0.00  184478/197064      vopbnowis [53]
+[127]    0.0    0.00    0.00  197064         setflgs [127]
+                0.00    0.00     130/430298      prive [55]
+-----------------------------------------------
+                                  26             input <cycle 2> [40]
+[128]    0.0    0.00    0.00      26         bouwboom_w <cycle 2> [128]
+                0.00    0.00      26/185875      lex [51]
+                0.00    0.00      27/2367627     bfree [18]
+                0.00    0.00       1/1           combineInputBuffers [145]
+                                  18             wis <cycle 2> [11]
+-----------------------------------------------
+                0.00    0.00       1/4           findhash [98]
+                0.00    0.00       3/4           inserthash [96]
+[129]    0.0    0.00    0.00       4         caseinsensitivehash [129]
+                0.00    0.00       9/18989       toLowerUnicode [66]
+                0.00    0.00       9/228720      getCodePoint2 [49]
+-----------------------------------------------
+                                  59             icopy_insert <cycle 2> [206]
+[130]    0.0    0.00    0.00      59         scopy_insert <cycle 2> [130]
+                0.00    0.00      59/263712      scopy [56]
+                                  59             insert <cycle 2> [25]
+                                  59             wis <cycle 2> [11]
+-----------------------------------------------
+                0.00    0.00       1/36          fil <cycle 2> [153]
+                0.00    0.00       4/36          functies <cycle 2> [43]
+                0.00    0.00      31/36          output <cycle 2> [126]
+[131]    0.0    0.00    0.00      36         deallocateFilehendel [131]
+                0.00    0.00      72/2367627     bfree [18]
+-----------------------------------------------
+                                  16             functies <cycle 2> [43]
+[132]    0.0    0.00    0.00      16         getObjectDef <cycle 2> [132]
+                0.00    0.00       7/7           objectcopie [137]
+                0.00    0.00      18/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00      11/2393350     bmalloc [22]
+                                   6             Naamwoord_w <cycle 2> [26]
+                                   4             wis <cycle 2> [11]
+                                   3             Head <cycle 2> [67]
+-----------------------------------------------
+                                   2             eval <cycle 2> [14]
+                                  26             insert <cycle 2> [25]
+[133]    0.0    0.00    0.00      28         update <cycle 2> [133]
+                0.00    0.00      24/532973      zoeknaam [32]
+                0.00    0.00      22/38299       Entry2 [104]
+                0.00    0.00       1/4708703     zelfde_als_w <cycle 1> [31]
+                                  24             setmember <cycle 2> [146]
+                                   1             wis <cycle 2> [11]
+-----------------------------------------------
+                0.00    0.00      40/40          myfopen [135]
+[134]    0.0    0.00    0.00      40         mygetfilehendel [134]
+                0.00    0.00      36/36          allocateFilehendel [136]
+-----------------------------------------------
+                0.00    0.00       1/38          bfopen [159]
+                0.00    0.00       6/38          functies <cycle 2> [43]
+                0.00    0.00      31/38          output <cycle 2> [126]
+[135]    0.0    0.00    0.00      38         myfopen [135]
+                0.00    0.00      40/40          mygetfilehendel [134]
+                0.00    0.00      38/38          findFilehendelByName [209]
+-----------------------------------------------
+                0.00    0.00      36/36          mygetfilehendel [134]
+[136]    0.0    0.00    0.00      36         allocateFilehendel [136]
+                0.00    0.00      72/2393350     bmalloc [22]
+-----------------------------------------------
+                0.00    0.00       7/7           getObjectDef <cycle 2> [132]
+[137]    0.0    0.00    0.00       7         objectcopie [137]
+                0.00    0.00       4/7           objectcopiesub2 <cycle 3> [150]
+                0.00    0.00       3/7           objectcopiesub <cycle 3> [139]
+                0.00    0.00       3/2393350     bmalloc [22]
+                0.00    0.00       3/4708703     zelfde_als_w <cycle 1> [31]
+-----------------------------------------------
+[138]    0.0    0.00    0.00       7+35      <cycle 3 as a whole> [138]
+                0.00    0.00      29             objectcopiesub <cycle 3> [139]
+                0.00    0.00      13             objectcopiesub2 <cycle 3> [150]
+-----------------------------------------------
+                                  26             objectcopiesub2 <cycle 3> [150]
+                0.00    0.00       3/7           objectcopie [137]
+[139]    0.0    0.00    0.00      29         objectcopiesub <cycle 3> [139]
+                0.00    0.00      40/4708703     zelfde_als_w <cycle 1> [31]
+                0.00    0.00      20/2393350     bmalloc [22]
+                                   9             objectcopiesub2 <cycle 3> [150]
+-----------------------------------------------
+                                  65             stringmatch <cycle 2> [68]
+[140]    0.0    0.00    0.00      65         sdoEval <cycle 2> [140]
+                0.00    0.00      65/4708703     subboomcopie <cycle 1> [54]
+                                  65             psh <cycle 2> [80]
+                                  65             string_copy_insert <cycle 2> [112]
+                                  65             eval <cycle 2> [14]
+                                  65             deleteNode <cycle 2> [61]
+                                  65             wis <cycle 2> [11]
+-----------------------------------------------
+                                 245             lambda <cycle 2> [141]
+                                  32             find_func <cycle 2> [148]
+[141]    0.0    0.00    0.00      32+245     lambda <cycle 2> [141]
+                0.00    0.00      62/4708703     subboomcopie <cycle 1> [54]
+                0.00    0.00     360/1454        atomtest [193]
+                                 168             wis <cycle 2> [11]
+                                 137             backbone <cycle 2> [118]
+                                 115             vgl <cycle 2> [93]
+                                 245             lambda <cycle 2> [141]
+-----------------------------------------------
+                                  18             lst <cycle 2> [212]
+[142]    0.0    0.00    0.00      18         lstsub <cycle 2> [142]
+                0.00    0.00      18/225703      haalaan [59]
+                0.00    0.00      18/1422699     Entry [60]
+                0.00    0.00      44/44          myprintf [208]
+                                  18             Head <cycle 2> [67]
+                                  18             result <cycle 2> [190]
+-----------------------------------------------
+                0.00    0.00       5/29          stapelmacht <cycle 2> [81]
+                0.00    0.00      24/29          substmaal <cycle 2> [38]
+[143]    0.0    0.00    0.00      29         _qmaalmineen [143]
+                0.00    0.00      29/2393350     bmalloc [22]
+-----------------------------------------------
+                                   1             rehash <cycle 2> [158]
+                                   7             hashdie <cycle 2> [220]
+[144]    0.0    0.00    0.00       8         freehash <cycle 2> [144]
+                0.00    0.00      20/2367627     bfree [18]
+                                   4             wis <cycle 2> [11]
+-----------------------------------------------
+                0.00    0.00       1/1           bouwboom_w <cycle 2> [128]
+[145]    0.0    0.00    0.00       1         combineInputBuffers [145]
+                0.00    0.00      14/2367627     bfree [18]
+                0.00    0.00       1/2393350     bmalloc [22]
+-----------------------------------------------
+                                  45             setmember <cycle 2> [146]
+                                  24             update <cycle 2> [133]
+[146]    0.0    0.00    0.00      24+45      setmember <cycle 2> [146]
+                0.00    0.00      24/4708703     zelfde_als_w <cycle 1> [31]
+                                  36             vgl <cycle 2> [93]
+                                  24             wis <cycle 2> [11]
+                                  45             setmember <cycle 2> [146]
+-----------------------------------------------
+                0.00    0.00       1/8           rehash <cycle 2> [158]
+                0.00    0.00       7/8           hashnew [149]
+[147]    0.0    0.00    0.00       8         newhash [147]
+                0.00    0.00      16/2393350     bmalloc [22]
+-----------------------------------------------
+                                5670             functies <cycle 2> [43]
+[148]    0.0    0.00    0.00    5670         find_func <cycle 2> [148]
+                0.00    0.00       7/7           hashnew [149]
+                0.00    0.00       1/4708703     subboomcopie <cycle 1> [54]
+                               11223             psh <cycle 2> [80]
+                               11198             dopb <cycle 2> [105]
+                                5670             find <cycle 2> [19]
+                                5624             deleteNode <cycle 2> [61]
+                                5599             eval <cycle 2> [14]
+                                5599             pop <cycle 2> [75]
+                                  77             wis <cycle 2> [11]
+                                  32             lambda <cycle 2> [141]
+                                   8             hashinsert <cycle 2> [95]
+                                   7             hashfind <cycle 2> [97]
+                                   1             hashremove <cycle 2> [161]
+                                   1             hashISO <cycle 2> [225]
+-----------------------------------------------
+                0.00    0.00       7/7           find_func <cycle 2> [148]
+[149]    0.0    0.00    0.00       7         hashnew [149]
+                0.00    0.00       7/8           newhash [147]
+-----------------------------------------------
+                                   9             objectcopiesub <cycle 3> [139]
+                0.00    0.00       4/7           objectcopie [137]
+[150]    0.0    0.00    0.00      13         objectcopiesub2 <cycle 3> [150]
+                0.00    0.00      13/2393350     bmalloc [22]
+                0.00    0.00      13/13          hasSubObject [214]
+                                  26             objectcopiesub <cycle 3> [139]
+-----------------------------------------------
+                0.00    0.00      39/39          stapelmacht <cycle 2> [81]
+[151]    0.0    0.00    0.00      39         subroot [151]
+                0.00    0.00      12/2393350     bmalloc [22]
+-----------------------------------------------
+                0.00    0.00       3/3           _qndeel [15]
+[152]    0.0    0.00    0.00       3         not_a_number [152]
+                0.00    0.00       3/42916       copievan [85]
+-----------------------------------------------
+                                  16             functies <cycle 2> [43]
+[153]    0.0    0.00    0.00      16         fil <cycle 2> [153]
+                0.00    0.00       1/36          deallocateFilehendel [131]
+                0.00    0.00       1/1           bfopen [159]
+                0.00    0.00      17/17          someopt [213]
+                0.00    0.00       9/9           preparefp [218]
+                0.00    0.00       5/5           setStop [222]
+                0.00    0.00       1/1           zoekfp [229]
+                0.00    0.00       1/2884        toLong [191]
+                                   8             input <cycle 2> [40]
+                                   8             wis <cycle 2> [11]
+                                   4             vopb <cycle 2> [52]
+-----------------------------------------------
+                0.00    0.00       1/1           startProc [3]
+[154]    0.0    0.00    0.00       1         startboom_w [154]
+                0.00    0.00       1/185875      lex [51]
+-----------------------------------------------
+                                   9             Naamwoord <cycle 2> [155]
+                              928621             Naamwoord_w <cycle 2> [26]
+[155]    0.0    0.00    0.00  928621+9       Naamwoord <cycle 2> [155]
+                0.00    0.00       2/4708703     subboomcopie <cycle 1> [54]
+                0.00    0.00       2/4708703     zelfde_als_w <cycle 1> [31]
+                              928630             find <cycle 2> [19]
+                                   6             wis <cycle 2> [11]
+                                   2             eval <cycle 2> [14]
+                                   9             Naamwoord <cycle 2> [155]
+-----------------------------------------------
+                0.00    0.00      38/38          lex [51]
+[156]    0.0    0.00    0.00      38         vshift_w [156]
+                0.00    0.00       2/2367627     bfree [18]
+-----------------------------------------------
+                                   3             match <cycle 2> [5]
+[157]    0.0    0.00    0.00       3         doEval <cycle 2> [157]
+                0.00    0.00       3/4708703     subboomcopie <cycle 1> [54]
+                                   3             psh <cycle 2> [80]
+                                   3             copy_insert <cycle 2> [82]
+                                   3             eval <cycle 2> [14]
+                                   3             deleteNode <cycle 2> [61]
+                                   3             wis <cycle 2> [11]
+-----------------------------------------------
+                                   1             hashISO <cycle 2> [225]
+[158]    0.0    0.00    0.00       1         rehash <cycle 2> [158]
+                0.00    0.00       1/8           newhash [147]
+                0.00    0.00       1/1           nextprime [227]
+                                   1             freehash <cycle 2> [144]
+-----------------------------------------------
+                0.00    0.00       1/1           fil <cycle 2> [153]
+[159]    0.0    0.00    0.00       1         bfopen [159]
+                0.00    0.00       1/38          myfopen [135]
+-----------------------------------------------
+                                   1             eval <cycle 2> [14]
+[160]    0.0    0.00    0.00       1         flinkertak <cycle 2> [160]
+                0.00    0.00       1/1585542     pskfree [24]
+                                   1             _flinkertak <cycle 2> [101]
+-----------------------------------------------
+                                   1             find_func <cycle 2> [148]
+[161]    0.0    0.00    0.00       1         hashremove <cycle 2> [161]
+                0.00    0.00       1/1           removeFromHash [162]
+                0.00    0.00       1/9           loadfactor [217]
+                                   1             wis <cycle 2> [11]
+-----------------------------------------------
+                0.00    0.00       1/1           hashremove <cycle 2> [161]
+[162]    0.0    0.00    0.00       1         removeFromHash [162]
+                0.00    0.00       1/2367627     bfree [18]
+                0.00    0.00       1/12          casesensitivehash [215]
+-----------------------------------------------
+                0.00    0.00       1/1           functies <cycle 2> [43]
+[163]    0.0    0.00    0.00       1         combiflags [163]
+                0.00    0.00       1/430298      prive [55]
+-----------------------------------------------
+                0.00    0.00    2862/712105      hreslt <cycle 2> [35]
+                0.00    0.00  218475/712105      reslt <cycle 2> [44]
+                0.00    0.00  490768/712105      eindknoop [41]
+[164]    0.0    0.00    0.00  712105         bewerk [164]
+                0.00    0.00  502665/618947      myputc [167]
+                0.00    0.00  104749/611241      pstr [168]
+                0.00    0.00  104749/611241      tstr [169]
+                0.00    0.00       5/138         plak [201]
+                0.00    0.00       5/138         tel [202]
+-----------------------------------------------
+                              642672             eval <cycle 2> [14]
+[165]    0.0    0.00    0.00  642672         evalvar <cycle 2> [165]
+                              642672             Naamwoord_w <cycle 2> [26]
+                              642632             wis <cycle 2> [11]
+-----------------------------------------------
+                              627140             _copyop <cycle 1> [28]
+[166]    0.0    0.00    0.00  627140         zelfde_als_w_2 <cycle 1> [166]
+                                   1             subboomcopie <cycle 1> [54]
+-----------------------------------------------
+                0.00    0.00      32/618947      myprintf [208]
+                0.00    0.00    3422/618947      printflags [176]
+                0.00    0.00    5720/618947      hreslt <cycle 2> [35]
+                0.00    0.00   38225/618947      eindknoop [41]
+                0.00    0.00   68883/618947      indent [62]
+                0.00    0.00  502665/618947      bewerk [164]
+[167]    0.0    0.00    0.00  618947         myputc [167]
+-----------------------------------------------
+                0.00    0.00       2/611241      hreslt <cycle 2> [35]
+                0.00    0.00  104749/611241      bewerk [164]
+                0.00    0.00  506490/611241      eindknoop [41]
+[168]    0.0    0.00    0.00  611241         pstr [168]
+-----------------------------------------------
+                0.00    0.00       2/611241      hreslt <cycle 2> [35]
+                0.00    0.00  104749/611241      bewerk [164]
+                0.00    0.00  506490/611241      eindknoop [41]
+[169]    0.0    0.00    0.00  611241         tstr [169]
+-----------------------------------------------
+                0.00    0.00  188840/393045      plus_samenvoegen_of_sorteren <cycle 2> [13]
+                0.00    0.00  204205/393045      merge <cycle 2> [42]
+[170]    0.0    0.00    0.00  393045         linkeroperand_and_tail [170]
+-----------------------------------------------
+                0.00    0.00  373412/373412      nplus [21]
+[171]    0.0    0.00    0.00  373412         skipnullen [171]
+-----------------------------------------------
+                0.00    0.00    2185/291501      functies <cycle 2> [43]
+                0.00    0.00   23574/291501      atoom [65]
+                0.00    0.00  265742/291501      fullnumbercheck [175]
+[172]    0.0    0.00    0.00  291501         numbercheck [172]
+-----------------------------------------------
+                               85628             cleanOncePattern [173]
+                0.00    0.00    1947/279940      stringmatch <cycle 2> [68]
+                0.00    0.00  277993/279940      match <cycle 2> [5]
+[173]    0.0    0.00    0.00  279940+85628   cleanOncePattern [173]
+                               85628             cleanOncePattern [173]
+-----------------------------------------------
+                0.00    0.00   65571/270971      functies <cycle 2> [43]
+                0.00    0.00  205400/270971      changeCase <cycle 2> [12]
+[174]    0.0    0.00    0.00  270971         putCodePoint [174]
+-----------------------------------------------
+                0.00    0.00     375/265742      sfullnumbercheck [195]
+                0.00    0.00    1655/265742      string_copy_insert <cycle 2> [112]
+                0.00    0.00  263712/265742      scopy [56]
+[175]    0.0    0.00    0.00  265742         fullnumbercheck [175]
+                0.00    0.00  265742/291501      numbercheck [172]
+-----------------------------------------------
+                0.00    0.00    2862/228952      hreslt <cycle 2> [35]
+                0.00    0.00  226090/228952      eindknoop [41]
+[176]    0.0    0.00    0.00  228952         printflags [176]
+                0.00    0.00    3422/618947      myputc [167]
+                0.00    0.00      51/138         plak [201]
+                0.00    0.00      51/138         tel [202]
+-----------------------------------------------
+                0.00    0.00  197628/197628      changeCase <cycle 2> [12]
+[177]    0.0    0.00    0.00  197628         utf8bytes [177]
+-----------------------------------------------
+                              191028             merge <cycle 2> [42]
+[178]    0.0    0.00    0.00  191028         vglplus <cycle 2> [178]
+                0.00    0.00   13412/25369       splitProduct_number_im_rest [181]
+                                6686             vgl <cycle 2> [93]
+-----------------------------------------------
+                0.00    0.00     357/48837       is_constant [198]
+                0.00    0.00   17588/48837       substmaal <cycle 2> [38]
+                0.00    0.00   30892/48837       vglmaal <cycle 2> [185]
+[179]    0.0    0.00    0.00   48837         getal_graad [179]
+-----------------------------------------------
+                0.00    0.00   33536/33536       lex [51]
+[180]    0.0    0.00    0.00   33536         flags [180]
+-----------------------------------------------
+                0.00    0.00   11957/25369       plus_samenvoegen_of_sorteren <cycle 2> [13]
+                0.00    0.00   13412/25369       vglplus <cycle 2> [178]
+[181]    0.0    0.00    0.00   25369         splitProduct_number_im_rest [181]
+-----------------------------------------------
+                0.00    0.00     937/17997       inumberNode [114]
+                0.00    0.00   17060/17997       nn2q [106]
+[182]    0.0    0.00    0.00   17997         numlength [182]
+-----------------------------------------------
+                0.00    0.00     923/17983       inumberNode [114]
+                0.00    0.00   17060/17983       nn2q [106]
+[183]    0.0    0.00    0.00   17983         iconvert2decimal [183]
+-----------------------------------------------
+                0.00    0.00   15446/15446       substmaal <cycle 2> [38]
+[184]    0.0    0.00    0.00   15446         rechteroperand [184]
+-----------------------------------------------
+                               15446             merge <cycle 2> [42]
+[185]    0.0    0.00    0.00   15446         vglmaal <cycle 2> [185]
+                0.00    0.00   30892/48837       getal_graad [179]
+                                3522             vgl <cycle 2> [93]
+-----------------------------------------------
+                               14969             plus_samenvoegen_of_sorteren <cycle 2> [13]
+[186]    0.0    0.00    0.00   14969         expandProduct <cycle 2> [186]
+                               18782             match <cycle 2> [5]
+                                 988             tryq <cycle 2> [113]
+-----------------------------------------------
+                0.00    0.00    1655/11267       string_copy_insert <cycle 2> [112]
+                0.00    0.00    9612/11267       copy_insert <cycle 2> [82]
+[187]    0.0    0.00    0.00   11267         all_refcount_bits_set [187]
+-----------------------------------------------
+                0.00    0.00    1191/7320        iop [194]
+                0.00    0.00    6129/7320        iaf [189]
+[188]    0.0    0.00    0.00    7320         iopaffinal [188]
+-----------------------------------------------
+                0.00    0.00    6129/6129        inplus [108]
+[189]    0.0    0.00    0.00    6129         iaf [189]
+                0.00    0.00    6129/7320        iopaffinal [188]
+-----------------------------------------------
+                                  18             lstsub <cycle 2> [142]
+                                 387             output <cycle 2> [126]
+                                4370             functies <cycle 2> [43]
+[190]    0.0    0.00    0.00    4775         result <cycle 2> [190]
+                                4775             reslt <cycle 2> [44]
+-----------------------------------------------
+                0.00    0.00       1/2884        fil <cycle 2> [153]
+                0.00    0.00     642/2884        doPosition <cycle 2> [119]
+                0.00    0.00    2241/2884        functies <cycle 2> [43]
+[191]    0.0    0.00    0.00    2884         toLong [191]
+-----------------------------------------------
+                0.00    0.00    1581/1581        lex [51]
+[192]    0.0    0.00    0.00    1581         shift_nw [192]
+-----------------------------------------------
+                0.00    0.00     360/1454        lambda <cycle 2> [141]
+                0.00    0.00     371/1454        match <cycle 2> [5]
+                0.00    0.00     723/1454        evalmacro <cycle 2> [116]
+[193]    0.0    0.00    0.00    1454         atomtest [193]
+-----------------------------------------------
+                0.00    0.00    1191/1191        inplus [108]
+[194]    0.0    0.00    0.00    1191         iop [194]
+                0.00    0.00    1191/7320        iopaffinal [188]
+-----------------------------------------------
+                0.00    0.00     165/375         scompare <cycle 2> [78]
+                0.00    0.00     210/375         stringmatch <cycle 2> [68]
+[195]    0.0    0.00    0.00     375         sfullnumbercheck [195]
+                0.00    0.00     375/265742      fullnumbercheck [175]
+-----------------------------------------------
+                0.00    0.00     350/350         output <cycle 2> [126]
+[196]    0.0    0.00    0.00     350         flush [196]
+-----------------------------------------------
+                0.00    0.00     339/339         stapelmacht <cycle 2> [81]
+[197]    0.0    0.00    0.00     339         abseen [197]
+-----------------------------------------------
+                                 107             is_constant [198]
+                0.00    0.00     290/290         substdiff <cycle 2> [123]
+[198]    0.0    0.00    0.00     290+107     is_constant [198]
+                0.00    0.00     357/48837       getal_graad [179]
+                                 107             is_constant [198]
+-----------------------------------------------
+                                 153             getmember <cycle 2> [199]
+                                 167             find <cycle 2> [19]
+[199]    0.0    0.00    0.00     167+153     getmember <cycle 2> [199]
+                0.00    0.00      21/28          findBuiltInMethod [210]
+                                 187             vgl <cycle 2> [93]
+                                 136             Head <cycle 2> [67]
+                                 153             getmember <cycle 2> [199]
+-----------------------------------------------
+                                  59             zoekopt [200]
+                0.00    0.00       4/139         mmf <cycle 2> [111]
+                0.00    0.00      49/139         functies <cycle 2> [43]
+                0.00    0.00      86/139         output <cycle 2> [126]
+[200]    0.0    0.00    0.00     139+59      zoekopt [200]
+                                  59             zoekopt [200]
+-----------------------------------------------
+                0.00    0.00       5/138         bewerk [164]
+                0.00    0.00      30/138         myprintf [208]
+                0.00    0.00      51/138         printflags [176]
+                0.00    0.00      52/138         eindknoop [41]
+[201]    0.0    0.00    0.00     138         plak [201]
+-----------------------------------------------
+                0.00    0.00       5/138         bewerk [164]
+                0.00    0.00      30/138         myprintf [208]
+                0.00    0.00      51/138         printflags [176]
+                0.00    0.00      52/138         eindknoop [41]
+[202]    0.0    0.00    0.00     138         tel [202]
+-----------------------------------------------
+                0.00    0.00      45/113         haalaan [59]
+                0.00    0.00      68/113         eindknoop [41]
+[203]    0.0    0.00    0.00     113         lineToLong [203]
+-----------------------------------------------
+                                  36             allopts [204]
+                0.00    0.00      74/74          output <cycle 2> [126]
+[204]    0.0    0.00    0.00      74+36      allopts [204]
+                                  36             allopts [204]
+-----------------------------------------------
+                                  60             vgl <cycle 2> [93]
+[205]    0.0    0.00    0.00      60         vglsub <cycle 2> [205]
+                                  60             opb <cycle 2> [110]
+                                  60             eval <cycle 2> [14]
+                                  60             vgl <cycle 2> [93]
+                                  60             wis <cycle 2> [11]
+-----------------------------------------------
+                                  59             doPosition <cycle 2> [119]
+[206]    0.0    0.00    0.00      59         icopy_insert <cycle 2> [206]
+                                  59             scopy_insert <cycle 2> [130]
+-----------------------------------------------
+                0.00    0.00      44/44          doPosition <cycle 2> [119]
+[207]    0.0    0.00    0.00      44         expressionLength [207]
+-----------------------------------------------
+                0.00    0.00      44/44          lstsub <cycle 2> [142]
+[208]    0.0    0.00    0.00      44         myprintf [208]
+                0.00    0.00      32/618947      myputc [167]
+                0.00    0.00      30/138         plak [201]
+                0.00    0.00      30/138         tel [202]
+-----------------------------------------------
+                0.00    0.00      38/38          myfopen [135]
+[209]    0.0    0.00    0.00      38         findFilehendelByName [209]
+-----------------------------------------------
+                0.00    0.00       7/28          find <cycle 2> [19]
+                0.00    0.00      21/28          getmember <cycle 2> [199]
+[210]    0.0    0.00    0.00      28         findBuiltInMethod [210]
+-----------------------------------------------
+                                  25             substdiff <cycle 2> [123]
+[211]    0.0    0.00    0.00      25         is_afhankelyk_van <cycle 2> [211]
+                                  25             vgl <cycle 2> [93]
+                                  25             opb <cycle 2> [110]
+                                  25             eval <cycle 2> [14]
+                                  25             wis <cycle 2> [11]
+-----------------------------------------------
+                                  18             output <cycle 2> [126]
+[212]    0.0    0.00    0.00      18         lst <cycle 2> [212]
+                                  18             lstsub <cycle 2> [142]
+-----------------------------------------------
+                0.00    0.00      17/17          fil <cycle 2> [153]
+[213]    0.0    0.00    0.00      17         someopt [213]
+-----------------------------------------------
+                                  13             hasSubObject [214]
+                0.00    0.00      13/13          objectcopiesub2 <cycle 3> [150]
+[214]    0.0    0.00    0.00      13+13      hasSubObject [214]
+                                  13             hasSubObject [214]
+-----------------------------------------------
+                0.00    0.00       1/12          removeFromHash [162]
+                0.00    0.00       5/12          inserthash [96]
+                0.00    0.00       6/12          findhash [98]
+[215]    0.0    0.00    0.00      12         casesensitivehash [215]
+-----------------------------------------------
+                0.00    0.00       5/11          newMemBlocks [221]
+                0.00    0.00       6/11          init_ruimte [77]
+[216]    0.0    0.00    0.00      11         initializeMemBlock [216]
+-----------------------------------------------
+                0.00    0.00       1/9           hashremove <cycle 2> [161]
+                0.00    0.00       8/9           hashinsert <cycle 2> [95]
+[217]    0.0    0.00    0.00       9         loadfactor [217]
+-----------------------------------------------
+                0.00    0.00       9/9           fil <cycle 2> [153]
+[218]    0.0    0.00    0.00       9         preparefp [218]
+-----------------------------------------------
+                0.00    0.00       9/9           functies <cycle 2> [43]
+[219]    0.0    0.00    0.00       9         print_clock [219]
+-----------------------------------------------
+                                   7             fireBuiltInFunc <cycle 2> [87]
+[220]    0.0    0.00    0.00       7         hashdie <cycle 2> [220]
+                                   7             freehash <cycle 2> [144]
+-----------------------------------------------
+                0.00    0.00       5/5           bmalloc [22]
+[221]    0.0    0.00    0.00       5         newMemBlocks [221]
+                0.00    0.00       5/11          initializeMemBlock [216]
+-----------------------------------------------
+                0.00    0.00       5/5           fil <cycle 2> [153]
+[222]    0.0    0.00    0.00       5         setStop [222]
+-----------------------------------------------
+                0.00    0.00       4/4           functies <cycle 2> [43]
+[223]    0.0    0.00    0.00       4         strToPointer [223]
+-----------------------------------------------
+                0.00    0.00       2/2           functies <cycle 2> [43]
+[224]    0.0    0.00    0.00       2         pointerToStr [224]
+-----------------------------------------------
+                                   1             find_func <cycle 2> [148]
+[225]    0.0    0.00    0.00       1         hashISO <cycle 2> [225]
+                                   1             rehash <cycle 2> [158]
+-----------------------------------------------
+                0.00    0.00       1/1           startProc [3]
+[226]    0.0    0.00    0.00       1         init_opcode [226]
+-----------------------------------------------
+                0.00    0.00       1/1           rehash <cycle 2> [158]
+[227]    0.0    0.00    0.00       1         nextprime [227]
+-----------------------------------------------
+                0.00    0.00       1/1           functies <cycle 2> [43]
+[228]    0.0    0.00    0.00       1         stringreverse [228]
+-----------------------------------------------
+                0.00    0.00       1/1           fil <cycle 2> [153]
+[229]    0.0    0.00    0.00       1         zoekfp [229]
+-----------------------------------------------
+
+ This table describes the call tree of the program, and was sorted by
+ the total amount of time spent in each function and its children.
+
+ Each entry in this table consists of several lines.  The line with the
+ index number at the left hand margin lists the current function.
+ The lines above it list the functions that called this function,
+ and the lines below it list the functions this one called.
+ This line lists:
+     index	A unique number given to each element of the table.
+		Index numbers are sorted numerically.
+		The index number is printed next to every function name so
+		it is easier to look up where the function in the table.
+
+     % time	This is the percentage of the `total' time that was spent
+		in this function and its children.  Note that due to
+		different viewpoints, functions excluded by options, etc,
+		these numbers will NOT add up to 100%.
+
+     self	This is the total amount of time spent in this function.
+
+     children	This is the total amount of time propagated into this
+		function by its children.
+
+     called	This is the number of times the function was called.
+		If the function called itself recursively, the number
+		only includes non-recursive calls, and is followed by
+		a `+' and the number of recursive calls.
+
+     name	The name of the current function.  The index number is
+		printed after it.  If the function is a member of a
+		cycle, the cycle number is printed between the
+		function's name and the index number.
+
+
+ For the function's parents, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the function into this parent.
+
+     children	This is the amount of time that was propagated from
+		the function's children into this parent.
+
+     called	This is the number of times this parent called the
+		function `/' the total number of times the function
+		was called.  Recursive calls to the function are not
+		included in the number after the `/'.
+
+     name	This is the name of the parent.  The parent's index
+		number is printed after it.  If the parent is a
+		member of a cycle, the cycle number is printed between
+		the name and the index number.
+
+ If the parents of the function cannot be determined, the word
+ `<spontaneous>' is printed in the `name' field, and all the other
+ fields are blank.
+
+ For the function's children, the fields have the following meanings:
+
+     self	This is the amount of time that was propagated directly
+		from the child into the function.
+
+     children	This is the amount of time that was propagated from the
+		child's children to the function.
+
+     called	This is the number of times the function called
+		this child `/' the total number of times the child
+		was called.  Recursive calls by the child are not
+		listed in the number after the `/'.
+
+     name	This is the name of the child.  The child's index
+		number is printed after it.  If the child is a
+		member of a cycle, the cycle number is printed
+		between the name and the index number.
+
+ If there are any cycles (circles) in the call graph, there is an
+ entry for the cycle-as-a-whole.  This entry shows who called the
+ cycle (as parents) and the members of the cycle (as children.)
+ The `+' recursive calls entry shows the number of function calls that
+ were internal to the cycle, and the calls entry for each member shows,
+ for that member, how many times it was called from other members of
+ the cycle.
+
+
+Index by function name
+
+  [60] Entry                  [43] functies              [126] output
+ [104] Entry2                 [48] getCodePoint          [201] plak
+  [67] Head                   [49] getCodePoint2          [13] plus_samenvoegen_of_sorteren
+ [155] Naamwoord             [132] getObjectDef          [224] pointerToStr
+  [26] Naamwoord_w           [179] getal_graad            [75] pop
+  [91] Sim                   [199] getmember             [218] preparefp
+ [122] __rechtertak           [59] haalaan               [219] print_clock
+  [28] _copyop               [117] handleKOMMA           [176] printflags
+ [125] _fencelinkertak        [57] handleLUCHT            [23] privatized
+ [101] _flinkertak           [214] hasSubObject           [55] prive
+  [58] _linkertak            [225] hashISO                [80] psh
+  [84] _q_qdeel              [220] hashdie                [24] pskfree
+  [37] _qdema                 [97] hashfind              [168] pstr
+ [120] _qdenominator          [95] hashinsert            [174] putCodePoint
+ [103] _qheeldeel            [149] hashnew               [184] rechteroperand
+  [36] _qmaal                [161] hashremove             [71] rechteroperand_and_tail
+ [143] _qmaalmineen           [35] hreslt                [107] rechtertak
+  [94] _qmodulo              [189] iaf                   [115] rechtsbrengen
+  [15] _qndeel                [33] iaf2                  [158] rehash
+   [6] _qplus                [183] iconvert2decimal      [162] removeFromHash
+  [10] _qvergelijk            [46] icopievan              [44] reslt
+ [121] _rechtertak           [206] icopy_insert          [190] result
+ [197] abseen                 [62] indent                 [78] scompare
+  [76] addAllocation         [226] init_opcode            [56] scopy
+  [50] af                     [77] init_ruimte           [130] scopy_insert
+ [187] all_refcount_bits_set [216] initializeMemBlock    [140] sdoEval
+ [136] allocateFilehendel    [108] inplus                [222] setStop
+ [204] allopts                [40] input                 [127] setflgs
+ [193] atomtest               [25] insert                [146] setmember
+  [65] atoom                  [96] inserthash            [195] sfullnumbercheck
+ [118] backbone              [114] inumberNode           [192] shift_nw
+ [164] bewerk                [194] iop                    [92] simil
+ [159] bfopen                [188] iopaffinal            [171] skipnullen
+  [18] bfree                 [211] is_afhankelyk_van     [213] someopt
+  [22] bmalloc               [198] is_constant           [181] splitProduct_number_im_rest
+ [128] bouwboom_w             [90] isplits                [34] splits
+ [129] caseinsensitivehash   [141] lambda                 [81] stapelmacht
+ [215] casesensitivehash      [51] lex                     [3] startProc
+  [12] changeCase            [203] lineToLong            [154] startboom_w
+ [173] cleanOncePattern      [170] linkeroperand_and_tail [223] strToPointer
+ [163] combiflags            [102] linkertak              [83] strcasecomp
+ [145] combineInputBuffers   [217] loadfactor             [79] strcasecompu
+   [9] compare                [69] lput                    [4] stringEval
+  [74] complexiteit          [212] lst                    [72] stringOncePattern
+  [63] convert2binary        [142] lstsub                [112] string_copy_insert
+  [20] convertLetter          [86] macht2                 [68] stringmatch
+  [85] copievan                [8] mainlus               [228] stringreverse
+ [109] copyToSnijaf            [5] match                  [54] subboomcopie
+  [82] copy_insert            [42] merge                 [151] subroot
+  [39] copyop                [111] mmf                   [123] substdiff
+ [131] deallocateFilehendel   [89] moetIndent            [100] substlog
+  [27] dec_refcount          [135] myfopen                [38] substmaal
+  [61] deleteNode             [70] mygetc                [202] tel
+ [157] doEval                [134] mygetfilehendel       [191] toLong
+ [119] doPosition            [208] myprintf               [66] toLowerUnicode
+ [105] dopb                  [167] myputc                [113] tryq
+  [41] eindknoop             [221] newMemBlocks          [169] tstr
+   [7] endProc                [45] new_operator_like     [133] update
+  [88] errorprintf           [147] newhash               [177] utf8bytes
+  [14] eval                  [227] nextprime              [93] vgl
+ [116] evalmacro              [64] nmaal                 [185] vglmaal
+ [165] evalvar               [106] nn2q                  [178] vglplus
+ [186] expandProduct          [17] nndeel                [205] vglsub
+ [207] expressionLength      [152] not_a_number           [52] vopb
+ [153] fil                    [21] nplus                  [53] vopbnowis
+  [19] find                  [124] numberNode             [73] vshift_nw
+ [210] findBuiltInMethod      [30] numberNode2           [156] vshift_w
+ [209] findFilehendelByName  [172] numbercheck            [11] wis
+ [148] find_func             [182] numlength              [31] zelfde_als_w
+  [98] findhash              [137] objectcopie           [166] zelfde_als_w_2
+  [87] fireBuiltInFunc       [139] objectcopiesub        [229] zoekfp
+ [180] flags                 [150] objectcopiesub2        [32] zoeknaam
+ [160] flinkertak             [29] oncePattern           [200] zoekopt
+ [196] flush                  [99] op                     [16] <cycle 1>
+ [144] freehash               [47] opaffinal               [2] <cycle 2>
+ [175] fullnumbercheck       [110] opb                   [138] <cycle 3>
