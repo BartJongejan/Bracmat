@@ -66,7 +66,12 @@ Test coverage:
 #define DATUM "1 November 2012"
 #define VERSION "6"
 #define BUILD "141"
-/*  1 November 2012
+/*  15 November 2012
+Added a comment to input with backslash followed by control character,
+which is unsyntactical. Fused numberNode into _qdenominator.
+Fused fireBuiltInFunc into wis.
+
+    1 November 2012
 Function someopt() conditionally excluded with 
   #if !defined NO_LOW_LEVEL_FILE_HANDLING
 
@@ -5404,7 +5409,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
                 {
                 escape = FALSE;
                 if(0 <= ikar && ikar < ' ')
-                    break;
+                    break; /* 20121115 this is unsyntactical */
                 switch(ikar)
                     {
                     case 'n' :
@@ -5869,35 +5874,16 @@ static psk dopb(psk pkn,psk src)
     return okn;
     }
 
-static int fireBuiltInFunc(objectknoop * object,char * name)
-    {
-    /*Printf("find member %s\n",name);*/
-    if(ISBUILTIN((objectknoop*)object))
+static method_pnt findBuiltInMethodByName(typedObjectknoop * object,const char * name)
+    {/*20121115*/
+    method * methods = object->vtab;
+    if(methods)
         {
-        method_pnt theMethod = NULL;
-        method * methods = ((typedObjectknoop*)object)->vtab;
-        /*
-        Printf("object==(");result((psk)object);Printf(")\n");
-        Printf("is <%s> built-in?\n",name);
-        Printf("object %p\n",object);
-        result((psk)object);
-        Printf("methods %p\n",methods);
-        getchar();
-        */
-        if(methods)
-            {
-            for(;methods->name && strcmp(methods->name,name);++methods)
-                ;
-            theMethod = methods->func;
-            }
-        if(theMethod)
-            {
-            /*Printf("theMethod found %p\n",theMethod);*/
-            theMethod((struct typedObjectknoop *)object,NULL);
-            return TRUE;
-            }
+        for(;methods->name && strcmp(methods->name,name);++methods)
+            ;
+        return methods->func;
         }
-    return FALSE;
+    return NULL;
     }
 
 static void wis(psk top)
@@ -5907,13 +5893,18 @@ static void wis(psk top)
         psk kn = NULL; /* 18 Maart 1997 */
         if(is_object(top) && ISCREATEDWITHNEW((objectknoop*)top))
             {
-    /*        psk kn = NULL;*/
             adr[1] = top->RIGHT;
             kn = opb(kn,"(((=\1).die)')",NULL);
             kn = eval(kn);
             wis(kn);
             if(ISBUILTIN((objectknoop*)top))
-                fireBuiltInFunc((objectknoop*)top,"Die");
+                {
+                method_pnt theMethod = findBuiltInMethodByName((typedObjectknoop*)top,"Die");
+                if(theMethod)
+                    {
+                    theMethod((struct typedObjectknoop *)top,NULL);
+                    }
+                }
             }
         if(is_op(top))
             {
@@ -6048,23 +6039,6 @@ static Qgetal _qmaalmineen(Qgetal _qx)
 
 /* Create a node from a number, allocating memory for the node.
 The numbers' memory isn't deallocated. */
-static psk numberNode(ngetal * g)
-    {
-    psk res;
-    size_t len;
-    len = offsetof(sk,u.obj) + 1 + g->length;
-    res = (psk)bmalloc(__LINE__,len);
-    if(g->sign & QNUL)
-        res->u.obj = '0';
-    else
-        {
-        memcpy((void*)POBJ(res),g->number,g->length);
-    /*(char *)POBJ(res) + g.length = '\0'; hoeft niet, gebeurt in bmalloc */
-        }
-    res->v.fl = READY | SUCCESS | QGETAL;
-    res->ops |= g->sign;
-    return res;
-    }
 
 static char * iconvert2decimal(ngetal * res, char * g)
     {
@@ -7377,11 +7351,26 @@ static Qgetal _qmodulo(Qgetal _qx,Qgetal _qy)
     return res;
     }
 
-static Qgetal _qdenominator(Qgetal _qx)
+static psk _qdenominator(psk pkn)
     {
+    Qgetal _qx = pkn->RIGHT;
+    psk res;
+    size_t len;
     ngetal xt = {0},xn = {0};
     splits(_qx,&xt,&xn);
-    return numberNode(&xn);
+    len = offsetof(sk,u.obj) + 1 + xn.length;
+    res = (psk)bmalloc(__LINE__,len);
+    assert(!(xn.sign & QNUL)); /*Because RATIONAAL_COMP(_qx)*/
+/*    if(xn.sign & QNUL)
+        res->u.obj = '0';
+    else*/
+        {
+        memcpy((void*)POBJ(res),xn.number,xn.length);
+        }
+    res->v.fl = READY | SUCCESS | QGETAL;
+    res->ops |= xn.sign;
+    wis(pkn);
+    return res;
     }
 
 static int _qvergelijk(Qgetal _qx,Qgetal _qy)
@@ -7977,25 +7966,27 @@ static int strcasecompu(char ** S, char ** P,char * snijaf)
     char * p = *P;
     while(s < snijaf && *s && *p)
         {
+        int diff;
         char * ns = s;
         char * np = p;
         int ks = getCodePoint2((const char **)&ns,&sutf);
         int kp = getCodePoint2((const char **)&np,&putf);
-        if(ks >= 0 && kp >= 0)
-            {
-            int diff = toLowerUnicode(ks) - toLowerUnicode(kp);
+        assert(ks >= 0 && kp >= 0);
+/*        if(ks >= 0 && kp >= 0)
+            {*/
+            diff = toLowerUnicode(ks) - toLowerUnicode(kp);
             if(diff)
                 {
                 *S = s;
                 *P = p;
                 return diff;
                 }
-            }
+           /* }
         else
             {
             *S = s;
             *P = p;
-            }
+            }*/
         s = ns;
         p = np;
         }
@@ -9395,18 +9386,11 @@ Bart 20010222
 
 classdef classes[] = {{"hash",hash},{NULL,NULL}};
 
-
 static method_pnt findBuiltInMethod(typedObjectknoop * object,psk methodName)
     {
     if(!is_op(methodName))
         {
-        method * methods = object->vtab;
-        if(methods)
-            {
-            for(;methods->name && strcmp(methods->name,(const char *)POBJ(methodName));++methods)
-                ;
-            return methods->func;
-            }
+        return findBuiltInMethodByName(object,(const char *)POBJ(methodName));
         }
     return NULL;
     }
@@ -14342,10 +14326,7 @@ static function_return_type functies(psk pkn)
             {
             if(RATIONAAL_COMP(rknoop))
                 {
-                psk kn;
-                kn = _qdenominator(rknoop);
-                wis(pkn);
-                pkn = kn;
+                pkn = _qdenominator(pkn);
                 }
             return functionOk(pkn);
             }

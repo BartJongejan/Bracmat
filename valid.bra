@@ -1,5 +1,4 @@
-{valid.bra}
-
+{valid.bra}
 Xobject=
   (donit=.)
   ( doit
@@ -4587,6 +4586,38 @@ towards operators that are closer to the root of the tree"
           | Out$612
           )
           (glf$(=!,l)&Out$613|)
+          (   lst$(tay,taytesttest,NEW)
+            & @(get$(taytesttest,STR):"tay=\n  f," ?)
+            & rmv$taytestest
+          | Out$614
+          )
+          (   lst$(tay,taytesttest,NEW)
+            &   get$(taytesttest,VAP)
+              : t a y "=" \n " " " " f "," ?
+            & rmv$taytestest
+          | Out$615
+          )
+          (   lst$(tay,taytesttest,NEW)
+            & @(get$(taytesttest,STR,VAP):"t a y = 
+     f , " ?)
+            & rmv$taytestest
+          | Out$616
+          )
+          (   lst$(tay,taytesttest,NEW)
+            & get$(taytesttest,ECH):tay
+            & rmv$taytestest
+          | Out$617
+          )
+          (   chu$200:?x
+            & str$("a " !x):?ee
+            & get$(!ee,MEM):a !x
+          | Out$618
+          )
+          (   tbl$(dagj,0)
+            & !dagj a:?dagj a
+            & Out$619
+          | 
+          )
       &   out
         $ ( str
           $ ( "Done. "
