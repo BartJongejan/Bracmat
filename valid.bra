@@ -4618,6 +4618,39 @@ towards operators that are closer to the root of the tree"
             & Out$619
           | 
           )
+          (   (a=!b)
+            & (b=d*g)
+            & 6:?!!a
+            & Out$620
+          | 
+          )
+          (   (b=ads)
+            & (ads=lau)
+            & (lau=1010)
+            & 763:?!!(=!b)
+            & !ads:lau
+            & !b:ads
+            & !lau:763
+          | Out$621
+          )
+          (   (abcd=bopt=cyt.dip)
+            & (cyt=dip=egs)
+            & foo:?!!(abcd.bopt)
+            & !egs:foo
+          | Out$622
+          )
+          (   (abcd=bopt=cyt*dip)
+            & (cyt=dip=egsae)
+            & foo:?!!(abcd.bopt)
+            & Out$623
+          | 
+          )
+          (   (ABCD=BOPT=CYT*DIP)
+            & (CYT=DIP=EGSAE)
+            & @(FOO:?!!(ABCD.BOPT))
+            & Out$624
+          | 
+          )
       &   out
         $ ( str
           $ ( "Done. "

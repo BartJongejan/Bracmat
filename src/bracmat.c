@@ -63,10 +63,14 @@ Test coverage:
 
 */
 
-#define DATUM "1 November 2012"
+#define DATUM "16 November 2012"
 #define VERSION "6"
-#define BUILD "141"
-/*  15 November 2012
+#define BUILD "142"
+/*  16 November 2012
+Found and solved bug in Naamwoord. Case:
+(abcd=bopt=cyt*dip) & (cyt=dip=egsae) & foo:?!!(abcd.bopt)
+
+    15 November 2012
 Added a comment to input with backslash followed by control character,
 which is unsyntactical. Fused numberNode into _qdenominator.
 Fused fireBuiltInFunc into wis.
@@ -9663,19 +9667,10 @@ static psk Naamwoord_w(psk variabele,int twolevelsofindirection);
 /*20111101 changed signature. Before, naamwoord and naamwoord_w returned TRUE
   or FALSE, while the binding was returned in a pointer-to-a-pointer.*/
 static psk Naamwoord(psk variabele,int *newval,int twolevelsofindirection)
-/* *pbinding kan een andere waarde krijgen, ook als de boel faalt */
     {
     psk pbinding;
     if((pbinding = find(variabele,newval,NULL)) != NULL)
         {
-        /*
-        a=b=(c=d)
-        e:?!(a.b)
-        dan krijg ik c en ken daar e aan toe, maar dat is niet de
-        bedoeling! Ik moet testen of ik in een object zit (self).
-        Als dat zo is, moet ik e toekennen aan its.c (e:?(its.c)),
-        zodat ik krijg a=b=c=e
-        */
         if(twolevelsofindirection)
             {
             psk peval;
@@ -9725,31 +9720,22 @@ static psk Naamwoord(psk variabele,int *newval,int twolevelsofindirection)
                       )
                         {
                         wis(peval);
-                        pbinding = NULL;
+                        if(*newval)
+                            {
+                            *newval = FALSE;
+                            wis(pbinding);
+                            }
+                        return NULL;
                         }
                     }
-                if(pbinding)
-                    {
-                    if(*newval)
-                        {
-                        *newval = FALSE;
-                        wis(pbinding);
-                        }
-                    if((pbinding = Naamwoord(peval,newval,(peval->v.fl & DOUBLY_INDIRECT))) != NULL)
-                        {
-                        wis(peval);
-                        }
-                    else
-                        {
-                        wis(peval);
-                        pbinding = NULL;
-                        }
-                    }
-                else if(*newval)
+                assert(pbinding);
+                if(*newval)
                     {
                     *newval = FALSE;
                     wis(pbinding);
                     }
+                pbinding = Naamwoord(peval,newval,(peval->v.fl & DOUBLY_INDIRECT));
+                wis(peval);
                 }
             else
                 {
@@ -9764,10 +9750,6 @@ static psk Naamwoord(psk variabele,int *newval,int twolevelsofindirection)
                 pbinding = binding;
                 }
             }
-        }
-    else
-        {
-        pbinding = NULL;
         }
     return pbinding;
     }
@@ -9821,8 +9803,6 @@ first finds (=B), which is an object that should not obtain the flags !! as in
             (pbinding)->v.fl = valueflags & ~ALL_REFCOUNT_BITS_SET;
             }
         }
-    else
-        pbinding = NULL;
     return pbinding;
     }
 
@@ -10515,6 +10495,8 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                                         }
                                     wis(loc);
                                     }
+                                else
+                                    s.c.rmr = (char)NIKS(pat);
                                 }
                             else
                                 /*s.c.rmr = (char)scopy_insert(pat, sub);*/
@@ -11063,6 +11045,8 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                                         }
                                     wis(loc);
                                     }
+                                else
+                                    s.c.rmr = (char)NIKS(pat);
                                 }
                             else
                                 {
