@@ -69,6 +69,9 @@ Test coverage:
 /*  16 November 2012
 Found and solved bug in Naamwoord. Case:
 (abcd=bopt=cyt*dip) & (cyt=dip=egsae) & foo:?!!(abcd.bopt)
+Removed rudimentary argument char ** punmatched from some functions.
+Removed old, forgotten attempt at working with < > and ~ on subject
+(lhs of : operator) in compare(). These flags are only useful in the pattern
 
     15 November 2012
 Added a comment to input with backslash followed by control character,
@@ -4690,27 +4693,7 @@ static LONG toLong(psk kn)
     return res;
     }
 
-#if DEBUGBRACMAT
-static void setend(char ** punmatched,char * p,const char * wh)
-    {
-    if(punmatched)
-        {
-        *punmatched = p;
-        if(debug)
-            {
-            Printf("                   *punmatched=\"%s\" ;; %s\n",p,wh);
-            }
-        }
-    }
-#else
-#define setend(punmatched,p,wh) {if(punmatched)*punmatched=p;}
-#endif
-
-static int numbercheck(char *begin,char ** punmatched)
-/* If 'punmatched' != NULL and if numbercheck fails, then '*punmatched' points at the
-first character that cannot be accepted. '*punmatched' must be set to NULL
-if the string 'begin' seems to be too short.
-*/
+static int numbercheck(char *begin)
     {
     int op_of_0,check;
     int needNonZeroDigit = FALSE; /* 20040308 */
@@ -4730,18 +4713,6 @@ if the string 'begin' seems to be too short.
                 /*20080911 check &= ~QNUL;*/
                 if(check & QBREUK)
                     {
-                    if(punmatched)
-                        {
-                        if(needNonZeroDigit)
-                            {
-                            setend(punmatched,begin - 1,"A The first '/' was not acceptable");
-                            }
-                        else
-                            {
-                            setend(punmatched,begin,"B The second '/' is not acceptable");
-                            }
-                        }
-                    /*check = 0;*/
                     check = DEFINITELYNONUMBER;
                     break;
                     }
@@ -4753,17 +4724,6 @@ if the string 'begin' seems to be too short.
                 }
             else if(op_of_0 < '0' || op_of_0 > '9')
                 {
-                if(punmatched)
-                    {
-                    if(needNonZeroDigit)
-                        {
-                        setend(punmatched,begin - 1,"C The '/' was not acceptable");
-                        }
-                    else
-                        {
-                        setend(punmatched,begin,"D This character is not acceptable");
-                        }
-                    }
                 check = DEFINITELYNONUMBER;
                 break;
                 }
@@ -4773,7 +4733,6 @@ if the string 'begin' seems to be too short.
                                  0 <= k <= 9 makes no number */
                 if((check & (QNUL|QBREUK)) == QNUL)
                     {
-                    setend(punmatched,begin,"H The second figure is not acceptable");
                     check = DEFINITELYNONUMBER;
                     break;
                     }
@@ -4784,10 +4743,6 @@ if the string 'begin' seems to be too short.
                     }
                 else if(needNonZeroDigit) /* '/' followed by '0' */
                     {
-                    if(punmatched)
-                        {
-                        setend(punmatched,begin - 1,"E The '/' was not acceptable");
-                        }
                     check = DEFINITELYNONUMBER;
                     break;
                     }
@@ -4796,63 +4751,40 @@ if the string 'begin' seems to be too short.
         /* 20101022 Trailing closing parentheses were accepted on equal footing with '\0' bytes. */
         if(op_of_0 == ')') /* "2)"+3       @("-23/4)))))":-23/4)  */
             {
-            if(punmatched)
-                {
-                setend(punmatched,begin - 1,"F The ')' was not acceptable");
-                }
             check = DEFINITELYNONUMBER;
             }
         }
     else
         {
-        if(punmatched)
-            {
-            if(*begin)
-                {
-                setend(punmatched,begin,"G NAN");
-                }
-            else
-                *punmatched = NULL;
-            }
         check = DEFINITELYNONUMBER;
         }
     if(check && needNonZeroDigit)
         {
-        if(punmatched)
-            {
-            if(*begin)
-                {
-                setend(punmatched,begin,"H needNonZeroDigit");
-                }
-            else
-                *punmatched = NULL;
-            }
         check = 0;
         }
     return check;
     }
 
-static int fullnumbercheck(char *begin,char ** punmatched)
-/* sets *punmatched to NULL if there are no digits or if there is a digit after a division slash, */
+static int fullnumbercheck(char *begin)
     {
     if(*begin == '-')
         {
-        int ret = numbercheck(begin+1,punmatched);
+        int ret = numbercheck(begin+1);
         if(ret & ~DEFINITELYNONUMBER)
             return ret | MINUS;
         else
             return ret;
         }
     else
-        return numbercheck(begin,punmatched);
+        return numbercheck(begin);
     }
 
-static int sfullnumbercheck(char *begin,char * snijaf,char ** punmatched)
+static int sfullnumbercheck(char *begin,char * snijaf)
     {
     unsigned char sav = *snijaf;
     int ret;
     *snijaf = '\0';
-    ret = fullnumbercheck(begin,punmatched);
+    ret = fullnumbercheck(begin);
     *snijaf = sav;
     return ret;
     }
@@ -4958,7 +4890,7 @@ static psk atoom(int Flgs,int opsflgs)
         if(ONTKENNING(Flgs,NUMBER))
             (pkn)->v.fl = (Flgs ^ (READY|SUCCESS));
         else
-            (pkn)->v.fl = (Flgs ^ (READY|SUCCESS)) | (numbercheck(SPOBJ(pkn),NULL) & ~DEFINITELYNONUMBER);
+            (pkn)->v.fl = (Flgs ^ (READY|SUCCESS)) | (numbercheck(SPOBJ(pkn)) & ~DEFINITELYNONUMBER);
         /* Bart 20010322 : */
 #if 0 /* 20101122 */
         if(  !(Flgs & (UNIFY|SMALLER_THAN|GREATER_THAN)) /* 20100126 */
@@ -7729,7 +7661,7 @@ Thereafter copies must be made.}
 
 static psk scopy(char * str)
     {
-    int nr = fullnumbercheck(str,NULL) & ~DEFINITELYNONUMBER;
+    int nr = fullnumbercheck(str) & ~DEFINITELYNONUMBER;
     psk kn;
     if(nr & MINUS)
         { /* bracmat out$arg$() -123 */
@@ -7775,7 +7707,7 @@ static int string_copy_insert(psk name,psk pknoop,char * str,char * snijaf)
         {
         stringrefknoop * kn;
         int nr;
-        nr = fullnumbercheck(str,NULL) & ~DEFINITELYNONUMBER;
+        nr = fullnumbercheck(str) & ~DEFINITELYNONUMBER;
         if((nr & MINUS) && !(name->v.fl & NUMBER))
             nr = 0; /* "-1" is only converted to -1 if the # flag is present on the pattern */
         kn = (stringrefknoop *)bmalloc(__LINE__,sizeof(stringrefknoop));
@@ -8079,13 +8011,14 @@ static int compare(psk s,psk p)
         {
         case 0 :
             {
+            /*
             if(s->v.fl & SMALLER_THAN)
-                return FALSE;
+                return FALSE;*/
             return NIET ^ (PGRT && 1);
             }
         case QNUL :
             {
-            switch(s->v.fl & (GREATER_THAN|SMALLER_THAN))
+            /*switch(s->v.fl & (GREATER_THAN|SMALLER_THAN))
                 {
                 case GREATER_THAN|SMALLER_THAN :
                     return NIET ^ PONG;
@@ -8093,14 +8026,15 @@ static int compare(psk s,psk p)
                     return NIET ^ PONG ^ EPGRT;
                 case SMALLER_THAN :
                     return NIET ^ PONG ^ EPKLN;
-                default :
+                default :*/
                     return !NIET ^ (PGRT || PKLN);
-                }
+                /*}*/
             }
         default :
             {
+            /*
             if(s->v.fl & GREATER_THAN)
-                return FALSE;
+                return FALSE;*/
             return NIET ^ (PKLN && 1);
             }
         }
@@ -8175,7 +8109,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
          )
       )
         {
-        int check = sfullnumbercheck(s,snijaf,NULL);
+        int check = sfullnumbercheck(s,snijaf);
         if(check & QGETAL)
             {
             int anythingGoes = 0;
@@ -10439,7 +10373,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
               )
            )
         || (  (Flgs & (BREUK|NUMBER))
-           && ( (ci = sfullnumbercheck(sub,snijaf,NULL))
+           && ( (ci = sfullnumbercheck(sub,snijaf))
               , (  (  (Flgs & BREUK)
                    && ((ci != (QBREUK | QGETAL)) ^ ONTKENNING(Flgs, BREUK))
                    )
@@ -13855,7 +13789,7 @@ static function_return_type functies(psk pkn)
             verwerk = pstr;
             bron = POBJ(rlknoop);
             result(rknoop);
-            rlknoop->v.fl = (READY|SUCCESS) | (numbercheck(SPOBJ(rlknoop),NULL) & ~DEFINITELYNONUMBER);
+            rlknoop->v.fl = (READY|SUCCESS) | (numbercheck(SPOBJ(rlknoop)) & ~DEFINITELYNONUMBER);
             mooi = TRUE;
             hum = 1;/* 15 Dec 1995 */
             verwerk = myputc;
