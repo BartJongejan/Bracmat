@@ -4650,6 +4650,72 @@ towards operators that are closer to the root of the tree"
             & Out$624
           | 
           )
+          (@(12/45/67:#)&Out$625|)
+          (   @(abc-120def:abc ?n def)
+            & !n+7:7+"-120"
+          | Out$626
+          )
+          (   @(abc-120def:abc #?n def)
+            & !n+7:-113
+          | Out$627
+          )
+          (   @(abc-120def:abc #?(fgh ghg) def)
+            & Out$628
+          | 
+          )
+          (utf$(chr$254)&Out$629|)
+          (   100:?asciival
+            &   utf
+              $ ( str
+                $ ( chr$(x2d$c0+div$(!asciival.64))
+                    chr$(x2d$80+mod$(!asciival,64))
+                  )
+                )
+            & Out$630
+          | 
+          )
+          ( d2x$(utf$(upp$(chu$(x2d$777777)))):777777
+          | Out$631
+          )
+          ( d2x$(utf$(upp$(chu$(x2d$77777777)))):77777777
+          | Out$632
+          )
+          (@(an23:~%a n23)|Out$633)
+          (@(an23:~/a n23)|Out$634)
+          (@(123:~/#1 23)|Out$635)
+          (@(1/23:/1/2 3)|Out$636)
+          (@(a-210:? -1 0)|Out$637)
+          ( @(a-210:? #-1 0)&Out$638
+          | 
+          )
+          (@(a210:? <2 0)|Out$639)
+          ( @(a230:?xx <2 0)&!xx:a23
+          | Out$640
+          )
+          ( @(20:?xx >@2 0)&Out$641
+          | 
+          )
+          ( @(3/340:?xx #>3 0)&!xx:3/
+          | Out$642
+          )
+          (tbl$(A,13/2)&Out$643|)
+          (   tbl$(A,20)
+            & tbl$(A,-19)
+            & tbl$(A,-1)
+          | Out$644
+          )
+          (   tbl$(A,20)
+            & tbl$(A,-21)
+            & Out$645
+          | 
+          )
+          ( tbl$(A B,13/2)&Out$646
+          | 
+          )
+          (   tbl$(A,123456789012345678901234567890)
+            & Out$647
+          | 
+          )
       &   out
         $ ( str
           $ ( "Done. "

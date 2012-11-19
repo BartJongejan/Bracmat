@@ -7089,7 +7089,7 @@
         -: 7084:    Qgetal res;
         -: 7085:    nmaal(x1,y1,&pa);
         -: 7086:    nmaal(x2,y2,&pb);
-        -: 7087:    res = nn2q(&pa,&pb);
+        -: 7087:    res = 2(&pa,&pb);
         -: 7088:    bfree(pa.alloc);
         -: 7089:    bfree(pb.alloc);
         -: 7090:    return(res);
