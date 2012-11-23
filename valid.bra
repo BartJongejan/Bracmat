@@ -4233,8 +4233,8 @@ towards operators that are closer to the root of the tree"
           | Out$550
           )
           (   (PPOS==dabra)
-            & a b c:? [?!(1+2&PPOS)
-            & !PPOS:(=3)
+            & a b c d:? [?!(11+2&PPOS)
+            & !PPOS:(=4)
           | Out$551
           )
           (   (PPOS==abracad)
@@ -4715,6 +4715,192 @@ towards operators that are closer to the root of the tree"
           (   tbl$(A,123456789012345678901234567890)
             & Out$647
           | 
+          )
+          (   new$hash:?myhash
+            & (myhash..ISO)$
+            & (ærinde.isokey):?keyval1
+            & (ØVE,unicodekey1):?keyval2
+            & (Århus,unicodekey2):?keyval3
+            & (myhash..insert)$!keyval1
+            & (myhash..insert)$!keyval2
+            & (myhash..insert)$!keyval3
+            & (myhash..find)$ÆRINDE:?a
+            & !a:!keyval1
+            & (myhash..find)$øve:?a
+            & !a:!keyval2
+            & (myhash..find)$åRHUS:?a
+            & !a:!keyval3
+          | Out$648
+          )
+          (   new$hash:?myhash
+            & (myhash..ISO)$
+            & 240:?I
+            &   whl
+              ' ( !I+1:<1240:?I
+                & (myhash..insert)$(chu$!I.!I)
+                )
+            & ( hashcount
+              =   cnt
+                .   0:?cnt
+                  &   (myhash..forall)
+                    $ ( 
+                      =   k v
+                        .   whl
+                          ' ( !arg:(?k.?v) ?arg
+                            & 1+!cnt:?cnt
+                            )
+                      )
+                  & !cnt
+              )
+            & hashcount$:?cnt1
+            & 0:?cnt2
+            & :?KV
+            &   (myhash..forall)
+              $ ( 
+                =   k v
+                  .   whl
+                    ' ( !arg:(?k.?v) ?arg
+                      & 1+!cnt2:?cnt2
+                      & (   mod$(!v.10):0
+                          & (myhash..remove)$!k:?kv
+                          & (!kv.!KV):?KV
+                          & (myhash..insert)$(low$!k.!v)
+                          & ( upp$!k:low$!k
+                            | (myhash..insert)$(upp$!k.!v)
+                            )
+                        | 
+                        )
+                      )
+                )
+            & ( listcount
+              =   cnt kv KV k v
+                .   0:?cnt
+                  &   whl
+                    ' ( !arg:(?kv.?arg)
+                      &   whl
+                        ' ( !kv:(?k.?v) ?kv
+                          & 1+!cnt:?cnt
+                          )
+                      )
+                  & !cnt
+              )
+            & listcount$!KV:?cnt3
+            & hashcount$:?cnt4
+            & 0:?cnt5
+            & :?KV
+            &   (myhash..forall)
+              $ ( 
+                =   k v
+                  .   whl
+                    ' ( !arg:(?k.?v) ?arg
+                      & 1+!cnt5:?cnt5
+                      & (   ( mod$(!v.2):0
+                            | mod$(!v.3):0
+                            | mod$(!v.5):0
+                            )
+                          & (myhash..remove)$!k:?kv
+                          & (!kv.!KV):?KV
+                        | 
+                        )
+                      )
+                )
+            & listcount$!KV:?cnt6
+            & hashcount$:?cnt7
+            & !cnt1:!cnt2:!cnt4:999
+            & !cnt3:165
+            & !cnt5:623
+            & !cnt6:583
+            & !cnt6+!cnt7:999
+            & (myhash..casesensitive)
+            & hashcount$:?cnt7b
+            & !cnt7:!cnt7b
+            & 0:?cnt8
+            & :?KV
+            &   (myhash..forall)
+              $ ( 
+                =   k v
+                  .   whl
+                    ' ( !arg:(?k.?v) ?arg
+                      & 1+!cnt8:?cnt8
+                      & (   ( mod$(!v.7):0
+                            | mod$(!v.11):0
+                            | mod$(!v.13):0
+                            | mod$(!v.17):0
+                            | mod$(!v.19):0
+                            | mod$(!v.23):0
+                            )
+                          & (myhash..remove)$!k:?kv
+                          & (!kv.!KV):?KV
+                        | 
+                        )
+                      )
+                )
+            & !cnt8:356
+            & listcount$!KV:?cnt9
+            & !cnt9:138
+            & hashcount$:?cnt10
+            & !cnt10:278
+            & 0:?cnt11
+            &   (myhash..forall)
+              $ ( 
+                =   k v
+                  .   whl
+                    ' ( !arg:(?k.?v) ?arg
+                      & 1+!cnt11:?cnt11
+                      & (myhash..remove)$!k:?kv
+                      & (!kv.!KV):?KV
+                      )
+                )
+            & listcount$!KV:?cnt12
+            & hashcount$:?cnt13
+            & !cnt10:278
+            & !cnt11:129
+            & !cnt12:267
+            & !cnt13:149
+            & !cnt13+!cnt11:!cnt10
+          | Out$649
+          )
+          (!(+(a=1).a)&Out$650|)
+          (   (=asdf.tbl$(asdf,0)&42)$
+            : 42
+          | Out$651
+          )
+          ( @("ab.cde":? (?a.?b) ?)&Out$652
+          | 
+          )
+          (   @("ab.cde":? (".":(?a.?b)) ?)
+            & Out$653
+          | 
+          )
+          (   @("ab.cde":? ((?a.?b)&f) ?)
+            & Out$654
+          | 
+          )
+          (   a b c:? [?!ghgjimpossible c
+            & Out$655
+          | 
+          )
+          (   a b c d:? [?(1:2)
+            & Out$656
+          | 
+          )
+          (   (p=a,b)
+            & a b c:? [?!p
+            & Out$657
+          | 
+          )
+          (a b c:? [?|Out$658)
+          (a b c:? [<2&Out$659|)
+          (a b c:? [~>2&Out$660|)
+          (a b c:? [~>3|Out$661)
+          (a b c:? [~>4|Out$662)
+          ( a b c:? [~<13&Out$663
+          | 
+          )
+          (a b c:? [>5&Out$664|)
+          (a b c:? [2&Out$665|)
+          ( @(abc:?xva ~% c)&!xva:ab
+          | Out$666
           )
       &   out
         $ ( str

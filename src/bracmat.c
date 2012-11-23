@@ -63,10 +63,14 @@ Test coverage:
 
 */
 
-#define DATUM "16 November 2012"
+#define DATUM "23 November 2012"
 #define VERSION "6"
-#define BUILD "142"
-/*  16 November 2012
+#define BUILD "143"
+/*  23 November 2012
+During testing of corner cases, found code that never executed in find() and
+code that was missing in doPosition.
+
+    16 November 2012
 Found and solved bug in Naamwoord. Case:
 (abcd=bopt=cyt*dip) & (cyt=dip=egsae) & foo:?!!(abcd.bopt)
 Removed rudimentary argument char ** punmatched from some functions.
@@ -9519,8 +9523,9 @@ must be equivalent
                     }
                 else
                     doel = NULL;
-                if(nieuw)
-                    wis(tmp);
+                assert(!nieuw);
+                /*if(nieuw) 20121121
+                    wis(tmp);*/
                 return doel;
                 }
             default:
@@ -10084,6 +10089,8 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
                         }
                     wis(loc);
                     }
+                else
+                    s.c.rmr = FALSE; /*20121121*/
                 }
             else
                 {
