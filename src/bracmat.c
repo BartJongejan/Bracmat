@@ -63,10 +63,13 @@ Test coverage:
 
 */
 
-#define DATUM "23 November 2012"
+#define DATUM "28 November 2012"
 #define VERSION "6"
-#define BUILD "143"
-/*  23 November 2012
+#define BUILD "144"
+/*  28 November
+Made input stop on EOF even if input is stdin.
+
+    23 November 2012
 During testing of corner cases, found code that never executed in find() and
 code that was missing in doPosition.
 
@@ -5213,6 +5216,7 @@ static int redirectError(char * name)
 
 static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean * GoOn)
     {
+    static stdinEOF = FALSE;
     int braces,ikar,hasop,whiteSpaceSeen,escape,backslashesAreEscaped,inString,parentheses,error;
 #ifdef __SYMBIAN32__
     unsigned char * lijst;
@@ -5220,6 +5224,8 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
 #else
     unsigned char lijst[DEFAULT_INPUT_BUFFER_SIZE];
 #endif
+    if((fpi == stdin) && (stdinEOF == TRUE))
+        exit(0); /*20121128*/
     maxwijzer = lijst + (DEFAULT_INPUT_BUFFER_SIZE - 1);/* er moet ruimte zijn voor afsluitende 0 */
     /* Array of pointers to inputbuffers. Initially 2 elements,
        large enough for small inputs (< DEFAULT_INPUT_BUFFER_SIZE)*/
@@ -5263,13 +5269,16 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
             if(fpi)
                 {
                 ikar = mygetc(fpi);
-                if(fpi == stdin)
-                   {
-                   if(ikar == '\n')
-                       break;
-                   }
-                else if(ikar == EOF)
-                   break;
+                if  (ikar == EOF)
+                    {
+                    if(fpi == stdin)
+                        stdinEOF = TRUE;
+                    break;
+                    }
+                if  (  (fpi == stdin) 
+                    && (ikar == '\n')
+                    )
+                    break;
                 }
             else
                 if((ikar = *bron++) == 0)
@@ -5510,6 +5519,10 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
                     }
                 }
             }
+        }
+    if((fpi == stdin) && (ikar == EOF))
+        {
+        stdinEOF = TRUE;
         }
     *wijzer = 0;
 #if _BRACMATEMBEDDED
@@ -6770,11 +6783,12 @@ checkBounds(quotient->ialloc);
 static Qgetal nn2q(ngetal * num,ngetal * den)
     {
     Qgetal res;
-
-    if(num->sign & QNUL)
+    assert(!(num->sign & QNUL));
+    assert(!(den->sign & QNUL));
+/*    if(num->sign & QNUL)
         return copievan(&nulk);
     else if(den->sign & QNUL)
-        return not_a_number();
+        return not_a_number();*/
     
     num->sign ^= (den->sign & MINUS);
 

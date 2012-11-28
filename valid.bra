@@ -4602,7 +4602,13 @@ towards operators that are closer to the root of the tree"
             & rmv$taytestest
           | Out$616
           )
-          (   lst$(tay,taytesttest,NEW)
+          (   put$("{comment line 1
+{comment line 2}
+}",taytesttest,NEW)
+            & put$("\"sting line 1
+string line 2\"
+;",taytesttest,APP)
+            & lst$(tay,taytesttest,APP)
             & get$(taytesttest,ECH):tay
             & rmv$taytestest
           | Out$617
@@ -4811,10 +4817,14 @@ towards operators that are closer to the root of the tree"
             & !cnt5:623
             & !cnt6:583
             & !cnt6+!cnt7:999
-            & (myhash..casesensitive)
+            & (myhash..casesensitive)$
+            & out$A
             & hashcount$:?cnt7b
+            & out$B
             & !cnt7:!cnt7b
+            & out$C
             & 0:?cnt8
+            & out$D
             & :?KV
             &   (myhash..forall)
               $ ( 
@@ -4835,11 +4845,17 @@ towards operators that are closer to the root of the tree"
                         )
                       )
                 )
-            & !cnt8:356
+            & out$(E !cnt8)
+            & !cnt8:312
+            & out$F
             & listcount$!KV:?cnt9
-            & !cnt9:138
+            & out$(G !cnt9)
+            & !cnt9:119
+            & out$H
             & hashcount$:?cnt10
-            & !cnt10:278
+            & out$(I !cnt10)
+            & !cnt10:297
+            & out$J
             & 0:?cnt11
             &   (myhash..forall)
               $ ( 
@@ -4851,13 +4867,21 @@ towards operators that are closer to the root of the tree"
                       & (!kv.!KV):?KV
                       )
                 )
+            & out$K
             & listcount$!KV:?cnt12
+            & out$L
             & hashcount$:?cnt13
-            & !cnt10:278
-            & !cnt11:129
-            & !cnt12:267
-            & !cnt13:149
+            & out$(M !cnt10)
+            & !cnt10:297
+            & out$(N !cnt11)
+            & !cnt11:165
+            & out$(O !cnt12)
+            & !cnt12:284
+            & out$(P !cnt13)
+            & !cnt13:132
+            & out$Q
             & !cnt13+!cnt11:!cnt10
+            & out$R
           | Out$649
           )
           (!(+(a=1).a)&Out$650|)
@@ -4901,6 +4925,32 @@ towards operators that are closer to the root of the tree"
           (a b c:? [2&Out$665|)
           ( @(abc:?xva ~% c)&!xva:ab
           | Out$666
+          )
+          (   tbl$(ggg,0)
+            & tbl$(ggg,3100)
+            & 0:?i
+            & (Obj==)
+            & new$Obj:?obj
+            &   whl
+              ' ( 1+!i:?i:<3100
+                & !obj:?(!i$ggg)
+                )
+          | Out$667
+          )
+          (   tbl$(ggg,0)
+            & tbl$(ggg,3100)
+            & 0:?i
+            & (Obj===)
+            &   whl
+              ' ( 1+!i:?i:<3100
+                & !Obj:?(!i$ggg)
+                )
+          | Out$668
+          )
+          (   (f=?(a b))
+            & lst$(f,MEM):?k
+            & @(!k:? "?(" ?)
+          | Out$669
           )
       &   out
         $ ( str
