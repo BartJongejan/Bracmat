@@ -63,10 +63,14 @@ Test coverage:
 
 */
 
-#define DATUM "28 November 2012"
+#define DATUM "1 December 2012"
 #define VERSION "6"
-#define BUILD "144"
-/*  28 November
+#define BUILD "145"
+/*   2 December
+Solved bug with late binding that turned up when evaluating 
+(cof==h) & @(gj:?!cof) & !cof
+
+    28 November
 Made input stop on EOF even if input is stdin.
 
     23 November 2012
@@ -9733,7 +9737,15 @@ first finds (=B), which is an object that should not obtain the flags !! as in
         assert(pbinding != NULL);
         DBGSRC(printf("pbinding:");result(pbinding);printf("\n");)
 
-        if(kop(pbinding) == WORDT/*20120918*/ || (pbinding)->v.fl == valueflags)
+        if(kop(pbinding) == WORDT)
+            {
+            if(!newval)
+                {
+                pbinding->RIGHT = Head(pbinding->RIGHT); /*20121201*/
+                pbinding = zelfde_als_w(pbinding);
+                }
+            }
+        else if((pbinding)->v.fl == valueflags)
             {
             if(!newval)
                 {

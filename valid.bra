@@ -4818,13 +4818,9 @@ string line 2\"
             & !cnt6:583
             & !cnt6+!cnt7:999
             & (myhash..casesensitive)$
-            & out$A
             & hashcount$:?cnt7b
-            & out$B
             & !cnt7:!cnt7b
-            & out$C
             & 0:?cnt8
-            & out$D
             & :?KV
             &   (myhash..forall)
               $ ( 
@@ -4845,17 +4841,11 @@ string line 2\"
                         )
                       )
                 )
-            & out$(E !cnt8)
             & !cnt8:312
-            & out$F
             & listcount$!KV:?cnt9
-            & out$(G !cnt9)
             & !cnt9:119
-            & out$H
             & hashcount$:?cnt10
-            & out$(I !cnt10)
             & !cnt10:297
-            & out$J
             & 0:?cnt11
             &   (myhash..forall)
               $ ( 
@@ -4867,21 +4857,13 @@ string line 2\"
                       & (!kv.!KV):?KV
                       )
                 )
-            & out$K
             & listcount$!KV:?cnt12
-            & out$L
             & hashcount$:?cnt13
-            & out$(M !cnt10)
             & !cnt10:297
-            & out$(N !cnt11)
             & !cnt11:165
-            & out$(O !cnt12)
             & !cnt12:284
-            & out$(P !cnt13)
             & !cnt13:132
-            & out$Q
             & !cnt13+!cnt11:!cnt10
-            & out$R
           | Out$649
           )
           (!(+(a=1).a)&Out$650|)
@@ -4951,6 +4933,29 @@ string line 2\"
             & lst$(f,MEM):?k
             & @(!k:? "?(" ?)
           | Out$669
+          )
+          ( @(a:?(1:2))&Out$670
+          | 
+          )
+          (   (cof=nih)
+            & @(a:?!cof)
+            & !nih:a
+          | Out$671
+          )
+          (   (cof==h)
+            & @(gj:?!cof)
+            & !cof:(=gj)
+          | Out$672
+          )
+          (   (cof=(.).a)
+            & @(abc:?!cof)
+            & Out$673
+          | 
+          )
+          (   (cof=(.).a)
+            & a b c:?!cof
+            & Out$674
+          | 
           )
       &   out
         $ ( str
