@@ -63,10 +63,14 @@ Test coverage:
 
 */
 
-#define DATUM "1 December 2012"
+#define DATUM "2 December 2012"
 #define VERSION "6"
-#define BUILD "145"
-/*   2 December
+#define BUILD "146"
+/*
+     2 December
+Made type 'int' explicit in line 5223
+ 
+     1 December
 Solved bug with late binding that turned up when evaluating 
 (cof==h) & @(gj:?!cof) & !cof
 
@@ -5220,7 +5224,7 @@ static int redirectError(char * name)
 
 static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean * GoOn)
     {
-    static stdinEOF = FALSE;
+    static int stdinEOF = FALSE;
     int braces,ikar,hasop,whiteSpaceSeen,escape,backslashesAreEscaped,inString,parentheses,error;
 #ifdef __SYMBIAN32__
     unsigned char * lijst;
