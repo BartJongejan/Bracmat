@@ -1727,6 +1727,14 @@ towards operators that are closer to the root of the tree"
             & !XXX:bla falfkhal
           | Out$149a
           )
+          (   (HHH=falfkhal)
+            & (fff=HHH)
+            & glf$('(!.$fff)):(=?ggg)
+            & '(/($ggg) ()):(=%?FFF ())
+            & flg$('$FFF):(=?X.HHH)
+            & put$('$X,MEM):"=/!"
+          | Out$149b
+          )
           out$150
           (   x^(y*(a+b))+x^(a*y+b*y)
             : 2*x^(y*(a+b))
@@ -4992,6 +5000,15 @@ string line 2\"
             & flg$('$h):(=?X.1)
             & @(lst$(X,MEM,LIN):"X=`" ?)
           | Out$683
+          )
+          (   (a=)
+            & (b=567)
+            & '($a)$b:(=567)
+          | Out$684
+          )
+          (   (a=789)
+            & put$('$($($a)),MEM):"=$789"
+          | Out$685
           )
       &   out
         $ ( str

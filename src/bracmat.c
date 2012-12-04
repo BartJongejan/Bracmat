@@ -66,15 +66,17 @@ Test coverage:
 #define DATUM "2 December 2012"
 #define VERSION "6"
 #define BUILD "146"
-/*
-     2 December
+/*   5 December 2012
+Commented out unreachable code in evalmacro
+
+     2 December 2012
 Made type 'int' explicit in line 5223
  
-     1 December
+     1 December 2012
 Solved bug with late binding that turned up when evaluating 
 (cof==h) & @(gj:?!cof) & !cof
 
-    28 November
+    28 November 2012
 Made input stop on EOF even if input is stdin.
 
     23 November 2012
@@ -11896,12 +11898,13 @@ static psk evalmacro(psk pkn)
                     Flgs = pkn->v.fl & UNOPS;
                     h = subboomcopie(pkn->RIGHT);
                     h->v.fl |= Flgs;
-                    hh = evalmacro(h->LEFT);
+                    assert(atomtest(h->LEFT) == 0);
+                    /*20121205 hh = evalmacro(h->LEFT);
                     if(hh)
                         {
                         wis(h->LEFT);
                         h->LEFT = hh;
-                        }
+                        }*/
                     hh = evalmacro(h->RIGHT);
                     if(hh)
                         {
