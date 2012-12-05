@@ -63,10 +63,15 @@ Test coverage:
 
 */
 
-#define DATUM "2 December 2012"
+#define DATUM "5 December 2012"
 #define VERSION "6"
-#define BUILD "146"
-/*   5 December 2012
+#define BUILD "147"
+/*
+     5 December 2012
+Compiled with Borland C++ 5.02, alternative typedef for UINT32, found unused
+global var hekje1.
+
+     4 December 2012
 Commented out unreachable code in evalmacro
 
      2 December 2012
@@ -1422,7 +1427,11 @@ Atari : definieer -DATARI i.v.m. BIGENDIAN en extern int _stksize = -1;
 #include <limits.h>
 
 #if defined _WIN64 || defined _WIN32
+#ifdef __BORLANDC__
+typedef unsigned int UINT32_T;
+#else
 typedef unsigned __int32 UINT32_T; /* pre VS2010 has no int32_t */
+#endif
 #endif
 
 #if defined _WIN64
@@ -2304,7 +2313,7 @@ static va_list ap;
 static unsigned char *startPos;
 
 static const char
-hekje1[] = "\1",
+/*hekje1[] = "\1",*/
 hekje5[] = "\5",
 hekje6[] = "\6",
 unbalanced[] =
@@ -13913,9 +13922,11 @@ static function_return_type functies(psk pkn)
                 case 4:
                     sprintf(klad,"%lu",(unsigned long)*(UINT32_T*)p);
                     break;
+#ifndef __BORLANDC__
                 case 8:
                     sprintf(klad,"%llu",*(unsigned long long*)p);
                     break;
+#endif                    
                 case 1:
                 default:
                     sprintf(klad,"%u",(int)*(unsigned char *)p);
@@ -13972,9 +13983,11 @@ static function_return_type functies(psk pkn)
                 case 4:
                     *(UINT32_T*)p = (UINT32_T)val;
                     break;
+#ifndef __BORLANDC__
                 case 8:
                     *(unsigned LONG*)p = (unsigned LONG)val;
                     break;
+#endif
                 case 1:
                 default:
                     *(unsigned char *)p = (unsigned char)val;
