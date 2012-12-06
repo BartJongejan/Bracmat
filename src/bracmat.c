@@ -63,10 +63,13 @@ Test coverage:
 
 */
 
-#define DATUM "5 December 2012"
+#define DATUM "6 December 2012"
 #define VERSION "6"
-#define BUILD "147"
+#define BUILD "148"
 /*
+     6 December 2012
+Thoroughly tested lambda.
+
      5 December 2012
 Compiled with Borland C++ 5.02, alternative typedef for UINT32, found unused
 global var hekje1.
@@ -12093,12 +12096,13 @@ static psk lambda(psk pkn,psk name,psk Arg)
                     Flgs = pkn->v.fl & UNOPS;
                     h = subboomcopie(pkn->RIGHT);
                     h->v.fl |= Flgs;
-                    hh = lambda(h->LEFT,name,Arg);
+                    assert(atomtest(h->LEFT) == 0);
+                    /*20121206 hh = lambda(h->LEFT,name,Arg);
                     if(hh)
                         {
                         wis(h->LEFT);
                         h->LEFT = hh;
-                        }
+                        }*/
                     hh = lambda(h->RIGHT,name,Arg);
                     if(hh)
                         {
