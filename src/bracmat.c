@@ -6465,13 +6465,7 @@ static LONG iopaffinal(LONG *highRemainder,LONG * lowRemainder,LONG carry)
         carry += *lowRemainder;
         if(carry >= RADIX)
             {
-/*
-{?} (10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000/1000000000000000000000000000000000000001
-  + 1/10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)
-{!} 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000001/10000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-{?} 100000000000000000000000000000000000000000000000/10000000000000000000000001+ 1
-{!} 100000000000000000000010000000000000000000000001/10000000000000000000000001
-*/
+/* 99999999999999999/10000000001+1 */
             *lowRemainder = carry - RADIX;
             assert(*lowRemainder >= 0);
             assert(*lowRemainder < RADIX);
@@ -6500,6 +6494,7 @@ static LONG iopaffinal(LONG *highRemainder,LONG * lowRemainder,LONG carry)
 static LONG iop(LONG *highRemainder,LONG *lowRemainder,LONG *highDivisor,LONG *lowDivisor)
     {
     LONG carry = 0;
+    assert(*highRemainder == 0);
     do
         {
         assert(lowRemainder >= highRemainder);
@@ -6522,6 +6517,7 @@ static LONG iop(LONG *highRemainder,LONG *lowRemainder,LONG *highDivisor,LONG *l
         --lowDivisor;
         }
     while(highDivisor <= lowDivisor );
+    assert(*highRemainder == 0);
     return iopaffinal(highRemainder,lowRemainder,carry);
     }
 
@@ -6665,10 +6661,9 @@ static LONG nndeel(ngetal * dividend,ngetal * divisor,ngetal * quotient, ngetal 
     assert((LONG)TEN_LOG_RADIX * remainder->ilength >= dividend->length);
     remainder->inumber = remainder->ialloc = (LONG *)bmalloc(__LINE__,sizeof(LONG) * remainder->iallocated);
     *(remainder->inumber) = 0;
-
-    if(dividend->ilength == 0)
+    assert(dividend->ilength != 0);/*if(dividend->ilength == 0)
         remainder->inumber[0] = 0;
-    else
+    else*/
         memcpy(remainder->inumber,dividend->inumber,dividend->ilength*sizeof(LONG));
 
     if(dividend->ilength >= divisor->ilength)
