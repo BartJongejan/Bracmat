@@ -63,10 +63,12 @@ Test coverage:
 
 */
 
-#define DATUM "6 December 2012"
+#define DATUM "10 December 2012"
 #define VERSION "6"
 #define BUILD "148"
-/*
+/*  10 December
+Replaced 2000000000 by HEADROOM * RADIX2, which is valid for both 32 and 64 bit.
+
      6 December 2012
 Thoroughly tested lambda.
 
@@ -6419,7 +6421,7 @@ static void nmaal(ngetal * x,ngetal * y,ngetal * product)
             itussen = iwyzer - 1;
             assert(itussen >= product->inumber);
             *itussen += karry;
-            while(*itussen >= 2000000000)
+            while(*itussen >= HEADROOM * RADIX2/*2000000000 20121210*/)
                 {
                 karry = *itussen/RADIX;
                 *itussen %= RADIX;
@@ -6466,6 +6468,7 @@ static LONG iopaffinal(LONG *highRemainder,LONG * lowRemainder,LONG carry)
         if(carry >= RADIX)
             {
 /* 99999999999999999/10000000001+1 */
+/* 99999999999999999999999999999999/100000000000000000000001+1 */
             *lowRemainder = carry - RADIX;
             assert(*lowRemainder >= 0);
             assert(*lowRemainder < RADIX);
@@ -17271,7 +17274,11 @@ int main(int argc,char *argv[])
 #ifndef NDEBUG
         {
         LONG radix,ten_log_radix;
+#if defined _WIN64
+        assert(HEADROOM*RADIX2 < LLONG_MAX);
+#else
         assert(HEADROOM*RADIX2 < LONG_MAX);
+#endif
         for(radix = 1,ten_log_radix = 1;ten_log_radix <= TEN_LOG_RADIX;radix *= 10,++ten_log_radix)
             ;
         assert(RADIX == radix);
