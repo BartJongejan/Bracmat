@@ -5056,6 +5056,33 @@ string line 2\"
           (@(1235:~1235 ())&Out$698|)
           (@(246/24:<123/12 ())&Out$699|)
           (@(246/24:<124/12 ())|Out$700)
+          (   @("-123":#>-12 (|))
+            & Out$701
+          | 
+          )
+          (   @("-123":~<-12 (|))
+            & Out$702
+          | 
+          )
+          ( @("-123":~<-123 (|))
+          | Out$703
+          )
+          (   @(123/2:~<123 (|))
+            & Out$704
+          | 
+          )
+          (@(123/2:~>123 (|))|Out$705)
+          (@(123:~>123 (|))|Out$706)
+          (   @(124:~>123 (|))
+            & Out$707
+          | 
+          )
+          ( @(xyz-ab:?x -ab)&!x:xyz-
+          | Out$708
+          )
+          ( @(xyz-12:?x -12)&!x:xyz
+          | Out$709
+          )
       &   out
         $ ( str
           $ ( "Done. "
@@ -5079,8 +5106,8 @@ r=
 & lst$(r,"valid.bra",APP)
 & put$(\n,"valid.bra",APP)
 & (   666:?aaa
-    & fast:?speed
     & slow:?speed
+    & fast:?speed
     & "LL keeps the '0' alife if 'lost' is incremented"
     & 0:?lost
     & (loss=1+!lost:?lost)

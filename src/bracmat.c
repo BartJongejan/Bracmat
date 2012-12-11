@@ -8359,7 +8359,8 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                                 return ONCE;
                         }
                     }
-                case NOT|GREATER_THAN:    /* n:~>p */
+                /*case NOT|GREATER_THAN:*/    /* n:~>p */
+                default:
                     {
     /*
                     n:~>p   n <= p
@@ -8392,8 +8393,6 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                             return TRUE;
                         }
                     }
-                default:
-                    return FALSE;
                 }
             /* End (check & QGETAL) == TRUE. */
             /*printf("Not expected here!");
