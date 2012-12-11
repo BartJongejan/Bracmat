@@ -68,6 +68,8 @@ Test coverage:
 #define BUILD "148"
 /*  10 December
 Replaced 2000000000 by HEADROOM * RADIX2, which is valid for both 32 and 64 bit.
+scompare: if subject is zero bytes long and therefore not a number, adding
+characters to it may make it a number.
 
      6 December 2012
 Thoroughly tested lambda.
@@ -8397,9 +8399,11 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
             /*printf("Not expected here!");
             getchar();*/
             }
-        else if(  (s < snijaf)
-               && (  ((*s == '-') && (snijaf < s + 2))
-                  || snijaf[-1] == '/'
+        else if( /* 20121210 */ ((s == snijaf) && (Flgs & (NUMBER|BREUK))) 
+               || (   (s < snijaf)
+                  && (  ((*s == '-') && (snijaf < s + 2))
+                     || snijaf[-1] == '/'
+                     )
                   )
                )
             {
