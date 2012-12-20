@@ -63,10 +63,13 @@ Test coverage:
 
 */
 
-#define DATUM "10 December 2012"
+#define DATUM "20 December 2012"
 #define VERSION "6"
-#define BUILD "148"
-/*  10 December
+#define BUILD "149"
+/*  20 December 2012
+Cut most of is_afhankelyk_van away as obsolete.
+
+    10 December 2012
 Replaced 2000000000 by HEADROOM * RADIX2, which is valid for both 32 and 64 bit.
 scompare: if subject is zero bytes long and therefore not a number, adding
 characters to it may make it a number.
@@ -8106,7 +8109,6 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
     char * S = s;
 #endif
     char sav;
-    int lessIfMoreDigitsAdded;
     int smallerIfMoreDigitsAdded; /* -1/22 smaller than -1/2 */ /* 1/22 smaller than 1/2 */
     int samesign;
     int less;
@@ -8159,15 +8161,6 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
             n = opb(n,s,NULL);
             *snijaf = sav;
 
-            if(RAT_NEG_COMP(n))
-                {
-                lessIfMoreDigitsAdded = 1;
-                }
-            else
-                {
-                lessIfMoreDigitsAdded = 0;
-                }
-    
             if(RAT_RAT(n))
                 {
                 smallerIfMoreDigitsAdded = 1;
@@ -8194,7 +8187,14 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                         }
                     }
                 }
-            less = lessIfMoreDigitsAdded ^ smallerIfMoreDigitsAdded;
+            if(RAT_NEG_COMP(n))
+                {
+                less = !smallerIfMoreDigitsAdded;
+                }
+            else
+                {
+                less = smallerIfMoreDigitsAdded;
+                }
             teken = _qvergelijk(n,p);
             samesign = ((n->v.fl & MINUS) == (p->v.fl & MINUS));
             wis(n);
@@ -12175,7 +12175,8 @@ if((lflgs = kn->LEFT->v.fl & UNOPS) != 0)
 static int is_afhankelyk_van(psk el,psk lijst)
     {
     int ret;
-    while(lijst)
+    assert(!is_op(lijst));
+    /*20121220 while(lijst)
         {
         psk hlp;
         if(!vgl(el,(hlp = (kop(lijst) == KOMMA) ? lijst->LEFT : lijst)))
@@ -12187,22 +12188,22 @@ static int is_afhankelyk_van(psk el,psk lijst)
             || is_afhankelyk_van(el,hlp->RIGHT))
                 return TRUE;
             }
-        else
+        else*/
             {
             psk kn = NULL;
-             adr[1] = hlp;
+             adr[1] = lijst;/*hlp;*/
              adr[2] = el;
              kn = opb(kn,"(!dep:(? (\1.? \2 ?) ?)",NULL);
              kn = eval(kn);
              ret = isSUCCESS(kn);
              wis(kn);
              return ret;
-            }
-        /* return is_afhankelyk_van(el,(kop(lijst) == KOMMA) ? lijst->RIGHT : NULL);
-        18 Maart 1997 */
+            }/*
+        / * return is_afhankelyk_van(el,(kop(lijst) == KOMMA) ? lijst->RIGHT : NULL);
+        18 Maart 1997 * /
         lijst = (kop(lijst) == KOMMA) ? lijst->RIGHT : NULL;
         }
-    return FALSE;
+    return FALSE;*/
     }
 
 static int zoekopt(psk kn,LONG opt)
@@ -16366,8 +16367,8 @@ static psk substdiff(psk pkn)
         wis(pkn);
         pkn = copievan(&eenk);
         }
-    else if(  (  kop(rknoop) == FUN
-              || !is_op(rknoop)
+    else if(  ( /* 20121220 kop(rknoop) == FUN
+              ||*/ !is_op(rknoop)
               )
            && is_afhankelyk_van(lknoop,rknoop)
            )

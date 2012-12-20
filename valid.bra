@@ -5083,6 +5083,37 @@ string line 2\"
           ( @(xyz-12:?x -12)&!x:xyz
           | Out$709
           )
+          ( @(123/45b:~<24/2 ?l)&!l:3/45b
+          | Out$710
+          )
+          ( @("-2/1b":~<-2 @?l)&!l:b
+          | Out$711
+          )
+          (@(a:~<1)|Out$712)
+          (@(1:~<b)&Out$713|)
+          (@(:~<b)&Out$714|)
+          (@(c:~>b)&Out$715|)
+          (@(a:~>b)|Out$716)
+          (@(b:~>b)|Out$717)
+          ( (~(a|b)|c):c
+          | Out$718
+          )
+          (~'m&Out$719|)
+          (   ~(a&~'m):?h
+            & flg$('$h):(=?X.m)
+            & @(lst$(X,MEM,LIN):"X=~" ?)
+          | Out$720
+          )
+          (   tbl$(GHJK,10)
+            & mem$EXT:? (GHJK.9.0) ?
+            & tbl$(GHJK,0)
+          | Out$721
+          )
+          (   ("a b"=23)
+            & lst$("a b",LIN,MEM):"\"a b\"=23;\n"
+          | Out$722
+          )
+          (lst$(out,sgn)|Out$723)
       &   out
         $ ( str
           $ ( "Done. "
