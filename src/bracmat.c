@@ -12918,7 +12918,8 @@ WRITE
                     case 4 :
                         snum.i = (INT32_T)(numwaarde & 0xFFFFFFFF);
                         fwrite(snum.c,1,4,fh->fp);
-                        numwaarde >>= 32;
+                        assert(fh->getal == 1);
+                        /*numwaarde >>= 32;*/
                         break;
                     default :
                         fwrite((char *)&numwaarde,1,4,fh->fp);
