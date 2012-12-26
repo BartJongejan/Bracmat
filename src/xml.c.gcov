@@ -68,18 +68,18 @@
         -:   63:static int Put(char * c);
         -:   64:static int (*xput)(char * c) = Put;
         -:   65:
-    #####:   66:static int rawput(int c)
+   187166:   66:static int rawput(int c)
         -:   67:    {
-    #####:   68:    putLeaveChar(c);
-    #####:   69:    return TRUE;
+   187166:   68:    putLeaveChar(c);
+   187166:   69:    return TRUE;
         -:   70:    }
         -:   71:
-    #####:   72:static int nrawput(char * c)
+     1307:   72:static int nrawput(char * c)
         -:   73:    {
-    #####:   74:    while(*c)
-    #####:   75:        if(!rawput(*c++))
+    11900:   74:    while(*c)
+     9286:   75:        if(!rawput(*c++))
     #####:   76:            return FALSE;
-    #####:   77:    return TRUE;
+     1307:   77:    return TRUE;
         -:   78:    }
         -:   79:/*
         -:   80:Handle such things:  &amp;security-level;
@@ -143,21 +143,21 @@
         -:  138:
         -:  139:static int (*namechar)(int c);
         -:  140:
-    #####:  141:static int NameChar(int c)
+     9106:  141:static int NameChar(int c)
         -:  142:    {
         -:  143:    int i;
-    #####:  144:    for( i = 0
-    #####:  145:       ; c > lu[i].u
-    #####:  146:       ; ++i
+    70779:  144:    for( i = 0
+    61673:  145:       ; c > lu[i].u
+    52567:  146:       ; ++i
         -:  147:       )
         -:  148:       ;
-    #####:  149:    return c >= lu[i].l && (anychar || lu[i].s);        
+     9106:  149:    return c >= lu[i].l && (anychar || lu[i].s);        
         -:  150:    }
         -:  151:
-    #####:  152:static int decimal(int c)
+       33:  152:static int decimal(int c)
         -:  153:    {
-    #####:  154:    if('0' <= c && c <= '9')
-    #####:  155:        return TRUE;
+       33:  154:    if('0' <= c && c <= '9')
+       33:  155:        return TRUE;
     #####:  156:    return FALSE;
         -:  157:    }
         -:  158:
@@ -171,36 +171,36 @@
     #####:  166:    return FALSE;
         -:  167:    }
         -:  168:
-    #####:  169:static int number(int c)
+       11:  169:static int number(int c)
         -:  170:    {
-    #####:  171:    if(c == 'x' || c == 'X')
+       11:  171:    if(c == 'x' || c == 'X')
         -:  172:        {
     #####:  173:        namechar = hex;
     #####:  174:        return TRUE;
         -:  175:        }
-    #####:  176:    if(decimal(c))
+       11:  176:    if(decimal(c))
         -:  177:        {
-    #####:  178:        namechar = decimal;
-    #####:  179:        return TRUE;
+       11:  178:        namechar = decimal;
+       11:  179:        return TRUE;
         -:  180:        }
     #####:  181:    return FALSE;
         -:  182:    }
         -:  183:
-    #####:  184:static int entity(int c)
+     1310:  184:static int entity(int c)
         -:  185:    {
-    #####:  186:    if(c == '#')
+     1310:  186:    if(c == '#')
         -:  187:        {
-    #####:  188:        namechar = number;
-    #####:  189:        return TRUE;
+       11:  188:        namechar = number;
+       11:  189:        return TRUE;
         -:  190:        }
         -:  191:    else
         -:  192:        {
-    #####:  193:        anychar = FALSE;
-    #####:  194:        if(NameChar(c))
+     1299:  193:        anychar = FALSE;
+     1299:  194:        if(NameChar(c))
         -:  195:            {
-    #####:  196:            anychar = TRUE;
-    #####:  197:            namechar = NameChar;
-    #####:  198:            return TRUE;
+     1299:  196:            anychar = TRUE;
+     1299:  197:            namechar = NameChar;
+     1299:  198:            return TRUE;
         -:  199:            }
         -:  200:        }
     #####:  201:    return FALSE;
@@ -499,17 +499,17 @@
         -:  494:    }
         -:  495:
         -:  496:static int HT = 0;
-    #####:  497:static int charref(char * c)
+    10460:  497:static int charref(char * c)
         -:  498:    {
-    #####:  499:    if(*c == ';')
+    10460:  499:    if(*c == ';')
         -:  500:        {
-    #####:  501:        *p = '\0';
-    #####:  502:        if(  !strcmp(buf,"amp")
-    #####:  503:          || !strcmp(buf,"#38")
-    #####:  504:          || !strcmp(buf,"#x26")
+     1310:  501:        *p = '\0';
+     1310:  502:        if(  !strcmp(buf,"amp")
+     1270:  503:          || !strcmp(buf,"#38")
+     1270:  504:          || !strcmp(buf,"#x26")
         -:  505:          )
         -:  506:#if ALWAYSREPLACEAMP
-    #####:  507:            rawput('&');
+       40:  507:            rawput('&');
         -:  508:#else
         -:  509:            {
         -:  510:            *p++ = ';';
@@ -519,33 +519,33 @@
         -:  514:            return TRUE;
         -:  515:            }
         -:  516:#endif
-    #####:  517:        else if(!strcmp(buf,"apos"))
+     1270:  517:        else if(!strcmp(buf,"apos"))
     #####:  518:            rawput('\'');
-    #####:  519:        else if(!strcmp(buf,"quot"))
+     1270:  519:        else if(!strcmp(buf,"quot"))
         -:  520:            {
     #####:  521:            rawput('\"');
         -:  522:            }
-    #####:  523:        else if(!strcmp(buf,"lt"))
-    #####:  524:            rawput('<');
-    #####:  525:        else if(!strcmp(buf,"gt"))
-    #####:  526:            rawput('>');
-    #####:  527:        else if(buf[0] == '#')
+     1270:  523:        else if(!strcmp(buf,"lt"))
+       78:  524:            rawput('<');
+     1192:  525:        else if(!strcmp(buf,"gt"))
+       18:  526:            rawput('>');
+     1174:  527:        else if(buf[0] == '#')
         -:  528:            {
         -:  529:            unsigned long N;
         -:  530:            char tmp[22];
-    #####:  531:            N = (buf[1] == 'x') ? strtoul(buf+2,NULL,16) : strtoul(buf+1,NULL,10);
-    #####:  532:            p = buf;
-    #####:  533:            xput = Put;
-    #####:  534:            if(putCodePoint(N,tmp))
+       11:  531:            N = (buf[1] == 'x') ? strtoul(buf+2,NULL,16) : strtoul(buf+1,NULL,10);
+       11:  532:            p = buf;
+       11:  533:            xput = Put;
+       11:  534:            if(putCodePoint(N,tmp))
         -:  535:                {
-    #####:  536:                return nrawput(tmp);
+       11:  536:                return nrawput(tmp);
         -:  537:                }
         -:  538:            else
     #####:  539:                return 0;
         -:  540:            }
         -:  541:        else
         -:  542:            {
-    #####:  543:            if(HT)
+     1163:  543:            if(HT)
         -:  544:                {
         -:  545:                Entity * pItem;
         -:  546:                Entity key;
@@ -567,17 +567,17 @@
         -:  562:                        }
         -:  563:                    }
         -:  564:                }
-    #####:  565:            rawput('&');
-    #####:  566:            nrawput(buf);
-    #####:  567:            rawput(';');
-    #####:  568:            p = buf;
-    #####:  569:            xput = Put;
-    #####:  570:            return FALSE;
+     1163:  565:            rawput('&');
+     1163:  566:            nrawput(buf);
+     1163:  567:            rawput(';');
+     1163:  568:            p = buf;
+     1163:  569:            xput = Put;
+     1163:  570:            return FALSE;
         -:  571:            }
-    #####:  572:        p = buf;
-    #####:  573:        xput = Put;
+      136:  572:        p = buf;
+      136:  573:        xput = Put;
         -:  574:        }
-    #####:  575:    else if(!namechar(*c))
+     9150:  575:    else if(!namechar(*c))
         -:  576:        {
     #####:  577:        rawput('&');
     #####:  578:        *p = '\0';
@@ -588,50 +588,50 @@
     #####:  583:        xput = Put;
     #####:  584:        return FALSE;
         -:  585:        }
-    #####:  586:    else if(p < buf+BUFSIZE-1)
+     9150:  586:    else if(p < buf+BUFSIZE-1)
         -:  587:        {
-    #####:  588:        *p++ = *c;
+     9150:  588:        *p++ = *c;
         -:  589:        }
-    #####:  590:    return TRUE;
+     9286:  590:    return TRUE;
         -:  591:    }
         -:  592:
-    #####:  593:static int Put(char * c)
+   136015:  593:static int Put(char * c)
         -:  594:    {
-    #####:  595:    if(*c == '&')
+   136015:  595:    if(*c == '&')
         -:  596:        {
-    #####:  597:        xput = charref;
-    #####:  598:        namechar = entity;
-    #####:  599:        return TRUE;
+     1310:  597:        xput = charref;
+     1310:  598:        namechar = entity;
+     1310:  599:        return TRUE;
         -:  600:        }
-    #####:  601:    return rawput(*c);
+   134705:  601:    return rawput(*c);
         -:  602:    }
         -:  603:
-    #####:  604:static void flush()
+    11145:  604:static void flush()
         -:  605:    {
-    #####:  606:    if(xput != Put)
+    11145:  606:    if(xput != Put)
     #####:  607:        xput("");
-    #####:  608:    }
+    11145:  608:    }
         -:  609:
-    #####:  610:static void nxput(char * start,char *end)
+     6611:  610:static void nxput(char * start,char *end)
         -:  611:    {
-    #####:  612:    for(;start < end;++start)
-    #####:  613:        xput(start);
-    #####:  614:    flush();
-    #####:  615:    }
+    37351:  612:    for(;start < end;++start)
+    30740:  613:        xput(start);
+     6611:  614:    flush();
+     6611:  615:    }
         -:  616:
-    #####:  617:static void nxputWithoutEntityUnfolding(char * start,char *end)
+      133:  617:static void nxputWithoutEntityUnfolding(char * start,char *end)
         -:  618:    {
-    #####:  619:    for(;start < end;++start)
-    #####:  620:        rawput(*start);
-    #####:  621:    }
+    40846:  619:    for(;start < end;++start)
+    40713:  620:        rawput(*start);
+      133:  621:    }
         -:  622:
-    #####:  623:static void nonTagWithoutEntityUnfolding(char * kind,char * start,char * end)
+      133:  623:static void nonTagWithoutEntityUnfolding(char * kind,char * start,char * end)
         -:  624:    {
-    #####:  625:    nrawput(kind);
-    #####:  626:    putOperatorChar('.');
-    #####:  627:    nxputWithoutEntityUnfolding(start,end);
-    #####:  628:    putOperatorChar(')');
-    #####:  629:    }
+      133:  625:    nrawput(kind);
+      133:  626:    putOperatorChar('.');
+      133:  627:    nxputWithoutEntityUnfolding(start,end);
+      133:  628:    putOperatorChar(')');
+      133:  629:    }
         -:  630:
     #####:  631:static void nonTag(char * kind,char * start,char * end)
         -:  632:    {
@@ -651,43 +651,43 @@
         -:  646:static char * startAttributeName = NULL;
         -:  647:static char * startValue = NULL;
         -:  648:
-    #####:  649:static void cbStartMarkUp()/* called when <!X has been read, where X != [ or - */
+     4534:  649:static void cbStartMarkUp()/* called when <!X has been read, where X != [ or - */
         -:  650:    {
-    #####:  651:    flush();
-    #####:  652:    startMarkup = ch+2;
-    #####:  653:    putOperatorChar(' ');
-    #####:  654:    putOperatorChar('(');
-    #####:  655:    }
+     4534:  651:    flush();
+     4534:  652:    startMarkup = ch+2;
+     4534:  653:    putOperatorChar(' ');
+     4534:  654:    putOperatorChar('(');
+     4534:  655:    }
         -:  656:
-    #####:  657:static void cbEndMarkUp()/* called when > has been read */
+      116:  657:static void cbEndMarkUp()/* called when > has been read */
         -:  658:    {
-    #####:  659:    if(startMarkup)
+      116:  659:    if(startMarkup)
     #####:  660:        nonTag("!",startMarkup,ch);
-    #####:  661:    }
+      116:  661:    }
         -:  662:
-    #####:  663:static void cbEndDOCTYPE()/* called when > has been read */
+        1:  663:static void cbEndDOCTYPE()/* called when > has been read */
         -:  664:    {
-    #####:  665:    startMarkup = NULL;
-    #####:  666:    nonTagWithoutEntityUnfolding("!DOCTYPE",startDOCTYPE,ch);
-    #####:  667:    }
+        1:  665:    startMarkup = NULL;
+        1:  666:    nonTagWithoutEntityUnfolding("!DOCTYPE",startDOCTYPE,ch);
+        1:  667:    }
         -:  668:
-    #####:  669:static void cbEndElementName()
+     4401:  669:static void cbEndElementName()
         -:  670:    {
-    #####:  671:    nxput(startElementName,ch);
-    #####:  672:    putOperatorChar('.');
-    #####:  673:    }
+     4401:  671:    nxput(startElementName,ch);
+     4401:  672:    putOperatorChar('.');
+     4401:  673:    }
         -:  674:
-    #####:  675:static void cbEndAttributeName()
+     1105:  675:static void cbEndAttributeName()
         -:  676:    {
-    #####:  677:    nxput(startAttributeName,ch);
-    #####:  678:    putOperatorChar('.');
-    #####:  679:    }
+     1105:  677:    nxput(startAttributeName,ch);
+     1105:  678:    putOperatorChar('.');
+     1105:  679:    }
         -:  680:
-    #####:  681:static void cbEndAttribute()
+     1105:  681:static void cbEndAttribute()
         -:  682:    {
-    #####:  683:    putOperatorChar(')');
-    #####:  684:    putOperatorChar(' ');
-    #####:  685:    }
+     1105:  683:    putOperatorChar(')');
+     1105:  684:    putOperatorChar(' ');
+     1105:  685:    }
         -:  686:
         -:  687:static estate def(int kar);
         -:  688:static estate lt(int kar);
@@ -723,48 +723,48 @@
         -:  718:static estate h3(int kar); /* <!--  - */
         -:  719:static estate endtag(int kar);
         -:  720:
-    #####:  721:static estate def(int kar)
+   120269:  721:static estate def(int kar)
         -:  722:    {
-    #####:  723:    switch(kar)
+   120269:  723:    switch(kar)
         -:  724:        {
         -:  725:        case '<':
-    #####:  726:            tagState = lt;
-    #####:  727:            cbStartMarkUp();
-    #####:  728:            return tag;
+     4534:  726:            tagState = lt;
+     4534:  727:            cbStartMarkUp();
+     4534:  728:            return tag;
         -:  729:        default:
-    #####:  730:            return notag;
+   115735:  730:            return notag;
         -:  731:        }
         -:  732:    }
         -:  733:
-    #####:  734:static estate lt(int kar)
+     4534:  734:static estate lt(int kar)
         -:  735:    {
-    #####:  736:    switch(kar)
+     4534:  736:    switch(kar)
         -:  737:        {
         -:  738:        case '>':
     #####:  739:            tagState = def;
     #####:  740:            return notag;
         -:  741:        case '!':
-    #####:  742:            tagState = markup;
-    #####:  743:            return tag;
+      131:  742:            tagState = markup;
+      131:  743:            return tag;
         -:  744:        case '?':
-    #####:  745:            startScript = ch;
-    #####:  746:            tagState = script;
-    #####:  747:            return tag;
+        2:  745:            startScript = ch;
+        2:  746:            tagState = script;
+        2:  747:            return tag;
         -:  748:        case '/':
-    #####:  749:            putOperatorChar('.');
-    #####:  750:            tagState = endtag;
+     2174:  749:            putOperatorChar('.');
+     2174:  750:            tagState = endtag;
         -:  751:        case 0xA0:
         -:  752:        case ' ':
         -:  753:        case '\t':
         -:  754:        case '\n':
         -:  755:        case '\r':
-    #####:  756:            return tag;
+     2174:  756:            return tag;
         -:  757:        default:
-    #####:  758:            if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
+     2227:  758:            if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
         -:  759:                {
-    #####:  760:                tagState = element;
-    #####:  761:                startElementName = ch;
-    #####:  762:                return tag;
+     2227:  760:                tagState = element;
+     2227:  761:                startElementName = ch;
+     2227:  762:                return tag;
         -:  763:                }
         -:  764:            else
         -:  765:                {
@@ -774,9 +774,9 @@
         -:  769:        }
         -:  770:    }
         -:  771:
-    #####:  772:static estate element(int kar)
+     8314:  772:static estate element(int kar)
         -:  773:    {
-    #####:  774:    switch(kar)
+     8314:  774:    switch(kar)
         -:  775:        {
         -:  776:        case '<':
     #####:  777:            tagState = lt;
@@ -785,23 +785,23 @@
     #####:  780:            cbStartMarkUp();
     #####:  781:            return endoftag_startoftag;
         -:  782:        case '>':
-    #####:  783:            tagState = def;
-    #####:  784:            cbEndElementName();
-    #####:  785:            putOperatorChar(')');
-    #####:  786:            return endoftag;
+     1264:  783:            tagState = def;
+     1264:  784:            cbEndElementName();
+     1264:  785:            putOperatorChar(')');
+     1264:  786:            return endoftag;
         -:  787:        case '-':
         -:  788:        case '_':
         -:  789:        case ':':
         -:  790:        case '.':
-    #####:  791:            return tag;
+        7:  791:            return tag;
         -:  792:        case 0xA0:
         -:  793:        case ' ':
         -:  794:        case '\t':
         -:  795:        case '\n':
         -:  796:        case '\r':
-    #####:  797:            cbEndElementName();
-    #####:  798:            tagState = atts;
-    #####:  799:            return tag;
+      963:  797:            cbEndElementName();
+      963:  798:            tagState = atts;
+      963:  799:            return tag;
         -:  800:        case '/':
     #####:  801:            cbEndElementName();
     #####:  802:            putOperatorChar(',');
@@ -809,8 +809,8 @@
     #####:  804:            tagState = emptytag;
     #####:  805:            return tag;
         -:  806:        default:
-    #####:  807:            if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
-    #####:  808:                return tag;
+     6080:  807:            if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
+     6080:  808:                return tag;
         -:  809:            else
         -:  810:                {
     #####:  811:                tagState = def;
@@ -819,9 +819,9 @@
         -:  814:        }
         -:  815:    }
         -:  816:
-    #####:  817:static estate elementonly(int kar)
+     8141:  817:static estate elementonly(int kar)
         -:  818:    {
-    #####:  819:    switch(kar)
+     8141:  819:    switch(kar)
         -:  820:        {
         -:  821:        case '<':
     #####:  822:            tagState = lt;
@@ -830,15 +830,15 @@
     #####:  825:            cbStartMarkUp();
     #####:  826:            return endoftag_startoftag;
         -:  827:        case '>':
-    #####:  828:            tagState = def;
-    #####:  829:            cbEndElementName();
-    #####:  830:            putOperatorChar(')');
-    #####:  831:            return endoftag;
+     2174:  828:            tagState = def;
+     2174:  829:            cbEndElementName();
+     2174:  830:            putOperatorChar(')');
+     2174:  831:            return endoftag;
         -:  832:        case '-':
         -:  833:        case '_':
         -:  834:        case ':':
         -:  835:        case '.':
-    #####:  836:            return tag;
+        7:  836:            return tag;
         -:  837:        case 0xA0:
         -:  838:        case ' ':
         -:  839:        case '\t':
@@ -848,8 +848,8 @@
     #####:  843:            tagState = gt;
     #####:  844:            return tag;
         -:  845:        default:
-    #####:  846:            if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
-    #####:  847:                return tag;
+     5960:  846:            if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
+     5960:  847:                return tag;
         -:  848:            else
         -:  849:                {
     #####:  850:                tagState = def;
@@ -883,17 +883,17 @@
         -:  878:        }
         -:  879:    }
         -:  880:
-    #####:  881:static estate emptytag(int kar)
+       53:  881:static estate emptytag(int kar)
         -:  882:    {
-    #####:  883:    switch(kar)
+       53:  883:    switch(kar)
         -:  884:        {
         -:  885:        case '<':
     #####:  886:            tagState = lt;
     #####:  887:            cbStartMarkUp();
     #####:  888:            return endoftag_startoftag;
         -:  889:        case '>':
-    #####:  890:            tagState = def;
-    #####:  891:            return endoftag;
+       53:  890:            tagState = def;
+       53:  891:            return endoftag;
         -:  892:        case 0xA0:
         -:  893:        case ' ':
         -:  894:        case '\t':
@@ -906,9 +906,9 @@
         -:  901:        }
         -:  902:    }
         -:  903:
-    #####:  904:static estate atts(int kar)
+     1115:  904:static estate atts(int kar)
         -:  905:    {
-    #####:  906:    switch(kar)
+     1115:  906:    switch(kar)
         -:  907:        {
         -:  908:        case '<':
     #####:  909:            tagState = lt;
@@ -916,27 +916,27 @@
     #####:  911:            cbStartMarkUp();
     #####:  912:            return endoftag_startoftag;
         -:  913:        case '>':
-    #####:  914:            tagState = def;
-    #####:  915:            putOperatorChar(')');
-    #####:  916:            return endoftag;
+        1:  914:            tagState = def;
+        1:  915:            putOperatorChar(')');
+        1:  916:            return endoftag;
         -:  917:        case 0xA0:
         -:  918:        case ' ':
         -:  919:        case '\t':
         -:  920:        case '\n':
         -:  921:        case '\r':
-    #####:  922:            return tag;
+        8:  922:            return tag;
         -:  923:        case '/':
-    #####:  924:            putOperatorChar(',');
-    #####:  925:            putOperatorChar(')');
-    #####:  926:            tagState = emptytag;
-    #####:  927:            return tag;
+        1:  924:            putOperatorChar(',');
+        1:  925:            putOperatorChar(')');
+        1:  926:            tagState = emptytag;
+        1:  927:            return tag;
         -:  928:        default:
-    #####:  929:            if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
+     1105:  929:            if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
         -:  930:                {
-    #####:  931:                putOperatorChar('(');
-    #####:  932:                startAttributeName = ch;
-    #####:  933:                tagState = name;
-    #####:  934:                return tag;
+     1105:  931:                putOperatorChar('(');
+     1105:  932:                startAttributeName = ch;
+     1105:  933:                tagState = name;
+     1105:  934:                return tag;
         -:  935:                }
         -:  936:            else
         -:  937:                {
@@ -946,9 +946,9 @@
         -:  941:        }
         -:  942:    }
         -:  943:
-    #####:  944:static estate name(int kar)
+     3527:  944:static estate name(int kar)
         -:  945:    {
-    #####:  946:    switch(kar)
+     3527:  946:    switch(kar)
         -:  947:        {
         -:  948:        case '<':
     #####:  949:            tagState = lt;
@@ -967,7 +967,7 @@
         -:  962:        case '_':
         -:  963:        case ':':
         -:  964:        case '.':
-    #####:  965:            return tag;
+        7:  965:            return tag;
         -:  966:        case 0xA0:
         -:  967:        case ' ':
         -:  968:        case '\t':
@@ -983,12 +983,12 @@
     #####:  978:            tagState = emptytag;
     #####:  979:            return tag;
         -:  980:        case '=':
-    #####:  981:            cbEndAttributeName();
-    #####:  982:            tagState = value;
-    #####:  983:            return tag;
+     1105:  981:            cbEndAttributeName();
+     1105:  982:            tagState = value;
+     1105:  983:            return tag;
         -:  984:        default:
-    #####:  985:            if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
-    #####:  986:                return tag;
+     2415:  985:            if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
+     2415:  986:                return tag;
         -:  987:            else
         -:  988:                {
     #####:  989:                tagState = def;
@@ -997,9 +997,9 @@
         -:  992:        }
         -:  993:    }
         -:  994:
-    #####:  995:static estate value(int kar)
+     1105:  995:static estate value(int kar)
         -:  996:    {
-    #####:  997:    switch(kar)
+     1105:  997:    switch(kar)
         -:  998:        {
         -:  999:        case '>':
         -: 1000:        case '/':
@@ -1013,11 +1013,11 @@
         -: 1008:        case '\r':
     #####: 1009:            return tag;
         -: 1010:        case '\'':
-    #####: 1011:            tagState = singlequotes;
-    #####: 1012:            return tag;
+      735: 1011:            tagState = singlequotes;
+      735: 1012:            return tag;
         -: 1013:        case '"':
-    #####: 1014:            tagState = doublequotes;
-    #####: 1015:            return tag;
+      370: 1014:            tagState = doublequotes;
+      370: 1015:            return tag;
         -: 1016:        default:
     #####: 1017:            if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
         -: 1018:                {
@@ -1125,10 +1125,10 @@
         -: 1120:        }
         -: 1121:    }
         -: 1122:
-    #####: 1123:static estate singlequotes(int kar)
+      735: 1123:static estate singlequotes(int kar)
         -: 1124:    {
-    #####: 1125:    startValue = ch;
-    #####: 1126:    switch(kar)
+      735: 1125:    startValue = ch;
+      735: 1126:    switch(kar)
         -: 1127:        {
         -: 1128:        case '\'':
     #####: 1129:            nxput(startValue,ch);
@@ -1136,15 +1136,15 @@
     #####: 1131:            tagState = endvalue;
     #####: 1132:            return tag;
         -: 1133:        default:
-    #####: 1134:            tagState = insinglequotedvalue;
-    #####: 1135:            return tag;
+      735: 1134:            tagState = insinglequotedvalue;
+      735: 1135:            return tag;
         -: 1136:        }
         -: 1137:    }
         -: 1138:
-    #####: 1139:static estate doublequotes(int kar)
+      370: 1139:static estate doublequotes(int kar)
         -: 1140:    {
-    #####: 1141:    startValue = ch;
-    #####: 1142:    switch(kar)
+      370: 1141:    startValue = ch;
+      370: 1142:    switch(kar)
         -: 1143:        {
         -: 1144:        case '\"':
     #####: 1145:            nxput(startValue,ch);
@@ -1152,43 +1152,43 @@
     #####: 1147:            tagState = endvalue;
     #####: 1148:            return tag;
         -: 1149:        default:
-    #####: 1150:            tagState = indoublequotedvalue;
-    #####: 1151:            return tag;
+      370: 1150:            tagState = indoublequotedvalue;
+      370: 1151:            return tag;
         -: 1152:        }
         -: 1153:    }
         -: 1154:
-    #####: 1155:static estate insinglequotedvalue(int kar)
+     7301: 1155:static estate insinglequotedvalue(int kar)
         -: 1156:    {
-    #####: 1157:    switch(kar)
+     7301: 1157:    switch(kar)
         -: 1158:        {
         -: 1159:        case '\'':
-    #####: 1160:            nxput(startValue,ch);
-    #####: 1161:            cbEndAttribute();
-    #####: 1162:            tagState = endvalue;
-    #####: 1163:            return tag;
+      735: 1160:            nxput(startValue,ch);
+      735: 1161:            cbEndAttribute();
+      735: 1162:            tagState = endvalue;
+      735: 1163:            return tag;
         -: 1164:        default:
-    #####: 1165:            return tag;
+     6566: 1165:            return tag;
         -: 1166:        }
         -: 1167:    }
         -: 1168:
-    #####: 1169:static estate indoublequotedvalue(int kar)
+     3457: 1169:static estate indoublequotedvalue(int kar)
         -: 1170:    {
-    #####: 1171:    switch(kar)
+     3457: 1171:    switch(kar)
         -: 1172:        {
         -: 1173:        case '\"':
-    #####: 1174:            nxput(startValue,ch);
-    #####: 1175:            cbEndAttribute();
-    #####: 1176:            tagState = endvalue;
-    #####: 1177:            return tag;
+      370: 1174:            nxput(startValue,ch);
+      370: 1175:            cbEndAttribute();
+      370: 1176:            tagState = endvalue;
+      370: 1177:            return tag;
         -: 1178:        default:
-    #####: 1179:            return tag;
+     3087: 1179:            return tag;
         -: 1180:        }
         -: 1181:    }
         -: 1182:
         -: 1183:
-    #####: 1184:static estate endvalue(int kar)
+     1105: 1184:static estate endvalue(int kar)
         -: 1185:    {
-    #####: 1186:    switch(kar)
+     1105: 1186:    switch(kar)
         -: 1187:        {
         -: 1188:        case '<':
     #####: 1189:            tagState = lt;
@@ -1196,30 +1196,30 @@
     #####: 1191:            cbStartMarkUp();
     #####: 1192:            return endoftag_startoftag;
         -: 1193:        case '>':
-    #####: 1194:            tagState = def;
-    #####: 1195:            putOperatorChar(')');
-    #####: 1196:            return endoftag;
+      909: 1194:            tagState = def;
+      909: 1195:            putOperatorChar(')');
+      909: 1196:            return endoftag;
         -: 1197:        case 0xA0:
         -: 1198:        case ' ':
         -: 1199:        case '\t':
         -: 1200:        case '\n':
         -: 1201:        case '\r':
-    #####: 1202:            tagState = atts;
-    #####: 1203:            return tag;
+      144: 1202:            tagState = atts;
+      144: 1203:            return tag;
         -: 1204:        case '/':
-    #####: 1205:            putOperatorChar(',');
-    #####: 1206:            putOperatorChar(')');
-    #####: 1207:            tagState = emptytag;
-    #####: 1208:            return tag;
+       52: 1205:            putOperatorChar(',');
+       52: 1206:            putOperatorChar(')');
+       52: 1207:            tagState = emptytag;
+       52: 1208:            return tag;
         -: 1209:        default:
     #####: 1210:            tagState = def;
     #####: 1211:            return notag;
         -: 1212:        }
         -: 1213:    }
         -: 1214:
-    #####: 1215:static estate markup(int kar) /* <! */
+      247: 1215:static estate markup(int kar) /* <! */
         -: 1216:    {
-    #####: 1217:    switch(kar)
+      247: 1217:    switch(kar)
         -: 1218:        {
         -: 1219:        case '<':
     #####: 1220:            tagState = lt;
@@ -1227,18 +1227,18 @@
     #####: 1222:            cbStartMarkUp();
     #####: 1223:            return endoftag_startoftag;
         -: 1224:        case '>':
-    #####: 1225:            tagState = def;
-    #####: 1226:            cbEndMarkUp();
-    #####: 1227:            return endoftag;
+      116: 1225:            tagState = def;
+      116: 1226:            cbEndMarkUp();
+      116: 1227:            return endoftag;
         -: 1228:        case '-':
-    #####: 1229:            tagState = h1;
-    #####: 1230:            return tag;
+      116: 1229:            tagState = h1;
+      116: 1230:            return tag;
         -: 1231:        case '[':
-    #####: 1232:            tagState = CDATA1;
-    #####: 1233:            return tag;
+       14: 1232:            tagState = CDATA1;
+       14: 1233:            return tag;
         -: 1234:        case 'D':
-    #####: 1235:            tagState = DOCTYPE1;
-    #####: 1236:            return tag;
+        1: 1235:            tagState = DOCTYPE1;
+        1: 1236:            return tag;
         -: 1237:        default:
     #####: 1238:            tagState = unknownmarkup;
     #####: 1239:            return tag;
@@ -1263,9 +1263,9 @@
         -: 1258:        }
         -: 1259:    }
         -: 1260:
-    #####: 1261:static estate script(int kar)
+       33: 1261:static estate script(int kar)
         -: 1262:    {
-    #####: 1263:    switch(kar)
+       33: 1263:    switch(kar)
         -: 1264:        {
         -: 1265:        case '<':
     #####: 1266:            tagState = lt;
@@ -1277,21 +1277,21 @@
     #####: 1272:            nonTagWithoutEntityUnfolding("?",startScript+1,ch-1);
     #####: 1273:            return endoftag;
         -: 1274:        case '?':
-    #####: 1275:            tagState = endscript;
-    #####: 1276:            return tag;
+        2: 1275:            tagState = endscript;
+        2: 1276:            return tag;
         -: 1277:        default:
-    #####: 1278:            return tag;
+       31: 1278:            return tag;
         -: 1279:        }
         -: 1280:    }
         -: 1281:
-    #####: 1282:static estate endscript(int kar)
+        2: 1282:static estate endscript(int kar)
         -: 1283:    {
-    #####: 1284:    switch(kar)
+        2: 1284:    switch(kar)
         -: 1285:        {
         -: 1286:        case '>':
-    #####: 1287:            tagState = def;
-    #####: 1288:            nonTagWithoutEntityUnfolding("?",startScript+1,ch-1);
-    #####: 1289:            return endoftag;
+        2: 1287:            tagState = def;
+        2: 1288:            nonTagWithoutEntityUnfolding("?",startScript+1,ch-1);
+        2: 1289:            return endoftag;
         -: 1290:        default:
     #####: 1291:            tagState = CDATA7;
     #####: 1292:            return tag;
@@ -1299,11 +1299,11 @@
         -: 1294:    }
         -: 1295:
         -: 1296:static int doctypei = 0;
-    #####: 1297:static estate DOCTYPE1(int kar) /* <!D */
+        6: 1297:static estate DOCTYPE1(int kar) /* <!D */
         -: 1298:    {
         -: 1299:    static char octype[] = "OCTYPE";
         -: 1300:    static int doctypei = 0;
-    #####: 1301:    switch(kar)
+        6: 1301:    switch(kar)
         -: 1302:        {
         -: 1303:        case '<':
     #####: 1304:            tagState = lt;
@@ -1315,15 +1315,15 @@
     #####: 1310:            doctypei = 0;
     #####: 1311:            return endoftag;
         -: 1312:        default:
-    #####: 1313:            if(kar == octype[doctypei])
+        6: 1313:            if(kar == octype[doctypei])
         -: 1314:                {
-    #####: 1315:                if(doctypei == sizeof(octype) - 2)
+        6: 1315:                if(doctypei == sizeof(octype) - 2)
         -: 1316:                    {
-    #####: 1317:                    tagState = DOCTYPE7;
+        1: 1317:                    tagState = DOCTYPE7;
         -: 1318:                    }
         -: 1319:                else
-    #####: 1320:                    ++doctypei;
-    #####: 1321:                return tag;
+        5: 1320:                    ++doctypei;
+        6: 1321:                return tag;
         -: 1322:                }
         -: 1323:            else
         -: 1324:                {
@@ -1335,9 +1335,9 @@
         -: 1330:    }
         -: 1331:
         -: 1332:
-    #####: 1333:static estate DOCTYPE7(int kar) /* <!DOCTYPE */
+        1: 1333:static estate DOCTYPE7(int kar) /* <!DOCTYPE */
         -: 1334:    {
-    #####: 1335:    switch(kar)
+        1: 1335:    switch(kar)
         -: 1336:        {
         -: 1337:        case '<':
     #####: 1338:            tagState = lt;
@@ -1351,18 +1351,18 @@
         -: 1346:        case '\t':
         -: 1347:        case '\r':
         -: 1348:        case '\n':
-    #####: 1349:            startDOCTYPE = ch+1;
-    #####: 1350:            tagState = DOCTYPE8;
-    #####: 1351:            return tag;
+        1: 1349:            startDOCTYPE = ch+1;
+        1: 1350:            tagState = DOCTYPE8;
+        1: 1351:            return tag;
         -: 1352:        default:
     #####: 1353:            tagState = unknownmarkup;
     #####: 1354:            return tag;
         -: 1355:        }
         -: 1356:    }
         -: 1357:
-    #####: 1358:static estate DOCTYPE8(int kar) /* <!DOCTYPE S */
+       24: 1358:static estate DOCTYPE8(int kar) /* <!DOCTYPE S */
         -: 1359:    {
-    #####: 1360:    switch(kar)
+       24: 1360:    switch(kar)
         -: 1361:        {
         -: 1362:        case '<':
     #####: 1363:            tagState = lt;
@@ -1373,38 +1373,38 @@
     #####: 1368:            cbEndDOCTYPE();
     #####: 1369:            return endoftag;
         -: 1370:        case '[':
-    #####: 1371:            tagState = DOCTYPE9;
-    #####: 1372:            return tag;
+        1: 1371:            tagState = DOCTYPE9;
+        1: 1372:            return tag;
         -: 1373:        default:
-    #####: 1374:            return tag;
+       23: 1374:            return tag;
         -: 1375:        }
         -: 1376:    }
         -: 1377:
-    #####: 1378:static estate DOCTYPE9(int kar)  /* <!DOCTYPE S [ */
+     6461: 1378:static estate DOCTYPE9(int kar)  /* <!DOCTYPE S [ */
         -: 1379:    {
-    #####: 1380:    switch(kar)
+     6461: 1380:    switch(kar)
         -: 1381:        {
         -: 1382:        case ']':
-    #####: 1383:            tagState = DOCTYPE10;
-    #####: 1384:            return tag;
+        1: 1383:            tagState = DOCTYPE10;
+        1: 1384:            return tag;
         -: 1385:        default:
-    #####: 1386:            tagState = DOCTYPE9;
-    #####: 1387:            return tag;
+     6460: 1386:            tagState = DOCTYPE9;
+     6460: 1387:            return tag;
         -: 1388:        }
         -: 1389:    }
         -: 1390:
-    #####: 1391:static estate DOCTYPE10(int kar)  /* <!DOCTYPE S [ ] */
+        1: 1391:static estate DOCTYPE10(int kar)  /* <!DOCTYPE S [ ] */
         -: 1392:    {
-    #####: 1393:    switch(kar)
+        1: 1393:    switch(kar)
         -: 1394:        {
         -: 1395:        case '<':
     #####: 1396:            tagState = lt;
     #####: 1397:            cbStartMarkUp();
     #####: 1398:            return endoftag_startoftag;
         -: 1399:        case '>':
-    #####: 1400:            tagState = def;
-    #####: 1401:            cbEndDOCTYPE();
-    #####: 1402:            return endoftag;
+        1: 1400:            tagState = def;
+        1: 1401:            cbEndDOCTYPE();
+        1: 1402:            return endoftag;
         -: 1403:        case ' ':
         -: 1404:        case '\t':
         -: 1405:        case '\r':
@@ -1419,10 +1419,10 @@
         -: 1414:
         -: 1415:
         -: 1416:static int cdatai = 0;
-    #####: 1417:static estate CDATA1(int kar) /* <![ */
+       84: 1417:static estate CDATA1(int kar) /* <![ */
         -: 1418:    {
         -: 1419:    static char cdata[] = "CDATA[";
-    #####: 1420:    switch(kar)
+       84: 1420:    switch(kar)
         -: 1421:        {
         -: 1422:        case '<':
     #####: 1423:            tagState = lt;
@@ -1434,17 +1434,17 @@
     #####: 1429:            cdatai = 0;
     #####: 1430:            return endoftag;
         -: 1431:        default:
-    #####: 1432:            if(cdata[cdatai] == kar)
+       84: 1432:            if(cdata[cdatai] == kar)
         -: 1433:                {
-    #####: 1434:                if(cdatai == sizeof(cdata) - 2)
+       84: 1434:                if(cdatai == sizeof(cdata) - 2)
         -: 1435:                    {
-    #####: 1436:                    tagState = CDATA7;
-    #####: 1437:                    startCDATA = ch+1;
-    #####: 1438:                    cdatai = 0;
+       14: 1436:                    tagState = CDATA7;
+       14: 1437:                    startCDATA = ch+1;
+       14: 1438:                    cdatai = 0;
         -: 1439:                    }
         -: 1440:                else
-    #####: 1441:                    ++cdatai;
-    #####: 1442:                return tag;
+       70: 1441:                    ++cdatai;
+       84: 1442:                return tag;
         -: 1443:                }
         -: 1444:            else
         -: 1445:                {
@@ -1455,40 +1455,40 @@
         -: 1450:        }
         -: 1451:    }
         -: 1452:
-    #####: 1453:static estate CDATA7(int kar) /* <![CDATA[ */
+     1685: 1453:static estate CDATA7(int kar) /* <![CDATA[ */
         -: 1454:    {
-    #####: 1455:    switch(kar)
+     1685: 1455:    switch(kar)
         -: 1456:        {
         -: 1457:        case ']':
-    #####: 1458:            tagState = CDATA8;
-    #####: 1459:            return tag;
+       16: 1458:            tagState = CDATA8;
+       16: 1459:            return tag;
         -: 1460:        default:
-    #####: 1461:            return tag;
+     1669: 1461:            return tag;
         -: 1462:        }
         -: 1463:    }
         -: 1464:
-    #####: 1465:static estate CDATA8(int kar) /* <![CDATA[ ] */
+       16: 1465:static estate CDATA8(int kar) /* <![CDATA[ ] */
         -: 1466:    {
-    #####: 1467:    switch(kar)
+       16: 1467:    switch(kar)
         -: 1468:        {
         -: 1469:        case ']':
-    #####: 1470:            tagState = CDATA9;
-    #####: 1471:            return tag;
+       14: 1470:            tagState = CDATA9;
+       14: 1471:            return tag;
         -: 1472:        default:
-    #####: 1473:            tagState = CDATA7;
-    #####: 1474:            return tag;
+        2: 1473:            tagState = CDATA7;
+        2: 1474:            return tag;
         -: 1475:        }
         -: 1476:    }
         -: 1477:
-    #####: 1478:static estate CDATA9(int kar) /* <![CDATA[ ]] */
+       14: 1478:static estate CDATA9(int kar) /* <![CDATA[ ]] */
         -: 1479:    {
-    #####: 1480:    switch(kar)
+       14: 1480:    switch(kar)
         -: 1481:        {
         -: 1482:        case '>':  /* <![CDATA[ ]]> */
-    #####: 1483:            tagState = def;
-    #####: 1484:            startMarkup = NULL;
-    #####: 1485:            nonTagWithoutEntityUnfolding("![CDATA[",startCDATA,ch-2);
-    #####: 1486:            return endoftag;
+       14: 1483:            tagState = def;
+       14: 1484:            startMarkup = NULL;
+       14: 1485:            nonTagWithoutEntityUnfolding("![CDATA[",startCDATA,ch-2);
+       14: 1486:            return endoftag;
         -: 1487:        default:
     #####: 1488:            tagState = CDATA7;
     #####: 1489:            return tag;
@@ -1496,9 +1496,9 @@
         -: 1491:    }
         -: 1492:
         -: 1493:
-    #####: 1494:static estate h1(int kar) /* <!- */
+      116: 1494:static estate h1(int kar) /* <!- */
         -: 1495:    {
-    #####: 1496:    switch(kar)
+      116: 1496:    switch(kar)
         -: 1497:        {
         -: 1498:        case '<':
     #####: 1499:            tagState = lt;
@@ -1508,45 +1508,45 @@
     #####: 1503:            tagState = def;
     #####: 1504:            return notag;
         -: 1505:        case '-':
-    #####: 1506:            tagState = h2;
-    #####: 1507:            startComment = ch+1;
-    #####: 1508:            return tag;
+      116: 1506:            tagState = h2;
+      116: 1507:            startComment = ch+1;
+      116: 1508:            return tag;
         -: 1509:        default:
     #####: 1510:            tagState = unknownmarkup;
     #####: 1511:            return tag;
         -: 1512:        }
         -: 1513:    }
         -: 1514:
-    #####: 1515:static estate h2(int kar) /* <!-- */
+    32333: 1515:static estate h2(int kar) /* <!-- */
         -: 1516:    {
-    #####: 1517:    switch(kar)
+    32333: 1517:    switch(kar)
         -: 1518:        {
         -: 1519:        case '-':
-    #####: 1520:            tagState = h3;
-    #####: 1521:            return tag;
+      423: 1520:            tagState = h3;
+      423: 1521:            return tag;
         -: 1522:        default:
-    #####: 1523:            return tag;
+    31910: 1523:            return tag;
         -: 1524:        }
         -: 1525:    }
         -: 1526:
-    #####: 1527:static estate h3(int kar) /* <!--  - */
+      423: 1527:static estate h3(int kar) /* <!--  - */
         -: 1528:    {
-    #####: 1529:    switch(kar)
+      423: 1529:    switch(kar)
         -: 1530:        {
         -: 1531:        case '-': /* <!-- -- */
-    #####: 1532:            tagState = markup;
-    #####: 1533:            startMarkup = NULL;
-    #####: 1534:            nonTagWithoutEntityUnfolding("!--",startComment,ch-1);
-    #####: 1535:            return tag;
+      116: 1532:            tagState = markup;
+      116: 1533:            startMarkup = NULL;
+      116: 1534:            nonTagWithoutEntityUnfolding("!--",startComment,ch-1);
+      116: 1535:            return tag;
         -: 1536:        default:
-    #####: 1537:            tagState = h2;
-    #####: 1538:            return tag;
+      307: 1537:            tagState = h2;
+      307: 1538:            return tag;
         -: 1539:        }
         -: 1540:    }
         -: 1541:
-    #####: 1542:static estate endtag(int kar)
+     2174: 1542:static estate endtag(int kar)
         -: 1543:    {
-    #####: 1544:    switch(kar)
+     2174: 1544:    switch(kar)
         -: 1545:        {
         -: 1546:        case '<':
     #####: 1547:            tagState = lt;
@@ -1564,11 +1564,11 @@
         -: 1559:        case '\r':
     #####: 1560:            return tag;
         -: 1561:        default:
-    #####: 1562:            if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
+     2174: 1562:            if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
         -: 1563:                {
-    #####: 1564:                tagState = elementonly;
-    #####: 1565:                startElementName = ch;
-    #####: 1566:                return tag;
+     2174: 1564:                tagState = elementonly;
+     2174: 1565:                startElementName = ch;
+     2174: 1566:                return tag;
         -: 1567:                }
         -: 1568:            else
         -: 1569:                {
@@ -1578,24 +1578,24 @@
         -: 1573:        }
         -: 1574:    }
         -: 1575:
-    #####: 1576:int XMLtext(FILE * fpi,char * bron,int trim,int html)
+        1: 1576:int XMLtext(FILE * fpi,char * bron,int trim,int html)
         -: 1577:    {
         -: 1578:    int kar;
-    #####: 1579:    int retval = 0;
-    #####: 1580:    int inc = 0x10000;
-    #####: 1581:    int incs = 1;
+        1: 1579:    int retval = 0;
+        1: 1580:    int inc = 0x10000;
+        1: 1581:    int incs = 1;
         -: 1582:    LONG filesize;
-    #####: 1583:    if(fpi)
+        1: 1583:    if(fpi)
         -: 1584:        {
-    #####: 1585:        if(fpi == stdin)
+        1: 1585:        if(fpi == stdin)
         -: 1586:            {
     #####: 1587:            filesize = inc - 1;
         -: 1588:            }
         -: 1589:        else
         -: 1590:            {
-    #####: 1591:            fseek(fpi,0,SEEK_END);
-    #####: 1592:            filesize = ftell(fpi);
-    #####: 1593:            rewind(fpi);
+        1: 1591:            fseek(fpi,0,SEEK_END);
+        1: 1592:            filesize = ftell(fpi);
+        1: 1593:            rewind(fpi);
         -: 1594:            }
         -: 1595:        }
     #####: 1596:    else if(bron)
@@ -1604,25 +1604,25 @@
         -: 1599:        }
         -: 1600:    else
     #####: 1601:        return 0;
-    #####: 1602:    if(filesize > 0)
+        1: 1602:    if(filesize > 0)
         -: 1603:        {
         -: 1604:        char * alltext;
-    #####: 1605:        doctypei = 0;
-    #####: 1606:        cdatai = 0;
-    #####: 1607:        retval = 1;
-    #####: 1608:        buf = (char*)malloc(BUFSIZE);
-    #####: 1609:        p = buf;
+        1: 1605:        doctypei = 0;
+        1: 1606:        cdatai = 0;
+        1: 1607:        retval = 1;
+        1: 1608:        buf = (char*)malloc(BUFSIZE);
+        1: 1609:        p = buf;
         -: 1610:#if !ALWAYSREPLACEAMP
         -: 1611:        q = buf;
         -: 1612:#endif
-    #####: 1613:        alltext = (fpi || trim) ? (char*)malloc(filesize+1) : bron;
-    #####: 1614:        HT = html;
-    #####: 1615:        if(buf && alltext)
-    #####: 1616:            {
+        1: 1613:        alltext = (fpi || trim) ? (char*)malloc(filesize+1) : bron;
+        1: 1614:        HT = html;
+        1: 1615:        if(buf && alltext)
+        1: 1616:            {
         -: 1617:            char * curr_pos;
         -: 1618:            char * endpos;
-    #####: 1619:            estate Seq = notag;
-    #####: 1620:            if(trim)
+        1: 1619:            estate Seq = notag;
+        1: 1620:            if(trim)
         -: 1621:                {
     #####: 1622:                char * p = alltext;
     #####: 1623:                int whitespace = FALSE;
@@ -1687,9 +1687,9 @@
         -: 1682:                    }
     #####: 1683:                *p = '\0';
         -: 1684:                }
-    #####: 1685:            else if(fpi)
+        1: 1685:            else if(fpi)
         -: 1686:                {
-    #####: 1687:                if(fpi == stdin)
+        1: 1687:                if(fpi == stdin)
         -: 1688:                    {
     #####: 1689:                    char * endp = alltext + incs * inc;
     #####: 1690:                    char * p = alltext;
@@ -1709,32 +1709,32 @@
         -: 1704:                    }
         -: 1705:                else
         -: 1706:                    {
-    #####: 1707:                    LONG result = fread(alltext,1,filesize,fpi);
+        1: 1707:                    LONG result = fread(alltext,1,filesize,fpi);
         -: 1708:                    assert(result <= filesize); 
         -: 1709:                    /* The file is perhaps not opened
         -: 1710:                    in binary mode, but in text mode. In that case the number of
         -: 1711:                    bytes read can be smaller than the number of bytes in the file.
         -: 1712:                    */
-    #####: 1713:                    alltext[result] = '\0';
+        1: 1713:                    alltext[result] = '\0';
         -: 1714:                    }
         -: 1715:                }
         -: 1716:
-    #####: 1717:            tagState = def;
+        1: 1717:            tagState = def;
         -: 1718:
-    #####: 1719:            ch = alltext;
+        1: 1719:            ch = alltext;
         -: 1720:
-    #####: 1721:            curr_pos = alltext;
-    #####: 1722:            while(*ch)
+        1: 1721:            curr_pos = alltext;
+     4536: 1722:            while(*ch)
         -: 1723:                {
-    #####: 1724:                while(  *ch 
-    #####: 1725:                     && (( Seq = (*tagState)(*ch)) == tag 
-    #####: 1726:                        || Seq == endoftag_startoftag
+    87912: 1724:                while(  *ch 
+    83378: 1725:                     && (( Seq = (*tagState)(*ch)) == tag 
+     4534: 1726:                        || Seq == endoftag_startoftag
         -: 1727:                        )
         -: 1728:                     )
         -: 1729:                    {
-    #####: 1730:                    ch++;
+    78844: 1730:                    ch++;
         -: 1731:                    }
-    #####: 1732:                if(Seq == notag)
+     4534: 1732:                if(Seq == notag)
         -: 1733:                    { /* Not an HTML tag. Backtrack. */
     #####: 1734:                    endpos = ch;
     #####: 1735:                    ch = curr_pos;
@@ -1744,27 +1744,27 @@
     #####: 1739:                        ch++;
         -: 1740:                        }
         -: 1741:                    }
-    #####: 1742:                else if(Seq == endoftag)
+     4534: 1742:                else if(Seq == endoftag)
         -: 1743:                    {
-    #####: 1744:                    putOperatorChar(' ');
-    #####: 1745:                    ++ch; /* skip > */
+     4534: 1744:                    putOperatorChar(' ');
+     4534: 1745:                    ++ch; /* skip > */
         -: 1746:                    }
-    #####: 1747:                if(*ch)
+     4534: 1747:                if(*ch)
         -: 1748:                    {
-    #####: 1749:                    while(  *ch 
-    #####: 1750:                         && (Seq = (*tagState)(*ch)) == notag
+   124803: 1749:                    while(  *ch 
+   120268: 1750:                         && (Seq = (*tagState)(*ch)) == notag
         -: 1751:                         )
         -: 1752:                        {
-    #####: 1753:                        xput(ch);
-    #####: 1754:                        ++ch;
+   115735: 1753:                        xput(ch);
+   115735: 1754:                        ++ch;
         -: 1755:                        }
-    #####: 1756:                    if(Seq == tag)
+     4534: 1756:                    if(Seq == tag)
         -: 1757:                        {
-    #####: 1758:                        curr_pos = ch++; /* skip < */
+     4533: 1758:                        curr_pos = ch++; /* skip < */
         -: 1759:                        }
         -: 1760:                    }
         -: 1761:                }
-    #####: 1762:            if(Seq == tag)
+        1: 1762:            if(Seq == tag)
         -: 1763:                { /* Incomplete SGML tag. Backtrack. */
     #####: 1764:                endpos = ch;
     #####: 1765:                ch = curr_pos;
@@ -1777,10 +1777,10 @@
         -: 1772:            }
         -: 1773:        else
     #####: 1774:            retval = 0;
-    #####: 1775:        if(buf)
-    #####: 1776:            free(buf);
-    #####: 1777:        if(alltext && alltext != bron)
-    #####: 1778:            free(alltext);
+        1: 1775:        if(buf)
+        1: 1776:            free(buf);
+        1: 1777:        if(alltext && alltext != bron)
+        1: 1778:            free(alltext);
         -: 1779:        }
-    #####: 1780:    return retval;
+        1: 1780:    return retval;
         -: 1781:    }

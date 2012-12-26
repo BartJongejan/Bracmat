@@ -8,6 +8,7 @@ profiling:
 	gcc -Wall -c -pg -DNDEBUG bracmat.c xml.c
 	gcc -Wall -pg bracmat.o xml.o
 	cp ../valid.bra .
+	cp ../pr-xml-utf-8.xml .
 	./a.out "get'\"valid.bra\";!r" 
 	gprof a.out > bracmat.prof
 	rm a.out
@@ -15,6 +16,7 @@ profiling:
 coverage:
 	gcc -fprofile-arcs -ftest-coverage -DNDEBUG bracmat.c xml.c
 	cp ../valid.bra .
+	cp ../pr-xml-utf-8.xml .
 	./a.out "get'\"../valid.bra\";!r"
 	gcov bracmat.c
 	gcov xml.c
