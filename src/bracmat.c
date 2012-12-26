@@ -63,10 +63,20 @@ Test coverage:
 
 */
 
-#define DATUM "20 December 2012"
+#define DATUM "26 December 2012"
 #define VERSION "6"
-#define BUILD "149"
-/*  20 December 2012
+#define BUILD "152"
+/*  26 December 2012
+Several small improvements to fil()
+
+    25 December 2012
+Debugged preparefp.
+
+    23 December 2012
+Removed a superfluous while loop in someopt. Superfluous, because all arguments
+to fil$ must be atomic and in a right descending structure.
+
+    20 December 2012
 Cut most of is_afhankelyk_van away as obsolete.
 
     10 December 2012
@@ -1439,8 +1449,10 @@ Atari : definieer -DATARI i.v.m. BIGENDIAN en extern int _stksize = -1;
 #if defined _WIN64 || defined _WIN32
 #ifdef __BORLANDC__
 typedef unsigned int UINT32_T;
+typedef   signed int  INT32_T;
 #else
 typedef unsigned __int32 UINT32_T; /* pre VS2010 has no int32_t */
+typedef   signed __int32  INT32_T; /* pre VS2010 has no int32_t */
 #endif
 #endif
 
@@ -1458,8 +1470,10 @@ typedef unsigned __int32 UINT32_T; /* pre VS2010 has no int32_t */
 #if !defined NO_C_INTERFACE && !defined _WIN32
 #if UINT_MAX == 4294967295
 typedef unsigned int UINT32_T;
+typedef   signed int  INT32_T;
 #elif ULONG_MAX == 4294967295
 typedef unsigned long UINT32_T;
+typedef   signed long  INT32_T;
 #endif
 #endif
 #if LONG_MAX <= 2147483647L
@@ -2152,6 +2166,7 @@ static FILE * errorStream = NULL;
 /*#endif*/
 
 #if !defined NO_FOPEN
+enum {NoPending,Writing,Reading};
 typedef struct filehendel
     {
     char *naam;
@@ -2166,7 +2181,7 @@ typedef struct filehendel
     LONG size;
     LONG getal;
     LONG tijd;
-    int written;
+    int rwstatus;
     char * stop; /* contains characters to stop reading at, default NULL */
 #endif
     } filehendel;
@@ -12416,14 +12431,14 @@ filehendel * myfopen(const char * filename,const char * mode)
 static LONG someopt(psk kn,LONG opt[])
     {
     int i;
-    while(is_op(kn))
+    assert(!is_op(kn));/*while(is_op(kn))
         {
-        /* return someopt(kn->LEFT,opt) || someopt(kn->RIGHT,opt);
-        18 Maart 1997 */
+        / * return someopt(kn->LEFT,opt) || someopt(kn->RIGHT,opt);
+        18 Maart 1997 * /
         if(someopt(kn->LEFT,opt))
             return TRUE;
         kn = kn->RIGHT;
-        }
+        }*/
     for(i=0;opt[i];i++)
         if(PLOBJ(kn) == opt[i])
             return opt[i];
@@ -12436,17 +12451,6 @@ static int openCount = 0;
 static int maxOpenCount = 0;
 static int allOpenCount = 0;
 */
-
-static void sluitfile(filehendel *fh)
-{
-fh->filepos = FTELL(fh->fp);
-/* fh->filepos != -1 means that the file is closed */
-fclose(fh->fp);
-fh->fp = NULL;
-/*--openCount;
-Printf("--OPEN %d (%d %d)\n",openCount,maxOpenCount,allOpenCount);
-*/
-}
 
 static int closeAFile()
     {
@@ -12462,56 +12466,36 @@ static int closeAFile()
         }
     if(fhmin == NULL)/* test added 12 Aug 1996 */
         return FALSE;
-    sluitfile(fhmin);
+    fhmin->filepos = FTELL(fhmin->fp);
+    /* fh->filepos != -1 means that the file is closed */
+    fclose(fhmin->fp);
+    fhmin->fp = NULL;
     return TRUE;
     }
-
-static filehendel * bfopen(char *naam,char *mode)
-{
-/*FILE *fp;*/
-filehendel *fh;
-if((fh=myfopen(naam,mode)) == NULL)
-    {
-    if(closeAFile())
-        fh=myfopen(naam,mode);
-    }
-/*
-++openCount;
-++allOpenCount;
-if(openCount > maxOpenCount)
-    maxOpenCount = openCount;
-Printf("++OPEN %d (%d %d)\n",openCount,maxOpenCount,allOpenCount);
-*/
-return fh;
-}
-
-static FILE * brefopen(filehendel * fh)
-{
-if((fh->fp = fopen(fh->naam,(char *)&(fh->mode))) == NULL)
-    {
-    if(closeAFile())
-        fh->fp = fopen(fh->naam,(char *)&(fh->mode));
-    }
-return fh->fp;
-}
 
 static filehendel * preparefp(filehendel * fh,char * naam,LONG mode)
     {
     assert(fh != NULL);
     assert(!strcmp(fh->naam,naam));
     if( mode != 0L /* added 16 July 1996 */
-    &&  mode != fh->mode)
+    &&  mode != fh->mode
+    && fh->fp != NULL /*20121225*/)
         {
         fh->mode = mode;
         if((fh->fp = freopen(fh->naam,(char *)&(fh->mode),fh->fp)) == NULL)
             return NULL;
-        fh->written = FALSE;
+        fh->rwstatus = NoPending;
         }
-    else if(fh->filepos > 0L)
+    else if(fh->filepos >= 0L)
         {
-        if(brefopen(fh) == NULL)
+        if((fh->fp = fopen(fh->naam,(char *)&(fh->mode))) == NULL)
+            {
+            if(closeAFile())
+                fh->fp = fopen(fh->naam,(char *)&(fh->mode));
+            }
+        if(fh->fp == NULL)
             return NULL;
-        fh->written = FALSE;
+        fh->rwstatus = NoPending;
         FSEEK(fh->fp,fh->filepos,SEEK_SET);
         }
     fh->filepos = -1L;
@@ -12587,7 +12571,8 @@ union
 union
     {
     short s;
-    char c[2];
+    INT32_T i; /*20121226*/
+    char c[4];
     } snum;
 
 /*
@@ -12661,7 +12646,12 @@ if(kns[1] && kns[1]->u.obj)
             fh = zoekfp(naam,mode.l);
         if(fh == NULL)
             {
-            if((fh=bfopen(naam,(char *)&mode)) == NULL)
+            if((fh=myfopen(naam,(char *)&mode)) == NULL)
+                {
+                if(closeAFile())
+                    fh=myfopen(naam,(char *)&mode);
+                }
+            if(fh == NULL)
                 {
                 return FALSE;
                 }
@@ -12671,9 +12661,11 @@ if(kns[1] && kns[1]->u.obj)
             fh->size = 1;
             fh->getal = 1;
             fh->tijd = tijdnr++;
-            fh->written = FALSE;
+            fh->rwstatus = NoPending;
             fh->stop = NULL;
+            assert(fh->fp != 0);
             }
+        assert(fh->fp != 0);
         return TRUE;
         }
     else
@@ -12682,14 +12674,20 @@ if(kns[1] && kns[1]->u.obj)
     We do not open a file now, so we should have a file handle in memory.
     */
         if(fh)
+            {
             fh = preparefp(fh,naam,0L);
+            }
         else
+            {
             fh = zoekfp(naam,0L);
+            }
+
 
         if(!fh)
             {
             return FALSE;
             }
+        assert(fh->fp != 0);
 
     /*
     SECOND ARGUMENT:TYPE
@@ -12778,6 +12776,7 @@ if(kns[1] && kns[1]->u.obj)
         else if((whence = someopt(kns[1],whences)) != 0L)
             {
             LONG offset;
+            assert(fh->fp != 0);
             fh->tijd = tijdnr++;
             /*
               THIRD ARGUMENT: an offset
@@ -12799,12 +12798,11 @@ if(kns[1] && kns[1]->u.obj)
                             : whence == END ? SEEK_END
                                             : SEEK_CUR))
                 {
-                /*sluitfile(fh);*/
 		deallocateFilehendel(fh);
                 fh = NULL;
                 return FALSE;
                 }
-            fh->written = FALSE;
+            fh->rwstatus = NoPending;
             return TRUE;
             }
     /*
@@ -12896,7 +12894,12 @@ if(kns[3])
 WRITE
 */
         {
-        fh->written = TRUE;
+        if(fh->rwstatus == Reading)
+            {
+            LONG fpos = FTELL(fh->fp);
+            FSEEK(fh->fp,fpos,SEEK_SET);
+            }
+        fh->rwstatus = Writing;
         if(type == DEC)
             {
             numwaarde = toLong(kns[3]);
@@ -12911,6 +12914,11 @@ WRITE
                         snum.s = (short)(numwaarde & 0xFFFF);
                         fwrite(snum.c,1,2,fh->fp);
                         numwaarde >>= 16;
+                        break;
+                    case 4 :
+                        snum.i = (INT32_T)(numwaarde & 0xFFFFFFFF);
+                        fwrite(snum.c,1,4,fh->fp);
+                        numwaarde >>= 32;
                         break;
                     default :
                         fwrite((char *)&numwaarde,1,4,fh->fp);
@@ -12960,15 +12968,16 @@ READ
 #define INPUTBUFFERSIZE 256
         unsigned char buffer[INPUTBUFFERSIZE];
         unsigned char * bbuffer;/* = buffer;*/
-        if(fh->written)
+        if(fh->rwstatus == Writing)
             {
             fflush(fh->fp);
-            fh->written = FALSE;
+            fh->rwstatus = NoPending;
             }
         if(feof(fp))
             {
             return FALSE;
             }
+        fh->rwstatus = Reading;
         if(type == STRt)
             {
             psk lpkn = NULL;
@@ -13043,13 +13052,16 @@ READ
             }
         else
             {
-            if(fh->size * fh->getal > 255)
-                bbuffer = (unsigned char *)bmalloc(__LINE__,(size_t)(fh->size * fh->getal)+1);
+            size_t readbytes = fh->size * fh->getal; /*20121226*/
+            if(readbytes >= INPUTBUFFERSIZE)
+                bbuffer = (unsigned char *)bmalloc(__LINE__,readbytes+1);
                           /* +1 added 18 Maart 1997 */
             else
                 bbuffer = buffer;
-            if(fread((char *)bbuffer,(size_t)fh->size,(size_t)fh->getal,fh->fp) == 0
-            && (size_t)fh->size*(size_t)fh->getal != 0)
+            if( (readbytes = fread((char *)bbuffer,(size_t)fh->size,(size_t)fh->getal,fh->fp)) == 0
+              && fh->size != 0
+              && fh->getal != 0
+              )
                 {
                 return FALSE;
                 }
@@ -13058,7 +13070,7 @@ READ
                 perror("fread");
                 return FALSE;
                 }
-            *(bbuffer+(int)(fh->size*fh->getal)) = 0;
+            *(bbuffer+(int)readbytes) = 0;
             if(type == DEC)
                 {
                 numwaarde = 0L;
@@ -13075,6 +13087,11 @@ READ
                             numwaarde += (LONG)(*(short*)(bbuffer+ind)) << sh;
                             ind += 2;
                             sh += 16;
+                            continue;
+                        case 4 :
+                            numwaarde += (LONG)(*(INT32_T*)(bbuffer+ind)) << sh;
+                            ind += 4;
+                            sh += 32;
                             continue;
                         default :
                             numwaarde += *(LONG*)bbuffer;

@@ -5114,6 +5114,242 @@ string line 2\"
           | Out$722
           )
           (lst$(out,sgn)|Out$723)
+          (   fil$(afil,w)
+            & fil$(bfil,w)
+            & fil$(cfil,w)
+            & (rmv$cfil:EACCES|Out$724)
+            & (fil$(,SET,-1)&Out$725|)
+            & (rmv$cfil:0|Out$726)
+            & ( fil$(bfil,SET,-1)&Out$727
+              | 
+              )
+            & (rmv$bfil:0|Out$728)
+            & (fil$(,SET,-1)&Out$729|)
+            & (rmv$bfil:ENOENT|Out$730)
+            & ( fil$(afil,SET,-1)&Out$731
+              | 
+              )
+            & (rmv$afil:0|Out$732)
+            & (rmv$afil:ENOENT|Out$733)
+          | Out$734
+          )
+          (   (fil$(afil,w)|Out$735)
+            & (fil$(bfil,w)|Out$736)
+            & (fil$(cfil,w)|Out$737)
+            & ( fil$(bfil,SET,-1)&Out$738
+              | 
+              )
+            & ( fil$(cfil,SET,-1)&Out$739
+              | 
+              )
+            & ( fil$(afil,SET,-1)&Out$740
+              | 
+              )
+            & (rmv$afil:0|Out$741)
+            & (rmv$bfil:0|Out$742)
+            & (rmv$cfil:0|Out$743)
+          | Out$744
+          )
+          out$745
+          (   (fil$(aaa,w)|Out$745)
+            & ( put$(test,aaa,APP)&Out$746
+              | 
+              )
+            & fil$(aaa,SET,-1)
+          | rmv$aaa
+          )
+          out$747
+          (get$klaa/bra&Out$747|)
+          (get$"klaa\\bra"&Out$748|)
+          (get$"klaa:bra"&Out$749|)
+          (get$"k:laabra"&Out$750|)
+          (get$"/klaa/bra"&Out$751|)
+          (get$"\\klaa/bra"&Out$752|)
+          (   0:?n
+            &   whl
+              ' ( 1+!n:~>1000:?n
+                & str$(manya !n):?NM
+                & fil$(!NM,w)
+                )
+            &   whl
+              ' ( str$(manya !n):?NM
+                & (fil$(!NM,SET,-1)|)
+                & rmv$!NM
+                & !n+-1:>0:?n
+                )
+          | Out$753
+          )
+          (   fil$("file98741lfn.txt",w)
+            & fil$(,CHR)
+            & fil$(,,,xyz)
+            & fil$(,CHR,3)
+            & fil$(,,,abcdefghi)
+            & fil$(,CHR,3,2)
+            & fil$(,,,1234567890)
+            & ~(fil$(,SET,-1))
+            & get$"file98741lfn.txt":xabc123456
+            & rmv$"file98741lfn.txt"
+          | Out$754
+          )
+          (fil$(,,,,)&Out$755|)
+          ( fil$(,4 5,)&Out$756
+          | 
+          )
+          ( fil$("file98741lfn.txt",w)
+          & (fil$(,CHR,hk)&Out$757|)
+          & (fil$(,CHR,45/7)&Out$758|)
+          & ( fil$(,CHR,3,hk)&Out$759
+            | 
+            )
+          & ( fil$(,CHR,5,45/7)&Out$760
+            | 
+            )
+          & (fil$(,CHR,5,4)|Out$761)
+          & (fil$(,,6,7)|Out$761)
+          & (fil$(,ijklmnop)&Out$762|)
+          & ( fil$(,,ijklmnop)&Out$763
+            | 
+            )
+          & (fil$(,,,ijklmnop)|Out$764)
+          & (fil$(,SET,3)|Out$765)
+          & (fil$(,TEL):3|Out$766)
+          & (fil$(,SET,)|Out$767)
+          & (fil$(,TEL):0|Out$768)
+          & (fil$(,SET,3/2)&Out$769|)
+          & ~(fil$(,SET,-1))
+          & rmv$"file98741lfn.txt"
+          )
+          ( fil$("file98741lfn.txt",w)
+          & (fil$(,DEC)|Out$770)
+          & (fil$(,,1)&Out$771|)
+          & (fil$(,,2)&Out$772|)
+          & (fil$(,,3)&Out$773|)
+          & (fil$(,,4)&Out$774|)
+          & (fil$(,,5)&Out$775|)
+          & (fil$(,DEC,1,5)|Out$776)
+          & (fil$(,,1,999999999)|Out$777)
+          & (fil$(,,2,999999999)|Out$778)
+          & (fil$(,,3,999999999)|Out$779)
+          & (fil$(,,4,999999999)|Out$780)
+          & (fil$(,,5,999999999)|Out$781)
+          & (fil$(,DEC,2,3)|Out$782)
+          & (fil$(,,1,999999999)|Out$783)
+          & (fil$(,,2,999999999)|Out$784)
+          & (fil$(,,3,999999999)|Out$785)
+          & (fil$(,,4,999999999)|Out$786)
+          & (fil$(,,5,999999999)|Out$787)
+          & (fil$(,DEC,3,3)|Out$788)
+          & (fil$(,,1,999999999)|Out$789)
+          & (fil$(,,2,999999999)|Out$790)
+          & (fil$(,,3,999999999)|Out$791)
+          & (fil$(,,4,999999999)|Out$792)
+          & (fil$(,,5,999999999)|Out$793)
+          & (fil$(,DEC,4,2)|Out$794)
+          & (fil$(,,1,999999999)|Out$795)
+          & (fil$(,,2,999999999)|Out$796)
+          & (fil$(,,3,999999999)|Out$797)
+          & (fil$(,,4,999999999)|Out$798)
+          & (fil$(,,5,999999999)|Out$799)
+          & (fil$(,DEC,5,2)|Out$800)
+          & (fil$(,,1,999999999)|Out$801)
+          & (fil$(,,2,999999999)|Out$802)
+          & (fil$(,,3,999999999)|Out$803)
+          & (fil$(,,4,999999999)|Out$804)
+          & (fil$(,,5,999999999)|Out$805)
+          & ~(fil$(,SET,-1))
+          & rmv$"file98741lfn.txt"
+          )
+          ( fil$("file98741lfn.txt",w)
+          & (fil$(,STR)|Out$806)
+          & (fil$(,,,koorddanser)|Out$807)
+          & ~(fil$(,SET,-1))
+          & rmv$"file98741lfn.txt"
+          )
+          ( rmv$"file98741lfn.txt"
+          & (fil$("file98741lfn.txt","w+b")|Out$808)
+          & (fil$(,CHR,1,2)|Out$809)
+          & (fil$(,,,abcdefghij)|Out$810)
+          & (fil$(,SET,0)|Out$811)
+          & (fil$:ab|Out$812)
+          & (fil$(,SET,1)|Out$813)
+          & (fil$(,,,123)|Out$814)
+          & (fil$:&Out$815|)
+          & (fil$(,SET,0)|Out$816)
+          & (fil$(,CHR,1,10)|Out$817)
+          & "There are no 10 bytes to read"
+          & (fil$:a12|Out$818)
+          & (fil$(,SET,0)|Out$819)
+          & "Write ten bytes"
+          & (fil$(,,,abcdefghij)|Out$820)
+          & "go to start of ten bytes"
+          & (fil$(,SET,0)|Out$821)
+          & "Overwrite first three bytes"
+          & (fil$(,CHR,1,3)|Out$822)
+          & (fil$(,,,1234)|Out$823)
+          & "Go to start"
+          & (fil$(,SET,0)|Out$824)
+          & "prepare for reading five bytes"
+          & (fil$(,CHR,1,5)|Out$825)
+          & "read next five bytes"
+          & (fil$:123de|Out$826)
+          & "Overwrite next byte"
+          & (fil$(,CHR,1,1)|Out$827)
+          & (fil$(,,,XYZ)|Out$828)
+          & (fil$(,CHR,1,5)|Out$829)
+          & "read next five bytes"
+          & (fil$:ghij|Out$830)
+          & "prepare for reading all bytes"
+          & (fil$(,STR)|Out$831)
+          & "read all bytes"
+          & (fil$(,SET,0)|Out$832)
+          & (fil$:(123deXghij.)|Out$833)
+          & ~(fil$(,SET,-1))
+          & (|rmv$"file98741lfn.txt")
+          )
+          ( rmv$"file98741lfn.txt"
+          & (fil$("file98741lfn.txt","w+b")|Out$834)
+          & (fil$(,CHR,10,1000)|Out$835)
+          & (fil$(,,,abcdefghij)|Out$836)
+          & (fil$(,CHR,4,1)|Out$837)
+          & (fil$(,,,STOP)|Out$838)
+          & "prepare for reading all bytes up to one of POT"
+          & (fil$(,STR,POT)|Out$839)
+          & "read all those bytes"
+          & (fil$(,SET,0)|Out$840)
+          & ( fil$:(@(?:abcdefghij ? [10000 S).T)
+            | Out$841
+            )
+          & "prepare for reading all remaining bytes"
+          & (fil$(,STR)|Out$842)
+          & (fil$:(OP.)|Out$843)
+          & ~(fil$(,SET,-1))
+          & (|rmv$"file98741lfn.txt")
+          )
+          ( rmv$"file98741lfn.txt"
+          & (fil$("file98741lfn.txt","w+b")|Out$844)
+          & (fil$(,CHR,1,255)|Out$845)
+          & (fil$(,,,abcdefghij)|Out$846)
+          & "prepare for reading all bytes"
+          & (fil$(,STR)|Out$847)
+          & "read all bytes"
+          & (fil$(,SET,0)|Out$848)
+          & (fil$:(@(?:? [255).)|Out$849)
+          & "prepare for reading all as DEC"
+          & (fil$(,DEC,4,1)|Out$850)
+          & "read that"
+          & (fil$(,SET,0)|Out$851)
+          & (fil$:1684209761|Out$852)
+          & (fil$(,DEC,2,2)|Out$853)
+          & "read that"
+          & (fil$(,SET,0)|Out$854)
+          & (fil$:25185|Out$855)
+          & (fil$(,DEC,1,4)|Out$856)
+          & "read that"
+          & (fil$(,SET,0)|Out$857)
+          & (fil$:1684234849|Out$843)
+          & ~(fil$(,SET,-1))
+          & (|rmv$"file98741lfn.txt")
+          )
       &   out
         $ ( str
           $ ( "Done. "
