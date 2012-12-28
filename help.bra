@@ -46,6 +46,7 @@ help=
 15 how to obtain Bracmat
 16 more example code
 html transform this file to HTML
+menu find menu structure
 save reformat and save this file
 lex lexical analysis of help file"
       ,   (0,aanbevelingen)
@@ -66,6 +67,7 @@ lex lexical analysis of help file"
           (15,colofon)
           (16,morexmlps)
           (html,)
+          (menu,)
           (lex,)
           (save,)
     )
@@ -3430,6 +3432,7 @@ Topic:")
                             : ~html
                             : ~save
                             : ~lex
+                            : ~menu
                           & (   !sel:? (`!antw,?keuze) ?
                               & verwerk$!keuze
                             | out$(!antw " is an invalid choice")
@@ -3446,8 +3449,183 @@ Topic:")
             & !antw
       )
       ( doHTML
-      =   writeHTML,fputall anchors convert2html
-        .   ( convert2html
+      =     writeHTML
+          , fputall anchors convert2html
+          , angbrack codes inline1
+        .   
+          & ( angbrack
+            =   a m
+              .     @(!arg:?a "<" %?m ">" ?arg)
+                  &   !a
+                      ( @(!m:? \n ?)&"<" !m ">"
+                      | (i.,!m)
+                      )
+                      angbrack$!arg
+                | !arg
+            )
+          & ( codes
+            =   e a cds sdc dc code codev A K L Z
+              .   ( code
+                  =     a e z ZA AA
+                      , az zz S seps P n A
+                    .     @( str$!arg
+                           :   ?a
+                               %@( ( "$"
+                                   | "`"
+                                   | "|"
+                                   | "&"
+                                   | "%"
+                                   | "\\"
+                                   | "@"
+                                   | "#"
+                                   | "{"
+                                   | "}"
+                                   | "["
+                                   | "]"
+                                   | "~"
+                                   | "^"
+                                   | "*"
+                                   | "+"
+                                   | "="
+                                   | "_"
+                                   |   ( "."
+                                       | ","
+                                       | "!"
+                                       | "?"
+                                       | ":"
+                                       | ";"
+                                       | "'"
+                                       )
+                                     & ( !a:
+                                       | @(!a:? " ")
+                                       | @(!a:? \n)
+                                       )
+                                   )
+                                 : ?e
+                                 )
+                               ?z
+                           )
+                        & (S=" "|\n)
+                        & " ":?seps
+                        & @( rev$!a
+                           : ( ?A ((\n|\r) ?:?P)
+                             | ?A&:?P
+                             )
+                           )
+                        & @( !A
+                           :   ?ZA
+                               (   %@( !S
+                                     |   ">"
+                                       & ("<":?S) !seps:?seps
+                                       & ~
+                                     |   ")"
+                                       & ("(":?S) !seps:?seps
+                                       & ~
+                                     )
+                                   ( ?AA
+                                   & (!seps:% ?seps|)
+                                   & (   !seps:
+                                       & str$(!ZA !S):?ZA
+                                     | !seps:%?S ?seps&~
+                                     )
+                                   )
+                               | :?AA
+                               )
+                           )
+                        & " ":?seps
+                        & " ":?S
+                        & @(!z:?z ((\n ?|):?n))
+                        & @( !z
+                           :   ?az
+                               (   %@( !S
+                                     |   (   "<"
+                                           & (">":?S) !seps:?seps
+                                         |   "("
+                                           & (")":?S) !seps:?seps
+                                         )
+                                       & ~
+                                     )
+                                   ( ?zz
+                                   & (!seps:% ?seps|)
+                                   & (   !seps:
+                                       & !az !S:?az
+                                     | !seps:%?S ?seps&~
+                                     )
+                                   )
+                               | :?zz
+                               )
+                           )
+                        &   codev$(str$(rev$!P rev$!AA))
+                            (code.,str$(rev$!ZA !e !az))
+                            code$(str$(!zz !n))
+                      | codev$!arg
+                  )
+                & ( codev
+                  =   a e z,az zz S seps n
+                    .     @( str$!arg
+                           : ( ?a " !" ?z&" !":?e
+                             | ?a " ?" ?z&" ?":?e
+                             )
+                           )
+                        & :?seps
+                        & " ":?S
+                        & @(!z:?z ((\n ?|):?n))
+                        & @( !z
+                           :   ?az
+                               (   %@( !S
+                                     |   (   "<"
+                                           & !S !seps:?seps
+                                           & ">":?S
+                                         |   "("
+                                           & !S !seps:?seps
+                                           & ")":?S
+                                         )
+                                       & ~
+                                     )
+                                   ( ?zz
+                                   & ( !seps:
+                                     | !seps:%?S ?seps&~
+                                     )
+                                   )
+                               | :?zz
+                               )
+                           )
+                        &   str$!a
+                            (code.,str$(!e !az !S))
+                            codev$(str$(!zz !n))
+                      | !arg
+                  )
+                & code$!arg:?cds
+                &   whl
+                  ' (   !cds
+                      : ?A (code.?,?K) (code.?,?L) ?Z
+                    & !A (code.,str$(!K !L)) !Z:?cds
+                    )
+                & :?sdc
+                &   whl
+                  ' ( !cds:%?dc ?cds
+                    & !dc !sdc:?sdc
+                    )
+                &   whl
+                  ' ( !sdc:%?dc ?sdc
+                    &     ( !dc:@&angbrack$!dc
+                          |   !dc:(?e.?a,?dc)
+                            & (!e.!a,angbrack$!dc)
+                          )
+                          !cds
+                      : ?cds
+                    )
+                & !cds
+            )
+          & ( inline1
+            =   a m
+              .     @(!arg:?a "|_" ?m "_|" ?arg)
+                  &   codes$!a
+                      (!m:|(code.,angbrack$!m))
+                      inline1$!arg
+                | codes$!arg
+            )
+          & ( convert2html
             =   xml file Ent atts ent entn write
               .   !arg:(?xml.?file)
                 & ( Ent
@@ -3598,16 +3776,12 @@ Topic:")
             )
           & (entCP=.get$(!arg,MEM,HT,ML))
           & ( writeHTML
-            =     refs Tit doMenuItems listmenu2 pag2 titel codes
+            =     refs Tit doMenuItems listmenu2 pag2 titel
                 , topictitel overviewtitref backtotitref
                 , txt men sel antw ptxt
-                ,   keuze
-                    addContent2paragraphs
-                    menu
-                    menutekst
-                    menutitel
-                    titl
-                , break2 indented2 asCode2 inline1 inline1
+                , keuze addContent2paragraphs menu
+                , menutekst menutitel titl
+                , break2 indented2 asCode2
                 , ol2 ul2 subul trim blocklevel
                 , chunk2 nbsp2 first next spaced
               .   ( refs
@@ -3666,199 +3840,6 @@ Topic:")
                         )
                   )
                 & (asCode2=.span.(class.courier),!arg)
-                & ( angbrack
-                  =   a m
-                    .     @(!arg:?a "<" %?m ">" ?arg)
-                        &   !a
-                            ( @(!m:? \n ?)&"<" !m ">"
-                            | (i.,!m)
-                            )
-                            angbrack$!arg
-                      | !arg
-                  )
-                & ( codes
-                  =   e a cds sdc dc code codev A K L Z
-                    .   ( code
-                        =     a e z ZA AA
-                            , az zz S seps P n A
-                          .     @( str$!arg
-                                 :   ?a
-                                     %@( ( "$"
-                                         | "`"
-                                         | "|"
-                                         | "&"
-                                         | "%"
-                                         | "\\"
-                                         | "@"
-                                         | "#"
-                                         | "{"
-                                         | "}"
-                                         | "["
-                                         | "]"
-                                         | "~"
-                                         | "^"
-                                         | "*"
-                                         | "+"
-                                         | "="
-                                         | "_"
-                                         |   ( "."
-                                             | ","
-                                             | "!"
-                                             | "?"
-                                             | ":"
-                                             | ";"
-                                             | "'"
-                                             )
-                                           & ( !a:
-                                             | @(!a:? " ")
-                                             | @(!a:? \n)
-                                             )
-                                         )
-                                       : ?e
-                                       )
-                                     ?z
-                                 )
-                              & (S=" "|\n)
-                              & " ":?seps
-                              & @( rev$!a
-                                 : ( ?A ((\n|\r) ?:?P)
-                                   | ?A&:?P
-                                   )
-                                 )
-                              & @( !A
-                                 :   ?ZA
-                                     (   %@( !S
-                                           |   ">"
-                                             &   ("<":?S) !seps
-                                               : ?seps
-                                             & ~
-                                           |   ")"
-                                             &   ("(":?S) !seps
-                                               : ?seps
-                                             & ~
-                                           )
-                                         ( ?AA
-                                         & ( !seps:% ?seps
-                                           | 
-                                           )
-                                         & (   !seps:
-                                             & str$(!ZA !S):?ZA
-                                           |   !seps:%?S ?seps
-                                             & ~
-                                           )
-                                         )
-                                     | :?AA
-                                     )
-                                 )
-                              & " ":?seps
-                              & " ":?S
-                              & @( !z
-                                 : ?z ((\n ?|):?n)
-                                 )
-                              & @( !z
-                                 :   ?az
-                                     (   %@( !S
-                                           |   (   "<"
-                                                 &   (">":?S) !seps
-                                                   : ?seps
-                                               |   "("
-                                                 &   (")":?S) !seps
-                                                   : ?seps
-                                               )
-                                             & ~
-                                           )
-                                         ( ?zz
-                                         & ( !seps:% ?seps
-                                           | 
-                                           )
-                                         & (   !seps:
-                                             & !az !S:?az
-                                           |   !seps:%?S ?seps
-                                             & ~
-                                           )
-                                         )
-                                     | :?zz
-                                     )
-                                 )
-                              &   codev$(str$(rev$!P rev$!AA))
-                                  (code.,str$(rev$!ZA !e !az))
-                                  code$(str$(!zz !n))
-                            | codev$!arg
-                        )
-                      & ( codev
-                        =   a e z,az zz S seps n
-                          .     @( str$!arg
-                                 : ( ?a " !" ?z&" !":?e
-                                   | ?a " ?" ?z&" ?":?e
-                                   )
-                                 )
-                              & :?seps
-                              & " ":?S
-                              & @( !z
-                                 : ?z ((\n ?|):?n)
-                                 )
-                              & @( !z
-                                 :   ?az
-                                     (   %@( !S
-                                           |   (   "<"
-                                                 & !S !seps:?seps
-                                                 & ">":?S
-                                               |   "("
-                                                 & !S !seps:?seps
-                                                 & ")":?S
-                                               )
-                                             & ~
-                                           )
-                                         ( ?zz
-                                         & ( !seps:
-                                           |   !seps:%?S ?seps
-                                             & ~
-                                           )
-                                         )
-                                     | :?zz
-                                     )
-                                 )
-                              &   str$!a
-                                  (code.,str$(!e !az !S))
-                                  codev$(str$(!zz !n))
-                            | !arg
-                        )
-                      & code$!arg:?cds
-                      &   whl
-                        ' (   !cds
-                            :   ?A
-                                (code.?,?K)
-                                (code.?,?L)
-                                ?Z
-                          &   !A (code.,str$(!K !L)) !Z
-                            : ?cds
-                          )
-                      & :?sdc
-                      &   whl
-                        ' ( !cds:%?dc ?cds
-                          & !dc !sdc:?sdc
-                          )
-                      &   whl
-                        ' ( !sdc:%?dc ?sdc
-                          &     ( !dc:@&angbrack$!dc
-                                |   !dc:(?e.?a,?dc)
-                                  & (!e.!a,angbrack$!dc)
-                                )
-                                !cds
-                            : ?cds
-                          )
-                      & !cds
-                  )
-                & ( inline1
-                  =   a m
-                    .     @(!arg:?a "|_" ?m "_|" ?arg)
-                        &   codes$!a
-                            ( !m:
-                            | (code.,angbrack$!m)
-                            )
-                            inline1$!arg
-                      | codes$!arg
-                  )
                 & ( addContent2paragraphs
                   =   a,b,c,e,f,g,par,section,content
                     .   !arg:(?par.?section.?content)
@@ -4408,7 +4389,7 @@ Topic:")
             )
           & ( createIndex
             =     a Anchors L h dts body nam tit Tits
-                , lastdt chapter b thisdt lasttit
+                , lastdt chapter b thisdt lasttit lasth
               .   0:?Anchors
                 & !arg:?body
                 & 0:?Tits
@@ -4449,6 +4430,7 @@ Topic:")
                   : ?lastdt
                   : ?thisdt
                   : ?lasttit
+                  : ?lasth
                 &   whl
                   ' (   !Anchors
                       : #*(?thisdt.(href."#" ?h),?a)+?Anchors
@@ -4457,9 +4439,12 @@ Topic:")
                       |   :!lasttit
                         & !tit:?lasttit
                       |       !dts
-                              (dd.,(a.(href."#" !h),!lasttit))
+                              ( dd
+                              . ,(a.(href."#" !lasth),!lasttit)
+                              )
                           : ?dts
                         & !tit:?lasttit
+                        & !h:?lasth
                       )
                     & ( !lastdt:!thisdt
                       |   !thisdt:?lastdt
@@ -4580,6 +4565,7 @@ Topic:")
               & flattenBlockLevel$(p.,!helpbody):?helpbody
               & removeEmptyP$(removeBreaks$!helpbody):?helpbody
               & createIndex$!helpbody:?Index
+              & doMenu$:?Contents
             )
           &     ( "!DOCTYPE"
                 . " html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\""
@@ -4591,7 +4577,8 @@ Topic:")
                         ,   ( style
                             .   (type.text/css)
                               ,   ("!--"."span.courier {font-family: monospace;}")
-                                  "span.arrow {line-height: 12pt}"
+                                  "span.arrow {line-height: 12pt}
+                                  dl a {text-decoration:none}"
                             )
                             ( meta
                             .     (http-equiv.Content-Type)
@@ -4619,6 +4606,13 @@ accompanies Bracmat, using Bracmat to do the conversion."
                             .   
                               , (a.(href.str$("#" INDEX)),INDEX)
                             )
+                            ( h1
+                            .   
+                              , ( a
+                                .   (href.str$("#" CONTENTS))
+                                  , Contents
+                                )
+                            )
                             (hr.,)
                             !helpbody
                             (h1.,(a.(name.INDEX),INDEX))
@@ -4632,6 +4626,17 @@ accompanies Bracmat, using Bracmat to do the conversion."
                                 )
                             )
                             !Index
+                            (h1.,(a.(name.CONTENTS),CONTENTS))
+                            ( p
+                            .   
+                              , ( i
+                                .   
+                                  , ( a
+                                    . (href."#" lusmenu),"main menu"
+                                    )
+                                )
+                            )
+                            !Contents
                             ( p
                             .   
                               , ( i
@@ -4664,6 +4669,104 @@ accompanies Bracmat, using Bracmat to do the conversion."
           & lst$(allhelp,str$(!fname ".bra"),NEW)
           & convert2html$(!allhelp.!fname)
       )
+      ( doMenu
+      =   inner menus
+        .   :?menus
+          & ( inner
+            =     level anc men LA a b A B
+                , Anc T x m s S
+              .     !arg:(?men.?level.?anc)
+                  & out$!arg
+                  &   (   !menus:?a (!men.?LA) ?b
+                        &   !a
+                            ( !men
+                            .     !LA:?A+(!level.?Anc)+?B
+                                & ( !Anc:? !anc ?&!LA
+                                  | !A+(!level.!Anc !anc)+!B
+                                  )
+                              | !LA+(!level.!anc)
+                            )
+                            !b
+                      | !menus !arg
+                      )
+                    : ?menus
+                  & !!men:(M,?T,?x,?m)
+                  &   whl
+                    ' ( !m:(?,?s) ?m
+                      &   whl
+                        ' ( !s:%?S ?s
+                          & (   (|!!S:(M,?))
+                              & inner$(!S.!level+1.!anc,!men)
+                            | 
+                            )
+                          )
+                      )
+                | 
+            )
+          & inner$(lusmenu.0.)
+          & lst$(menus,"menus.bra",NEW)
+          & !menus
+          &   whl
+            ' ( !menus:?A (?M.%?B+%) ?C
+              & !A (!M.!B) !C:?menus
+              )
+          & lst$(menus,"menus.bra",APP)
+          & !menus:?Menus
+          & :?MM
+          &   whl
+            ' ( !Menus:(?N.?L.?Anc) ?Menus
+              & !MM (!N.!L.!Anc):?MM
+              &   whl
+                ' ( !Anc:%?Anc1 ?Anc
+                  & (!Anc1,!N):?anc
+                  & :?Menutje
+                  &   whl
+                    ' ( !Menus:?A (?n.?l.? !anc ?) ?B
+                      & !Menutje (!n.!l.!anc):?Menutje
+                      & !A !B:?Menus
+                      )
+                  & !Menutje !Menus:?Menus
+                  )
+              )
+          & lst$(MM,"menus.bra",APP)
+          & ( levmen
+            =   U T L A levs R M t
+              .     !arg:(?T.?L.?A) ?arg
+                  & levmen$!arg:?levs
+                  & !L+1:?M
+                  & :?U
+                  &   whl
+                    ' ( !levs:(?t.!M.?R) ?levs
+                      & !U (!t.!M.!R):?U
+                      )
+                  & (!!T:(?,?t,?)|UNKNOWN:?t)
+                  & (!T.!L.!t.!U) !levs
+                | !arg
+            )
+          & levmen$!MM:?LL
+          & lst$(LL,"menus.bra",APP)
+          & ( todl
+            =   R T L t S
+              .     :?R
+                  &   whl
+                    ' ( !arg:(?T.?L.?t.?S) ?arg
+                      &     !R
+                            ( dt
+                            .   
+                              , ( a
+                                . (href.str$("#" !T)),inline1$!t
+                                )
+                            )
+                            (!S:|(dd.,todl$!S))
+                        : ?R
+                      )
+                  & (dl.,!R)
+                | 
+            )
+          & todl$!LL:?LLhtml
+          & lst$(LLhtml,"menus.bra",APP)
+          & !LLhtml
+      )
   &   out
     $ "* Choose from the menus the topics that interest you.
 * Enter the number or character string that precedes your choice.
@@ -4674,6 +4777,7 @@ accompanies Bracmat, using Bracmat to do the conversion."
     : (   html
         & out$HTML
         & doHTML$"bracmat.html"
+      | menu&doMenu$
       | lex&get$"lex.bra"&lex$help
       |   save
         & lst$(help,"help.bra",NEW)
