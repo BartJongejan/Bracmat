@@ -887,11 +887,11 @@ matches are forgotten<code> : </code>the<code> _ </code>operator is a global var
    !a.!b</pre></blockquote>
 <p>Repetition:</p>
 <dl><dt>WHILE a DO b;</dt><dd>  <code> whl'(!a&amp;`!b)</code></dd><dt>DO b WHILE a;</dt><dd>  <code> whl'(`!b&amp;!a)</code></dd><dt>DO b UNTIL a;</dt><dd>  <code> whl'(`!b&amp;~!a)</code></dd><dt>FOR i<code> := </code>m TO n DO b;</dt><dd>
-  <code> !m+-1:?i&amp;whl'(1+!i:~&gt;!n:?i&`!b);</code></dd></dl>
+  <code> !m+-1:?i&amp;whl'(1+!i:~&gt;!n:?i&amp;`!b);</code></dd></dl>
 <p>Selection:</p>
-<dl><dt>IF a THEN b ELSE c;</dt><dd>  <code> !a&`!b|!c;</code></dd><dt>v<code> := </code>IF a THEN b ELSE c;</dt><dd>  <code> (!a&amp;`!b|`!c):?v</code>
+<dl><dt>IF a THEN b ELSE c;</dt><dd>  <code> !a&amp;`!b|!c;</code></dd><dt>v<code> := </code>IF a THEN b ELSE c;</dt><dd>  <code> (!a&amp;`!b|`!c):?v</code>
    (works even if<code> !c </code>fails)</dd><dt>SELECT  a WHEN  c1<code> : </code>b1 WHEN  c2<code> : </code>b2 OTHERWISE  bx;</dt><dd>
-  <code> !a:(!c1&amp;`!b1|!c2&amp;`!b2|?&!bx);</code></dd></dl>
+  <code> !a:(!c1&amp;`!b1|!c2&amp;`!b2|?&amp;!bx);</code></dd></dl>
 <p>Branching:</p>
 <dl><dt>CALL a;</dt><dd>  <code> !a;</code></dd><dt>CALL b(x,y,z);</dt><dd>  <code> b$(x,y,z);</code></dd><dt>v<code> := </code>b(x,y,z);</dt><dd>
   <code> b$(x,y,z):?v;</code></dd></dl>

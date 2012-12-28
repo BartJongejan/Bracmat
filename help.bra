@@ -46,7 +46,6 @@ help=
 15 how to obtain Bracmat
 16 more example code
 html transform this file to HTML
-menu find menu structure
 save reformat and save this file
 lex lexical analysis of help file"
       ,   (0,aanbevelingen)
@@ -67,7 +66,6 @@ lex lexical analysis of help file"
           (15,colofon)
           (16,morexmlps)
           (html,)
-          (menu,)
           (lex,)
           (save,)
     )
@@ -3432,7 +3430,6 @@ Topic:")
                             : ~html
                             : ~save
                             : ~lex
-                            : ~menu
                           & (   !sel:? (`!antw,?keuze) ?
                               & verwerk$!keuze
                             | out$(!antw " is an invalid choice")
@@ -3449,9 +3446,13 @@ Topic:")
             & !antw
       )
       ( doHTML
-      =     writeHTML
-          , fputall anchors convert2html
-          , angbrack codes inline1
+      =     writeHTML doMenu compactBlockquotes
+          , fputall anchors convert2html entCP
+          , angbrack codes inline1 createIndex
+          , flatten flattenBlockLevel removeBr
+          , removeBreaks removeEmpty removeEmptyP
+          , unspace
+          , Contents Index allhelp helpbody
         .   
           & ( angbrack
             =   a m
@@ -3626,10 +3627,22 @@ Topic:")
                 | codes$!arg
             )
           & ( convert2html
-            =   xml file Ent atts ent entn write
+            =   xml file Ent atts ent entn write,doamp
               .   !arg:(?xml.?file)
+                & ( doamp
+                  =   x y
+                    .     @(!arg:?x ";" ?y)
+                        & (   @( get$(str$("&" !x ";"),HT,ML,MEM)
+                               : "&" !x ";"
+                               )
+                            & amp
+                          | !y:?arg&!x
+                          )
+                      | amp
+                    . !arg
+                  )
                 & ( Ent
-                  =   a c x y
+                  =   a c amp
                     .     @( str$!arg
                            :   ?a
                                ( ( "<"
@@ -3646,13 +3659,8 @@ Topic:")
                             "&"
                             ( !c:"<"&lt
                             |   !c:"&"
-                              & (   @(!arg:?x ";" ?y)
-                                  & (   @(!x:? ~>%" " ?)
-                                      & amp
-                                    | !y:?arg&!x
-                                    )
-                                | amp
-                                )
+                              & doamp$!arg:(?amp.?arg)
+                              & !amp
                             | !c:">"&gt
                             | !c:\"&quot
                             | apos
@@ -3662,7 +3670,7 @@ Topic:")
                       | !arg
                   )
                 & ( ent
-                  =   a c x y
+                  =   a c amp
                     .     @( !arg
                            :   ?a
                                ( ("<"|"&"|">")
@@ -3674,15 +3682,8 @@ Topic:")
                             "&"
                             ( !c:"<"&lt
                             |   !c:"&"
-                              & (   @(!arg:?x ";" ?y)
-                                  & (   @(!x:? ~>%" " ?)
-                                      & amp
-                                    |   @(!x:? "&" ?)
-                                      & amp
-                                    | !y:?arg&!x
-                                    )
-                                | amp
-                                )
+                              & doamp$!arg:(?amp.?arg)
+                              & !amp
                             | gt
                             )
                             ";"
@@ -3784,6 +3785,7 @@ Topic:")
                 , break2 indented2 asCode2
                 , ol2 ul2 subul trim blocklevel
                 , chunk2 nbsp2 first next spaced
+                , definitionList
               .   ( refs
                   =     ptxt titl next nextptxts
                       , overviewtitel overviewref
@@ -3872,7 +3874,7 @@ Topic:")
                       | inline1$!arg
                   )
                 & ( break2
-                  =   a,b,c,d,id
+                  =   b,id
                     .     ~
                         & @( !arg
                            :   (|? " "|`)
@@ -3971,8 +3973,7 @@ Topic:")
                       & rev$!arg
                   )
                 & ( chunk2
-                  =     a b c d ee f g s x y
-                      , termpat defline defpat termdefpat termer
+                  =   a b c
                     .   @(!arg:\n ?c)&chunk2$!c
                       |   @(!arg:?a \n\n ?c)
                         & chunk2$!a chunk2$!c
@@ -4033,8 +4034,7 @@ Topic:")
                       & (dl.,!dl)
                   )
                 & ( blocklevel
-                  =     a b c d ee f g s x y
-                      , termpat defline defpat termdefpat termer
+                  =   a b c d ee f g s x y
                     .     @(!arg:?a \n1 %?`s ?b \n2 !s ?c)
                         &   break2$!a
                             (   @( !c
@@ -4337,7 +4337,7 @@ Topic:")
           & :?helpbody
           & fputall$
           & ( removeEmpty
-            =   A M Z z e a p es
+            =   A M Z z e a es
               .   !arg:(?Z.?es)
                 & :?z
                 & whl'(!Z:%?A ?Z&!A !z:?z)
@@ -4359,7 +4359,7 @@ Topic:")
                 & !Z
             )
           & ( flatten
-            =   A B C D
+            =   A D
               .     !arg:?A (?.?,?D) ?arg
                   & !A flatten$!D flatten$!arg
                 | !arg
@@ -4390,6 +4390,7 @@ Topic:")
           & ( createIndex
             =     a Anchors L h dts body nam tit Tits
                 , lastdt chapter b thisdt lasttit lasth
+                , LL
               .   0:?Anchors
                 & !arg:?body
                 & 0:?Tits
@@ -4456,13 +4457,13 @@ Topic:")
                 & (dl.,!dts)
             )
           & ( removeEmptyP
-            =   
+            =   A
               .     !arg:?A (p.,) ?arg
                   & !A removeEmptyP$!arg
                 | !arg
             )
           & ( removeBr
-            =   A E x a z
+            =   A E x a
               .     !arg:?A (?E.?x,?a) ?arg
                   & !A (!E.!x,removeBreaks$!a) removeBr$!arg
                 | !arg
@@ -4501,64 +4502,171 @@ Topic:")
                       flattenBlockLevel$(!block.!at,!Z)
                 | !arg
             )
-          & ( compactBlockquotes
-            =   A B M Z z e a p
-              .   !arg:?Z
-                & :?z
-                &   whl
-                  ' ( !Z:%?A ?Z
-                    & (!A:\n|!A !z:?z)
+          &   ( compactBlockquotes
+              =   A B M Z z e a
+                .   !arg:?Z
+                  & :?z
+                  &   whl
+                    ' ( !Z:%?A ?Z
+                      & (!A:\n|!A !z:?z)
+                      )
+                  &   whl
+                    ' ( !z:%?A ?z
+                      &     (   !A:(~blockquote:?e.?a,?M)
+                              & (!e.!a,compactBlockquotes$!M)
+                            | !A
+                            )
+                            !Z
+                        : ?Z
+                      )
+                  &   whl
+                    ' (   !Z
+                        :   ?a
+                            (blockquote.?,(pre.,?A))
+                            (blockquote.?,(pre.,?B))
+                            ?z
+                      &     !a
+                            ( blockquote
+                            . (pech.H),(pre.,!A \n !B)
+                            )
+                            !z
+                        : ?Z
+                      )
+                  &   whl
+                    ' (   !Z
+                        :   ?a
+                            (br.?,)
+                            (br.?,)
+                            (blockquote.?,(pre.,?A))
+                            ?z
+                      &     !a
+                            (br.,)
+                            (blockquote.,(pre.,!A))
+                            !z
+                        : ?Z
+                      )
+                  &   whl
+                    ' (   !Z
+                        :   ?a
+                            (blockquote.?,(pre.,?A))
+                            (br.?,)
+                            (br.?,)
+                            ?z
+                      &     !a
+                            (blockquote.,(pre.,!A))
+                            (br.,)
+                            !z
+                        : ?Z
+                      )
+                  & !Z
+              )
+              ( doMenu
+              =     inner menus levmen todl LL
+                  , A Anc Anc1 B C L LLhtml
+                  , M MM Menus Menutje N anc l n
+                .   :?menus
+                  & ( inner
+                    =     level anc men LA a b A B
+                        , Anc T x m s S
+                      .     !arg:(?men.?level.?anc)
+                          & out$!arg
+                          &   (   !menus:?a (!men.?LA) ?b
+                                &   !a
+                                    ( !men
+                                    .     !LA:?A+(!level.?Anc)+?B
+                                        & (   !Anc:? !anc ?
+                                            & !LA
+                                          | !A+(!level.!Anc !anc)+!B
+                                          )
+                                      | !LA+(!level.!anc)
+                                    )
+                                    !b
+                              | !menus !arg
+                              )
+                            : ?menus
+                          & !!men:(M,?T,?x,?m)
+                          &   whl
+                            ' ( !m:(?,?s) ?m
+                              &   whl
+                                ' ( !s:%?S ?s
+                                  & (   (|!!S:(M,?))
+                                      & inner$(!S.!level+1.!anc,!men)
+                                    | 
+                                    )
+                                  )
+                              )
+                        | 
                     )
-                &   whl
-                  ' ( !z:%?A ?z
-                    &     (   !A:(~blockquote:?e.?a,?M)
-                            & (!e.!a,compactBlockquotes$!M)
-                          | !A
+                  & inner$(lusmenu.0.)
+                  & lst$(menus,"menus.bra",NEW)
+                  & !menus
+                  &   whl
+                    ' ( !menus:?A (?M.%?B+%) ?C
+                      & !A (!M.!B) !C:?menus
+                      )
+                  & lst$(menus,"menus.bra",APP)
+                  & !menus:?Menus
+                  & :?MM
+                  &   whl
+                    ' ( !Menus:(?N.?L.?Anc) ?Menus
+                      & !MM (!N.!L.!Anc):?MM
+                      &   whl
+                        ' ( !Anc:%?Anc1 ?Anc
+                          & (!Anc1,!N):?anc
+                          & :?Menutje
+                          &   whl
+                            ' (   !Menus
+                                : ?A (?n.?l.? !anc ?) ?B
+                              & !Menutje (!n.!l.!anc):?Menutje
+                              & !A !B:?Menus
+                              )
+                          & !Menutje !Menus:?Menus
                           )
-                          !Z
-                      : ?Z
+                      )
+                  & lst$(MM,"menus.bra",APP)
+                  & ( levmen
+                    =   U T L A levs R M t
+                      .     !arg:(?T.?L.?A) ?arg
+                          & levmen$!arg:?levs
+                          & !L+1:?M
+                          & :?U
+                          &   whl
+                            ' ( !levs:(?t.!M.?R) ?levs
+                              & !U (!t.!M.!R):?U
+                              )
+                          & ( !!T:(?,?t,?)
+                            | UNKNOWN:?t
+                            )
+                          & (!T.!L.!t.!U) !levs
+                        | !arg
                     )
-                &   whl
-                  ' (   !Z
-                      :   ?a
-                          (blockquote.?,(pre.,?A))
-                          (blockquote.?,(pre.,?B))
-                          ?z
-                    &     !a
-                          ( blockquote
-                          . (pech.H),(pre.,!A \n !B)
-                          )
-                          !z
-                      : ?Z
+                  & levmen$!MM:?LL
+                  & lst$(LL,"menus.bra",APP)
+                  & ( todl
+                    =   R T L t S
+                      .     :?R
+                          &   whl
+                            ' ( !arg:(?T.?L.?t.?S) ?arg
+                              &     !R
+                                    ( dt
+                                    .   
+                                      , ( a
+                                        .   (href.str$("#" !T))
+                                          , inline1$!t
+                                        )
+                                    )
+                                    ( !S:
+                                    | (dd.,todl$!S)
+                                    )
+                                : ?R
+                              )
+                          & (dl.,!R)
+                        | 
                     )
-                &   whl
-                  ' (   !Z
-                      :   ?a
-                          (br.?,)
-                          (br.?,)
-                          (blockquote.?,(pre.,?A))
-                          ?z
-                    &     !a
-                          (br.,)
-                          (blockquote.,(pre.,!A))
-                          !z
-                      : ?Z
-                    )
-                &   whl
-                  ' (   !Z
-                      :   ?a
-                          (blockquote.?,(pre.,?A))
-                          (br.?,)
-                          (br.?,)
-                          ?z
-                    &     !a
-                          (blockquote.,(pre.,!A))
-                          (br.,)
-                          !z
-                      : ?Z
-                    )
-                & !Z
-            )
+                  & todl$!LL:?LLhtml
+                  & lst$(LLhtml,"menus.bra",APP)
+                  & !LLhtml
+              )
           & ( ~
             |   removeEmpty$(!helpbody.code i):?helpbody
               & compactBlockquotes$!helpbody:?helpbody
@@ -4669,104 +4777,6 @@ accompanies Bracmat, using Bracmat to do the conversion."
           & lst$(allhelp,str$(!fname ".bra"),NEW)
           & convert2html$(!allhelp.!fname)
       )
-      ( doMenu
-      =   inner menus
-        .   :?menus
-          & ( inner
-            =     level anc men LA a b A B
-                , Anc T x m s S
-              .     !arg:(?men.?level.?anc)
-                  & out$!arg
-                  &   (   !menus:?a (!men.?LA) ?b
-                        &   !a
-                            ( !men
-                            .     !LA:?A+(!level.?Anc)+?B
-                                & ( !Anc:? !anc ?&!LA
-                                  | !A+(!level.!Anc !anc)+!B
-                                  )
-                              | !LA+(!level.!anc)
-                            )
-                            !b
-                      | !menus !arg
-                      )
-                    : ?menus
-                  & !!men:(M,?T,?x,?m)
-                  &   whl
-                    ' ( !m:(?,?s) ?m
-                      &   whl
-                        ' ( !s:%?S ?s
-                          & (   (|!!S:(M,?))
-                              & inner$(!S.!level+1.!anc,!men)
-                            | 
-                            )
-                          )
-                      )
-                | 
-            )
-          & inner$(lusmenu.0.)
-          & lst$(menus,"menus.bra",NEW)
-          & !menus
-          &   whl
-            ' ( !menus:?A (?M.%?B+%) ?C
-              & !A (!M.!B) !C:?menus
-              )
-          & lst$(menus,"menus.bra",APP)
-          & !menus:?Menus
-          & :?MM
-          &   whl
-            ' ( !Menus:(?N.?L.?Anc) ?Menus
-              & !MM (!N.!L.!Anc):?MM
-              &   whl
-                ' ( !Anc:%?Anc1 ?Anc
-                  & (!Anc1,!N):?anc
-                  & :?Menutje
-                  &   whl
-                    ' ( !Menus:?A (?n.?l.? !anc ?) ?B
-                      & !Menutje (!n.!l.!anc):?Menutje
-                      & !A !B:?Menus
-                      )
-                  & !Menutje !Menus:?Menus
-                  )
-              )
-          & lst$(MM,"menus.bra",APP)
-          & ( levmen
-            =   U T L A levs R M t
-              .     !arg:(?T.?L.?A) ?arg
-                  & levmen$!arg:?levs
-                  & !L+1:?M
-                  & :?U
-                  &   whl
-                    ' ( !levs:(?t.!M.?R) ?levs
-                      & !U (!t.!M.!R):?U
-                      )
-                  & (!!T:(?,?t,?)|UNKNOWN:?t)
-                  & (!T.!L.!t.!U) !levs
-                | !arg
-            )
-          & levmen$!MM:?LL
-          & lst$(LL,"menus.bra",APP)
-          & ( todl
-            =   R T L t S
-              .     :?R
-                  &   whl
-                    ' ( !arg:(?T.?L.?t.?S) ?arg
-                      &     !R
-                            ( dt
-                            .   
-                              , ( a
-                                . (href.str$("#" !T)),inline1$!t
-                                )
-                            )
-                            (!S:|(dd.,todl$!S))
-                        : ?R
-                      )
-                  & (dl.,!R)
-                | 
-            )
-          & todl$!LL:?LLhtml
-          & lst$(LLhtml,"menus.bra",APP)
-          & !LLhtml
-      )
   &   out
     $ "* Choose from the menus the topics that interest you.
 * Enter the number or character string that precedes your choice.
@@ -4777,7 +4787,6 @@ accompanies Bracmat, using Bracmat to do the conversion."
     : (   html
         & out$HTML
         & doHTML$"bracmat.html"
-      | menu&doMenu$
       | lex&get$"lex.bra"&lex$help
       |   save
         & lst$(help,"help.bra",NEW)
