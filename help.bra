@@ -4319,23 +4319,21 @@ Topic:")
                 & !acc
             )
           & ( fputall
-            =   parcontent,content,a
-              .   whl
-                ' ( !paragraphs:(?.?parcontent) ?paragraphs
-                  &   whl
-                    ' ( !parcontent:(?.%?content) ?parcontent
-                      &   whl
-                        ' ( !content:%?a ?content
-                          & !helpbody anchors$!a:?helpbody
-                          )
-                      )
-                  )
+            =   parcontent,content,a,paragraphs,helpbody
+              .   !arg:?paragraphs
+                & :?helpbody
+                &   whl
+                  ' ( !paragraphs:(?.?parcontent) ?paragraphs
+                    &   whl
+                      ' ( !parcontent:(?.%?content) ?parcontent
+                        &   whl
+                          ' ( !content:%?a ?content
+                            & !helpbody anchors$!a:?helpbody
+                            )
+                        )
+                    )
+                & !helpbody
             )
-          & !arg:?fname
-          & :?paragraphs
-          & writeHTML$((.).Bracmat.lusmenu)
-          & :?helpbody
-          & fputall$
           & ( removeEmpty
             =   A M Z z e a es
               .   !arg:(?Z.?es)
@@ -4589,8 +4587,7 @@ Topic:")
                             ' ( !m:(?,?s) ?m
                               &   whl
                                 ' ( !s:%?S ?s
-                                  & (   (|!!S:(M,?))
-                                      & inner$(!S.!level+1.!anc,!men)
+                                  & ( inner$(!S.!level+1.!anc,!men)
                                     | 
                                     )
                                   )
@@ -4665,16 +4662,56 @@ Topic:")
                     )
                   & todl$!LL:?LLhtml
                   & lst$(LLhtml,"menus.bra",APP)
-                  & !LLhtml
+                  & (!LL.!LLhtml)
               )
-          & ( ~
-            |   removeEmpty$(!helpbody.code i):?helpbody
-              & compactBlockquotes$!helpbody:?helpbody
-              & flattenBlockLevel$(p.,!helpbody):?helpbody
-              & removeEmptyP$(removeBreaks$!helpbody):?helpbody
-              & createIndex$!helpbody:?Index
-              & doMenu$:?Contents
+          & ( flatMenuList
+            =   NN menlist trv
+              .   0:?NN
+                & :?menlist
+                & ( trv
+                  =   name lev tit subs sub
+                    .   !arg:(?name.?lev.?tit.?subs)
+                      &   !menlist (1+!NN:?NN.!name.!lev)
+                        : ?menlist
+                      &   whl
+                        ' (!subs:%?sub ?subs&trv$!sub)
+                  )
+                & trv$!arg
+                & lst$(menlist,menlist,NEW)
+                & !menlist
             )
+          & ( reorderParagraphs
+            =     menlist paragraphs pars
+                , NN name lev A B C D
+              .   !arg:(?menlist.?pars)
+                & :?paragraphs
+                &   whl
+                  ' ( !menlist:(?NN.?name.?lev) ?menlist
+                    & out$(!NN !name)
+                    &   !pars
+                      : ?A (!name.(titel.?.?B) ?C) ?D
+                    &     !paragraphs
+                          (!name.(titel.str$(h !lev).!B) !C)
+                      : ?paragraphs
+                    & !A !D:?pars
+                    )
+                & lst$(paragraphs,paragraphs,APP)
+                & !paragraphs
+            )
+          & !arg:?fname
+          & doMenu$:(?theMenu.?Contents)
+          & lst$(theMenu,theMenu,NEW)
+          & flatMenuList$!theMenu:?menlist
+          & :?paragraphs
+          & writeHTML$((.).Bracmat.lusmenu)
+          & lst$(paragraphs,paragraphs,NEW)
+          & reorderParagraphs$(!menlist.!paragraphs):?paragraphs
+          & fputall$!paragraphs:?helpbody
+          & removeEmpty$(!helpbody.code i):?helpbody
+          & compactBlockquotes$!helpbody:?helpbody
+          & flattenBlockLevel$(p.,!helpbody):?helpbody
+          & removeEmptyP$(removeBreaks$!helpbody):?helpbody
+          & createIndex$!helpbody:?Index
           &     ( "!DOCTYPE"
                 . " html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\""
                 )
