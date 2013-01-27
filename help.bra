@@ -1,5 +1,5 @@
 help=
-  ( streep,verwerk,lusmenu,aanbevelingen,filosofie,colofon
+  ( streep,verwerk,lusmenu,whatIsBracmat,filosofie,colofon
   . syntax,atotxt,evaltxt,gettxt,contxt,binovztxt,patternm
   . savtxt,dumtxt,binprotxt,prostutxt1,prostutxt2,funmactxt
   . unops,naamloos,algtxt,unpattxt,binmenu,pattxttxt
@@ -14,16 +14,10 @@ help=
   . sgntxt,cattxt,gontxt,factxt,subtxt1,show,rmvtxt,macrotxt
   . outtxt,taytxt,newtxt,newobjecttxt,humtxt,objecttxt,hashtxt
   . paragraphs,fname,findtxt,inserttxt,removetxt,Newtxt,Dietxt
-  . ISOtxt,casesensitivetxt,foralltxt,doHTML,clktxt
+  . ISOtxt,casesensitivetxt,foralltxt,doHTML,clktxt,limitations
   . lowtxt,upptxt,DOSopttxt,whltxt,argtxt,d2xtxt,x2dtxt
-  .   closetxt
-      filesettxt
-      fixdtxt
-      modetxt
-      positiontxt
-      readtxt
-      varitxt
-      writetxt
+  . gentlepat recurpat closetxt filesettxt interaction usecases
+  . fixdtxt modetxt positiontxt readtxt varitxt writetxt
   )
 .   ( lusmenu
     =   M
@@ -41,14 +35,10 @@ help=
 10 data structures
 11 objects
 12 hash tables
-13 how Bracmat evolved
-14 why the name 'Bracmat'?
-15 how to obtain Bracmat
-16 more example code
 html transform this file to HTML
 save reformat and save this file
 lex lexical analysis of help file"
-      ,   (0,aanbevelingen)
+      ,   (0,intro)
           (1,patternm)
           (2,syntax)
           (3,binmenu)
@@ -61,10 +51,6 @@ lex lexical analysis of help file"
           (10,contxt)
           (11,objecttxt)
           (12,hashtxt)
-          (13,filosofie)
-          (14,Bracmat-name)
-          (15,colofon)
-          (16,morexmlps)
           (html,)
           (lex,)
           (save,)
@@ -251,70 +237,135 @@ lex lexical analysis of help file"
           (35,whltxt)
           (36,x2dtxt)
     )
-  & ( aanbevelingen
+  & ( intro
+    =   M
+      , Introduction
+      , "The best thing about Bracmat is that it makes it a joy to find your way in
+oddly shaped data and manipluate it at your will. Bracmat occupies a niche were
+you find none of the widely used full fledged computer programming languages.
+
+This chapter may give you an impression of what Bracmat can do for you.
+
+0 What is Bracmat?
+1 Why use Bracmat?
+2 How does Bracmat work?
+3 What are Bracmat's limitations?
+4 How did Bracmat evolve?
+5 Why the name \"Bracmat\"?
+6 How to obtain Bracmat
+7 Where to find example code on the internet"
+      ,   (0,whatIsBracmat)
+          (1,usecases)
+          (2,interaction)
+          (3,limitations)
+          (4,filosofie)
+          (5,Bracmat-name)
+          (6,colofon)
+          (7,morexmlps)
+    )
+  & ( whatIsBracmat
     =   T
-      , "If you haven't seen Bracmat before .."
-      ,   "Bracmat is an interpreted programming language that will evaluate instructions
-that you type at the keyboard. For example, Bracmat can
-* handle big, irregular data structures,
-* let you delve into a data structure by means of pattern matching and
-* simplify an algebraic formula,
-* read a file with source text and execute this code in one go,
-* save neatly formatted source text in a file.
+      , "What is Bracmat?"
+      , "Bracmat is a computer programming language designed for easy analysis and
+manipulation of complex data, be it evaluation of algebraic expressions,
+parsing natural language, validation of HTML or automatic chaining
+multi-facetted webservices into a workflow. In several projects, Bracmat has
+been combined with other programming languages to take care of high level
+activities that otherwise would be very time consuming to implement.
+
+Bracmat was developed as a calculator for symbolic algebra. Like a table
+calculator, Bracmat continuously runs a Read Eval Print Loop (REPL). It adds,
+multiplies, takes powers and logarithms and differentiates algebraic
+expressions.
+
+Later additions transformed the calculator into a programming language. The
+subject matter, algebraic expressions, required an advanced pattern matching
+mechanism to control flow in a Bracmat program. Envisioning that pattern
+matching also would be very useful in natural language related problems, the
+subject domain was extended to cover almost any kind of non-binary data.
+
+True to its roots, Bracmat still has an important feature in common with
+calculators have: as long as the input data are simple enough, the user does
+(and can) not specify how these data have to be processed. Calculators handle
+basic calculations in a predictable, unchangeable way, e.g. 4+7 will always
+result in |_11_|, and not in, say, |_10_| or |_23-12_|. That is because the
+manufacturer had good reasons to think that |_11_| is what the user expects and
+nothing else.
+
+In the same way, Bracmat handles basic \"calculations\" with a much wider
+variety of data: rational numbers, symbols, words and collections thereof. For
+example, a+b+a becomes 2*a+b and not, say, |_x.a_| or |_b+2*a_|. Again, Bracmat
+takes decisions that you can't easily circumvent. However, the more complex the
+data are, the better are the chances that not all results, although defendable,
+have an appearance that suits you. It is here that programming comes in:
+Bracmat leaves certain kinds of data unchanged, but opens the possibility to
+dissect data, to perform calculations on the parts, and to assemble an answer
+from the resulting sub-answers.
 
 In Bracmat, data and instructions have the same syntax: a mix of parentheses,
 binary operators, operands and prefixes preceding those operands or
-parentheses. In fact, in many cases you can't tell the difference between the
-data and instructions. Bracmat has a REPL (Read Eval Print Loop), like Lisp
-and many other programming languages. It offers a simple environment for input
-of both data and code. After the prompt {?} you can write. When you hit the
-<return> key, Bracmat evaluates your input and writes the result to the screen
-following a {!} sequence (unless there was no visible result). Under the result
-follows a line that tells whether the evaluation was successful (S) or not (F)
-(in rare cases you may see an |_I_|, which, for the time being, you may
-interpret as failure). In the same line the machine shows how much processor
-time it needed. Intermediary results may also appear on the screen.
+parentheses. When programmability was added to Bracmat, no new syntax was
+invented, but only a few handfuls of prefixes and binary operators dedicated to
+assignment, function calling, pattern matching and program flow, in addition
+to the operators for addition, multiplication, etc."
+    )
+  & ( limitations
+    =   T
+      , Limitations
+      ,   "Oddly enough, Bracmat has no operators for subtraction and division. The reason
+is that these operations lack a very desirable property: associativity.
+Addition and multiplication are associative, because
 
-Bracmat and calculators have an important common feature: as long as the input
-data are simple enough, the user need (and can) not specify how these data have
-to be processed. Calculators handle basic calculations in a predictable,
-unchangeable way, e.g. 4+7 will always result in |_11_|, and not in, say,
-|_10_| or |_23-12_|. That is because the manufacturer had good reasons to think
-that |_11_| is what the user expects and nothing else. In the same way, Bracmat
-handles basic \"calculations\" with a much wider variety of data: rational
-numbers, symbols, words and collections thereof. For example, a+b+a becomes
-2*a+b and not, say, |_x.a_| or |_b+2*a_|. Again, Bracmat takes decisions
-that you can't easily circumvent. However, the more complex the data are, the
-better are the chances that not all results, although defendable, have an
-appearance that suits you. It is here that programming comes in: Bracmat leaves
-certain kinds of data unchanged, but opens the possibility to dissect data, to
-perform calculations on the parts, and to assemble an answer from the resulting
-sub-answers.
+    a+(b+c)
+    
+is equivalent with
 
-First and foremost Bracmat was developed with symbolic algebra in mind. You may
-add, multiply, take powers and logarithms and differentiate. Oddly enough,
-Bracmat has no operators for subtraction and division. This reduces the amount
-of arbitrariness in the presentation of formulae. 
+    (a+b)+c
+    
+and can be written as
 
-    a-b
+    a+b+c
+    
+On the other hand, subtraction and division are not associative, as can be seen
+in this example 
 
-must be written as
+    a-(b-c)
 
-    a+-1*b
+which is not equivalent with
+
+    (a-b)-c 
+
+because
+
+    a-(b-c) = a-b+c
+    
+while
+
+    (a-b)-c = a-b-c
+
+Fortunately, subtraction and division are unnecessary operations if you have
+negative numbers and the operations of multiplication and exponentiation,
+because
+
+    a - b
+    
+can be written as
+
+    a + -1 * b
 
 and
 
-    a/b
+    a / b
 
-must be written as
+can be written as
 
-    a*b^-1
+    a * b ^ -1
     
-Calculations are always exact. Number expressions for which no rational
-representation exists are not further evaluated. Bracmat knows how to handle
-the special symbols |_i_|, |_e_| and |_pi_|, but it offers no numerical representation for
-|_e_| and |_pi_|.
-Examples:
+A completely unrelated limitation is that in Bracmat, calculations always have
+to be exact. Number expressions for which no rational representation exists
+are not further evaluated. Bracmat knows how to handle the special symbols
+|_i_|, |_e_| and |_pi_|, but it offers no numerical representation for |_e_|
+and |_pi_|. Examples:
 
 {?} a+b+-1*a                 { this is how you subtract in Bracmat }
 {!} b
@@ -334,27 +385,57 @@ Examples:
 
 {?} y\\D(x\\D((x+y)^-2))
 {!} 6*(x+y)^-4"
-          "Bracmat can only do arithmetic operations with integer and rational numbers.
-There is virtually no limit to their size, but the program is not optimised
-for number crunching.
+          "Whereas Bracmat lacks floating point arithmetic, it can perform arithmetic
+operations with integer and rational numbers and happily adds and multiplies
+numbers with thousands of digits. Only available computer memory and address
+size impose a limit to the size of numerical operands, but before you decide to
+multiply two ten-million digit numbers you should realize that Bracmat is not
+optimised for number crunching on that scale.
 
-Bracmat handles non-integer powers of positive rational numbers provided that
-the number (if it is an integer) or the numerator and the denominator (if the
-number is a fraction) are less than 2^32 or 2^64 respectively, depending on
-whether Bracmat is compiled for a 32 or a 64 bit platform.
+Bracmat handles non-integer powers of positive rational numbers (square root,
+for example) provided that the number (if it is an integer) or the numerator
+and the denominator (if the number is a fraction) are less than 2^32 (or 2^64,
+if Bracmat is compiled for a 64 bit platform).
 
-Bracmat happily adds and multiplies numbers of, say, a few hundred digits.
 There is a pre-defined function, flt$, that represents rational numbers in a
 scientific floating point notation, but Bracmat cannot do calculations with
 these floating point numbers, unless you write a function to convert them back
 to rational numbers."
-          "The binary operators have an ordering of precedence. Of the mathematical
-operators, + has the lowest precedence and \\D the highest (+ * ^ \\L \\D).
-You may use parentheses to overrule this ordering, as in:
+    )
+  & ( usecases
+    =   T
+      , "Why use Bracmat?"
+      , "Bracmat is not a general purpose programming language, but a programming
+language that was conceived in the 1980's with a single aim: to make tedious
+algebraic manipulations easy and, most importantly, not prone to human errors.
+Now hang on.
 
-{?} (a+b)*(a+c)+a^(-1*d^2+(d+1)*(d+-1))
-{!} a^-1+a^2+a*b+a*c+b*c"
-          "When instructions are entered from the keyboard, the program waits until all
+Many problems can be solved by following steps similar to those taken when solving
+an algebraic problem:
+
+* Find stuff
+* Find the context of stuff
+* Sort stuff
+* Merge stuff
+* Combine stuff
+* Replace stuff
+* Iterate
+* Recurse
+"
+    )
+  & ( interaction
+    =   T
+      , "User Interaction with Bracmat"
+      ,   "Bracmat offers a simple environment for input of both data and code. After the
+prompt {?} you can write. When you hit the <return> key, Bracmat evaluates your
+input and writes the result to the screen following a {!} sequence (unless
+there was no visible result). Under the result follows a line that tells
+whether the evaluation was successful (S) or not (F) (in rare cases you may see
+an |_I_|, which, for the time being, you may interpret as failure). In the same
+line the machine shows how much processor time it needed. Intermediary results
+may also appear on the screen.
+
+When instructions are entered from the keyboard, the program waits until all
 of the conditions below are fulfilled:
 * <return> (or <enter>) is the last key that has been pressed
 * every opening parenthesis has a closing counterpart
@@ -396,10 +477,9 @@ argument has been written to the screen.
 
 {?} put$(x*x);put$(y+y)
 x^22*y{!} 2*y"
-          "Often you will need the result of the last evaluated instruction in the
-next one. You can use the exclamation mark ! instead of re-entering
-the result. (Because Bracmat is still evaluating the instruction |_get$help_|,
-this trick is of no use in the context of this program.) Example (try later):
+          "Often you will need the result of the last evaluated instruction in the next
+instruction. You can use the exclamation mark ! instead of re-entering the
+result. Example:
 {?} 1+1
 {!} 2
 {?} !^!^!^!
@@ -446,7 +526,76 @@ not only propositional rules comparable to regular expressions, but also first
 order predicate rules, backtracking to search the space of combinations of data
 that make its predicates come true. In this way it is very easy to implement a
 relational database. But it doesn't stop here, because Bracmat supports
-recursive invocations of pattern matching and other operations. Examples:
+recursive invocations of pattern matching and other operations.
+
+1 Gentle introduction
+2 Recursive patterns
+3 Pattern matching in character strings
+4 Pattern matching in tree structures"
+      ,   (1,gentlepat)
+          (2,recurpat)
+          (3,pattxttxt pattxt2)
+          (4,pattxt escappattxt)
+    )
+  & ( gentlepat
+    =   T
+      , "Gentle introduction to pattern matching"
+      , "The following is an expression that tests whether a specific detail is present
+in a list of nodes, a sum in this case:
+
+{?} 20+a+b+c:?+b+?  { Is there a term \"b\" in the sum (20+a+b+c) ?}
+{!} 20+a+b+c
+    S   0,00 sec
+
+This is what happened. The match operator |_:_| has a left hand side which is
+the subject of the pattern, which is right hand side of the match operator.
+If the match operation is to succeed, the pattern must be similar to the
+subject. This is the case here, because the question marks are similar to
+anything (like the Joker in some card plays) and the \"b\" is similar to
+itself. By the way, when a pattern match operation succeeds, the resulting
+expression is the subject. The second example shows a pattern match operation
+that fails:
+
+{?} 20+a+b+c:?+q+?  { Is there a term \"q\" in the sum (20+a+b+c) ?}
+    F
+
+The \"q\" in the pattern is not similar to anything in the subject 20+a+b+c
+and thus the pattern match operation must fail.
+
+The following examples are quite similar to the introductory example, merely
+replacing the |_+_| operator by the |_*_| and the blank operators:
+
+{?} 20*a*b*c:?*b*?  { Is there a factor \"b\" in the product (20*a*b*c) ?}
+{!} 20*a*b*c
+    S   0,00 sec
+
+{?} 20 a b c:? b ?  { Is there a word \"b\" in the sentence (20 a b c) ?}
+{!} 20 a b c
+    S   0,00 sec
+
+In the following example, the pattern applies to the characters in the string,
+rather than to nodes in a list of terms, factors or words. The |_@_| that is
+prefixed to the match expression, indicates to the match operator that this is
+not the normal match operation, but a string match operation. 
+
+{?} @(20abc:? b ?)  { Is there a character \"b\" in the string \"20abc\" ?}
+{!} 20 a b c
+    S   0,00 sec
+
+The patterns in string match operations are similar to patterns in normal match
+operations that have sentences (words separated by blank operators) as the
+subject."
+    )
+  & ( recurpat
+    =   T
+      , "Pattern matching with recursive patterns"
+      , "Many real life problems can be solved by first solving a less complex problem.
+If needed, this process can be done again and again, until we end with a
+problem that we know how to solve. In such cases, Bracmat's ability to handle
+recursive patterns can be of much help.
+
+Here is a rather academic example that defines a grammar with recursive
+patterns and that checks whether an input is valid, according to this grammar.
 
 {?} S=(|0 !S|1 !T);T=(0 !T|1 !S); { Regular grammar }
 {?} 0 1 0 1 0:!S { Check whether subject contains an even number of 1's. }
@@ -459,6 +608,9 @@ recursive invocations of pattern matching and other operations. Examples:
 {!} 0 0 0 1 1 1
     S   0,00 sec
     
+The following example could be the basis for a yourney planner. We use a
+recursive pattern to find out whether two continents are connected over land.
+
 {?} connected=(\"South America\".\"North America\") (Africa.Asia) (Asia.Europe);
 {?} (reachable = a b f
     .     !arg:(?a.?b.?f)
@@ -481,11 +633,7 @@ recursive invocations of pattern matching and other operations. Examples:
     Europe is reachable from Africa
     Europe is reachable from Asia
     Africa is reachable from Asia
-    North America is reachable from South America
-    
-1 Pattern matching in character strings
-2 Pattern matching in tree structures"
-      , (1,pattxttxt pattxt2) (2,pattxt escappattxt)
+    North America is reachable from South America"
     )
   & ( filosofie
     =   T
@@ -502,11 +650,12 @@ business. It would be nice to have an interpreter at hand that could interpret
 human readable production rules. That is exactly what Bracmat embodies.
 This program is written in ANSI-C and developed on the fastest home computer
 that existed at that time (Acorn Archimedes). Although Bracmat is much faster
-than its predecessor, its main virtue lies in its programmability. The speed
-at which it processes formulae is not impressive, Bracmat needs a fast machine.
-Unlike many other algebra systems, its grammar has no relationship to the Algol
-grammar. Instead, the language component extends the syntax of simple algebraic
-formulae."
+than its predecessor, its main virtue lies in its programmability and the
+advanced pattern matching. The speed at which it processed formulae was not
+impressive, so Bracmat always needed a fast machine. Fortunately computers
+have become faster and faster, and nowadays Bracmat performs at a speed
+that is quite acceptable, even in real time systems with users expecting
+immediate responses."
           "Compared with other algebra systems, Bracmat has few built-in functions and
 even its set of mathematical operators is small. There are no operators for
 subtraction and division, for example. Nevertheless, Bracmat is general and
@@ -577,15 +726,14 @@ C
     * conditional execution of right operands of \"and\" and \"or\"
     * parameter passing (only \"by value\")
 Pascal
-    * locally defined functions and routines
+    locally defined functions and routines
 Lisp
     * implementation of expressions in binary trees
     * weak type checking
     * late binding
 Logo
-    * different notations for the same variable, depending on whether it
-      produces or receives a value
-Snobol,Icon
+    different notations for the same variable, depending on whether it produces or receives a value
+Snobol, Icon
     * a well developed pattern matching apparatus including backtracking
     * dual results of evaluations : both value and success/failure
 
@@ -594,9 +742,9 @@ convergence."
     )
   & ( Bracmat-name
     =   T
-      , "Why the name 'Bracmat'?"
-      ,   "The name Bracmat stems from Ludvig Holbergs novel 'Nicolai Klimii iter
-subterraneum', the history of Niels Klim who visits the planet Nazar and
+      , "Why the name \"Bracmat\"?"
+      ,   "The name Bracmat stems from Ludvig Holbergs novel \"Nicolai Klimii iter
+subterraneum\", the history of Niels Klim who visits the planet Nazar and
 comments the habits of its inhabitants. For example, the people of the country
 Bracmat are clumsy juniper trees and Niels Klim initially thinks they must be
 more or less blind. But he discovers that their sight is so sharp that they
@@ -604,12 +752,12 @@ can see the smallest details in the far distance and therefore don't see
 what is right in front of them. They are mostly occupied with astronomy and
 transcendental philosophy, but the state also uses them to do prospection
 for minerals in the mines."
-          "It so happens that the Latin word 'brachiatus', meaning 'with arms' or
-'with branches', in litterature of botany often is shortened to 'brachiat.'.
+          "It so happens that the Latin word \"brachiatus\", meaning \"with arms\" or
+\"with branches\", in litterature of botany often is shortened to \"brachiat.\".
 I like to think that Ludvig Holberg, who wrote the story in 1742, knew about
 the works of Carl Linnaeus (1707 - 1778) and was inspired by him to populate
-his planet with smart trees. The word 'Bracmat' is only a ligature away from
-the word 'brachiat.'! Whether true or not, this derivation highlights one
+his planet with smart trees. The word \"Bracmat\" is only a ligature away from
+the word \"brachiat.\"! Whether true or not, this derivation highlights one
 of the most prominent characteristics of the programming language Bracmat:
 it is all about tree branches."
     )
@@ -628,7 +776,7 @@ Alternatively, you can obtain a copy of Bracmat by sending an e-mail to me
     )
   & ( morexmlps
     =   T
-      , "more example code"
+      , "Where to find example code on the internet"
       , "At http://rosettacode.org/wiki/Category:Bracmat over 100 tasks are solved
 using Bracmat. The site is an excellent way to compare how the same task is
 solved in a great number of programming languages."
@@ -951,8 +1099,12 @@ of the matrix at hand, and may even be indifferent to the number of indices."
     =   M
       , "=.,|&: +*^\\L\\D'$_"
       , "These are the 15 binary Bracmat operators. The higher in the list, the lower
-in the order of operations. Use parentheses to force an operator to a higher
-position in the order of operations.
+in the order of operations. Use parentheses to overrule the ordering of 
+precedence and force an operator to a higher position in the order of
+operations, as in:
+
+{?} (a+b)*(a+c)+a^(-1*d^2+(d+1)*(d+-1))
+{!} a^-1+a^2+a*b+a*c+b*c
 
 1 =
     assignment: (x=7) (square=.!arg^2)
@@ -1861,7 +2013,9 @@ prefixes that control the matching process.
     part of the subject is captured by this variable or member. In other
     words, pattern matching can have assignment as a side-effect.
 |_@_|
-    unifies only with atoms.
+    unifies only with atoms. Also, if prefixed to the |_:_| operator, it
+    indicates that the pattern applies to the characters inside the atom
+    (string match).
 |_%_|
     causes the match to succeed only with one or more non-trivial elements of
     the subject-list. (Exception: in combination with |_[_| prefix).
@@ -3453,8 +3607,7 @@ Topic:")
           , removeBreaks removeEmpty removeEmptyP
           , unspace
           , Contents Index allhelp helpbody
-        .   
-          & ( angbrack
+        .   ( angbrack
             =   a m
               .     @(!arg:?a "<" %?m ">" ?arg)
                   &   !a
@@ -3785,7 +3938,7 @@ Topic:")
                 , break2 indented2 asCode2
                 , ol2 ul2 subul trim blocklevel
                 , chunk2 nbsp2 first next spaced
-                , definitionList
+                , definitionList unindent
               .   ( refs
                   =     ptxt titl next nextptxts
                       , overviewtitel overviewref
@@ -3996,6 +4149,25 @@ Topic:")
                             chunk2$!c
                       | (br.,) blocklevel$!arg (br.,)
                   )
+                & ( unindent
+                  =   line lines all ret
+                    .     :?lines:?ret
+                        & !arg:?all
+                        &   whl
+                          ' ( @( !all
+                               :   " "
+                                   ?line
+                                   (\n ?all|:?all)
+                               )
+                            & !lines !line:?lines
+                            &     (!ret:|!ret \n)
+                                  !line
+                              : ?ret
+                            )
+                        & !all:
+                        & unindent$(str$!ret)
+                      | !arg
+                  )
                 & ( definitionList
                   =   T dt n dt dd dds dl
                     .   !arg:?T
@@ -4007,7 +4179,10 @@ Topic:")
                         ' ( @(!T:?dt \n ?T)
                           & @(!dt:~:~(" " ?))
                           & ( :!dds
-                            |     !dl (dd.,inline1$(str$!dds))
+                            |       !dl
+                                    ( dd
+                                    . ,blocklevel$(unindent$(str$!dds))
+                                    )
                                 : ?dl
                               & :?dds
                             )
@@ -4026,12 +4201,31 @@ Topic:")
                            |   " "
                                ( ?dd
                                &     !dl
-                                     (dd.,inline1$(str$(!dds \n !dd)))
+                                     ( dd
+                                     .   
+                                       ,   blocklevel
+                                         $ (unindent$(str$(!dds \n !dd)))
+                                     )
                                  : ?dl
                                )
                            )
                          )
                       & (dl.,!dl)
+                  )
+                & ( pre
+                  =   a b
+                    .     @(!arg:"{?}" ?)
+                        & (   @(!arg:"{?}" ?a \n ("{!}" ?:?b))
+                            &   (pre.(class.exinput),"{?}" !a)
+                                pre$!b
+                          | (pre.(class.exinput),!arg)
+                          )
+                      |   @(!arg:"{!}" ?)
+                        & (   @(!arg:"{!}" ?a ("{?}" ?:?b))
+                            &   (pre.(class.exoutput),"{!}" !a)
+                                pre$!b
+                          | (pre.(class.exoutput),!arg)
+                          )
                   )
                 & ( blocklevel
                   =   a b c d ee f g s x y
@@ -4062,7 +4256,27 @@ Topic:")
                             | (ul.,ul2$("*"."*" !b \n "*" !c))
                             )
                       |   @(!arg:"{?}" ?)
-                        & (blockquote.(pech.EXAMPL),(pre.,!arg))
+                        & (   @(!arg:"{?}" ?a \n ("{!}" ?:?b))
+                            & ( blockquote
+                              .   
+                                ,   (pre.(class.exinput),"{?}" !a)
+                                    pre$!b
+                              )
+                          | ( blockquote
+                            . ,(pre.(class.exinput),!arg)
+                            )
+                          )
+                      |   @(!arg:"{!}" ?)
+                        & (   @(!arg:"{!}" ?a ("{?}" ?:?b))
+                            & ( blockquote
+                              .   
+                                ,   (pre.(class.exoutput),"{!}" !a)
+                                    pre$!b
+                              )
+                          | ( blockquote
+                            . ,(pre.(class.exoutput),!arg)
+                            )
+                          )
                       | definitionList$!arg
                       |   @(!arg:?a "\n " ?b)
                         &   blocklevel$!a
@@ -4501,7 +4715,7 @@ Topic:")
                 | !arg
             )
           &   ( compactBlockquotes
-              =   A B M Z z e a
+              =   A B M Z z e a x y
                 .   !arg:?Z
                   & :?z
                   &   whl
@@ -4520,13 +4734,11 @@ Topic:")
                   &   whl
                     ' (   !Z
                         :   ?a
-                            (blockquote.?,(pre.,?A))
-                            (blockquote.?,(pre.,?B))
+                            (blockquote.?x,(pre.,?A))
+                            (blockquote.!x,(pre.,?B))
                             ?z
                       &     !a
-                            ( blockquote
-                            . (pech.H),(pre.,!A \n !B)
-                            )
+                            (blockquote.!x,(pre.,!A \n !B))
                             !z
                         : ?Z
                       )
@@ -4535,23 +4747,23 @@ Topic:")
                         :   ?a
                             (br.?,)
                             (br.?,)
-                            (blockquote.?,(pre.,?A))
+                            (blockquote.?x,(pre.,?A))
                             ?z
                       &     !a
                             (br.,)
-                            (blockquote.,(pre.,!A))
+                            (blockquote.!x,(pre.,!A))
                             !z
                         : ?Z
                       )
                   &   whl
                     ' (   !Z
                         :   ?a
-                            (blockquote.?,(pre.,?A))
+                            (blockquote.?x,(pre.,?A))
                             (br.?,)
                             (br.?,)
                             ?z
                       &     !a
-                            (blockquote.,(pre.,!A))
+                            (blockquote.!x,(pre.,!A))
                             (br.,)
                             !z
                         : ?Z
@@ -4722,8 +4934,10 @@ Topic:")
                         ,   ( style
                             .   (type.text/css)
                               ,   ("!--"."span.courier {font-family: monospace;}")
-                                  "span.arrow {line-height: 12pt}
-                                  dl a {text-decoration:none}"
+                                  "span.arrow {line-height: 12pt;}
+dl a {text-decoration:none;}
+.exinput {color:blue;}
+.exoutput {color:brown;}"
                             )
                             ( meta
                             .     (http-equiv.Content-Type)
