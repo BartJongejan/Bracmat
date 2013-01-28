@@ -33,12 +33,12 @@ mechanism to control flow in a Bracmat program. Envisioning that pattern
 matching also would be very useful in natural language related problems, the
 subject domain was extended to cover almost any kind of non-binary data.</p>
 <p>True to its roots, Bracmat still has an important feature in common with
-calculators have: as long as the input data are simple enough, the user does
-(and can) not specify how these data have to be processed. Calculators handle
-basic calculations in a predictable, unchangeable way, e.g.<code> 4+7 </code>will always
-result in <code>11</code><code>, </code>and not in, say, <code>10</code> or <code>23-12</code><code>. </code>That is because the
-manufacturer had good reasons to think that <code>11</code> is what the user expects and
-nothing else.</p>
+calculators: as long as the input data are simple enough, the user does (and
+can) not specify how these data have to be processed. Calculators handle basic
+calculations in a predictable, unchangeable way, e.g.<code> 4+7 </code>will always result in
+<code>11</code><code>, </code>and not in, say, <code>10</code> or <code>23-12</code><code>. </code>That is because the manufacturer
+had good reasons to think that <code>11</code> is what the user expects and nothing
+else.</p>
 <p>In the same way, Bracmat handles basic "calculations" with a much wider
 variety of data: rational numbers, symbols, words and collections thereof. For
 example,<code> a+b+a </code>becomes<code> 2*a+b </code>and not, say, <code>x.a</code> or <code>b+2*a</code><code>. </code>Again, Bracmat
@@ -62,20 +62,23 @@ algebraic manipulations easy and, most importantly, not prone to human errors.
 Now hang on.</p>
 <p>Many problems can be solved by following steps similar to those taken when solving
 an algebraic problem:</p>
-<ul><li> Find stuff</li><li> Find the context of stuff</li><li> Sort stuff</li><li> Merge stuff</li><li> Combine stuff</li><li> Replace stuff</li><li> Iterate</li><li> Recurse</li></ul>
+<ul><li> Find stuff</li><li> Find the context of stuff</li><li> Sort stuff</li><li> Merge stuff</li><li> Combine stuff</li><li> Replace stuff</li><li> Cope with labyrinthian problems with many culs-de-sac</li></ul>
 <p><span class="arrow">⇑</span><a href="#intro" style="line-height:12pt">Introduction</a></p>
 <h2><a name="interaction">User Interaction with Bracmat</a></h2>
 <p>Bracmat offers a simple environment for input of both data and code. After the
-prompt<code> {?} </code>you can write. When you hit the <i>return</i> key, Bracmat evaluates your
-input and writes the result to the screen following a<code> {!} </code>sequence (unless
-there was no visible result). Under the result follows a line that tells
-whether the evaluation was successful (S) or not (F) (in rare cases you may see
-an <code>I</code><code>, </code>which, for the time being, you may interpret as failure). In the same
-line the machine shows how much processor time it needed. Intermediary results
-may also appear on the screen.</p>
+prompt<code> {?} </code>you can write your input. When you hit the <i>return</i> key, Bracmat
+evaluates your input and writes the result to the screen following a<code> {!}</code>
+sequence (unless there was no visible result). Under the result follows a line
+that tells whether the evaluation was successful (S) or not (F) (in rare cases
+you may see an <code>I</code><code>, </code>which, for the time being, you may interpret as failure).
+In the same line the machine shows how much processor time it needed.
+Intermediary results may also appear on the screen.</p>
 <p>When instructions are entered from the keyboard, the program waits until all
 of the conditions below are fulfilled:</p>
 <ul><li> <i>return</i> (or <i>enter</i>) is the last key that has been pressed</li><li> every opening parenthesis has a closing counterpart</li><li> every opening brace (start of comment) has a closing counterpart</li><li> every string has either two enclosing double quotes, or none.</li></ul>
+<p>You can freely have parentheses and double quotes in a comment and you can
+freely have parentheses and braces in a string, provided the string is enclosed
+in double quotes.</p>
 <p>You can write a multiple-line instruction by putting the instruction inside
 an extra pair of parentheses. After each non-terminating <i>return</i>, Bracmat
 shows in the next line how many closing parentheses are needed for the
@@ -126,7 +129,7 @@ function <code>fct</code> to a file <code>factorise</code> by entering the follo
 <p>At first sight, a Bracmat program doesn't look like programs written in other
 languages. This may even become a permanent impression. So here are some
 recommendations about programming habits:</p>
-<ul><li> Experiment with the examples from this information program.</li><li> Use a modular and incremental style of programming: test every function
+<ul><li> Experiment with the examples in this document.</li><li> Use a modular and incremental style of programming: test every function
   before going on to the next one.</li><li> Keep functions small, to begin with. Error messages point to functions, not
   to line numbers.</li><li> Use meaningful names. There is no limit to their length and you may use the
   minus-sign as separator in multiple-word-names.</li><li> Let Bracmat indent your code: regularly save your code, read it in Bracmat,
@@ -151,6 +154,30 @@ in this example</p>
 <blockquote good="GOOD4"><pre>   a-(b-c) = a-b+c</pre></blockquote>
 <p>while</p>
 <blockquote good="GOOD4"><pre>   (a-b)-c = a-b-c</pre></blockquote>
+<p>So we see that an expression with binary minus operations and written without
+parentheses is a left descending tree: the topmost binary operator is the
+operator to the far right. And indeed, the first incarnation of Bracmat
+internally represented sums and products as left descending trees. However,
+we are used to see numerical factors to the left of non-numerical symbols.
+If sums and products are left-descending, adding<code> 3*a*b*c+4*a*b*c </code>becomes
+unnecessary expensive</p>
+<blockquote good="GOOD4"><pre>   3*a*b*c+4*a*b*c = ((3*a)*b)*c+((4*a)*b)*c</pre></blockquote>
+<p>The first expensive step is finding the numerical factors <code>3</code> and <code>4</code><code>,</code>
+because they are several levels deep. The second expensive step is that
+in the result</p>
+<blockquote good="GOOD4"><pre>   ((7*a)*b)*c</pre></blockquote>
+<p>all multiplication operators necessarily have to be new nodes, so to do this
+simple addition, 4 new nodes (one for the <code>7</code> and three for the
+multiplication operators) had to be created. Compare this with a right
+descending tree as the default internal representation for sums and products:</p>
+<blockquote good="GOOD4"><pre>   3*a*b*c+4*a*b*c = 3*(a*(b*c))+4*(a*(b*c))</pre></blockquote>
+<p>The numerical factors are very close to the root of the tree and therefore
+easy to find. Moreover, for the result</p>
+<blockquote good="GOOD4"><pre>   3*(a*(b*c))</pre></blockquote>
+<p>Bracmat only needs to create one node for the numerical factor <code>7</code> and
+one node for a single multiplication operator, because the subexpression</p>
+<blockquote good="GOOD4"><pre>   (a*(b*c))</pre></blockquote>
+<p>can be shared with the original expression.</p>
 <p>Fortunately, subtraction and division are unnecessary operations if you have
 negative numbers and the operations of multiplication and exponentiation,
 because</p>
@@ -287,10 +314,13 @@ transcendental philosophy, but the state also uses them to do prospection
 for minerals in the mines.</p>
 <p>It so happens that the Latin word "brachiatus", meaning "with arms" or
 "with branches", in litterature of botany often is shortened to "brachiat.".
-I like to think that Ludvig Holberg, who wrote the story in 1742, knew about
+I like to think that Ludvig Holberg, who wrote the story in 1741, knew about
 the works of Carl Linnaeus (1707 - 1778) and was inspired by him to populate
-his planet with smart trees. The word "Bracmat" is only a ligature away from
-the word "brachiat."! Whether true or not, this derivation highlights one
+his planet with smart trees. The word "bracmat" is easily morphed into the
+word "brachiat.", and there is at least one case that can be found on the
+internet where the Optical Character Reader has misinterpreted "brachiat." as
+"bracmat", caused by a black speck that almost connects the "h" and the "i"
+in the word "brachiat."! Whether true or not, this derivation highlights one
 of the most prominent characteristics of the programming language Bracmat:
 it is all about tree branches.</p>
 <p><span class="arrow">⇑</span><a href="#intro" style="line-height:12pt">Introduction</a></p>
