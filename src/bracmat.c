@@ -63,10 +63,13 @@ Test coverage:
 
 */
 
-#define DATUM "26 December 2012"
+#define DATUM "1 February 2013"
 #define VERSION "6"
-#define BUILD "152"
-/*  26 December 2012
+#define BUILD "153"
+/*   1 February 2013
+Two ínstead of three parameters for preparefp if not compiled with debug info.
+
+    26 December 2012
 Several small improvements to fil()
 
     25 December 2012
@@ -12472,6 +12475,9 @@ static int closeAFile()
     fhmin->fp = NULL;
     return TRUE;
     }
+#if defined NDEBUG
+#define preparefp(fh,naam,mode) preparefp(fh,mode)
+#endif
 
 static filehendel * preparefp(filehendel * fh,char * naam,LONG mode)
     {
