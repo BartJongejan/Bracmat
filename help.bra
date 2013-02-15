@@ -36,6 +36,7 @@ help=
 11 objects
 12 hash tables
 html transform this file to HTML
+htmltable transform this file to HTML, put excercises in tables, not blockquotes
 save reformat and save this file
 lex lexical analysis of help file"
       ,   (0,intro)
@@ -52,6 +53,7 @@ lex lexical analysis of help file"
           (11,objecttxt)
           (12,hashtxt)
           (html,)
+          (htmltable,)
           (lex,)
           (save,)
     )
@@ -3557,15 +3559,26 @@ An open file is closed by specifying an impossible file position."
                 .     
                     & !arg:%?t ?arg
                     & 0:?n
+                    & ( detag
+                      =   a b c
+                        .     whl
+                            ' ( @(!arg:?a "|_" ?b "_|" ?c)
+                              & str$(!a !b !c):?arg
+                              )
+                          & !arg
+                      )
                     & ( wr
                       =   
-                        .     !n+1:<200:?n
+                        .     !n+1:<23:?n
                             & out$!arg
                           |   0:?n
                             & put$!arg
                             & get'
                       )
-                    & whl'(@(!t:?s \n ?t)&wr$!s)
+                    &   whl
+                      ' ( @(!t:?s \n ?t)
+                        & wr$(detag$!s)
+                        )
                     & wr$!t
                     & putout$!arg
                   | 
@@ -3622,6 +3635,7 @@ Topic:")
                             : ?antw
                             : ~
                             : ~html
+                            : ~htmltable
                             : ~save
                             : ~lex
                           & (   !sel:? (`!antw,?keuze) ?
@@ -3645,7 +3659,7 @@ Topic:")
           , angbrack codes inline1 createIndex
           , flatten flattenBlockLevel removeBr
           , removeBreaks removeEmpty removeEmptyP
-          , unspace
+          , unspace tablestuff
           , Contents Index allhelp helpbody
         .   ( angbrack
             =   a m
@@ -4252,13 +4266,116 @@ Topic:")
                          )
                       & (dl.,!dl)
                   )
+                & ( trimn
+                  =   c p line R trm
+                    .   !arg:(?arg.?p)
+                      & str$!arg:?arg
+                      & ( trm
+                        =   p
+                          .   !arg:(?arg.?p)
+                            &   whl
+                              ' ( !p+-1:~<0:?p
+                                & @(!arg:" " ?arg)
+                                )
+                            & !arg
+                        )
+                      & :?R
+                      &   whl
+                        ' ( @(!arg:?line \n ?arg)
+                          & !R trm$(!line.!p) \n:?R
+                          )
+                      & !R trm$(!arg.!p):?R
+                      & str$!R
+                  )
+                & ( trim1
+                  =   
+                    .     whl
+                        ' ( ~( 
+                             & @( !arg
+                                : ( 
+                                  | (%@:~" ") ?
+                                  | ? \n (%@:~" ":~\n) ?
+                                  )
+                                )
+                             )
+                          & trimn$(!arg.1):?arg
+                          )
+                      & !arg
+                  )
+                & ( commentOut
+                  =     lines comments code com edoc p A Z
+                      , nls bal
+                    .   :?lines:?comments
+                      & ( nls
+                        =   
+                          .     @(!arg:? \n ?arg)
+                              & \n nls$!arg
+                            | 
+                        )
+                      & ( bal
+                        =   a b c
+                          .   @( !arg
+                               :   ?a
+                                   "{"
+                                   ?b
+                                   "}"
+                                   ( ?c
+                                   & bal$!a
+                                   & bal$!b
+                                   & bal$!c
+                                   )
+                               )
+                            | ~( 
+                               & @( !arg
+                                  : ( ? "{" ?
+                                    | !arg:? "}" ?
+                                    )
+                                  )
+                               )
+                        )
+                      &   whl
+                        ' ( @( !arg
+                             :   ?code
+                                 "{"
+                                 ?com
+                                 ("}"&bal$!com)
+                                 ?arg
+                             )
+                          & (   !com:"?"
+                              & str$(!code "{?}"):?code
+                              & :?com
+                            | 
+                            )
+                          & (   @(!com:?A \n ?Z)
+                              & rev$(str$(!lines !code)):?edoc
+                              & ( @(!edoc:? \n [?p ?)
+                                | @(!edoc:? [?p)
+                                )
+                              &   str$(!A \n trimn$(!Z.!p+1))
+                                : ?com
+                            | trimn$(!com.1):?com
+                            )
+                          & !comments nls$!code !com:?comments
+                          & !lines !code nls$!com:?lines
+                          )
+                      & ( str$(!lines !arg)
+                        . trim1$(str$(!comments nls$!arg))
+                        )
+                  )
+                & ( exinput
+                  =   code comment
+                    .     !tablestuff:convertBlockQuoteToTable
+                        & commentOut$(str$!arg):(?code.?comment)
+                        &   (pre.(class.exinput),!code)
+                            (pre.(class.excomment),!comment)
+                      | (pre.(class.exinput),str$!arg)
+                  )
                 & ( pre
                   =   a b
                     .     @(!arg:"{?}" ?)
                         & (   @(!arg:"{?}" ?a \n ("{!}" ?:?b))
-                            &   (pre.(class.exinput),"{?}" !a)
-                                pre$!b
-                          | (pre.(class.exinput),!arg)
+                            & exinput$("{?}" !a) pre$!b
+                          | exinput$!arg
                           )
                       |   @(!arg:"{!}" ?)
                         & (   @(!arg:"{!}" ?a ("{?}" ?:?b))
@@ -4297,14 +4414,8 @@ Topic:")
                             )
                       |   @(!arg:"{?}" ?)
                         & (   @(!arg:"{?}" ?a \n ("{!}" ?:?b))
-                            & ( blockquote
-                              .   
-                                ,   (pre.(class.exinput),"{?}" !a)
-                                    pre$!b
-                              )
-                          | ( blockquote
-                            . ,(pre.(class.exinput),!arg)
-                            )
+                            & (blockquote.,exinput$("{?}" !a) pre$!b)
+                          | (blockquote.,exinput$!arg)
                           )
                       |   @(!arg:"{!}" ?)
                         & (   @(!arg:"{!}" ?a ("{?}" ?:?b))
@@ -4327,11 +4438,9 @@ Topic:")
                             )
                       |   @(!arg:" " ?b)
                         & (   @(!b:?b \n ?c)
-                            &   ( blockquote
-                                . (good.GOOD3),(pre.,!b)
-                                )
+                            &   (blockquote.,(pre.,!b))
                                 blocklevel$!c
-                          | (blockquote.(good.GOOD4),(pre.,!b))
+                          | (blockquote.,(pre.,!b))
                           )
                       |   @( !arg
                            :   ( &:?a
@@ -4363,10 +4472,7 @@ Topic:")
                                   )
                                )
                            )
-                        &   break2$!a
-                            ( blockquote
-                            . (pech.C),(pre.,!c \n !ee)
-                            )
+                        & break2$!a (blockquote.,(pre.,!c \n !ee))
                       | inline1$!arg
                       | break2$!arg
                   )
@@ -4943,14 +5049,104 @@ Topic:")
                     &   !pars
                       : ?A (!name.(titel.?.?B) ?C) ?D
                     &     !paragraphs
-                          (!name.(titel.str$(h !lev).!B) !C)
+                          (!name.(titel.str$(h !lev+1).!B) !C)
                       : ?paragraphs
                     & !A !D:?pars
                     )
                 & lst$(paragraphs,paragraphs,APP)
                 & !paragraphs
             )
-          & !arg:?fname
+          & ( rtrim
+            =   R A Z RTR
+              .   str$!arg:?arg
+                & :?R
+                & ( RTR
+                  = .whl'@(!arg:?arg " ")&!arg
+                  )
+                &   whl
+                  ' ( @(!arg:?A \n ?arg)
+                    & !R RTR$!A \n:?R
+                    )
+                & str$(!R RTR$!arg):?R
+                & whl'@(!R:?R " ")
+                & !R
+            )
+          & ( rightTrimPre
+            =   R A X E P
+              .   :?R
+                &   whl
+                  ' ( !arg:?X (?E.?Y) ?arg
+                    &     !R
+                          !X
+                          (   !Y:(?A,?P)
+                            & (   !E:pre
+                                & (pre.!A,rtrim$!P)
+                              | (!E.!A,rightTrimPre$!P)
+                              )
+                          | (!E.rightTrimPre$!Y)
+                          )
+                      : ?R
+                    )
+                & !R !arg
+            )
+          & ( convertBlockQuoteToTable
+            =     A Z prows ret rows row
+                , input comment output
+              .   :?ret
+                &   whl
+                  ' (   !arg
+                      :   ?A
+                          ( blockquote
+                          .   
+                            ,     ?
+                                  ( pre
+                                  .   ( class
+                                      .   exinput
+                                        | excomment
+                                        | exoutput
+                                      )
+                                    , ?
+                                  )
+                                  ?
+                              : ?prows
+                          )
+                          ?arg
+                    & :?row:?rows
+                    &   whl
+                      ' ( !prows
+                        :   (   (pre.(class.exinput),?input)
+                              &     !rows
+                                    ( !row:
+                                    | (tr.,!row)
+                                    )
+                                : ?rows
+                              & :?comment:?output
+                              &   ( td
+                                  .   (class.exinput)
+                                    , !input chu$160
+                                  )
+                                : ?row
+                            |   (pre.(class.excomment),?comment)
+                              &     !row
+                                    ( td
+                                    .   (class.excomment)
+                                      , !comment chu$160
+                                    )
+                                : ?row
+                            |   (pre.(class.exoutput),?output)
+                              &     !row
+                                    (td.(class.exoutput),!output)
+                                : ?row
+                            )
+                            ?prows
+                        )
+                    &   !rows (!row:|(tr.,!row))
+                      : ?rows
+                    & !ret !A (table.,!rows):?ret
+                    )
+                & !ret !arg
+            )
+          & !arg:(?fname.?tablestuff)
           & doMenu$:(?theMenu.?Contents)
           & lst$(theMenu,theMenu,NEW)
           & flatMenuList$!theMenu:?menlist
@@ -4963,6 +5159,11 @@ Topic:")
           & compactBlockquotes$!helpbody:?helpbody
           & flattenBlockLevel$(p.,!helpbody):?helpbody
           & removeEmptyP$(removeBreaks$!helpbody):?helpbody
+          & rightTrimPre$!helpbody:?helpbody
+          & ( !tablestuff:
+            | !tablestuff$!helpbody:?helpbody
+            )
+          & lst$(helpbody,helpbody,NEW)
           & createIndex$!helpbody:?Index
           &     ( "!DOCTYPE"
                 . " html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\""
@@ -4976,8 +5177,9 @@ Topic:")
                               ,   ("!--"."span.courier {font-family: monospace;}")
                                   "span.arrow {line-height: 12pt;}
 dl a {text-decoration:none;}
-.exinput {color:blue;}
-.exoutput {color:brown;}"
+.exinput {color:blue;white-space:pre;font-family:consolas,monospace;font-size:0.8em;}
+.excomment {color:green;white-space:pre;font-family:consolas,monospace;font-size:0.8em;}
+.exoutput {color:brown;white-space:pre;font-family:consolas,monospace;font-size:0.8em;}"
                             )
                             ( meta
                             .     (http-equiv.Content-Type)
@@ -5077,7 +5279,10 @@ accompanies Bracmat, using Bracmat to do the conversion."
   &   verwerk$lusmenu
     : (   html
         & out$HTML
-        & doHTML$"bracmat.html"
+        & doHTML$("bracmat.html".)
+      |   htmltable
+        & out$"HTML with excercises in tables"
+        & doHTML$("bracmat.html".convertBlockQuoteToTable)
       | lex&get$"lex.bra"&lex$help
       |   save
         & lst$(help,"help.bra",NEW)
