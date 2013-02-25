@@ -36,6 +36,7 @@ help=
 11 objects
 12 hash tables
 html transform this file to HTML
+htmltable transform this file to HTML, put excercises in tables, not blockquotes
 save reformat and save this file
 lex lexical analysis of help file"
       ,   (0,intro)
@@ -52,6 +53,7 @@ lex lexical analysis of help file"
           (11,objecttxt)
           (12,hashtxt)
           (html,)
+          (htmltable,)
           (lex,)
           (save,)
     )
@@ -3633,6 +3635,7 @@ Topic:")
                             : ?antw
                             : ~
                             : ~html
+                            : ~htmltable
                             : ~save
                             : ~lex
                           & (   !sel:? (`!antw,?keuze) ?
@@ -3656,7 +3659,7 @@ Topic:")
           , angbrack codes inline1 createIndex
           , flatten flattenBlockLevel removeBr
           , removeBreaks removeEmpty removeEmptyP
-          , unspace
+          , unspace tablestuff
           , Contents Index allhelp helpbody
         .   ( angbrack
             =   a m
@@ -4300,7 +4303,12 @@ Topic:")
                       & !arg
                   )
                 & ( commentOut
+<<<<<<< HEAD
                   =   lines comments code com edoc p A Z
+=======
+                  =     lines comments code com edoc p A Z
+                      , nls bal
+>>>>>>> b3e68f530905dbe0204d05759fd8f22103b98872
                     .   :?lines:?comments
                       & ( nls
                         =   
@@ -4309,7 +4317,11 @@ Topic:")
                             | 
                         )
                       & ( bal
+<<<<<<< HEAD
                         =   
+=======
+                        =   a b c
+>>>>>>> b3e68f530905dbe0204d05759fd8f22103b98872
                           .   @( !arg
                                :   ?a
                                    "{"
@@ -4360,9 +4372,17 @@ Topic:")
                   )
                 & ( exinput
                   =   code comment
+<<<<<<< HEAD
                     .   commentOut$(str$!arg):(?code.?comment)
                       &   (pre.(class.exinput),!code)
                           (pre.(class.excomment),!comment)
+=======
+                    .     !tablestuff:convertBlockQuoteToTable
+                        & commentOut$(str$!arg):(?code.?comment)
+                        &   (pre.(class.exinput),!code)
+                            (pre.(class.excomment),!comment)
+                      | (pre.(class.exinput),str$!arg)
+>>>>>>> b3e68f530905dbe0204d05759fd8f22103b98872
                   )
                 & ( pre
                   =   a b
@@ -5115,11 +5135,25 @@ Topic:")
                                     )
                                 : ?rows
                               & :?comment:?output
+<<<<<<< HEAD
                               &   (td.(class.exinput),!input)
                                 : ?row
                             |   (pre.(class.excomment),?comment)
                               &     !row
                                     (td.(class.excomment),!comment)
+=======
+                              &   ( td
+                                  .   (class.exinput)
+                                    , !input chu$160
+                                  )
+                                : ?row
+                            |   (pre.(class.excomment),?comment)
+                              &     !row
+                                    ( td
+                                    .   (class.excomment)
+                                      , !comment chu$160
+                                    )
+>>>>>>> b3e68f530905dbe0204d05759fd8f22103b98872
                                 : ?row
                             |   (pre.(class.exoutput),?output)
                               &     !row
@@ -5134,7 +5168,11 @@ Topic:")
                     )
                 & !ret !arg
             )
+<<<<<<< HEAD
           & !arg:?fname
+=======
+          & !arg:(?fname.?tablestuff)
+>>>>>>> b3e68f530905dbe0204d05759fd8f22103b98872
           & doMenu$:(?theMenu.?Contents)
           & lst$(theMenu,theMenu,NEW)
           & flatMenuList$!theMenu:?menlist
@@ -5148,7 +5186,13 @@ Topic:")
           & flattenBlockLevel$(p.,!helpbody):?helpbody
           & removeEmptyP$(removeBreaks$!helpbody):?helpbody
           & rightTrimPre$!helpbody:?helpbody
+<<<<<<< HEAD
           & convertBlockQuoteToTable$!helpbody:?helpbody
+=======
+          & ( !tablestuff:
+            | !tablestuff$!helpbody:?helpbody
+            )
+>>>>>>> b3e68f530905dbe0204d05759fd8f22103b98872
           & lst$(helpbody,helpbody,NEW)
           & createIndex$!helpbody:?Index
           &     ( "!DOCTYPE"
@@ -5265,7 +5309,10 @@ accompanies Bracmat, using Bracmat to do the conversion."
   &   verwerk$lusmenu
     : (   html
         & out$HTML
-        & doHTML$"bracmat.html"
+        & doHTML$("bracmat.html".)
+      |   htmltable
+        & out$"HTML with excercises in tables"
+        & doHTML$("bracmat.html".convertBlockQuoteToTable)
       | lex&get$"lex.bra"&lex$help
       |   save
         & lst$(help,"help.bra",NEW)
