@@ -4303,12 +4303,8 @@ Topic:")
                       & !arg
                   )
                 & ( commentOut
-<<<<<<< HEAD
-                  =   lines comments code com edoc p A Z
-=======
                   =     lines comments code com edoc p A Z
                       , nls bal
->>>>>>> b3e68f530905dbe0204d05759fd8f22103b98872
                     .   :?lines:?comments
                       & ( nls
                         =   
@@ -4317,11 +4313,7 @@ Topic:")
                             | 
                         )
                       & ( bal
-<<<<<<< HEAD
-                        =   
-=======
                         =   a b c
->>>>>>> b3e68f530905dbe0204d05759fd8f22103b98872
                           .   @( !arg
                                :   ?a
                                    "{"
@@ -4372,17 +4364,11 @@ Topic:")
                   )
                 & ( exinput
                   =   code comment
-<<<<<<< HEAD
-                    .   commentOut$(str$!arg):(?code.?comment)
-                      &   (pre.(class.exinput),!code)
-                          (pre.(class.excomment),!comment)
-=======
                     .     !tablestuff:convertBlockQuoteToTable
                         & commentOut$(str$!arg):(?code.?comment)
                         &   (pre.(class.exinput),!code)
                             (pre.(class.excomment),!comment)
                       | (pre.(class.exinput),str$!arg)
->>>>>>> b3e68f530905dbe0204d05759fd8f22103b98872
                   )
                 & ( pre
                   =   a b
@@ -5135,13 +5121,6 @@ Topic:")
                                     )
                                 : ?rows
                               & :?comment:?output
-<<<<<<< HEAD
-                              &   (td.(class.exinput),!input)
-                                : ?row
-                            |   (pre.(class.excomment),?comment)
-                              &     !row
-                                    (td.(class.excomment),!comment)
-=======
                               &   ( td
                                   .   (class.exinput)
                                     , !input chu$160
@@ -5153,7 +5132,6 @@ Topic:")
                                     .   (class.excomment)
                                       , !comment chu$160
                                     )
->>>>>>> b3e68f530905dbe0204d05759fd8f22103b98872
                                 : ?row
                             |   (pre.(class.exoutput),?output)
                               &     !row
@@ -5168,11 +5146,7 @@ Topic:")
                     )
                 & !ret !arg
             )
-<<<<<<< HEAD
-          & !arg:?fname
-=======
           & !arg:(?fname.?tablestuff)
->>>>>>> b3e68f530905dbe0204d05759fd8f22103b98872
           & doMenu$:(?theMenu.?Contents)
           & lst$(theMenu,theMenu,NEW)
           & flatMenuList$!theMenu:?menlist
@@ -5186,13 +5160,9 @@ Topic:")
           & flattenBlockLevel$(p.,!helpbody):?helpbody
           & removeEmptyP$(removeBreaks$!helpbody):?helpbody
           & rightTrimPre$!helpbody:?helpbody
-<<<<<<< HEAD
-          & convertBlockQuoteToTable$!helpbody:?helpbody
-=======
           & ( !tablestuff:
             | !tablestuff$!helpbody:?helpbody
             )
->>>>>>> b3e68f530905dbe0204d05759fd8f22103b98872
           & lst$(helpbody,helpbody,NEW)
           & createIndex$!helpbody:?Index
           &     ( "!DOCTYPE"
