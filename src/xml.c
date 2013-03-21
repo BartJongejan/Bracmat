@@ -54,7 +54,7 @@ attributes can be empty (no =[value])
 #define FALSE 0
 
 extern void putOperatorChar(int c);
-extern void putLeaveChar(int c);
+extern void putLeafChar(int c);
 extern char * putCodePoint(unsigned LONG val,char * s);
 
 typedef enum {notag,tag,endoftag,endoftag_startoftag} estate;
@@ -65,7 +65,7 @@ static int (*xput)(char * c) = Put;
 
 static int rawput(int c)
     {
-    putLeaveChar(c);
+    putLeafChar(c);
     return TRUE;
     }
 
@@ -1297,7 +1297,6 @@ static int doctypei = 0;
 static estate DOCTYPE1(int kar) /* <!D */
     {
     static char octype[] = "OCTYPE";
-    static int doctypei = 0;
     switch(kar)
         {
         case '<':
@@ -1346,7 +1345,7 @@ static estate DOCTYPE7(int kar) /* <!DOCTYPE */
         case '\t':
         case '\r':
         case '\n':
-            startDOCTYPE = ch+1;
+            startDOCTYPE = ch;
             tagState = DOCTYPE8;
             return tag;
         default:
@@ -1717,7 +1716,6 @@ int XMLtext(FILE * fpi,char * bron,int trim,int html)
             tagState = def;
 
             ch = alltext;
-
             curr_pos = alltext;
             while(*ch)
                 {

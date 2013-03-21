@@ -1,3 +1,89 @@
+    21 March 2013
+In xml.c, the space after !DOCTYPE disappeared. The error was sometimes
+negated by another error because doctypei was not properly reset to 0.
+Renamed putLeaveChar to putLeafChar.
+
+     1 February 2013
+Two ínstead of three parameters for preparefp if not compiled with debug info.
+
+    26 December 2012
+Several small improvements to fil()
+
+    25 December 2012
+Debugged preparefp.
+
+    23 December 2012
+Removed a superfluous while loop in someopt. Superfluous, because all arguments
+to fil$ must be atomic and in a right descending structure.
+
+    20 December 2012
+Cut most of is_afhankelyk_van away as obsolete.
+
+    10 December 2012
+Replaced 2000000000 by HEADROOM * RADIX2, which is valid for both 32 and 64 bit.
+scompare: if subject is zero bytes long and therefore not a number, adding
+characters to it may make it a number.
+
+     6 December 2012
+Thoroughly tested lambda.
+
+     5 December 2012
+Compiled with Borland C++ 5.02, alternative typedef for UINT32, found unused
+global var hekje1.
+
+     4 December 2012
+Commented out unreachable code in evalmacro
+
+     2 December 2012
+Made type 'int' explicit in line 5223
+ 
+     1 December 2012
+Solved bug with late binding that turned up when evaluating 
+(cof==h) & @(gj:?!cof) & !cof
+
+    28 November 2012
+Made input stop on EOF even if input is stdin.
+
+    23 November 2012
+During testing of corner cases, found code that never executed in find() and
+code that was missing in doPosition.
+
+    16 November 2012
+Found and solved bug in Naamwoord. Case:
+(abcd=bopt=cyt*dip) & (cyt=dip=egsae) & foo:?!!(abcd.bopt)
+Removed rudimentary argument char ** punmatched from some functions.
+Removed old, forgotten attempt at working with < > and ~ on subject
+(lhs of : operator) in compare(). These flags are only useful in the pattern
+
+    15 November 2012
+Added a comment to input with backslash followed by control character,
+which is unsyntactical. Fused numberNode into _qdenominator.
+Fused fireBuiltInFunc into wis.
+
+    1 November 2012
+Function someopt() conditionally excluded with 
+  #if !defined NO_LOW_LEVEL_FILE_HANDLING
+
+    21 October 2012
+Made sure that put$ cannot write to a file that is still open in get$.
+
+    17 October 2012
+In evalvar, the assumption that shared = false is false.
+
+    15 October 2012
+Added 8 byte peek and poke (pee, pok) (perhaps not on all 32 bit platforms).
+Default is now 1 byte.
+
+    14 October 2012
+flg$(=~exp):(=?f.?o)  !f now fails, as it should.
+Relaxed requirement that parameters be separated with comma for function sim.
+new$(hash,1000) gives a hint at the initial size of the hash table.
+Default is 97.
+
+    12 October 2012
+Found some places in plus_samenvoegen_of_sorteren that were never reached,
+commented these.
+
     23 September 2012
 Discovered buffer overflow when compiled under fresh installation of Xubuntu 
 gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3 with optimization -O1 and higher.

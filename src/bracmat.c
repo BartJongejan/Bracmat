@@ -63,10 +63,15 @@ Test coverage:
 
 */
 
-#define DATUM "1 February 2013"
+#define DATUM "21 March 2013"
 #define VERSION "6"
-#define BUILD "153"
-/*   1 February 2013
+#define BUILD "154"
+/*  21 March 2013
+In xml.c, the space after !DOCTYPE disappeared. The error was sometimes
+negated by another error because doctypei was not properly reset to 0.
+Renamed putLeaveChar to putLeafChar.
+
+     1 February 2013
 Two ínstead of three parameters for preparefp if not compiled with debug info.
 
     26 December 2012
@@ -5179,7 +5184,7 @@ void putOperatorChar(int c)
     }
 
 /* referenced from xml.c */
-void putLeaveChar(int c)
+void putLeafChar(int c)
 /* c == any character that should end as part of an atom (string) */ 
     {
     if(c & 0x80)
