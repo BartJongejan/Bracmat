@@ -63,10 +63,13 @@ Test coverage:
 
 */
 
-#define DATUM "21 March 2013"
+#define DATUM "25 March 2013"
 #define VERSION "6"
-#define BUILD "154"
-/*  21 March 2013
+#define BUILD "155"
+/*  25 March 2013
+Friendlier error reporting when parentheses don't balance.
+
+    21 March 2013
 In xml.c, the space after !DOCTYPE disappeared. The error was sometimes
 negated by another error because doctypei was not properly reset to 0.
 Renamed putLeaveChar to putLeafChar.
@@ -5265,6 +5268,30 @@ static int redirectError(char * name)
     }
 /*#endif*/
 
+static void politelyWriteError(psk pkn)
+    {
+    unsigned char name[256] = "";
+#if !_BRACMATEMBEDDED
+    if(errorFileName)
+        {
+        ;
+        }
+    else
+        {
+        int i,ikar;
+        Printf("\nType name of file to write erroneous expression to and then press <return>\n(Type nothing: screen, type dot '.': skip): ");
+        for(i = 0;i < 255 && (ikar = mygetc(stdin)) != '\n';)
+            {
+            name[i++] = (unsigned char)ikar;
+            }
+        name[i] = '\0';
+        if(name[0] && name[0] != '.')
+            redirectError((char *)name);
+        }
+#endif
+    if(name[0] != '.')
+        writeError(pkn);
+    }
 
 static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean * GoOn)
     {
@@ -5513,7 +5540,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
                                     *wijzer = 0;
                                     pkn = bouwboom_w(pkn);
                                     if(error)
-                                        writeError(pkn);
+                                        politelyWriteError(pkn);
                                     if(err) *err = error;
 #ifdef __SYMBIAN32__
                                     bfree(lijst);
@@ -5638,25 +5665,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
             pkn = bouwboom_w(pkn);
             if(error)
                 {
-#if !_BRACMATEMBEDDED
-                if(errorFileName)
-                    {
-                    ;
-                    }
-                else
-                    {
-                    Printf("\nType name of file to write erroneous code to and then press <return>: ");
-                    wijzer = lijst;
-                    while((ikar = mygetc(stdin)) != '\n')
-                        {
-                        *wijzer++ = (unsigned char)ikar;
-                        }
-                    *wijzer = '\0';
-                    if(lijst[0])
-                        redirectError((char *)lijst);
-                    }
-#endif
-                writeError(pkn);
+                politelyWriteError(pkn);
                 }
             }
         else
