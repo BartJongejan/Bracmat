@@ -5,7 +5,7 @@ help=
   . unops,naamloos,algtxt,unpattxt,binmenu,pattxttxt
   . pattxt,asstxt,unopsmenu,unstuurtxt,varsmenu,funcmenu
   . varmattxt,varprotxt,progsmenu,debugtxt,debugtxt2,debugtxt3
-  . inbltmenu,alctxt,aligntxt,asctxt,utftxt,chrtxt
+  . inbltmenu,alctxt,aligntxt,asctxt,utftxt,chrtxt,charset
   . chutxt,dbgtxt,dentxt,escappattxt,lambda,morexmlps
   . divtxt,fretxt,funtxt1,funtxt3,lsttxt1,difftxt,pattxt2
   . lsttxt2,lsttxt3,memtxt,modtxt,peetxt,poktxt,Bracmat-name
@@ -25,16 +25,17 @@ help=
       , "0  starting with Bracmat
 1  pattern matching
 2  grammar
-3  binary operators
-4  prefixes/unary operators
-5  strings or atoms
-6  symbols
-7  the four evaluation contexts
-8  programming in Bracmat
-9  functions
-10 data structures
-11 objects
-12 hash tables
+3  character set
+4  binary operators
+5  prefixes/unary operators
+6  strings or atoms
+7  symbols
+8  the four evaluation contexts
+9  programming in Bracmat
+10  functions
+11 data structures
+12 objects
+13 hash tables
 html transform this file to HTML
 htmltable transform this file to HTML, put excercises in tables, not blockquotes
 save reformat and save this file
@@ -42,16 +43,17 @@ lex lexical analysis of help file"
       ,   (0,intro)
           (1,patternm)
           (2,syntax)
-          (3,binmenu)
-          (4,unopsmenu)
-          (5,atotxt)
-          (6,varsmenu)
-          (7,evaltxt)
-          (8,progsmenu)
-          (9,funcmenu)
-          (10,contxt)
-          (11,objecttxt)
-          (12,hashtxt)
+          (3,charset utftxt chutxt lowtxt upptxt)
+          (4,binmenu)
+          (5,unopsmenu)
+          (6,atotxt)
+          (7,varsmenu)
+          (8,evaltxt)
+          (9,progsmenu)
+          (10,funcmenu)
+          (11,contxt)
+          (12,objecttxt)
+          (13,hashtxt)
           (html,)
           (htmltable,)
           (lex,)
@@ -852,6 +854,17 @@ if necessary, e.g. |_in this case_| or |_he{this is not a comment}re_|.
 Comments can be written everywhere, except in the middle of a string in
 Quotation marks. Comments are enclosed in {} and may be nested."
     )
+  & ( charset
+    =   T
+      , "Character set"
+      ,   "Bracmat supports UTF-8 as well as ISO 8859-1 encoded source code. In most cases
+it does not matter how characters are encoded, because Bracmat merely sees
+sequences of non-zero bytes. Only a few functions explicitly handle UTF-8
+encoded characters. When lower- or uppercasing text, Bracmat assumes that the
+argument is UTF-8 encoded, but graciously falls back to regarding the argument
+as ISO 8859-1 encoded if parsing the argument as UTF-8 fails. UTF-16 and UTF-32
+is not supported, because those encodings make use of zero-bytes."
+    )
   & ( atotxt
     =   T
       , "strings or atoms"
@@ -875,12 +888,12 @@ ways to convert atoms to trees and back.
     to an atom.
 Atoms can be used as names for variables, functions, files, etc.. Often they
 are used as literals, such as mathematical symbols or text."
-          "Most characters which the computer knows of can be members of an atom. Only
-the first seven characters in the ASCII character set are forbidden. These
-characters are used by the system. In most cases you don't need quotation marks
-in order to get a string of characters into an atom. You do need them if you
-want parentheses, operators or prefixes to be part of an atom. Some special
-characters have to be preceded by a back slash:
+          "Atoms consist of any number of non-zero bytes, up to the limits set by the
+operating system and hardware. Atoms can be surrounded by quotation marks,
+but are in many cases optional. You do need them if you want parentheses,
+braces, semicolons, operators or prefixes to be part of an atom.  All UTF-8
+encoded unicode characters can be used in strings. Some special characters
+have to be preceded by a back slash:
 
 \\a
     attention (bell)
@@ -2115,7 +2128,8 @@ the first of them. The most useful combinations are:
     are compared case insensitive. This applies to the full Unicode
     table, but defaults to ASCII and the upper 128 characters in the
     ISO8859-1 (Latin 1) character set if the characters are not UTF-8
-    encoded.
+    encoded. Subject and pattern can have different encodings and still
+    match with success.
 |_~#_|
     does not unify with rational numbers.
 |_~/_|
