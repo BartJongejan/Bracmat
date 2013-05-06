@@ -63,10 +63,14 @@ Test coverage:
 
 */
 
-#define DATUM "25 March 2013"
+#define DATUM "6 May 2013"
 #define VERSION "6"
-#define BUILD "155"
-/*  25 March 2013
+#define BUILD "156"
+/*  6 May 2013
+Found bug in input that melted the tree Δ A into a single atom ΔA.
+Other example:  (ø l:% %)  failed.
+
+    25 March 2013
 Friendlier error reporting when parentheses don't balance.
 
     21 March 2013
@@ -5430,6 +5434,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
             lput(0x7F);
             lput(ikar);
             escape = FALSE;
+            hasop = FALSE; /* 20130506 */
             }
         else
             { 
