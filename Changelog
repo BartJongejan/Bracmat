@@ -1,3 +1,10 @@
+    6 May 2013
+Found bug in input that melted the tree Δ A into a single atom ΔA.
+Other example:  (ø l:% %)  failed.
+
+    25 March 2013
+Friendlier error reporting when parentheses don't balance.
+
     21 March 2013
 In xml.c, the space after !DOCTYPE disappeared. The error was sometimes
 negated by another error because doctypei was not properly reset to 0.
