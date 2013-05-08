@@ -1,8 +1,12 @@
 {lex.bra
 
-analyse bracmat code for lexicality}
+analyse bracmat code for lexicality
 
-X=
+Usage:
+ lex$<symbol>
+}
+
+"sOme wEiRdN→ame"=
   new
 =   
   . ( lex
@@ -373,14 +377,24 @@ rr=
   get'"lex.bra"
 & rmv$(str$(lex ".bak"))
 & ren$("lex.bra".str$(lex ".bak"))
-& put$("{lex.bra
+&   put
+  $ ( "{lex.bra
 
-analyse bracmat code for lexicality}
+analyse bracmat code for lexicality
 
-","lex.bra",NEW)
-& lst'(X,"lex.bra",APP)
+Usage:
+ lex$<symbol>
+}
+
+"
+    , "lex.bra"
+    , NEW
+    )
+& lst'("sOme wEiRdN→ame","lex.bra",APP)
 & put'(\n,"lex.bra",APP)
 & lst'(rr,"lex.bra",APP)
-& put$(str$("\nnew'" X ";\n"),"lex.bra",APP);
+& put$("
+new'\"sOme wEiRdN→ame\";
+","lex.bra",APP);
 
-new'X;
+new'"sOme wEiRdN→ame";
