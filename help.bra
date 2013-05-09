@@ -22,20 +22,20 @@ help=
 .   ( lusmenu
     =   M
       , "                       BRACMAT                       "
-      , "0  starting with Bracmat
+      , "0  introduction
 1  pattern matching
 2  grammar
-3  character set
-4  binary operators
-5  prefixes/unary operators
-6  strings or atoms
-7  symbols
-8  the four evaluation contexts
-9  programming in Bracmat
-10  functions
-11 data structures
-12 objects
-13 hash tables
+3  binary operators
+4  prefixes/unary operators
+5  strings or atoms
+6  symbols
+7  the four evaluation contexts
+8  programming in Bracmat
+9  functions
+10 data structures
+11 objects
+12 hash tables
+13  character set
 html transform this file to HTML
 htmltable transform this file to HTML, put excercises in tables, not blockquotes
 save reformat and save this file
@@ -43,17 +43,17 @@ lex lexical analysis of help file"
       ,   (0,intro)
           (1,patternm)
           (2,syntax)
-          (3,charset utftxt chutxt lowtxt upptxt)
-          (4,binmenu)
-          (5,unopsmenu)
-          (6,atotxt)
-          (7,varsmenu)
-          (8,evaltxt)
-          (9,progsmenu)
-          (10,funcmenu)
-          (11,contxt)
-          (12,objecttxt)
-          (13,hashtxt)
+          (3,binmenu)
+          (4,unopsmenu)
+          (5,atotxt)
+          (6,varsmenu)
+          (7,evaltxt)
+          (8,progsmenu)
+          (9,funcmenu)
+          (10,contxt)
+          (11,objecttxt)
+          (12,hashtxt)
+          (13,charset utftxt chutxt lowtxt upptxt)
           (html,)
           (htmltable,)
           (lex,)
@@ -244,9 +244,10 @@ lex lexical analysis of help file"
   & ( intro
     =   M
       , Introduction
-      , "The best thing about Bracmat is that it makes it a joy to find your way in
-oddly shaped data and manipluate it at your will. Bracmat occupies a niche were
-you find none of the widely used full fledged computer programming languages.
+      , "
+Bracmat makes it a joy to find your way in oddly shaped data and manipluate it
+at your will. Bracmat occupies a niche were you find few, if any, other
+computer programming languages.
 
 This chapter may give you an impression of what Bracmat can do for you.
 
@@ -270,23 +271,28 @@ This chapter may give you an impression of what Bracmat can do for you.
   & ( whatIsBracmat
     =   T
       , "What is Bracmat?"
-      , "Bracmat is a computer programming language designed for easy analysis and
+      , "Bracmat is a computer programming language designed for analysis and
 manipulation of complex data, be it evaluation of algebraic expressions,
 parsing natural language, validation of HTML or automatic chaining
 multi-facetted webservices into a workflow. In several projects, Bracmat has
 been combined with other programming languages to take care of high level
 activities that otherwise would be very time consuming to implement.
 
-Bracmat was developed as a calculator for symbolic algebra. Like a table
-calculator, Bracmat continuously runs a Read Eval Print Loop (REPL). It adds,
-multiplies, takes powers and logarithms and differentiates algebraic
+Bracmat was originally developed as a calculator for symbolic algebra. Like a
+table calculator, Bracmat runned a Read Eval Print Loop (REPL). It added,
+multiplied, took powers and logarithms and differentiated algebraic
 expressions.
 
-Later additions transformed the calculator into a programming language. The
-subject matter, algebraic expressions, required an advanced pattern matching
-mechanism to control flow in a Bracmat program. Envisioning that pattern
-matching also would be very useful in natural language related problems, the
-subject domain was extended to cover almost any kind of non-binary data.
+Later additions transformed the calculator into a programming language.
+The subject matter, algebraic expressions, had often to be destructured
+and recombined in a different way, e.g. to find terms with like factors
+and recombining these into a group of new terms with a common factor.
+What was needed was advanced pattern matching with a notation that requires
+little more than your intuition to understand, because the algebraic
+transformations to be implemented were already hard enough to grasp.
+Envisioning that pattern matching also would be very useful in natural language
+related problems, the subject domain was extended to cover almost any kind of
+data.
 
 True to its roots, Bracmat still has an important feature in common with
 calculators: as long as the input data are simple enough, the user does (and
@@ -306,12 +312,33 @@ Bracmat leaves certain kinds of data unchanged, but opens the possibility to
 dissect data, to perform calculations on the parts, and to assemble an answer
 from the resulting sub-answers.
 
-In Bracmat, data and instructions have the same syntax: a mix of parentheses,
-binary operators, operands and prefixes preceding those operands or
-parentheses. When programmability was added to Bracmat, no new syntax was
-invented, but only a few handfuls of prefixes and binary operators dedicated to
-assignment, function calling, pattern matching and program flow, in addition
-to the operators for addition, multiplication, etc."
+Bracmat makes no distinction between data and instructions. All there is are
+expressions. Some expressions stay the same upon evaluation, other expressions
+change radically, and then there are expressions that contain some parts that
+are stable upon evaluation and other parts that change. The advantage of having
+the same syntax for data and instructions is not in the first place that you
+could deconstruct and recombine program code (generally not a good idea), but
+that you can embed code in a data structure that adds more data upon
+evaluation. Such code can function as growing tips in list or tree structures,
+as variable fields in a standard letter, or as places of particular interest
+inside a pattern, to name some examples.
+
+Another advantage of not having to distinguish between code and data is that
+reading a program and reading data from a file are no different. And saving a
+program is the same as saving data to a file. Which brings us to yet another
+enormous advantage: a Bracmat expression is virtually undecipherable if it
+doesn't obey the canonical layout rules, which are ... canonical. Whereas
+layout doesn't matter to Bracmat, it does to you, and therefore Bracmat, when
+asked to save an expression to file, imposes the canonical lay-out rules on
+the output, unless you insist on wanting to have it all in one line, no
+superfluous spaces allowed.
+
+Bracmat expressions have a simple syntax: a mix of parentheses, binary
+operators, operands and prefixes preceding those operands or parentheses.
+When programmability was added to Bracmat, no new syntax was invented, but
+only a few handfuls of prefixes and binary operators dedicated to assignment,
+function calling, pattern matching and program flow, in addition to the
+operators for addition, multiplication, etc."
     )
   & ( limitations
     =   T
