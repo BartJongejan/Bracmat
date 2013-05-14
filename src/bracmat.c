@@ -63,10 +63,16 @@ Test coverage:
 
 */
 
-#define DATUM "6 May 2013"
+#define DATUM "14 May 2013"
 #define VERSION "6"
-#define BUILD "156"
-/*  6 May 2013
+#define BUILD "157"
+/*  14 May 2013
+Added a field "dontcloseme" to filehendel struct. It is set to TRUE if the
+file is opened using get$ and ensures that such a file isn't closed if
+fil$(,filename,r) fails and Bracmat tries to free a filehandle. Made sure that
+code can be compiled with NO_FOPEN defined.
+
+     6 May 2013
 Found bug in input that melted the tree Δ A into a single atom ΔA.
 Other example:  (ø l:% %)  failed.
 
@@ -2188,6 +2194,7 @@ typedef struct filehendel
     FILE *fp;
     struct filehendel *next;
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
+    Boolean dontcloseme; /* 20130514 */
     LONG filepos; /* Normally -1. If >= 0, then the file is closed.
                 When reopening, filepos is used to find the position
                 before the file was closed. */
@@ -5221,8 +5228,8 @@ void writeError(psk pkn)
             {
             fclose(fpo);/* 20100312 */
             }
-        }
 #endif
+        }
 /*#endif*/
     fpo = redfpo;
     mooi = redMooi;
@@ -5276,6 +5283,7 @@ static void politelyWriteError(psk pkn)
     {
     unsigned char name[256] = "";
 #if !_BRACMATEMBEDDED
+#if !defined NO_FOPEN
     if(errorFileName)
         {
         ;
@@ -5292,6 +5300,7 @@ static void politelyWriteError(psk pkn)
         if(name[0] && name[0] != '.')
             redirectError((char *)name);
         }
+#endif
 #endif
     if(name[0] != '.')
         writeError(pkn);
@@ -12349,6 +12358,7 @@ static void lst(psk kn)
     lstsub(kn);
     }
 
+#if !defined NO_FOPEN
 static filehendel * findFilehendelByName(const char * name)
     {
     filehendel * fh;
@@ -12361,12 +12371,19 @@ static filehendel * findFilehendelByName(const char * name)
     return NULL;
     }
 
-static filehendel * allocateFilehendel(const char * name,FILE * fp)
+static filehendel * allocateFilehendel(const char * name,FILE * fp
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
+                                       ,Boolean dontcloseme
+#endif
+                                       )
     {
     filehendel * fh = (filehendel*)bmalloc(__LINE__,sizeof(filehendel));
     fh->naam = (char *)bmalloc(__LINE__,strlen(name) + 1);
     strcpy(fh->naam,name);
     fh->fp = fp;
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
+    fh->dontcloseme = dontcloseme;
+#endif
     fh->next = fh0;
     fh0 = fh;
     return fh0;
@@ -12376,47 +12393,63 @@ static void deallocateFilehendel(filehendel * fh)
     {
     filehendel * fhvorig, * fhh;
     for(fhvorig = NULL,fhh = fh0
-	;fhh != fh
-	;fhvorig = fhh,fhh = fhh->next
-	)
-	;
+        ;fhh != fh
+        ;fhvorig = fhh,fhh = fhh->next
+        )
+        ;
     if(fhvorig)
-	fhvorig->next = fh->next;
+        fhvorig->next = fh->next;
     else
-	fh0 = fh->next;
+        fh0 = fh->next;
     if(fh->fp)
         fclose(fh->fp);
     bfree(fh->naam);
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
     if(fh->stop)
 #ifdef BMALLLOC
-	bfree(fh->stop);
+        bfree(fh->stop);
 #else
-	free(fh->stop);
+        free(fh->stop);
 #endif
 #endif
     bfree(fh);
     }
 
-filehendel * mygetfilehendel(const char * filename,const char * mode)
+filehendel * mygetfilehendel(const char * filename,const char * mode
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
+                             ,Boolean dontcloseme
+#endif
+                             )
     {
     FILE * fp = fopen(filename,mode);
     if(fp)
         {
-        filehendel * fh = allocateFilehendel(filename,fp);
+        filehendel * fh = allocateFilehendel(filename,fp
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
+            ,dontcloseme
+#endif
+            );
         return fh;
         }
     return NULL;
     }
 
-filehendel * myfopen(const char * filename,const char * mode)
+filehendel * myfopen(const char * filename,const char * mode
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
+                     ,Boolean dontcloseme
+#endif
+                     )
     {
 #if !defined NO_FOPEN
     if(findFilehendelByName(filename))
         return NULL;
     else
         {
-        filehendel * fh = mygetfilehendel(filename,mode);
+        filehendel * fh = mygetfilehendel(filename,mode
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
+            ,dontcloseme
+#endif
+            );
         if(!fh && targetPath && strchr(mode,'r'))
             {
             const char * p = filename;
@@ -12439,7 +12472,11 @@ filehendel * myfopen(const char * filename,const char * mode)
                 {
                 strcpy(q,targetPath);
                 strcpy(q+len,filename);
-                fh = mygetfilehendel(q,mode);
+                fh = mygetfilehendel(q,mode
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
+                    ,dontcloseme
+#endif
+                    );
                 free(q);
                 }
             }
@@ -12448,6 +12485,7 @@ filehendel * myfopen(const char * filename,const char * mode)
 #endif
     return NULL;
     }
+#endif
 
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
 static LONG someopt(psk kn,LONG opt[])
@@ -12467,6 +12505,8 @@ static LONG someopt(psk kn,LONG opt[])
     return 0L;
     }
 
+#if !defined NO_FOPEN
+
 static LONG tijdnr = 0L;
 /*
 static int openCount = 0;
@@ -12483,11 +12523,16 @@ static int closeAFile()
         fh != NULL;
         fh = fh->next)
         {
-        if(fh->filepos == -1L /* fh->fp != NULL */ /* test added 12 Aug 1996 */ && fh->tijd < fhmin->tijd)
+        if( !fh->dontcloseme /* 20130514 */
+          && fh->filepos == -1L /* fh->fp != NULL */ /* test added 12 Aug 1996 */ 
+          && fh->tijd < fhmin->tijd
+          )
             fhmin = fh;
         }
-    if(fhmin == NULL)/* test added 12 Aug 1996 */
+    if(fhmin == NULL || fhmin->dontcloseme)/* test added 12 Aug 1996 */
+        {
         return FALSE;
+        }
     fhmin->filepos = FTELL(fhmin->fp);
     /* fh->filepos != -1 means that the file is closed */
     fclose(fhmin->fp);
@@ -12671,10 +12716,10 @@ if(kns[1] && kns[1]->u.obj)
             fh = zoekfp(naam,mode.l);
         if(fh == NULL)
             {
-            if((fh=myfopen(naam,(char *)&mode)) == NULL)
+            if((fh=myfopen(naam,(char *)&mode,FALSE)) == NULL)
                 {
                 if(closeAFile())
-                    fh=myfopen(naam,(char *)&mode);
+                    fh=myfopen(naam,(char *)&mode,FALSE);
                 }
             if(fh == NULL)
                 {
@@ -12823,7 +12868,7 @@ if(kns[1] && kns[1]->u.obj)
                             : whence == END ? SEEK_END
                                             : SEEK_CUR))
                 {
-		deallocateFilehendel(fh);
+                deallocateFilehendel(fh);
                 fh = NULL;
                 return FALSE;
                 }
@@ -13144,6 +13189,7 @@ READ
 return TRUE;
 }
 #endif
+#endif
 
 static int allopts(psk kn,LONG opt[])
     {
@@ -13225,9 +13271,14 @@ if(kop(rknoop = (*pkn)->RIGHT) == KOMMA)
          && !is_op(rrknoop->LEFT)
          && allopts((rrrknoop = rrknoop->RIGHT),opts))
         {
+#if !defined NO_FOPEN
         filehendel * fh = 
             myfopen((char *)POBJ(rrknoop->LEFT),
-                    zoekopt(rrrknoop,NEW) ? "w" : "a");
+                    zoekopt(rrrknoop,NEW) ? "w" : "a"
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
+                    ,TRUE
+#endif
+                    );
         if(fh == NULL)
             {
             errorprintf("cannot open %s\n",POBJ(rrknoop->LEFT));
@@ -13243,6 +13294,10 @@ if(kop(rknoop = (*pkn)->RIGHT) == KOMMA)
             fpo = redfpo;
             adr[2] = rlknoop;
             }
+#else
+        hum = 1;
+        return FALSE;
+#endif
         }
     else
         {
@@ -14172,10 +14227,12 @@ static function_return_type functies(psk pkn)
                 }
             }
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
+#if !defined NO_FOPEN
         CASE(FIL) /* fil $ (<naam>,[<offset>,[set|cur|end]]) */
             {
             return fil(&pkn) ? functionOk(pkn) : functionFail(pkn);
             }
+#endif
 #endif
         CASE(FLG) /* flg $ <expr>  or flg$(=<expr>) */
             {
@@ -14520,11 +14577,16 @@ static function_return_type functies(psk pkn)
                 {
                 if(rlknoop->u.obj && strcmp((char *)POBJ(rlknoop),"stdin"))
                     {
+#if !defined NO_FOPEN
                     FILE *red;
                     int err;
                     filehendel * fh;
                     red = fpi;
-                    fh = myfopen((char *)POBJ(rlknoop),"r");
+                    fh = myfopen((char *)POBJ(rlknoop),"r"
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
+                        ,TRUE
+#endif
+                        );
                     if(fh == NULL)
                         {
                         fpi = red;
@@ -14542,6 +14604,9 @@ static function_return_type functies(psk pkn)
                     /*fclose(fpi);*/
                     deallocateFilehendel(fh);
                     fpi = red;
+#else
+                    return functionFail(pkn);
+#endif
                     }
                 else
                     {
@@ -17336,12 +17401,14 @@ int main(int argc,char *argv[])
         if(*p == '\\' || *p == '/')
             {
             ++p;
+#if !defined NO_FOPEN
             targetPath = (char *)malloc(p - argv[0] + 1);
             if(targetPath)
                 {
                 strncpy(targetPath,argv[0],p - argv[0]);
                 targetPath[p - argv[0]] = '\0';
                 }
+#endif
             break;
             }
 /*  Printf("targetPath=%s\n",targetPath);*/
@@ -17351,8 +17418,10 @@ int main(int argc,char *argv[])
         return -1;
     ret = mainlus(argc,argv);
     endProc();/* to get here, eg: {?} main=out$bye! */
+#if !defined NO_FOPEN
     if(targetPath)
         free(targetPath);
+#endif
     return ret;
     }
 
