@@ -725,7 +725,7 @@ numbers. Try 123465864564581765^1/2 Answer: 5^1/2*24693172912916353^1/2,
 so 24693172912916353 is prime.
 
    12 March 2010
-errorStream is not kept open if it is not stderr or strout, so that other
+errorStream is not kept open if it is not stderr or stdout, so that other
 processes also can write to the errorFile, if necessary. This also ensures
 that the message is written an saved before the program ... uhm ... crashes.
 
