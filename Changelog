@@ -1,3 +1,9 @@
+   14 May 2013
+Added a field "dontcloseme" to filehendel struct. It is set to TRUE if the
+file is opened using get$ and ensures that such a file isn't closed if
+fil$(,filename,r) fails and Bracmat tries to free a filehandle. Made sure that
+code can be compiled with NO_FOPEN defined.
+
     6 May 2013
 Found bug in input that melted the tree Δ A into a single atom ΔA.
 Other example:  (ø l:% %)  failed.

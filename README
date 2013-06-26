@@ -35,7 +35,7 @@ valid.bra       (From version 3.47) A test suite.
 The Bracmat source code has no other dependencies than what is provided by
 Standard C. Building bracmat from source is extremely simple, e.g.:
 
-    gcc bracmat.c
+    gcc bracmat.c xml.c
 
 Bracmat has been compiled and run on the following platforms:
 
