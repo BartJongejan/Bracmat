@@ -63,10 +63,14 @@ Test coverage:
 
 */
 
-#define DATUM "14 May 2013"
+#define DATUM "2 July 2013"
 #define VERSION "6"
-#define BUILD "157"
-/*  14 May 2013
+#define BUILD "158"
+/*   2 July 2013
+fil$: Switching from input to output back to input did not work if the second
+input only had one argument - the input's file name.
+
+    14 May 2013
 Added a field "dontcloseme" to filehendel struct. It is set to TRUE if the
 file is opened using get$ and ensures that such a file isn't closed if
 fil$(,filename,r) fails and Bracmat tries to free a filehandle. Made sure that
@@ -12895,6 +12899,18 @@ if(kns[1] && kns[1]->u.obj)
     /*
     return FALSE if the second argument is not empty but could not be recognised
     */
+    }
+/*20130702*/
+else
+    {
+    if(fh)
+        {
+        fh = preparefp(fh,naam,0L);
+        }
+    else
+        {
+        fh = zoekfp(naam,0L);
+        }
     }
 
 if(!fh)

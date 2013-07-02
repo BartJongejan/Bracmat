@@ -5327,6 +5327,16 @@
           | Out$849
           )
           (ø l:% %|Out$850)
+          ( (   fil$(taytesttest,r)
+              & fil$(,CHR)
+              & fil$("file98741lfn.txt",w)
+              & fil$taytesttest
+            | Out$852
+            )
+          & (fil$(taytesttest,SET,-1)|)
+          & (fil$("file98741lfn.txt",SET,-1)|)
+          & rmv$"file98741lfn.txt"
+          )
       &   out
         $ ( str
           $ ( "Done. "
