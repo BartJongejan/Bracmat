@@ -1,3 +1,7 @@
+    2 July 2013
+fil$: Switching from input to output back to input did not work if the second
+input only had one argument - the input's file name.
+
    14 May 2013
 Added a field "dontcloseme" to filehendel struct. It is set to TRUE if the
 file is opened using get$ and ensures that such a file isn't closed if
