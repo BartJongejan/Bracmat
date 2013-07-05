@@ -62,6 +62,12 @@ http://rosettacode.org/wiki/Rosetta_Code
   the file. In this way, the user doesn't need to bother about formatting.
   Cyclus: edit program, save from editor, reread in  Bracmat, reload in editor, edit program.
 
+* uni.bra
+
+  A utility that generates UNICODE-related tables from UnicodeData.txt (http://unicode.org/Public/UNIDATA/UnicodeData.txt).
+  These tables, which are also found in bracmat.c, have to be updated every few years, when UnicodeData.txt is updated.
+  Conversion between lower and upper casing is based on these tables.
+
 * valid.bra
 
   A test suite.
@@ -111,3 +117,18 @@ Bracmat has been compiled and run on the following platforms:
 * Solaris (gcc)
 * Linux   (gcc)
 * MacOS   (xcode)
+
+**Testing**
+
+The file valid.bra contains enough tests to get in all corners of the source code,
+except those that lead to a controled exit condition.
+
+For each error correction and for each new or changed feature a test must be added to valid.bra.
+
+The testsuite valid.bra can also be used to find out how things can be programmed, although there is
+no good way to quickly search for what you are looking for.
+
+usage: start Bracmat in interactve mode and write
+
+    get$"valid.bra"
+    !r
