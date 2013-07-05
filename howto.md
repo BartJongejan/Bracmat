@@ -1,4 +1,5 @@
 **Create a Bracmat program in a text file**
+
 Start Bracmat in interactive mode
 
     > bracmat
