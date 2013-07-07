@@ -63,10 +63,14 @@ Test coverage:
 
 */
 
-#define DATUM "2 July 2013"
+#define DATUM "7 July 2013"
 #define VERSION "6"
-#define BUILD "158"
-/*   2 July 2013
+#define BUILD "159"
+/*   7 July 2013
+Checked that Unicode tables u2l and l2u are in agreement with latest 
+UnicodeData.txt (08-Aug-2012 13:06).
+
+     2 July 2013
 fil$: Switching from input to output back to input did not work if the second
 input only had one argument - the input's file name.
 
@@ -2458,7 +2462,8 @@ static FILE * fpi;
 static FILE * fpo;
 
 #if 0
-/*20111214 Based on http://unicode.org/Public/UNIDATA/UnicodeData.txt 2011-11-08 */
+/*20130707 Based on http://unicode.org/Public/UNIDATA/UnicodeData.txt 
+                 08-Aug-2012 13:06 (no changes since 2011-11-08) */
 /* structures created with uni.bra */
 struct cletter {int L:21;int range:11;};
 struct cletter Cletters[]={{0x41,25},{0x61,25},{0xAA,0},
