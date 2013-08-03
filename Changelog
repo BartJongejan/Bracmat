@@ -1,3 +1,6 @@
+    3 August 2013
+glf$(=(!.a.)):(=?h) didn't succeed because !(a.) erronously had READY flag set.
+
     7 July 2013
 Checked that Unicode tables u2l and l2u are in agreement with latest 
 UnicodeData.txt (08-Aug-2012 13:06).

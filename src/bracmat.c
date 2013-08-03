@@ -63,10 +63,13 @@ Test coverage:
 
 */
 
-#define DATUM "7 July 2013"
+#define DATUM "3 August 2013"
 #define VERSION "6"
-#define BUILD "159"
-/*   7 July 2013
+#define BUILD "160"
+/*   3 August 2013
+glf$(=(!.a.)):(=?h) didn't succeed because !(a.) erronously had READY flag set.
+
+     7 July 2013
 Checked that Unicode tables u2l and l2u are in agreement with latest 
 UnicodeData.txt (08-Aug-2012 13:06).
 
@@ -14302,7 +14305,7 @@ static function_return_type functies(psk pkn)
                 /* 20110332: */
                 if(intVal & INDIRECT)
                     {
-                    adr[3]->v.fl ^= READY;
+                    adr[3]->v.fl &= ~READY;/* 20130803 ^= --> &= ~ */
                     }
                 sprintf(klad,"=\3");
                 pkn = opb(pkn,klad,NULL);
