@@ -63,10 +63,15 @@ Test coverage:
 
 */
 
-#define DATUM "3 August 2013"
+#define DATUM "26 August 2013"
 #define VERSION "6"
-#define BUILD "160"
-/*   3 August 2013
+#define BUILD "161"
+/*  26 August 2013
+Changed format specifier %ld %lX etc to %lld %llx etc for Microsoft 64 bit platforms.
+(long long integer type). 
+Reason: d2x was bitterly giving the wrong result for arguments >= 2^32
+
+     3 August 2013
 glf$(=(!.a.)):(=?h) didn't succeed because !(a.) erronously had READY flag set.
 
      7 July 2013
@@ -1494,6 +1499,10 @@ typedef   signed __int32  INT32_T; /* pre VS2010 has no int32_t */
 #define _4      1
 #define _5_6    1
 #define LONG long long
+#define LONGU "%llu"
+#define LONGD "%lld"
+#define LONG0D "%0lld"
+#define LONGX "%llX"
 #define STRTOUL _strtoui64
 #define STRTOL _strtoi64
 #define FSEEK _fseeki64
@@ -1518,6 +1527,10 @@ typedef   signed long  INT32_T;
 #define _5_6    1
 #endif
 #define LONG long
+#define LONGU "%lu"
+#define LONGD "%ld"
+#define LONG0D "%0ld"
+#define LONGX "%lX"
 #define STRTOUL strtoul
 #define STRTOL strtol
 #define FSEEK fseek
@@ -6091,7 +6104,7 @@ static char * iconvert2decimal(ngetal * res, char * g)
         assert(*iwyzer < RADIX);
         if(*iwyzer)
             {
-            g += sprintf(g,"%ld",*iwyzer);
+            g += sprintf(g,LONGD,*iwyzer);
             for(;++iwyzer < res->inumber + res->ilength;)
                 {
                 assert(*iwyzer >= 0);
@@ -7791,7 +7804,7 @@ static int scopy_insert(psk name,char * str)
 static int icopy_insert(psk name,LONG number)
     {
     char buf[22];
-    sprintf((char*)buf,"%ld",number);
+    sprintf((char*)buf,LONGD,number);
     return scopy_insert(name,buf);
     }
 
@@ -7828,7 +7841,7 @@ static int string_copy_insert(psk name,psk pknoop,char * str,char * snijaf)
             }
         DBGSRC(int redMooi;int redhum;redMooi = mooi;\
             redhum = hum;mooi = FALSE;hum = FALSE;\
-            Printf("str [%s] length %lu\n",kn->str,(unsigned LONG int)kn->length);\
+            Printf("str [%s] length " LONGU "\n",kn->str,(unsigned LONG int)kn->length);\
             mooi = redMooi;hum = redhum;)
         ret = insert(name,(psk)kn);
         if(ret)
@@ -11649,7 +11662,7 @@ static int subroot(ngetal * ag,char *conc[],int *pind)
                         {
                         conc[*pind] = (char *)bmalloc(__LINE__,20);
                         }
-                    sprintf(conc[(*pind)++],"%lu^(%d*\1)*",ores,macht);
+                    sprintf(conc[(*pind)++],LONGU "^(%d*\1)*",ores,macht);
                     }
                 macht = 1;
                 ores = smalldivisor;
@@ -11670,9 +11683,9 @@ static int subroot(ngetal * ag,char *conc[],int *pind)
         return FALSE;
     conc[*pind] = (char *)bmalloc(__LINE__,24);
     if((ores == g && ++macht) || ores == 1)
-        sprintf(conc[(*pind)++],"%lu^(%d*\1)",g,macht); /*{?} 32^1/2 => 2^5/2 */
+        sprintf(conc[(*pind)++],LONGU "^(%d*\1)",g,macht); /*{?} 32^1/2 => 2^5/2 */
     else
-        sprintf(conc[(*pind)++],"%lu^(%d*\1)*%lu^\1",ores,macht,g);
+        sprintf(conc[(*pind)++],LONGU "^(%d*\1)*" LONGU "^\1",ores,macht,g);
     return TRUE;
     }
 
@@ -12894,7 +12907,7 @@ if(kns[1] && kns[1]->u.obj)
         else if(PLOBJ(kns[1]) == TEL)
             {
             char pos[11];
-            sprintf(pos,"%ld",FTELL(fh->fp));
+            sprintf(pos,LONGD,FTELL(fh->fp));
             wis(*pkn);
             *pkn = scopy((char *)pos);
             return TRUE;
@@ -13194,7 +13207,7 @@ READ
                         }
                     break;
                     }
-                sprintf((char *)bbuffer,"%ld",numwaarde);
+                sprintf((char *)bbuffer,LONGD,numwaarde);
                 }
             bron = bbuffer;
             *pkn = input(NULL,*pkn,1,NULL/*int * err*/,NULL);
@@ -13432,7 +13445,7 @@ static void Sim(char * klad,char * str1,char * str2)
     LONG len1 = 0;
     LONG len2 = 0;
     LONG sim = simil(str1,str1+strlen((char *)str1),str2,str2+strlen((char *)str2),&utf1,&utf2,&len1,&len2);
-    sprintf(klad,"%ld/%ld",(2L*(LONG)sim),len1+len2);
+    sprintf(klad,LONGD "/" LONGD,(2L*(LONG)sim),len1+len2);
     }
 
 static function_return_type find_func(psk pkn)
@@ -13924,7 +13937,7 @@ static void print_clock(char * pklad,clock_t time)
 #if defined __TURBOC__ && !defined __BORLANDC__
         sprintf(pklad,"%0lu/%lu",(unsigned LONG)time,(unsigned LONG)(10.0*CLOCKS_PER_SEC));/* CLOCKS_PER_SEC == 18.2 */
 #else
-        sprintf(pklad,"%0ld/%ld",(LONG )time,(LONG)CLOCKS_PER_SEC);
+        sprintf(pklad,LONG0D "/" LONGD,(LONG )time,(LONG)CLOCKS_PER_SEC);
 #endif
     }
 
@@ -14157,7 +14170,7 @@ static function_return_type functies(psk pkn)
             val = STRTOUL((char *)POBJ(rknoop),&endptr,16);
             if(errno == ERANGE || (endptr && *endptr))
                 return functionFail(pkn); /*not all characters scanned*/
-            sprintf(klad,"%lu",val);
+            sprintf(klad,LONGU,val);
             wis(pkn);
             pkn = scopy((char *)klad);
             return functionOk(pkn);
@@ -14181,7 +14194,7 @@ static function_return_type functies(psk pkn)
               || (endptr && *endptr)
               )
                 return functionFail(pkn); /*not all characters scanned*/
-            sprintf(klad,"%lX",val);
+            sprintf(klad,LONGX,val);
             wis(pkn);
             pkn = scopy((char *)klad);
             return functionOk(pkn);
@@ -14320,7 +14333,7 @@ static function_return_type functies(psk pkn)
 #if MAXSTACK
             sprintf(klad,"%lu.%lu.%u.%d",(unsigned LONG)globalloc,(unsigned LONG)maxgloballoc,maxbez / ONE,maxstack);
 #else
-            sprintf(klad,"%lu.%lu.%u",(unsigned LONG)globalloc,(unsigned LONG)maxgloballoc,maxbez / ONE);
+            sprintf(klad,LONGU "." LONGU "." LONGU,(unsigned LONG)globalloc,(unsigned LONG)maxgloballoc,maxbez / ONE);
 #endif
             pkn = opb(pkn,klad,NULL);
 #if TELLING
