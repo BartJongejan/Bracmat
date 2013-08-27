@@ -63,10 +63,10 @@ Test coverage:
 
 */
 
-#define DATUM "26 August 2013"
+#define DATUM "27 August 2013"
 #define VERSION "6"
-#define BUILD "161"
-/*  26 August 2013
+#define BUILD "162"
+/*  26,27 August 2013
 Changed format specifier %ld %lX etc to %lld %llx etc for Microsoft 64 bit platforms.
 (long long integer type). 
 Reason: d2x was bitterly giving the wrong result for arguments >= 2^32
@@ -6397,7 +6397,7 @@ static void pbint(LONG * high,LONG * low)
         {
         if(*high)
             {
-            printf("%ld ",*high);
+            printf(LONGD " ",*high);
             break;
             }
         else
@@ -6420,7 +6420,7 @@ static void fpbint(FILE * fp,LONG * high,LONG * low)
         {
         if(*high)
             {
-            fprintf(fp,"%ld ",*high);
+            fprintf(fp,LONGD " ",*high);
             break;
             }
         else
@@ -17400,25 +17400,17 @@ int main(int argc,char *argv[])
 #if 0
 #ifdef _WIN64 /* Microsoft 64 bit */
     printf("_WIN64\n");
-    printf("sizeof(char *) %lld\n",sizeof(char *));
-    printf("sizeof(LONG) %lld\n",sizeof(LONG));
-    printf("sizeof(size_t) %lld\n",sizeof(size_t));
-    printf("WORD32 %d\n",WORD32);
-    printf("RADIX %lld\n",(LONG)RADIX);
-    printf("RADIX2 %lld\n",(LONG)RADIX2);
-    printf("TEN_LOG_RADIX %lld\n",(LONG)TEN_LOG_RADIX);
-    printf("HEADROOM %lld\n",(LONG)HEADROOM);
 #else /* 32 bit and gcc 64 bit */
     printf("!_WIN64\n");
-    printf("sizeof(char *) %ld\n",sizeof(char *));
-    printf("sizeof(LONG) %ld\n",sizeof(LONG));
-    printf("sizeof(size_t) %ld\n",sizeof(size_t));
-    printf("WORD32 %d\n",WORD32);
-    printf("RADIX %ld\n",(LONG)RADIX);
-    printf("RADIX2 %ld\n",(LONG)RADIX2);
-    printf("TEN_LOG_RADIX %ld\n",(LONG)TEN_LOG_RADIX);
-    printf("HEADROOM %ld\n",(LONG)HEADROOM);
 #endif
+    printf("sizeof(char *) " LONGD "\n",sizeof(char *));
+    printf("sizeof(LONG) " LONGD "\n",sizeof(LONG));
+    printf("sizeof(size_t) " LONGD "\n",sizeof(size_t));
+    printf("WORD32 %d\n",WORD32);
+    printf("RADIX " LONGD "\n",(LONG)RADIX);
+    printf("RADIX2 " LONGD "\n",(LONG)RADIX2);
+    printf("TEN_LOG_RADIX " LONGD "\n",(LONG)TEN_LOG_RADIX);
+    printf("HEADROOM " LONGD "\n",(LONG)HEADROOM);
 #endif
 #ifndef NDEBUG
         {
