@@ -63,10 +63,22 @@ Test coverage:
 
 */
 
-#define DATUM "27 August 2013"
+#define DATUM "13 September 2013"
 #define VERSION "6"
-#define BUILD "162"
-/*  26,27 August 2013
+#define BUILD "163"
+/*  13 September 2013
+ @(548:@548 @) succeeded (wrong),
+ @(548:@ @) failed
+ @(548:@(548:548) @) succeeded (wrong)
+ @(548:@(548:?) @) succeeded (wrong)
+ @(548:@(548 ?) @) succeeded (wrong)
+ @(548:@(548&?) @) succeeded (wrong)
+ @(548:@(?:548) @) failed
+ @(548:@(?:?) @) failed
+The @ in front af a string is no longer removed.
+Otherwise, @(548:@548 @) would succeed!
+
+   26,27 August 2013
 Changed format specifier %ld %lX etc to %lld %llx etc for Microsoft 64 bit platforms.
 (long long integer type). 
 Reason: d2x was bitterly giving the wrong result for arguments >= 2^32
@@ -3863,7 +3875,7 @@ static void pskfree(psk p)
     bfree(p);
     }
 
-#if !defined NDEBUG
+#if defined DEBUGBRACMAT
 static void result(psk wortel);
 #endif
 
@@ -4998,11 +5010,13 @@ static psk atoom(int Flgs,int opsflgs)
             (pkn)->v.fl &= ~(ATOM|NONIDENT); /* Remove superfluous flags @ and % from non-empty atom*/
 #else
         /* 20110111 */
+#if 0 /* 20130913 */
         if(  !(Flgs & (UNIFY|SMALLER_THAN|GREATER_THAN)) /* 20100126 */
             && (Flgs & ATOM)
             && (pkn)->u.obj
             )
             (pkn)->v.fl &= ~ATOM; /* Remove superfluous flag @ from non-empty atom*/
+#endif
 #endif
         }
 #undef opsflgs
@@ -9891,33 +9905,42 @@ static int stringOncePattern(psk pat) /* 20070222 */
     should be slightly different for normal matches and for string matches.
     Ideally, two flags should be reserved.
     */
+    DBGSRC(printf("stringOncePattern:");result(pat);printf("\n");)
     if(pat->v.fl & IMPLIEDFENCE)
         {
+    DBGSRC(printf("stringOncePattern:A\n");)
         return TRUE;
         }
     if(pat->v.fl & SATOMFILTERS)
         {
         pat->v.fl |= IMPLIEDFENCE;
+    DBGSRC(printf("stringOncePattern:B\n");)
         return TRUE;
         }
     else if(pat->v.fl & ATOMFILTERS)
         {
+    DBGSRC(printf("stringOncePattern:C\n");)
         return FALSE;
         }
     else if (  IS_VARIABLE(pat)
             || NIKS(pat)
             || (pat->v.fl & NONIDENT) /*20100406 @(abc:% c) */
             )
+        {
+    DBGSRC(printf("stringOncePattern:D\n");)
         return FALSE;
+        }
     else if(!is_op(pat))
         {
         if(!pat->u.obj)
             {
             pat->v.fl |= IMPLIEDFENCE;
+    DBGSRC(printf("stringOncePattern:E\n");)
             return TRUE;
             }
         else
             {
+    DBGSRC(printf("stringOncePattern:F\n");)
             return FALSE;
             }
         }
@@ -9932,11 +9955,13 @@ static int stringOncePattern(psk pat) /* 20070222 */
             case LOG:
             case DIF:
                 pat->v.fl |= IMPLIEDFENCE;
+    DBGSRC(printf("stringOncePattern:G\n");)
                 return TRUE;
             case OF:
                 if(stringOncePattern(pat->LEFT) && stringOncePattern(pat->RIGHT))
                     {
                     pat->v.fl |= IMPLIEDFENCE;
+    DBGSRC(printf("stringOncePattern:H\n");)
                     return TRUE;
                     }
                 break;
@@ -9944,6 +9969,7 @@ static int stringOncePattern(psk pat) /* 20070222 */
                 if(stringOncePattern(pat->LEFT) || stringOncePattern(pat->RIGHT))
                     {
                     pat->v.fl |= IMPLIEDFENCE;
+    DBGSRC(printf("stringOncePattern:I\n");)
                     return TRUE;
                     }
                 break;
@@ -9951,6 +9977,7 @@ static int stringOncePattern(psk pat) /* 20070222 */
                 if(stringOncePattern(pat->LEFT))
                     {
                     pat->v.fl |= IMPLIEDFENCE;
+    DBGSRC(printf("stringOncePattern:J\n");)
                     return TRUE;
                     }
                 break;
@@ -9958,6 +9985,7 @@ static int stringOncePattern(psk pat) /* 20070222 */
                 break;
             }
         }
+    DBGSRC(printf("stringOncePattern:K\n");)
     return FALSE;
     }
 
@@ -10438,7 +10466,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
     if(!snijaf)
         snijaf = sub+stringLength;
 #if CUTOFFSUGGEST
-    if(NIKS(pat) && (is_op(pat) || !pat->u.obj))
+    if((pat->flgs & ATOM) /* 20130913 */ || NIKS(pat) && (is_op(pat) || !pat->u.obj))
         {
         suggestedCutOff = NULL;
         }
@@ -10591,6 +10619,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                 }
             }
         else
+            {
             switch (kop(pat))
                 {
                 case PLUS:
@@ -10939,6 +10968,7 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                     s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE));
                     */
                 }
+            }
         }
     DBGSRC(if(s.c.rmr & (FENCE | ONCE))\
         {Printf("%s %d%*s+",wh,ind,ind,"");if(s.c.rmr & FENCE)\

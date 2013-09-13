@@ -1,3 +1,15 @@
+   13 September 2013
+ @(548:@548 @) succeeded (wrong),
+ @(548:@ @) failed
+ @(548:@(548:548) @) succeeded (wrong)
+ @(548:@(548:?) @) succeeded (wrong)
+ @(548:@(548 ?) @) succeeded (wrong)
+ @(548:@(548&?) @) succeeded (wrong)
+ @(548:@(?:548) @) failed
+ @(548:@(?:?) @) failed
+The @ in front af a string is no longer removed.
+Otherwise, @(548:@548 @) would succeed!
+
    26,27 August 2013
 Changed format specifier %ld %lX etc to %lld %llx etc for Microsoft 64 bit platforms.
 (long long integer type). 
