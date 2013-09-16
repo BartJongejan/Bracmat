@@ -1,3 +1,6 @@
+   16 September 2013
+Corrected a format specifier.
+
    13 September 2013
  @(548:@548 @) succeeded (wrong),
  @(548:@ @) failed

@@ -66,7 +66,10 @@ Test coverage:
 #define DATUM "13 September 2013"
 #define VERSION "6"
 #define BUILD "163"
-/*  13 September 2013
+/* 16 September 2013
+Corrected a format specifier.
+
+   13 September 2013
  @(548:@548 @) succeeded (wrong),
  @(548:@ @) failed
  @(548:@(548:548) @) succeeded (wrong)
@@ -14363,7 +14366,7 @@ static function_return_type functies(psk pkn)
 #if MAXSTACK
             sprintf(klad,"%lu.%lu.%u.%d",(unsigned LONG)globalloc,(unsigned LONG)maxgloballoc,maxbez / ONE,maxstack);
 #else
-            sprintf(klad,LONGU "." LONGU "." LONGU,(unsigned LONG)globalloc,(unsigned LONG)maxgloballoc,maxbez / ONE);
+            sprintf(klad,LONGU "." LONGU ".%u",(unsigned LONG)globalloc,(unsigned LONG)maxgloballoc,maxbez / ONE);
 #endif
             pkn = opb(pkn,klad,NULL);
 #if TELLING
