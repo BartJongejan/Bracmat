@@ -601,7 +601,7 @@ static int Put(char * c)
     return rawput(*c);
     }
 
-static void flush()
+static void flush(void)
     {
     if(xput != Put)
         xput("");
@@ -646,7 +646,7 @@ static char * startElementName = NULL;
 static char * startAttributeName = NULL;
 static char * startValue = NULL;
 
-static void cbStartMarkUp()/* called when <!X has been read, where X != [ or - */
+static void cbStartMarkUp(void)/* called when <!X has been read, where X != [ or - */
     {
     flush();
     startMarkup = ch+2;
@@ -654,31 +654,31 @@ static void cbStartMarkUp()/* called when <!X has been read, where X != [ or - *
     putOperatorChar('(');
     }
 
-static void cbEndMarkUp()/* called when > has been read */
+static void cbEndMarkUp(void)/* called when > has been read */
     {
     if(startMarkup)
         nonTag("!",startMarkup,ch);
     }
 
-static void cbEndDOCTYPE()/* called when > has been read */
+static void cbEndDOCTYPE(void)/* called when > has been read */
     {
     startMarkup = NULL;
     nonTagWithoutEntityUnfolding("!DOCTYPE",startDOCTYPE,ch);
     }
 
-static void cbEndElementName()
+static void cbEndElementName(void)
     {
     nxput(startElementName,ch);
     putOperatorChar('.');
     }
 
-static void cbEndAttributeName()
+static void cbEndAttributeName(void)
     {
     nxput(startAttributeName,ch);
     putOperatorChar('.');
     }
 
-static void cbEndAttribute()
+static void cbEndAttribute(void)
     {
     putOperatorChar(')');
     putOperatorChar(' ');
@@ -730,7 +730,7 @@ static estate def(int kar)
             return notag;
         }
     }
-
+    
 static estate lt(int kar)
     {
     switch(kar)

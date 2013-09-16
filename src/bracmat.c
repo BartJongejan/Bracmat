@@ -8574,7 +8574,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                     if(s >= snijaf && *P == 0)
                         {
                         *suggestedCutOff = s;
-                        teken = 0;
+                        /*teken = 0; 20131016*/
                         if(mayMoveStartOfSubject)
                             *mayMoveStartOfSubject = 0;
                         return TRUE|ONCE;
@@ -8582,9 +8582,9 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                     if(mayMoveStartOfSubject && *mayMoveStartOfSubject != 0)
                         {
                         char * startpos;
-#ifndef NDEBUG
+/* #ifndef NDEBUG 20131016
                         char * pat = (char *)POBJ(p);
-#endif
+#endif */
                         startpos = strstr((char *)S,(char *)POBJ(p));
                         if(startpos != 0)
                             {
@@ -12577,7 +12577,7 @@ static int maxOpenCount = 0;
 static int allOpenCount = 0;
 */
 
-static int closeAFile()
+static int closeAFile(void)
     {
     filehendel *fh,*fhmin;
     if(fh0 == NULL)
