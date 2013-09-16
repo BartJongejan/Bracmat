@@ -10469,7 +10469,12 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
     if(!snijaf)
         snijaf = sub+stringLength;
 #if CUTOFFSUGGEST
-    if((pat->flgs & ATOM) /* 20130913 */ || NIKS(pat) && (is_op(pat) || !pat->u.obj))
+    if(  (pat->flgs & ATOM) /* 20130913 */ 
+	  ||    (NIKS(pat) 
+	     && (  is_op(pat) 
+		    || !pat->u.obj)
+			)
+	  )
         {
         suggestedCutOff = NULL;
         }
