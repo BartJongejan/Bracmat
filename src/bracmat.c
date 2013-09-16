@@ -63,9 +63,9 @@ Test coverage:
 
 */
 
-#define DATUM "13 September 2013"
+#define DATUM "16 September 2013"
 #define VERSION "6"
-#define BUILD "163"
+#define BUILD "164"
 /* 16 September 2013
 Corrected a format specifier.
 
