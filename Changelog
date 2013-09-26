@@ -1,3 +1,8 @@
+   26 September 2013
+In doPosition, changed FLGS to Flgs in 
+    if((Flgs & UNIFY) && (is_op(pat) || (FLGS & INDIRECT)))
+This caused no error, just unnecessary CPU cycles.
+
    16 September 2013
 Corrected a format specifier. Added pair of parentheses for clarity.
 

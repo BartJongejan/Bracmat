@@ -63,10 +63,16 @@ Test coverage:
 
 */
 
-#define DATUM "16 September 2013"
+#define DATUM "26 September 2013"
 #define VERSION "6"
-#define BUILD "164"
-/* 16 September 2013
+#define BUILD "165"
+/* 
+   26 September 2013
+In doPosition, changed FLGS to Flgs in 
+    if((Flgs & UNIFY) && (is_op(pat) || (FLGS & INDIRECT)))
+This caused no error, just unnecessary CPU cycles.
+
+   16 September 2013
 Corrected a format specifier.
 
    13 September 2013
@@ -10186,7 +10192,7 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
     DBGSRC(printf("patA:");result(pat);printf("\n");)
     name = subboomcopie(pat);
     name->v.fl |= SUCCESS;
-    if((Flgs & UNIFY) && (is_op(pat) || (FLGS & INDIRECT)))
+    if((Flgs & UNIFY) && (is_op(pat) || (Flgs & INDIRECT)))
         {
         name->v.fl &= ~VISIBLE_FLAGS;
         if(!is_op(name))
@@ -17441,14 +17447,15 @@ int main(int argc,char *argv[])
 #else /* 32 bit and gcc 64 bit */
     printf("!_WIN64\n");
 #endif
-    printf("sizeof(char *) " LONGD "\n",sizeof(char *));
-    printf("sizeof(LONG) " LONGD "\n",sizeof(LONG));
-    printf("sizeof(size_t) " LONGD "\n",sizeof(size_t));
+    printf("sizeof(char *) " LONGU "\n",(unsigned long)sizeof(char *));
+    printf("sizeof(LONG) " LONGU "\n",(unsigned long)sizeof(LONG));
+    printf("sizeof(size_t) " LONGU "\n",(unsigned long)sizeof(size_t));
     printf("WORD32 %d\n",WORD32);
     printf("RADIX " LONGD "\n",(LONG)RADIX);
     printf("RADIX2 " LONGD "\n",(LONG)RADIX2);
     printf("TEN_LOG_RADIX " LONGD "\n",(LONG)TEN_LOG_RADIX);
     printf("HEADROOM " LONGD "\n",(LONG)HEADROOM);
+	return 0;
 #endif
 #ifndef NDEBUG
         {
