@@ -2401,7 +2401,27 @@ static void dec_refcount(psk kn)
 #define ECHO      8
 
 #include <stdarg.h>
-static va_list ap;
+
+#if EMSCRIPTEN /* This is set if compiling with emscripten. */
+#define EMSCRIPTEN_HTML 0 /* set to 1 if using emscripten to convert this file to HTML*/
+#define GLOBALARGPTR 0
+#else
+#define EMSCRIPTEN_HTML 0 /* Normally this should be 0 */
+#define GLOBALARGPTR 0 /* Normally this should be 1 */
+#endif
+
+#if EMSCRIPTEN_HTML
+ /* must be 0: compiling with emcc (emscripten C to JavaScript compiler) */
+#else
+#define GLOBALARGPTR 0 /* 0 if compiling with emcc (emscripten C to JavaScript compiler) */
+#endif
+
+#if GLOBALARGPTR
+static va_list argptr;
+#define VOIDORARGPTR void
+#else
+#define VOIDORARGPTR va_list * pargptr
+#endif
 static unsigned char *startPos;
 
 static const char
@@ -3925,12 +3945,16 @@ static psk new_operator_like(psk kn)
         return (psk)bmalloc(__LINE__,sizeof(kknoop));
     }
 
-static unsigned char *shift_nw(void)
+static unsigned char *shift_nw(VOIDORARGPTR)
 /* Used from startboom_w and opb */
     {
     if(startPos)
         {
-        startPos = va_arg(ap,unsigned char *);
+#if GLOBALARGPTR
+        startPos = va_arg(argptr,unsigned char *);
+#else
+        startPos = va_arg(*pargptr,unsigned char *);
+#endif
         if(startPos)
                 start = startPos;
         }
@@ -3997,7 +4021,7 @@ the next buffers. These buffers are combined into one big buffer.
     next2->mallocallocated = FALSE;
     }
 
-static unsigned char * vshift_w(void)
+static unsigned char * vshift_w(VOIDORARGPTR)
 /* used from bouwboom_w, which receives a list of bmalloc-allocated string
    pointers. The last string pointer must not be deallocated here */
     {
@@ -4007,7 +4031,7 @@ static unsigned char * vshift_w(void)
             {
             combineInputBuffers();
             }
-	assert(InputElement[-1].mallocallocated);
+    assert(InputElement[-1].mallocallocated);
         bfree(InputElement[-1].buffer);
         InputElement[-1].mallocallocated = FALSE;
         start = InputElement->buffer;
@@ -4015,7 +4039,7 @@ static unsigned char * vshift_w(void)
     return start;
     }
 
-static unsigned char *vshift_nw(void)
+static unsigned char *vshift_nw(VOIDORARGPTR)
 /* Used from vopb */
     {
     if(*pstart && *++pstart)
@@ -4023,7 +4047,7 @@ static unsigned char *vshift_nw(void)
     return start;
     }
 
-static unsigned char *(*shift)(void) = shift_nw;
+static unsigned char *(*shift)(VOIDORARGPTR) = shift_nw;
 
 static void tel(int c)
     {
@@ -5032,9 +5056,17 @@ static psk atoom(int Flgs,int opsflgs)
     return pkn;
     }
 
+#if GLOBALARGPTR
 #define lex(NXT,GRENS,FLGS,OPSFLGS) lex(NXT,GRENS,FLGS)
+#else
+#define lex(NXT,GRENS,FLGS,OPSFLGS,PVA_LIST) lex(NXT,GRENS,FLGS,PVA_LIST)
+#endif
 
+#if GLOBALARGPTR
 static psk lex(int * nxt,int priority,int Flgs,int opsflgs)
+#else
+static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
+#endif
 /* tbw zoekt een expressie of subexpressie */
 /* *nxt (if nxt != 0) is set to the character following the expression. */
     {
@@ -5049,8 +5081,13 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs)
         if(*start == '(')
             {
             if(*++start == 0)
+#if GLOBALARGPTR
                 (*shift)();
             pkn = lex(NULL,0,Flgs,locopsflgs);
+#else
+                (*shift)(pargptr);
+            pkn = lex(NULL,0,Flgs,locopsflgs,pargptr);
+#endif
             }
         else
             pkn = atoom(Flgs,locopsflgs);
@@ -5058,14 +5095,22 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs)
 
     if(*start == 0)
         {
+#if GLOBALARGPTR
         if(!*(*shift)())
+#else
+        if(!*(*shift)(pargptr))
+#endif
             return /*0*/pkn;
         }
 
     op_of_0 = *start;
 
     if(*++start == 0)
+#if GLOBALARGPTR
         (*shift)();
+#else
+        (*shift)(pargptr);
+#endif
 
     if(optab[op_of_0] == NOOP) /* 20080910 Otherwise problem with the k in ()k */
         errorprintf("malformed input\n");
@@ -5123,7 +5168,11 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs)
                 {
                 child_op_of_0 = 0;
                 assert(optab[op_of_0] >= 0);
+#if GLOBALARGPTR
                 operatorNode->RIGHT = lex(&child_op_of_0,optab[op_of_0],0,0);
+#else
+                operatorNode->RIGHT = lex(&child_op_of_0,optab[op_of_0],0,0,pargptr);
+#endif
                 if(child_op_of_0 != op_of_0)
                     break;
                 operatorNode = operatorNode->RIGHT;
@@ -5147,7 +5196,11 @@ static psk bouwboom_w(psk pkn)
         }
     start = InputElement->buffer;
     shift = vshift_w;
+#if GLOBALARGPTR
     pkn = lex(NULL,0,0,0);
+#else
+    pkn = lex(NULL,0,0,0,0);
+#endif
     shift = shift_nw;
     if((--InputElement)->mallocallocated)
         {
@@ -5165,7 +5218,7 @@ static void lput(int c)
         unsigned char * lijst;
         unsigned char * dest;
         int len;
-	size_t L;
+    size_t L;
 
         for(len = 0;InputArray[++len].buffer;)
             ;
@@ -5186,21 +5239,21 @@ static void lput(int c)
         newInputArray[len + 1].cutoff = FALSE;
         newInputArray[len + 1].mallocallocated = FALSE;
         newInputArray[len].buffer = lijst;
-	/*The buffer pointers with lower index are copied further down.*/
+    /*The buffer pointers with lower index are copied further down.*/
 
         /*Printf("lijst %p\n",lijst);*/
 
         newInputArray[len].cutoff = FALSE;
         newInputArray[len].mallocallocated = FALSE;
         /*The active buffer is still the one declared in input(),
-	  so on the stack (except under EPOC).*/
+      so on the stack (except under EPOC).*/
         --len; /* point at the second last element, the one that got filled up. */
         if(wijzer == lijst)
             {
             /* copy the full content of lijst to the second last element */
             dest = newInputArray[len].buffer = (unsigned char *)bmalloc(__LINE__,DEFAULT_INPUT_BUFFER_SIZE);
             strncpy((char *)dest,(char *)lijst,DEFAULT_INPUT_BUFFER_SIZE - 1);
-	    dest[DEFAULT_INPUT_BUFFER_SIZE - 1] = '\0';
+        dest[DEFAULT_INPUT_BUFFER_SIZE - 1] = '\0';
             /* Make a notice that the element's string is cut-off */
             newInputArray[len].cutoff = TRUE;
             newInputArray[len].mallocallocated = TRUE;
@@ -5209,7 +5262,7 @@ static void lput(int c)
             {
             ++wijzer; /* wijzer points at first character after the operator */
             /* maxwijzer - wijzer >= 0 */
-	    L = (size_t)(wijzer - lijst);
+        L = (size_t)(wijzer - lijst);
             dest = newInputArray[len].buffer = (unsigned char *)bmalloc(__LINE__,L + 1);
             strncpy((char *)dest,(char *)lijst,L);
             dest[L] = '\0';
@@ -5217,9 +5270,9 @@ static void lput(int c)
             newInputArray[len].mallocallocated = TRUE;
 
             /* Now remove the substring up to wijzer from lijst */
-	    L = (size_t)(maxwijzer - wijzer);
+        L = (size_t)(maxwijzer - wijzer);
             strncpy((char *)lijst,(char *)wijzer,L);
-	    lijst[L] = '\0';
+        lijst[L] = '\0';
             wijzer = lijst + L;
             }
 
@@ -5897,12 +5950,19 @@ static psk setflgs(psk pokn,int Flgs)
 
 static psk startboom_w(psk pkn,...)
     {
+#if !GLOBALARGPTR
+    va_list argptr;
+#endif
     if(pkn)
         wis(pkn);
-    va_start(ap,pkn);
-    start = startPos = va_arg(ap,unsigned char *);
+    va_start(argptr,pkn);
+    start = startPos = va_arg(argptr,unsigned char *);
+#if GLOBALARGPTR
     pkn = lex(NULL,0,0,0);
-    va_end(ap);
+#else
+    pkn = lex(NULL,0,0,0,&argptr);
+#endif
+    va_end(argptr);
     return pkn;
     }
 
@@ -5913,7 +5973,11 @@ static psk vopbnowis(psk pkn,const char *conc[])
     pstart = (unsigned char **)conc;
     start = (unsigned char *)conc[0];
     shift = vshift_nw;
+#if GLOBALARGPTR
     okn = lex(NULL,0,0,0);
+#else
+    okn = lex(NULL,0,0,0,0);
+#endif
     shift = shift_nw;
     okn = setflgs(okn,pkn->v.fl);
     return okn;
@@ -5929,10 +5993,17 @@ static psk vopb(psk pkn,const char *conc[])
 static psk opb(psk pkn,...)
     {
     psk okn;
-    va_start(ap,pkn);
-    start = startPos = va_arg(ap,unsigned char *);
+#if !GLOBALARGPTR
+    va_list argptr;
+#endif
+    va_start(argptr,pkn);
+    start = startPos = va_arg(argptr,unsigned char *);
+#if GLOBALARGPTR
     okn = lex(NULL,0,0,0);
-    va_end(ap);
+#else
+    okn = lex(NULL,0,0,0,&argptr);
+#endif
+    va_end(argptr);
     if(pkn)
         {
         okn = setflgs(okn,pkn->v.fl);
@@ -10476,11 +10547,11 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
         snijaf = sub+stringLength;
 #if CUTOFFSUGGEST
     if(  (pat->flgs & ATOM) /* 20130913 */ 
-	  ||    (NIKS(pat) 
-	     && (  is_op(pat) 
-		    || !pat->u.obj)
-			)
-	  )
+      ||    (NIKS(pat) 
+         && (  is_op(pat) 
+            || !pat->u.obj)
+            )
+      )
         {
         suggestedCutOff = NULL;
         }
@@ -12794,7 +12865,7 @@ if(kns[1] && kns[1]->u.obj)
                 {
                 return FALSE;
                 }
-	    fh->filepos = -1L;
+        fh->filepos = -1L;
             fh->mode = mode.l;
             fh->type = CHR;
             fh->size = 1;
@@ -14675,7 +14746,7 @@ static function_return_type functies(psk pkn)
                         }
                     else
                         fpi = fh->fp;
-		    for(;;)
+                    for(;;)
                         {
                         pkn = input(fpi,pkn,intVal,&err,&GoOn);
                         if(!GoOn || err)
@@ -17368,13 +17439,43 @@ void endProc(void)
 
 #include <stddef.h>
 
+#if EMSCRIPTEN
+int oneShot(char * inp)
+    {
+    int err;
+    char * mainloop;
+    const char * ret;
+    char * argv[1] = {NULL};
+    argv[0] = inp;
+    ARGV = argv;
+    ARGC = 1;
+    mainloop = "out$get$(arg$,MEM)";
+    stringEval(mainloop,&ret,&err);
+    return (int)STRTOL(ret,0,10);
+    }
+#endif
+
 int mainlus(int argc,char *argv[])
     {
     int err;
     char * mainloop;
     const char * ret;
-    if(argc > 1)
+#if EMSCRIPTEN
+    if(argc == 2)
         { /* to get here, e.g.: ./bracmat out$hello */
+        return oneShot(argv[1]);
+        /*
+        int i;
+        for(i = 1;i < argc;++i) / *20090630* /
+            {
+            stringEval(argv[i],NULL,&err);
+            }
+            */
+        }
+    else
+#endif
+    if(argc > 1)
+        { /* to get here, e.g.: ./bracmat "you:?a" "out$(hello !a)" */
         ARGC = argc;
         ARGV = argv;
         mainloop = "arg$&whl'(get$(arg$,MEM):?\"?...@#$*~%!\")&!\"?...@#$*~%!\"";
@@ -17436,6 +17537,8 @@ int mainlus(int argc,char *argv[])
     return 0;
     }
 
+#if EMSCRIPTEN_HTML
+#else
 int main(int argc,char *argv[])
     {
     int ret; /*20100310 numerical result of mainlus becomes exit code.
@@ -17455,7 +17558,7 @@ int main(int argc,char *argv[])
     printf("RADIX2 " LONGD "\n",(LONG)RADIX2);
     printf("TEN_LOG_RADIX " LONGD "\n",(LONG)TEN_LOG_RADIX);
     printf("HEADROOM " LONGD "\n",(LONG)HEADROOM);
-	return 0;
+    return 0;
 #endif
 #ifndef NDEBUG
         {
@@ -17471,6 +17574,7 @@ int main(int argc,char *argv[])
         }
 #endif
     assert(sizeof(tFlags) == sizeof(unsigned int));
+#if !EMSCRIPTEN
     while(--p >= argv[0])
         if(*p == '\\' || *p == '/')
             {
@@ -17485,6 +17589,7 @@ int main(int argc,char *argv[])
 #endif
             break;
             }
+#endif
 /*  Printf("targetPath=%s\n",targetPath);*/
 
     errorStream = stderr;
@@ -17498,6 +17603,6 @@ int main(int argc,char *argv[])
 #endif
     return ret;
     }
-
+#endif
 #endif /*#if !_BRACMATEMBEDDED*/
 
