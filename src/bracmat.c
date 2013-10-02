@@ -63,10 +63,12 @@ Test coverage:
 
 */
 
-#define DATUM "26 September 2013"
+#define DATUM "2 October 2013"
 #define VERSION "6"
-#define BUILD "165"
-/* 
+#define BUILD "166"
+/* 2 October 2013
+In stringEval: parameter 4 -> OPT_MEM
+
    26 September 2013
 In doPosition, changed FLGS to Flgs in 
     if((Flgs & UNIFY) && (is_op(pat) || (FLGS & INDIRECT)))
@@ -5819,7 +5821,7 @@ void /*int*/ stringEval(const char *s,const char ** out,int * err)
     sprintf(buf,"str$(%s)",s);
 #endif
     bron = (unsigned char *)buf;
-    anker = input(NULL,anker,4,err,NULL);
+    anker = input(NULL,anker,OPT_MEM,err,NULL); /*20130902 4 -> OPT_MEM*/
     if(err && *err)
         return /*FALSE*/;
 #if JMP
@@ -17449,7 +17451,7 @@ int oneShot(char * inp)
     argv[0] = inp;
     ARGV = argv;
     ARGC = 1;
-    mainloop = "out$get$(arg$,MEM)";
+    mainloop = "out$get$(arg$0,MEM)";
     stringEval(mainloop,&ret,&err);
     return (int)STRTOL(ret,0,10);
     }
