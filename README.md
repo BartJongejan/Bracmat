@@ -94,6 +94,7 @@ You can download Bracmat from GitHub.
     cd bracmat
     git init
     git remote add origin https://github.com/BartJongejan/Bracmat.git
+    git pull origin master
     cd ..
 
 **Installation**
