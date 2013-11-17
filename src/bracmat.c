@@ -63,10 +63,16 @@ Test coverage:
 
 */
 
-#define DATUM "26 September 2013"
+#define DATUM "17 November 2013"
 #define VERSION "6"
-#define BUILD "165"
-/* 
+#define BUILD "166"
+/* 17 November 2013
+Did some adaptations to make Norcroft C compiler (RiscOS) happy.
+(Suffix ul on large integer, correction in otherwise unused function
+swi(), removal of non-ASCII characters.)
+(There is a comment containing non-ASCII characters. Those characters
+must be removed to make the compiler completely happy.)
+
    26 September 2013
 In doPosition, changed FLGS to Flgs in 
     if((Flgs & UNIFY) && (is_op(pat) || (FLGS & INDIRECT)))
@@ -1530,10 +1536,10 @@ typedef   signed __int32  INT32_T; /* pre VS2010 has no int32_t */
 #define FTELL _ftelli64
 #else
 #if !defined NO_C_INTERFACE && !defined _WIN32
-#if UINT_MAX == 4294967295
+#if UINT_MAX == 4294967295ul
 typedef unsigned int UINT32_T;
 typedef   signed int  INT32_T;
-#elif ULONG_MAX == 4294967295
+#elif ULONG_MAX == 4294967295ul
 typedef unsigned long UINT32_T;
 typedef   signed long  INT32_T;
 #endif
@@ -2402,7 +2408,7 @@ static void dec_refcount(psk kn)
 
 #include <stdarg.h>
 
-#if EMSCRIPTEN /* This is set if compiling with emscripten. */
+#if defined EMSCRIPTEN /* This is set if compiling with emscripten. */
 #define EMSCRIPTEN_HTML 0 /* set to 1 if using emscripten to convert this file to HTML*/
 #define GLOBALARGPTR 0
 #else
@@ -3515,7 +3521,7 @@ static void checkAllBounds()
                         if(' ' <= *s && *s <= 127)
                             printf("%c",*s);
                         else if(*s == 0)
-                            printf("Ø");
+                            printf("NIL");
                         else
                             printf("-",*s);
                     printf("] %p\n",x);
@@ -5831,7 +5837,7 @@ void /*int*/ stringEval(const char *s,const char ** out,int * err)
 #endif
     anker = eval(anker);
     if(out != NULL)
-        *out = is_op(anker) ? "" : (const char *)POBJ(anker);
+        *out = is_op(anker) ? (const char *)"" : (const char *)POBJ(anker);
     free(buf);
     return /*1*/;
     }
@@ -13985,7 +13991,7 @@ static void pointerToStr(char * pc,void * p)
 #endif
 
 #if O_S
-static function_return_type swi(ppsk pkn,psk rlknoop,psk rrknoop)
+static psk swi(psk pkn,psk rlknoop,psk rrknoop)
     {
     int i;
     union
@@ -14000,14 +14006,14 @@ static function_return_type swi(ppsk pkn,psk rlknoop,psk rrknoop)
     char pc[121];
     for(i = 0;i < sizeof(os_regset)/sizeof(int);i++)
         u.s.regs.r[i] = 0;
-    rrknoop = *pkn;
+    rrknoop = pkn;
     i=0;
     do
         {
         rrknoop = rrknoop->RIGHT;
         rlknoop = is_op(rrknoop) ? rrknoop->LEFT : rrknoop;
         if(is_op(rlknoop) || !INTEGER_NIET_NEG(rlknoop))
-            return function_fail;
+            return functionFail(pkn);
         u.i[i++] = (unsigned int)
             strtoul((char *)POBJ(rlknoop),(char **)NULL,10);
         }
@@ -14026,8 +14032,7 @@ static function_return_type swi(ppsk pkn,psk rlknoop,psk rrknoop)
         u.i[6],u.i[7],u.i[8],u.i[9],u.i[10]);
 #endif
 #endif
-    *pkn = opb(*pkn,pc,NULL);
-    return functionOk(*pkn);
+    return opb(pkn,pc,NULL);
     }
 #endif
 
@@ -14105,7 +14110,8 @@ static function_return_type functies(psk pkn)
 #if O_S
         CASE(SWI) /* swi$(<interrupt number>.(input regs)) */
             {
-            swi(pkn,rlknoop,rrknoop);
+            pkn = swi(pkn,rlknoop,rrknoop);
+            return functionOk(pkn);
             }
 #endif
 
@@ -14179,9 +14185,11 @@ static function_return_type functies(psk pkn)
                     sprintf(klad,"%lu",(unsigned long)*(UINT32_T*)p);
                     break;
 #ifndef __BORLANDC__
+#if (!defined ARM || defined __SYMBIAN32__)
                 case 8:
                     sprintf(klad,"%llu",*(unsigned long long*)p);
                     break;
+#endif
 #endif                    
                 case 1:
                 default:
@@ -14575,7 +14583,7 @@ static function_return_type functies(psk pkn)
                 if(intVal)
                     {
 #ifndef EACCES
-                    sprintf(klad,"%d",ret);
+                    sprintf(klad,"%d",intVal);
 #else
                     switch(errno)
                         {
@@ -16224,14 +16232,14 @@ ltail = x
 rhead = b
 rtail = c
 
-repol = Ø
+repol = NIL
 loper = (a * x) * b * c
 lloper = a * x
 
   2*
   / \
  a
- repol = a*Ø
+ repol = a*NIL
 
 
              1*
@@ -17439,7 +17447,7 @@ void endProc(void)
 
 #include <stddef.h>
 
-#if EMSCRIPTEN
+#if defined EMSCRIPTEN
 int oneShot(char * inp)
     {
     int err;
@@ -17460,7 +17468,7 @@ int mainlus(int argc,char *argv[])
     int err;
     char * mainloop;
     const char * ret;
-#if EMSCRIPTEN
+#if defined EMSCRIPTEN
     if(argc == 2)
         { /* to get here, e.g.: ./bracmat out$hello */
         return oneShot(argv[1]);
@@ -17574,7 +17582,7 @@ int main(int argc,char *argv[])
         }
 #endif
     assert(sizeof(tFlags) == sizeof(unsigned int));
-#if !EMSCRIPTEN
+#if !defined EMSCRIPTEN
     while(--p >= argv[0])
         if(*p == '\\' || *p == '/')
             {
