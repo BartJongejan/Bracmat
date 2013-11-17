@@ -65,13 +65,16 @@ Test coverage:
 
 #define DATUM "17 November 2013"
 #define VERSION "6"
-#define BUILD "166"
+#define BUILD "167"
 /* 17 November 2013
 Did some adaptations to make Norcroft C compiler (RiscOS) happy.
 (Suffix ul on large integer, correction in otherwise unused function
 swi(), removal of non-ASCII characters.)
 (There is a comment containing non-ASCII characters. Those characters
 must be removed to make the compiler completely happy.)
+
+   2 October 2013
+In stringEval: parameter 4 -> OPT_MEM
 
    26 September 2013
 In doPosition, changed FLGS to Flgs in 
@@ -5825,7 +5828,7 @@ void /*int*/ stringEval(const char *s,const char ** out,int * err)
     sprintf(buf,"str$(%s)",s);
 #endif
     bron = (unsigned char *)buf;
-    anker = input(NULL,anker,4,err,NULL);
+    anker = input(NULL,anker,OPT_MEM,err,NULL); /*20130902 4 -> OPT_MEM*/
     if(err && *err)
         return /*FALSE*/;
 #if JMP
@@ -17457,7 +17460,7 @@ int oneShot(char * inp)
     argv[0] = inp;
     ARGV = argv;
     ARGC = 1;
-    mainloop = "out$get$(arg$,MEM)";
+    mainloop = "out$get$(arg$0,MEM)";
     stringEval(mainloop,&ret,&err);
     return (int)STRTOL(ret,0,10);
     }
