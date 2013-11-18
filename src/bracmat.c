@@ -63,10 +63,13 @@ Test coverage:
 
 */
 
-#define DATUM "17 November 2013"
+#define DATUM "18 November 2013"
 #define VERSION "6"
-#define BUILD "167"
-/* 17 November 2013
+#define BUILD "168"
+/* 18 November
+Set GLOBALARGPTR to 1. (Default: no emscripten)
+
+   17 November 2013
 Did some adaptations to make Norcroft C compiler (RiscOS) happy.
 (Suffix ul on large integer, correction in otherwise unused function
 swi(), removal of non-ASCII characters.)
@@ -2416,13 +2419,13 @@ static void dec_refcount(psk kn)
 #define GLOBALARGPTR 0
 #else
 #define EMSCRIPTEN_HTML 0 /* Normally this should be 0 */
-#define GLOBALARGPTR 0 /* Normally this should be 1 */
+#define GLOBALARGPTR 1 /* Normally this should be 1 */
 #endif
 
 #if EMSCRIPTEN_HTML
  /* must be 0: compiling with emcc (emscripten C to JavaScript compiler) */
 #else
-#define GLOBALARGPTR 0 /* 0 if compiling with emcc (emscripten C to JavaScript compiler) */
+#define GLOBALARGPTR 1 /* 0 if compiling with emcc (emscripten C to JavaScript compiler) */
 #endif
 
 #if GLOBALARGPTR
