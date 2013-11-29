@@ -1279,7 +1279,7 @@ TODO list:
 #define MAXSTACK 0 /* 1: show max stack depth (eval function only)*/
 #define CUTOFFSUGGEST 1
 #define READMARKUPFAMILY 1 /* read SGML, HTML and XML files. (include xml.c in your project!) */
-
+#define READJSON 1 /* read JSON files. (include json.c in your project!) */
 /* 
 About reference counting.
 Most nodes can be shared by no more than 1024 referers. Copies must be made as needed.
@@ -1788,6 +1788,7 @@ typedef struct
 /*#define HUM O('H','U','M')*/
 #define HT  O('H','T', 0 )
 #define IM  O('i', 0 , 0 )
+#define JSN O('J','S','N')
 #define KAR O('c','h','r')
 #define KAU O('c','h','u')
 #define LIN O('L','I','N')
@@ -1827,6 +1828,7 @@ typedef struct
 #define SHIFT_ML  4
 #define SHIFT_TRM 5
 #define SHIFT_HT  6
+#define SHIFT_JSN 7
 #define OPT_STR 1
 #define OPT_VAP 2
 #define OPT_MEM 4
@@ -1838,6 +1840,12 @@ typedef struct
 #define OPT_HT  64
 extern void XMLtext(FILE * fpi,char * bron,int trim,int html);
 #endif
+
+#if READJSON
+#define OPT_JSON 128
+extern void JSONtext(FILE * fpi,char * bron);
+#endif
+
 
 #if REFCOUNTSTRESSTEST
 #define REF_COUNT_BITS 1
@@ -5455,6 +5463,23 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
         {
         wijzer = lijst;
         XMLtext(fpi,(char*)bron,(echmemvapstrmltrm & OPT_TRM),(echmemvapstrmltrm & OPT_HT));
+        *wijzer = 0;
+        pkn = bouwboom_w(pkn);
+        if(err) *err = error;
+#ifdef __SYMBIAN32__
+        bfree(lijst);
+#endif
+        if(GoOn)
+            *GoOn = FALSE;
+        return pkn;
+        }
+    else
+#endif
+#if READJSON
+    if(echmemvapstrmltrm & OPT_JSON)
+        {
+        wijzer = lijst;
+        JSONtext(fpi,(char*)bron);
         *wijzer = 0;
         pkn = bouwboom_w(pkn);
         if(err) *err = error;
@@ -14718,7 +14743,8 @@ static function_return_type functies(psk pkn)
                        + (zoekopt(rrknoop,STG) << SHIFT_STR)
                        + (zoekopt(rrknoop,ML ) << SHIFT_ML)
                        + (zoekopt(rrknoop,TRM) << SHIFT_TRM)
-                       + (zoekopt(rrknoop,HT)  << SHIFT_HT);
+                       + (zoekopt(rrknoop,HT)  << SHIFT_HT)
+                       + (zoekopt(rrknoop,JSN) << SHIFT_JSN);
                 }
             else
                 {
@@ -17551,6 +17577,8 @@ int mainlus(int argc,char *argv[])
     return 0;
     }
 
+extern void JSONtest(void);
+
 #if EMSCRIPTEN_HTML
 #else
 int main(int argc,char *argv[])
@@ -17558,6 +17586,7 @@ int main(int argc,char *argv[])
     int ret; /*20100310 numerical result of mainlus becomes exit code.
              If out of integer range or not numerical: 0*/
     char * p = argv[0] + strlen(argv[0]);
+/*    JSONtest();*/
 #if 0
 #ifdef _WIN64 /* Microsoft 64 bit */
     printf("_WIN64\n");

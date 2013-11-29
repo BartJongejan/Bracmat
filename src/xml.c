@@ -1572,10 +1572,9 @@ static estate endtag(int kar)
         }
     }
 
-int XMLtext(FILE * fpi,char * bron,int trim,int html)
+void XMLtext(FILE * fpi,char * bron,int trim,int html)
     {
     int kar;
-    int retval = 0;
     int inc = 0x10000;
     int incs = 1;
     LONG filesize;
@@ -1603,7 +1602,6 @@ int XMLtext(FILE * fpi,char * bron,int trim,int html)
         char * alltext;
         doctypei = 0;
         cdatai = 0;
-        retval = 1;
         buf = (char*)malloc(BUFSIZE);
         p = buf;
 #if !ALWAYSREPLACEAMP
@@ -1768,12 +1766,9 @@ int XMLtext(FILE * fpi,char * bron,int trim,int html)
                     }
                 }
             }
-        else
-            retval = 0;
         if(buf)
             free(buf);
         if(alltext && alltext != bron)
             free(alltext);
         }
-    return retval;
     }

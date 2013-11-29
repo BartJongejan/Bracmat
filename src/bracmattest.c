@@ -1,6 +1,26 @@
 #include "bracmat.h"
+#include <stdio.h>
 
-/*#include <stddef.h>*/
+/* Compile with BRACMATEMBEDDED defined */
+
+static int In(void)
+    {
+    return getchar();
+    }
+
+static void Out(int c)
+    {
+    putchar(c);
+    }
+
+static void Flush(void)
+    {
+#ifdef __GNUC__
+    return fflush(stdout);
+#endif
+    }
+
+static startStruct StartStruct = {In,Out,Flush};
 
 int mainlus(int argc,char *argv[])
     {
@@ -14,7 +34,7 @@ int mainlus(int argc,char *argv[])
 int main(int argc,char *argv[])
     {
     int ret; 
-    startProc(0);
+    startProc(&StartStruct);
     ret = mainlus(argc,argv);
     endProc();
     return ret;
