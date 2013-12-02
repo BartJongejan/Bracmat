@@ -1596,7 +1596,7 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html)
         filesize = strlen(bron);
         }
     else
-        return 0;
+        return;
     if(filesize > 0)
         {
         char * alltext;

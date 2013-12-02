@@ -35,7 +35,6 @@ Convert JSONL file to Bracmat file.
 #define LONG long
 #endif
 
-
 #define TRUE 1
 #define FALSE 0
 
@@ -44,61 +43,16 @@ extern void putLeafChar(int c);
 extern char * putCodePoint(unsigned LONG val,char * s);
 
 typedef enum {nojson,json} jstate;
-static jstate (*jsonState)(int kar);
-
-static int Put(char * c);
-static int (*xput)(char * c) = Put;
-
-static int rawput(int c)
-    {
-    putLeafChar(c);
-    return TRUE;
-    }
-
-static int nrawput(char * c)
-    {
-    while(*c)
-        if(!rawput(*c++))
-            return FALSE;
-    return TRUE;
-    }
 
 #define BUFSIZE 35000
 
-static char * buf;
-static char * p;
-static char * q;
-static int anychar = FALSE;
-
 static int decimals;
 static int leadingzeros;
-
-static int Put(char * c)
-    {
-    return rawput(*c);
-    }
-
-static void flush(void)
-    {
-    if(xput != Put)
-        xput("");
-    }
-
-static void nxput(char * start,char *end)
-    {
-    for(;start < end;++start)
-        xput(start);
-    flush();
-    }
-
-
-static char * ch;
 
 static void startString(void)
     {
     putOperatorChar(' ');
     putOperatorChar('(');
-/*  nrawput("String");*/
     putOperatorChar('.');
     }
 
@@ -107,74 +61,50 @@ static void endString(void)
     putOperatorChar(')');
     }
 
-static void startValue(void)
+static void firstValue(void)
     {
     putOperatorChar(' ');
     putOperatorChar('(');
     }
 
-static void endValue(void)
-    {
-    putOperatorChar(')');
-    }
-
-static void firstNamedValue(void)
-    {
-    putOperatorChar(' ');
-    putOperatorChar('(');
-    }
-
-static void nextNamedValue(void)
+static void nextValue(void)
     {
     putOperatorChar(')');
     putOperatorChar('+');
     putOperatorChar('(');
     }
 
-static void lastNamedValue(void)
+static void lastValue(void)
     {
     putOperatorChar(')');
     }
 
-static void jcbStartArray(void)/* called when [ has been read */
+static void startArray(void)/* called when [ has been read */
     {
-    flush();
     putOperatorChar(' ');
     putOperatorChar('(');
-    /*nrawput("Array");*/
     putOperatorChar(',');
     putOperatorChar('(');
     }
 
-static void jcbEndArray(void)/* called when ] has been read */
+static void endArray(void)/* called when ] has been read */
     {
-    flush();
     putOperatorChar(')');
     putOperatorChar(')');
     }
-
 
 typedef jstate (*stateFncTp)(int);
-stateFncTp stack[100]; /* TODO make variable */
-stateFncTp * stackpointer = NULL;
-stateFncTp action;
+static stateFncTp stack[100]; /* TODO make variable */
+static stateFncTp * stackpointer = NULL;
+static stateFncTp action;
 
-stateFncTp push(stateFncTp arg)
-    {
-    *++stackpointer = arg;
-    return arg;
-    }
+#define push(arg) *++stackpointer=(arg)
+#define pop() *--stackpointer
 
-stateFncTp pop(void)
-    {
-    return *--stackpointer;
-    }
+static int needed;
+static unsigned LONG hexvalue;
 
-
-int needed;
-unsigned LONG hexvalue;
-
-jstate hexdigits(int arg)
+static jstate hexdigits(int arg)
     {
     if     ('0' <= arg && arg <= '9')
         arg -= '0';
@@ -188,32 +118,36 @@ jstate hexdigits(int arg)
         {
         char tmp[22];
         if(putCodePoint(hexvalue,tmp))
-            nrawput(tmp);
+            {
+            char * c = tmp;
+            while(*c)
+                putLeafChar(*c++);
+            }
         action = pop();
         }
     return json;
     }
 
-jstate escape(int arg)
+static jstate escape(int arg)
     {
     switch(arg)
         {
-        case '"': rawput('\"'); action = pop(); return json;
-        case '\\': rawput('\\'); action = pop(); return json;
-        case '/': rawput('/'); action = pop(); return json;
-        case 'b': rawput('\b'); action = pop(); return json;
-        case 'f': rawput('\f'); action = pop(); return json;
-        case 'n': rawput('\n'); action = pop(); return json;
-        case 'r': rawput('\r'); action = pop(); return json;
-        case 't': rawput('\t'); action = pop(); return json;
+        case '"': putLeafChar('\"'); break;
+        case '\\': putLeafChar('\\'); break;
+        case '/': putLeafChar('/'); break;
+        case 'b': putLeafChar('\b'); break;
+        case 'f': putLeafChar('\f'); break;
+        case 'n': putLeafChar('\n'); break;
+        case 'r': putLeafChar('\r'); break;
+        case 't': putLeafChar('\t'); break;
         case 'u': pop(); needed = 4; hexvalue = 0L; action = push(hexdigits); return json;
-        default:
-            pop();
+        default: action = pop(); return nojson;
         }
-    return nojson;
+    action = pop();
+    return json;
     }
 
-jstate string(int arg)
+static jstate string(int arg)
     {
     switch(arg)
         {
@@ -222,33 +156,30 @@ jstate string(int arg)
         default:
             if(arg < ' ')
                 return nojson;
-            rawput(arg);
+            putLeafChar(arg);
         }
     return json;
     }
 
-jstate name(int arg)
+static jstate name(int arg)
     {
-    switch(arg)
+    if(arg == '"')
         {
-        case '"': action = pop(); break;
-        case '\\': action = push(escape); break;
-        default:
-            if(arg < ' ')
-                return nojson;
-            rawput(arg);
+        action = pop();
+        return json;
         }
-    return json;
+    else
+        return string(arg);
     }
 
-jstate value(int arg);
+static jstate value(int arg);
 
-jstate commaOrCloseSquareBracket(int arg)
+static jstate commaOrCloseSquareBracket(int arg)
     {
     switch(arg)
         {
-        case ']': action = pop(); endValue(); jcbEndArray(); return json;
-        case ',': action = push(value); endValue(); startValue(); return json;
+        case ']': action = pop(); lastValue(); endArray(); return json;
+        case ',': action = push(value); lastValue(); firstValue(); return json;
         case ' ':
         case '\t':
         case '\r':
@@ -259,14 +190,14 @@ jstate commaOrCloseSquareBracket(int arg)
         }
     }
 
-jstate startNamestring(int arg);
+static jstate startNamestring(int arg);
 
-jstate commaOrCloseBrace(int arg)
+static jstate commaOrCloseBrace(int arg)
     {
     switch(arg)
         {
-        case '}': action = pop(); lastNamedValue(); return json;
-        case ',': pop(); action = push(startNamestring); nextNamedValue(); return json;
+        case '}': action = pop(); lastValue(); return json;
+        case ',': pop(); action = push(startNamestring); nextValue(); return json;
         case ' ':
         case '\t':
         case '\r':
@@ -277,11 +208,11 @@ jstate commaOrCloseBrace(int arg)
         }
     }
 
-jstate colon(int arg)
+static jstate colon(int arg)
         {
         switch(arg)
             {
-            case ':': pop(); putOperatorChar('.'); push(commaOrCloseBrace); action = push(value); return json;
+            case ':': pop(); putOperatorChar('.'); push(commaOrCloseBrace); action = push(value);
             case ' ':
             case '\t':
             case '\r':
@@ -292,11 +223,11 @@ jstate colon(int arg)
             }
         }
 
-jstate startNamestring(int arg)
+static jstate startNamestring(int arg)
     {
     switch(arg)
         {
-        case '"': pop(); push(colon); action = push(name); return json;
+        case '"': pop(); push(colon); action = push(name);
         case ' ':
         case '\t':
         case '\r':
@@ -305,15 +236,14 @@ jstate startNamestring(int arg)
         default:
             return nojson;
         }
-    return nojson;
     }
 
 
-jstate valueOrCloseSquareBracket(int arg)
+static jstate valueOrCloseSquareBracket(int arg)
     {
     switch(arg)
         {
-        case ']': action = pop(); jcbEndArray(); return json;
+        case ']': action = pop(); endArray();
         case ' ':
         case '\t':
         case '\r':
@@ -321,17 +251,16 @@ jstate valueOrCloseSquareBracket(int arg)
             return json;
         default:
             pop(); 
-            startValue(); 
+            firstValue(); 
             push(commaOrCloseSquareBracket);
             action = push(value);
             return value(arg);
         }
-    return nojson;
     }
 
-const char * FIXED;
+static const char * FIXED;
 
-jstate fixed(int arg)
+static jstate fixed(int arg)
     {
     int next;
     next = *FIXED++;
@@ -341,34 +270,35 @@ jstate fixed(int arg)
             {
             action = pop();
             }
-        rawput(next);
+        putLeafChar(next);
         return json;
         }
     return nojson;
     }
 
-int sign;
-int exp;
+static int sign;
+static int exp;
 
-void aftermath(int zeros)
+static void aftermath(int zeros)
     {
     if(leadingzeros)
         {
-        rawput('0');
+        putLeafChar('0');
         }
     else
         {
         if(zeros < 0)
             {
-            nrawput("/1");
+            putLeafChar('/');
+            putLeafChar('1');
             zeros = -zeros;
             }
         while(zeros--)
-            rawput('0');
+            putLeafChar('0');
         }
     }
 
-jstate exponentdigits(int arg)
+static jstate exponentdigits(int arg)
     {
     if('0' <= arg && arg <= '9')
         {
@@ -380,7 +310,7 @@ jstate exponentdigits(int arg)
     return action(arg);
     }
 
-jstate exponent(int arg)
+static jstate exponent(int arg)
     {
     if('0' <= arg && arg <= '9')
         {
@@ -392,7 +322,7 @@ jstate exponent(int arg)
     return nojson;
     }
 
-jstate plusOrMinusOrDigit(int arg)
+static jstate plusOrMinusOrDigit(int arg)
     {
     switch(arg)
         {
@@ -403,19 +333,11 @@ jstate plusOrMinusOrDigit(int arg)
             action = push(exponent);
             return json;
         default:
-            if('0' <= arg && arg <= '9')
-                {
-                pop();
-                exp = 10*exp + arg - '0';
-                action = push(exponentdigits);
-                return json;
-                }
+            return exponent(arg);
         }
-    return nojson;
     }
 
-
-jstate decimal(int arg)
+static jstate decimal(int arg)
     {
     switch(arg)
         {
@@ -427,18 +349,16 @@ jstate decimal(int arg)
             action = push(plusOrMinusOrDigit);
             return json;
         case '0':
-                {
-                ++decimals;
-                if(!leadingzeros)
-                    rawput(arg);
-                return json;
-                }
+            ++decimals;
+            if(!leadingzeros)
+                putLeafChar(arg);
+            return json;
         default:
             if('1' <= arg && arg <= '9')
                 {
                 leadingzeros = FALSE;
                 ++decimals;
-                rawput(arg);
+                putLeafChar(arg);
                 return json;
                 }
         }
@@ -447,14 +367,14 @@ jstate decimal(int arg)
     return action(arg);
     }
 
-jstate firstdecimal(int arg)
+static jstate firstdecimal(int arg)
     {
     if('0' == arg)
         {
         pop();
         decimals = 1;
         if(!leadingzeros)
-            rawput(arg);
+            putLeafChar(arg);
         action = push(decimal);
         return json;
         }
@@ -463,14 +383,14 @@ jstate firstdecimal(int arg)
         pop();
         decimals = 1;
         leadingzeros = FALSE;
-        rawput(arg);
+        putLeafChar(arg);
         action = push(decimal);
         return json;
         }
     return nojson;
     }
 
-jstate dotOrE(int arg)
+static jstate dotOrE(int arg)
     {
     switch(arg)
         {
@@ -482,38 +402,26 @@ jstate dotOrE(int arg)
             action = push(plusOrMinusOrDigit);
             return json;
         case '.': pop(); action = push(firstdecimal); return json;
-        default: action = pop(); return action(arg);
+        default: action = pop(); aftermath(0); return action(arg);
         }
     }
 
-jstate digitsOrDotOrE(int arg)
+static jstate digitsOrDotOrE(int arg)
     {
-    switch(arg)
+    if('0' <= arg && arg <= '9')
         {
-        case 'e':
-        case 'E':
-            pop();
-            sign = 1;
-            exp = 0;
-            action = push(plusOrMinusOrDigit);
-            return json;
-        case '.': pop(); action = push(firstdecimal); return json;
-        default:
-            if('0' <= arg && arg <= '9')
-                {
-                rawput(arg);
-                return json;
-                }
+        putLeafChar(arg);
+        return json;
         }
-    action = pop();
-    return action(arg);
+    else
+        return dotOrE(arg);
     }
 
-jstate firstdigit(int arg)
+static jstate firstdigit(int arg)
     {
     switch(arg)
         {
-        case '0': leadingzeros = TRUE;/*rawput(arg);*/ pop(); action = push(dotOrE); return json;
+        case '0': pop(); action = push(dotOrE); leadingzeros = TRUE;
         case ' ':
         case '\t':
         case '\r':
@@ -523,7 +431,7 @@ jstate firstdigit(int arg)
             if('1' <= arg && arg <= '9')
                 {
                 leadingzeros = FALSE;
-                rawput(arg);
+                putLeafChar(arg);
                 pop();
                 action = push(digitsOrDotOrE);
                 return json;
@@ -532,12 +440,12 @@ jstate firstdigit(int arg)
     return nojson;
     }
 
-jstate startNamestringOrCloseBrace(int arg)
+static jstate startNamestringOrCloseBrace(int arg)
     {
     switch(arg)
         {
         case '"': pop(); push(colon); action = push(name); return json;
-        case '}': action = pop(); endValue(); return json;
+        case '}': action = pop(); lastValue(); return json;
         case ' ':
         case '\t':
         case '\r':
@@ -546,46 +454,30 @@ jstate startNamestringOrCloseBrace(int arg)
         default:
             return nojson;
         }
-    return nojson;
     }
 
-jstate value(int arg)
+static jstate value(int arg)
     {
     switch(arg)
         {
-        case ' ':
-        case '\t':
-        case '\r':
-        case '\n':
-            return json;
-        case '"': pop(); startString(); action = push(string); return json;
-        case '[': pop(); action = push(valueOrCloseSquareBracket); jcbStartArray(); return json;
-        case '{': pop(); firstNamedValue(); action = push(startNamestringOrCloseBrace); return json;
-        case 't': pop(); action = push(fixed); rawput('t'); FIXED = "rue"; return json;
-        case 'f': pop(); action = push(fixed); rawput('f'); FIXED = "alse"; return json;
-        case 'n': pop(); action = push(fixed); rawput('n'); FIXED = "ull"; return json;
-        case '-': pop(); startValue(); action = push(firstdigit); rawput(arg); return json;
-        case '0': pop(); startValue(); action = push(dotOrE); leadingzeros = TRUE;/*rawput(arg);*/ return json;
+        case '"': pop(); action = push(string); startString(); return json;
+        case '[': pop(); action = push(valueOrCloseSquareBracket); startArray(); return json;
+        case '{': pop(); action = push(startNamestringOrCloseBrace); firstValue(); return json;
+        case 't': pop(); action = push(fixed); putLeafChar('t'); FIXED = "rue"; return json;
+        case 'f': pop(); action = push(fixed); putLeafChar('f'); FIXED = "alse"; return json;
+        case 'n': pop(); action = push(fixed); putLeafChar('n'); FIXED = "ull"; return json;
+        case '-': pop(); action = push(firstdigit); putLeafChar(arg); return json;
         default:
-            if('1' <= arg && arg <= '9')
-                {
-                rawput(arg);
-                pop(); 
-                action = push(digitsOrDotOrE); 
-                leadingzeros = FALSE;
-                return json;
-                }
+            return firstdigit(arg);
         }
-    return nojson;
     }
 
-
-jstate top(int arg)
+static jstate top(int arg)
     {
     switch(arg)
         {
-        case '{': action = push(startNamestringOrCloseBrace); firstNamedValue(); return json;
-        case '[': action = push(valueOrCloseSquareBracket); jcbStartArray(); return json;
+        case '{': action = push(startNamestringOrCloseBrace); firstValue(); return json;
+        case '[': action = push(valueOrCloseSquareBracket); startArray(); return json;
         case ' ':
         case '\t':
         case '\r':
@@ -594,9 +486,7 @@ jstate top(int arg)
         default:
             return nojson;
         }
-    return nojson;
     }
-
 
 static int doit(char * arg)
     {
@@ -649,22 +539,15 @@ void JSONtext(FILE * fpi,char * bron)
         filesize = strlen(bron);
         }
     else
-        return 0;
+        return;
     if(filesize > 0)
         {
-        char * alltext;
-        buf = (char*)malloc(BUFSIZE);
-        p = buf;
-#if !ALWAYSREPLACEAMP
-        q = buf;
-#endif
-        alltext = fpi ? (char*)malloc(filesize+1) : bron;
-        if(buf && alltext)
+        char * alltext = fpi ? (char*)malloc(filesize+1) : bron;
+        if(alltext)
             {
-            jstate Seq = nojson;
-            char * p = alltext;
             if(fpi)
                 {
+                char * p = alltext;
                 while((kar = getc(fpi)) != EOF)
                     {
                     *p++ = (char)kar;
@@ -676,38 +559,11 @@ void JSONtext(FILE * fpi,char * bron)
                         p = alltext + dif;
                         }
                     }
+                *p = '\0';
                 }
-            else
-                {
-                while((kar = *bron++) != 0)
-                    {
-                    *p++ = (char)kar;
-                    }
-                }
-            *p = '\0';
             doit(alltext);
-            /*
-            if(doit(alltext))
-                printf("OKJSON\n");
-            else
-                printf("FAULTY JSON\n");*/
+            if(alltext != bron)
+                free(alltext);
             }
-        if(buf)
-            free(buf);
-        if(alltext && alltext != bron)
-            free(alltext);
         }
-    }
-
-void JSONtest(void)
-    {
-    char * json = strdup("{ \"ABC\" :  [0e+9,true,[false],[null]]  }"); 
-    FILE * fp = fopen("jsontest.txt","r");
-    if(fp)
-        {
-        JSONtext(fp,0);
-        fclose(fp);
-        }
-    getchar();
-    exit(0);
     }
