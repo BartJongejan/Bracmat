@@ -277,7 +277,7 @@ static jstate fixed(int arg)
     }
 
 static int sign;
-static int exp;
+static int Nexp;
 
 static void aftermath(int zeros)
     {
@@ -302,10 +302,10 @@ static jstate exponentdigits(int arg)
     {
     if('0' <= arg && arg <= '9')
         {
-        exp = 10*exp + arg - '0';
+        Nexp = 10*Nexp + arg - '0';
         return json;
         }
-    aftermath(sign*exp - decimals);
+    aftermath(sign*Nexp - decimals);
     action = pop();
     return action(arg);
     }
@@ -314,7 +314,7 @@ static jstate exponent(int arg)
     {
     if('0' <= arg && arg <= '9')
         {
-        exp = 10*exp + arg - '0';
+        Nexp = 10*Nexp + arg - '0';
         pop();
         action = push(exponentdigits);
         return json;
@@ -345,7 +345,7 @@ static jstate decimal(int arg)
         case 'E':
             pop();
             sign = 1;
-            exp = 0;
+            Nexp = 0;
             action = push(plusOrMinusOrDigit);
             return json;
         case '0':
@@ -398,7 +398,7 @@ static jstate dotOrE(int arg)
         case 'E':
             pop();
             sign = 1;
-            exp = 0;
+            Nexp = 0;
             action = push(plusOrMinusOrDigit);
             return json;
         case '.': pop(); action = push(firstdecimal); return json;
