@@ -37,7 +37,7 @@ implements reading XML files.
 
 On *N?X, just compile with
 
-    gcc -std=c99 -pedantic -Wall -O3 -static -DNDEBUG -o bracmat bracmat.c xml.c
+    gcc -std=c99 -pedantic -Wall -O3 -static -DNDEBUG -o bracmat bracmat.c xml.c json.c
 
 
 The options are not necessary to successfully compile the program just
@@ -48,7 +48,7 @@ also works and produces the executable a.out.
 
 Profiling:
 
-    gcc -Wall -c -pg -DNDEBUG bracmat.c xml.c
+    gcc -Wall -c -pg -DNDEBUG bracmat.c xml.c json.c
     gcc -Wall -pg bracmat.o xml.o
     ./a.out 'get$"valid.bra";!r'
     gprof a.out
@@ -56,17 +56,27 @@ Profiling:
 Test coverage:
 (see http://gcc.gnu.org/onlinedocs/gcc/Invoking-Gcov.html#Invoking-Gcov)
 
-    gcc -fprofile-arcs -ftest-coverage -DNDEBUG bracmat.c xml.c
+    gcc -fprofile-arcs -ftest-coverage -DNDEBUG bracmat.c xml.c json.c
     ./a.out
     gcov bracmat.c
     gcov xml.c
+    gcov json.c
 
 */
 
-#define DATUM "18 November 2013"
+#define DATUM "4 December 2013"
 #define VERSION "6"
-#define BUILD "168"
-/* 18 November
+#define BUILD "169"
+/*  4 December 2013
+Bug found in scompare. Signed character comparison gave wrong sign for
+variable 'teken', causing mistreatment of 8th-bit-set characters, so 
+@(får:? (å|æ) ?l) failed.
+
+    1 December 2013
+Added json.c to support reading JSON files. Use JSN, e.g. 
+get'("myjson.json",JSN)
+
+   18 November
 Set GLOBALARGPTR to 1. (Default: no emscripten)
 
    17 November 2013
@@ -8633,7 +8643,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                 case GREATER_THAN|SMALLER_THAN:    /* n:<>p */
                 case NOT:                        /* n:~p */
                     {
-                    while(((teken = (s < snijaf ? *s : 0) - *P) == 0) && *P) /* 20100210 Additional argument snijaf */
+                    while(((teken = (s < snijaf ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*P) == 0) && *P) /* 20100210 Additional argument snijaf */
                         {
                         ++s;
                         ++P;
@@ -8665,7 +8675,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                     }
                 case GREATER_THAN:    /* n:>p */
                     {
-                    while(((teken = *s - *P) == 0) && *s && *P)
+                    while(((teken = (int)(unsigned char)*s - (int)(unsigned char)*P) == 0) && *s && *P)
                         {
                         ++s;
                         ++P;
@@ -8680,7 +8690,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                     }
                 case NOT|GREATER_THAN|SMALLER_THAN:    /* n:~<>p */
                 case 0:                                /* n:p */
-                    while(((teken = *s - *P) == 0) && *s && *P)
+                    while(((teken = (int)(unsigned char)*s - (int)(unsigned char)*P) == 0) && *s && *P)
                         {
                         ++s;
                         ++P;
@@ -8721,7 +8731,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                     /*break;*/
                 case NOT|SMALLER_THAN:    /* n:~<p */
                 /*default:*/
-                    while(((teken = *s - *P) == 0) && *s && *P)
+                    while(((teken = (int)(unsigned char)*s - (int)(unsigned char)*P) == 0) && *s && *P)
                         {
                         ++s;
                         ++P;
@@ -8746,7 +8756,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
 #if 1
                 case NOT|GREATER_THAN|SMALLER_THAN:    /* n:~<>p */
                 case 0:                                /* n:p */
-                    while(((teken = (s < snijaf ? *s : 0) - *P) == 0) && *s && *P)
+                    while(((teken = (s < snijaf ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*P) == 0) && *s && *P)
                         {
                         ++s;
                         ++P;

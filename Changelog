@@ -1,3 +1,25 @@
+    4 December 2013
+Bug found in scompare. Signed character comparison gave wrong sign for
+variable 'teken', causing mistreatment of 8th-bit-set characters, so 
+@(får:? (å|æ) ?l) failed.
+
+    1 December 2013
+Added json.c to support reading JSON files. Use JSN, e.g. 
+get'("myjson.json",JSN)
+
+   18 November
+Set GLOBALARGPTR to 1. (Default: no emscripten)
+
+   17 November 2013
+Did some adaptations to make Norcroft C compiler (RiscOS) happy.
+(Suffix ul on large integer, correction in otherwise unused function
+swi(), removal of non-ASCII characters.)
+(There is a comment containing non-ASCII characters. Those characters
+must be removed to make the compiler completely happy.)
+
+   2 October 2013
+In stringEval: parameter 4 -> OPT_MEM
+
    26 September 2013
 In doPosition, changed FLGS to Flgs in 
     if((Flgs & UNIFY) && (is_op(pat) || (FLGS & INDIRECT)))

@@ -999,7 +999,7 @@ used."
     )
   & ( gettxt
     =   T
-      , "get$(<atom-or-nil>[,MEM][,ECH][,VAP][,STR])"
+      , "get$(<atom-or-nil>[,MEM][,ECH][,VAP][,STR][,JSN]|[[,X]|[,HT],ML[,TRM]])"
       ,   "get$ reads and interprets characters in a string (internal memory) or file
 (external memory or keyboard).
 
@@ -1027,6 +1027,9 @@ options :
     <not present>
     The characters are interpreted as parts of a Bracmat expression and
     evaluated after the whole expression has been read.
+|_JSN_|
+    <present>
+    The input is parsed as JSON.
 |_ML_|
     <present>
     The input is parsed as markup (SGML,XML or HTML)

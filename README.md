@@ -17,6 +17,8 @@ http://rosettacode.org/wiki/Rosetta_Code
       An optional header file, if you want to compile Bracmat as a library.
     * xml.c
       Source code that implements support for reading XML-files
+    * json.c
+      Source code that implements support for reading JSON-files
 * Changelog
   
   A document describing changes between versions.
@@ -102,7 +104,7 @@ You can download Bracmat from GitHub.
 The Bracmat source code has no other dependencies than what is provided by
 Standard C. Building bracmat from source is extremely simple, e.g.:
 
-    gcc bracmat.c xml.c
+    gcc bracmat.c xml.c json.c
     
 You can also use the Makefile, which is in the src directory.    
 
