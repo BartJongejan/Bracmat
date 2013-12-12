@@ -1,3 +1,9 @@
+   13 December 2013
+get$ now fails when trying to read invalid JSON
+get$("<p",MEM,ML) now returns (p.). Before an empty string was returned.
+Combined some stringpointers into one variable StaRt.
+Can now read deeply nested JSON, because stack dynamically resizes. 
+
     4 December 2013
 Bug found in scompare. Signed character comparison gave wrong sign for
 variable 'teken', causing mistreatment of 8th-bit-set characters, so 

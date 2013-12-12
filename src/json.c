@@ -94,12 +94,30 @@ static void endArray(void)/* called when ] has been read */
     }
 
 typedef jstate (*stateFncTp)(int);
-static stateFncTp stack[100]; /* TODO make variable */
-static stateFncTp * stackpointer = NULL;
+static unsigned int stacksiz;
+static stateFncTp * stack;
+static stateFncTp * stackpointer;
 static stateFncTp action;
 
-#define push(arg) *++stackpointer=(arg)
-#define pop() *--stackpointer
+static stateFncTp push(stateFncTp arg)
+    {
+    ++stackpointer;
+    if(stackpointer == stack + stacksiz)
+        {
+        unsigned int newsiz = (2 * stacksiz + 1);
+        stack = (stateFncTp *)realloc(stack,newsiz * sizeof(stateFncTp));
+        stackpointer = stack + stacksiz; 
+        stacksiz = newsiz;
+        }
+    return *stackpointer=(arg);
+    }
+
+static stateFncTp pop(void)
+    {
+    --stackpointer;
+    assert(stackpointer >= stack);
+    return *stackpointer;
+    }
 
 static int needed;
 static unsigned LONG hexvalue;
@@ -490,7 +508,11 @@ static jstate top(int arg)
 
 static int doit(char * arg)
     {
-    stackpointer = stack + 0;
+    stacksiz = 1;
+    stack = (stateFncTp *)malloc(stacksiz * sizeof(stateFncTp));
+    *stack = 0;
+    stackpointer = stack + 0; 
+
     action = top;
     for(;*arg && action;++arg)
         {
@@ -510,16 +532,17 @@ static int doit(char * arg)
                 return FALSE;
             }
         }
-    
+    free(stack);
     return stackpointer == stack;
     }
 
 
-void JSONtext(FILE * fpi,char * bron)
+int JSONtext(FILE * fpi,char * bron)
     {
     int kar;
     int inc = 0x10000;
     int incs = 1;
+    int ok = 1;
     LONG filesize;
     if(fpi)
         {
@@ -539,7 +562,7 @@ void JSONtext(FILE * fpi,char * bron)
         filesize = strlen(bron);
         }
     else
-        return;
+        return 0;
     if(filesize > 0)
         {
         char * alltext = fpi ? (char*)malloc(filesize+1) : bron;
@@ -561,9 +584,10 @@ void JSONtext(FILE * fpi,char * bron)
                     }
                 *p = '\0';
                 }
-            doit(alltext);
+            ok = doit(alltext);
             if(alltext != bron)
                 free(alltext);
             }
         }
+    return !ok;
     }

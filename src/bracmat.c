@@ -64,10 +64,16 @@ Test coverage:
 
 */
 
-#define DATUM "4 December 2013"
+#define DATUM "13 December 2013"
 #define VERSION "6"
-#define BUILD "169"
-/*  4 December 2013
+#define BUILD "170"
+/* 13 December 2013
+get$ now fails when trying to read invalid JSON
+get$("<p",MEM,ML) now returns (p.). Before an empty string was returned.
+Combined some stringpointers into one variable StaRt.
+Can now read deeply nested JSON, because stack dynamically resizes. 
+
+   4 December 2013
 Bug found in scompare. Signed character comparison gave wrong sign for
 variable 'teken', causing mistreatment of 8th-bit-set characters, so 
 @(får:? (å|æ) ?l) failed.
@@ -1853,7 +1859,7 @@ extern void XMLtext(FILE * fpi,char * bron,int trim,int html);
 
 #if READJSON
 #define OPT_JSON 128
-extern void JSONtext(FILE * fpi,char * bron);
+extern int JSONtext(FILE * fpi,char * bron);
 #endif
 
 
@@ -5489,7 +5495,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
     if(echmemvapstrmltrm & OPT_JSON)
         {
         wijzer = lijst;
-        JSONtext(fpi,(char*)bron);
+        error = JSONtext(fpi,(char*)bron);
         *wijzer = 0;
         pkn = bouwboom_w(pkn);
         if(err) *err = error;
@@ -14742,6 +14748,7 @@ static function_return_type functies(psk pkn)
         CASE(GET) /* get$file */
             {
             Boolean GoOn;
+            int err = 0;
             if(is_op(rknoop))
                 {
                 if(is_op(rlknoop = rknoop->LEFT))
@@ -14763,7 +14770,6 @@ static function_return_type functies(psk pkn)
                 }
             if(intVal & OPT_MEM)
                 {
-                int err;
                 adr[1] = zelfde_als_w(rlknoop);
                 bron = POBJ(adr[1]);
                 for(;;)
@@ -14781,7 +14787,6 @@ static function_return_type functies(psk pkn)
                     {
 #if !defined NO_FOPEN
                     FILE *red;
-                    int err;
                     filehendel * fh;
                     red = fpi;
                     fh = myfopen((char *)POBJ(rlknoop),"r"
@@ -14812,7 +14817,6 @@ static function_return_type functies(psk pkn)
                     }
                 else
                     {
-                    int err;
                     intVal |= OPT_ECH;
 #ifdef DELAY_DUE_TO_INPUT
                     for(;;)
@@ -14836,7 +14840,7 @@ static function_return_type functies(psk pkn)
 #endif
                     }
                 }
-            return functionOk(pkn);
+            return err ? functionFail(pkn) : functionOk(pkn);
             }
         CASE(PUT) /* put$(file,mode,knoop) of put$knoop */
             {

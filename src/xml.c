@@ -637,44 +637,39 @@ static void nonTag(char * kind,char * start,char * end)
     }
 
 static char * ch;
-static char * startScript = 0;
-static char * startMarkup = NULL;
-static char * startComment = NULL;
-static char * startDOCTYPE = NULL;
-static char * startCDATA = NULL;
-static char * startElementName = NULL;
-static char * startAttributeName = NULL;
-static char * startValue = NULL;
+static char * StaRt = 0;
+static int isMarkup = 0;
 
 static void cbStartMarkUp(void)/* called when <!X has been read, where X != [ or - */
     {
     flush();
-    startMarkup = ch+2;
+    StaRt = ch+2;
+    isMarkup = 1;
     putOperatorChar(' ');
     putOperatorChar('(');
     }
 
 static void cbEndMarkUp(void)/* called when > has been read */
     {
-    if(startMarkup)
-        nonTag("!",startMarkup,ch);
+    if(isMarkup)
+        nonTag("!",StaRt,ch);
     }
 
 static void cbEndDOCTYPE(void)/* called when > has been read */
     {
-    startMarkup = NULL;
-    nonTagWithoutEntityUnfolding("!DOCTYPE",startDOCTYPE,ch);
+    isMarkup = 0;
+    nonTagWithoutEntityUnfolding("!DOCTYPE",StaRt,ch);
     }
 
 static void cbEndElementName(void)
     {
-    nxput(startElementName,ch);
+    nxput(StaRt,ch);
     putOperatorChar('.');
     }
 
 static void cbEndAttributeName(void)
     {
-    nxput(startAttributeName,ch);
+    nxput(StaRt,ch);
     putOperatorChar('.');
     }
 
@@ -742,7 +737,7 @@ static estate lt(int kar)
             tagState = markup;
             return tag;
         case '?':
-            startScript = ch;
+            StaRt = ch;
             tagState = script;
             return tag;
         case '/':
@@ -758,7 +753,7 @@ static estate lt(int kar)
             if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
                 {
                 tagState = element;
-                startElementName = ch;
+                StaRt = ch;
                 return tag;
                 }
             else
@@ -929,7 +924,7 @@ static estate atts(int kar)
             if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
                 {
                 putOperatorChar('(');
-                startAttributeName = ch;
+                StaRt = ch;
                 tagState = name;
                 return tag;
                 }
@@ -1016,7 +1011,7 @@ static estate value(int kar)
         default:
             if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
                 {
-                startValue = ch;
+                StaRt = ch;
                 tagState = invalue;
                 return tag;
                 }
@@ -1069,7 +1064,7 @@ static estate atts_or_value(int kar)
                 {
                 cbEndAttribute();
                 putOperatorChar('(');
-                startAttributeName = ch;
+                StaRt = ch;
                 tagState = name;
                 return tag;
                 }
@@ -1087,14 +1082,14 @@ static estate invalue(int kar)
         {
         case '<':
             tagState = lt;
-            nxput(startValue,ch);
+            nxput(StaRt,ch);
             cbEndAttribute();
             putOperatorChar(')');
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
             tagState = def;
-            nxput(startValue,ch);
+            nxput(StaRt,ch);
             cbEndAttribute();
             putOperatorChar(')');
             return endoftag;
@@ -1103,7 +1098,7 @@ static estate invalue(int kar)
         case '\t':
         case '\n':
         case '\r':
-            nxput(startValue,ch);
+            nxput(StaRt,ch);
             cbEndAttribute();
             tagState = atts;
             return tag;
@@ -1122,11 +1117,11 @@ static estate invalue(int kar)
 
 static estate singlequotes(int kar)
     {
-    startValue = ch;
+    StaRt = ch;
     switch(kar)
         {
         case '\'':
-            nxput(startValue,ch);
+            nxput(StaRt,ch);
             cbEndAttribute();
             tagState = endvalue;
             return tag;
@@ -1138,11 +1133,11 @@ static estate singlequotes(int kar)
 
 static estate doublequotes(int kar)
     {
-    startValue = ch;
+    StaRt = ch;
     switch(kar)
         {
         case '\"':
-            nxput(startValue,ch);
+            nxput(StaRt,ch);
             cbEndAttribute();
             tagState = endvalue;
             return tag;
@@ -1157,7 +1152,7 @@ static estate insinglequotedvalue(int kar)
     switch(kar)
         {
         case '\'':
-            nxput(startValue,ch);
+            nxput(StaRt,ch);
             cbEndAttribute();
             tagState = endvalue;
             return tag;
@@ -1171,7 +1166,7 @@ static estate indoublequotedvalue(int kar)
     switch(kar)
         {
         case '\"':
-            nxput(startValue,ch);
+            nxput(StaRt,ch);
             cbEndAttribute();
             tagState = endvalue;
             return tag;
@@ -1264,12 +1259,12 @@ static estate script(int kar)
         {
         case '<':
             tagState = lt;
-            nonTagWithoutEntityUnfolding("?",startScript+1,ch-1);
+            nonTagWithoutEntityUnfolding("?",StaRt+1,ch-1);
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
             tagState = def;
-            nonTagWithoutEntityUnfolding("?",startScript+1,ch-1);
+            nonTagWithoutEntityUnfolding("?",StaRt+1,ch-1);
             return endoftag;
         case '?':
             tagState = endscript;
@@ -1285,7 +1280,7 @@ static estate endscript(int kar)
         {
         case '>':
             tagState = def;
-            nonTagWithoutEntityUnfolding("?",startScript+1,ch-1);
+            nonTagWithoutEntityUnfolding("?",StaRt+1,ch-1);
             return endoftag;
         default:
             tagState = CDATA7;
@@ -1345,7 +1340,7 @@ static estate DOCTYPE7(int kar) /* <!DOCTYPE */
         case '\t':
         case '\r':
         case '\n':
-            startDOCTYPE = ch;
+            StaRt = ch;
             tagState = DOCTYPE8;
             return tag;
         default:
@@ -1433,7 +1428,7 @@ static estate CDATA1(int kar) /* <![ */
                 if(cdatai == sizeof(cdata) - 2)
                     {
                     tagState = CDATA7;
-                    startCDATA = ch+1;
+                    StaRt = ch+1;
                     cdatai = 0;
                     }
                 else
@@ -1480,8 +1475,8 @@ static estate CDATA9(int kar) /* <![CDATA[ ]] */
         {
         case '>':  /* <![CDATA[ ]]> */
             tagState = def;
-            startMarkup = NULL;
-            nonTagWithoutEntityUnfolding("![CDATA[",startCDATA,ch-2);
+            isMarkup = 0;
+            nonTagWithoutEntityUnfolding("![CDATA[",StaRt,ch-2);
             return endoftag;
         default:
             tagState = CDATA7;
@@ -1503,7 +1498,7 @@ static estate h1(int kar) /* <!- */
             return notag;
         case '-':
             tagState = h2;
-            startComment = ch+1;
+            StaRt = ch+1;
             return tag;
         default:
             tagState = unknownmarkup;
@@ -1529,8 +1524,8 @@ static estate h3(int kar) /* <!--  - */
         {
         case '-': /* <!-- -- */
             tagState = markup;
-            startMarkup = NULL;
-            nonTagWithoutEntityUnfolding("!--",startComment,ch-1);
+            isMarkup = 0;
+            nonTagWithoutEntityUnfolding("!--",StaRt,ch-1);
             return tag;
         default:
             tagState = h2;
@@ -1544,11 +1539,13 @@ static estate endtag(int kar)
         {
         case '<':
             tagState = lt;
+            cbEndElementName();
             putOperatorChar(')');
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
             tagState = def;
+            cbEndElementName();
             putOperatorChar(')');
             return endoftag;
         case 0xA0:
@@ -1561,7 +1558,7 @@ static estate endtag(int kar)
             if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
                 {
                 tagState = elementonly;
-                startElementName = ch;
+                StaRt = ch;
                 return tag;
                 }
             else
@@ -1756,6 +1753,12 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html)
                     }
                 }
             if(Seq == tag)
+                {
+                Seq = (*tagState)(' ');
+                if(Seq == tag)
+                    putOperatorChar(')');
+                }
+#if 0
                 { /* Incomplete SGML tag. Backtrack. */
                 endpos = ch;
                 ch = curr_pos;
@@ -1765,6 +1768,7 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html)
                     ch++;
                     }
                 }
+#endif
             }
         if(buf)
             free(buf);
