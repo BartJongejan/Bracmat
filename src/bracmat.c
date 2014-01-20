@@ -33,7 +33,8 @@ The program only utilizes standard libraries.
 
 Until 2012, the source code consisted of a single file, bracmat.c.
 Because XML is becoming more popular, a separate source file, xml.c
-implements reading XML files.
+implements reading XML files. Another separate source file, json.c,
+implements reading JSON files.
 
 On *N?X, just compile with
 
@@ -49,7 +50,7 @@ also works and produces the executable a.out.
 Profiling:
 
     gcc -Wall -c -pg -DNDEBUG bracmat.c xml.c json.c
-    gcc -Wall -pg bracmat.o xml.o
+    gcc -Wall -pg bracmat.o xml.o json.o
     ./a.out 'get$"valid.bra";!r'
     gprof a.out
 
