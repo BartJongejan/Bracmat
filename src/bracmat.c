@@ -64,10 +64,13 @@ Test coverage:
 
 */
 
-#define DATUM "13 December 2013"
+#define DATUM "20 January 2014"
 #define VERSION "6"
-#define BUILD "170"
-/* 13 December 2013
+#define BUILD "171"
+/* 20 January 2014
+If EMSCRIPTEN: define NO_C_INTERFACE NO_FILE_RENAME NO_FILE_REMOVE NO_SYSTEM_CALL NO_LOW_LEVEL_FILE_HANDLING NO_FOPEN NO_EXIT_ON_NON_SEVERE_ERRORS
+
+   13 December 2013
 get$ now fails when trying to read invalid JSON
 get$("<p",MEM,ML) now returns (p.). Before an empty string was returned.
 Combined some stringpointers into one variable StaRt.
