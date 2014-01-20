@@ -400,7 +400,7 @@ descending tree as the default internal representation for sums and products:
 The numerical factors are very close to the root of the tree and therefore
 easy to find. Moreover, for the result
 
-    3*(a*(b*c))
+    7*(a*(b*c))
     
 Bracmat only needs to create one node for the numerical factor |_7_| and
 one node for a single multiplication operator, because the subexpression    

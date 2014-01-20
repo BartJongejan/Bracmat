@@ -2439,8 +2439,17 @@ static void dec_refcount(psk kn)
 #include <stdarg.h>
 
 #if defined EMSCRIPTEN /* This is set if compiling with emscripten. */
-#define EMSCRIPTEN_HTML 0 /* set to 1 if using emscripten to convert this file to HTML*/
+#define EMSCRIPTEN_HTML 1 /* set to 1 if using emscripten to convert this file to HTML*/
 #define GLOBALARGPTR 0
+
+#define NO_C_INTERFACE
+#define NO_FILE_RENAME
+#define NO_FILE_REMOVE
+#define NO_SYSTEM_CALL
+#define NO_LOW_LEVEL_FILE_HANDLING
+#define NO_FOPEN
+#define NO_EXIT_ON_NON_SEVERE_ERRORS
+
 #else
 #define EMSCRIPTEN_HTML 0 /* Normally this should be 0 */
 #define GLOBALARGPTR 1 /* Normally this should be 1 */
