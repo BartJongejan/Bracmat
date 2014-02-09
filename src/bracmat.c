@@ -65,10 +65,14 @@ Test coverage:
 
 */
 
-#define DATUM "20 January 2014"
+#define DATUM "8 February 2014"
 #define VERSION "6"
-#define BUILD "171"
-/* 20 January 2014
+#define BUILD "172"
+/* 8 February 2014
+Found bug that cause Bracmat to crash on 4*(x+7)+p+-4*x. 
+Solved by uncommenting old code.
+
+   20 January 2014
 If EMSCRIPTEN: define NO_C_INTERFACE NO_FILE_RENAME NO_FILE_REMOVE NO_SYSTEM_CALL NO_LOW_LEVEL_FILE_HANDLING NO_FOPEN NO_EXIT_ON_NON_SEVERE_ERRORS
 
    13 December 2013
@@ -15661,9 +15665,9 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
         {
         adr[1] = Rterm;
         adr[2] = L;
-        assert(Rtail);
-/*        if(Rtail)
-            {*/
+        /*assert(Rtail);*/
+        if(Rtail)
+            {
          /* How to get here?
                 (1+a)*(1+b)+c+(1+d)*(1+f)
          The lhs (1+a)*(1+b) is not expanded before the merge starts
@@ -15677,11 +15681,12 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
          */
             adr[3] = Rtail;
             return opb     (top,"\1+\2+\3",NULL);
-          /*  }
+            }
         else
-            {
+            { /* 20140208 */
+            /* 4*(x+7)+p+-4*x */
             return opb     (top,"\1+\2",NULL);
-            }*/
+            }
         }
 
     if(  kop(Lterm) == LOG

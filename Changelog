@@ -1,3 +1,6 @@
+   8 February 2014
+Crash on 4*(x+7)+p+-4*x. Solved by uncommenting old code.
+
    20 January 2014
 If EMSCRIPTEN: define NO_C_INTERFACE NO_FILE_RENAME NO_FILE_REMOVE
 NO_SYSTEM_CALL NO_LOW_LEVEL_FILE_HANDLING NO_FOPEN NO_EXIT_ON_NON_SEVERE_ERRORS
