@@ -65,10 +65,26 @@ Test coverage:
 
 */
 
-#define DATUM "8 February 2014"
+#define DATUM "17 April 2014"
 #define VERSION "6"
-#define BUILD "172"
-/* 8 February 2014
+#define BUILD "173"
+/* 17 April 2014
+In HTML (not XHTML), the script and style elements have cdata, not parsing the
+<![CDATA[  ]]> tag that may be present for compatibility with XHTML.
+The cdata of scipt and style elements ends at the first occurrence of the
+character sequence </
+(That means that that character sequence may not occur in for example inline
+JavaScript in an HTML file that is not XML at the same time.)
+
+get, put and lst can take argument TXT and BIN. BIN means that a 'b' is added
+to the file mode. In *n*x systems this has no effect. In Windows, text mode
+is default, while a 'b' is needed to suppress carriage returns.
+get and lst read resp. write per default in binary mode. put writes per default
+in text mode.
+
+When lst is used to output to stdout, a newline is inserted before the last ).
+
+    8 February 2014
 Found bug that cause Bracmat to crash on 4*(x+7)+p+-4*x. 
 Solved by uncommenting old code.
 
@@ -1610,6 +1626,13 @@ typedef   signed long  INT32_T;
 #endif
 #endif
 
+#define READBIN   "rb" /* BIN is default for get$, overrule with option TXT */
+#define READTXT   "r"
+#define WRITEBIN  "wb" /* BIN is default for lst$, overrule with option TXT */
+#define APPENDBIN "ab" 
+#define WRITETXT  "w"  /* TXT is default for put$, overrule with option BIN */
+#define APPENDTXT "a"
+
 #define LOGWORDLENGTH 2
 /* vlaggen in knoop */
 #define NOT              1      /* ~ */
@@ -1791,6 +1814,7 @@ typedef struct
 #define ARG O('a','r','g') /*20100308 arg$ returns next program argument*/
 #define APP O('A','P','P')
 #define ASC O('a','s','c')
+#define BIN O('B','I','N')
 #define CLK O('c','l','k')
 #define CON O('C','O','N')
 #if DEBUGBRACMAT
@@ -1835,11 +1859,12 @@ typedef struct
 #define TBL O('t','b','l')
 #define TRM O('T','R','M')
 #define TWEE O('2', 0 , 0 )
-#define TXT O('E','X','P')
+#define TXT O('T','X','T')
 #define UPP O('u','p','p')
 #define UTF O('u','t','f')
 #define VAP O('V','A','P')
 #define WHL O('w','h','l')
+#define X   O('X', 0 , 0 )
 #define X2D O('x','2','d') /*20100219 hex -> dec*/
 #define D2X O('d','2','x') /*20100219 dec -> hex*/
 #define XX  O('e', 0 , 0 )
@@ -1852,21 +1877,28 @@ typedef struct
 #define SHIFT_ML  4
 #define SHIFT_TRM 5
 #define SHIFT_HT  6
-#define SHIFT_JSN 7
-#define OPT_STR 1
-#define OPT_VAP 2
-#define OPT_MEM 4
-#define OPT_ECH 8
+#define SHIFT_X   7
+#define SHIFT_JSN 8
+#define SHIFT_TXT 9  /* "r" "w" "a" */
+#define SHIFT_BIN 10 /* "rb" "wb" "ab" */
+
+#define OPT_STR (1 << SHIFT_STR)
+#define OPT_VAP (1 << SHIFT_VAP)
+#define OPT_MEM (1 << SHIFT_MEM)
+#define OPT_ECH (1 << SHIFT_ECH)
+#define OPT_TXT (1 << SHIFT_TXT)
+#define OPT_BIN (1 << SHIFT_BIN)
 
 #if READMARKUPFAMILY
-#define OPT_ML 16
-#define OPT_TRM 32
-#define OPT_HT  64
-extern void XMLtext(FILE * fpi,char * bron,int trim,int html);
+#define OPT_ML  (1 << SHIFT_ML)
+#define OPT_TRM (1 << SHIFT_TRM)
+#define OPT_HT  (1 << SHIFT_HT)
+#define OPT_X   (1 << SHIFT_X)
+extern void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml);
 #endif
 
 #if READJSON
-#define OPT_JSON 128
+#define OPT_JSON (1 << SHIFT_JSN)
 extern int JSONtext(FILE * fpi,char * bron);
 #endif
 
@@ -3317,7 +3349,7 @@ static int errorprintf(const char *fmt, ...)
     fpo = errorStream;
 #if !defined NO_FOPEN
     if(fpo == NULL && errorFileName != NULL)
-        fpo = fopen(errorFileName,"a");
+        fpo = fopen(errorFileName,APPENDTXT);
 #endif
 /*#endif*/
     if(fpo)
@@ -5370,7 +5402,7 @@ void writeError(psk pkn)
     fpo = errorStream;
 #if !defined NO_FOPEN
     if(fpo == NULL && errorFileName != NULL)
-        fpo = fopen(errorFileName,"a");
+        fpo = fopen(errorFileName,APPENDBIN);
 #endif
     if(fpo)
         {
@@ -5416,7 +5448,7 @@ static int redirectError(char * name)
     else
         {
 #if !defined NO_FOPEN
-        errorStream = fopen(name,"a");
+        errorStream = fopen(name,APPENDTXT);
         if(errorStream)
             {
 /*            errorFileName = strdup(name);*/
@@ -5495,7 +5527,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
     if(echmemvapstrmltrm & OPT_ML)
         {
         wijzer = lijst;
-        XMLtext(fpi,(char*)bron,(echmemvapstrmltrm & OPT_TRM),(echmemvapstrmltrm & OPT_HT));
+        XMLtext(fpi,(char*)bron,(echmemvapstrmltrm & OPT_TRM),(echmemvapstrmltrm & OPT_HT),(echmemvapstrmltrm & OPT_X));
         *wijzer = 0;
         pkn = bouwboom_w(pkn);
         if(err) *err = error;
@@ -12547,7 +12579,7 @@ for(alfabet = 0;alfabet<256;alfabet++)
                 tmp = Entry(navar->n,n,&navar->pvaria);
                 result(*tmp = Head(*tmp));
                 if(fpo == stdout)
-                    Printf(")");
+                    Printf("\n)");
                 myprintf(";\n",NULL);
                 }
             }
@@ -13451,7 +13483,7 @@ FILE *redfpo;
 psk rknoop,rlknoop,rrknoop,rrrknoop;
 static LONG opts[] =
     {APP,NEW,
-     TXT,VAP,
+     TXT,BIN,VAP,
      EXT,MEM,
      CON,LIN,
      0L};
@@ -13494,9 +13526,18 @@ if(kop(rknoop = (*pkn)->RIGHT) == KOMMA)
          && allopts((rrrknoop = rrknoop->RIGHT),opts))
         {
 #if !defined NO_FOPEN
+        int binmode = ((hoe == lst) && !zoekopt(rrrknoop,TXT)) || zoekopt(rrrknoop,BIN);
         filehendel * fh = 
             myfopen((char *)POBJ(rrknoop->LEFT),
-                    zoekopt(rrrknoop,NEW) ? "w" : "a"
+                      zoekopt(rrrknoop,NEW) 
+                    ? ( binmode
+                      ? WRITEBIN 
+                      : WRITETXT
+                      ) 
+                    : ( binmode 
+                      ? APPENDBIN 
+                      : APPENDTXT
+                      )
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
                     ,TRUE
 #endif
@@ -14778,7 +14819,10 @@ static function_return_type functies(psk pkn)
                        + (zoekopt(rrknoop,ML ) << SHIFT_ML)
                        + (zoekopt(rrknoop,TRM) << SHIFT_TRM)
                        + (zoekopt(rrknoop,HT)  << SHIFT_HT)
-                       + (zoekopt(rrknoop,JSN) << SHIFT_JSN);
+                       + (zoekopt(rrknoop,X)   << SHIFT_X)
+                       + (zoekopt(rrknoop,JSN) << SHIFT_JSN)
+                       + (zoekopt(rrknoop,TXT) << SHIFT_TXT)
+                       + (zoekopt(rrknoop,BIN) << SHIFT_BIN);
                 }
             else
                 {
@@ -14806,7 +14850,7 @@ static function_return_type functies(psk pkn)
                     FILE *red;
                     filehendel * fh;
                     red = fpi;
-                    fh = myfopen((char *)POBJ(rlknoop),"r"
+                    fh = myfopen((char *)POBJ(rlknoop),(intVal & OPT_TXT) ? READTXT : READBIN
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
                         ,TRUE
 #endif

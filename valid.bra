@@ -1,4 +1,5 @@
-{valid.bra}Xobject=
+{valid.bra}
+Xobject=
   (donit=.)
   ( doit
   =     D I M N Out SEC T W
@@ -350,9 +351,10 @@
             & !y:bbcaa
           | Out$(24 x !x y !y)
           )
-          "{\r\r\rgrep = name,text,loop,line,stop\r\r\r.     !arg:(?name.?text)\r\r\r   & fil$(!name,rb)\r\r\r   & fil$(,STR)\r\r\r   & ( loop\r\r\r     =   (fil$:(?line.?stop))\r\r\r       & (   @(!line:? !text ?)\r\r\r           & Out$!line\r\r\r         | \r\r\r         )\r\r\r       & !loop\r\r\r     )\r\r\r   & ~!loop\r\r\r   & fil$(,SET,-1)\r\r\r   | fil$(,SET,-1)\r\r\r   |\r\r\r   ;\r\r\r\r\r\rgrep$(help\\help.Bart);\r\r\r}"
           (       get
-                $ ( "The pacifier or shortcut flag is inherited by higher levels, it percolates\r\r\rtowards operators that are closer to the root of the tree, until it is\r\r\rsubsumed in situations like the above ones."
+                $ ( "The pacifier or shortcut flag is inherited by higher levels, it percolates
+towards operators that are closer to the root of the tree, until it is
+subsumed in situations like the above ones."
                   , MEM
                   , VAP
                   )
@@ -362,17 +364,21 @@
                   & ~(!g:?h "," ?&!h:~)
                   )
             &   str$!f
-              : "The pacifier or shortcut flag is inherited by higher levels, it percolates\r\r\rtowards operators that are closer to the root of the tree"
+              : "The pacifier or shortcut flag is inherited by higher levels, it percolates
+towards operators that are closer to the root of the tree"
           | Out$(25 str$("f=[" !f "]"))
           )
           (       get
-                $ ( "The pacifier or shortcut flag is inherited by higher levels, it percolates\r\r\rtowards operators that are closer to the root of the tree, until it is\r\r\rsubsumed in situations like the above ones."
+                $ ( "The pacifier or shortcut flag is inherited by higher levels, it percolates
+towards operators that are closer to the root of the tree, until it is
+subsumed in situations like the above ones."
                   , MEM
                   , VAP
                   )
               : ?f "," (("," ?|~(? "," ?)):?g)
             &   str$!f
-              : "The pacifier or shortcut flag is inherited by higher levels, it percolates\r\r\rtowards operators that are closer to the root of the tree"
+              : "The pacifier or shortcut flag is inherited by higher levels, it percolates
+towards operators that are closer to the root of the tree"
           | Out$(26 str$("f=[" !f "]"))
           )
           ( @("a  b":? "  " ?)
@@ -416,7 +422,11 @@
           & !y:"/"
           & Out$"28k outer stringmatch must have atom as subject."
           )
-          "   (This fails because the pattern \r\r\r        #?a (~#%@:?y) #?b \r\r\r    is in the match context 12/34:<rhs>, not in a stringmatch context.\r\r\r    Remember, the first @ says that subject is an atom, which it is in the \r\r\r    match context, but not in a stringmatch context.)"
+          "   (This fails because the pattern 
+          #?a (~#%@:?y) #?b 
+          is in the match context 12/34:<rhs>, not in a stringmatch context.
+          Remember, the first @ says that subject is an atom, which it is in the 
+          match context, but not in a stringmatch context.)"
           ( @( 12/34:@(#?a (~#%@:?y) #?b:?x)
              & !y:"/"
              )
@@ -1884,7 +1894,7 @@
             & !y:"  "
           | Out$162
           )
-          (   @("  \r\r\r\r\r\r	  xyz\r\r\r\r\r\r  ":?a (>@" " ?:?y) ~>%" " ?)
+          (   @("  \r	  xyz\r  ":?a (>@" " ?:?y) ~>%" " ?)
             & str$("[" !y "]"):"[xyz]"
           | Out$162
           )
@@ -3298,7 +3308,15 @@
                   )
                 $ 10
               : 3628800
-            & "recursive lambda function computing factorial of 10. \r\r\r            g := λr. λn.(1, if n = 0; else n × (r r (n-1)))\r\r\r            f := g g\r\r\r          or, translated to Bracmat\r\r\r            ( (=(r.!arg:?r&'(.!arg:0&1|!arg*(($r)$($r))$(!arg+-1)))):?g\r\r\r            & (!g$!g):?f\r\r\r            & !f$10\r\r\r            )\r\r\r          See http://en.wikipedia.org/wiki/Lambda_calculus"
+            & "recursive lambda function computing factorial of 10.
+               g := λr. λn.(1, if n = 0; else n × (r r (n-1)))
+               f := g g
+               or, translated to Bracmat
+               ( (=(r.!arg:?r&'(.!arg:0&1|!arg*(($r)$($r))$(!arg+-1)))):?g
+               & (!g$!g):?f
+               & !f$10
+                 )
+               See http://en.wikipedia.org/wiki/Lambda_calculus"
           | Out$435
           )
           (   ( 
@@ -3879,7 +3897,11 @@
           (   ( W
               = whl'(1+!n:?n:~>1100&!W)
               )
-            & "Microsoft VC++ 2008 \r\r\r						32 bit:		16056 debug: 1119\r\r\r						64 bit:	     5384\r\r\r			   Borland BC5			 8618\r\r\r			   gcc 4.1.2 20080704	23807"
+            & "Microsoft VC++ 2008
+            	32 bit:		16056 debug: 1119
+                64 bit:	     5384
+                Borland BC5			 8618
+                gcc 4.1.2 20080704	23807"
             & 0:?n
             & !W
           | Out$498
@@ -3893,7 +3915,11 @@
                   )
                 & !loop
               )
-            & "Microsoft VC++ 2008\r\r\r						32 bit:		28546 debug: 4016\r\r\r						64 bit:	     9231\r\r\r		       Borland BC5	        28730\r\r\r		       gcc 4.1.2 20080704  157128"
+            & "Microsoft VC++ 2008
+            	32 bit:		28546 debug: 4016
+                64 bit:	     9231
+                Borland BC5	        28730
+                gcc 4.1.2 20080704  157128"
             & 0:?n
             & `!L
           | Out$499
@@ -4122,7 +4148,10 @@
             &   !G3
               : (=(A&X:?(G3.)) B)
               : (=A B)
-            & "The value of G3, =A B, is not evaluated. When !G3 is evaluated, \r\r\r               a copy of the = is created, with the READY flag set.\r\r\r               The assignment X:?(G3.) assigns to the original, unevaluated,\r\r\r               object, dereferencing A, B and the operator connecting them."
+            & "The value of G3, =A B, is not evaluated. When !G3 is evaluated,
+               a copy of the = is created, with the READY flag set.
+               The assignment X:?(G3.) assigns to the original, unevaluated,
+               object, dereferencing A, B and the operator connecting them."
             & A
             & !loss
             & "blank operator"
@@ -4562,8 +4591,12 @@
             & rmv$taytestest
           | Out$616
           )
-          (   put$("{comment line 1\r{comment line 2}\r}",taytesttest,NEW)
-            & put$("\"sting line 1\rstring line 2\"\r;",taytesttest,APP)
+          (   put$("{comment line 1
+{comment line 2}
+}",taytesttest,NEW)
+            & put$("\"sting line 1
+string line 2\"
+;",taytesttest,APP)
             & lst$(tay,taytesttest,APP)
             & get$(taytesttest,ECH):tay
             & rmv$taytestest
@@ -5381,6 +5414,79 @@
           )
           (-1*(-1+x^2)+1+-2*x+x^2|Out$868)
           (4*(x+7)+p+-4*x|Out$869)
+          (   get$("<style><![CDATA[</a*]]></style><b>",MEM,X,ML)
+            :   (style.)
+                ("![CDATA["."</a*")
+                (.style.)
+                (b.)
+          | Out$870
+          )
+          (   get$("<style><![CDATA[</a*]]></style><b>",MEM,H,ML)
+            :   (style.)
+                ("![CDATA["."</a*")
+                (.style.)
+                (b.)
+          | Out$871
+          )
+          (   get$("<style><![CDATA[</a*]]></style><b>",MEM,HT,ML)
+            :   (style.)
+                "<![CDATA["
+                (."</a*]]>" (.style.) (b.))
+          | Out$872
+          )
+          (     get
+              $ ( "<style><br/><![CDATA[< /a*</style><b>]]></style>"
+                , MEM
+                , HT
+                , ML
+                )
+            :   (style.)
+                "<br/><![CDATA[< /a*"
+                (.style.)
+                (b.)
+                "]]>"
+                (.style.)
+          | Out$873
+          )
+          (     get
+              $ ( "<style><br/><![CDATA[< /a*</style><b>]]></style>"
+                , MEM
+                , X
+                , ML
+                )
+            :   (style.)
+                (br.,)
+                ("![CDATA["."< /a*</style><b>")
+                (.style.)
+          | Out$874
+          )
+          (     get
+              $ ( "<style><br/><![CDATA[< /a*</style><b>]]></style>"
+                , MEM
+                , X
+                , HT
+                , ML
+                )
+            :   (style.)
+                (br.,)
+                ("![CDATA["."< /a*</style><b>")
+                (.style.)
+          | Out$875
+          )
+          (     get
+              $ ( "<style><br/><![CDATA[< /a*</style><b>]]></style>"
+                , MEM
+                , HT
+                , ML
+                )
+            :   (style.)
+                "<br/><![CDATA[< /a*"
+                (.style.)
+                (b.)
+                "]]>"
+                (.style.)
+          | Out$876
+          )
       &   out
         $ ( str
           $ ( "Done. "
@@ -5394,14 +5500,15 @@
   );
 
 r=
-  get$"valid.bra"
+  get$("valid.bra",TXT)
 & rmv$"valid.bak"
 & ren$("valid.bra","valid.bak")
-& put$("{valid.bra}\r\r\r","valid.bra",NEW)
+& put$("{valid.bra}
+","valid.bra",NEW,BIN)
 & lst$(Xobject,"valid.bra",APP)
-& put$(\n,"valid.bra",APP)
+& put$(\n,"valid.bra",APP,BIN)
 & lst$(r,"valid.bra",APP)
-& put$(\n,"valid.bra",APP)
+& put$(\n,"valid.bra",APP,BIN)
 & (   666:?aaa
     & fast:?speed
     & slow:?speed

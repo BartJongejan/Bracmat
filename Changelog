@@ -1,3 +1,18 @@
+   17 April 2014
+In HTML (not XHTML), the script and style elements have cdata, not parsing the
+<![CDATA[  ]]> tag that may be present for compatibility with XHTML.
+The cdata of scipt and style elements ends at the first occurrence of the
+character sequence </
+(That means that that character sequence may not occur in for example inline
+JavaScript in an HTML file that is not XML at the same time.)
+
+get, put and lst can take argument TXT and BIN. BIN means that a 'b' is added
+to the file mode. In *n*x systems this has no effect. In Windows, text mode
+is default, while a 'b' is needed to suppress carriage returns.
+get and lst read resp. write per default in binary mode. put writes per default
+in text mode.
+
+When lst is used to output to stdout, a newline is inserted before the last ).
    8 February 2014
 Crash on 4*(x+7)+p+-4*x. Solved by uncommenting old code.
 
