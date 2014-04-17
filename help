@@ -2,7 +2,7 @@ help=
   ( streep,verwerk,lusmenu,whatIsBracmat,filosofie,colofon
   . syntax,atotxt,evaltxt,gettxt,contxt,binovztxt,patternm
   . savtxt,dumtxt,binprotxt,prostutxt1,prostutxt2,funmactxt
-  . unops,naamloos,algtxt,unpattxt,binmenu,pattxttxt
+  . unops,naamloos,algtxt,unpattxt,binmenu,pattxttxt,
   . pattxt,asstxt,unopsmenu,unstuurtxt,varsmenu,funcmenu
   . varmattxt,varprotxt,progsmenu,debugtxt,debugtxt2,debugtxt3
   . inbltmenu,alctxt,aligntxt,asctxt,utftxt,chrtxt,charset
@@ -221,13 +221,13 @@ lex lexical analysis of help file"
           (15,fretxt)
           (16,gettxt)
           (17,lowtxt DOSopttxt)
-          (18,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt)
+          (18,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt )
           (19,memtxt)
           (20,modtxt)
           (21,newobjecttxt)
           (22,peetxt)
           (23,poktxt)
-          (24,puttxt1 humtxt puttxt2 puttxt3 newtxt)
+          (24,puttxt1 humtxt puttxt2 puttxt3 newtxt )
           (25,rentxt)
           (26,rmvtxt)
           (27,revtxt)
@@ -999,7 +999,7 @@ used."
     )
   & ( gettxt
     =   T
-      , "get$(<atom-or-nil>[,MEM][,ECH][,VAP][,STR][,JSN]|[[,X]|[,HT],ML[,TRM]])"
+      , "get$(<atom-or-nil>[,MEM][,ECH][,VAP][,STR][,TXT|BIN][,JSN]|[[,X]|[,HT],ML[,TRM]])"
       ,   "get$ reads and interprets characters in a string (internal memory) or file
 (external memory or keyboard).
 
@@ -1027,6 +1027,16 @@ options :
     <not present>
     The characters are interpreted as parts of a Bracmat expression and
     evaluated after the whole expression has been read.
+|_TXT_|
+    <present>
+    File is read in 'text' mode (file mode r)
+    <not present>
+    File is read in binary mode (file mode rb)
+|_BIN_|
+    <present>
+    File is read in binary mode
+    <not present>
+    File is still read in binary mode
 |_JSN_|
     <present>
     The input is parsed as JSON.
@@ -3036,7 +3046,7 @@ very large atoms (such as this help function) do less well. Example:
     )
   & ( lsttxt3
     =   T
-      , "|_lst$(<variable>,<file name>,NEW | APP [,LIN])_|"
+      , "|_lst$(<variable>,<file name>,NEW | APP [,LIN][,TXT][,BIN])_|"
       , "This time, output is sent to the named file instead of standard output.
 The third argument is explained below.
 Code that has been saved with lst$ can be reloaded with get$.
@@ -3060,14 +3070,25 @@ The predefined function cat$ makes use of mem$.
     )
   & ( newtxt
     =   T
-      , "options |_NEW_| and |_APP_|"
-      , "one of the options |_NEW_| and |_APP_| must be present:
+      , "options |_NEW_|, |_APP_|, |_TXT_| and |_BIN_|"
+      , "One of the options |_NEW_| and |_APP_| must be present:
       
 |_NEW_|
     tells the computer to open a new file or overwrite an old one.
 |_APP_|
     directs output to an existing file. If the file does not exist, it is
-    created first."
+    created first.
+
+Options |_TXT_| and |_BIN_| overrule the default file mode of the functions
+|_put_| and |_lst_|.
+      
+|_TXT_|
+    tells Bracmat to write a file in text mode. This is the default file mode
+    for |_put_|. In Windows, each line feed character will be preceded by a
+    carriage return. In Unix and Linux, text mode and binary mode are the same.
+|_BIN_|
+    tells Bracmat to write a file in binary mode. This is the default file mode
+    for |_lst_|."
     )
   & ( humtxt
     =   T
@@ -5353,6 +5374,7 @@ _________________________________________________________________________
 "
             , "help.bra"
             , APP
+            , BIN
             )
       | ?
       );
