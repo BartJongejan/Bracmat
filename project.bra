@@ -1,6 +1,6 @@
-project=
+(project=
   new
-=   n N c C K E B K v V f F l r L G
+=   N c C K E B K v V f F l r L G
   .   prog:?B
     & str$(!B ".bra"):?N
     & X:?C
@@ -26,7 +26,7 @@ project=
     & whl'@(!K:(\n|" "|\t) ?K)
     & rev$!K:?K
     & str$("{" !n (!K:|\n !K) "}\n\n"):?K
-    & put$(str$!K,!n,NEW)
+    & put$(str$!K,!n,NEW,BIN)
     & ( G
       =   L v
         .   :?L
@@ -65,17 +65,20 @@ project=
       : (=?l)
     & l$
     &     
-        ' ( get'$n
+        ' ( get'($n,TXT)
           & rmv$(str$($B ".bak"))
           & ren$($n.str$($B ".bak"))
-          & put$($K,$n,NEW)
+          & put$($K,$n,NEW,BIN)
           & lst'($c,$n,APP)
-          & put'(\n,$n,APP)
+          & put'(\n,$n,APP,BIN)
           & lst'(r,$n,APP)
-          & put$(str$("\nnew'" ()$c ";\n"),$n,APP)
+          & put$(str$("\nnew'" ()$c ";\n"),$n,APP,BIN)
+          &
           )
       : (=?r)
-    & put$(\n,!n,APP)
+    & put$(\n,!n,APP,BIN)
     & lst$(r,!n,APP)
-    & put$(str$("\nnew$" !c ";\n"),!n,APP)
-    & out$done;
+    & put$(str$("\nnew$" !c "&|failure!;\n"),!n,APP,BIN)
+    & out$done
+);
+new$project&tbl$(project,-1)&get$!n&put$("Enter !r to re-read" !n \n)&tbl$(n,-1)&;
