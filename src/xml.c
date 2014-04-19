@@ -564,6 +564,8 @@ static int charref(char * c)
                     }
                 }
             rawput('&');
+            rawput('&');
+            rawput(';');
             nrawput(buf);
             rawput(';');
             p = buf;

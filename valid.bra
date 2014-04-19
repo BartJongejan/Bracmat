@@ -5487,6 +5487,10 @@ string line 2\"
                 (.style.)
           | Out$876
           )
+          (   get$("&surrogate-blocks;",MEM,ML)
+            : "&&;surrogate-blocks;"
+          | Out$877
+          )
       &   out
         $ ( str
           $ ( "Done. "

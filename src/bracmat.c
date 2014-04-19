@@ -68,7 +68,13 @@ Test coverage:
 #define DATUM "17 April 2014"
 #define VERSION "6"
 #define BUILD "173"
-/* 17 April 2014
+/* 19 April 2014
+(xml.c) Unknown entity references are escaped by replacing the '&' at the start
+by '&&;'. So "&surrogate-blocks;" becomes "&&;surrogate-blocks;". When writing
+back to mark-up, all '&' must be converted to &amp;, except the seqences '&&;',
+which must be converted to '&'.
+
+   17 April 2014
 In HTML (not XHTML), the script and style elements have cdata, not parsing the
 <![CDATA[  ]]> tag that may be present for compatibility with XHTML.
 The cdata of scipt and style elements ends at the first occurrence of the
