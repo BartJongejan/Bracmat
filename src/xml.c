@@ -76,23 +76,6 @@ static int nrawput(char * c)
             return FALSE;
     return TRUE;
     }
-/*
-Handle such things:  &amp;security-level;
-
-In this case, &amp; must not be converted to &, because &security-level; is
-(probably) not a declared entity reference name.
- 
-[4]   	NameStartChar	   ::=   	":" | [A-Z] | "_" | [a-z] | [#xC0-#xD6] | [#xD8-#xF6] | [#xF8-#x2FF] | [#x370-#x37D] | [#x37F-#x1FFF] | [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] | [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] | [#x10000-#xEFFFF]
-[4a]   	NameChar	   ::=   	NameStartChar | "-" | "." | [0-9] | #xB7 | [#x0300-#x036F] | [#x203F-#x2040]
-[5]   	Name	   ::=   	NameStartChar (NameChar)*
-
-
-The charref thing can first be done after the string following it is sure
-not to be an entity reference.
-
-If you want &amp; always to be converted to &, #define ALWAYSREPLACEAMP 1
-*/
-#define ALWAYSREPLACEAMP 1
 
 struct lowup
     {
@@ -131,9 +114,6 @@ struct lowup lu[] =
 
 static char * buf;
 static char * p;
-#if !ALWAYSREPLACEAMP
-static char * q;
-#endif
 static int anychar = FALSE;
 
 static int (*namechar)(int c);
@@ -200,38 +180,6 @@ static int entity(int c)
         }
     return FALSE;
     }
-
-#if !ALWAYSREPLACEAMP
-static int charrefamp(char * c)
-    {
-    if(*c == ';')
-        { /* Found something like &amp;security-level; */
-        *p = '\0';
-        rawput('&');
-        nrawput(buf);
-        rawput(';');
-        p = buf;
-        xput = Put;
-        return FALSE;
-        }
-    else if(!namechar(*c))
-        { /* Found something like &amp;security-level# */
-        rawput('&');
-        *p = '\0';
-        nrawput(q);
-        if(*c > 0)
-            rawput(*c);
-        p = buf;
-        xput = Put;
-        return FALSE;
-        }
-    else if(p < buf+BUFSIZE-1)
-        {
-        *p++ = *c;
-        }
-    return TRUE;
-    }
-#endif
 
 typedef struct Entity {char * ent;int code;} Entity;
 static Entity entities[]={
@@ -504,17 +452,7 @@ static int charref(char * c)
           || !strcmp(buf,"#38")
           || !strcmp(buf,"#x26")
           )
-#if ALWAYSREPLACEAMP
             rawput('&');
-#else
-            {
-            *p++ = ';';
-            q = p;
-            namechar = entity;
-            xput = charrefamp;
-            return TRUE;
-            }
-#endif
         else if(!strcmp(buf,"apos"))
             rawput('\'');
         else if(!strcmp(buf,"quot"))
@@ -1725,9 +1663,6 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
         cdatai = 0;
         buf = (char*)malloc(BUFSIZE);
         p = buf;
-#if !ALWAYSREPLACEAMP
-        q = buf;
-#endif
         alltext = (fpi || trim) ? (char*)malloc(filesize+1) : bron;
         HT = html;
         X = xml;
