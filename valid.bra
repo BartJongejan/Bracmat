@@ -5487,8 +5487,14 @@ string line 2\"
                 (.style.)
           | Out$876
           )
-          (   get$("&surrogate-blocks;",MEM,ML)
-            : "&&;surrogate-blocks;"
+          ( @( get$("&surrogate-blocks;",MEM,ML)
+             : chr$127 "&surrogate-blocks;"
+             )
+          | Out$877
+          )
+          ( @( get$(str$(chr$127),MEM,ML)
+             : chr$127 chr$127
+             )
           | Out$877
           )
       &   out

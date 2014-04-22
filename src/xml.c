@@ -501,9 +501,8 @@ static int charref(char * c)
                         }
                     }
                 }
+            rawput(127); /* Escape with DEL */
             rawput('&');
-            rawput('&');
-            rawput(';');
             nrawput(buf);
             rawput(';');
             p = buf;
@@ -539,6 +538,8 @@ static int Put(char * c)
         namechar = entity;
         return TRUE;
         }
+    else if(*c == 127) /* DEL, used as escape character for & before unrecognised entity reference */
+        rawput(*c); /* double the escape character */
     return rawput(*c);
     }
 

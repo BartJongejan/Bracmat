@@ -65,10 +65,17 @@ Test coverage:
 
 */
 
-#define DATUM "17 April 2014"
+#define DATUM "22 April 2014"
 #define VERSION "6"
-#define BUILD "173"
-/* 19 April 2014
+#define BUILD "174"
+/* 22 April 2014
+(xml.c) The &&; sequence to escape & is no good, because &amp;&amp;; after a
+full round trip ends up as & using this scheme. Decide to use the DEL character
+(ASCII 127) instead and see whether that goes.. This character is forbidden or
+discouraged in HTML  and XML So &blah; becomes DEL&blah; and DEL becomes 
+DELDEL.
+
+   19 April 2014
 (xml.c) Unknown entity references are escaped by replacing the '&' at the start
 by '&&;'. So "&surrogate-blocks;" becomes "&&;surrogate-blocks;". When writing
 back to mark-up, all '&' must be converted to &amp;, except the seqences '&&;',
