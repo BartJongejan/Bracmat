@@ -15,9 +15,9 @@ help=
   . outtxt,taytxt,newtxt,newobjecttxt,humtxt,objecttxt,hashtxt
   . paragraphs,fname,findtxt,inserttxt,removetxt,Newtxt,Dietxt
   . ISOtxt,casesensitivetxt,foralltxt,doHTML,clktxt,limitations
-  . lowtxt,upptxt,DOSopttxt,whltxt,argtxt,d2xtxt,x2dtxt
+  . lowtxt,upptxt,DOSopttxt,whltxt,argtxt,d2xtxt,x2dtxt,rewriting 
   . gentlepat recurpat closetxt filesettxt interaction usecases
-  . fixdtxt modetxt positiontxt readtxt varitxt writetxt
+  . fixdtxt modetxt positiontxt readtxt varitxt writetxt nonlinpat
   )
 .   ( lusmenu
     =   M
@@ -597,13 +597,17 @@ relational database. But it doesn't stop here, because Bracmat supports
 recursive invocations of pattern matching and other operations.
 
 1 Gentle introduction
-2 Recursive patterns
-3 Pattern matching in character strings
-4 Pattern matching in tree structures"
+2 Rewriting data using pattern matching
+3 Non-linear patterns
+4 Recursive patterns
+5 Pattern matching in character strings
+6 Pattern matching in tree structures"
       ,   (1,gentlepat)
-          (2,recurpat)
-          (3,pattxttxt pattxt2)
-          (4,pattxt escappattxt)
+          (2,rewriting)
+          (3,nonlinpat)
+          (4,recurpat)
+          (5,pattxttxt pattxt2)
+          (6,pattxt escappattxt)
     )
   & ( gentlepat
     =   T
@@ -653,6 +657,77 @@ not the normal match operation, but a string match operation.
 The patterns in string match operations are similar to patterns in normal match
 operations that have sentences (words separated by blank operators) as the
 subject."
+    )
+  & (rewriting
+    = T
+     ,"Rewriting data using pattern matching"
+     ,"
+An important application of pattern matching is rewriting data by means of a
+number of rules. Each rule consists of a pattern and a replacement expression.
+Often, the pattern explicitly specifies only parts of the subject, so that the
+same rule will fire for a broad class of subjects, all having the specified
+parts of the rule in common. The remaining, unspecified, parts normally have
+to reappear unscathed in the output of the transformation rule. To catch these
+parts, patterns can contain any number of variables that bind to the parts of
+the rule that are not completely fixed.
+
+Suppose we have the sentence |_My name is Ivan the terrible_| and we want to
+change |_Ivan_| to |_Wanja_|.
+The following instructions can do that:
+
+{?} My name is Ivan the terrible:?begin Ivan ?end
+{!} My name is Ivan the terrible
+{?} !begin Wanja !end
+{!} My name is Wanja the terrible
+
+A question mark indicates that the symbol that it precedes is a variable that
+accepts (part of) the subject as value. An exclamation mark indicates that the
+following symbol is supposed to be a variable and that the value of that 
+variable must replace the variable.
+
+The pattern |_?begin Ivan ?end_| and the replacement |_!begin Wanja !end_|
+are not sensitive to what the rest of the sentence looks like, so we can
+use the same pattern and replacement expression to transform another sentence:
+
+{?} Ivan goes to school:?begin Ivan ?end
+{!} Ivan goes to school
+{?} !begin Wanja !end
+{!} Wanja goes to school
+
+To make a rewrite rule out of these two components, we can put them in a
+function that we can feed any sentence and that returns a transformed sentence,
+if the pattern matched the input. In addition, the function below simply
+returns the input if the pattern didn't match.
+
+{?} ( ivanRule
+    =   begin end
+      .     !arg:?begin Ivan ?end
+          & !begin Wanja !end
+        | !arg
+    )
+{!} ivanRule
+{?} ivanRule$(She bought a bycicle for Ivan)
+{!} She bought a bycicle for Wanja
+"
+     )
+  & (nonlinpat
+    = T
+      , "Non-linear patterns"
+      ,"Bracmat patterns not only can contain receiving variables (those that are
+preceded by a question mark), but also giving variables (those that are
+preceded by an exclamation mark). The same variable symbol can even occur
+in both roles: as receiving and as giving, in any order. If an occurrence of a
+variable is receiving and a later in the pattern giving, than the pattern is
+said to be non-linear. Such patterns can for example be used to find things
+that occur more than once in the subject. For example, find two inventions of the
+same age in a list of name/year pairs:
+
+{?} (   (teabag.1904) (sonar.1906) (computer.1941) (triode.1906) (zeppelin.1900)
+      : ? (?invention1.?year) ? (?invention2.!year) ?
+    & !invention1 !invention2
+    )
+{!} sonar triode
+"
     )
   & ( recurpat
     =   T
@@ -1468,7 +1543,7 @@ most useful in definitions of certain types of recursive functions
 (tree walkers).
 
 The assignment of a new value to the _ variable can only take place
-in a match. A _ in a pattern is always receiving, whereas a _
+in a match operation. A _ in a pattern is always receiving, whereas a _
 outside a pattern is either giving or left unchanged. Try this :
 
 {?} a_b             { This has unpredictable results. }
@@ -2686,7 +2761,8 @@ extra text to the output, remember that the atgument to out$ is returned.
        & out$(still need !n+-1*!k loops) {you don't always need quotation marks}
        & !loop)"
           "Now an example that is faulty. The purpose is to find two equal words in a
-sentence. This expression succeeds, but finds nothing:
+sentence with a non-linear pattern.
+This expression succeeds, but finds nothing:
 
   (De kok snijdt recht en de meid snijdt scheef : (? ?a ? !a ?) & out$(!a is occurring twice))
 
@@ -2950,14 +3026,19 @@ behaviour of the program.
     )
   & ( funtxt1
     =   T
-      , "<function name>=<var1> [,<var2>, ...].<function body>"
-      , "Definition of a function. <var1>,<var2>, etc. are explicitly declared local
-variables. A function is called by
-<function name>$<argument expression> or
-|_<function name>'<argument expression>_| ,
-depending on whether <argument expression> must be evaluated ($) or not |_(')_|
-before it is passed to the function in the always present local variable
-|_arg_|.
+      , "Definition of a function"
+      , "<function-name>=<var1> [,<var2>, ...].<function-body>
+      
+<var1>,<var2>, etc. are explicitly declared local variables. A function is
+called by <function name>$<argument expression>
+or |_<function name>'<argument expression>_| ,
+depending on whether <argument expression> must be evaluated ($) 
+or not |_(')_|.
+
+All Bracmat functions have arity one or two, that is, they accept one or two
+arguments. The |_<argument expression>_| to the right of the ($) or |_(')_|
+is always represented in the body of the function by a local variable |_arg_|.
+
 The returned value of a function is simply the function body after it
 has been evaluated.
 
@@ -2970,10 +3051,11 @@ has been evaluated.
 {?} swap$(I think,I guess)
 
 In a match context, a function call creates a second local variable,
-|_sjt_|, the current subject. The value returned from a function in a match
-context is interpreted as a pattern by the match evaluator. However, if the
-function call fails, the pattern match is not attempted and fails as well.
-If the returned value is negated the behaviour is not defined.
+|_sjt_| (think SuJeT, SubJecT), the current subject. The value returned from
+a function in a match context is interpreted as a pattern by the match
+evaluator. However, if the function call fails, the pattern match operation
+is not attempted and fails as well. The behaviour is not defined if the
+returned value is negated.
 
 {?} ( like
     =
