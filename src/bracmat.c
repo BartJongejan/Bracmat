@@ -65,10 +65,13 @@ Test coverage:
 
 */
 
-#define DATUM "22 April 2014"
+#define DATUM "3 May 2014"
 #define VERSION "6"
-#define BUILD "174"
-/* 22 April 2014
+#define BUILD "175"
+/* 3 May 2014
+a^(b+c+d+e)*f^(g+h):?*?^(%+[<3)*? failed, while it should succeed
+
+   22 April 2014
 (xml.c) The &&; sequence to escape & is no good, because &amp;&amp;; after a
 full round trip ends up as & using this scheme. Decide to use the DEL character
 (ASCII 127) instead and see whether that goes.. This character is forbidden or
@@ -11561,6 +11564,9 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                         {
                         if ((s.c.lmr = match(ind+1,sub->LEFT, pat->LEFT, NULL,0,sub->LEFT,12345)) & TRUE)
                             s.c.rmr = match(ind+1,sub->RIGHT, pat->RIGHT, NULL,0,sub->RIGHT,12345);
+#ifndef NDEBUG
+                            DBGSRC(printMatchState("EXP:EXIT-MID",s,pposition,0);)
+#endif
                         s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE)); /* a*b^2*c:?x*?y^(~1:?t)*?z */
                         }
                     else if(  ((s.c.lmr = match(ind+1,sub, pat->LEFT, snijaf,pposition,expr,op)) & TRUE)
@@ -11569,6 +11575,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                         { /* a^2*b*c*d^3 : ?x^(?s:~1)*?y^?t*?z^(>2:?u) */
                         s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE));
                         }
+                    s.c.rmr &= ~POSITION_MAX_REACHED;
                     break;
                 case STREEP:
                     if (is_op(sub))
@@ -11599,6 +11606,21 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                             {
                             dummy_op = kop(sub);
                             }
+#ifndef NDEBUG
+                        DBGSRC(printMatchState("STREEP:EXIT-MID",s,pposition,0);)
+#endif
+                            switch( kop(sub))
+                            {
+                            case LUCHT:
+                            case PLUS:
+                            case MAAL:
+                                break;
+                            default:
+                                s.c.rmr &= ~POSITION_MAX_REACHED;
+                            }
+#ifndef NDEBUG
+                        DBGSRC(printMatchState("streep:EXIT-MID",s,pposition,0);)
+#endif
                         }
                     if (s.c.lmr != PRISTINE)
                         s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE));
@@ -11761,6 +11783,7 @@ b b h h h a b c d:?X (|b c|x) d)
                             }
                         else
                             s.c.rmr = (char)ONCE; /*{?} (=!):(=$!!) => F */
+                        s.c.rmr &= ~POSITION_MAX_REACHED;
                         break;
                         }
                     /* fall through */
@@ -11804,7 +11827,11 @@ b b h h h a b c d:?X (|b c|x) d)
                                     s.c.rmr = match(ind+1,sub->RIGHT, pat->RIGHT, NULL,0,sub->RIGHT,2234);
                                 }
                             s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE));
+                            s.c.rmr &= ~POSITION_MAX_REACHED;
                             }
+#ifndef NDEBUG
+                            DBGSRC(printMatchState("DEFAULT:EXIT-MID",s,pposition,0);)
+#endif
                         }
                     else
                         {

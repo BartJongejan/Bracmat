@@ -1,3 +1,15 @@
+   3 May 2014
+a^(b+c+d+e)*f^(g+h):?*?^(%+[<3)*? failed to succeed. If the first found
+sublist (b+c+d+e in this example) failed to match the pattern, other sublists
+where not tried.
+
+   22 April 2014
+(xml.c) The &&; sequence to escape & is no good, because &amp;&amp;; after a
+full round trip ends up as & using this scheme. Decide to use the DEL character
+(ASCII 127) instead and see whether that goes.. This character is forbidden or
+discouraged in HTML  and XML So &blah; becomes DEL&blah; and DEL becomes 
+DELDEL.
+
    19 April 2014
 (xml.c) Unknown entity references are escaped by replacing the '&' at the start
 by '&&;'. So "&surrogate-blocks;" becomes "&&;surrogate-blocks;". When writing
