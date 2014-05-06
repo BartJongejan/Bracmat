@@ -1,3 +1,8 @@
+   6 May 2014
+Increased a buffer size to solve segmentation fault problem with 64-bit
+version when evaluating roots of some big numbers, for example
+10090000004431^1/2
+
    3 May 2014
 a^(b+c+d+e)*f^(g+h):?*?^(%+[<3)*? failed to succeed. If the first found
 sublist (b+c+d+e in this example) failed to match the pattern, other sublists

@@ -65,10 +65,15 @@ Test coverage:
 
 */
 
-#define DATUM "3 May 2014"
+#define DATUM "6 May 2014"
 #define VERSION "6"
-#define BUILD "175"
-/* 3 May 2014
+#define BUILD "176"
+/* 6 May 2014
+Increased a buffer size to solve segmentation fault problem with 64-bit
+version when evaluating roots of some big numbers, for example
+10090000004431^1/2
+
+   3 May 2014
 a^(b+c+d+e)*f^(g+h):?*?^(%+[<3)*? failed, while it should succeed
 
    22 April 2014
@@ -11938,7 +11943,7 @@ static int subroot(ngetal * ag,char *conc[],int *pind)
         }
     if(ores == 1 && macht == 1)
         return FALSE;
-    conc[*pind] = (char *)bmalloc(__LINE__,24);
+    conc[*pind] = (char *)bmalloc(__LINE__,32);
     if((ores == g && ++macht) || ores == 1)
         sprintf(conc[(*pind)++],LONGU "^(%d*\1)",g,macht); /*{?} 32^1/2 => 2^5/2 */
     else
