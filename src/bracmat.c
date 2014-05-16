@@ -65,10 +65,13 @@ Test coverage:
 
 */
 
-#define DATUM "6 May 2014"
+#define DATUM "16 May 2014"
 #define VERSION "6"
-#define BUILD "176"
-/* 6 May 2014
+#define BUILD "177"
+/* 16 May 2014
+1\La+1\Lb crashed due to stack overflow. Test ~1 in f5 solves the problem.
+
+   6 May 2014
 Increased a buffer size to solve segmentation fault problem with 64-bit
 version when evaluating roots of some big numbers, for example
 10090000004431^1/2
