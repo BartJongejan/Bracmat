@@ -65,10 +65,13 @@ Test coverage:
 
 */
 
-#define DATUM "16 May 2014"
+#define DATUM "22 May 2014"
 #define VERSION "6"
-#define BUILD "177"
-/* 16 May 2014
+#define BUILD "178"
+/* 22 May 2014
+img^jpg:(img^jpg)^?n failed, while img+jpg:(img+jpg)^?n succeded. Now they both succeed.
+
+   16 May 2014
 1\La+1\Lb crashed due to stack overflow. Test ~1 in f5 solves the problem.
 
    6 May 2014
@@ -11577,7 +11580,8 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
 #endif
                         s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE)); /* a*b^2*c:?x*?y^(~1:?t)*?z */
                         }
-                    else if(  ((s.c.lmr = match(ind+1,sub, pat->LEFT, snijaf,pposition,expr,op)) & TRUE)
+                    if  ( !(s.c.rmr & TRUE) /* 20140522 */
+                        && ((s.c.lmr = match(ind+1,sub, pat->LEFT, snijaf,pposition,expr,op)) & TRUE)
                         && ((s.c.rmr = match(ind+1,&eenk, pat->RIGHT, NULL,0,&eenk,1234567)) & TRUE)
                         )
                         { /* a^2*b*c*d^3 : ?x^(?s:~1)*?y^?t*?z^(>2:?u) */
