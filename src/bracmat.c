@@ -65,11 +65,11 @@ Test coverage:
 
 */
 
-#define DATUM "22 May 2014"
+#define DATUM "04 June 2014"
 #define VERSION "6"
-#define BUILD "178"
+#define BUILD "179"
 /* 22 May 2014
-img^jpg:(img^jpg)^?n failed, while img+jpg:(img+jpg)^?n succeded. Now they both succeed.
+img^jpg:(img^jpg)^?n failed, while img+jpg:(img+jpg)^?n succeeded. Now they both succeed.
 
    16 May 2014
 1\La+1\Lb crashed due to stack overflow. Test ~1 in f5 solves the problem.
