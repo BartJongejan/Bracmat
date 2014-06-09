@@ -4728,12 +4728,26 @@ string line 2\"
           | Out$648
           )
           (   new$hash:?myhash
+            & put$(,"listHash.txt",NEW)
+            & ( listHash
+              =   LH N n
+                .   :?LH
+                  & 0:?n
+                  & !arg:(?N.?arg)
+                  &   (!arg..forall)
+                    $ ( 
+                      = .(1+!n:?n.!arg) !LH:?LH
+                      )
+                  & put$(str$(\n\n !N ":\n"),"listHash.txt",APP)
+                  & lst$(LH,"listHash.txt",APP)
+              )
             & (myhash..ISO)$
             & 240:?I
             &   whl
               ' ( !I+1:<1240:?I
                 & (myhash..insert)$(chu$!I.!I)
                 )
+            & listHash$(FRESH.myhash)
             & ( hashcount
               =   cnt
                 .   0:?cnt
@@ -4767,6 +4781,7 @@ string line 2\"
                         )
                       )
                 )
+            & listHash$(UPLOW.myhash)
             & ( listcount
               =   cnt kv KV k v
                 .   0:?cnt
@@ -4799,6 +4814,7 @@ string line 2\"
                         )
                       )
                 )
+            & listHash$(mod235.myhash)
             & listcount$!KV:?cnt6
             & hashcount$:?cnt7
             & !cnt1:!cnt2:!cnt4:999
@@ -4825,6 +4841,7 @@ string line 2\"
               )
           )
           (   (myhash..casesensitive)$
+            & listHash$(casesensitive.myhash)
             & hashcount$:?cnt7b
             & !cnt7:!cnt7b
           | Out$(649b cnt7 !cnt7 cnt7b !cnt7b)
@@ -4850,6 +4867,7 @@ string line 2\"
                         )
                       )
                 )
+            & listHash$(mod7-23.myhash)
             & !cnt8:312
           | Out$(649c cnt8 !cnt8)
           )
@@ -4870,6 +4888,7 @@ string line 2\"
                       & (!kv.!KV):?KV
                       )
                 )
+            & listHash$(remainder.myhash)
             & listcount$!KV:?cnt12
             & hashcount$:?cnt13
             & !cnt10:297
