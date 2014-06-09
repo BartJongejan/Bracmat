@@ -17715,7 +17715,9 @@ int main(int argc,char *argv[])
              If out of integer range or not numerical: 0*/
     char * p = argv[0] + strlen(argv[0]);
 /*    JSONtest();*/
-#if 0
+#if 1
+    char s1[] = {160,0};
+    char s2[] = {32,0};
 #ifdef _WIN64 /* Microsoft 64 bit */
     printf("_WIN64\n");
 #else /* 32 bit and gcc 64 bit */
@@ -17729,6 +17731,7 @@ int main(int argc,char *argv[])
     printf("RADIX2 " LONGD "\n",(LONG)RADIX2);
     printf("TEN_LOG_RADIX " LONGD "\n",(LONG)TEN_LOG_RADIX);
     printf("HEADROOM " LONGD "\n",(LONG)HEADROOM);
+    printf("strcmp:%d\n",strcmp(s1,s2));
     return 0;
 #endif
 #ifndef NDEBUG
