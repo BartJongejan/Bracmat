@@ -4806,10 +4806,30 @@ string line 2\"
             & !cnt5:623
             & !cnt6:583
             & !cnt6+!cnt7:999
-            & (myhash..casesensitive)$
+          |   Out
+            $ ( 649a
+                cnt1
+                !cnt1
+                cnt2
+                !cnt2
+                cnt3
+                !cnt3
+                cnt4
+                !cnt4
+                cnt5
+                !cnt5
+                cnt6
+                !cnt6
+                "cnt6+cnt7"
+                !cnt6+!cnt7
+              )
+          )
+          (   (myhash..casesensitive)$
             & hashcount$:?cnt7b
             & !cnt7:!cnt7b
-            & 0:?cnt8
+          | Out$(649b cnt7 !cnt7 cnt7b !cnt7b)
+          )
+          (   0:?cnt8
             & :?KV
             &   (myhash..forall)
               $ ( 
@@ -4831,11 +4851,15 @@ string line 2\"
                       )
                 )
             & !cnt8:312
-            & listcount$!KV:?cnt9
-            & !cnt9:119
-            & hashcount$:?cnt10
-            & !cnt10:297
-            & 0:?cnt11
+          | Out$(649c cnt8 !cnt8)
+          )
+          ( listcount$!KV:?cnt9&!cnt9:119
+          | Out$(649d cnt9 !cnt9)
+          )
+          ( hashcount$:?cnt10&!cnt10:297
+          | Out$(649e cnt10 !cnt10)
+          )
+          (   0:?cnt11
             &   (myhash..forall)
               $ ( 
                 =   k v
@@ -4853,7 +4877,19 @@ string line 2\"
             & !cnt12:284
             & !cnt13:132
             & !cnt13+!cnt11:!cnt10
-          | Out$649
+          |   Out
+            $ ( 649f
+                cnt10
+                !cnt10
+                cnt11
+                !cnt11
+                cnt12
+                !cnt12
+                cnt13
+                !cnt13
+                "cnt13+cnt11-cnt10"
+                !cnt13+!cnt11+-1*!cnt10
+              )
           )
           (!(+(a=1).a)&Out$650|)
           (   (=asdf.tbl$(asdf,0)&42)$
@@ -5534,7 +5570,9 @@ string line 2\"
           | Out$884
           )
           (1\La+1\Lb:1\L(a*b)|Out$885)
-          (img^jpg:(img^jpg)^?n&1:!n|Out$886)
+          ( img^jpg:(img^jpg)^?n&1:!n
+          | Out$886
+          )
       &   out
         $ ( str
           $ ( "Done. "
