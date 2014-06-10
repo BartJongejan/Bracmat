@@ -65,10 +65,13 @@ Test coverage:
 
 */
 
-#define DATUM "04 June 2014"
+#define DATUM "10 June 2014"
 #define VERSION "6"
-#define BUILD "179"
-/* 22 May 2014
+#define BUILD "180"
+/* 10 June 2014
+casesensitivehash: explicit cast to signed char.
+
+   22 May 2014
 img^jpg:(img^jpg)^?n failed, while img+jpg:(img+jpg)^?n succeeded. Now they both succeed.
 
    16 May 2014
@@ -9160,10 +9163,14 @@ static LONG casesensitivehash(const char * cp)
     while (*cp != '\0')
         {
         if(hash_temp < 0)
+            {
             hash_temp = (hash_temp << 1) +1;
+            }
         else
+            {
             hash_temp = hash_temp << 1;
-        hash_temp ^= *cp;
+            }
+        hash_temp ^= *(const signed char*)cp;/*20140610*/
         ++cp;
         }
     return hash_temp;
@@ -9176,9 +9183,13 @@ static LONG caseinsensitivehash(const char * cp)
     while (*cp != '\0')
         {
         if(hash_temp < 0)
+            {
             hash_temp = (hash_temp << 1) +1;
+            }
         else
+            {
             hash_temp = hash_temp << 1;
+            }
         /* 20060704 (int) --> (const unsigned char) */
 #if 0
         hash_temp ^= lowerEquivalent[(const unsigned char)*cp];
@@ -9263,10 +9274,17 @@ static psk inserthash(Hash * temp,psk Arg)
             if(kop(r->entry) == LUCHT)
                 {
                 if(!(*temp->cmpfunc)(key,(const char *)POBJ(r->entry->LEFT->LEFT)))
+                    {
                     break;
+                    }
                 }
-            else if(!(*temp->cmpfunc)(key,(const char *)POBJ(r->entry->LEFT)))
-               break;
+            else
+                {
+                if(!(*temp->cmpfunc)(key,(const char *)POBJ(r->entry->LEFT)))
+                    {
+                    break;
+                    }
+                }
             r = r->next;
             }
     if(r)
@@ -9414,11 +9432,6 @@ static void rehash(Hash ** ptemp,int loadFactor/*1-100*/)
         {
         unsigned LONG newsize;
         Hash * newtable;
-/*
-        Printf("Old: size %ld unoccupied %ld records %ld elements %ld\n",
-            temp->hash_size,temp->unoccupied,temp->record_count,temp->elements);
-        Printf("rehash\n");
-*/
         newsize = nextprime((100 * temp->record_count)/loadFactor);
         if(!newsize)
             newsize = 1;

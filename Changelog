@@ -1,3 +1,6 @@
+  10 June 2014
+casesensitivehash: explicit cast to signed char.
+
   22 May 2014
 img^jpg:(img^jpg)^?n failed, while img+jpg:(img+jpg)^?n succeeded. Now they both succeed.
 
