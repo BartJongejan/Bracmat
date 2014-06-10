@@ -17715,7 +17715,7 @@ int main(int argc,char *argv[])
              If out of integer range or not numerical: 0*/
     char * p = argv[0] + strlen(argv[0]);
 /*    JSONtest();*/
-#if 1
+#if 0
     char s1[] = {160,0};
     char s2[] = {32,0};
 #ifdef _WIN64 /* Microsoft 64 bit */
