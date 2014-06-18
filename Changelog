@@ -1,3 +1,6 @@
+  18 June 2014
+New case conversion based on UnicodeData.txt 10-03-2014 18:20:00 
+
   10 June 2014
 casesensitivehash: explicit cast to signed char.
 
