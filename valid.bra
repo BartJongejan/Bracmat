@@ -4817,11 +4817,12 @@ string line 2\"
             & listHash$(mod235.myhash)
             & listcount$!KV:?cnt6
             & hashcount$:?cnt7
-            & !cnt1:!cnt2:!cnt4:999
+            & !cnt1:!cnt2:999
             & !cnt3:165
-            & !cnt5:623
-            & !cnt6:583
-            & !cnt6+!cnt7:999
+            & !cnt4:1001
+            & !cnt5:624
+            & !cnt6:584
+            & !cnt6+!cnt7:1001
           |   Out
             $ ( 649a
                 cnt1
@@ -4868,13 +4869,13 @@ string line 2\"
                       )
                 )
             & listHash$(mod7-23.myhash)
-            & !cnt8:312
+            & !cnt8:313
           | Out$(649c cnt8 !cnt8)
           )
           ( listcount$!KV:?cnt9&!cnt9:119
           | Out$(649d cnt9 !cnt9)
           )
-          ( hashcount$:?cnt10&!cnt10:297
+          ( hashcount$:?cnt10&!cnt10:298
           | Out$(649e cnt10 !cnt10)
           )
           (   0:?cnt11
@@ -4891,10 +4892,10 @@ string line 2\"
             & listHash$(remainder.myhash)
             & listcount$!KV:?cnt12
             & hashcount$:?cnt13
-            & !cnt10:297
-            & !cnt11:165
-            & !cnt12:284
-            & !cnt13:132
+            & !cnt10:298
+            & !cnt11:164
+            & !cnt12:283
+            & !cnt13:134
             & !cnt13+!cnt11:!cnt10
           |   Out
             $ ( 649f
