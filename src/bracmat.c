@@ -65,10 +65,13 @@ Test coverage:
 
 */
 
-#define DATUM "18 June 2014"
+#define DATUM "6 August 2014"
 #define VERSION "6"
-#define BUILD "181"
-/* 18 June 2014
+#define BUILD "182"
+/* 6 August 2014
+Better handling of SGML (<?...>) and XML (<?...?>) processing instructions
+
+   18 June 2014
 New case conversion based on UnicodeData.txt 10-03-2014 18:20:00 
 
    10 June 2014

@@ -5593,6 +5593,14 @@ string line 2\"
           ( img^jpg:(img^jpg)^?n&1:!n
           | Out$886
           )
+          (   get$("aap<?xml ?<kludge> ??>noot",X,ML,MEM)
+            : aap ("?"."xml ?<kludge> ?") noot
+          | Out$887
+          )
+          (   get$("aap<?xml ?<kludge> ??>noot",ML,MEM)
+            : aap ("?"."xml ?<kludge") " ??>noot"
+          | Out$888
+          )
       &   out
         $ ( str
           $ ( "Done. "

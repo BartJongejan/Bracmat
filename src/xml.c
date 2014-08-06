@@ -644,8 +644,8 @@ static estate markup(int kar); /* <! */
 static estate perhapsScriptOrStyle(int kar); /* <s or <S */
 static estate scriptOrStyleElement(int kar); /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
 static estate unknownmarkup(int kar);
-static estate script(int kar);
-static estate endscript(int kar);
+static estate PI(int kar);       /* processing instruction <?...?> (XML) or <?...> (non-XML) */
+static estate endPI(int kar);
 static estate DOCTYPE1(int kar); /* <!D */
 static estate DOCTYPE7(int kar); /* <!DOCTYPE */
 static estate DOCTYPE8(int kar); /* <!DOCTYPE S */
@@ -698,7 +698,7 @@ static estate lt(int kar)
             return tag;
         case '?':
             StaRt = ch;
-            tagState = script;
+            tagState = PI;
             return tag;
         case '/':
             putOperatorChar('.');
@@ -1316,37 +1316,41 @@ static estate unknownmarkup(int kar) /* <! */
         }
     }
 
-static estate script(int kar)
+static estate PI(int kar)
+    {
+    if(X)
+        switch(kar)
+            {
+            case '?':
+                tagState = endPI;
+                return tag;
+            default:
+                return tag;
+            }
+    else
+        switch(kar)
+            {
+            case '>':
+                tagState = def;
+                nonTagWithoutEntityUnfolding("?",StaRt+1,ch);
+                return endoftag;
+            default:
+                return tag;
+            }
+    }
+
+static estate endPI(int kar)
     {
     switch(kar)
         {
-        case '<':
-            tagState = lt;
-            nonTagWithoutEntityUnfolding("?",StaRt+1,ch-1);
-            cbStartMarkUp();
-            return endoftag_startoftag;
         case '>':
             tagState = def;
             nonTagWithoutEntityUnfolding("?",StaRt+1,ch-1);
             return endoftag;
         case '?':
-            tagState = endscript;
             return tag;
         default:
-            return tag;
-        }
-    }
-
-static estate endscript(int kar)
-    {
-    switch(kar)
-        {
-        case '>':
-            tagState = def;
-            nonTagWithoutEntityUnfolding("?",StaRt+1,ch-1);
-            return endoftag;
-        default:
-            tagState = CDATA7;
+            tagState = PI;
             return tag;
         }
     }
