@@ -127,9 +127,9 @@ static jstate hexdigits(int arg)
     if     ('0' <= arg && arg <= '9')
         arg -= '0';
     else if('A' <= arg && arg <= 'F')
-        arg -= ('A'+10);
+        arg -= ('A'-10);
     else if('a' <= arg && arg <= 'f')
-        arg -= ('a'+10);
+        arg -= ('a'-10);
     else return nojson;
     hexvalue = (hexvalue << 4) + arg; 
     if(--needed == 0)
@@ -150,16 +150,26 @@ static jstate escape(int arg)
     {
     switch(arg)
         {
-        case '"': putLeafChar('\"'); break;
-        case '\\': putLeafChar('\\'); break;
-        case '/': putLeafChar('/'); break;
-        case 'b': putLeafChar('\b'); break;
-        case 'f': putLeafChar('\f'); break;
-        case 'n': putLeafChar('\n'); break;
-        case 'r': putLeafChar('\r'); break;
-        case 't': putLeafChar('\t'); break;
-        case 'u': pop(); needed = 4; hexvalue = 0L; action = push(hexdigits); return json;
-        default: action = pop(); return nojson;
+        case '"': 
+            putLeafChar('\"'); break;
+        case '\\': 
+            putLeafChar('\\'); break;
+        case '/': 
+            putLeafChar('/'); break;
+        case 'b': 
+            putLeafChar('\b'); break;
+        case 'f': 
+            putLeafChar('\f'); break;
+        case 'n': 
+            putLeafChar('\n'); break;
+        case 'r': 
+            putLeafChar('\r'); break;
+        case 't': 
+            putLeafChar('\t'); break;
+        case 'u': 
+            pop(); needed = 4; hexvalue = 0L; action = push(hexdigits); return json;
+        default: 
+            action = pop(); return nojson;
         }
     action = pop();
     return json;
@@ -169,11 +179,24 @@ static jstate string(int arg)
     {
     switch(arg)
         {
-        case '"': endString(); action = pop(); break;
-        case '\\': action = push(escape); break;
+        case '"': 
+            endString(); action = pop(); break;
+        case '\\': 
+            action = push(escape); break;
         default:
             if(arg < ' ')
-                return nojson;
+				switch(arg)
+					{
+					case 8:
+					case 9:
+					case 10:
+					case 12:
+					case 13:
+						/*See http://www.bennadel.com/blog/2576-testing-which-ascii-characters-break-json-javascript-object-notation-parsing.htm*/
+						break;
+					default:
+						return nojson;
+					}
             putLeafChar(arg);
         }
     return json;
@@ -196,8 +219,10 @@ static jstate commaOrCloseSquareBracket(int arg)
     {
     switch(arg)
         {
-        case ']': action = pop(); lastValue(); endArray(); return json;
-        case ',': action = push(value); lastValue(); firstValue(); return json;
+        case ']': 
+            action = pop(); lastValue(); endArray(); return json;
+        case ',': 
+            action = push(value); lastValue(); firstValue(); return json;
         case ' ':
         case '\t':
         case '\r':
@@ -214,8 +239,10 @@ static jstate commaOrCloseBrace(int arg)
     {
     switch(arg)
         {
-        case '}': action = pop(); lastValue(); return json;
-        case ',': pop(); action = push(startNamestring); nextValue(); return json;
+        case '}': 
+            action = pop(); lastValue(); return json;
+        case ',': 
+            pop(); action = push(startNamestring); nextValue(); return json;
         case ' ':
         case '\t':
         case '\r':
@@ -230,7 +257,8 @@ static jstate colon(int arg)
         {
         switch(arg)
             {
-            case ':': pop(); putOperatorChar('.'); push(commaOrCloseBrace); action = push(value);
+            case ':': 
+                pop(); putOperatorChar('.'); push(commaOrCloseBrace); action = push(value);
             case ' ':
             case '\t':
             case '\r':
@@ -245,7 +273,8 @@ static jstate startNamestring(int arg)
     {
     switch(arg)
         {
-        case '"': pop(); push(colon); action = push(name);
+        case '"': 
+            pop(); push(colon); action = push(name);
         case ' ':
         case '\t':
         case '\r':
@@ -261,7 +290,8 @@ static jstate valueOrCloseSquareBracket(int arg)
     {
     switch(arg)
         {
-        case ']': action = pop(); endArray();
+        case ']': 
+            action = pop(); endArray();
         case ' ':
         case '\t':
         case '\r':
@@ -419,8 +449,10 @@ static jstate dotOrE(int arg)
             Nexp = 0;
             action = push(plusOrMinusOrDigit);
             return json;
-        case '.': pop(); action = push(firstdecimal); return json;
-        default: action = pop(); aftermath(0); return action(arg);
+        case '.': 
+            pop(); action = push(firstdecimal); return json;
+        default: 
+            action = pop(); aftermath(0); return action(arg);
         }
     }
 
@@ -439,7 +471,8 @@ static jstate firstdigit(int arg)
     {
     switch(arg)
         {
-        case '0': pop(); action = push(dotOrE); leadingzeros = TRUE;
+        case '0': 
+            pop(); action = push(dotOrE); leadingzeros = TRUE;
         case ' ':
         case '\t':
         case '\r':
@@ -462,8 +495,10 @@ static jstate startNamestringOrCloseBrace(int arg)
     {
     switch(arg)
         {
-        case '"': pop(); push(colon); action = push(name); return json;
-        case '}': action = pop(); lastValue(); return json;
+        case '"':
+            pop(); push(colon); action = push(name); return json;
+        case '}':
+            action = pop(); lastValue(); return json;
         case ' ':
         case '\t':
         case '\r':
@@ -478,13 +513,20 @@ static jstate value(int arg)
     {
     switch(arg)
         {
-        case '"': pop(); action = push(string); startString(); return json;
-        case '[': pop(); action = push(valueOrCloseSquareBracket); startArray(); return json;
-        case '{': pop(); action = push(startNamestringOrCloseBrace); firstValue(); return json;
-        case 't': pop(); action = push(fixed); putLeafChar('t'); FIXED = "rue"; return json;
-        case 'f': pop(); action = push(fixed); putLeafChar('f'); FIXED = "alse"; return json;
-        case 'n': pop(); action = push(fixed); putLeafChar('n'); FIXED = "ull"; return json;
-        case '-': pop(); action = push(firstdigit); putLeafChar(arg); return json;
+        case '"':
+            pop(); action = push(string); startString(); return json;
+        case '[':
+            pop(); action = push(valueOrCloseSquareBracket); startArray(); return json;
+        case '{':
+            pop(); action = push(startNamestringOrCloseBrace); firstValue(); return json;
+        case 't':
+            pop(); action = push(fixed); putLeafChar('t'); FIXED = "rue"; return json;
+        case 'f': 
+            pop(); action = push(fixed); putLeafChar('f'); FIXED = "alse"; return json;
+        case 'n':
+            pop(); action = push(fixed); putLeafChar('n'); FIXED = "ull"; return json;
+        case '-':
+            pop(); action = push(firstdigit); putLeafChar(arg); return json;
         default:
             return firstdigit(arg);
         }
@@ -494,8 +536,10 @@ static jstate top(int arg)
     {
     switch(arg)
         {
-        case '{': action = push(startNamestringOrCloseBrace); firstValue(); return json;
-        case '[': action = push(valueOrCloseSquareBracket); startArray(); return json;
+        case '{':
+            action = push(startNamestringOrCloseBrace); firstValue(); return json;
+        case '[':
+            action = push(valueOrCloseSquareBracket); startArray(); return json;
         case ' ':
         case '\t':
         case '\r':

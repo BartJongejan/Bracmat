@@ -65,10 +65,16 @@ Test coverage:
 
 */
 
-#define DATUM "6 August 2014"
+#define DATUM "28 August 2014"
 #define VERSION "6"
-#define BUILD "182"
-/* 6 August 2014
+#define BUILD "183"
+/* 28 August 2014
+Tested json.c. Now correctly handles \uXXXX and control characters.
+The latter inspired by 
+http://www.bennadel.com/blog/2576-testing-which-ascii-characters-break-json-javascript-object-notation-parsing.htm
+TODO 8232 (Line Separator) 8233 (Paragraph Separator) are also control characters, but not catched in json.c
+
+    6 August 2014
 Better handling of SGML (<?...>) and XML (<?...?>) processing instructions
 
    18 June 2014
