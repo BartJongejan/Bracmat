@@ -65,10 +65,13 @@ Test coverage:
 
 */
 
-#define DATUM "28 August 2014"
+#define DATUM "29 August 2014"
 #define VERSION "6"
-#define BUILD "183"
-/* 28 August 2014
+#define BUILD "184"
+/* 29 August 2014
+json.c: Negative numbers now interpreted as numbers, not strings.
+
+   28 August 2014
 Tested json.c. Now correctly handles \uXXXX and control characters.
 The latter inspired by 
 http://www.bennadel.com/blog/2576-testing-which-ascii-characters-break-json-javascript-object-notation-parsing.htm
@@ -5471,14 +5474,14 @@ static void lput(int c)
     *wijzer++ = (unsigned char)c;
     }
 
-/* referenced from xml.c */
+/* referenced from xml.c json.c */
 void putOperatorChar(int c)
 /* c == parenthesis, operator of flag */ 
     {
     lput(c);
     }
 
-/* referenced from xml.c */
+/* referenced from xml.c json.c */
 void putLeafChar(int c)
 /* c == any character that should end as part of an atom (string) */ 
     {
@@ -8244,7 +8247,7 @@ static int utf8bytes(unsigned LONG val)
         }
     }
 
-/* extern, is called from xml.c */
+/* extern, is called from xml.c json.c */
 char * putCodePoint(unsigned LONG val,char * s)
     {
     /* Converts Unicode character w to 1,2,3 or 4 bytes of UTF8 in s. */

@@ -526,7 +526,7 @@ static jstate value(int arg)
         case 'n':
             pop(); action = push(fixed); putLeafChar('n'); FIXED = "ull"; return json;
         case '-':
-            pop(); action = push(firstdigit); putLeafChar(arg); return json;
+            pop(); action = push(firstdigit); putOperatorChar(arg); return json;
         default:
             return firstdigit(arg);
         }

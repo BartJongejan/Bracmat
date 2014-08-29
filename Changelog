@@ -1,3 +1,6 @@
+  29 August 2014
+json.c: Negative numbers now interpreted as numbers, not strings.
+
   28 August 2014
 Tested json.c. Now correctly handles \uXXXX and control characters.
 The latter inspired by 
