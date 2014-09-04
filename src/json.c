@@ -469,6 +469,7 @@ static jstate digitsOrDotOrE(int arg)
 
 static jstate firstdigit(int arg)
     {
+    decimals = 0;
     switch(arg)
         {
         case '0': 

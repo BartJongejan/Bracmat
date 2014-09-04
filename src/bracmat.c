@@ -65,10 +65,13 @@ Test coverage:
 
 */
 
-#define DATUM "29 August 2014"
+#define DATUM "1 September 2014"
 #define VERSION "6"
-#define BUILD "184"
-/* 29 August 2014
+#define BUILD "185"
+/* 1 September 2014
+Decimals were not counted correctly.
+
+   29 August 2014
 json.c: Negative numbers now interpreted as numbers, not strings.
 
    28 August 2014

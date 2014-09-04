@@ -1,3 +1,6 @@
+   1 September 2014
+Decimals in floating point numbers (JSON) were not counted correctly.
+
   29 August 2014
 json.c: Negative numbers now interpreted as numbers, not strings.
 
