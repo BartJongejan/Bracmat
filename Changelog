@@ -1,3 +1,7 @@
+   6 September 2014
+Added atomicity checks in jsn where string argument is expected.
+Nevertheless, jsn is not validating. Garbage in, garbage out.
+
    1 September 2014
 Decimals in floating point numbers (JSON) were not counted correctly.
 

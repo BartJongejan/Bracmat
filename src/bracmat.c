@@ -65,10 +65,14 @@ Test coverage:
 
 */
 
-#define DATUM "5 September 2014"
+#define DATUM "6 September 2014"
 #define VERSION "6"
-#define BUILD "186"
-/* 5 September 2014
+#define BUILD "187"
+/* 6 September 2014
+Added atomicity checks in jsn where string argument is expected.
+Nevertheless, jsn is not validating. Garbage in, garbage out.
+
+   5 September 2014
 Added built-in, but redefinable function jsn. This function converts a properly
 constructed Bracmat datastructure to a string containing JSON.
 
@@ -17655,10 +17659,10 @@ int startProc(
 
         "(cos=(.1/2*(e^(i*!arg)+e^(-i*!arg)))),",
 		
-		"(jsn=Q R O C T H I X Y.(Q=.!arg:(,?arg)&R$!arg|!arg:(.?arg)&I$!arg|!arg:(|("
+		"(jsn=Q R O C T H I X Y.(Q=.!arg:(,?arg)&R$!arg|!arg:(.?@arg)&I$!arg|!arg:(|("
 		"?.?)+?)&O$!arg|!arg:(true|false|null)|!arg:/&(X$!arg|Y$(!arg,20))|!arg)&(R="
 		"J S L.\333:?S&whl'(!arg:%?J ?arg&\254 Q$!J !S:?S)&(!S:\254 ?S|)&\335 !S:?S&"
-		":?L&whl'(!S:%?a ?S&!a !L:?L)&str$!L)&(O=J V S.:?S&whl'(!arg:(?J.?V)+?arg&!S"
+		":?L&whl'(!S:%?a ?S&!a !L:?L)&str$!L)&(O=J V S.:?S&whl'(!arg:(?@J.?V)+?arg&!S"
 		" \254 I$!J \272 Q$!V:?S)&(!S:\254 ?S|)&str$(\373 !S \375))&(C=a c z.@(!arg:"
 		"?a (%@:<\240:?c) ?z)&str$(!a (!c:\210&\334\342|!c:\212&\334\356|!c:\215&"
 		"\334\362|!c:\214&\334\346|!c:\211&\334\364|\334\365\260\260 d2x$(asc$!c)) C"
