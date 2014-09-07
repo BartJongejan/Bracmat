@@ -6,7 +6,7 @@ help=
   . pattxt,asstxt,unopsmenu,unstuurtxt,varsmenu,funcmenu
   . varmattxt,varprotxt,progsmenu,debugtxt,debugtxt2,debugtxt3
   . inbltmenu,alctxt,aligntxt,asctxt,utftxt,chrtxt,charset
-  . chutxt,dbgtxt,dentxt,escappattxt,lambda,morexmlps
+  . chutxt,dbgtxt,dentxt,escappattxt,lambda,morexmlps,jsntxt
   . divtxt,fretxt,funtxt1,funtxt3,lsttxt1,difftxt,pattxt2
   . lsttxt2,lsttxt3,memtxt,modtxt,peetxt,poktxt,Bracmat-name
   . puttxt1,puttxt2,puttxt3,rentxt,revtxt,seltxt,simtxt,strtxt
@@ -15,7 +15,8 @@ help=
   . outtxt,taytxt,newtxt,newobjecttxt,humtxt,objecttxt,hashtxt
   . paragraphs,fname,findtxt,inserttxt,removetxt,Newtxt,Dietxt
   . ISOtxt,casesensitivetxt,foralltxt,doHTML,clktxt,limitations
-  . lowtxt,upptxt,DOSopttxt,whltxt,argtxt,d2xtxt,x2dtxt,rewriting 
+  . lowtxt,upptxt,DOSopttxt,whltxt,argtxt,d2xtxt,x2dtxt
+  . rewriting,jsntranstxt
   . gentlepat recurpat closetxt filesettxt interaction usecases
   . fixdtxt modetxt positiontxt readtxt varitxt writetxt nonlinpat
   )
@@ -221,13 +222,13 @@ lex lexical analysis of help file"
           (15,fretxt)
           (16,gettxt)
           (17,lowtxt DOSopttxt)
-          (18,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt )
+          (18,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt)
           (19,memtxt)
           (20,modtxt)
           (21,newobjecttxt)
           (22,peetxt)
           (23,poktxt)
-          (24,puttxt1 humtxt puttxt2 puttxt3 newtxt )
+          (24,puttxt1 humtxt puttxt2 puttxt3 newtxt)
           (25,rentxt)
           (26,rmvtxt)
           (27,revtxt)
@@ -658,10 +659,10 @@ The patterns in string match operations are similar to patterns in normal match
 operations that have sentences (words separated by blank operators) as the
 subject."
     )
-  & (rewriting
-    = T
-     ,"Rewriting data using pattern matching"
-     ,"
+  & ( rewriting
+    =   T
+      , "Rewriting data using pattern matching"
+      , "
 An important application of pattern matching is rewriting data by means of a
 number of rules. Each rule consists of a pattern and a replacement expression.
 Often, the pattern explicitly specifies only parts of the subject, so that the
@@ -709,11 +710,11 @@ returns the input if the pattern didn't match.
 {?} ivanRule$(She bought a bycicle for Ivan)
 {!} She bought a bycicle for Wanja
 "
-     )
-  & (nonlinpat
-    = T
+    )
+  & ( nonlinpat
+    =   T
       , "Non-linear patterns"
-      ,"Bracmat patterns not only can contain receiving variables (those that are
+      , "Bracmat patterns not only can contain receiving variables (those that are
 preceded by a question mark), but also giving variables (those that are
 preceded by an exclamation mark). The same variable symbol can even occur
 in both roles: as receiving and as giving, in any order. If an occurrence of a
@@ -2350,26 +2351,29 @@ visible functions are predefined:
     factorisation
 4 |_flt_|
     floating point notation of numbers
-5 |_out_|
+5 |_jsn_|
+    serialize data to JSON format
+6 |_out_|
     output to screen, then new line
-6 |_sgn_|
+7 |_sgn_|
     sign
-7 |_sin_|
+8 |_sin_|
     sine formula
-8 |_sub_|
+9 |_sub_|
     substitution
-9 |_tay_|
+10 |_tay_|
     Taylor series development"
       ,   (0,sgntxt)
           (1,cattxt)
           (2,gontxt)
           (3,factxt)
           (4,flttxt)
-          (5,outtxt debugtxt2 debugtxt3)
-          (6,sgntxt)
-          (7,gontxt)
-          (8,subtxt1)
-          (9,taytxt)
+          (5,jsntxt jsntranstxt)
+          (6,outtxt debugtxt2 debugtxt3)
+          (7,sgntxt)
+          (8,gontxt)
+          (9,subtxt1)
+          (10,taytxt)
     )
   & ( flttxt
     =   T
@@ -2422,6 +2426,61 @@ differentiated and, sometimes, simplified."
 
 {?} 1+(2*a^3+6/7*t)*(3*x+4*y+z^-1)+-1:?sum
 {?} fct$!sum"
+    )
+  & ( jsntxt
+    =   T
+      , "jsn$<expression>"
+      , "
+jsn$ serializes <expression> to JSON format.
+
+Suppose mars.json contains
+ 
+{\"planet\":\"Mars\",
+ \"moons\":[\"Deimos\",\"Phobos\"],
+ \"Eccentricity\":0.0934}
+
+Read mars.json into variable mars:
+{?} get$(\"mars.json\",JSN):?mars
+{!} (Eccentricity.934/10000) + (moons.,(.Deimos) (.Phobos)) + (planet..Mars)
+
+Now add the fact that Mars' gravity, compared to the Earth's, is about 3711/9807
+{?} (ratio.3711/9807)+!mars:?mars
+{!} (Eccentricity.934/10000) + (moons.,(.Deimos) (.Phobos)) + (planet..Mars) + (ratio.3711/9807)
+
+Finally, serialize the new data to JSON
+{?} jsn$!mars
+{!} {\"Eccentricity\":0.0934,\"moons\":[\"Deimos\",\"Phobos\"],\"planet\":\"Mars\",\"ratio\":3.78403181401040073417E-1}
+
+Numbers are, if possible, represented in exact fixed decimal notation.
+If rounding is inevitable, numbers are represented in floating point notation
+with 21 digits. Numbers that have been read from JSON input are always
+considered to be unrounded, and therefore represented in fixed decimal notation
+upon writing to JSON.
+
+Objects have their elements sorted.
+
+No attempt is made to make the result look pretty using indentation."
+    )
+  & ( jsntranstxt
+    =   T
+      , "Mapping between JSON and Bracmat expressions"
+      , "
+A JSON object is represented as a sum of dotted pairs as the lhs (left hand
+side) of a comma operator, while the rhs must be empty. The original ordering
+of members may be lost, as the sum operator sorts its terms. In each dotted
+pair, the lhs represents the object member's key while the rhs represents the
+object member's value. An empty object is represented as (0,)
+
+A JSON array is a space separated list as the rhs of a comma operator with an
+empty string as lhs.
+
+A string is mapped to the atomic rhs of a dot operator, leaving the lhs empty.
+
+Integer numbers map onto themselves. A non integral number is represented in
+fixed point notation if there is an exact representation. Otherwise, a floating
+point representation with 21 digits is produced.
+
+true, false and null map onto themselves."
     )
   & ( subtxt1
     =   T
@@ -4650,7 +4709,6 @@ Topic:")
                   =   titel ptxt
                     .   !arg:(?ptxt.?titel)
                       & put$\n\n
-                      & out$!titel
                       &   addContent2paragraphs
                         $ ( !ptxt
                           . titel
@@ -4757,7 +4815,10 @@ Topic:")
                           & ( !keuze:
                             |   !menutekst:%?menutitel ?menutekst
                               &   writeHTML
-                                $ ((!titel.!ptxt).!menutitel.!keuze)
+                                $ ( (!titel.!ptxt)
+                                  . !menutitel
+                                  . !keuze
+                                  )
                             )
                           )
                       & out$(doMenuItems done)
@@ -4785,7 +4846,6 @@ Topic:")
                         )
                     & (!topictitel.!ptxt):?backtotitref
                     )
-                & out$(writeHTML loop done)
                 & put$\nexit
                 & put$" \""
                 & put$!titel
@@ -5312,6 +5372,7 @@ Topic:")
           & flatMenuList$!theMenu:?menlist
           & :?paragraphs
           & writeHTML$((.).Bracmat.lusmenu)
+          & out$(lst paragraphs)
           & lst$(paragraphs,paragraphs,NEW)
           & reorderParagraphs$(!menlist.!paragraphs):?paragraphs
           & fputall$!paragraphs:?helpbody
@@ -5460,9 +5521,9 @@ _________________________________________________________________________
             )
       | ?
       );
-      
-  help$()
-& tbl$(help,0)
-& "
-_________________________________________________________________________
-"
+      
+  help$()
+& tbl$(help,0)
+& "
+_________________________________________________________________________
+"
