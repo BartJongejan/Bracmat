@@ -1708,7 +1708,7 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
                             {
                             size_t dif = p - alltext; 
                             ++incs;                            
-                            alltext = realloc(alltext,incs * inc);
+                            alltext = (char*)realloc(alltext,incs * inc);
                             p = alltext + dif;
                             }
                         }
@@ -1754,7 +1754,7 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
                             {
                             size_t dif = p - alltext; 
                             ++incs;                            
-                            alltext = realloc(alltext,incs * inc);
+                            alltext = (char*)realloc(alltext,incs * inc);
                             p = alltext + dif;
                             endp = alltext + incs * inc;
                             }
