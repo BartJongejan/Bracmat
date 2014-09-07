@@ -93,6 +93,20 @@ static void endArray(void)/* called when ] has been read */
     putOperatorChar(')');
     }
 
+static void startObject(void)/* called when { has been read */
+    {
+    putOperatorChar(' ');
+    putOperatorChar('(');
+    putOperatorChar('(');
+    }
+
+static void endObject(void)/* called when } has been read */
+    {
+    putOperatorChar(')');
+    putOperatorChar(',');
+    putOperatorChar(')');
+    }
+
 typedef jstate (*stateFncTp)(int);
 static unsigned int stacksiz;
 static stateFncTp * stack;
@@ -240,7 +254,7 @@ static jstate commaOrCloseBrace(int arg)
     switch(arg)
         {
         case '}': 
-            action = pop(); lastValue(); return json;
+            action = pop(); lastValue(); endObject(); return json;
         case ',': 
             pop(); action = push(startNamestring); nextValue(); return json;
         case ' ':
@@ -499,7 +513,7 @@ static jstate startNamestringOrCloseBrace(int arg)
         case '"':
             pop(); push(colon); action = push(name); return json;
         case '}':
-            action = pop(); lastValue(); return json;
+            action = pop(); putLeafChar('0'); lastValue(); endObject(); return json;
         case ' ':
         case '\t':
         case '\r':
@@ -519,7 +533,7 @@ static jstate value(int arg)
         case '[':
             pop(); action = push(valueOrCloseSquareBracket); startArray(); return json;
         case '{':
-            pop(); action = push(startNamestringOrCloseBrace); firstValue(); return json;
+            pop(); action = push(startNamestringOrCloseBrace); startObject(); firstValue(); return json;
         case 't':
             pop(); action = push(fixed); putLeafChar('t'); FIXED = "rue"; return json;
         case 'f': 
@@ -538,7 +552,7 @@ static jstate top(int arg)
     switch(arg)
         {
         case '{':
-            action = push(startNamestringOrCloseBrace); firstValue(); return json;
+            action = push(startNamestringOrCloseBrace); startObject(); firstValue(); return json;
         case '[':
             action = push(valueOrCloseSquareBracket); startArray(); return json;
         case ' ':

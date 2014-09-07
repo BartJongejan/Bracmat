@@ -65,10 +65,19 @@ Test coverage:
 
 */
 
-#define DATUM "6 September 2014"
+#define DATUM "7 September 2014"
 #define VERSION "6"
-#define BUILD "187"
-/* 6 September 2014
+#define BUILD "188"
+/* 7 September 2014
+Changed JSON object mapping. 
+    {} is (0,)
+    {"key":123} is ((key.123),)
+    {"k1":true,"K2":"key 2"} is ((K2..key 2)+(k1.true),)
+So [] becomes (,)
+   [{}] becomes (,(0,)) which is (,0,)
+   [{},{}] becomes (,(0,) (0,))
+
+   6 September 2014
 Added atomicity checks in jsn where string argument is expected.
 Nevertheless, jsn is not validating. Garbage in, garbage out.
 
@@ -17659,24 +17668,25 @@ int startProc(
 
         "(cos=(.1/2*(e^(i*!arg)+e^(-i*!arg)))),",
 		
-		"(jsn=Q R O C T H I X Y.(Q=.!arg:(,?arg)&R$!arg|!arg:(.?@arg)&I$!arg|!arg:(|("
-		"?.?)+?)&O$!arg|!arg:(true|false|null)|!arg:/&(X$!arg|Y$(!arg,20))|!arg)&(R="
-		"J S L.\333:?S&whl'(!arg:%?J ?arg&\254 Q$!J !S:?S)&(!S:\254 ?S|)&\335 !S:?S&"
-		":?L&whl'(!S:%?a ?S&!a !L:?L)&str$!L)&(O=J V S.:?S&whl'(!arg:(?@J.?V)+?arg&!S"
-		" \254 I$!J \272 Q$!V:?S)&(!S:\254 ?S|)&str$(\373 !S \375))&(C=a c z.@(!arg:"
-		"?a (%@:<\240:?c) ?z)&str$(!a (!c:\210&\334\342|!c:\212&\334\356|!c:\215&"
-		"\334\362|!c:\214&\334\346|!c:\211&\334\364|\334\365\260\260 d2x$(asc$!c)) C"
-		"$!z)|!arg)&(T=a z.@(!arg:?a \" ?z)&str$(C$!a \334\242 T$!z)|C$!arg)&(H=a z."
-		"@(!arg:?a \334 ?z)&str$(T$!a \334\334 H$!z)|T$!arg)&(I=.str$(\" H$!arg \"))"
-		"&(X=a z d n A B D F G L x.den$!arg:?d&!d*!arg:?n&(5\016!d:#%?A+?B&`(!B:0&2^"
-		"!A|!B:5\016?B&2\016(!B*(den$!B:?B)):#?D&!A+-1*5\016!B+-1*!D:?A&(!A:>0&2|1/5"
-		")^!A)|2\016!d:#%?A&5^!A):?F&-1+-1*10\016(!d*!F):?x&!n*!F:?G&@(!G:? [?L)&whl"
-		"'(!L+!x:<0&str$(0 !G):?G&1+!L:?L)&@(!G:?a [!x ?z)&whl'@(!z:?z 0)&str$((!arg"
-		":<0&\255|) !a \256 !z))&(Y=e,d,m,s,f.!arg:(?arg,~<0:?d)&!arg:0|(-1*!arg:>0:"
-		"?arg&-1|1):?s&10\016!arg:?e+(10\016?m|0&1:?m)&(!m+1/2*1/10^!d:~<10&1+!e:?e&"
-		"!m*1/10:?m|)&@(div$(!m+1/2*(1/10^!d:?d),!d):%?`f ?m)&str$(!s*!f (!d:~1&\256"
-		" (@(rev$!m:? #?m)&rev$!m)|!m) E !e))&str$(Q$!arg)),",
-		
+        "(jsn=Q R O C T H I X Y.(Q=.!arg:(,?arg)&R$!arg|!arg:(.@?arg)&I$!arg|"
+        "!arg:(0|(?.?)+?,)&O$!arg|!arg:(true|false|null)|!arg:/&(X$!arg|Y$("
+        "!arg,20))|!arg)&(R=J S L.\333:?S&whl'(!arg:%?J ?arg&\254 Q$!J !S:?S)&"
+        "(!S:\254 ?S|)&\335 !S:?S&:?L&whl'(!S:%?a ?S&!a !L:?L)&str$!L)&(O=J V "
+        "S.!arg:(?arg,)&:?S&whl'(!arg:(@?J.?V)+?arg&!S \254 I$!J \272 Q$!V:?S)"
+        "&(!S:\254 ?S|)&str$(\373 !S \375))&(C=a c z.@(!arg:?a (%@:<\240:?c) "
+        "?z)&str$(!a (!c:\210&\334\342|!c:\212&\334\356|!c:\215&\334\362|!c:"
+        "\214&\334\346|!c:\211&\334\364|\334\365\260\260 d2x$(asc$!c)) C$!z)|"
+        "!arg)&(T=a z.@(!arg:?a \" ?z)&str$(C$!a \334\242 T$!z)|C$!arg)&(H=a z"
+        ".@(!arg:?a \334 ?z)&str$(T$!a \334\334 H$!z)|T$!arg)&(I=.str$(\" H$"
+        "!arg \"))&(X=a z d n A B D F G L x.den$!arg:?d&!d*!arg:?n&(5\016!d:"
+        "#%?A+?B&`(!B:0&2^!A|!B:5\016?B&2\016(!B*(den$!B:?B)):#?D&!A+-1*5\016"
+        "!B+-1*!D:?A&(!A:>0&2|1/5)^!A)|2\016!d:#%?A&5^!A):?F&-1+-1*10\016(!d*"
+        "!F):?x&!n*!F:?G&@(!G:? [?L)&whl'(!L+!x:<0&str$(0 !G):?G&1+!L:?L)&@(!G"
+        ":?a [!x ?z)&whl'@(!z:?z 0)&str$((!arg:<0&\255|) !a \256 !z))&(Y=e,d,m"
+        ",s,f.!arg:(?arg,~<0:?d)&!arg:0|(-1*!arg:>0:?arg&-1|1):?s&10\016!arg:"
+        "?e+(10\016?m|0&1:?m)&(!m+1/2*1/10^!d:~<10&1+!e:?e&!m*1/10:?m|)&@(div$"
+        "(!m+1/2*(1/10^!d:?d),!d):%?`f ?m)&str$(!s*!f (!d:~1&\256 (@(rev$!m:? "
+        "#?m)&rev$!m)|!m) E !e))&str$(Q$!arg)),",		
         "(sgn=(.!arg:?#%arg*%+?&sgn$!arg|!arg:<0&-1|1)),",
         "(abs=(.sgn$!arg*!arg)),",
         "(sub=\177e,\177x,\177v,\177F.(\177F=\177l,\177r.!arg:!\177x&!\177v|"

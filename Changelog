@@ -1,3 +1,12 @@
+   7 September 2014
+Changed JSON object mapping. 
+    {} is (0,)
+    {"key":123} is ((key.123),)
+    {"k1":true,"K2":"key 2"} is ((K2..key 2)+(k1.true),)
+So [] becomes (,)
+   [{}] becomes (,(0,)) which is (,0,)
+   [{},{}] becomes (,(0,) (0,))
+
    6 September 2014
 Added atomicity checks in jsn where string argument is expected.
 Nevertheless, jsn is not validating. Garbage in, garbage out.
