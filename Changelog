@@ -1,3 +1,9 @@
+  23 September
+xml.c: Fixed bugs in handling close tags inside script (or style) cdata.
+Removed allowance for white space between < / and element name.
+(Between / and > white space is still allowed. This is not comme il faut.)
+Removed possibility of close tag without name like so: </> or: </ p>
+
    7 September 2014
 Changed JSON object mapping. 
     {} is (0,)

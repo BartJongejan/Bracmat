@@ -65,10 +65,16 @@ Test coverage:
 
 */
 
-#define DATUM "7 September 2014"
+#define DATUM "23 September 2014"
 #define VERSION "6"
-#define BUILD "188"
-/* 7 September 2014
+#define BUILD "189"
+/* 23 September
+xml.c: Fixed bugs in handling close tags inside script (or style) cdata.
+Removed allowance for white space between < / and element name.
+(Between / and > white space is still allowed. This is not comme il faut.)
+Removed possibility of close tag without name like so: </> or: </ p>
+
+   7 September 2014
 Changed JSON object mapping. 
     {} is (0,)
     {"key":123} is ((key.123),)

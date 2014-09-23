@@ -603,10 +603,13 @@ static void cbEndDOCTYPE(void)/* called when > has been read */
     nonTagWithoutEntityUnfolding("!DOCTYPE",StaRt,ch);
     }
 
+static char * endElementName;
 static void cbEndElementName(void)
     {
-    nxput(StaRt,ch);
+    nxput(StaRt,endElementName ? endElementName : ch);
+/*    nxput(StaRt,ch);*/
     putOperatorChar('.');
+    endElementName = NULL;
     }
 
 static void cbEndAttributeName(void)
@@ -626,6 +629,7 @@ static estate (*def)(int kar) = def_pcdata;
 static estate def_cdata(int kar);
 static estate lt(int kar);
 static estate lt_cdata(int kar);
+static estate lts_cdata(int kar);
 static estate element(int kar);
 static estate elementonly(int kar);
 static estate gt(int kar);
@@ -643,6 +647,8 @@ static estate endvalue(int kar);
 static estate markup(int kar); /* <! */
 static estate perhapsScriptOrStyle(int kar); /* <s or <S */
 static estate scriptOrStyleElement(int kar); /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
+static estate scriptOrStyleEndElement(int kar); /* </s or </S */
+static estate scriptOrStyleEndElementL(int kar); /* </script or </SCRIPT or </style or </STYLE */
 static estate unknownmarkup(int kar);
 static estate PI(int kar);       /* processing instruction <?...?> (XML) or <?...> (non-XML) */
 static estate endPI(int kar);
@@ -688,6 +694,7 @@ static estate def_cdata(int kar)
     
 static estate lt(int kar)
     {
+    endElementName = NULL;
     switch(kar)
         {
         case '>':
@@ -701,14 +708,15 @@ static estate lt(int kar)
             tagState = PI;
             return tag;
         case '/':
-            putOperatorChar('.');
             tagState = endtag;
             /* fall through */
+            /*
         case 0xA0:
         case ' ':
         case '\t':
         case '\n':
         case '\r':
+        */
             return tag;
         case 's':
         case 'S':
@@ -739,21 +747,118 @@ static estate lt_cdata(int kar)
     switch(kar)
         {
         case '/':
-/*            nxputWithoutEntityUnfolding(StaRt,ch-1);*/
-            cbStartMarkUp();
-            putOperatorChar('.');
-            tagState = endtag;
-            def = def_pcdata;
+            tagState = lts_cdata;
             return tag;
+            /*
+        case ' ':
+        case '\n':
+        case '\r':
+        case '\t':
+            return notag;
+            */
         default:
             tagState = def_cdata;
             return notag;            
         }
     }
 
+static int ScriptStyleiMax = 0;
 static int scriptstylei = 0;
+static int scriptstylei2 = 0;
+static int scriptstyleimax = 0;
+static char * elementEndNameLower;
+static char * elementEndNameUpper;
+static estate scriptOrStyleEndElement(int kar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
+    {
+    if(kar == elementEndNameLower[scriptstylei2] || kar == elementEndNameUpper[scriptstylei2])
+        {
+        estate ret;
+        if(scriptstylei2 == scriptstyleimax)
+            {
+            tagState = scriptOrStyleEndElementL;
+            scriptstylei2 = 0;
+            endElementName = NULL;
+            }
+        else
+            ++scriptstylei2;
+        ret = element(kar);
+        /*tagState = scriptOrStyleElement;*/
+        return ret;
+        }
+    else
+        {
+        scriptstylei2 = 0;
+        tagState = def_cdata;
+        return notag;
+        }
+    }
 
-static void stillCdata()
+static estate scriptOrStyleEndElementL(int kar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
+    {
+    switch(kar)
+        {
+        case '>':
+            flush();
+            isMarkup = 1;
+            putOperatorChar(' ');
+            putOperatorChar('(');
+            /*cbStartMarkUp();*/
+            putOperatorChar('.');
+            cbEndElementName();    
+            /*nxput(StaRt,endElementName ? endElementName : ch);
+            endElementName = NULL;
+            putOperatorChar('.');*/
+            putOperatorChar(')');
+            def = def_pcdata;
+            tagState = def;
+            StaRt = ch+1;
+            return endoftag;
+        case ' ':
+        case '\n':
+        case '\r':
+        case '\t':
+            if(endElementName == NULL)
+                endElementName = ch;
+            return tag;           
+        default:
+            endElementName = NULL;
+            scriptstylei2 = 0;
+            tagState = def_cdata;
+            return notag;
+        }
+    }
+
+static estate lts_cdata(int kar)
+    {
+        /*
+    switch(kar)
+        {
+        case ' ':
+        case '\n':
+        case '\r':
+        case '\t':
+            return tag;
+        default:
+            */
+            scriptstyleimax = ScriptStyleiMax;
+            scriptstylei2 = 0;
+            if(  kar == elementEndNameLower[scriptstylei2]
+              || kar == elementEndNameUpper[scriptstylei2]
+              )
+                {
+                StaRt = ch;
+                ++scriptstylei2;
+                tagState = scriptOrStyleEndElement;
+                return tag;            
+                }
+            tagState = def_cdata;
+            return notag;
+            /*
+        }*/
+    }
+
+
+static void stillCdata(void)
     {
     if(scriptstylei > 0 && def == def_cdata)
         {
@@ -818,12 +923,14 @@ static estate elementonly(int kar)
         {
         case '<':
             tagState = lt;
+            putOperatorChar('.');
             cbEndElementName();
             putOperatorChar(')');
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
             tagState = def;
+            putOperatorChar('.');
             cbEndElementName();
             putOperatorChar(')');
             return endoftag;
@@ -837,7 +944,8 @@ static estate elementonly(int kar)
         case '\t':
         case '\n':
         case '\r':
-            cbEndElementName();
+            if(endElementName == NULL)
+                endElementName = ch;
             tagState = gt;
             return tag;
         default:
@@ -857,11 +965,15 @@ static estate gt(int kar)
         {
         case '<':
             tagState = lt;
+            putOperatorChar('.');
+            cbEndElementName();
             putOperatorChar(')');
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
             tagState = def;
+            putOperatorChar('.');
+            cbEndElementName();
             putOperatorChar(')');
             return endoftag;
         case 0xA0:
@@ -887,12 +999,13 @@ static estate emptytag(int kar)
         case '>':
             tagState = def;
             return endoftag;
+            /*
         case 0xA0:
         case ' ':
         case '\t':
         case '\n':
         case '\r':
-            return tag;
+            return tag;*/
         default:
             tagState = def;
             return notag;
@@ -973,6 +1086,7 @@ static estate name(int kar)
             cbEndAttributeName();
             cbEndAttribute();
             putOperatorChar(',');
+            putOperatorChar(')');
             tagState = emptytag;
             return tag;
         case '=':
@@ -1211,7 +1325,6 @@ static estate endvalue(int kar)
     }
 
 
-static int scriptstyleimax = 0;
 static char * elementNameLower;
 static char * elementNameUpper;
 static estate scriptOrStyleElement(int kar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
@@ -1228,7 +1341,7 @@ static estate scriptOrStyleElement(int kar) /* <sc or <SC or <Sc or <sC or <st o
         else
             ++scriptstylei;
         ret = element(kar);
-        tagState = scriptOrStyleElement;
+        /*tagState = scriptOrStyleElement;*/
         return ret;
         }
     else
@@ -1238,28 +1351,34 @@ static estate scriptOrStyleElement(int kar) /* <sc or <SC or <Sc or <sC or <st o
     return element(kar);
     }
 
+static char script[] = "script";
+static char SCRIPT[] = "SCRIPT";
+static char style[] = "style";
+static char STYLE[] = "STYLE";
 static estate perhapsScriptOrStyle(int kar) /* <s or <S */
     {
-    static char ript[] = "ript";
-    static char RIPT[] = "RIPT";
-    static char yle[] = "yle";
-    static char YLE[] = "YLE";
     estate ret;
     switch(kar)
         {
         case 'C':
         case 'c':
-            elementNameLower = ript;
-            elementNameUpper = RIPT;
-            scriptstyleimax = sizeof(ript) - 2;
+            elementNameLower = script+2;
+            elementNameUpper = SCRIPT+2;
+            elementEndNameLower = script;
+            elementEndNameUpper = SCRIPT;
+            scriptstyleimax = sizeof(script) - 4;
+            ScriptStyleiMax = sizeof(script) - 2;
             ret = element(kar);
             tagState = scriptOrStyleElement;
             return ret;
         case 'T':
         case 't':
-            elementNameLower = yle;
-            elementNameUpper = YLE;
-            scriptstyleimax = sizeof(yle) - 2;
+            elementNameLower = style+2;
+            elementNameUpper = STYLE+2;
+            elementEndNameLower = style;
+            elementEndNameUpper = STYLE;
+            scriptstyleimax = sizeof(style) - 4;
+            ScriptStyleiMax = sizeof(style) - 2;
             ret = element(kar);
             tagState = scriptOrStyleElement;
             return ret;
@@ -1601,7 +1720,7 @@ static estate h3(int kar) /* <!--  - */
     }
 
 static estate endtag(int kar)
-    {
+    {/*
     switch(kar)
         {
         case '<':
@@ -1615,15 +1734,17 @@ static estate endtag(int kar)
             cbEndElementName();
             putOperatorChar(')');
             return endoftag;
+       */     /*
         case 0xA0:
         case ' ':
         case '\t':
         case '\n':
         case '\r':
-            return tag;
-        default:
+            return tag;*/
+        /*default:*/
             if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
                 {
+                endElementName = NULL;
                 tagState = elementonly;
                 StaRt = ch;
                 return tag;
@@ -1633,7 +1754,7 @@ static estate endtag(int kar)
                 tagState = def;
                 return notag;
                 }
-        }
+/*        }*/
     }
 
 void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
@@ -1661,6 +1782,7 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
         }
     else
         return;
+    def = def_pcdata;
     if(filesize > 0)
         {
         char * alltext;

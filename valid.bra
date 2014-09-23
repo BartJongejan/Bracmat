@@ -5486,9 +5486,14 @@ string line 2\"
           )
           (   get$("<style><![CDATA[</a*]]></style><b>",MEM,HT,ML)
             :   (style.)
+                "<![CDATA[</a*]]>"
+                (.style.)
+                (b.)
+          |   Out$872
+            &   "Earlier:"
+                (style.)
                 "<![CDATA["
                 (."</a*]]>" (.style.) (b.))
-          | Out$872
           )
           (     get
               $ ( "<style><br/><![CDATA[< /a*</style><b>]]></style>"
@@ -5703,6 +5708,35 @@ string line 2\"
           (jsn$123/4096:"0.030029296875"|Out$890)
           (jsn$123/3125:"0.03936"|Out$891)
           (jsn$123/5000:"0.0246"|Out$892)
+          (   get$("<br H/><p>",MEM,HT,ML)
+            : (br.(H.),) (p.)
+          | Out$893
+          )
+          (     get
+              $ ( "<script >A< d </script  </scRipt > <p > < /p> </ p ><p /><p />"
+                , MEM
+                , HT
+                , ML
+                )
+            :   (script.)
+                "A< d </script  "
+                (.scRipt.)
+                " "
+                (p.)
+                " "
+                "< /p> "
+                "</ p >"
+                (p.,)
+                (p.,)
+          | Out$894
+          )
+          ( get$("</pop >",MEM,HT,ML):(.pop.)
+          | Out$895
+          )
+          (   get$("</pop A>",MEM,HT,ML):"</pop A>"
+            & get$("<xy>",MEM,HT,ML):(xy.)
+          | Out$896
+          )
       &   out
         $ ( str
           $ ( "Done. "
