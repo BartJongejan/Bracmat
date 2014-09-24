@@ -713,9 +713,10 @@ static estate lt(int kar)
             /*
         case 0xA0:
         case ' ':
-        case '\t':
+        case '\f':
         case '\n':
         case '\r':
+        case '\t':
         */
             return tag;
         case 's':
@@ -751,6 +752,7 @@ static estate lt_cdata(int kar)
             return tag;
             /*
         case ' ':
+        case '\f':
         case '\n':
         case '\r':
         case '\t':
@@ -802,18 +804,15 @@ static estate scriptOrStyleEndElementL(int kar) /* <sc or <SC or <Sc or <sC or <
             isMarkup = 1;
             putOperatorChar(' ');
             putOperatorChar('(');
-            /*cbStartMarkUp();*/
             putOperatorChar('.');
-            cbEndElementName();    
-            /*nxput(StaRt,endElementName ? endElementName : ch);
-            endElementName = NULL;
-            putOperatorChar('.');*/
+            cbEndElementName();
             putOperatorChar(')');
             def = def_pcdata;
             tagState = def;
             StaRt = ch+1;
             return endoftag;
         case ' ':
+        case '\f':
         case '\n':
         case '\r':
         case '\t':
@@ -834,6 +833,7 @@ static estate lts_cdata(int kar)
     switch(kar)
         {
         case ' ':
+        case '\f':
         case '\n':
         case '\r':
         case '\t':
@@ -890,9 +890,10 @@ static estate element(int kar)
             return tag;
         case 0xA0:
         case ' ':
-        case '\t':
+        case '\f':
         case '\n':
         case '\r':
+        case '\t':
             cbEndElementName();
             tagState = atts;
             return tag;
@@ -941,9 +942,10 @@ static estate elementonly(int kar)
             return tag;
         case 0xA0:
         case ' ':
-        case '\t':
+        case '\f':
         case '\n':
         case '\r':
+        case '\t':
             if(endElementName == NULL)
                 endElementName = ch;
             tagState = gt;
@@ -978,9 +980,10 @@ static estate gt(int kar)
             return endoftag;
         case 0xA0:
         case ' ':
-        case '\t':
+        case '\f':
         case '\n':
         case '\r':
+        case '\t':
             return tag;
         default:
             tagState = def;
@@ -1002,9 +1005,10 @@ static estate emptytag(int kar)
             /*
         case 0xA0:
         case ' ':
-        case '\t':
+        case '\f':
         case '\n':
         case '\r':
+        case '\t':
             return tag;*/
         default:
             tagState = def;
@@ -1027,9 +1031,10 @@ static estate atts(int kar)
             return endoftag;
         case 0xA0:
         case ' ':
-        case '\t':
+        case '\f':
         case '\n':
         case '\r':
+        case '\t':
             return tag;
         case '/':
             putOperatorChar(',');
@@ -1076,9 +1081,10 @@ static estate name(int kar)
             return tag;
         case 0xA0:
         case ' ':
-        case '\t':
+        case '\f':
         case '\n':
         case '\r':
+        case '\t':
             cbEndAttributeName();
             tagState = atts_or_value;
             return tag;
@@ -1115,9 +1121,10 @@ static estate value(int kar)
             return notag;
         case 0xA0:
         case ' ':
-        case '\t':
+        case '\f':
         case '\n':
         case '\r':
+        case '\t':
             return tag;
         case '\'':
             tagState = singlequotes;
@@ -1126,17 +1133,17 @@ static estate value(int kar)
             tagState = doublequotes;
             return tag;
         default:
-            if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
-                {
+/*            if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
+                {*/
                 StaRt = ch;
                 tagState = invalue;
                 return tag;
-                }
+/*                }
             else
                 {
                 tagState = def;
                 return notag;
-                }
+                }*/
         }
     }
 
@@ -1163,9 +1170,10 @@ static estate atts_or_value(int kar)
             return notag;
         case 0xA0:
         case ' ':
-        case '\t':
+        case '\f':
         case '\n':
         case '\r':
+        case '\t':
             return tag;
         case '/':
             cbEndAttribute();
@@ -1193,6 +1201,9 @@ static estate atts_or_value(int kar)
         }
     }
 
+/* This is far from conforming to and more forgiving than 
+https://html.spec.whatwg.org/multipage/syntax.html#unquoted
+*/
 static estate invalue(int kar)
     {
     switch(kar)
@@ -1212,23 +1223,34 @@ static estate invalue(int kar)
             return endoftag;
         case 0xA0:
         case ' ':
-        case '\t':
+        case '\f':
         case '\n':
         case '\r':
+        case '\t':
             nxput(StaRt,ch);
             cbEndAttribute();
             tagState = atts;
             return tag;
+        case '/':
+            nxput(StaRt,ch);
+            cbEndAttribute();
+            putOperatorChar(',');
+            putOperatorChar(')');
+            tagState = emptytag;
+            return tag;
         default:
-            if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
-                {
+/*            if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
+                {*/
                 return tag;
-                }
+/* Returning notag does not solve the problem, 
+because we can't undo the already emitted name and attributes.
+*/
+               /* }
             else
                 {
                 tagState = def;
                 return notag;
-                }
+                }*/
         }
     }
 
@@ -1308,9 +1330,10 @@ static estate endvalue(int kar)
             return endoftag;
         case 0xA0:
         case ' ':
-        case '\t':
+        case '\f':
         case '\n':
         case '\r':
+        case '\t':
             tagState = atts;
             return tag;
         case '/':
@@ -1523,9 +1546,10 @@ static estate DOCTYPE7(int kar) /* <!DOCTYPE */
             cbEndDOCTYPE();
             return endoftag;
         case ' ':
-        case '\t':
-        case '\r':
+        case '\f':
         case '\n':
+        case '\r':
+        case '\t':
             StaRt = ch;
             tagState = DOCTYPE8;
             return tag;
@@ -1581,9 +1605,10 @@ static estate DOCTYPE10(int kar)  /* <!DOCTYPE S [ ] */
             cbEndDOCTYPE();
             return endoftag;
         case ' ':
-        case '\t':
-        case '\r':
+        case '\f':
         case '\n':
+        case '\r':
+        case '\t':
             tagState = DOCTYPE10;
             return tag;
         default:
@@ -1737,9 +1762,10 @@ static estate endtag(int kar)
        */     /*
         case 0xA0:
         case ' ':
-        case '\t':
+        case '\f':
         case '\n':
         case '\r':
+        case '\t':
             return tag;*/
         /*default:*/
             if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
@@ -1809,9 +1835,10 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
                         switch(kar)
                             {
                             case ' ':
-                            case '\t':
+                            case '\f':
                             case '\n':
                             case '\r':
+                            case '\t':
                                 {
                                 if(!whitespace)
                                     {
@@ -1842,9 +1869,10 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
                         switch(kar)
                             {
                             case ' ':
-                            case '\t':
+                            case '\f':
                             case '\n':
                             case '\r':
+                            case '\t':
                                 {
                                 if(!whitespace)
                                     {

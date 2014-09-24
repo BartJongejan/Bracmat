@@ -65,10 +65,14 @@ Test coverage:
 
 */
 
-#define DATUM "23 September 2014"
+#define DATUM "24 September 2014"
 #define VERSION "6"
-#define BUILD "189"
-/* 23 September
+#define BUILD "190"
+/* 24 September
+Made handling of unquoted attributes in html elements more forgiving. Added
+form feed to list of white space characters in html/xml parsing.
+
+   23 September
 xml.c: Fixed bugs in handling close tags inside script (or style) cdata.
 Removed allowance for white space between < / and element name.
 (Between / and > white space is still allowed. This is not comme il faut.)

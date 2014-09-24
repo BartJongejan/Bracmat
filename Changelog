@@ -1,3 +1,7 @@
+  24 September
+Made handling of unquoted attributes in html elements more forgiving. Added
+form feed to list of white space characters in html/xml parsing.
+
   23 September
 xml.c: Fixed bugs in handling close tags inside script (or style) cdata.
 Removed allowance for white space between < / and element name.
