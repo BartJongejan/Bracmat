@@ -5737,6 +5737,26 @@ string line 2\"
             & get$("<xy>",MEM,HT,ML):(xy.)
           | Out$896
           )
+          (     get$("<pap color=#'fedcba'>",MEM,HT,ML)
+              : (pap.color."#'fedcba'")
+            & "Not conforming, but forgiving!"
+          | Out$897
+          )
+          (     get$("<pap color=blue/>",MEM,HT,ML)
+              : (pap.(color.blue),)
+            & "Not conforming, but forgiving!"
+          | Out$898
+          )
+          (     get
+              $ (   str
+                  $ ("<pap" \f "color=blue" \f a \f "=" \f "'3'" \f ">")
+                , MEM
+                , HT
+                , ML
+                )
+            : (pap.(color.blue) (a.3))
+          | Out$899
+          )
       &   out
         $ ( str
           $ ( "Done. "
