@@ -1,3 +1,6 @@
+  17 October 2014
+Return -1 if an argument cannot be evaluated.
+
   24 September
 Made handling of unquoted attributes in html elements more forgiving. Added
 form feed to list of white space characters in html/xml parsing.

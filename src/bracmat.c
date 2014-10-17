@@ -65,10 +65,14 @@ Test coverage:
 
 */
 
-#define DATUM "24 September 2014"
+#define DATUM "17 Oktober 2014"
 #define VERSION "6"
-#define BUILD "190"
-/* 24 September
+#define BUILD "191"
+/* 17 October 2014
+If started with arguments AND stringeval fails, bracmat returns -1.
+Before the program might crash.
+
+   24 September
 Made handling of unquoted attributes in html elements more forgiving. Added
 form feed to list of white space characters in html/xml parsing.
 
@@ -17758,7 +17762,7 @@ int mainlus(int argc,char *argv[])
     {
     int err;
     char * mainloop;
-    const char * ret;
+    const char * ret = 0;
 #if defined EMSCRIPTEN
     if(argc == 2)
         { /* to get here, e.g.: ./bracmat out$hello */
@@ -17779,7 +17783,7 @@ int mainlus(int argc,char *argv[])
         ARGV = argv;
         mainloop = "arg$&whl'(get$(arg$,MEM):?\"?...@#$*~%!\")&!\"?...@#$*~%!\"";
         stringEval(mainloop,&ret,&err);
-        return (int)STRTOL(ret,0,10);
+        return ret ? (int)STRTOL(ret,0,10) : -1;
         /*
         int i;
         for(i = 1;i < argc;++i) / *20090630* /
