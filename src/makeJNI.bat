@@ -17,7 +17,7 @@ javac ./dk/cst/*.java
 jar cfv bracmat.jar dk/cst/bracmat.class
 javac -classpath bracmat.jar ./bracmattest.java
 java -D"java.library.path=../" -classpath bracmat.jar;. bracmattest
-move bracmat.jar "%TOMCAT_HOME%\lib\bracmat.jar"
+copy bracmat.jar "%TOMCAT_HOME%\lib\bracmat.jar"
 cd ..
 
 move bracmat.dll "%TOMCAT_HOME%\bin\bracmat.dll"
