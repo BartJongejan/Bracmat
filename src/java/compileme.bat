@@ -1,8 +1,4 @@
-cd src
-javac -d ../classes/ ./dk/cst/*.java
-cd ../classes
-jar cfv ../jar/bracmat.jar dk/cst/bracmat.class
-cd ..
-javac -d ./jar/ -classpath ./jar/bracmat.jar ./src/bracmattest.java
-REM java -Djava.library.path="C:/Users/zgk261/Documents/Visual Studio 2010/Projects/Bracmat/Release/" -classpath ./jar/bracmat.jar;./jar bracmattest
-java -Djava.library.path="C:/utils/" -classpath ./jar/bracmat.jar;./jar bracmattest
+javac ./dk/cst/*.java
+jar cfv "%TOMCAT_HOME%/lib/bracmat.jar" dk/cst/bracmat.class
+javac -classpath "%TOMCAT_HOME%/lib/bracmat.jar" ./bracmattest.java
+java -D"java.library.path=%TOMCAT_HOME%/bin" -classpath "%TOMCAT_HOME%/lib/bracmat.jar";. bracmattest
