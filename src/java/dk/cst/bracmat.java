@@ -67,9 +67,7 @@ public class bracmat
         {
         try
             {
-	    //fh = new FileHandler("/var/log/clarin/tools.log");
-            //fh = new FileHandler("/var/log/clarin/dk.cst.bracmat.log");
-            //fh = new FileHandler("/home/bart/tools.log");
+            //fh = new FileHandler("/home/xxx/tools.log");
             }
         catch(Throwable t) 
             {
