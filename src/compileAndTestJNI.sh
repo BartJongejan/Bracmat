@@ -14,7 +14,7 @@
 # block went ok. (If there is a test.)
 
 # Create stand-alone bracmat.
-gcc -std=c99 -pedantic -Wall -O3 -DNDEBUG bracmat.c xml.c json.c
+gcc -std=c99 -pedantic -Wall -O2 -DNDEBUG bracmat.c xml.c json.c
 mv a.out bracmat
 # Test the stand-alone version of Bracmat.
 # Expect a line only saying 'bracmat alife and kicking'.
@@ -22,7 +22,7 @@ mv a.out bracmat
 
 # Compile bracmat.c as relocatable code for shared object
 # Create bracmatso.o, xml.o and json.o
-gcc -std=c99 -pedantic -Wall -O3 -c -fPIC -DNDEBUG bracmatso.c xml.c json.c
+gcc -std=c99 -pedantic -Wall -O2 -c -fPIC -DNDEBUG bracmatso.c xml.c json.c
 cd java
 
 # Compile java class that loads shared object libbracmat.so.
