@@ -14,7 +14,7 @@
 # block went ok. (If there is a test.)
 
 # Create stand-alone bracmat.
-gcc -std=c99 -pedantic -Wall -O3 -DNDEBUG bracmat.c xml.c json.c
+gcc -std=c99 -pedantic -Wall -O2 -DNDEBUG bracmat.c xml.c json.c
 mv a.out bracmat
 # Test the stand-alone version of Bracmat.
 # Expect a line only saying 'bracmat alife and kicking'.
@@ -22,9 +22,17 @@ mv a.out bracmat
 
 # Compile bracmat.c as relocatable code for shared object
 # Create bracmatso.o, xml.o and json.o
-gcc -std=c99 -pedantic -Wall -O3 -c -fPIC -DNDEBUG bracmatso.c xml.c json.c
+gcc -std=c99 -pedantic -Wall -O2 -c -fPIC -DNDEBUG bracmatso.c xml.c json.c
 cd java
 
+JDK_DIRS="/usr/lib/jvm/default-java ${OPENJDKS} /usr/lib/jvm/java-6-openjdk /usr/lib/jvm/java-6-sun /usr/lib/jvm/java-7-oracle"
+# Look for the right JVM to use
+for jdir in $JDK_DIRS; do
+    if [ -r "$jdir/bin/java" -a -z "${JAVA_HOME}" ]; then
+	JAVA_HOME="$jdir"
+    fi
+done
+export JAVA_HOME
 # Compile java class that loads shared object libbracmat.so.
 javac ./dk/cst/*.java
 
@@ -36,7 +44,7 @@ jar cfv bracmat.jar dk/cst/bracmat.class
 
 cd ..
 # Compile the C code that exposes methods to Java.
-gcc -std=c99 -pedantic -Wall -pthread -c -fPIC -DNDEBUG -I/usr/lib/jvm/java-1.6.0-sun.x86_64/include -I/usr/lib/jvm/java-1.6.0-sun.x86_64/include/linux/ dk_cst_bracmat.c -o dk_cst_bracmat.o    
+gcc -std=c99 -pedantic -Wall -pthread -c -fPIC -DNDEBUG -I$JAVA_HOME/include -I$JAVA_HOME/include/linux/ dk_cst_bracmat.c -o dk_cst_bracmat.o    
 # Link the two object files into a shared library (REALNAME).
 gcc -shared -Wl,-soname,libbracmat.so.1 -o libbracmat.so.1.0 bracmatso.o xml.o json.o dk_cst_bracmat.o -lpthread
 # Link REALNAME to SONAME.
@@ -91,17 +99,14 @@ javac -classpath bracmat.jar ./bracmattest.java
 sudo java -classpath bracmat.jar:. bracmattest
 
 #copy bracmat.jar to final destination(s) (Platform-dependend!)
-if [ -d /srv/dkclarin-infra ]; then
-    #infra:
-    #sudo cp -p ./java/jar/bracmat.jar /srv/dkclarin-infra/jboss-4.2.3.GA/server/all/lib/
-    #sudo cp -p ./java/jar/bracmat.jar /srv/dkclarin-infra/jboss-4.2.3.GA/server/default/lib/
-    sudo scp ~/trunk/dkclarin-services/tools/bracmat/libbracmat.so.1.0 bart@infra.hum.ku.dk:libbracmat.so.1.0
-    sudo scp ~/trunk/dkclarin-services/tools/bracmat/java/jar/bracmat.jar bart@infra.hum.ku.dk:bracmat.jar
-    # After copying bracmat.jar to infra, run script deployBracmatJar in ~
-else
+if [ -d /usr/local/jboss ]; then
     #devtools:
     sudo cp -p ./bracmat.jar /usr/local/jboss/server/all/lib/
     sudo cp -p ./bracmat.jar /usr/local/jboss/server/default/lib/
+else 
+    if [ -d /usr/share/tomcat7/lib ]; then
+        sudo cp -p ./bracmat.jar /usr/share/tomcat7/lib/
+    fi
 fi
 
 # Windows, Visual Studio C++ (2008, 2010 Express):
