@@ -16,7 +16,7 @@ static void Out(int c)
 static void Flush(void)
     {
 #ifdef __GNUC__
-    return fflush(stdout);
+    fflush(stdout);
 #endif
     }
 
