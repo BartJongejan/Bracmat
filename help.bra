@@ -2,11 +2,11 @@ help=
   ( streep,verwerk,lusmenu,whatIsBracmat,filosofie,colofon
   . syntax,atotxt,evaltxt,gettxt,contxt,binovztxt,patternm
   . savtxt,dumtxt,binprotxt,prostutxt1,prostutxt2,funmactxt
-  . unops,naamloos,algtxt,unpattxt,binmenu,pattxttxt
+  . unops,naamloos,algtxt,unpattxt,binmenu,pattxttxt,
   . pattxt,asstxt,unopsmenu,unstuurtxt,varsmenu,funcmenu
   . varmattxt,varprotxt,progsmenu,debugtxt,debugtxt2,debugtxt3
   . inbltmenu,alctxt,aligntxt,asctxt,utftxt,chrtxt,charset
-  . chutxt,dbgtxt,dentxt,escappattxt,lambda,morexmlps
+  . chutxt,dbgtxt,dentxt,escappattxt,lambda,morexmlps,jsntxt
   . divtxt,fretxt,funtxt1,funtxt3,lsttxt1,difftxt,pattxt2
   . lsttxt2,lsttxt3,memtxt,modtxt,peetxt,poktxt,Bracmat-name
   . puttxt1,puttxt2,puttxt3,rentxt,revtxt,seltxt,simtxt,strtxt
@@ -15,9 +15,10 @@ help=
   . outtxt,taytxt,newtxt,newobjecttxt,humtxt,objecttxt,hashtxt
   . paragraphs,fname,findtxt,inserttxt,removetxt,Newtxt,Dietxt
   . ISOtxt,casesensitivetxt,foralltxt,doHTML,clktxt,limitations
-  . lowtxt,upptxt,DOSopttxt,whltxt,argtxt,d2xtxt,x2dtxt
+  . lowtxt,upptxt,DOSopttxt,whltxt,argtxt,d2xtxt,x2dtxt,toMLtxt
+  . rewriting,jsntranstxt,transformtxt,MLencodingtxt,nestMLtxt
   . gentlepat recurpat closetxt filesettxt interaction usecases
-  . fixdtxt modetxt positiontxt readtxt varitxt writetxt
+  . fixdtxt modetxt positiontxt readtxt varitxt writetxt nonlinpat
   )
 .   ( lusmenu
     =   M
@@ -69,9 +70,9 @@ lex lexical analysis of help file"
 5  currying
 6  built-in functions
 7  predefined, changeable functions"
-      ,   (1,funmactxt naamloos macrotxt)
+      ,   (1,funmactxt naamloos macrotxt transformtxt)
           (2,funtxt1 funtxt3)
-          (3,naamloos macrotxt escappattxt)
+          (3,naamloos macrotxt transformtxt escappattxt)
           (4,lambda)
           (5,lambda)
           (6,inbltmenu)
@@ -94,7 +95,7 @@ lex lexical analysis of help file"
           (3,pattxt pattxttxt pattxt2 escappattxt)
           (4,contxt)
           (5,asstxt)
-          (6,funmactxt naamloos macrotxt)
+          (6,funmactxt naamloos macrotxt transformtxt)
           (7,dumtxt funtxt3)
     )
   & ( unopsmenu
@@ -400,7 +401,7 @@ descending tree as the default internal representation for sums and products:
 The numerical factors are very close to the root of the tree and therefore
 easy to find. Moreover, for the result
 
-    3*(a*(b*c))
+    7*(a*(b*c))
     
 Bracmat only needs to create one node for the numerical factor |_7_| and
 one node for a single multiplication operator, because the subexpression    
@@ -597,13 +598,17 @@ relational database. But it doesn't stop here, because Bracmat supports
 recursive invocations of pattern matching and other operations.
 
 1 Gentle introduction
-2 Recursive patterns
-3 Pattern matching in character strings
-4 Pattern matching in tree structures"
+2 Rewriting data using pattern matching
+3 Non-linear patterns
+4 Recursive patterns
+5 Pattern matching in character strings
+6 Pattern matching in tree structures"
       ,   (1,gentlepat)
-          (2,recurpat)
-          (3,pattxttxt pattxt2)
-          (4,pattxt escappattxt)
+          (2,rewriting)
+          (3,nonlinpat)
+          (4,recurpat)
+          (5,pattxttxt pattxt2)
+          (6,pattxt escappattxt)
     )
   & ( gentlepat
     =   T
@@ -653,6 +658,77 @@ not the normal match operation, but a string match operation.
 The patterns in string match operations are similar to patterns in normal match
 operations that have sentences (words separated by blank operators) as the
 subject."
+    )
+  & ( rewriting
+    =   T
+      , "Rewriting data using pattern matching"
+      , "
+An important application of pattern matching is rewriting data by means of a
+number of rules. Each rule consists of a pattern and a replacement expression.
+Often, the pattern explicitly specifies only parts of the subject, so that the
+same rule will fire for a broad class of subjects, all having the specified
+parts of the rule in common. The remaining, unspecified, parts normally have
+to reappear unscathed in the output of the transformation rule. To catch these
+parts, patterns can contain any number of variables that bind to the parts of
+the rule that are not completely fixed.
+
+Suppose we have the sentence |_My name is Ivan the terrible_| and we want to
+change |_Ivan_| to |_Wanja_|.
+The following instructions can do that:
+
+{?} My name is Ivan the terrible:?begin Ivan ?end
+{!} My name is Ivan the terrible
+{?} !begin Wanja !end
+{!} My name is Wanja the terrible
+
+A question mark indicates that the symbol that it precedes is a variable that
+accepts (part of) the subject as value. An exclamation mark indicates that the
+following symbol is supposed to be a variable and that the value of that 
+variable must replace the variable.
+
+The pattern |_?begin Ivan ?end_| and the replacement |_!begin Wanja !end_|
+are not sensitive to what the rest of the sentence looks like, so we can
+use the same pattern and replacement expression to transform another sentence:
+
+{?} Ivan goes to school:?begin Ivan ?end
+{!} Ivan goes to school
+{?} !begin Wanja !end
+{!} Wanja goes to school
+
+To make a rewrite rule out of these two components, we can put them in a
+function that we can feed any sentence and that returns a transformed sentence,
+if the pattern matched the input. In addition, the function below simply
+returns the input if the pattern didn't match.
+
+{?} ( ivanRule
+    =   begin end
+      .     !arg:?begin Ivan ?end
+          & !begin Wanja !end
+        | !arg
+    )
+{!} ivanRule
+{?} ivanRule$(She bought a bycicle for Ivan)
+{!} She bought a bycicle for Wanja
+"
+    )
+  & ( nonlinpat
+    =   T
+      , "Non-linear patterns"
+      , "Bracmat patterns not only can contain receiving variables (those that are
+preceded by a question mark), but also giving variables (those that are
+preceded by an exclamation mark). The same variable symbol can even occur
+in both roles: as receiving and as giving, in any order. If an occurrence of a
+variable is receiving and a later in the pattern giving, than the pattern is
+said to be non-linear. Such patterns can for example be used to find things
+that occur more than once in the subject. For example, find two inventions of the
+same age in a list of name/year pairs:
+
+{?} (   (teabag.1904) (sonar.1906) (computer.1941) (triode.1906) (zeppelin.1900)
+      : ? (?invention1.?year) ? (?invention2.!year) ?
+    & !invention1 !invention2
+    )
+{!} sonar triode
+"
     )
   & ( recurpat
     =   T
@@ -999,7 +1075,7 @@ used."
     )
   & ( gettxt
     =   T
-      , "get$(<atom-or-nil>[,MEM][,ECH][,VAP][,STR][,JSN]|[[,X]|[,HT],ML[,TRM]])"
+      , "get$(<atom-or-nil>[,MEM][,ECH][,VAP][,STR][,TXT|BIN][,JSN]|[[,X]|[,HT],ML[,TRM]])"
       ,   "get$ reads and interprets characters in a string (internal memory) or file
 (external memory or keyboard).
 
@@ -1027,6 +1103,16 @@ options :
     <not present>
     The characters are interpreted as parts of a Bracmat expression and
     evaluated after the whole expression has been read.
+|_TXT_|
+    <present>
+    File is read in 'text' mode (file mode r)
+    <not present>
+    File is read in binary mode (file mode rb)
+|_BIN_|
+    <present>
+    File is read in binary mode
+    <not present>
+    File is still read in binary mode
 |_JSN_|
     <present>
     The input is parsed as JSON.
@@ -1250,7 +1336,7 @@ operations, as in:
           (10,algtxt)
           (11,algtxt)
           (12,difftxt algtxt)
-          (13,funmactxt macrotxt)
+          (13,funmactxt macrotxt transformtxt)
           (14,funmactxt escappattxt)
           (15,dumtxt funtxt3)
     )
@@ -1458,7 +1544,7 @@ most useful in definitions of certain types of recursive functions
 (tree walkers).
 
 The assignment of a new value to the _ variable can only take place
-in a match. A _ in a pattern is always receiving, whereas a _
+in a match operation. A _ in a pattern is always receiving, whereas a _
 outside a pattern is either giving or left unchanged. Try this :
 
 {?} a_b             { This has unpredictable results. }
@@ -1825,6 +1911,34 @@ More examples:
 {!} =a value z
 {?} '(a ($(=value)) z)
 {!} =a value z"
+    )
+  & ( transformtxt
+    =   T
+      , "Program transformation"
+      , "Bracmat code is data. Yet it is easier to transform the internal representation
+of JSON or XML data than to transform a Bracmat program. The reason is that for
+code introspection it is necessary to turn off the expression evaluation that
+normally takes place in patterns. This can be achieved by using macros. Here is
+an example that reverses (|_rev$_|) and lowercases (|_low$_|) all leaves, but
+keeps everything else the same: prefixes, operators - even those that play
+special roles inside patterns, such as the |_!_| prefix and the |_ _ _| operator.
+
+{?} ( tr\r
+    =   a b f\r
+      .   flg$!arg:(=?f.?arg)\r
+        &   glf\r
+          $ (\r
+            ' ( $f\r
+              .\r
+                $ (   '$arg:(=?a_?b)\r
+                    & '$($(tr$('$a)))_($(tr$('$b)))\r
+                  | low$rev$!arg:?arg&arg\r
+                  )\r
+              )\r
+            )\r
+    )\r
+{?} tr$(=foo\L\"STRing\" ~!(sin$4/56) !and_?<UNDERSCORE)\r
+{!} (=oof\Lgnirts ~!(nis$65/4) !dna_<?erocsrednu)"
     )
   & ( unops
     =   T
@@ -2265,26 +2379,38 @@ visible functions are predefined:
     factorisation
 4 |_flt_|
     floating point notation of numbers
-5 |_out_|
+5 |_jsn_|
+    serialize data to JSON format
+6 |_MLencoding_|
+    detect the encoding used in XML or HTML data
+7 |_nestML_|    
+    nest the internal representation of XML or HTML data
+8 |_out_|
     output to screen, then new line
-6 |_sgn_|
+9 |_sgn_|
     sign
-7 |_sin_|
+10 |_sin_|
     sine formula
-8 |_sub_|
+11 |_sub_|
     substitution
-9 |_tay_|
-    Taylor series development"
+12 |_tay_|
+    Taylor series development    
+13 |_toML_|    
+    convert an internal representation of XML or HTML to XML resp. HTML"
       ,   (0,sgntxt)
           (1,cattxt)
           (2,gontxt)
           (3,factxt)
           (4,flttxt)
-          (5,outtxt debugtxt2 debugtxt3)
-          (6,sgntxt)
-          (7,gontxt)
-          (8,subtxt1)
-          (9,taytxt)
+          (5,jsntxt jsntranstxt)
+          (6,MLencodingtxt)
+          (7,nestMLtxt)
+          (8,outtxt debugtxt2 debugtxt3)
+          (9,sgntxt)
+          (10,gontxt)
+          (11,subtxt1)
+          (12,taytxt)
+          (13,toMLtxt)
     )
   & ( flttxt
     =   T
@@ -2338,6 +2464,61 @@ differentiated and, sometimes, simplified."
 {?} 1+(2*a^3+6/7*t)*(3*x+4*y+z^-1)+-1:?sum
 {?} fct$!sum"
     )
+  & ( jsntxt
+    =   T
+      , "jsn$<expression>"
+      , "
+jsn$ serializes <expression> to JSON format.
+
+Suppose mars.json contains
+ 
+{\"planet\":\"Mars\",
+ \"moons\":[\"Deimos\",\"Phobos\"],
+ \"Eccentricity\":0.0934}
+
+Read mars.json into variable mars:
+{?} get$(\"mars.json\",JSN):?mars
+{!} (Eccentricity.934/10000) + (moons.,(.Deimos) (.Phobos)) + (planet..Mars)
+
+Now add the fact that Mars' gravity, compared to the Earth's, is about 3711/9807
+{?} (ratio.3711/9807)+!mars:?mars
+{!} (Eccentricity.934/10000) + (moons.,(.Deimos) (.Phobos)) + (planet..Mars) + (ratio.3711/9807)
+
+Finally, serialize the new data to JSON
+{?} jsn$!mars
+{!} {\"Eccentricity\":0.0934,\"moons\":[\"Deimos\",\"Phobos\"],\"planet\":\"Mars\",\"ratio\":3.78403181401040073417E-1}
+
+Numbers are, if possible, represented in exact fixed decimal notation.
+If rounding is inevitable, numbers are represented in floating point notation
+with 21 digits. Numbers that have been read from JSON input are always
+considered to be unrounded, and therefore represented in fixed decimal notation
+upon writing to JSON.
+
+Objects have their elements sorted.
+
+No attempt is made to make the result look pretty using indentation."
+    )
+  & ( jsntranstxt
+    =   T
+      , "Mapping between JSON and Bracmat expressions"
+      , "
+A JSON object is represented as a sum of dotted pairs as the lhs (left hand
+side) of a comma operator, while the rhs must be empty. The original ordering
+of members may be lost, as the sum operator sorts its terms. In each dotted
+pair, the lhs represents the object member's key while the rhs represents the
+object member's value. An empty object is represented as (0,)
+
+A JSON array is a space separated list as the rhs of a comma operator with an
+empty string as lhs.
+
+A string is mapped to the atomic rhs of a dot operator, leaving the lhs empty.
+
+Integer numbers map onto themselves. A non integral number is represented in
+fixed point notation if there is an exact representation. Otherwise, a floating
+point representation with 21 digits is produced.
+
+true, false and null map onto themselves."
+    )
   & ( subtxt1
     =   T
       , "sub$(<expression>.<pattern>.<replacement>)"
@@ -2364,6 +2545,27 @@ The second argument is the independent variable.
 The third argument denotes the number of terms, including vanishing terms.
 
 {?} tay$((cos$x)^-1,x,20)"
+    )
+  & ( MLencodingtxt
+    =   T
+      , "MLencoding$<internal expression of XML or HTML data>"
+      , "This function parses the data for indicators of the used character encoding."
+    )
+  & ( nestMLtxt
+    =   T
+      , 
+      ,   "nestML$<internal expression of XML or HTML data>"
+          "After reading XML or HTML data, all text and tags are in a flat list.
+The function |_nestML_| attempts to match opening and closing tags and creates
+a tree structure. This works best for XML data"
+    )
+  & ( toMLtxt
+    =   T
+      , "toML$<internal expression of XML or HTML data>"
+      , "This function creates a string containing XML or HTML formatted data from an
+internal representation of those data. |_toML_| works both with nested and
+unnested data. All necessary character conversions are made in PCDATA and
+attributes."
     )
   & ( pattxttxt
     =   T
@@ -2676,7 +2878,8 @@ extra text to the output, remember that the atgument to out$ is returned.
        & out$(still need !n+-1*!k loops) {you don't always need quotation marks}
        & !loop)"
           "Now an example that is faulty. The purpose is to find two equal words in a
-sentence. This expression succeeds, but finds nothing:
+sentence with a non-linear pattern.
+This expression succeeds, but finds nothing:
 
   (De kok snijdt recht en de meid snijdt scheef : (? ?a ? !a ?) & out$(!a is occurring twice))
 
@@ -2940,14 +3143,19 @@ behaviour of the program.
     )
   & ( funtxt1
     =   T
-      , "<function name>=<var1> [,<var2>, ...].<function body>"
-      , "Definition of a function. <var1>,<var2>, etc. are explicitly declared local
-variables. A function is called by
-<function name>$<argument expression> or
-|_<function name>'<argument expression>_| ,
-depending on whether <argument expression> must be evaluated ($) or not |_(')_|
-before it is passed to the function in the always present local variable
-|_arg_|.
+      , "Definition of a function"
+      , "<function-name>=<var1> [,<var2>, ...].<function-body>
+      
+<var1>,<var2>, etc. are explicitly declared local variables. A function is
+called by <function name>$<argument expression>
+or |_<function name>'<argument expression>_| ,
+depending on whether <argument expression> must be evaluated ($) 
+or not |_(')_|.
+
+All Bracmat functions have arity one or two, that is, they accept one or two
+arguments. The |_<argument expression>_| to the right of the ($) or |_(')_|
+is always represented in the body of the function by a local variable |_arg_|.
+
 The returned value of a function is simply the function body after it
 has been evaluated.
 
@@ -2960,10 +3168,11 @@ has been evaluated.
 {?} swap$(I think,I guess)
 
 In a match context, a function call creates a second local variable,
-|_sjt_|, the current subject. The value returned from a function in a match
-context is interpreted as a pattern by the match evaluator. However, if the
-function call fails, the pattern match is not attempted and fails as well.
-If the returned value is negated the behaviour is not defined.
+|_sjt_| (think SuJeT, SubJecT), the current subject. The value returned from
+a function in a match context is interpreted as a pattern by the match
+evaluator. However, if the function call fails, the pattern match operation
+is not attempted and fails as well. The behaviour is not defined if the
+returned value is negated.
 
 {?} ( like
     =
@@ -3036,7 +3245,7 @@ very large atoms (such as this help function) do less well. Example:
     )
   & ( lsttxt3
     =   T
-      , "|_lst$(<variable>,<file name>,NEW | APP [,LIN])_|"
+      , "|_lst$(<variable>,<file name>,NEW | APP [,LIN][,TXT][,BIN])_|"
       , "This time, output is sent to the named file instead of standard output.
 The third argument is explained below.
 Code that has been saved with lst$ can be reloaded with get$.
@@ -3060,14 +3269,25 @@ The predefined function cat$ makes use of mem$.
     )
   & ( newtxt
     =   T
-      , "options |_NEW_| and |_APP_|"
-      , "one of the options |_NEW_| and |_APP_| must be present:
+      , "options |_NEW_|, |_APP_|, |_TXT_| and |_BIN_|"
+      , "One of the options |_NEW_| and |_APP_| must be present:
       
 |_NEW_|
     tells the computer to open a new file or overwrite an old one.
 |_APP_|
     directs output to an existing file. If the file does not exist, it is
-    created first."
+    created first.
+
+Options |_TXT_| and |_BIN_| overrule the default file mode of the functions
+|_put_| and |_lst_|.
+      
+|_TXT_|
+    tells Bracmat to write a file in text mode. This is the default file mode
+    for |_put_|. In Windows, each line feed character will be preceded by a
+    carriage return. In Unix and Linux, text mode and binary mode are the same.
+|_BIN_|
+    tells Bracmat to write a file in binary mode. This is the default file mode
+    for |_lst_|."
     )
   & ( humtxt
     =   T
@@ -4547,7 +4767,6 @@ Topic:")
                   =   titel ptxt
                     .   !arg:(?ptxt.?titel)
                       & put$\n\n
-                      & out$!titel
                       &   addContent2paragraphs
                         $ ( !ptxt
                           . titel
@@ -4682,7 +4901,6 @@ Topic:")
                         )
                     & (!topictitel.!ptxt):?backtotitref
                     )
-                & out$(writeHTML loop done)
                 & put$\nexit
                 & put$" \""
                 & put$!titel
@@ -5209,6 +5427,7 @@ Topic:")
           & flatMenuList$!theMenu:?menlist
           & :?paragraphs
           & writeHTML$((.).Bracmat.lusmenu)
+          & out$(lst paragraphs)
           & lst$(paragraphs,paragraphs,NEW)
           & reorderParagraphs$(!menlist.!paragraphs):?paragraphs
           & fputall$!paragraphs:?helpbody
@@ -5353,6 +5572,7 @@ _________________________________________________________________________
 "
             , "help.bra"
             , APP
+            , BIN
             )
       | ?
       );

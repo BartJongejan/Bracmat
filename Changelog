@@ -1,3 +1,12 @@
+  17 April 2015
+XML: New predefined functions for nesting data and for converting data back
+to XML format.
+    MLencoding - detects encoding in XML or HTML file
+    nestML     - nest the internal representation of XML data
+    toML       - convert internal representation of XML data to a string
+                 containing XML data
+HTML is supported, although nestML may still make wrong guesses.
+
   17 October 2014
 Return -1 if an argument cannot be evaluated.
 

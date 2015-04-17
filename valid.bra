@@ -5406,7 +5406,19 @@ string line 2\"
           ( (k=ab Lk)&new$k
           | Out$847
           )
-          ( get$("pr-xml-utf-8.xml",ML):?xml&
+          (   get$("pr-xml-utf-8.xml",X,ML):?xml
+            & @( toML$!xml
+               :   ?x
+                   "<tr><td bgcolor=\"&cellback;\" rowspan=\"2\" colspan=\"1\"></td>"
+                   ?y
+               )
+            & @( toML$(nestML$!xml)
+               :   ?a
+                   "<tr><td bgcolor=\"&cellback;\" rowspan=\"2\" colspan=\"1\" />"
+                   ?b
+               )
+            & !y:!b
+            & !x:!a
           | Out$848
           )
           (   11:?!(=)

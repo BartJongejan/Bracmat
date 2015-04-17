@@ -15,8 +15,8 @@ help=
   . outtxt,taytxt,newtxt,newobjecttxt,humtxt,objecttxt,hashtxt
   . paragraphs,fname,findtxt,inserttxt,removetxt,Newtxt,Dietxt
   . ISOtxt,casesensitivetxt,foralltxt,doHTML,clktxt,limitations
-  . lowtxt,upptxt,DOSopttxt,whltxt,argtxt,d2xtxt,x2dtxt
-  . rewriting,jsntranstxt
+  . lowtxt,upptxt,DOSopttxt,whltxt,argtxt,d2xtxt,x2dtxt,toMLtxt
+  . rewriting,jsntranstxt,transformtxt,MLencodingtxt,nestMLtxt
   . gentlepat recurpat closetxt filesettxt interaction usecases
   . fixdtxt modetxt positiontxt readtxt varitxt writetxt nonlinpat
   )
@@ -70,9 +70,9 @@ lex lexical analysis of help file"
 5  currying
 6  built-in functions
 7  predefined, changeable functions"
-      ,   (1,funmactxt naamloos macrotxt)
+      ,   (1,funmactxt naamloos macrotxt transformtxt)
           (2,funtxt1 funtxt3)
-          (3,naamloos macrotxt escappattxt)
+          (3,naamloos macrotxt transformtxt escappattxt)
           (4,lambda)
           (5,lambda)
           (6,inbltmenu)
@@ -95,7 +95,7 @@ lex lexical analysis of help file"
           (3,pattxt pattxttxt pattxt2 escappattxt)
           (4,contxt)
           (5,asstxt)
-          (6,funmactxt naamloos macrotxt)
+          (6,funmactxt naamloos macrotxt transformtxt)
           (7,dumtxt funtxt3)
     )
   & ( unopsmenu
@@ -1336,7 +1336,7 @@ operations, as in:
           (10,algtxt)
           (11,algtxt)
           (12,difftxt algtxt)
-          (13,funmactxt macrotxt)
+          (13,funmactxt macrotxt transformtxt)
           (14,funmactxt escappattxt)
           (15,dumtxt funtxt3)
     )
@@ -1912,6 +1912,34 @@ More examples:
 {?} '(a ($(=value)) z)
 {!} =a value z"
     )
+  & ( transformtxt
+    =   T
+      , "Program transformation"
+      , "Bracmat code is data. Yet it is easier to transform the internal representation
+of JSON or XML data than to transform a Bracmat program. The reason is that for
+code introspection it is necessary to turn off the expression evaluation that
+normally takes place in patterns. This can be achieved by using macros. Here is
+an example that reverses (|_rev$_|) and lowercases (|_low$_|) all leaves, but
+keeps everything else the same: prefixes, operators - even those that play
+special roles inside patterns, such as the |_!_| prefix and the |_ _ _| operator.
+
+{?} ( tr\r
+    =   a b f\r
+      .   flg$!arg:(=?f.?arg)\r
+        &   glf\r
+          $ (\r
+            ' ( $f\r
+              .\r
+                $ (   '$arg:(=?a_?b)\r
+                    & '$($(tr$('$a)))_($(tr$('$b)))\r
+                  | low$rev$!arg:?arg&arg\r
+                  )\r
+              )\r
+            )\r
+    )\r
+{?} tr$(=foo\L\"STRing\" ~!(sin$4/56) !and_?<UNDERSCORE)\r
+{!} (=oof\Lgnirts ~!(nis$65/4) !dna_<?erocsrednu)"
+    )
   & ( unops
     =   T
       , "minus sign"
@@ -2353,27 +2381,36 @@ visible functions are predefined:
     floating point notation of numbers
 5 |_jsn_|
     serialize data to JSON format
-6 |_out_|
+6 |_MLencoding_|
+    detect the encoding used in XML or HTML data
+7 |_nestML_|    
+    nest the internal representation of XML or HTML data
+8 |_out_|
     output to screen, then new line
-7 |_sgn_|
+9 |_sgn_|
     sign
-8 |_sin_|
+10 |_sin_|
     sine formula
-9 |_sub_|
+11 |_sub_|
     substitution
-10 |_tay_|
-    Taylor series development"
+12 |_tay_|
+    Taylor series development    
+13 |_toML_|    
+    convert an internal representation of XML or HTML to XML resp. HTML"
       ,   (0,sgntxt)
           (1,cattxt)
           (2,gontxt)
           (3,factxt)
           (4,flttxt)
           (5,jsntxt jsntranstxt)
-          (6,outtxt debugtxt2 debugtxt3)
-          (7,sgntxt)
-          (8,gontxt)
-          (9,subtxt1)
-          (10,taytxt)
+          (6,MLencodingtxt)
+          (7,nestMLtxt)
+          (8,outtxt debugtxt2 debugtxt3)
+          (9,sgntxt)
+          (10,gontxt)
+          (11,subtxt1)
+          (12,taytxt)
+          (13,toMLtxt)
     )
   & ( flttxt
     =   T
@@ -2508,6 +2545,27 @@ The second argument is the independent variable.
 The third argument denotes the number of terms, including vanishing terms.
 
 {?} tay$((cos$x)^-1,x,20)"
+    )
+  & ( MLencodingtxt
+    =   T
+      , "MLencoding$<internal expression of XML or HTML data>"
+      , "This function parses the data for indicators of the used character encoding."
+    )
+  & ( nestMLtxt
+    =   T
+      , 
+      ,   "nestML$<internal expression of XML or HTML data>"
+          "After reading XML or HTML data, all text and tags are in a flat list.
+The function |_nestML_| attempts to match opening and closing tags and creates
+a tree structure. This works best for XML data"
+    )
+  & ( toMLtxt
+    =   T
+      , "toML$<internal expression of XML or HTML data>"
+      , "This function creates a string containing XML or HTML formatted data from an
+internal representation of those data. |_toML_| works both with nested and
+unnested data. All necessary character conversions are made in PCDATA and
+attributes."
     )
   & ( pattxttxt
     =   T
@@ -4815,10 +4873,7 @@ Topic:")
                           & ( !keuze:
                             |   !menutekst:%?menutitel ?menutekst
                               &   writeHTML
-                                $ ( (!titel.!ptxt)
-                                  . !menutitel
-                                  . !keuze
-                                  )
+                                $ ((!titel.!ptxt).!menutitel.!keuze)
                             )
                           )
                       & out$(doMenuItems done)
@@ -5521,9 +5576,9 @@ _________________________________________________________________________
             )
       | ?
       );
-      
-  help$()
-& tbl$(help,0)
-& "
-_________________________________________________________________________
-"
+      
+  help$()
+& tbl$(help,0)
+& "
+_________________________________________________________________________
+"

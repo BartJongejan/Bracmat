@@ -65,10 +65,19 @@ Test coverage:
 
 */
 
-#define DATUM "17 Oktober 2014"
+#define DATUM "17 April 2015"
 #define VERSION "6"
-#define BUILD "191"
-/* 17 October 2014
+#define BUILD "192"
+/* 17 April 2015
+XML: New predefined functions for nesting data and for converting data back
+to XML format.
+    MLencoding - detects encoding in XML or HTML file
+    nestML     - nest the internal representation of XML data
+    toML       - convert internal representation of XML data to a string
+                 containing XML data
+HTML is supported, although nestML may still make wrong guesses.
+
+   17 October 2014
 If started with arguments AND stringeval fails, bracmat returns -1.
 Before the program might crash.
 
@@ -17708,6 +17717,43 @@ int startProc(
         "?\177e.?\177x.?\177v)|out$(str$((=sub$(expr.var.rep)) !arg))&get'&~`)"
         "&\177F$!\177e),",
 
+        "(MLencoding=N M J h m R.:?N&(R=? (charset.?N) ?|? (content.@(?:? "
+        "charset ? \275 ?N)) ?)&(M=? (~<>M.(!R,?)|!R) ?)&(J=? (~<>head.(?,!M)|"
+        "?&~`) ?|? (~<>head:?h.?) ?m (.!h.) ?&!m:!M)&(!arg:(@ (\277.@(?:~<>XML"
+        " (? encoding ? \275 ? (\242 ?N \242|\247 ?N \247) ?|?&utf\255\270:?N)"
+        ")) ?|? (~<>html.(?,!J)|?&~`) ?|? (~<>html.?) !J)|)&(!N:~|!arg:? ("
+        "\241DOCTYPE.@(?:? html ?)) ?&utf\255\270|)),",
+        "(nestML=a L B s e x.:?L&whl'(!arg:%?a ?arg&!a !L:?L)&!L:?arg&:?L:?B:"
+        "?s&whl'(!arg:%?a ?arg&(!a:(.?e.)&(!L.) !B:?B&:?L&!e !s:?s|(!a:(?e.?,?"
+        ")&!a|!a:(?e.?x)&(!s:!e ?s&(!e.!x,!L) (!B:(%?L.) ?B&)|!a)|!a) !L:?L))&"
+        "!L),",
+        "(toML=O d t g l \246 w \242 \247 H G S D E F I U.:?O&chr$\261\262\267"
+        ":?D&(d=a.whl'(!arg:%?a ?arg&!a !O:?O))&'(a c n.@(!arg:?a (>%@($D) ?:"
+        "?arg))&(@(!arg:(%?c&utf$!c:?n) ?arg)|@(!arg:(%?c&asc$!c:?n) ?arg))&!a"
+        " \246\243 !n \273 S$!arg|!arg):(=?S)&'(a c n.@(!arg:?a (>%@($D) ?:"
+        "?arg))&(@(!arg:(%?c&utf$!c:?n) ?arg)&(!n:>\262\265\265&!a \246\243 !n"
+        " \273 I$!arg|!a chr$!n I$!arg)|!a !arg)|!arg):(=?I)&'(a c n.@(!arg:?a"
+        " (>%@($D) ?:?arg))&(@(!arg:(%?c&utf$!c:?n) ?)&!a !arg|@(!arg:(%?c&asc"
+        "$!c:?n) ?arg)&!a chu$!n U$!arg)|!arg):(=?U)&MLencoding$!arg:("
+        "~<>utf\255\270&U:?F|~<>iso\255\270\270\265\271\255\261&I:?F|?&S:?F)&'"
+        "($F)$!a:(=?H)&'($F)$!arg:(=?G)&'(a b.@(!arg:?a \246 ?arg)&$H "
+        "\246amp\273 \246$!arg|$G):(=?\246)&'(a b.@(!arg:?a ()$D ?arg)&\246$!a"
+        " (@(!arg:%?b ?arg)&!b) E$!arg|\246$!arg):(=?E)&'(a.@(!arg:?a \274 "
+        "?arg)&E$!a \246lt\273 l$!arg|E$!arg):(=?l)&(g=a.@(!arg:?a \276 ?arg)&"
+        "l$!a \246gt\273 g$!arg|l$!arg)&(\242=a.@(!arg:?a \242 ?arg)&g$!a "
+        "\246quot\273 \242$!arg|g$!arg)&(\247=a.@(!arg:?a \247 ?arg)&\242$!a "
+        "\246apos\273 \247$!arg|\242$!arg)&(t=a v.!arg:(?a.?v) ?arg&\240 g$!a "
+        "\275\242 \247$!v \242 t$!arg|)&(!arg:? (html|HTML.?) ?&(Q=!C:&low$!A:"
+        "(area|base|br|col|command|embed|hr|img|input|keygen|link|meta|param|"
+        "source|track|wbr))|(Q=!C:))&'(r A B C T.whl'(!arg:%?r ?arg&(!r:(?A."
+        "?B)&(!B:(?T,?C)&($Q&d$(\274 !A t$!T \240\257\276)|d$(\274 !A t$!T "
+        "\276)&(!A:(~<>script|~<>style)&d$!C|w$!C)&d$(\274\257 !A \276))|!A:(&"
+        "!B:(?B.)&d$(\274\257 g$!B \276)|\241&d$(\274\241 !F$!B \276)|"
+        "\241\255\255&d$(\274\241\255\255 !F$!B \255\255\276)|\277&d$(\274\277"
+        " !F$!B \277\276)|\241\333CDATA\333&d$(\274\241\333CDATA\333 !F$!B "
+        "\335\335\276)|\241DOCTYPE&d$(\274\241DOCTYPE !F$!B \276)|?&d$(\274 !A"
+        " t$!B \276)))|d$(g$!r)))):(=?w)&w$!arg&str$((=a L.:?L&whl'(!arg:%?a "
+        "?arg&!a !L:?L)&!L)$!O)),",
         fct,
         NULL);
 
