@@ -1,8 +1,8 @@
 bracmat: bracmat.c xml.c
-	gcc -std=c99 -pedantic -Wall -O3 -static -DNDEBUG -o bracmat bracmat.c xml.c json.c
+	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -o bracmat bracmat.c xml.c json.c
 
 bracmatsafe: bracmat.c xml.c json.c
-	gcc -std=c99 -pedantic -Wall -O3 -static -DNDEBUG -DNO_C_INTERFACE -DNO_FILE_RENAME -DNO_FILE_REMOVE -DNO_SYSTEM_CALL -DNO_LOW_LEVEL_FILE_HANDLING -o bracmatsafe bracmat.c xml.c json.c
+	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DNO_C_INTERFACE -DNO_FILE_RENAME -DNO_FILE_REMOVE -DNO_SYSTEM_CALL -DNO_LOW_LEVEL_FILE_HANDLING -o bracmatsafe bracmat.c xml.c json.c
 
 profiling:
 	gcc -Wall -c -pg -DNDEBUG bracmat.c xml.c json.c

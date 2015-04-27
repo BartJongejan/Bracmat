@@ -347,7 +347,7 @@ Discovered buffer overflow when compiled under fresh installation of Xubuntu
 gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3 with optimization -O1 and higher.
 Cause: strcpy in some places got the address of a single byte as destination
 and coredumped when that single-byte buffer was overrun, not knowing that
-there was, in fact, allocated memory to house the fulle source. See definition
+there was, in fact, allocated memory to house the full source. See definition
 of POBJ.
 
     22 September 2012
