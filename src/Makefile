@@ -1,4 +1,4 @@
-bracmat: bracmat.c xml.c
+bracmat: bracmat.c xml.c json.c
 	gcc -std=c99 -pedantic -Wall -O3 -static -DNDEBUG -o bracmat bracmat.c xml.c json.c
 
 bracmatsafe: bracmat.c xml.c json.c
