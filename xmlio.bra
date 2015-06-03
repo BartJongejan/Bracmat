@@ -1,5 +1,8 @@
 {xmlio.bra
 
+SINCE APRIL 2015 THE FUNCTIONALITY IN THIS FILE IS ALSO AVAILABLE
+VIA THE PREDEFINED FUNCTIONS nestML, MLencoding, and toML.
+
 Reads document that has been converted from XML to Bracmat and writes the data
 as an XML-file. This file should be exactly the same as the original XML file.
 
@@ -87,7 +90,7 @@ XMLIO=
       & ( !enc:~
         |   !arg:? ("!DOCTYPE".@(?:? html ?)) ?
           & utf-8
-          | 
+        | 
         )
   )
   ( convert
@@ -264,6 +267,9 @@ rxmlio=
 & sys$(str$(ren " " "xmlio.bra" " " xmlio ".bak"))
 &   put
   $ ( "{xmlio.bra
+
+SINCE APRIL 2015 THE FUNCTIONALITY IN THIS FILE IS ALSO AVAILABLE
+VIA THE PREDEFINED FUNCTIONS nestML, MLencoding, and toML.
 
 Reads document that has been converted from XML to Bracmat and writes the data
 as an XML-file. This file should be exactly the same as the original XML file.
