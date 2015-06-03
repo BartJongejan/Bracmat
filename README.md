@@ -11,61 +11,96 @@ http://rosettacode.org/wiki/Rosetta_Code
 **This distribution contains the following directories and files:**
 * src
     * java
+    
       Java source code for creating a JNI (Java Native Interface) so the
       Bracmat evaluator can be called from the Java programming language.
+      
 	    * bracmattest.java
+	    
 	      Example program showing how to evaluate a Bracmat expression from
 	      within a Java program
+	      
 	    * dk
 	        * cst
 	            * bracmat.java
+	            
 	              Java code that loads the Bracmat dynamic library.
+	              
     * Makefile
+      
       Builds the standard edition of bracmat, a "safe" version of bracmat,
       a version for profiling, and a version for code coverage.
-    * bracmat.c     
+      
+    * bracmat.c
+    
       Most of the source code of the program.
+      
     * bracmat.h
+    
       An optional header file, if you want to compile Bracmat as a library.
+      
     * bracmatJS.html
+    
       Bracmat compiled to Javascript using emscripten, embedded in a single
       HTML-page. Nice for toy scripts, slow.
+      
     * bracmatdll.cpp, 
     * bracmatdll.h
+    
       Source and header files that are needed for building the Windows version
       of a Bracmat JNI, which requires Bracmat to be in a dynamic linked
       library.
+      
     * bracmatso.c
+    
       Source file that includes bracmat.c after turning off functionality
       that we don't want in a JNI running in a production system: low level
       file manipulations, system() calls, and exit() which would bring the
       application container down.
+      
     * bracmattest.c
+    
       Program source that links with a Bracmat dynamic library. For Linux.
+      
     * compileAndTestJNI.sh
+    
       Linux script to create a Bracmat JNI. This file contains a comment that
       describes the steps to create a Bracmat JNI for the Windows platform
       using Visual C++.
+      
     * dk_cst_bracmat.c,
       dk_cst_bracmat.h
+      
       Source and header files that are needed for building a Bracmat JNI,
       which requires Bracmat to be in a dynamic linked
       library.
+      
     * dlltest.cpp,
       dlltest.h
+      
       Program source that links with a Bracmat dynamic library. For Windows.
+      
     * editbracmatjs.bra
+    
       A Bracmat script that edits the output of the emscripten C-to-Javascript
       compiler and creates a HTML page containing Javascript embodying Bracmat.
+      
     * emscriptenHowToHTML.bat
+    
       Windows batch file that runs emscripten and does some postprocessing,
       creating a Javascript version of Bracmat.
+      
     * json.c
+    
       Source code that implements support for reading JSON-files
+      
     * makeJNI.bat
+    
       Batch file for Windows to create a Bracmat JNI. Should work with a number
       of versions of Microsoft's C-compiler.
+      
     * xml.c
+    
       Source code that implements support for reading XML-files
     
 * Changelog
