@@ -629,17 +629,35 @@ returns<code> !s.</code></dd><dt><code>(!s:!p)|!e </code>or<code> !s:!p|!e</code
 <p><span class="arrow">⇐</span><a href="#asstxt" style="line-height:12pt">Assignment to variables</a></p>
 <h3><a name="escappattxt">Escaping operator in patterns</a></h3>
 <p>Some operators can not be part of a pattern unless<code> 'escaped', </code>because these
-operators play an active role in pattern matching instead of being passiv part
+operators play an active role in pattern matching instead of being passive part
 of a pattern. These operators are<code> = | &amp; : ' $ _</code></p>
 <p>The normal role of these operators is ignored by the pattern matching
 evaluator if they are escaped with a<code> $ </code>node with an empty lhs.</p>
-<blockquote><pre class="exinput">{?} (=foo'bar):(=$(foo'bar))</pre><pre class="exoutput">{!} =foo'bar
-    S   0,00</pre></blockquote>
-<blockquote><pre class="exinput">{?} (=foo'bar):(=$(?f'?x)) &amp; !f !x</pre><pre class="exoutput">{!} foo bar
-    S   0,00 sec</pre></blockquote>
+<blockquote><pre class="exinput">{?} (=foo'bar):(=$(foo'bar))</pre><pre class="exoutput">{!} =foo'bar</pre></blockquote>
+<blockquote><pre class="exinput">{?} (=foo'bar):(=$(?f'?x)) &amp; !f !x</pre><pre class="exoutput">{!} foo bar</pre></blockquote>
 <p>The escape operator only affects the top node of the escape operator's rhs.
 The lhs and rhs of the affected node are matched against the subject in the
-normal way. The escape operator functions with all Bracmat operators, but the
+normal way.</p>
+<blockquote><pre class="exinput">{?} vowel=.!sjt:(a|e|i|o|u|y)      { Function to be used in a pattern to check
+                                     that the subject is a single vowel. }</pre></blockquote>
+<blockquote><pre class="exinput">{?} (=a$123):(=$((vowel')$(#:?n))) { Only the $ between ) and ( is escaped,
+                                     because that is the top node of
+                                        (vowel')$(#:?n)
+                                     So the pattern expressions vowel' and #:?n
+                                     are evaluated as normal. }</pre><pre class="exoutput">{!} =a$123</pre></blockquote>
+<blockquote><pre class="exinput">{?} !n</pre><pre class="exoutput">{!} 123                            { This proves that the rhs of the top $
+                                     was evaluated. }</pre></blockquote>
+<blockquote><pre class="exinput">{?} (=b$456):(=$((vowel')$(#:?m))) { This fails, proving that the pattern
+                                     expression vowel' doesn't recognise
+                                     the b in the subject as a vowel.
+                                     No assignment to variable ?m takes
+                                     place. }</pre></blockquote>
+<blockquote><pre class="exinput">{?} (=(vowel')$456) : (=$(($(vowel'))$(#:?m)))    { This succeeds, because
+                                     the ' in the pattern expression $(vowel')
+                                     is escaped. So the pattern $(vowel')
+                                     matches the subject vowel' }</pre><pre class="exoutput">{!} =(vowel')$456</pre></blockquote>
+<blockquote><pre class="exinput">{?} !m</pre><pre class="exoutput">{!} 456</pre></blockquote>
+<p>The escape operator functions with all Bracmat operators, but the
 operators<code> . , </code>whitespace,<code> + * ^ \L </code>and<code> \D </code>should not be escaped normally.</p>
 <p><span class="arrow">⇑</span><a href="#patternm" style="line-height:12pt">Pattern matching</a></p>
 <p><span class="arrow">⇑</span><a href="#binovztxt" style="line-height:12pt"><code>=.,|&amp;: +*^\L\D'$_</code></a></p>

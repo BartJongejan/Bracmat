@@ -2,23 +2,107 @@
 
 Bracmat is software for exploration and transformation of uncharted and
 complex data. Bracmat employs a pattern matching technique that can
-handle string data (text) as well as structured data (XML, HTML, algebraic
-expressions, email, program code, ...).
+handle string data (text) as well as structured data (XML, HTML, JSON,
+algebraic expressions, email, program code, ...).
 
 Over hundred and fifty examples of Bracmat code can be found at
 http://rosettacode.org/wiki/Rosetta_Code
 
-**This distribution contains the following essential directories and files:**
+**This distribution contains the following directories and files:**
 * src
+    * java
+    
+      Java source code for creating a JNI (Java Native Interface) so the
+      Bracmat evaluator can be called from the Java programming language.
+      
+	    * bracmattest.java
+	    
+	      Example program showing how to evaluate a Bracmat expression from
+	      within a Java program
+	      
+	    * dk
+	        * cst
+	            * bracmat.java
+	            
+	              Java code that loads the Bracmat dynamic library.
+	              
     * Makefile
-    * bracmat.c     
+      
+      Builds the standard edition of bracmat, a "safe" version of bracmat,
+      a version for profiling, and a version for code coverage.
+      
+    * bracmat.c
+    
       Most of the source code of the program.
+      
     * bracmat.h
+    
       An optional header file, if you want to compile Bracmat as a library.
-    * xml.c
-      Source code that implements support for reading XML-files
+      
+    * bracmatJS.html
+    
+      Bracmat compiled to Javascript using emscripten, embedded in a single
+      HTML-page. Nice for toy scripts, slow.
+      
+    * bracmatdll.cpp, 
+    * bracmatdll.h
+    
+      Source and header files that are needed for building the Windows version
+      of a Bracmat JNI, which requires Bracmat to be in a dynamic linked
+      library.
+      
+    * bracmatso.c
+    
+      Source file that includes bracmat.c after turning off functionality
+      that we don't want in a JNI running in a production system: low level
+      file manipulations, system() calls, and exit() which would bring the
+      application container down.
+      
+    * bracmattest.c
+    
+      Program source that links with a Bracmat dynamic library. For Linux.
+      
+    * compileAndTestJNI.sh
+    
+      Linux script to create a Bracmat JNI. This file contains a comment that
+      describes the steps to create a Bracmat JNI for the Windows platform
+      using Visual C++.
+      
+    * dk_cst_bracmat.c,
+      dk_cst_bracmat.h
+      
+      Source and header files that are needed for building a Bracmat JNI,
+      which requires Bracmat to be in a dynamic linked
+      library.
+      
+    * dlltest.cpp,
+      dlltest.h
+      
+      Program source that links with a Bracmat dynamic library. For Windows.
+      
+    * editbracmatjs.bra
+    
+      A Bracmat script that edits the output of the emscripten C-to-Javascript
+      compiler and creates a HTML page containing Javascript embodying Bracmat.
+      
+    * emscriptenHowToHTML.bat
+    
+      Windows batch file that runs emscripten and does some postprocessing,
+      creating a Javascript version of Bracmat.
+      
     * json.c
+    
       Source code that implements support for reading JSON-files
+      
+    * makeJNI.bat
+    
+      Batch file for Windows to create a Bracmat JNI. Should work with a number
+      of versions of Microsoft's C-compiler.
+      
+    * xml.c
+    
+      Source code that implements support for reading XML-files
+    
 * Changelog
   
   A document describing changes between versions.
@@ -29,7 +113,8 @@ http://rosettacode.org/wiki/Rosetta_Code
   
 * bracmat.html
 
-  The documentation in HTML format, automatically generated from the file 'help'.
+  The documentation in HTML format, automatically generated from the file
+  'help'.
 
 * gpl.txt
 
@@ -37,11 +122,13 @@ http://rosettacode.org/wiki/Rosetta_Code
 
 * help
 
-  The documentation in Bracmat format. (You have to run Bracmat and issue 'get$help' to see it properly.)
+  The documentation in Bracmat format. (You have to run Bracmat and issue
+  'get$help' to see it properly.)
   
 * howto.md
 
-  Detailed explaination of how to use the wizzard project.bra to create a Bracmat program.
+  Detailed explanation of how to use the wizzard project.bra to create a Bracmat
+  program.
   
 * lex.bra
 
@@ -62,17 +149,21 @@ http://rosettacode.org/wiki/Rosetta_Code
   and saves it, thereby nicely reformatting the code. (Most comments are lost!)
   Some editors discover that the file has been changed and propose to reread
   the file. In this way, the user doesn't need to bother about formatting.
-  Cyclus: edit program, save from editor, reread in  Bracmat, reload in editor, edit program.
+  Cyclus: edit program, save from editor, reread in  Bracmat, reload in editor,
+  edit program.
 
 * uni.bra
 
-  A utility that generates UNICODE-related tables from UnicodeData.txt (http://unicode.org/Public/UNIDATA/UnicodeData.txt).
-  These tables, which are also found in bracmat.c, have to be updated every few years, when UnicodeData.txt is updated.
+  A utility that generates UNICODE-related tables from UnicodeData.txt 
+  (http://unicode.org/Public/UNIDATA/UnicodeData.txt).
+  These tables, which are also found in bracmat.c, have to be updated every
+  few years, when UnicodeData.txt is updated.
   Conversion between lower and upper casing is based on these tables.
 
 * valid.bra
 
-  A test suite.
+  A test suite. Whenever possible, one or more tests are added for every new
+  functionality and every bug fix.
 
 **Usage**
 
