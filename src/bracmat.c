@@ -1919,7 +1919,7 @@ typedef struct
 #endif
 #if _BRACMATEMBEDDED
 #if defined PYTHONINTERFACE
-#define NI O('N','i')
+#define NI O('N','i',0)
 #endif
 #endif
 
