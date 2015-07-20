@@ -3387,7 +3387,7 @@ static int (*WinIn)(void) = NULL;
 static void (*WinOut)(int c) = NULL;
 static void (*WinFlush)(void) = NULL;
 #if defined PYTHONINTERFACE
-static const char (*Ni)(const char *) = NULL;
+static const char * (*Ni)(const char *) = NULL;
 #endif
 static int mygetc(FILE * fpi)
     {
@@ -14422,7 +14422,7 @@ static function_return_type functies(psk pkn)
                 errno = 0;
                 val = Ni((const char *)POBJ(rknoop));
                 wis(pkn);
-                pkn = scopy(val);
+                pkn = scopy((const char *)val);
                 return functionOk(pkn);
                 }
             else
@@ -17561,7 +17561,7 @@ int startProc(
 #if defined PYTHONINTERFACE
         if(init->Ni)
             {
-            Ni = Init->Ni;
+            Ni = init->Ni;
             }
 #endif
         }
