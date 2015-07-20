@@ -2989,10 +2989,10 @@ towards operators that are closer to the root of the tree"
             & @(lst$(S,MEM,LIN):"S=@\"\\\\\";\n")
           | Out$413
           )
-          (   tyr:?a:?b:?c:?d
-            & :?a+?b^?c+?d
+          (   tyr:?a:?b:?cc:?d
+            & :?a+?b^?cc+?d
             & 0:!a:!b
-            & 1:!c
+            & 1:!cc
             & :!d
           | Out$414
           )
@@ -5768,6 +5768,24 @@ string line 2\"
                 )
             : (pap.(color.blue) (a.3))
           | Out$899
+          )
+          (   (alice=bob|carol)
+            & (bob=7)
+            & (carol=13)
+            & !!alice:7
+          | Out$900
+          )
+          (   (alice=bob|carol)
+            & (bob=7)
+            & (carol=13)
+            & !('$!alice):7
+          | Out$901
+          )
+          (   (alice=~&bob|carol)
+            & (bob=7)
+            & (carol=13)
+            & !('$!('$alice)):13
+          | Out$901
           )
       &   out
         $ ( str
