@@ -8,6 +8,9 @@ typedef struct startStruct
 	int (*WinIn)(void);
     void (*WinOut)(int c);
     void (*WinFlush)(void);
+#if defined PYTHONINTERFACE
+    const char * Ni(const char * str);
+#endif
     } startStruct;
 
 #ifdef __cplusplus

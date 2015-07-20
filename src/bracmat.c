@@ -1913,6 +1913,12 @@ typedef struct
 #if CODEPAGE850
 #define DOS O('D','O','S')
 #endif
+#if _BRACMATEMBEDDED
+#if defined PYTHONINTERFACE
+#define NI O('N','i')
+#endif
+#endif
+
 #define ECH O('E','C','H')
 #define EEN O('1', 0 , 0 )
 /* err$foo redirects error messages to foo */
@@ -3376,7 +3382,9 @@ static psk subboomcopie(psk src);
 static int (*WinIn)(void) = NULL;
 static void (*WinOut)(int c) = NULL;
 static void (*WinFlush)(void) = NULL;
-
+#if defined PYTHONINTERFACE
+static const char (*Ni)(const char *) = NULL;
+#endif
 static int mygetc(FILE * fpi)
     {
     if(WinIn && fpi == stdin)
@@ -5062,7 +5070,7 @@ static LONG toLong(psk kn)
     return res;
     }
 
-static int numbercheck(char *begin)
+static int numbercheck(const char *begin)
     {
     int op_of_0,check;
     int needNonZeroDigit = FALSE; /* 20040308 */
@@ -5134,7 +5142,7 @@ static int numbercheck(char *begin)
     return check;
     }
 
-static int fullnumbercheck(char *begin)
+static int fullnumbercheck(const char *begin)
     {
     if(*begin == '-')
         {
@@ -8110,7 +8118,7 @@ Thereafter copies must be made.}
     return ret;
     }
 
-static psk scopy(char * str)
+static psk scopy(const char * str)
     {
     int nr = fullnumbercheck(str) & ~DEFINITELYNONUMBER;
     psk kn;
@@ -8128,7 +8136,7 @@ static psk scopy(char * str)
     return kn;
     }
 
-static int scopy_insert(psk name,char * str)
+static int scopy_insert(psk name,const char * str)
     {
     int ret;
     psk kn;
@@ -13302,7 +13310,7 @@ if(kns[1] && kns[1]->u.obj)
             char pos[11];
             sprintf(pos,LONGD,FTELL(fh->fp));
             wis(*pkn);
-            *pkn = scopy((char *)pos);
+            *pkn = scopy((const char *)pos);
             return TRUE;
             }
         else
@@ -13644,7 +13652,8 @@ static int flush(void)
     return fflush(fpo);
 #else
 #if _BRACMATEMBEDDED
-    WinFlush();
+    if(WinFlush)
+        WinFlush();
     return 1;
 #else
     return 1;
@@ -14376,11 +14385,11 @@ static function_return_type functies(psk pkn)
             telling = 1;
             verwerk = tstr;
             result(rknoop);
-            rlknoop = (psk)bmalloc(__LINE__,sizeof(unsigned LONG)+telling);
+            rlknoop = (psk)bmalloc(__LINE__, sizeof(unsigned LONG) + telling);
             verwerk = pstr;
             bron = POBJ(rlknoop);
             result(rknoop);
-            rlknoop->v.fl = (READY|SUCCESS) | (numbercheck(SPOBJ(rlknoop)) & ~DEFINITELYNONUMBER);
+            rlknoop->v.fl = (READY | SUCCESS) | (numbercheck(SPOBJ(rlknoop)) & ~DEFINITELYNONUMBER);
             mooi = TRUE;
             hum = 1;/* 15 Dec 1995 */
             verwerk = myputc;
@@ -14394,6 +14403,28 @@ static function_return_type functies(psk pkn)
             pkn = swi(pkn,rlknoop,rrknoop);
             return functionOk(pkn);
             }
+#endif
+#if _BRACMATEMBEDDED
+#if defined PYTHONINTERFACE
+        CASE(NI) /* Ni$"Expression to be evaluated by Python"*/
+            {
+            if(Ni)
+                {
+                const char * val;
+                if (is_op(rknoop)
+                    || HAS_VISIBLE_FLAGS_OR_MINUS(rknoop)
+                    )
+                    return functionFail(pkn);
+                errno = 0;
+                val = Ni((const char *)POBJ(rknoop));
+                wis(pkn);
+                pkn = scopy(val);
+                return functionOk(pkn);
+                }
+            else
+                return functionFail(pkn);
+            }
+#endif
 #endif
 
 #ifdef ERR
@@ -14420,7 +14451,7 @@ static function_return_type functies(psk pkn)
                 return functionFail(pkn);
             pointerToStr(klad,p);
             wis(pkn);
-            pkn = scopy((char *)klad);
+            pkn = scopy((const char *)klad);
             return functionOk(pkn);
             }
         CASE(FRE) /* fre $ <pointer> */
@@ -14478,7 +14509,7 @@ static function_return_type functies(psk pkn)
                     break;
                 }
             wis(pkn);
-            pkn = scopy((char *)klad);
+            pkn = scopy((const char *)klad);
             return functionOk(pkn);
             }
         CASE(POK) /* pok $ (<pointer>,<number>[,<number of bytes>]) */
@@ -14576,7 +14607,7 @@ static function_return_type functies(psk pkn)
                 return functionFail(pkn); /*not all characters scanned*/
             sprintf(klad,LONGU,val);
             wis(pkn);
-            pkn = scopy((char *)klad);
+            pkn = scopy((const char *)klad);
             return functionOk(pkn);
             }
         CASE(D2X) /* d2x $ decimalnumber */
@@ -14600,7 +14631,7 @@ static function_return_type functies(psk pkn)
                 return functionFail(pkn); /*not all characters scanned*/
             sprintf(klad,LONGX,val);
             wis(pkn);
-            pkn = scopy((char *)klad);
+            pkn = scopy((const char *)klad);
             return functionOk(pkn);
             }
         CASE(KAR) /* chr $ getal */
@@ -14613,7 +14644,7 @@ static function_return_type functies(psk pkn)
             klad[0] = (char)intVal;
             klad[1] = 0;
             wis(pkn);
-            pkn = scopy((char *)klad);
+            pkn = scopy((const char *)klad);
             return functionOk(pkn);
             }
         CASE(KAU) /* chu $ number */
@@ -14625,7 +14656,7 @@ static function_return_type functies(psk pkn)
             if(putCodePoint(val,(char *)klad) == NULL)
                 return functionFail(pkn);
             wis(pkn);
-            pkn = scopy((char *)klad);
+            pkn = scopy((const char *)klad);
             return functionOk(pkn);
             }
         CASE(ASC) /* asc $ character */
@@ -14635,7 +14666,7 @@ static function_return_type functies(psk pkn)
                 return functionFail(pkn);
             sprintf(klad,"%d",(int)rknoop->u.obj);
             wis(pkn);
-            pkn = scopy((char *)klad);
+            pkn = scopy((const char *)klad);
             return functionOk(pkn);
             }
         CASE(UTF)
@@ -14663,7 +14694,7 @@ static function_return_type functies(psk pkn)
                     }
                 sprintf(klad,"%d",intVal);
                 wis(pkn);
-                pkn = scopy((char *)klad);
+                pkn = scopy((const char *)klad);
                 return functionOk(pkn);
                 }
             }
@@ -14897,7 +14928,7 @@ static function_return_type functies(psk pkn)
                 else
                     strcpy(klad,"0");
                 wis(pkn);
-                pkn = scopy((char *)klad);
+                pkn = scopy((const char *)klad);
                 return functionOk(pkn);
                 }
             else
@@ -14944,7 +14975,7 @@ static function_return_type functies(psk pkn)
                 else
                     strcpy(klad,"0");
                 wis(pkn);
-                pkn = scopy((char *)klad);
+                pkn = scopy((const char *)klad);
                 return functionOk(pkn);
                 }
             else
@@ -14965,13 +14996,13 @@ static function_return_type functies(psk pkn)
                 if(val >= ARGC)
                     return functionFail(pkn);
                 wis(pkn);
-                pkn = scopy((char *)ARGV[val]);
+                pkn = scopy((const char *)ARGV[val]);
                 return functionOk(pkn);
                 }
             if(argno < ARGC)
                 {
                 wis(pkn);
-                pkn = scopy((char *)ARGV[argno++]);
+                pkn = scopy((const char *)ARGV[argno++]);
                 return functionOk(pkn);
                 }
             else
@@ -15132,7 +15163,7 @@ static function_return_type functies(psk pkn)
                 else
                     strcpy(klad,"0");
                 wis(pkn);
-                pkn = scopy((char *)klad);
+                pkn = scopy((const char *)klad);
                 return functionOk(pkn);
                 }
             }
@@ -15166,7 +15197,7 @@ The same effect is obtained by <expr>:?!(=)
 #endif
             print_clock(klad,time);
             wis(pkn);
-            pkn = scopy((char *)klad);
+            pkn = scopy((const char *)klad);
             return functionOk(pkn);
             }
 
@@ -15178,7 +15209,7 @@ The same effect is obtained by <expr>:?!(=)
                 {
                 Sim(klad,(char *)POBJ(rlknoop),(char *)POBJ(rrknoop));
                 wis(pkn);
-                pkn = scopy((char *)klad);
+                pkn = scopy((const char *)klad);
                 return functionOk(pkn);
                 }
             else
@@ -17523,6 +17554,12 @@ int startProc(
             {
             WinFlush = init->WinFlush;
             }
+#if defined PYTHONINTERFACE
+        if(init->Ni)
+            {
+            Ni = Init->Ni;
+            }
+#endif
         }
 #endif
     for(tel = 0;tel<256;variabelen[tel++] = NULL)
