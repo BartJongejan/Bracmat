@@ -65,10 +65,14 @@ Test coverage:
 
 */
 
-#define DATUM "17 April 2015"
+#define DATUM "20 July 2015"
 #define VERSION "6"
-#define BUILD "192"
-/* 17 April 2015
+#define BUILD "193"
+/* 20 July 2015
+Added function Ni for interfacing with Python when embedded using Cython.
+Added 'const' to scopy, numbercheck and fullnumbercheck
+
+   17 April 2015
 XML: New predefined functions for nesting data and for converting data back
 to XML format.
     MLencoding - detects encoding in XML or HTML file
