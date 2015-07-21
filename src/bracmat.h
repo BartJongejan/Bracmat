@@ -9,7 +9,8 @@ typedef struct startStruct
     void (*WinOut)(int c);
     void (*WinFlush)(void);
 #if defined PYTHONINTERFACE
-    const char * (*Ni)(const char * str);
+    void (*Ni)(const char * str); /* exec */
+    const char * (*Nii)(const char * str); /* eval() */
 #endif
     } startStruct;
 

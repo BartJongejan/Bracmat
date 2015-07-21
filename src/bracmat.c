@@ -1919,7 +1919,8 @@ typedef struct
 #endif
 #if _BRACMATEMBEDDED
 #if defined PYTHONINTERFACE
-#define NI O('N','i',0)
+#define NI  O('N','i', 0 )
+#define NII O('N','i','!')
 #endif
 #endif
 
@@ -3387,7 +3388,8 @@ static int (*WinIn)(void) = NULL;
 static void (*WinOut)(int c) = NULL;
 static void (*WinFlush)(void) = NULL;
 #if defined PYTHONINTERFACE
-static const char * (*Ni)(const char *) = NULL;
+static void (*Ni)(const char *) = NULL;
+static const char * (*Nii)(const char *) = NULL;
 #endif
 static int mygetc(FILE * fpi)
     {
@@ -14410,17 +14412,22 @@ static function_return_type functies(psk pkn)
 #endif
 #if _BRACMATEMBEDDED
 #if defined PYTHONINTERFACE
-        CASE(NI) /* Ni$"Expression to be evaluated by Python"*/
+        CASE(NI) /* Ni$"Statements to be executed by Python" */
             {
-            if(Ni)
+            if(Ni && !is_op(rknoop) && !HAS_VISIBLE_FLAGS_OR_MINUS(rknoop))
+                {
+                Ni((const char *)POBJ(rknoop));
+                return functionOk(pkn);
+                }
+            else
+                return functionFail(pkn);
+            }
+        CASE(NII) /* Ni!$"Expression to be evaluated by Python" */
+            {
+            if(Nii && !is_op(rknoop) && !HAS_VISIBLE_FLAGS_OR_MINUS(rknoop))
                 {
                 const char * val;
-                if (is_op(rknoop)
-                    || HAS_VISIBLE_FLAGS_OR_MINUS(rknoop)
-                    )
-                    return functionFail(pkn);
-                errno = 0;
-                val = Ni((const char *)POBJ(rknoop));
+                val = Nii((const char *)POBJ(rknoop));
                 wis(pkn);
                 pkn = scopy((const char *)val);
                 return functionOk(pkn);
@@ -17562,6 +17569,10 @@ int startProc(
         if(init->Ni)
             {
             Ni = init->Ni;
+            }
+        if(init->Nii)
+            {
+            Nii = init->Nii;
             }
 #endif
         }
