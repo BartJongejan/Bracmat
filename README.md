@@ -33,7 +33,7 @@ http://rosettacode.org/wiki/Rosetta_Code
 	    
 		* build-launch.bat
 
-		  Contains two lines. The first line comiles and links the module,
+		  Contains two lines. The first line compiles and links the module,
 		  the second tests the result.
 		
 		* launch.py
@@ -234,9 +234,9 @@ Bracmat has been compiled and run on the following platforms:
 * Linux   (gcc)
 * MacOS   (xcode)
 
-If you have plans to run Bracmat from Python, you need Cython. If you want to do this on a Windows
-platform, you likely need Visual Studio 2008. Contact me if you want a compiled module for Windows
-and do not have the compiler to build it.
+If you have plans to run Bracmat from Python, you need Python and Cython besides a C-compiler.
+If you want to do this on a Windows platform, you likely need Visual Studio C++ 2008. 
+Contact me if you want a compiled module for Windows and do not have the compiler to build it.
 
 **Testing**
 
