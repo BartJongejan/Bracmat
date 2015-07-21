@@ -1,3 +1,20 @@
+  21 July 2015 - 6.194
+If defined with -DPYTHONINTERFACE and -DBRACMATEMBEDDED you can now make a
+Python module called 'prythat'. From Python you call (in this order)
+    prythat.init()
+    prythat.HolyGrail(string containing Bracmat expression)
+    prythat.final()
+The HolyGrail can be called any number of times.
+From Bracmat you can call back to Python with the functions 
+    Ni$"String with Python statements"
+and Ni!$"String with a Python expression"
+Only the function Ni! returns a value back from Python.
+The subdirectory src/Python contains the Cython source file to 
+construct the Python module, together with Bracmat's C source.
+That subdirectory also contains a file launch.py that tests and
+demonstrates the prythat module.
+ 
+
   17 April 2015
 XML: New predefined functions for nesting data and for converting data back
 to XML format.

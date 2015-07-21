@@ -25,7 +25,29 @@ http://rosettacode.org/wiki/Rosetta_Code
 	            * bracmat.java
 	            
 	              Java code that loads the Bracmat dynamic library.
-	              
+	
+	* Python
+	  
+	  Python and Cython source code for creating a Python module 'prythat' so
+	  the Bracmat evaluator can be called from the Python programming language
+	    
+		* build-launch.bat
+
+		  Contains two lines. The first line comiles and links the module,
+		  the second tests the result.
+		
+		* launch.py
+		
+		  Tests the prythat module.  
+
+	    * prythat.pyx
+
+		  Cython source code that interfaces Python with Bracmat and vv.
+
+		* setup.py
+
+		  Makefile for buidling the module.
+		              
     * Makefile
       
       Builds the standard edition of bracmat, a "safe" version of bracmat,
@@ -211,6 +233,10 @@ Bracmat has been compiled and run on the following platforms:
 * Solaris (gcc)
 * Linux   (gcc)
 * MacOS   (xcode)
+
+If you have plans to run Bracmat from Python, you need Cython. If you want to do this on a Windows
+platform, you likely need Visual Studio 2008. Contact me if you want a compiled module for Windows
+and do not have the compiler to build it.
 
 **Testing**
 

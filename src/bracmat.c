@@ -65,9 +65,9 @@ Test coverage:
 
 */
 
-#define DATUM "20 July 2015"
+#define DATUM "21 July 2015"
 #define VERSION "6"
-#define BUILD "193"
+#define BUILD "194"
 /* 20 July 2015
 Added function Ni for interfacing with Python when embedded using Cython.
 Added 'const' to scopy, numbercheck and fullnumbercheck
