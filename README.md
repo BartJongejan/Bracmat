@@ -237,7 +237,7 @@ Bracmat has been compiled and run on the following platforms:
 If you have plans to run Bracmat from Python, you need Python and Cython besides a C-compiler.
 If you want to do this on a Windows platform, you need Visual Studio C++ 2008 (Correct me if there
 are ways to use other C++ compilers). The software has been tested on Windows 7 and 8.1, 
-both 64 bit platforms, using _Cython version 0.22.1_ and _GCC 4.8.2_.
+both 64 bit platforms, using _Cython version 0.22.1_ and 
 _Python 2.7.3 (default, Apr 10 2012, 23:31:26) [MSC v.1500 32 bit (Intel)] on win32_ 
 (or _Python 2.7.10 (default, May 23 2015, 09:40:32) [MSC v.1500 32 bit (Intel)] on win32_).
 On Linux ( _Ubuntu 14.04.2 LTS_ 64 bit), the software is tested with _Cython version 0.22_, 
