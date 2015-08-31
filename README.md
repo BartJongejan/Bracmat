@@ -15,39 +15,39 @@ http://rosettacode.org/wiki/Rosetta_Code
       Java source code for creating a JNI (Java Native Interface) so the
       Bracmat evaluator can be called from the Java programming language.
       
-	    * bracmattest.java
-	    
-	      Example program showing how to evaluate a Bracmat expression from
-	      within a Java program
-	      
-	    * dk
-	        * cst
-	            * bracmat.java
-	            
-	              Java code that loads the Bracmat dynamic library.
-	
-	* Python
-	  
-	  Python and Cython source code for creating a Python module 'prythat' so
-	  the Bracmat evaluator can be called from the Python programming language
-	    
-		* build-launch.bat
+        * bracmattest.java
+        
+          Example program showing how to evaluate a Bracmat expression from
+          within a Java program
+          
+        * dk
+            * cst
+                * bracmat.java
+                
+                  Java code that loads the Bracmat dynamic library.
+    
+    * Python
+      
+      Python and Cython source code for creating a Python module 'prythat' so
+      the Bracmat evaluator can be called from the Python programming language
+        
+        * build-launch.bat
 
-		  Contains two lines. The first line compiles and links the module,
-		  the second tests the result.
-		
-		* launch.py
-		
-		  Tests the prythat module.  
+          Contains two lines. The first line compiles and links the module,
+          the second tests the result.
+        
+        * launch.py
+        
+          Tests the prythat module.  
 
-	    * prythat.pyx
+        * prythat.pyx
 
-		  Cython source code that interfaces Python with Bracmat and vv.
+          Cython source code that interfaces Python with Bracmat and vv.
 
-		* setup.py
+        * setup.py
 
-		  Makefile for buidling the module.
-		              
+          Makefile for buidling the module.
+                      
     * Makefile
       
       Builds the standard edition of bracmat, a "safe" version of bracmat,
