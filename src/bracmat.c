@@ -65,10 +65,14 @@ Test coverage:
 
 */
 
-#define DATUM "21 July 2015"
+#define DATUM "31 August 2015"
 #define VERSION "6"
-#define BUILD "194"
-/* 20 July 2015
+#define BUILD "195"
+/* 31 August 2015
+Updated case conversion with latest UnicodeData.txt (09-Feb-2015 20:08).
+See http://www.unicode.org/Public/UNIDATA/UnicodeData.txt.
+
+   20 July 2015
 Added function Ni for interfacing with Python when embedded using Cython.
 Added 'const' to scopy, numbercheck and fullnumbercheck
 
@@ -2906,6 +2910,7 @@ static int isLetter(int a)
 {0x28A,1,1,-217},
 {0x28C,0,0,-71},
 {0x292,0,0,-219},
+{0x29D,0,0,42261},
 {0x29E,0,0,42258},
 {0x345,0,0,84},
 {0x371,2,2,-1},
@@ -2939,6 +2944,7 @@ static int isLetter(int a)
 {0x4CF,0,0,-15},
 {0x4D1,94,2,-1},
 {0x561,37,1,-48},
+{0x13F8,5,1,-8},
 {0x1D79,0,0,35332},
 {0x1D7D,0,0,3814},
 {0x1E01,148,2,-1},
@@ -2994,8 +3000,12 @@ static int isLetter(int a)
 {0xA78C,0,0,-1},
 {0xA791,2,2,-1},
 {0xA797,18,2,-1},
+{0xA7B5,2,2,-1},
+{0xAB53,0,0,-928},
+{0xAB70,79,1,-38864},
 {0xFF41,25,1,-32},
 {0x10428,39,1,-40},
+{0x10CC0,50,1,-64},
 {0x118C0,31,1,-32},
 {0x1FFFFF,0,0,0}};
 
@@ -3090,6 +3100,8 @@ struct ccaseconv u2l[]={
 {0x10A0,36,1,7264},
 {0x10C5,2,2,7264},
 {0x10CD,0,0,7264},
+{0x13A0,79,1,38864},
+{0x13F0,5,1,8},
 {0x1E00,148,2,1},
 {0x1E9E,0,0,-7615},
 {0x1EA0,94,2,1},
@@ -3156,11 +3168,14 @@ struct ccaseconv u2l[]={
 {0xA7AD,0,0,-42305},
 {0xA7B0,0,0,-42258},
 {0xA7B1,0,0,-42282},
+{0xA7B2,0,0,-42261},
+{0xA7B3,0,0,928},
+{0xA7B4,2,2,1},
 {0xFF21,25,1,32},
 {0x10400,39,1,40},
+{0x10C80,50,1,64},
 {0x118A0,31,1,32},
-{0x1FFFFF,0,0,0}};
-
+{0x1FFFFF,0,0,0}};
 static int convertLetter(int a,struct ccaseconv * T)
     {
     int i;
@@ -17742,7 +17757,7 @@ int startProc(
         "(sin=(.i*(-1/2*e^(i*!arg)+1/2*e^(-i*!arg)))),",
 
         "(cos=(.1/2*(e^(i*!arg)+e^(-i*!arg)))),",
-		
+
         "(jsn=Q R O C T H I X Y.(Q=.!arg:(,?arg)&R$!arg|!arg:(.@?arg)&I$!arg|"
         "!arg:(0|(?.?)+?,)&O$!arg|!arg:(true|false|null)|!arg:/&(X$!arg|Y$("
         "!arg,20))|!arg)&(R=J S L.\333:?S&whl'(!arg:%?J ?arg&\254 Q$!J !S:?S)&"
@@ -17761,7 +17776,7 @@ int startProc(
         ",s,f.!arg:(?arg,~<0:?d)&!arg:0|(-1*!arg:>0:?arg&-1|1):?s&10\016!arg:"
         "?e+(10\016?m|0&1:?m)&(!m+1/2*1/10^!d:~<10&1+!e:?e&!m*1/10:?m|)&@(div$"
         "(!m+1/2*(1/10^!d:?d),!d):%?`f ?m)&str$(!s*!f (!d:~1&\256 (@(rev$!m:? "
-        "#?m)&rev$!m)|!m) E !e))&str$(Q$!arg)),",		
+        "#?m)&rev$!m)|!m) E !e))&str$(Q$!arg)),",
         "(sgn=(.!arg:?#%arg*%+?&sgn$!arg|!arg:<0&-1|1)),",
         "(abs=(.sgn$!arg*!arg)),",
         "(sub=\177e,\177x,\177v,\177F.(\177F=\177l,\177r.!arg:!\177x&!\177v|"
