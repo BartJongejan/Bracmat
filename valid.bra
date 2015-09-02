@@ -5785,7 +5785,37 @@ string line 2\"
             & (bob=7)
             & (carol=13)
             & !('$!('$alice)):13
-          | Out$901
+          | Out$902
+          )
+          ( (no=~)
+          & !no:?x
+          & "lhs fails, so no match takes attempted"
+          & Out$903
+          )
+          ( (no=~ a)
+          & !no:?x
+          & "lhs succeeds, because space operator does not propagate failure of elements"
+          & !x
+          & "succeeds, just like !no earlier"
+          & !no:?x a
+          & "succceeds, x contains ~"
+          & !x
+          & "fails, because expression bound to x fails"
+          & Out$904
+          )
+          (   (no=~ a)
+            & !no:?x a
+            & ~!x
+            & "succeeds, because expression bound to x is negated to become successfull"
+          | Out$905
+          )
+          ( !tnjgkff
+          & "Fails, no expression bond to tnjgkff"
+          & Out$906
+          )
+          (   ~!tnjgkff
+            & "Succeeds, no expression bond to tnjgkff. ~ does turn that absence into success."
+          | Out$907
           )
       &   out
         $ ( str
