@@ -5794,27 +5794,27 @@ string line 2\"
           )
           ( (no=~ a)
           & !no:?x
-          & "lhs succeeds, because space operator does not propagate failure of elements"
+          & "LHS succeeds, because space operator does not propagate failure of elements"
           & !x
-          & "succeeds, just like !no earlier"
+          & "Succeeds, just like !no earlier"
           & !no:?x a
-          & "succceeds, x contains ~"
+          & "Succceeds, x contains ~"
           & !x
-          & "fails, because expression bound to x fails"
+          & "Fails, because expression bound to x fails"
           & Out$904
           )
           (   (no=~ a)
             & !no:?x a
             & ~!x
-            & "succeeds, because expression bound to x is negated to become successfull"
+            & "Succeeds, because expression bound to x is negated and becomes successfull"
           | Out$905
           )
           ( !tnjgkff
-          & "Fails, no expression bond to tnjgkff"
+          & "Fails, no expression bound to tnjgkff"
           & Out$906
           )
           (   ~!tnjgkff
-            & "Succeeds, no expression bond to tnjgkff. ~ does turn that absence into success."
+            & "Succeeds, no expression bound to tnjgkff. ~ turns that absence into success."
           | Out$907
           )
       &   out
