@@ -9,6 +9,34 @@ Over hundred and fifty examples of Bracmat code can be found at
 http://rosettacode.org/wiki/Rosetta_Code
 
 **This distribution contains the following directories and files:**
+* doc
+    * bracmat.html
+
+      The documentation in HTML format, automatically generated from the file
+      'help'.
+
+    * bracmat-table.html
+
+      The documentation in HTML format, automatically generated from the file
+      'help' and using an alternative lay-out with tables.
+
+    * CLIN26-poster.pdf
+    
+      Poster presented at the 26th Meeting of Computational Linguistics in the
+      Netherlands (CLIN26) in Amsterdam on December 18, 2015.
+
+    * help
+
+      The documentation in Bracmat format. (You have to run Bracmat and issue
+      'get$help' to see it properly.)
+      
+
+* epoc
+    * bracmat.SIS
+    
+      Installation program for Psion 5MX and Ericsson MC218 PDAs. This file is
+      not always up to date.
+      
 * src
     * java
     
@@ -133,20 +161,10 @@ http://rosettacode.org/wiki/Rosetta_Code
 
   This file.
   
-* bracmat.html
-
-  The documentation in HTML format, automatically generated from the file
-  'help'.
-
 * gpl.txt
 
   The full text of the GNU public licence.
 
-* help
-
-  The documentation in Bracmat format. (You have to run Bracmat and issue
-  'get$help' to see it properly.)
-  
 * howto.md
 
   Detailed explanation of how to use the wizzard project.bra to create a Bracmat
