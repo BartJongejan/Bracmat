@@ -13673,7 +13673,7 @@ static int allopts(psk kn,LONG opt[])
 static int flush(void)
     {
 #ifdef __GNUC__
-    return fflush(fpo);
+    return fflush(global_fpo);
 #else
 #if _BRACMATEMBEDDED
     if(WinFlush)
