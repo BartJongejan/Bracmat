@@ -1,3 +1,8 @@
+  29 December 2015
+First time build with Microsoft Visual Studio Express 2015 for Windows Desktop
+Replaced format "%0*ld" by LONG0nD, which is defined as "%0*lld" for Win64.
+Some global variables renamed + other actions to remove shadowing.
+
   31 August 2015
 Updated case conversion with latest UnicodeData.txt (09-Feb-2015 20:08).
 See http://www.unicode.org/Public/UNIDATA/UnicodeData.txt.

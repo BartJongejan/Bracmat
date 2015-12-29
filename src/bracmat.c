@@ -65,10 +65,15 @@ Test coverage:
 
 */
 
-#define DATUM "31 August 2015"
+#define DATUM "29 December 2015"
 #define VERSION "6"
-#define BUILD "195"
-/* 31 August 2015
+#define BUILD "196"
+/* 29 December 2015
+First time build with Microsoft Visual Studio Express 2015 for Windows Desktop
+Replaced format "%0*ld" by LONG0nD, which is defined as "%0*lld" for Win64.
+Some global variables renamed + other actions to remove shadowing.
+
+   31 August 2015
 Updated case conversion with latest UnicodeData.txt (09-Feb-2015 20:08).
 See http://www.unicode.org/Public/UNIDATA/UnicodeData.txt.
 
@@ -1671,6 +1676,7 @@ typedef   signed __int32  INT32_T; /* pre VS2010 has no int32_t */
 #define LONGU "%llu"
 #define LONGD "%lld"
 #define LONG0D "%0lld"
+#define LONG0nD "%0*lld"
 #define LONGX "%llX"
 #define STRTOUL _strtoui64
 #define STRTOL _strtoi64
@@ -1699,6 +1705,7 @@ typedef   signed long  INT32_T;
 #define LONGU "%lu"
 #define LONGD "%ld"
 #define LONG0D "%0ld"
+#define LONG0nD "%0*ld"
 #define LONGX "%lX"
 #define STRTOUL strtoul
 #define STRTOL strtol
@@ -2703,8 +2710,8 @@ static int debug = 0;
 static unsigned int maxbez = 0;
 #endif
 
-static FILE * fpi;
-static FILE * fpo;
+static FILE * global_fpi;
+static FILE * global_fpo;
 
 #if 0
 /*
@@ -3357,7 +3364,7 @@ static clock_t delayDueToInput = 0;
 #endif
 #endif
 
-static psk anker;
+static psk global_anker;
 
 typedef struct inputBuffer
     {
@@ -3429,7 +3436,7 @@ static void myputc(int c)
 #else
 static void myputc(int c)
     {
-    fputc(c,fpo);
+    fputc(c, global_fpo);
     }
 
 static int mygetc(FILE * fpi)
@@ -3512,27 +3519,27 @@ static int errorprintf(const char *fmt, ...)
     {
     char buffer[1000];
     int ret;
-    FILE * save = fpo;
+    FILE * save = global_fpo;
     va_list ap;
     va_start(ap,fmt);
     ret = vsprintf(buffer,fmt,ap);
-    fpo = errorStream;
+    global_fpo = errorStream;
 #if !defined NO_FOPEN
-    if(fpo == NULL && errorFileName != NULL)
-        fpo = fopen(errorFileName,APPENDTXT);
+    if(global_fpo == NULL && errorFileName != NULL)
+        global_fpo = fopen(errorFileName,APPENDTXT);
 #endif
 /*#endif*/
-    if(fpo)
+    if(global_fpo)
         myprintf(buffer,NULL);
     else
         ret = 0;
 /*#if !_BRACMATEMBEDDED*/
 #if !defined NO_FOPEN
-    if(errorStream == NULL && fpo != NULL)
-        fclose(fpo); /* 20100312 */
+    if(errorStream == NULL && global_fpo != NULL)
+        fclose(global_fpo); /* 20100312 */
 #endif
 /*#endif*/
-    fpo = save;
+    global_fpo = save;
     va_end(ap);
     return ret;
     }
@@ -3558,8 +3565,8 @@ struct allocation
     struct memblock * memoryBlock;
     };
 
-static struct allocation * allocations;
-static int nallocations = 0;
+static struct allocation * global_allocations;
+static int global_nallocations = 0;
 
 
 struct memoryElement
@@ -3570,7 +3577,7 @@ struct memoryElement
 struct pointerStruct
     {
     struct pointerStruct * lp;
-    } *p, *ep;
+    } *global_p, *global_ep;
 
 /*struct memblock * MemBlocks = 0;*/
 struct memblock ** pMemBlocks = 0; /* list of memblock, sorted
@@ -3870,19 +3877,19 @@ static struct memblock * initializeMemBlock(size_t elementSize, size_t numberOfE
         exit(-1);
 #endif
         }
-    p = (struct pointerStruct *)mb->lowestAddress;
-    ep = p + nlongpointers;
-    mb->highestAddress = (void*)ep;
+    global_p = (struct pointerStruct *)mb->lowestAddress;
+    global_ep = global_p + nlongpointers;
+    mb->highestAddress = (void*)global_ep;
 #if TELMAX
     mb->numberOfFreeElementsBetweenAddresses = numberOfElements;
 #endif
-    ep -= stepSize;
+    global_ep -= stepSize;
     for (
-        ;p < ep
-        ;p = p->lp
+        ; global_p < global_ep
+        ; global_p = global_p->lp
         )
-        p->lp = p+stepSize;
-    p->lp = 0;
+        global_p->lp = global_p+stepSize;
+    global_p->lp = 0;
     return mb;
     }
 /*
@@ -3923,12 +3930,12 @@ static struct memblock * newMemBlocks(size_t n)
     struct memblock * mb;
     int i,j = 0;
     struct memblock ** npMemBlocks;
-    mb = initializeMemBlock(allocations[n].elementSize, allocations[n].numberOfElements);
+    mb = initializeMemBlock(global_allocations[n].elementSize, global_allocations[n].numberOfElements);
     if(!mb)
         return 0;
-    allocations[n].numberOfElements *= 2;
-    mb->previousOfSameLength = allocations[n].memoryBlock;
-    allocations[n].memoryBlock = mb;
+    global_allocations[n].numberOfElements *= 2;
+    mb->previousOfSameLength = global_allocations[n].memoryBlock;
+    global_allocations[n].memoryBlock = mb;
 
     ++NumberOfMemBlocks;
     npMemBlocks = (struct memblock **)malloc((NumberOfMemBlocks)*sizeof(struct memblock *));
@@ -3993,7 +4000,7 @@ static void * bmalloc(int lineno,size_t n)
 #endif
         )
         {
-        struct memblock * mb = allocations[n].memoryBlock;
+        struct memblock * mb = global_allocations[n].memoryBlock;
         ret = mb->firstFreeElementBetweenAddresses;
         while(ret == 0)
             {
@@ -4109,7 +4116,7 @@ int memblocksort(const void * a, const void * b)
 static int init_ruimte(void)
     {
     int i;
-    allocations = (struct allocation *)malloc( sizeof(struct allocation)
+    global_allocations = (struct allocation *)malloc( sizeof(struct allocation)
                         *
 #if _5_6
                             6
@@ -4119,22 +4126,22 @@ static int init_ruimte(void)
                             3
 #endif
                         );
-    nallocations = addAllocation(1*sizeof(struct pointerStruct),MEM1SIZE,0,allocations);
-    nallocations = addAllocation(2*sizeof(struct pointerStruct),MEM2SIZE,nallocations,allocations);
-    nallocations = addAllocation(3*sizeof(struct pointerStruct),MEM3SIZE,nallocations,allocations);
+    global_nallocations = addAllocation(1*sizeof(struct pointerStruct),MEM1SIZE,0, global_allocations);
+    global_nallocations = addAllocation(2*sizeof(struct pointerStruct),MEM2SIZE, global_nallocations, global_allocations);
+    global_nallocations = addAllocation(3*sizeof(struct pointerStruct),MEM3SIZE, global_nallocations, global_allocations);
 #if _4
-    nallocations = addAllocation(4*sizeof(struct pointerStruct),MEM4SIZE,nallocations,allocations);
+    global_nallocations = addAllocation(4*sizeof(struct pointerStruct),MEM4SIZE, global_nallocations, global_allocations);
 #endif
 #if _5_6
-    nallocations = addAllocation(5*sizeof(struct pointerStruct),MEM5SIZE,nallocations,allocations);
-    nallocations = addAllocation(6*sizeof(struct pointerStruct),MEM6SIZE,nallocations,allocations);
+    global_nallocations = addAllocation(5*sizeof(struct pointerStruct),MEM5SIZE, global_nallocations, global_allocations);
+    global_nallocations = addAllocation(6*sizeof(struct pointerStruct),MEM6SIZE, global_nallocations, global_allocations);
 #endif
-    NumberOfMemBlocks = nallocations;
+    NumberOfMemBlocks = global_nallocations;
     pMemBlocks = (struct memblock **)malloc(NumberOfMemBlocks*sizeof(struct memblock *));
 
     for(i = 0;i < NumberOfMemBlocks;++i)
         {
-        pMemBlocks[i] = allocations[i].memoryBlock = initializeMemBlock(allocations[i].elementSize, allocations[i].numberOfElements);
+        pMemBlocks[i] = global_allocations[i].memoryBlock = initializeMemBlock(global_allocations[i].elementSize, global_allocations[i].numberOfElements);
         }
     qsort(pMemBlocks,NumberOfMemBlocks,sizeof(struct memblock *),memblocksort);
     /*
@@ -5318,7 +5325,7 @@ static psk atoom(int Flgs,int opsflgs)
 #endif
 
 #if GLOBALARGPTR
-static psk lex(int * nxt,int priority,int Flgs,int opsflgs)
+static psk lex(int * nxt,int priority,int Flags,int opsflgs)
 #else
 static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
 #endif
@@ -5371,7 +5378,7 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
         errorprintf("malformed input\n");
     else
         {
-        Flgs &= ~MINUS;/* 20110831 Bitwise, operators cannot have the - flag. */
+        Flags &= ~MINUS;/* 20110831 Bitwise, operators cannot have the - flag. */
         do
             {
             /* op_of_0 == een operator */
@@ -5393,7 +5400,7 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
                     Flgs ^= SUCCESS;
                     }
 #endif
-                (pkn)->v.fl ^= Flgs; /*19970821*/
+                (pkn)->v.fl ^= Flags; /*19970821*/
                 if(nxt)
                     *nxt = op_of_0;
                 return pkn;
@@ -5413,7 +5420,7 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
             pkn = operatorNode;/* 'op_of_0' heeft voldoende prioriteit */
             if(optab[op_of_0] == priority) /* 'op_of_0' heeft zelfde prioriteit */
                 {
-                (pkn)->v.fl ^= Flgs; /*19970821*/
+                (pkn)->v.fl ^= Flags; /*19970821*/
                 operatorNode->RIGHT = NULL;
                 if(nxt)
                     *nxt = op_of_0;
@@ -5436,7 +5443,7 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
             }
         while(op_of_0 != 0);
         }
-    (pkn)->v.fl ^= Flgs; /*19970821*/
+    (pkn)->v.fl ^= Flags; /*19970821*/
     return /*0*/pkn;
     }
 
@@ -5568,26 +5575,26 @@ void writeError(psk pkn)
     int redMooi;
     redMooi = mooi;
     mooi = FALSE;
-    redfpo = fpo;
-    fpo = errorStream;
+    redfpo = global_fpo;
+    global_fpo = errorStream;
 #if !defined NO_FOPEN
-    if(fpo == NULL && errorFileName != NULL)
-        fpo = fopen(errorFileName,APPENDBIN);
+    if(global_fpo == NULL && errorFileName != NULL)
+        global_fpo = fopen(errorFileName,APPENDBIN);
 #endif
-    if(fpo)
+    if(global_fpo)
         {
         result(pkn);
         myputc('\n');
 /*#if !_BRACMATEMBEDDED*/
 #if !defined NO_FOPEN
-        if(errorStream == NULL && fpo != stderr && fpo != stdout)
+        if(errorStream == NULL && global_fpo != stderr && global_fpo != stdout)
             {
-            fclose(fpo);/* 20100312 */
+            fclose(global_fpo);/* 20100312 */
             }
 #endif
         }
 /*#endif*/
-    fpo = redfpo;
+    global_fpo = redfpo;
     mooi = redMooi;
     }
 
@@ -6091,7 +6098,7 @@ void /*int*/ stringEval(const char *s,const char ** out,int * err)
     sprintf(buf,"str$(%s)",s);
 #endif
     bron = (unsigned char *)buf;
-    anker = input(NULL,anker,OPT_MEM,err,NULL); /*20130902 4 -> OPT_MEM*/
+    global_anker = input(NULL, global_anker,OPT_MEM,err,NULL); /*20130902 4 -> OPT_MEM*/
     if(err && *err)
         return /*FALSE*/;
 #if JMP
@@ -6101,9 +6108,9 @@ void /*int*/ stringEval(const char *s,const char ** out,int * err)
         return -1;
         }
 #endif
-    anker = eval(anker);
+    global_anker = eval(global_anker);
     if(out != NULL)
-        *out = is_op(anker) ? (const char *)"" : (const char *)POBJ(anker);
+        *out = is_op(global_anker) ? (const char *)"" : (const char *)POBJ(global_anker);
     free(buf);
     return /*1*/;
     }
@@ -6475,7 +6482,7 @@ static char * iconvert2decimal(ngetal * res, char * g)
                 {
                 assert(*iwyzer >= 0);
                 assert(*iwyzer < RADIX);
-                g += sprintf(g,"%0*ld",(int)TEN_LOG_RADIX,*iwyzer);
+                g += sprintf(g,/*"%0*ld"*/LONG0nD,(int)TEN_LOG_RADIX,*iwyzer);
                 }
             break;
             }
@@ -12240,8 +12247,6 @@ static void pop(psk kn)
     while(is_op(kn))
         {
         pop(kn->LEFT);
-        /* pop(kn->RIGHT);
-        18 Maart 1997 */
         kn = kn->RIGHT;
         }
     deleteNode(kn);
@@ -12767,7 +12772,7 @@ for(alfabet = 0;alfabet<256;alfabet++)
             for(n = navar->n;n >= 0;n--)
                 {
                 ppsk tmp;
-                if(fpo == stdout)
+                if(global_fpo == stdout)
                     {
                     if(navar->n > 0)
                         Printf("%c%d (",n == navar->selector ? '>' : ' ',n);
@@ -12783,7 +12788,7 @@ for(alfabet = 0;alfabet<256;alfabet++)
                 assert(navar->pvaria);
                 tmp = Entry(navar->n,n,&navar->pvaria);
                 result(*tmp = Head(*tmp));
-                if(fpo == stdout)
+                if(global_fpo == stdout)
                     Printf("\n)");
                 myprintf(";\n",NULL);
                 }
@@ -12888,9 +12893,7 @@ filehendel * myfopen(const char * filename,const char * mode
                      )
     {
 #if !defined NO_FOPEN
-    if(findFilehendelByName(filename))
-        return NULL;
-    else
+    if(!findFilehendelByName(filename))
         {
         filehendel * fh = mygetfilehendel(filename,mode
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
@@ -13695,7 +13698,7 @@ static LONG opts[] =
      0L};
 if(kop(rknoop = (*pkn)->RIGHT) == KOMMA)
    {
-   redfpo = fpo;
+   redfpo = global_fpo;
    rlknoop = rknoop->LEFT;
    rrknoop = rknoop->RIGHT;
    hum = !zoekopt(rrknoop,LIN);
@@ -13706,7 +13709,7 @@ if(kop(rknoop = (*pkn)->RIGHT) == KOMMA)
             psk ret;
             telling = 1;
             verwerk = tel;
-            fpo = NULL;
+            global_fpo = NULL;
             (*hoe)(rlknoop);
             ret = (psk)bmalloc(__LINE__,sizeof(unsigned LONG)+telling);
             ret->v.fl = READY | SUCCESS;
@@ -13717,7 +13720,7 @@ if(kop(rknoop = (*pkn)->RIGHT) == KOMMA)
             verwerk = myputc;
             wis(*pkn);
             *pkn = ret;
-            fpo = redfpo;
+            global_fpo = redfpo;
             return TRUE;
             }
         else
@@ -13751,16 +13754,16 @@ if(kop(rknoop = (*pkn)->RIGHT) == KOMMA)
         if(fh == NULL)
             {
             errorprintf("cannot open %s\n",POBJ(rrknoop->LEFT));
-            fpo = redfpo;
+            global_fpo = redfpo;
             hum = 1;
             return FALSE;
             }
         else
             {
-            fpo = fh->fp;
+            global_fpo = fh->fp;
             (*hoe)(rlknoop);
             deallocateFilehendel(fh);
-            fpo = redfpo;
+            global_fpo = redfpo;
             adr[2] = rlknoop;
             }
 #else
@@ -15082,7 +15085,7 @@ static function_return_type functies(psk pkn)
 #if !defined NO_FOPEN
                     FILE *red;
                     filehendel * fh;
-                    red = fpi;
+                    red = global_fpi;
                     fh = myfopen((char *)POBJ(rlknoop),(intVal & OPT_TXT) ? READTXT : READBIN
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
                         ,TRUE
@@ -15090,21 +15093,21 @@ static function_return_type functies(psk pkn)
                         );
                     if(fh == NULL)
                         {
-                        fpi = red;
+                        global_fpi = red;
                         return functionFail(pkn);
                         }
                     else
-                        fpi = fh->fp;
+                        global_fpi = fh->fp;
                     for(;;)
                         {
-                        pkn = input(fpi,pkn,intVal,&err,&GoOn);
+                        pkn = input(global_fpi,pkn,intVal,&err,&GoOn);
                         if(!GoOn || err)
                             break;
                         pkn = eval(pkn);
                         }
                     /*fclose(fpi);*/
                     deallocateFilehendel(fh);
-                    fpi = red;
+                    global_fpi = red;
 #else
                     return functionFail(pkn);
 #endif
@@ -15419,7 +15422,7 @@ static psk stapelmacht(psk pkn)
         }
     else
         {
-        static const char * conc[] = {NULL,NULL,NULL,NULL,NULL,NULL};
+        static const char * conc_arr[] = {NULL,NULL,NULL,NULL,NULL,NULL};
 
         Qgetal iexponent,
         hiexponent;
@@ -15451,13 +15454,13 @@ static psk stapelmacht(psk pkn)
                     {
                     if(RAT_NEG_COMP(rknoop) && abseen(rknoop))
                         {
-                        conc[1] = NULL;
-                        conc[2] = hekje6;
-                        conc[3] = NULL;
+                        conc_arr[1] = NULL;
+                        conc_arr[2] = hekje6;
+                        conc_arr[3] = NULL;
                         adr[6] = _q_qdeel(&eenk,lknoop);
-                        /*pkn = numboom(pkn,lknoop,conc);*/
+                        /*pkn = numboom(pkn,lknoop,conc_arr);*/
                         assert(lknoop == pkn->LEFT);
-                        pkn = vopb(pkn,conc+2);
+                        pkn = vopb(pkn, conc_arr +2);
                         wis(adr[6]);
                         return pkn;
                         }
@@ -15473,11 +15476,11 @@ static psk stapelmacht(psk pkn)
                     if(_qvergelijk(rknoop,&nulk) & MINUS)
                         { /* i^-n -> -i^n */ /*{?} i^-7 => i */
                           /* -i^-n -> i^n */ /*{?} -i^-7 => -i */
-                        conc[0] = "(\2^\3)";
+                        conc_arr[0] = "(\2^\3)";
                         adr[2] = _qmaalmineen(lknoop);
                         adr[3] = _qmaalmineen(rknoop);
-                        conc[1] = NULL;
-                        pkn = vopb(pkn,conc);
+                        conc_arr[1] = NULL;
+                        pkn = vopb(pkn, conc_arr);
                         wis(adr[2]);
                         wis(adr[3]);
                         return pkn;
@@ -15511,10 +15514,10 @@ static psk stapelmacht(psk pkn)
                                     }
                                 adr[2] = lknoop;
                                 adr[6] = iexponent;
-                                conc[0] = "(-1*\2)^";
-                                conc[1] = "(\6)";/*hekje6;*/
-                                conc[2] = NULL;
-                                pkn = vopb(pkn,conc);
+                                conc_arr[0] = "(-1*\2)^";
+                                conc_arr[1] = "(\6)";/*hekje6;*/
+                                conc_arr[2] = NULL;
+                                pkn = vopb(pkn, conc_arr);
                                 }
                             }
                         wis(iexponent);
@@ -15538,8 +15541,6 @@ static psk stapelmacht(psk pkn)
                 haakmineen[] = ")^-1",
                 haakhekje1macht[] = "(\1^",
                 macht2maaleenmacht[] = ")^2*\1^";
-            psk rknoop;
-            rknoop = pkn->RIGHT;
             if(INTEGER_NIET_NUL_COMP(rknoop) && !abseen(rknoop))
                 {
                 adr[1] = lknoop;
@@ -15548,14 +15549,14 @@ static psk stapelmacht(psk pkn)
                     if(_qvergelijk(&tweek,rknoop) & MINUS)
                         {
                         /* m^n = (m^(n\2))^2*m^(n mod 2) */ /*{?} 9^7 => 4782969 */
-                        conc[0] = haakhekje1macht;
-                        conc[1] = hekje5;
-                        conc[3] = hekje6;
-                        conc[4] = NULL;
+                        conc_arr[0] = haakhekje1macht;
+                        conc_arr[1] = hekje5;
+                        conc_arr[3] = hekje6;
+                        conc_arr[4] = NULL;
                         adr[5] = _qheeldeel(rknoop,&tweek);
-                        conc[2] = macht2maaleenmacht;
+                        conc_arr[2] = macht2maaleenmacht;
                         adr[6] = _qmodulo(rknoop,&tweek);
-                        pkn = vopb(pkn,conc);
+                        pkn = vopb(pkn, conc_arr);
                         wis(adr[5]);
                         wis(adr[6]);
                         }
@@ -15569,12 +15570,12 @@ static psk stapelmacht(psk pkn)
                 else
                     {
                     /*{?} 7^-13 => 1/96889010407 */
-                    conc[0] = haakhekje1macht;
-                    conc[1] = hekje6;
+                    conc_arr[0] = haakhekje1macht;
+                    conc_arr[1] = hekje6;
                     adr[6] = _qmaalmineen(rknoop);
-                    conc[2] = haakmineen;
-                    conc[3] = 0;
-                    pkn = vopb(pkn,conc);
+                    conc_arr[2] = haakmineen;
+                    conc_arr[3] = 0;
+                    pkn = vopb(pkn, conc_arr);
                     wis(adr[6]);
                     }
                 return pkn;
@@ -17135,11 +17136,11 @@ static psk handleKOMMA(psk pkn)
 
 static psk evalvar(psk pkn)
     {
-    psk adr;
-    if((adr = Naamwoord_w(pkn,pkn->v.fl & DOUBLY_INDIRECT)) != NULL)
+    psk loc_adr = Naamwoord_w(pkn, pkn->v.fl & DOUBLY_INDIRECT);
+    if(loc_adr != NULL)
         {
         wis(pkn);
-        pkn = adr;
+        pkn = loc_adr;
         }
     else
         {
@@ -17597,9 +17598,9 @@ int startProc(
     if(!init_ruimte())
         return 0;
     init_opcode();
-    anker = NULL;
-    fpi = stdin;
-    fpo = stdout;
+    global_anker = NULL;
+    global_fpi = stdin;
+    global_fpo = stdout;
 
     argk.flgs = READY | SUCCESS;
     argk.u.lobj = O('a','r','g');
@@ -17726,7 +17727,7 @@ int startProc(
           "&!arg:?l\016(?*!l^?*?)"
           "&d$!arg", NULL);
 
-    anker = startboom_w(anker ,
+    global_anker = startboom_w(global_anker ,
         "(cat=flt,sin,tay,fct,cos,out,sgn.!arg:((?flt,(?sin,?tay)|?sin&:?tay)|?flt&:?sin:"
         "?tay)&(fct=.!arg:%?cos ?arg&!cos:((?out.?)|?out)&'(? ($out|($out.?)"
         ") ?):(=?sgn)&(!flt:!sgn&!(glf$(=~.!sin:!sgn))&!cos|) fct$!arg|)&(:!flt:!sin&mem$!tay|(:!flt&mem$:?flt"
@@ -17829,7 +17830,7 @@ int startProc(
     if(setjmp(jumper) != 0)
         return;
 #endif
-    anker = eval(anker);
+    global_anker = eval(global_anker);
     stringEval("(v=\"Bracmat version " VERSION ", build " BUILD " (" DATUM ")\")",NULL,&err);
     return 1;
 }

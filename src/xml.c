@@ -113,7 +113,7 @@ struct lowup lu[] =
 #define BUFSIZE 35000
 
 static char * buf;
-static char * p;
+static char * glob_p;
 static int anychar = FALSE;
 
 static int (*namechar)(int c);
@@ -447,7 +447,7 @@ static int charref(char * c)
     {
     if(*c == ';')
         {
-        *p = '\0';
+        *glob_p = '\0';
         if(  !strcmp(buf,"amp")
           || !strcmp(buf,"#38")
           || !strcmp(buf,"#x26")
@@ -468,7 +468,7 @@ static int charref(char * c)
             unsigned long N;
             char tmp[22];
             N = (buf[1] == 'x') ? strtoul(buf+2,NULL,16) : strtoul(buf+1,NULL,10);
-            p = buf;
+            glob_p = buf;
             xput = Put;
             if(putCodePoint(N,tmp))
                 {
@@ -493,7 +493,7 @@ static int charref(char * c)
                 if (pItem!=NULL)
                     {
                     char tmp[22];
-                    p = buf;
+                    glob_p = buf;
                     xput = Put;
                     if(putCodePoint(pItem->code,tmp))
                         {
@@ -505,27 +505,27 @@ static int charref(char * c)
             rawput('&');
             nrawput(buf);
             rawput(';');
-            p = buf;
+            glob_p = buf;
             xput = Put;
             return FALSE;
             }
-        p = buf;
+        glob_p = buf;
         xput = Put;
         }
     else if(!namechar(*c))
         {
         rawput('&');
-        *p = '\0';
+        *glob_p = '\0';
         nrawput(buf);
         if(*c > 0)
             rawput(*c);
-        p = buf;
+        glob_p = buf;
         xput = Put;
         return FALSE;
         }
-    else if(p < buf+BUFSIZE-1)
+    else if(glob_p < buf+BUFSIZE-1)
         {
-        *p++ = *c;
+        *glob_p++ = *c;
         }
     return TRUE;
     }
@@ -1815,7 +1815,7 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
         doctypei = 0;
         cdatai = 0;
         buf = (char*)malloc(BUFSIZE);
-        p = buf;
+        glob_p = buf;
         alltext = (fpi || trim) ? (char*)malloc(filesize+1) : bron;
         HT = html;
         X = xml;
