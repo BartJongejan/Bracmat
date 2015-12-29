@@ -2249,15 +2249,15 @@ NEWMULT
 
 typedef struct ngetal
     {
-    int sign; /* 0: positive, QNUL: zero, MINUS: negative number */
     ptrdiff_t length;
-    void * alloc;
-    char * number;
-    size_t allocated;
     ptrdiff_t ilength;
+    void * alloc;
     void * ialloc;
     LONG * inumber;
+    char * number;
+    size_t allocated;
     size_t iallocated;
+    int sign; /* 0: positive, QNUL: zero, MINUS: negative number */
     } ngetal;
 
 #define NGETALIS1(x) ((x)->sign == 0 && (x)->length == 1 && ((char*)((x)->number))[0] == '1')
@@ -14795,9 +14795,9 @@ static function_return_type functies(psk pkn)
         CASE(BEZ) /* bez $  */
             {
 #if MAXSTACK
-            sprintf(klad,"%lu.%lu.%u.%d",(unsigned LONG)globalloc,(unsigned LONG)maxgloballoc,maxbez / ONE,maxstack);
+            sprintf(klad,"%zu.%zu.%u.%d",globalloc,maxgloballoc,maxbez / ONE,maxstack);
 #else
-            sprintf(klad,LONGU "." LONGU ".%u",(unsigned LONG)globalloc,(unsigned LONG)maxgloballoc,maxbez / ONE);
+            sprintf(klad,"%zu.%zu.%u",globalloc,maxgloballoc,maxbez / ONE);
 #endif
             pkn = opb(pkn,klad,NULL);
 #if TELLING
