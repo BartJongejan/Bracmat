@@ -1,3 +1,6 @@
+  30 December 2015
+Deleted some stale comments.
+
   29 December 2015
 First time build with Microsoft Visual Studio Express 2015 for Windows Desktop
 Replaced format "%0*ld" by LONG0nD, which is defined as "%0*lld" for Win64.

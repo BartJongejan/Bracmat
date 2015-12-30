@@ -65,10 +65,13 @@ Test coverage:
 
 */
 
-#define DATUM "29 December 2015"
+#define DATUM "30 December 2015"
 #define VERSION "6"
-#define BUILD "196"
-/* 29 December 2015
+#define BUILD "197"
+/* 30 December 2015
+Deleted some stale comments.
+
+   29 December 2015
 First time build with Microsoft Visual Studio Express 2015 for Windows Desktop
 Replaced format "%0*ld" by LONG0nD, which is defined as "%0*lld" for Win64.
 Some global variables renamed + other actions to remove shadowing.
@@ -4031,11 +4034,6 @@ static void * bmalloc(int lineno,size_t n)
             ((LONG*)ret)[1] = n;
             ((LONG*)ret)[n] = ('t'<<24)+('e'<<16)+('n'<<8)+('d');
             ((LONG*)ret)[0] = ('s'<<24)+('t'<<16)+('a'<<8)+('r');
-               /* {
-                FILE * f = fopen("bmalloc","a");
-                fprintf(f,"line %d: %p %d\n",lineno,ret,n);
-                fclose(f);
-                }*/
             return (void *)(((LONG*)ret) + 2);
 #else
             return ret;
@@ -4077,11 +4075,6 @@ static void * bmalloc(int lineno,size_t n)
     ((LONG*)ret)[1] = n;
     ((LONG*)ret)[n] = ('t'<<24)+('e'<<16)+('n'<<8)+('d');
     ((LONG*)ret)[0] = ('s'<<24)+('t'<<16)+('a'<<8)+('r');
-                /*{
-                FILE * f = fopen("bmalloc","a");
-                fprintf(f,"line %d: %p %d\n",lineno,ret,n);
-                fclose(f);
-                }*/
     return (void *)(((LONG*)ret) + 2);
 #else
     return ret;
@@ -8074,22 +8067,18 @@ static int copy_insert(psk name,psk pknoop,psk snijaf)
         */
       )
         {
-        DBGSRC(printf("A\n");)
         return FALSE;
         }
     else if(pknoop->v.fl & IDENT)
         {
-        DBGSRC(printf("B\n");)
         kn = copievan(pknoop);
         }
     else if(snijaf == NULL)
         {
-        DBGSRC(printf("C\n");)
         return insert(name,pknoop);
         }
     else
         {
-        DBGSRC(printf("D\n");)
         assert(!is_object(pknoop));
         if((shared(pknoop) != ALL_REFCOUNT_BITS_SET) && !all_refcount_bits_set(snijaf))
             {/* snijaf: either node with headroom in the small refcounter 
@@ -8140,7 +8129,6 @@ Thereafter copies must be made.}
             }
         }
 
-    DBGSRC(printf("E\n");)
     ret = insert(name,kn);
     wis(kn);
     return ret;
@@ -8839,8 +8827,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                     }
                 }
             /* End (check & QGETAL) == TRUE. */
-            /*printf("Not expected here!");
-            getchar();*/
+            /*printf("Not expected here!");getchar();*/
             }
         else if( /* 20121210 */ ((s == snijaf) && (Flgs & (NUMBER|BREUK))) 
                || (   (s < snijaf)
@@ -10277,18 +10264,15 @@ static int stringOncePattern(psk pat) /* 20070222 */
     DBGSRC(printf("stringOncePattern:");result(pat);printf("\n");)
     if(pat->v.fl & IMPLIEDFENCE)
         {
-    DBGSRC(printf("stringOncePattern:A\n");)
         return TRUE;
         }
     if(pat->v.fl & SATOMFILTERS)
         {
         pat->v.fl |= IMPLIEDFENCE;
-    DBGSRC(printf("stringOncePattern:B\n");)
         return TRUE;
         }
     else if(pat->v.fl & ATOMFILTERS)
         {
-    DBGSRC(printf("stringOncePattern:C\n");)
         return FALSE;
         }
     else if (  IS_VARIABLE(pat)
@@ -10296,7 +10280,6 @@ static int stringOncePattern(psk pat) /* 20070222 */
             || (pat->v.fl & NONIDENT) /*20100406 @(abc:% c) */
             )
         {
-    DBGSRC(printf("stringOncePattern:D\n");)
         return FALSE;
         }
     else if(!is_op(pat))
@@ -10304,12 +10287,10 @@ static int stringOncePattern(psk pat) /* 20070222 */
         if(!pat->u.obj)
             {
             pat->v.fl |= IMPLIEDFENCE;
-    DBGSRC(printf("stringOncePattern:E\n");)
             return TRUE;
             }
         else
             {
-    DBGSRC(printf("stringOncePattern:F\n");)
             return FALSE;
             }
         }
@@ -10324,13 +10305,11 @@ static int stringOncePattern(psk pat) /* 20070222 */
             case LOG:
             case DIF:
                 pat->v.fl |= IMPLIEDFENCE;
-    DBGSRC(printf("stringOncePattern:G\n");)
                 return TRUE;
             case OF:
                 if(stringOncePattern(pat->LEFT) && stringOncePattern(pat->RIGHT))
                     {
                     pat->v.fl |= IMPLIEDFENCE;
-    DBGSRC(printf("stringOncePattern:H\n");)
                     return TRUE;
                     }
                 break;
@@ -10338,7 +10317,6 @@ static int stringOncePattern(psk pat) /* 20070222 */
                 if(stringOncePattern(pat->LEFT) || stringOncePattern(pat->RIGHT))
                     {
                     pat->v.fl |= IMPLIEDFENCE;
-    DBGSRC(printf("stringOncePattern:I\n");)
                     return TRUE;
                     }
                 break;
@@ -10346,7 +10324,6 @@ static int stringOncePattern(psk pat) /* 20070222 */
                 if(stringOncePattern(pat->LEFT))
                     {
                     pat->v.fl |= IMPLIEDFENCE;
-    DBGSRC(printf("stringOncePattern:J\n");)
                     return TRUE;
                     }
                 break;
@@ -10354,7 +10331,6 @@ static int stringOncePattern(psk pat) /* 20070222 */
                 break;
             }
         }
-    DBGSRC(printf("stringOncePattern:K\n");)
     return FALSE;
     }
 
@@ -15863,7 +15839,6 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
 
     int ok;
 
-/*    printf("%d     :%*s",level,level,"");result(pkn);printf("\n");*/
     if(!is_op(L) && RAT_NUL_COMP(L))
         {
         /* 0+x -> x */
@@ -16692,12 +16667,9 @@ static psk merge
     psk lhead,ltail,rhead,rtail;
     psk Repol = &nilk; /* Will contain all evaluated nodes in inverse order.*/
     psk tmp;
-    /*++level;
-    printf("%dMerge:%*s",level,level,"");result(pkn);printf("\n");*/
+    /*++level;printf("%dMerge:%*s",level,level,"");result(pkn);printf("\n");*/
     for(;;)
-        {/* traverse from left to right
-            to evaluate left side branches
-         */
+        {/* traverse from left to right to evaluate left side branches */
 #if EXPAND
         Boolean ok;
 #endif
@@ -16761,7 +16733,6 @@ static psk merge
             assert(pkn->RIGHT->v.fl & READY); /* 20120916 */
             if(comp(lhead,rhead) <= 0) /* a * b */
                 {
-                /*printf("<= "); */
                 if(ltail == NULL)   /* a * (b*c) */
                     {
                     assert(pkn->RIGHT->v.fl & READY); /* 20120916 */
@@ -16800,7 +16771,6 @@ static psk merge
                 }
             else /* Wrong order */
                 {
-                /*printf("> "); */
                 pkn = prive(pkn);
                 assert(!shared(pkn));
                 assert(L->v.fl & READY); /* 20120916 */
@@ -17558,13 +17528,10 @@ int startProc(
     int tel;
     int err; /* 20100802, evaluation of version string */
     static int called = 0;
-    /*printf("startProc ");*/
     if(called)
         {
-        /*printf("already called\n");*/
         return 2;
         }
-    /*printf("call\n");*/
     called = 1;
 #if _BRACMATEMBEDDED
     if(init)
