@@ -65,10 +65,14 @@ Test coverage:
 
 */
 
-#define DATUM "30 December 2015"
+#define DATUM "1 March 2016"
 #define VERSION "6"
-#define BUILD "197"
-/* 30 December 2015
+#define BUILD "198"
+/* 
+    1 March 2016
+Format %zu not supported in VS 2008. Made it %lu if __WIN32__ defined.
+
+   30 December 2015
 Deleted some stale comments.
 
    29 December 2015
@@ -14771,9 +14775,17 @@ static function_return_type functies(psk pkn)
         CASE(BEZ) /* bez $  */
             {
 #if MAXSTACK
+#if defined __WIN32__
+            sprintf(klad,"%lu.%lu.%u.%d",(unsigned long)globalloc,(unsigned long)maxgloballoc,maxbez / ONE,maxstack);
+#else
             sprintf(klad,"%zu.%zu.%u.%d",globalloc,maxgloballoc,maxbez / ONE,maxstack);
+#endif
+#else
+#if defined __WIN32__
+            sprintf(klad,"%lu.%lu.%u",(unsigned long)globalloc,(unsigned long)maxgloballoc,maxbez / ONE);
 #else
             sprintf(klad,"%zu.%zu.%u",globalloc,maxgloballoc,maxbez / ONE);
+#endif
 #endif
             pkn = opb(pkn,klad,NULL);
 #if TELLING

@@ -1,3 +1,6 @@
+   1 March 2016
+Format %zu not supported in VS 2008. Made it %lu if __WIN32__ defined.
+
   30 December 2015
 Deleted some stale comments.
 
