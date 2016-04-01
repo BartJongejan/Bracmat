@@ -5806,7 +5806,7 @@ string line 2\"
           (   (no=~ a)
             & !no:?x a
             & ~!x
-            & "Succeeds, because expression bound to x is negated and becomes successfull"
+            & "Succeeds, because expression bound to x is negated and becomes successful"
           | Out$905
           )
           ( !tnjgkff
@@ -5816,6 +5816,12 @@ string line 2\"
           (   ~!tnjgkff
             & "Succeeds, no expression bound to tnjgkff. ~ turns that absence into success."
           | Out$907
+          )
+          (   @(abcdex:?h1 [%@(ascbdex:?h2 !sjt))
+            & !h1:abc
+            & !h2:ascb
+            & (!sjt&Out$908|)
+          | Out$909
           )
       &   out
         $ ( str
