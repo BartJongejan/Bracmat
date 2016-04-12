@@ -1,3 +1,7 @@
+  12 April 2016
+Bug: (.B+C)+(.2*(U+Z))+(.A*E)+(.B+C) did not evaluate to an expression where
+the (.B+C) terms were combined. vgl() function was the culprit.
+
    7 April 2016
 Made %zu %lu if _WIN32 defined (not __WIN32__).
 

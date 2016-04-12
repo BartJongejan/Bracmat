@@ -5298,6 +5298,7 @@ string line 2\"
           & (fil$(,,3,999999999)|Out$797)
           & (fil$(,,4,999999999)|Out$798)
           & (fil$(,,5,999999999)|Out$799)
+          & out$800
           & (fil$(,DEC,5,2)|Out$800)
           & (fil$(,,1,999999999)|Out$801)
           & (fil$(,,2,999999999)|Out$802)
@@ -5427,6 +5428,7 @@ string line 2\"
             & !p:11
           | Out$849
           )
+          out$850
           (ø l:% %|Out$850)
           ( (   fil$(taytesttest,r)
               & fil$(,CHR)
@@ -5769,6 +5771,7 @@ string line 2\"
             : (pap.(color.blue) (a.3))
           | Out$899
           )
+          out$900
           (   (alice=bob|carol)
             & (bob=7)
             & (carol=13)
@@ -5787,21 +5790,23 @@ string line 2\"
             & !('$!('$alice)):13
           | Out$902
           )
-          ( (no=~)
-          & !no:?x
-          & "lhs fails, so no match takes attempted"
-          & Out$903
+          (   (no=~)
+            & !no:?x
+            & "lhs fails, so no match takes attempted"
+            & Out$903
+          | 
           )
-          ( (no=~ a)
-          & !no:?x
-          & "LHS succeeds, because space operator does not propagate failure of elements"
-          & !x
-          & "Succeeds, just like !no earlier"
-          & !no:?x a
-          & "Succceeds, x contains ~"
-          & !x
-          & "Fails, because expression bound to x fails"
-          & Out$904
+          (   (no=~ a)
+            & !no:?x
+            & "LHS succeeds, because space operator does not propagate failure of elements"
+            & !x
+            & "Succeeds, just like !no earlier"
+            & !no:?x a
+            & "Succceeds, x contains ~"
+            & !x
+            & "Fails, because expression bound to x fails"
+            & Out$904
+          | 
           )
           (   (no=~ a)
             & !no:?x a
@@ -5809,9 +5814,10 @@ string line 2\"
             & "Succeeds, because expression bound to x is negated and becomes successful"
           | Out$905
           )
-          ( !tnjgkff
-          & "Fails, no expression bound to tnjgkff"
-          & Out$906
+          (   !tnjgkff
+            & "Fails, no expression bound to tnjgkff"
+            & Out$906
+          | 
           )
           (   ~!tnjgkff
             & "Succeeds, no expression bound to tnjgkff. ~ turns that absence into success."
@@ -5822,6 +5828,26 @@ string line 2\"
             & !h2:ascb
             & (!sjt&Out$908|)
           | Out$909
+          )
+          (   (.2*(C+D))+(.A+B)
+            : (.2*(C+D))+(.A+B)
+          | Out$910
+          )
+          (   (.2*(C+D))+(.3*(A+B))
+            : (.2*(C+D))+(.3*(A+B))
+          | Out$911
+          )
+          (   (.B+C)+(.2*(U+Z))+(.A*E)+(.B+C)
+            : (.2*(U+Z))+(.A*E)+2*(.B+C)
+          | Out$912
+          )
+          (   (.a*(b+c))+(.a*b+a*c)
+            : (.a*(b+c))+(.a*b+a*c)
+          | Out$913
+          )
+          (   (.a*b+a*c)+(.a*(b+c))
+            : (.a*(b+c))+(.a*b+a*c)
+          | Out$914
           )
       &   out
         $ ( str

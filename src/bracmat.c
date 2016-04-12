@@ -65,10 +65,14 @@ Test coverage:
 
 */
 
-#define DATUM "7 April 2016"
+#define DATUM "12 April 2016"
 #define VERSION "6"
-#define BUILD "199"
+#define BUILD "200"
 /* 
+  12 April 2016
+Bug: (.B+C)+(.2*(U+Z))+(.A*E)+(.B+C) did not evaluate to an expression where
+the (.B+C) terms were combined. vgl() function was the culprit.
+
     7 April 2016
 Made %zu %lu if _WIN32 defined (not __WIN32__).
 
@@ -2848,7 +2852,9 @@ static int isLetter(int a)
 
 /*20140618 Based on http://unicode.org/Public/UNIDATA/UnicodeData.txt 10-03-2014 18:20:00 */
 /* structures created with uni.bra */
-struct ccaseconv {unsigned int L:21;int range:11;unsigned int inc:2;int dif:20;};struct ccaseconv l2u[]={
+
+struct ccaseconv {unsigned int L:21;int range:11;unsigned int inc:2;int dif:20;};
+struct ccaseconv l2u[]={
 {0x61,25,1,-32},
 {0xB5,0,0,743},
 {0xE0,22,1,-32},
@@ -3192,7 +3198,8 @@ struct ccaseconv u2l[]={
 {0x10400,39,1,40},
 {0x10C80,50,1,64},
 {0x118A0,31,1,32},
-{0x1FFFFF,0,0,0}};
+{0x1FFFFF,0,0,0}};
+
 static int convertLetter(int a,struct ccaseconv * T)
     {
     int i;
@@ -7806,6 +7813,72 @@ static int _qvergelijk(Qgetal _qx,Qgetal _qy)
     return res;
     }
 
+
+static int equal(psk kn1,psk kn2)
+    {
+    /*DBGSRC(* /Printf("equal    (");result(kn1);Printf(",");result(kn2);Printf(")\n");/ *)*/
+    while(kn1 != kn2)
+        {
+        int r;
+    /*DBGSRC(* /Printf("equal    (");result(kn1);Printf(",");result(kn2);Printf(")\n");/ *)*/
+        if(is_op(kn1))
+            {
+            if(is_op(kn2))
+                {
+                r = (int)kop(kn2) - (int)kop(kn1);
+                if(r)
+                    {
+                    /*
+                    if(kop(kn1) == MAAL && RATIONAAL(kn1->LEFT))
+                        {
+                        return equal(kn1->RIGHT,kn2);
+                        }
+                    else if(kop(kn2) == MAAL && RATIONAAL(kn2->LEFT))
+                        {
+                        return equal(kn1,kn2->RIGHT);
+                        }*/
+                    return r;
+                    }
+                r = equal(kn1->LEFT,kn2->LEFT);
+                if(r)
+                    return r;
+                kn1 = kn1->RIGHT;
+                kn2 = kn2->RIGHT;
+                }
+            else
+                return 1;
+            }
+        else if(is_op(kn2))
+            return -1;
+        else if(RATIONAAL_COMP(kn1))
+            {
+            if(RATIONAAL_COMP(kn2))
+                {
+                switch(_qvergelijk(kn1,kn2))
+                    {
+                    case MINUS: return -1;
+                    case QNUL:
+                        {
+                        return 0;
+                        }
+                    default: return 1;
+                    }
+                }
+            else
+                return -1; /*20120204*/
+            }
+        else if(RATIONAAL_COMP(kn2))
+            {
+            return 1; /*20120204*/
+            }
+        else
+            return (r = HAS_MINUS_SIGN(kn1) - HAS_MINUS_SIGN(kn2)) == 0
+                    ? strcmp((char *)POBJ(kn1),(char *)POBJ(kn2))
+                    : r;
+        }
+    return 0;
+    }
+
 static int vgl(psk kn1,psk kn2);
 
 static int vglsub(psk kn1,psk kn2)
@@ -7822,10 +7895,11 @@ static int vglsub(psk kn1,psk kn2)
 
 static int vgl(psk kn1,psk kn2)
     {
-    DBGSRC(Printf("vgl(");result(kn1);Printf(",");result(kn2);Printf(")\n");)
+    DBGSRC(Printf("vgl      (");result(kn1);Printf(",");result(kn2);Printf(")\n");)
     while(kn1 != kn2)
         {
         int r;
+    /*DBGSRC(* /Printf("vgl      (");result(kn1);Printf(",");result(kn2);Printf(")\n");/ *)*/
         if(is_op(kn1))
             {
             if(is_op(kn2))
@@ -7854,11 +7928,28 @@ static int vgl(psk kn1,psk kn2)
                         }
                     return r;
                     }
-                r = vgl(kn1->LEFT,kn2->LEFT);
-                if(r)
-                    return r;
-                kn1 = kn1->RIGHT;
-                kn2 = kn2->RIGHT;
+                switch(kop(kn1))
+                    {
+                    case PLUS:
+                    case EXP:
+                    /*
+                    case MAAL:
+                    case LOG:
+                    case DIF:
+                    */
+                        r = vgl(kn1->LEFT,kn2->LEFT);
+                        if(r)
+                            return r;
+                        kn1 = kn1->RIGHT;
+                        kn2 = kn2->RIGHT;
+                        break;
+                    default:
+                        r = equal(kn1->LEFT,kn2->LEFT);
+                        if(r)
+                            return r;
+                        else
+                            return equal(kn1->RIGHT, kn2->RIGHT);
+                    }
                 }
             else
                 return 1;
@@ -7908,7 +7999,7 @@ static int setmember(psk name,psk tree,psk nieuw)
                 nname = name->LEFT;
             else
                 nname = name;
-            if(vgl(tree->LEFT,nname))
+            if(equal(tree->LEFT,nname))
                 {
                 return FALSE;
                 }
@@ -9855,7 +9946,7 @@ static psk getmember(psk name,psk tree,objectStuff * Object)
                 nname = name->LEFT;
             else
                 nname = name;
-            if(vgl(tree->LEFT,nname))
+            if(equal(tree->LEFT,nname))
                 return NULL;
             else if(nname == name)
                 {
@@ -11270,7 +11361,7 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                     if(isSUCCESS(loc))/*20100910*/
                         {
                         loc = setflgs(loc,pat->v.fl); /* 20100221 */
-                        if (vgl(pat, loc))
+                        if (equal(pat, loc))
                             {
 #if CUTOFFSUGGEST
                             s.c.rmr = (char)(stringmatch(ind+1,"T",sub,snijaf,loc,subkn,pposition,stringLength,NULL,0) ^ NIKS(loc));
@@ -11951,7 +12042,7 @@ b b h h h a b c d:?X (|b c|x) d)
                     if(isSUCCESS(loc))/*20100910*/
                         {
                         loc = setflgs(loc,pat->v.fl); /* 20100221 */
-                        if (vgl(pat, loc))
+                        if (equal(pat, loc))
                             {
                             s.c.rmr = (char)(match(ind+1,sub, loc, snijaf,pposition,expr,op) ^ NIKS(loc));
                             wis(loc);
@@ -12596,7 +12687,7 @@ static psk lambda(psk pkn,psk name,psk Arg)
                     *last = h;
                     return first;
                     }
-                else if(!vgl(name,pkn->RIGHT))
+                else if(!equal(name,pkn->RIGHT))
                     {
                     psk h;
                     psk first;
@@ -12620,7 +12711,7 @@ static psk lambda(psk pkn,psk name,psk Arg)
             else if (  kop(pkn) == FUU 
                     && (pkn->v.fl & BREUK)
                     && kop(pkn->RIGHT) == DOT
-                    && !vgl(name,pkn->RIGHT->LEFT)
+                    && !equal(name,pkn->RIGHT->LEFT)
                     )
                 {
                 return NULL;
@@ -15853,7 +15944,7 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
     psk RtermN,RtermI,RtermNNNI;
 
     int ok;
-
+/*    printf("pkn      :");result(pkn);printf("\n");*/
     if(!is_op(L) && RAT_NUL_COMP(L))
         {
         /* 0+x -> x */
@@ -15959,7 +16050,7 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
 
     if(  kop(Lterm) == LOG
       && kop(Rterm) == LOG
-      && !vgl(Lterm->LEFT,Rterm->LEFT)
+      && !equal(Lterm->LEFT,Rterm->LEFT)
       )
         {
         adr[1] = Lterm->LEFT;
@@ -16005,7 +16096,7 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
             else
                 {
                 assert(RtermNNNI != NULL);
-                dif = vgl(LtermNNNI,RtermNNNI);
+                dif = equal(LtermNNNI,RtermNNNI);
                 assert(dif <= 0 || kop((*loper)->RIGHT) != PLUS);
                 /*while(  (dif = vgl(LtermNNNI,RtermNNNI)) > 0
                      && kop((*loper)->RIGHT) == PLUS
@@ -16207,6 +16298,17 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
              && kop((*loper)->RIGHT) == PLUS
              )
             {
+            /*
+            x^(y*(a+b))+z^(y*(a+b))+-1*x^(a*y+b*y) => z^(y*(a+b))
+            cos$(a+b)+-1*(cos$a*cos$b+-1*sin$a*sin$b) => 0
+            x^(y*(a+b))+x^(a*y+b*y) => 2*x^(y*(a+b))
+            x^(y*(a+b))+-1*x^(a*y+b*y) => 0
+            fct$(a^((b+c)*(d+e))+a^((b+c)*(d+f))) => a^(b*d+c*d) * (a^(b*f+c*f)+a^(e*b+e*c))
+            (a^((b+c)*(d+e))+a^((b+c)*(d+f))) + -1 * a^(b*d+c*d) * (a^(b*f+c*f)+a^(e*b+e*c)) => 0
+            -1*(a^((b+c)*(d+e))+a^((b+c)*(d+f)))  +   a^(b*d+c*d) * (a^(b*f+c*f)+a^(e*b+e*c)) => 0
+            a^(b*d+c*d) * (a^(b*f+c*f)+a^(e*b+e*c)) + -1*(a^((b+c)*(d+e))+a^((b+c)*(d+f))) => 0
+            -1 * a^(b*d+c*d) * (a^(b*f+c*f)+a^(e*b+e*c)) + a^((b+c)*(d+e)) + a^((b+c)*(d+f)) => 0
+            */
             loper = &(*loper)->RIGHT; /*{?} (b^3+c^3)+b^3+c+b^3 => c+3*b^3+c^3 */
             *loper = prive(*loper);
             rechteroperand_and_tail((*loper),&Rterm,&Rtail);
@@ -16390,7 +16492,7 @@ static psk substmaal(psk pkn)
 
     rlknoop = kop(rkn) == EXP ? rkn->LEFT : rkn; /*{?} (f.e)*(y.s) => (f.e)*(y.s) */
     llknoop = kop(lkn) == EXP ? lkn->LEFT : lkn;
-    if((knverschil = vgl(llknoop,rlknoop)) == 0)
+    if((knverschil = equal(llknoop,rlknoop)) == 0)
         {
         /* a^n*a^m */
         if(rlknoop != rkn)
@@ -16612,7 +16714,9 @@ static int vglplus(psk kn1,psk kn2)
             return -1;
         else
             {
-            int diff = vgl(NNNI1,NNNI2);
+            int diff;
+/*            printf("NNNI1    :");result(NNNI1);printf("\nNNNI2    :");result(NNNI2);printf("\n");*/
+            diff = equal(NNNI1,NNNI2);
             if(diff > 0)
                 {
                 return 1; /* switch places */
@@ -16650,7 +16754,7 @@ static int vglmaal(psk kn1,psk kn2)
         return 1; /* switch places */
     else if(diff == 0)
         {
-        diff = vgl(kn1,kn2);
+        diff = equal(kn1,kn2);
         if(diff > 0)
             {
             return 1; /* switch places */
@@ -16727,7 +16831,7 @@ static psk merge
         Repol = pkn;
         pkn = tmp;
         }
-    /*printf("%d xxxx:%*s",level,level,"");result(pkn);printf("\n");*/
+/*    printf("xxxx     :");result(pkn);printf("\n");*/
     for(;;)
         { /* From right to left, prepend sorted elements to result */
         psk repol = &nilk; /*Will contain branches in inverse sorted order*/
@@ -16824,10 +16928,13 @@ static psk merge
                 /* (b*c) * d */
                 }
             }
+/*        printf("yyyy     :");result(pkn);printf("\n");*/
         for(;;)
             { /*Combine combinable elements and prepend to result*/
             pkn->v.fl |= READY;
+/*            printf("combine  :");result(pkn);printf("\n");*/
             pkn = combine(pkn);
+/*            printf("combined :");result(pkn);printf("\n");*/
             if(!(pkn->v.fl & READY))
                 { /*This may results in recursive call to merge
                     if the result of the evaluation is not in same
@@ -16864,7 +16971,7 @@ static psk substlog(psk pkn)
     {
     static const char *conc[] = {NULL,NULL,NULL,NULL};
     psk lknoop = pkn->LEFT,rknoop = pkn->RIGHT;
-    if(!vgl(lknoop,rknoop))
+    if(!equal(lknoop,rknoop))
         {
         wis(pkn);
         return copievan(&eenk);
@@ -16957,7 +17064,7 @@ static psk substdiff(psk pkn)
         wis(pkn);
         pkn = copievan(&nulk);
         }
-    else if(!vgl(lknoop,rknoop))
+    else if(!equal(lknoop,rknoop))
         {
         wis(pkn);
         pkn = copievan(&eenk);
@@ -17129,7 +17236,7 @@ static psk evalvar(psk pkn)
         }
     else
         {
-        DBGSRC(printf("evalvar(");result(pkn);printf("\n");)
+        DBGSRC(printf("evalvar  (");result(pkn);printf("\n");)
         if(shared(pkn))
             {
             /*You can get here if a !variable is unitialized*/
@@ -17188,7 +17295,7 @@ static psk eval(psk pkn)
     Notice the low number of local variables on the stack. This ensures maximal
     utilisation of stack-depth for recursion.
     */
-    DBGSRC(Printf("evaluate:");result(pkn);Printf("\n");)
+    DBGSRC(Printf("evaluate :");result(pkn);Printf("\n");)
     while(!(pkn->v.fl & READY))
         {
         if(is_op(pkn))
@@ -17377,11 +17484,13 @@ static psk eval(psk pkn)
                         {
                         pkn = copyop(pkn);
                         }
+/*                    printf("merge    :");result(pkn);printf("\n");*/
                     pkn = merge(pkn,vglplus,plus_samenvoegen_of_sorteren
 #if EXPAND
                         ,expandProduct
 #endif
                         );
+/*                    printf("merged   :");result(pkn);printf("\n");*/
                     if(lkn.v.fl & INDIRECT)
                         {
                         pkn = evalvar(pkn);
