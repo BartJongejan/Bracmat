@@ -65,10 +65,14 @@ Test coverage:
 
 */
 
-#define DATUM "12 April 2016"
+#define DATUM "20 April 2016"
 #define VERSION "6"
-#define BUILD "200"
+#define BUILD "201"
 /* 
+  20 April 2016
+Bug: jsn$-1/2 jsn$-1/25 returned deformed strings. (Only if denominator is 
+multiple of 2 and/or 5).
+
   12 April 2016
 Bug: (.B+C)+(.2*(U+Z))+(.A*E)+(.B+C) did not evaluate to an expression where
 the (.B+C) terms were combined. vgl() function was the culprit.
@@ -17860,15 +17864,15 @@ int startProc(
         "\214&\334\346|!c:\211&\334\364|\334\365\260\260 d2x$(asc$!c)) C$!z)|"
         "!arg)&(T=a z.@(!arg:?a \" ?z)&str$(C$!a \334\242 T$!z)|C$!arg)&(H=a z"
         ".@(!arg:?a \334 ?z)&str$(T$!a \334\334 H$!z)|T$!arg)&(I=.str$(\" H$"
-        "!arg \"))&(X=a z d n A B D F G L x.den$!arg:?d&!d*!arg:?n&(5\016!d:"
-        "#%?A+?B&`(!B:0&2^!A|!B:5\016?B&2\016(!B*(den$!B:?B)):#?D&!A+-1*5\016"
-        "!B+-1*!D:?A&(!A:>0&2|1/5)^!A)|2\016!d:#%?A&5^!A):?F&-1+-1*10\016(!d*"
-        "!F):?x&!n*!F:?G&@(!G:? [?L)&whl'(!L+!x:<0&str$(0 !G):?G&1+!L:?L)&@(!G"
-        ":?a [!x ?z)&whl'@(!z:?z 0)&str$((!arg:<0&\255|) !a \256 !z))&(Y=e,d,m"
-        ",s,f.!arg:(?arg,~<0:?d)&!arg:0|(-1*!arg:>0:?arg&-1|1):?s&10\016!arg:"
-        "?e+(10\016?m|0&1:?m)&(!m+1/2*1/10^!d:~<10&1+!e:?e&!m*1/10:?m|)&@(div$"
-        "(!m+1/2*(1/10^!d:?d),!d):%?`f ?m)&str$(!s*!f (!d:~1&\256 (@(rev$!m:? "
-        "#?m)&rev$!m)|!m) E !e))&str$(Q$!arg)),",
+        "!arg \"))&(X=a z d n A B D F G L x.den$!arg:?d&!d*(!arg:~<0|-1*!arg):"
+        "?n&(5\016!d:#%?A+?B&`(!B:0&2^!A|!B:5\016?B&2\016(!B*(den$!B:?B)):#?D&"
+        "!A+-1*5\016!B+-1*!D:?A&(!A:>0&2|1/5)^!A)|2\016!d:#%?A&5^!A):?F&-1+-1*"
+        "10\016(!d*!F):?x&!n*!F:?G&@(!G:? [?L)&whl'(!L+!x:<0&str$(0 !G):?G&1+"
+        "!L:?L)&@(!G:?a [!x ?z)&whl'@(!z:?z 0)&str$((!arg:<0&\255|) !a (!z:|"
+        "\256 !z)))&(Y=e,d,m,s,f.!arg:(?arg,~<0:?d)&!arg:0|(-1*!arg:>0:?arg&-1"
+        "|1):?s&10\016!arg:?e+(10\016?m|0&1:?m)&(!m+1/2*1/10^!d:~<10&1+!e:?e&"
+        "!m*1/10:?m|)&@(div$(!m+1/2*(1/10^!d:?d),!d):%?`f ?m)&str$(!s*!f (!d:"
+        "~1&\256 (@(rev$!m:? #?m)&rev$!m)|!m) E !e))&str$(Q$!arg)),",
         "(sgn=(.!arg:?#%arg*%+?&sgn$!arg|!arg:<0&-1|1)),",
         "(abs=(.sgn$!arg*!arg)),",
         "(sub=\177e,\177x,\177v,\177F.(\177F=\177l,\177r.!arg:!\177x&!\177v|"
