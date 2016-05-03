@@ -5855,6 +5855,11 @@ string line 2\"
           )
           (jsn$-3/2:"-1.5"|Out$917)
           (jsn$-1/25:"-0.04"|Out$918)
+          (   lst$(tay,MEM,RAW):?TAY
+            & get$(str$("(taylor=" !TAY ")"),MEM)
+            & taylor$(e^x,x,3):1+x+1/2*x^2+1/6*x^3
+          | Out$919
+          )
       &   out
         $ ( str
           $ ( "Done. "

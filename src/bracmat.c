@@ -65,10 +65,16 @@ Test coverage:
 
 */
 
-#define DATUM "20 April 2016"
+#define DATUM "3 May 2016"
 #define VERSION "6"
-#define BUILD "201"
-/* 
+#define BUILD "202"
+/* 3 May 2016
+New option RAW for lst function. A RAW listing does not have (varname= at the
+beginning and ); at the end. This can be used to store a data structure that,
+when read, can be assigned to a variable of the programmer's own choice.
+One has to take care when listing a variable that shadows another variable of
+the same name. Both variables will be listed!
+
   20 April 2016
 Bug: jsn$-1/2 jsn$-1/25 returned deformed strings. (Only if denominator is 
 multiple of 2 and/or 5).
@@ -1972,8 +1978,8 @@ typedef struct
 #define REV O('r','e','v') /* 20040830 strrev */
 #define LST O('l','s','t')
 #define MEM O('M','E','M')
-#define ML  O('M','L',0)
 #define MINEEN O('-','1',0)
+#define ML  O('M','L',0)
 #define MMF O('m','e','m')
 #define MOD O('m','o','d')
 #define NEW O('N','E','W')
@@ -1981,6 +1987,7 @@ typedef struct
 #define PI  O('p','i', 0 )
 #define PUT O('p','u','t')
 #define PRV O('?', 0 , 0 )
+#define RAW O('R','A','W')
 #define STR O('s','t','r')
 #define SIM O('s','i','m')
 #define STG O('S','T','R')
@@ -2717,6 +2724,7 @@ total bytes = 1166400
 #endif
 
 static int hum = 1;
+static int listWithName = 1;
 static int mooi = TRUE;
 static int optab[256];
 static int dummy_op = LUCHT;
@@ -12850,25 +12858,31 @@ for(alfabet = 0;alfabet<256;alfabet++)
             for(n = navar->n;n >= 0;n--)
                 {
                 ppsk tmp;
-                if(global_fpo == stdout)
+                if(listWithName)
                     {
-                    if(navar->n > 0)
-                        Printf("%c%d (",n == navar->selector ? '>' : ' ',n);
+                    if(global_fpo == stdout)
+                        {
+                        if(navar->n > 0)
+                            Printf("%c%d (",n == navar->selector ? '>' : ' ',n);
+                        else
+                            Printf("(");
+                        }
+                    if(haalaan(VARNAME(navar)))
+                        myprintf("\"",(char *)VARNAME(navar),"\"=",NULL);
                     else
-                        Printf("(");
+                        myprintf((char *)VARNAME(navar),"=",NULL);
+                    if(hum)
+                        myprintf("\n",NULL);
                     }
-                if(haalaan(VARNAME(navar)))
-                    myprintf("\"",(char *)VARNAME(navar),"\"=",NULL);
-                else
-                    myprintf((char *)VARNAME(navar),"=",NULL);
-                if(hum)
-                    myprintf("\n",NULL);
                 assert(navar->pvaria);
                 tmp = Entry(navar->n,n,&navar->pvaria);
                 result(*tmp = Head(*tmp));
-                if(global_fpo == stdout)
-                    Printf("\n)");
-                myprintf(";\n",NULL);
+                if(listWithName)
+                    {
+                    if(global_fpo == stdout)
+                        Printf("\n)");
+                    myprintf(";\n",NULL);
+                    }
                 }
             }
         }
@@ -13769,17 +13783,14 @@ static int output(ppsk pkn,void (*hoe)(psk k))
 FILE *redfpo;
 psk rknoop,rlknoop,rrknoop,rrrknoop;
 static LONG opts[] =
-    {APP,NEW,
-     TXT,BIN,VAP,
-     EXT,MEM,
-     CON,LIN,
-     0L};
+    {APP,BIN,CON,EXT,MEM,LIN,NEW,RAW,TXT,VAP,0L};
 if(kop(rknoop = (*pkn)->RIGHT) == KOMMA)
    {
    redfpo = global_fpo;
    rlknoop = rknoop->LEFT;
    rrknoop = rknoop->RIGHT;
    hum = !zoekopt(rrknoop,LIN);
+   listWithName = !zoekopt(rrknoop,RAW);
    if(allopts(rrknoop,opts))
         {
         if(zoekopt(rrknoop,MEM))
@@ -13864,6 +13875,7 @@ else
     *pkn = rechtertak(*pkn);
     }
 hum = 1;
+listWithName = 1;
 return TRUE;
 }
 

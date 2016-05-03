@@ -1,3 +1,10 @@
+   3 May 2016
+New option RAW for lst function. A RAW listing does not have (varname= at the
+beginning and ); at the end. This can be used to store a data structure that,
+when read, can be assigned to a variable of the programmer's own choice.
+One has to take care when listing a variable that shadows another variable of
+the same name. Both variables will be listed!
+
   20 April 2016
 Bug: jsn$-1/2 jsn$-1/25 returned deformed strings. (Only if denominator is 
 multiple of 2 and/or 5).
