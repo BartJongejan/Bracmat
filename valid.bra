@@ -5860,6 +5860,19 @@ string line 2\"
             & taylor$(e^x,x,3):1+x+1/2*x^2+1/6*x^3
           | Out$919
           )
+          (   lst$('$tay,MEM,RAW):?TAY
+            & get$(str$("(taylor=" !TAY ")"),MEM)
+            & taylor$(e^x,x,3):1+x+1/2*x^2+1/6*x^3
+          | Out$920
+          )
+          (   lst$('$tay,MEM):?TAY
+            & get$(!TAY,MEM):(=?taylor)
+            & taylor$(e^x,x,3):1+x+1/2*x^2+1/6*x^3
+          | Out$921
+          )
+          ( lst'((a=\n),LIN,MEM):"(a=\\n)\n"
+          | Out$922
+          )
       &   out
         $ ( str
           $ ( "Done. "

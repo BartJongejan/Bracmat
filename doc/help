@@ -167,7 +167,7 @@ lex lexical analysis of help file"
 17 |_low_|
     convert to lower case
 18 |_lst_|
-    list un-evaluated value of variable(s)
+    list un-evaluated expression(s) or value(s) of variable(s)
 19 |_mem_|
     list existing variable names
 20 |_mod_|
@@ -557,13 +557,13 @@ result. Example:
 external text editor. You can enter small programs directly at the Bracmat
 prompt {?}, but a small change in an instruction can only be done by re-
 entering the whole instruction. You may save instructions that are still
-held in memory (which is only possible if they are bound to variables),
-by the built-in |_lst_| function. This function takes a number of optional
-parameters that tell the system whether the instruction has to be written in a
-compact and barely readable form, or in a more pretty form, with lots of
-indentations. Comments are never written, as they are ignored at input time.
-As an example, you can write the definition of the pre-defined factorisation
-function |_fct_| to a file |_factorise_| by entering the following instruction:
+held in memory, by the built-in |_lst_| function. This function takes a number
+of optional parameters that tell the system whether the instruction has to be
+written in a compact and barely readable form, or in a more pretty form, with
+lots of indentations. Comments are never written, as they are ignored at input
+time. As an example, you can write the definition of the pre-defined
+factorisation function |_fct_| to a file |_factorise_| by entering the following
+instruction:
 
 {?} lst$(fct,factorise,NEW) {NEW:replace old file with same name}
 {!} fct"
@@ -3243,8 +3243,26 @@ matches are forgotten : the _ operator is a global variable.
     )
   & ( lsttxt1
     =   T
-      , "lst$(<variable>[,LIN])"
-      , "Outputs all present bindings of one or more variables to standard output.
+      , "lst$(<(=expression) or variable>*[,LIN][,RAW])"
+      , "|_lst$_| outputs all present bindings of one or more variables to standard
+output. If a variable is local to a function and a variable of the same name
+already exists in the context of another function invocation or globally, all
+instances will be listed!
+
+If a variable is listed to stdout, the listing starts with |_(varname=_| and
+ends with |_);_|. The surrounding parentheses are suppressed if a variable is
+listed to a file.
+
+Expressions headed by the |_=_| operator can be used instead of 
+variable names. In that case no semicolon is appended. The listing starts 
+with  |_(=_| and ends with |_)_|, followed by a newline.
+
+With the |_RAW_| option only the expression right of the |_=_| operator is
+listed.
+
+The LIN option suppresses most newlines and all other unneeded white
+space characters.
+
 If the first parameter is the zero-length string, then all variables with
 names starting with a character below ASCII 128 are shown. If a variable
 has more than one binding (arrays/stacks) then the current value is preceded
@@ -3257,7 +3275,7 @@ The second parameter is optional.
     )
   & ( lsttxt2
     =   T
-      , "lst$(<variable>,MEM [,LIN])"
+      , "lst$(<(=expression) or variable>*,MEM [,LIN][,RAW])"
       , "The difference with the preceding form is, that output takes place to
 memory. What is normally visible on screen is put in one atom, which is
 the return value of the call to lst. It has the opposite effect of
@@ -3273,7 +3291,7 @@ very large atoms (such as this help function) do less well. Example:
     )
   & ( lsttxt3
     =   T
-      , "|_lst$(<variable>,<file name>,NEW | APP [,LIN][,TXT][,BIN])_|"
+      , "|_lst$(<(=expression) or variable>*,<file name>,NEW | APP [,LIN][,TXT][,BIN])_|"
       , "This time, output is sent to the named file instead of standard output.
 The third argument is explained below.
 Code that has been saved with lst$ can be reloaded with get$.
@@ -4897,11 +4915,14 @@ Topic:")
                     .   !arg:(?sel.?menutekst)
                       &   whl
                         ' ( !sel:(?antw,?keuze) ?sel
-                          & out$(doMenuItem !antw !keuze)
+                          & out$(doMenuItem !antw en !keuze)
                           & ( !keuze:
+                              & out$NOKEUZE
                             |   !menutekst:%?menutitel ?menutekst
+                              & out$(!titel !menutitel !keuze)
                               &   writeHTML
                                 $ ((!titel.!ptxt).!menutitel.!keuze)
+                              & out$(DONE !titel !menutitel !keuze)
                             )
                           )
                       & out$(doMenuItems done)

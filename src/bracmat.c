@@ -65,10 +65,17 @@ Test coverage:
 
 */
 
-#define DATUM "3 May 2016"
+#define DATUM "6 May 2016"
 #define VERSION "6"
-#define BUILD "202"
-/* 3 May 2016
+#define BUILD "203"
+/* 6 May 2016
+lst function takes the name of an expression or the expression itself, as the
+rhs of an = operator. This is in line with the rest of Bracmat. Usefull when
+listing code bound to a variable that has namesakes on the stack. (Before, you
+had to assign the variable's value to global variable and list that global
+variable instead.)
+
+   3 May 2016
 New option RAW for lst function. A RAW listing does not have (varname= at the
 beginning and ); at the end. This can be used to store a data structure that,
 when read, can be assigned to a variable of the programmer's own choice.
@@ -12894,10 +12901,33 @@ static void lst(psk kn)
     {
     while(is_op(kn))
         {
-        lst(kn->LEFT);
-        /* lst(kn->RIGHT);
-        18 Maart 1997 */
-        kn = kn->RIGHT;
+        if(kop(kn) == WORDT)
+            {
+            mooi = FALSE;
+            myprintf("(",NULL);
+            if(hum)
+                myprintf("\n",NULL);
+            if(listWithName)
+                {
+                result(kn);
+                }
+            else
+                {
+                result(kn->RIGHT);
+                }
+            if(hum)
+                myprintf("\n",NULL);
+            myprintf(")\n",NULL);
+            mooi = TRUE;
+            return;
+            }
+        else
+            {
+            lst(kn->LEFT);
+            /* lst(kn->RIGHT);
+            18 Maart 1997 */
+            kn = kn->RIGHT;
+            }
         }
     lstsub(kn);
     }
