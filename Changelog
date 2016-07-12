@@ -1,3 +1,6 @@
+   12 July 2016
+lst: Only list variable on top of stack if RAW option set.
+
    6 May 2016
 lst$ function takes the name of an expression or the expression itself, as the
 rhs of an = operator. This is in line with the rest of Bracmat. Usefull when

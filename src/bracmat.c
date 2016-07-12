@@ -65,10 +65,13 @@ Test coverage:
 
 */
 
-#define DATUM "6 May 2016"
+#define DATUM "12 July 2016"
 #define VERSION "6"
-#define BUILD "203"
-/* 6 May 2016
+#define BUILD "204"
+/* 12 July 2016
+lst: Only list variable on top of stack if RAW option set.
+
+   6 May 2016
 lst function takes the name of an expression or the expression itself, as the
 rhs of an = operator. This is in line with the rest of Bracmat. Usefull when
 listing code bound to a variable that has namesakes on the stack. (Before, you
@@ -12884,12 +12887,14 @@ for(alfabet = 0;alfabet<256;alfabet++)
                 assert(navar->pvaria);
                 tmp = Entry(navar->n,n,&navar->pvaria);
                 result(*tmp = Head(*tmp));
-                if(listWithName)
+                if (listWithName)
                     {
-                    if(global_fpo == stdout)
+                    if (global_fpo == stdout)
                         Printf("\n)");
-                    myprintf(";\n",NULL);
+                    myprintf(";\n", NULL);
                     }
+                else
+                    break; /*Only list variable on top of stack if RAW*/
                 }
             }
         }
