@@ -65,10 +65,13 @@ Test coverage:
 
 */
 
-#define DATUM "12 July 2016"
+#define DATUM "5 August 2016"
 #define VERSION "6"
-#define BUILD "204"
-/* 12 July 2016
+#define BUILD "205"
+/* 5 August 2016
+fpo -> global_fpo in myputc
+
+  12 July 2016
 lst: Only list variable on top of stack if RAW option set.
 
    6 May 2016
@@ -3465,12 +3468,12 @@ static int mygetc(FILE * fpi)
 
 static void myputc(int c)
     {
-    if(WinOut && (fpo == stdout || fpo == stderr))
+    if(WinOut && (global_fpo == stdout || global_fpo == stderr))
         {
         WinOut(c);
         }
     else
-        fputc(c,fpo);
+        fputc(c,global_fpo);
     }
 #else
 static void myputc(int c)
