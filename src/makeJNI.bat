@@ -9,9 +9,10 @@ if "%1" == "" goto :usage
 
 rem set "JAVA_HOME=C:\Program Files\Java\jdk1.7.0_45"
 rem set "JAVA_HOME=C:\Program Files\Java\jdk1.7.0_10"
-rem set "JAVA_HOME=C:\Program Files\Java\jdk1.8.0_25"
+rem set "JAVA_HOME=C:\Program Files\Java\jdk1.8.0_31"
 rem set "CATALINA_HOME=C:\Program Files\Apache Software Foundation\Tomcat 7.0"
 rem set "CATALINA_HOME=C:\Program Files\Apache Software Foundation\Tomcat 8.0"
+rem set "CATALINA_HOME=C:\Program Files\Apache Software Foundation\Tomcat 8.5"
 if "%1" == "x86" goto :w32 
 if "%2" == "12" goto :v12
 if "%2" == "10" goto :v10
