@@ -1,3 +1,9 @@
+  31 August
+Made the FENCE flag ` the first flag to be printed.
+
+   5 August 2016
+fpo -> global_fpo in myputc
+
    12 July 2016
 lst: Only list variable on top of stack if RAW option set.
 

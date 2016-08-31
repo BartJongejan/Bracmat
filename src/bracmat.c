@@ -65,10 +65,13 @@ Test coverage:
 
 */
 
-#define DATUM "5 August 2016"
+#define DATUM "31 August 2016"
 #define VERSION "6"
-#define BUILD "205"
-/* 5 August 2016
+#define BUILD "206"
+/* 31 August
+Made the FENCE flag ` the first flag to be printed.
+
+   5 August 2016
 fpo -> global_fpo in myputc
 
   12 July 2016
@@ -4572,6 +4575,11 @@ static int printflags(psk wortel)
     {
     int count = 0;
     int Flgs = wortel->v.fl;
+    if(Flgs & FENCE)
+        {
+        (*verwerk)('`');
+        ++count;
+        }
     if(Flgs & POSITION)
         {
         (*verwerk)('[');
@@ -4616,16 +4624,6 @@ static int printflags(psk wortel)
         {
         (*verwerk)('?');
         ++count;
-        }
-    if(Flgs & FENCE)
-        {
-        /* 20111216
-        if(!(Flgs & POSITION))
-            {*/
-            (*verwerk)('`'); /*20111221 this was also commented out*/
-            ++count;
-            /*}
-        */
         }
     if(Flgs & INDIRECT)
         {

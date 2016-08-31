@@ -1794,7 +1794,7 @@ towards operators that are closer to the root of the tree"
                        ?v
                        "<"
                    & (!id.!v) !p:?p
-                   & ~`
+                   & `~
                    )
                    ?
                )
@@ -2252,7 +2252,7 @@ towards operators that are closer to the root of the tree"
           ( x^(y*(a+b))+-1*x^(a*y+b*y):0
           | Out$257
           )
-          ( (@(~`ab:%?x %?y)&!x):a
+          ( (@(`~ab:%?x %?y)&!x):a
           | Out$258
           )
           ( (a b c:% c):a b c
@@ -2509,7 +2509,7 @@ towards operators that are closer to the root of the tree"
               =   
                 .   sim$(!arg,!sjt):>9/10&?
                   |   den$(sim$(!sjt,)):~<(den$(sim$(!arg,0)))
-                    & ~`
+                    & `~
               )
             & @( "Dogs and Cats are friends"
                : ? (like$cat:?animal) ?
@@ -2519,7 +2519,7 @@ towards operators that are closer to the root of the tree"
           )
           (   ( dependent
               =   
-                .   !sjt:(0|1)&~`
+                .   !sjt:(0|1)&`~
                   |   !sjt
                     : ( ?*!arg^?*?
                       | ?*?^(?+dependent$!arg+?)*?
@@ -2559,7 +2559,7 @@ towards operators that are closer to the root of the tree"
                     & !( 
                        ' ( $L
                          :   ?
-                             ( %`:$P:?M
+                             ( `%:$P:?M
                              & !M !A:?A
                              & ~
                              )
@@ -2581,29 +2581,29 @@ towards operators that are closer to the root of the tree"
           | Out$350
           )
           (   (a=b)
-            & /#<>%@?`!('$a):?X
+            & `/#<>%@?!('$a):?X
             & put$(!X,MEM):"/#<>%@?`b"
           | Out$"351 (Acceptable), /('(v.e)) is lambda"
           )
           (   (a=b)
-            & #<>%@?`!('$a):?X
-            & put$(!X,MEM):"#<>%@?`b"
+            & `#<>%@?!('$a):?X
+            & put$(!X,MEM):"`#<>%@?b"
           | Out$351bis
           )
           (   (a=b)
-            & /#<>%@?`!!(=a):?X
-            & put$(!X,MEM):"/#<>%@?`b"
+            & `/#<>%@?!!(=a):?X
+            & put$(!X,MEM):"`/#<>%@?b"
           | Out$352
           )
           (   (a=b)
-            & ~/#<>%@?`!!(=a):?X
-            & put$(!X,MEM):"~/#<>%@?`b"
+            & `~/#<>%@?!!(=a):?X
+            & put$(!X,MEM):"`~/#<>%@?b"
           | Out$353
           )
           (   (a=b)
             & (b=c)
-            & ~/#<>%@?`!!a:?X
-            & put$(!X,MEM):"~/#<>%@?`c"
+            & `~/#<>%@?!!a:?X
+            & put$(!X,MEM):"`~/#<>%@?c"
           | Out$354
           )
           (     (1+i)*(1+e)*(1+pi)*(1+a)
@@ -3268,10 +3268,10 @@ towards operators that are closer to the root of the tree"
             : (L.8,z) g^y x
           | Out$431
           )
-          ( ((~`A|B)|C):C
+          ( ((`~A|B)|C):C
           | Out$432
           )
-          ((~`A|B)&Out$433|)
+          ((`~A|B)&Out$433|)
           (   flg$(=!a):(=?X.?Z)
             & lst$(X,MEM,LIN):"X=!;\n"
             & !Z:a
@@ -3851,7 +3851,7 @@ towards operators that are closer to the root of the tree"
                    ( [%( sim$(cat,!sjt):>9/10
                        |     den$(sim$(!sjt,))
                            : ~<(den$(sim$(cat,0)))
-                         & ~`
+                         & `~
                        )
                    : ?animal
                    )
@@ -3864,10 +3864,10 @@ towards operators that are closer to the root of the tree"
           (   :?animal
             &   Dogs and Cats are friends
               :   ?
-                  %`( [%( sim$(cat,!sjt):>6/8
+                  `%( [%( sim$(cat,!sjt):>6/8
                         |     den$(sim$(!sjt,))
                             : ~<(den$(sim$(cat,0)))
-                          & ~`
+                          & `~
                         )
                     : ?animal
                     )
@@ -4414,9 +4414,9 @@ towards operators that are closer to the root of the tree"
             & @(lst$(g,MEM):"g=" ? "\"12345	67890\";" ?)
           | Out$566
           )
-          (   /#<>%@?`!(=b):?h
+          (   `/#<>%@?!(=b):?h
             & flg$('$h):(=?X.b)
-            & @(lst$(X,MEM,LIN):"X=/#<>%@?`" ?)
+            & @(lst$(X,MEM,LIN):"X=`/#<>%@?" ?)
           | Out$567
           )
           (7^-13:1/96889010407|Out$568)
@@ -5028,11 +5028,11 @@ string line 2\"
           ( a b c:? (%@ %@|%@ [<1) ?
           | Out$680
           )
-          (   a b c:? (=.~`)$() ?
+          (   a b c:? (=.`~)$() ?
             & Out$681
           | 
           )
-          (@`(a:b)&ok|Out$682)
+          (`@(a:b)&ok|Out$682)
           (   `(1:1|ok):?h
             & flg$('$h):(=?X.1)
             & @(lst$(X,MEM,LIN):"X=`" ?)
