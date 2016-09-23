@@ -198,7 +198,7 @@ static jstate string(int arg)
         case '\\': 
             action = push(escape); break;
         default:
-            if(arg < ' ')
+            if(0 < arg && arg < ' ')
 				switch(arg)
 					{
 					case 8:

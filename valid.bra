@@ -5873,6 +5873,10 @@ string line 2\"
           ( lst'((a=\n),LIN,MEM):"(a=\\n)\n"
           | Out$922
           )
+          (   get$("{\"reg\":\"Rhône\",\"metro\":0}",MEM,JSN)
+            : ((metro.0)+(reg..Rhône),)
+          | Out$923
+          )
       &   out
         $ ( str
           $ ( "Done. "

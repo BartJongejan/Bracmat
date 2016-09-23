@@ -65,10 +65,13 @@ Test coverage:
 
 */
 
-#define DATUM "31 August 2016"
+#define DATUM "23 September 2016"
 #define VERSION "6"
-#define BUILD "206"
-/* 31 August
+#define BUILD "207"
+/* 23 September 2016
+json.c: fixed reading strings with characters with 8th bit set. 
+
+  31 August
 Made the FENCE flag ` the first flag to be printed.
 
    5 August 2016

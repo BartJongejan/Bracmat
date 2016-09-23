@@ -1,4 +1,7 @@
-  31 August
+  23 September 2016
+json.c: fixed reading strings with characters with 8th bit set. 
+
+  31 August 2016
 Made the FENCE flag ` the first flag to be printed.
 
    5 August 2016
