@@ -65,7 +65,7 @@ Test coverage:
 
 */
 
-#define DATUM "23 September 2016"
+#define DATUM "5 October 2016"
 #define VERSION "6"
 #define BUILD "208"
 /*  5 October 2016
