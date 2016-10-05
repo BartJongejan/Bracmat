@@ -67,8 +67,11 @@ Test coverage:
 
 #define DATUM "23 September 2016"
 #define VERSION "6"
-#define BUILD "207"
-/* 23 September 2016
+#define BUILD "208"
+/*  5 October 2016
+Fixed error that made sim$(abbcd.abcd) equal to 10/9 instead of 8/9
+
+   23 September 2016
 json.c: fixed reading strings with characters with 8th bit set. 
 
   31 August
@@ -13952,7 +13955,7 @@ static LONG simil
             LONG len12 = 0;
             for(;;)
                    {
-                   if(lls1 < s1end)
+                   if(lls1 < s1end && lls2 < s2end)
                        {
                        const char * ns1 = lls1,* ns2 = lls2;
                        int K1 = getCodePoint2(&ns1,putf1);
