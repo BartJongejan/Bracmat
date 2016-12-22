@@ -1,3 +1,7 @@
+  22 December 2016 - Version 6.209
+Uses UnicodeData.txt 16-May-2016 19:23
+Removed change log from bracmat.c
+
    5 October 2016
 Fixed error that made sim$(abbcd.abcd) equal to 10/9 instead of 8/9
 
@@ -68,7 +72,10 @@ The subdirectory src/Python contains the Cython source file to
 construct the Python module, together with Bracmat's C source.
 That subdirectory also contains a file launch.py that tests and
 demonstrates the prythat module.
- 
+
+  20 July 2015
+Added function Ni for interfacing with Python when embedded using Cython.
+Added 'const' to scopy, numbercheck and fullnumbercheck
 
   17 April 2015
 XML: New predefined functions for nesting data and for converting data back
@@ -104,6 +111,10 @@ So [] becomes (,)
    6 September 2014
 Added atomicity checks in jsn where string argument is expected.
 Nevertheless, jsn is not validating. Garbage in, garbage out.
+
+ 5 September 2014
+Added built-in, but redefinable function jsn. This function converts a properly
+constructed Bracmat datastructure to a string containing JSON.
 
    1 September 2014
 Decimals in floating point numbers (JSON) were not counted correctly.
@@ -375,6 +386,28 @@ is not shared. Deleted code that was never reached.
 Updated u2l and l2u with data from UnicodeData.txt 2011-11-08
 (using script uni.bra)
 
+   22 August 2012
+Bug removed. The expression
+    ( (=A B)
+    : ?G1
+    : (=(A&X:?(G1.)) B)
+    )
+would not match the 'B' in the pattern with anything valid, because the 
+assignment X:?(G1.) had deleted the original subject. Now the subject is
+temporarily reference-incremented, so the 'B' still matches the old value of
+G1. The expression as a whole evaluates to X. Notice that this bug did not
+affect the very similar
+    ( (G2==A B)
+    & !G2
+    : (=(A&X:?(G2.)) B)
+    )
+Reason: here, the subject is not the object that G1 is bound to, but a copy.
+And that is so because the object that G1 is bound to is headed by an
+unevaluated = (being part of the rhs of an = operator). The expression !G2,
+however, must be evaluated, so it cannot be identical to G2's value.
+Consequently, the reassignment of G2 does not affect the subject of the
+pattern match operation, which is (=A B) at all times.
+
    4 August 2012
 Removed function "?"$<expr>. The same effect is obtained by <expr>:?!(=)
 
@@ -439,6 +472,11 @@ An option HT is made, but does not work yet. Purpose: translate HTML entities.
 The characters @ and % in front of a string now only turn off escaping with
 the \ character inside the string if the string is surrounded by " characters.
 Reason: the \L operator was not recognised if its lhs contained a % or @.
+
+   23 February 2012
+
+When Bracmat reads a file that is not well-formed, it asks for a file name
+where it can write what it has understood. This did not work. Now it does.
 
     9 February 2012
 
@@ -965,20 +1003,25 @@ occupy more bytes when uppercased. A simple in-place replacement is tried
 first, and is fine in 99% of all cases. If an overrun is imminent, more space
 is allocated.
 
+   22 February 2010
 sim$(s1,s2) accepts UTF-8. 8-bit Latin-1 is also ok. 
 chr$ fails if argument is > 255
 
+   21 February 2010
 ~<> are now effective on patterns headed by $ or ' operator
 b:>(str$a)
 b:~<>(str$A)
 
+   20 February 2010
 ~<> uses case insensitive compare on unicode
 
+   19 February 2010
 x2d$   converts hexadecimal number to decimal
 d2x$   converts decimal number to hexadecimal
 Both routines are restricted to decimal numbers 0 ... 4294967295 (hex 0 ... ffffffff)
 Failure if not all characters can be scanned.
 
+   12 February 2010 
 Simplified changeCase()
 
 ------------------------------------
@@ -1008,6 +1051,7 @@ Handy if you want to skip white space:
 
 @("  \r\n\t  xyz\r\n  ":?a (>@" " ?:?y) ~>%" " ?)
 
+   16 September 2009
 Changed KILOKNOPEN (indicating the minimum amount of working memory)
 back to 10000 
 
@@ -1107,9 +1151,11 @@ New version because of
     patterns and 
 (B) introduction of control structures for implementing loops.
 
+   28 January 2008
 Function evalmacro did not unset the ready-bit on an inserted expression 
 consisting of a variable with exclamation mark. It does now.
 
+   27 January 2008
 Introduction of flag [ for acquiring or requiring the current position during
 a (string)match. Examples:
 
@@ -1253,6 +1299,7 @@ Broken functionality repaired:
 The pattern (|? " "|`) did not only match a string starting with all blanks.
 It matched any string with a blank. 
 
+   7 July 2007
 Differentiation: Originally, to indicate that a variable x depends on another
 variable p, one wrote x=p, or x=s and s=p. If one wrote (x=), then y\Dx
 resulted in stack overflow. The appropriate way to indicate dependeny is
@@ -1272,6 +1319,7 @@ The unfinished attempt at implementing objects that can be saved and re-read
 VAX-specific code removed.
 
 Partly undoing of a change made in 200704:
+   5 July 2007:
 There were problems with stringmatches like this one
 @(aaab:((|a) aa) b)
 
@@ -1347,6 +1395,19 @@ starting with high-bit-set characters are kept hidden.)
 
 Defunct ego$ and goe$ are abolished.
 
+   22 February 2007:
+Major change in match() that speeds up matching. Found also an error in the
+handling of an alternating pattern with an alternating pattern in the lhs
+and a FENCE flag in the leftmost node.
+Similar changes in stringmatch() must yet be made.
+
+   20 February 2007:
+Changed int and unsigned long to size_t in two places to stop warnings.
+
+   23 June 2006
+caseinsensitivehash uses lowerEquivalent without converting array index to
+unsigned int!
+
 ------------------------------------
 Version 2 build 26 (18 January 2007)
 ------------------------------------
@@ -1369,6 +1430,14 @@ Changed 'flg' function.
 flg$<flags><atom> now returns ((=<flags>).<atom>)
 This protects the flags from evaluation, so that it now is possible to handle
 the '!'-flag using this function.
+
+   5 September 2005:
+Changed C++-style comments to old fashioned C-style comments.
+Removed enum {NoIndication,AnInteger,NotAFraction,NotANumber,AFraction,ANumber};
+
+   5 april 2005:
+flg$<flags><atom> now returns ((=<flags>).<atom>)
+This protects the flags from evaluation.
 
 ------------------------------------
 Version 2 build 22 (18 November 2004)
@@ -1418,6 +1487,9 @@ Version 2 build 19 (27 September 2004)
 ------------------------------------
 Replaced the non-ANSI strrev function with portable code.
 No change in functionality.
+
+   25 sep 2004
+strrev rewritten for Epoc
 
 ------------------------------------
 Version 2 build 18 (21 September 2004)
@@ -1474,12 +1546,22 @@ to minimise costly substring manipulation, substring manipulation is made
 needed the first time. Until that time, only a bytecount and an offset into
 the complete string are kept.
 
+   30 August 2004
+This fails:
+(obj=x=)&dbg'@("abc":?(obj.x) "c") & out$!(obj.x);
+
+This works:
+dbg'@("abc":?x "c") & out$!x;
+
+
+   6 June 2004:
+1) Started to make late binding in string matching
+2) Corrected errors in assignment to and listing of objects with late bound values
 
 ------------------------------------
 Version 2 build 8 (26 February 2004)
 ------------------------------------
 Fixed errors with allocation (function "bmalloc") and deallocation (function "fil").
-
 
 ------------------------------------
 Version 2 build 7 (23 February 2003)

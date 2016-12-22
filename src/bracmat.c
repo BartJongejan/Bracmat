@@ -19,6 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
+#define DATUM "22 December 2016"
+#define VERSION "6"
+#define BUILD "209"
 /*
 COMPILATION
 -----------
@@ -65,1335 +68,6 @@ Test coverage:
 
 */
 
-#define DATUM "5 October 2016"
-#define VERSION "6"
-#define BUILD "208"
-/*  5 October 2016
-Fixed error that made sim$(abbcd.abcd) equal to 10/9 instead of 8/9
-
-   23 September 2016
-json.c: fixed reading strings with characters with 8th bit set. 
-
-  31 August
-Made the FENCE flag ` the first flag to be printed.
-
-   5 August 2016
-fpo -> global_fpo in myputc
-
-  12 July 2016
-lst: Only list variable on top of stack if RAW option set.
-
-   6 May 2016
-lst function takes the name of an expression or the expression itself, as the
-rhs of an = operator. This is in line with the rest of Bracmat. Usefull when
-listing code bound to a variable that has namesakes on the stack. (Before, you
-had to assign the variable's value to global variable and list that global
-variable instead.)
-
-   3 May 2016
-New option RAW for lst function. A RAW listing does not have (varname= at the
-beginning and ); at the end. This can be used to store a data structure that,
-when read, can be assigned to a variable of the programmer's own choice.
-One has to take care when listing a variable that shadows another variable of
-the same name. Both variables will be listed!
-
-  20 April 2016
-Bug: jsn$-1/2 jsn$-1/25 returned deformed strings. (Only if denominator is 
-multiple of 2 and/or 5).
-
-  12 April 2016
-Bug: (.B+C)+(.2*(U+Z))+(.A*E)+(.B+C) did not evaluate to an expression where
-the (.B+C) terms were combined. vgl() function was the culprit.
-
-    7 April 2016
-Made %zu %lu if _WIN32 defined (not __WIN32__).
-
-    1 March 2016
-Format %zu not supported in VS 2008. Made it %lu if __WIN32__ defined.
-
-   30 December 2015
-Deleted some stale comments.
-
-   29 December 2015
-First time build with Microsoft Visual Studio Express 2015 for Windows Desktop
-Replaced format "%0*ld" by LONG0nD, which is defined as "%0*lld" for Win64.
-Some global variables renamed + other actions to remove shadowing.
-
-   31 August 2015
-Updated case conversion with latest UnicodeData.txt (09-Feb-2015 20:08).
-See http://www.unicode.org/Public/UNIDATA/UnicodeData.txt.
-
-   20 July 2015
-Added function Ni for interfacing with Python when embedded using Cython.
-Added 'const' to scopy, numbercheck and fullnumbercheck
-
-   17 April 2015
-XML: New predefined functions for nesting data and for converting data back
-to XML format.
-    MLencoding - detects encoding in XML or HTML file
-    nestML     - nest the internal representation of XML data
-    toML       - convert internal representation of XML data to a string
-                 containing XML data
-HTML is supported, although nestML may still make wrong guesses.
-
-   17 October 2014
-If started with arguments AND stringeval fails, bracmat returns -1.
-Before the program might crash.
-
-   24 September
-Made handling of unquoted attributes in html elements more forgiving. Added
-form feed to list of white space characters in html/xml parsing.
-
-   23 September
-xml.c: Fixed bugs in handling close tags inside script (or style) cdata.
-Removed allowance for white space between < / and element name.
-(Between / and > white space is still allowed. This is not comme il faut.)
-Removed possibility of close tag without name like so: </> or: </ p>
-
-   7 September 2014
-Changed JSON object mapping. 
-    {} is (0,)
-    {"key":123} is ((key.123),)
-    {"k1":true,"K2":"key 2"} is ((K2..key 2)+(k1.true),)
-So [] becomes (,)
-   [{}] becomes (,(0,)) which is (,0,)
-   [{},{}] becomes (,(0,) (0,))
-
-   6 September 2014
-Added atomicity checks in jsn where string argument is expected.
-Nevertheless, jsn is not validating. Garbage in, garbage out.
-
-   5 September 2014
-Added built-in, but redefinable function jsn. This function converts a properly
-constructed Bracmat datastructure to a string containing JSON.
-
-   1 September 2014
-Decimals were not counted correctly.
-
-   29 August 2014
-json.c: Negative numbers now interpreted as numbers, not strings.
-
-   28 August 2014
-Tested json.c. Now correctly handles \uXXXX and control characters.
-The latter inspired by 
-http://www.bennadel.com/blog/2576-testing-which-ascii-characters-break-json-javascript-object-notation-parsing.htm
-TODO 8232 (Line Separator) 8233 (Paragraph Separator) are also control characters, but not catched in json.c
-
-    6 August 2014
-Better handling of SGML (<?...>) and XML (<?...?>) processing instructions
-
-   18 June 2014
-New case conversion based on UnicodeData.txt 10-03-2014 18:20:00 
-
-   10 June 2014
-casesensitivehash: explicit cast to signed char.
-
-   22 May 2014
-img^jpg:(img^jpg)^?n failed, while img+jpg:(img+jpg)^?n succeeded. Now they both succeed.
-
-   16 May 2014
-1\La+1\Lb crashed due to stack overflow. Test ~1 in f5 solves the problem.
-
-   6 May 2014
-Increased a buffer size to solve segmentation fault problem with 64-bit
-version when evaluating roots of some big numbers, for example
-10090000004431^1/2
-
-   3 May 2014
-a^(b+c+d+e)*f^(g+h):?*?^(%+[<3)*? failed, while it should succeed
-
-   22 April 2014
-(xml.c) The &&; sequence to escape & is no good, because &amp;&amp;; after a
-full round trip ends up as & using this scheme. Decide to use the DEL character
-(ASCII 127) instead and see whether that goes.. This character is forbidden or
-discouraged in HTML  and XML So &blah; becomes DEL&blah; and DEL becomes 
-DELDEL.
-
-   19 April 2014
-(xml.c) Unknown entity references are escaped by replacing the '&' at the start
-by '&&;'. So "&surrogate-blocks;" becomes "&&;surrogate-blocks;". When writing
-back to mark-up, all '&' must be converted to &amp;, except the seqences '&&;',
-which must be converted to '&'.
-
-   17 April 2014
-In HTML (not XHTML), the script and style elements have cdata, not parsing the
-<![CDATA[  ]]> tag that may be present for compatibility with XHTML.
-The cdata of scipt and style elements ends at the first occurrence of the
-character sequence </
-(That means that that character sequence may not occur in for example inline
-JavaScript in an HTML file that is not XML at the same time.)
-
-get, put and lst can take argument TXT and BIN. BIN means that a 'b' is added
-to the file mode. In *n*x systems this has no effect. In Windows, text mode
-is default, while a 'b' is needed to suppress carriage returns.
-get and lst read resp. write per default in binary mode. put writes per default
-in text mode.
-
-When lst is used to output to stdout, a newline is inserted before the last ).
-
-    8 February 2014
-Found bug that cause Bracmat to crash on 4*(x+7)+p+-4*x. 
-Solved by uncommenting old code.
-
-   20 January 2014
-If EMSCRIPTEN: define NO_C_INTERFACE NO_FILE_RENAME NO_FILE_REMOVE NO_SYSTEM_CALL NO_LOW_LEVEL_FILE_HANDLING NO_FOPEN NO_EXIT_ON_NON_SEVERE_ERRORS
-
-   13 December 2013
-get$ now fails when trying to read invalid JSON
-get$("<p",MEM,ML) now returns (p.). Before an empty string was returned.
-Combined some stringpointers into one variable StaRt.
-Can now read deeply nested JSON, because stack dynamically resizes. 
-
-   4 December 2013
-Bug found in scompare. Signed character comparison gave wrong sign for
-variable 'teken', causing mistreatment of 8th-bit-set characters, so 
-@(får:? (å|æ) ?l) failed.
-
-    1 December 2013
-Added json.c to support reading JSON files. Use JSN, e.g. 
-get'("myjson.json",JSN)
-
-   18 November
-Set GLOBALARGPTR to 1. (Default: no emscripten)
-
-   17 November 2013
-Did some adaptations to make Norcroft C compiler (RiscOS) happy.
-(Suffix ul on large integer, correction in otherwise unused function
-swi(), removal of non-ASCII characters.)
-(There is a comment containing non-ASCII characters. Those characters
-must be removed to make the compiler completely happy.)
-
-   2 October 2013
-In stringEval: parameter 4 -> OPT_MEM
-
-   26 September 2013
-In doPosition, changed FLGS to Flgs in 
-    if((Flgs & UNIFY) && (is_op(pat) || (FLGS & INDIRECT)))
-This caused no error, just unnecessary CPU cycles.
-
-   16 September 2013
-Corrected a format specifier.
-
-   13 September 2013
- @(548:@548 @) succeeded (wrong),
- @(548:@ @) failed
- @(548:@(548:548) @) succeeded (wrong)
- @(548:@(548:?) @) succeeded (wrong)
- @(548:@(548 ?) @) succeeded (wrong)
- @(548:@(548&?) @) succeeded (wrong)
- @(548:@(?:548) @) failed
- @(548:@(?:?) @) failed
-The @ in front af a string is no longer removed.
-Otherwise, @(548:@548 @) would succeed!
-
-   26,27 August 2013
-Changed format specifier %ld %lX etc to %lld %llx etc for Microsoft 64 bit platforms.
-(long long integer type). 
-Reason: d2x was bitterly giving the wrong result for arguments >= 2^32
-
-     3 August 2013
-glf$(=(!.a.)):(=?h) didn't succeed because !(a.) erronously had READY flag set.
-
-     7 July 2013
-Checked that Unicode tables u2l and l2u are in agreement with latest 
-UnicodeData.txt (08-Aug-2012 13:06).
-
-     2 July 2013
-fil$: Switching from input to output back to input did not work if the second
-input only had one argument - the input's file name.
-
-    14 May 2013
-Added a field "dontcloseme" to filehendel struct. It is set to TRUE if the
-file is opened using get$ and ensures that such a file isn't closed if
-fil$(,filename,r) fails and Bracmat tries to free a filehandle. Made sure that
-code can be compiled with NO_FOPEN defined.
-
-     6 May 2013
-Found bug in input that melted the tree Δ A into a single atom ΔA.
-Other example:  (ø l:% %)  failed.
-
-    25 March 2013
-Friendlier error reporting when parentheses don't balance.
-
-    21 March 2013
-In xml.c, the space after !DOCTYPE disappeared. The error was sometimes
-negated by another error because doctypei was not properly reset to 0.
-Renamed putLeaveChar to putLeafChar.
-
-     1 February 2013
-Two ínstead of three parameters for preparefp if not compiled with debug info.
-
-    26 December 2012
-Several small improvements to fil()
-
-    25 December 2012
-Debugged preparefp.
-
-    23 December 2012
-Removed a superfluous while loop in someopt. Superfluous, because all arguments
-to fil$ must be atomic and in a right descending structure.
-
-    20 December 2012
-Cut most of is_afhankelyk_van away as obsolete.
-
-    10 December 2012
-Replaced 2000000000 by HEADROOM * RADIX2, which is valid for both 32 and 64 bit.
-scompare: if subject is zero bytes long and therefore not a number, adding
-characters to it may make it a number.
-
-     6 December 2012
-Thoroughly tested lambda.
-
-     5 December 2012
-Compiled with Borland C++ 5.02, alternative typedef for UINT32, found unused
-global var hekje1.
-
-     4 December 2012
-Commented out unreachable code in evalmacro
-
-     2 December 2012
-Made type 'int' explicit in line 5223
- 
-     1 December 2012
-Solved bug with late binding that turned up when evaluating 
-(cof==h) & @(gj:?!cof) & !cof
-
-    28 November 2012
-Made input stop on EOF even if input is stdin.
-
-    23 November 2012
-During testing of corner cases, found code that never executed in find() and
-code that was missing in doPosition.
-
-    16 November 2012
-Found and solved bug in Naamwoord. Case:
-(abcd=bopt=cyt*dip) & (cyt=dip=egsae) & foo:?!!(abcd.bopt)
-Removed rudimentary argument char ** punmatched from some functions.
-Removed old, forgotten attempt at working with < > and ~ on subject
-(lhs of : operator) in compare(). These flags are only useful in the pattern
-
-    15 November 2012
-Added a comment to input with backslash followed by control character,
-which is unsyntactical. Fused numberNode into _qdenominator.
-Fused fireBuiltInFunc into wis.
-
-    1 November 2012
-Function someopt() conditionally excluded with 
-  #if !defined NO_LOW_LEVEL_FILE_HANDLING
-
-    21 October 2012
-Made sure that put$ cannot write to a file that is still open in get$.
-
-    17 October 2012
-In evalvar, the assumption that shared = false is false.
-
-    15 October 2012
-Added 8 byte peek and poke (pee, pok) (perhaps not on all 32 bit platforms).
-Default is now 1 byte.
-
-    14 October 2012
-flg$(=~exp):(=?f.?o)  !f now fails, as it should.
-Relaxed requirement that parameters be separated with comma for function sim.
-new$(hash,1000) gives a hint at the initial size of the hash table.
-Default is 97.
-
-    12 October 2012
-Found some places in plus_samenvoegen_of_sorteren that were never reached,
-commented these.
-
-    23 September 2012
-Discovered buffer overflow when compiled under fresh installation of Xubuntu 
-gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3 with optimization -O1 and higher.
-Cause: strcpy in some places got the address of a single byte as destination
-and coredumped when that single-byte buffer was overrun, not knowing that
-there was, in fact, allocated memory to house the full source. See definition
-of POBJ.
-
-    22 September 2012
-Discovered that built in objects too easily were copied. The new function is
-for that. Worse, the copies were not initialized with a call to New. Also,
-new$hash returned ((=).New)'. Now it returns the object node. Changed the rhs
-of this node to the node that is the argument of the original call to new, so:
-  =hash
-
-    20 September 2012
-Reference counting should now be faster, bigger and better.
-Before, reference counting went to 2^30+1024. Now it goes to 2^30*1023+1
-Test added to valid.bra.
-
-    19 September 2012
-Made major changes in Naamwoord, Naamwoord_w and doPosition to make two levels
-of indirection work also in the case that an object is at the first level.
-Handling of two levels of indirection is improved generally.
-
-    16 September 2012
-Using gcov, found some places that are unreachable in merge(), substdiff() and
-evalvar(). Simplified substdiff. Function evalvar now expects that the argument
-is not shared. Deleted code that was never reached.
-
-    12 September 2012
-Updated u2l and l2u with data from UnicodeData.txt 2011-11-08
-(using script uni.bra)
-
-    22 August 2012
-Bug removed. The expression
-    ( (=A B)
-    : ?G1
-    : (=(A&X:?(G1.)) B)
-    )
-would not match the 'B' in the pattern with anything valid, because the 
-assignment X:?(G1.) had deleted the original subject. Now the subject is
-temporarily reference-incremented, so the 'B' still matches the old value of
-G1. The expression as a whole evaluates to X. Notice that this bug did not
-affect the very similar
-    ( (G2==A B)
-    & !G2
-    : (=(A&X:?(G2.)) B)
-    )
-Reason: here, the subject is not the object that G1 is bound to, but a copy.
-And that is so because the object that G1 is bound to is headed by an
-unevaluated = (being part of the rhs of an = operator). The expression !G2,
-however, must be evaluated, so it cannot be identical to G2's value.
-Consequently, the reassignment of G2 does not affect the subject of the
-pattern match operation, which is (=A B) at all times.
-
-     4 August 2012
-Removed function "?"$<expr>. The same effect is obtained by <expr>:?!(=)
-
-    31 July 2012
-Made code gcc -pedantic proof. There are two string constants with a length
-greater than 509, which ISO C89 compilers are required to support. Therefore
-the option -std=c99 is added.
-The LL suffix is replaced by L for non-Microsoft compilers.
-
-     8 July 2012
-Added explanation and two small improvements to nextprime()
-
-     2 July 2012
-
-Since build 115 (9 February 2012), the version should have read '6',
-not '5'. (This was the date when bracmat wás brought to GitHub.)
-Changes in bmalloc that makes it possible to compile with -O3.
-Changed 'unsigned char' to 'char' in a lot of places to make some
-warnings go away when compiled with gcc.
-
-    22 June 2012
-
-Correction in scompare(). The expression @(1b:~<1 b) did not evaluate 
-successfully, which it should. Did a clean-up of this function.
-
-    4 June 2012
-
-Introduced READMARKUPFAMILY macro to turn xml-stuff on (1) or off (0)
-
-    2 June 2012
-
-xml.c supports reading from stdio (no rewind). Example of use:
-type pr-xml-utf-8.xml | bracmat "put$(get$(,ML),\"pr-xml-utf-8.bra\",NEW)&"
-
-    1 June 2012
-
-Did some finishing, no essential code changes.
-
-    1 May 2012
-
-Added list of HTML entities. These are decoded to unicode codepoints and
-encoded as utf-8 if an option HT is added.
-
-get$("filename.html",HT,ML,TRM)
-
-   29 April 2012
-
-Restructured the (ancient) input function and renamed some identifiers to
-English equivalents.
-Added a source file, xml.c, that reads SGML, HTML and XML files.
-Syntax:
-
-get$(filename,ML)
-get$(filename,ML,TRM)
-get$(string,MEM,ML)
-get$(string,MEM,ML,TRM)
-
-An option HT is made, but does not work yet. Purpose: translate HTML entities.
-
-   13 April 2012
-
-The characters @ and % in front of a string now only turn off escaping with the
-\ character inside the string if the string is surrounded by " characters.
-Reason: the \L operator was not recognised if its lhs contained a % or @.
-
-   23 February 2012
-
-When Bracmat reads a file that is not well-formed, it asks fo a file name where
-it can write what it has understood. This did not work. Now it does.
-
-    9 February 2012
-
-Corrected error in doPosition that was introduced with the latest
-optimizations.
-
-    4 February 2012
-
-Discovered that "greater than" relation implemented in the vgl function
-wasn't transitive:
-(1a.)+(10.)      -> (10.)+(1a.)
-(1a.)+(10.)+(2.) -> (1a.)+(2.)+(10.)
-Thus the order of (10.) and (1a.) depends on other terms.
-Now the rule is: 
-1) any number is smaller than any non-number
-2) numbers are compared numerically
-3) non-numbers are compared with strcmp
-
-    25 January 2012
-
-Improved handling of negative positions (positions counted from the end)
-in lists, sums and products.
-
-    24 January 2012
-
-doPosition is buggy
-    a (c,d): ? [-1
-
-expressionLength  counts the wrong way. It must look at the top level operator 
-in the pattern containing the [ and count 1 + the number of this operator 
-until the end of the list. 0 if [ is last in the pattern.
-
-    20 January 2012
-
-The previous change moved the scanning pointer to the point in the subject
-where the rhs pattern starts. The current change moves the end of the
-subject as far as necessary to the right to allow a full match of the rhs
-pattern with last characters of the subject. Of course, this is only possible
-if the final zero byte has not been reached. The calling instance of
-stringmatch defines the end of the subject for the called instance. The called
-instance can propose to move the end. In this way, scanning can move much
-faster if a patterns contains some fixed strings. Speed-up does not work for
-alternations of fixed srings. Speed-up only works for the first pattern
-in a series of patterns connected by :
-
-    7 January 2012
-
-If an non-initial part of a stringpattern is a string, then the scanning
-pointer jumps to the first (or next) occurrence in the subject string after
-the first mismatch.
-
-This changes the behaviour of some patterns, such as in
-@(abXk:(|? b|`) X ?id)
-Before, the match failed, because the 'b' in the pattern did not match the
-'a' in the subject. Now, nowing that the first X occurs in the third position,
-the pattern matcher not even tries to match 'a' and 'b' and so the expression
-succeeds. In many cases the (|? b|`) pattern works as before, though:
-@(abXk:(|? b|`) (X|Y) ?id)
-@(abXk:(|? b|`) () X ?id)    dangerous! Does not work in @(ab:(|? b|`) ())
-@(abXk:(|? b|`) !(=X) ?id)
-X:?x
-@(abXk:(|? b|`) !x ?id)
-
-It is not advisable to use this pattern anymore. It is too much dependent on
-pattern matching not being optimized.
-
-    6 January 2012
-
-Compiled 64 bit version with VS 2008. Had to use _WIN64 and some #defines,
-because longs are 32 bit under VS 2008, whereas longs under gcc are 64 bits.
-Also used the 64 bit versions of ftell and fseek in the VS 2008 case.
-
-I have these preprocessor defines
-NDEBUG;__CONSOLE__;__WIN32__;WIN32;_CONSOLE;_CRT_SECURE_NO_WARNINGS
-
-(Some of these are automatically set in the 32 bit version).
-For 64 bit
-
-Impression is that the 32 bit version should be used unless you have to deal
-with enormous data (memory, file) or huge numbers (because numerical
-computations are faster and bigger numbers can be factorized quickly using
-exponentiation with a fractional exponent).
-Otherwise, the 64 bit version is significantly slower and has almost three
-times less stack depth.
-
-    2 January 2012
-
-Made stringmatch 'greedy' to an extend that does not change the program's
-behaviour. (That is: all tests in valid.bra go through). Many string
-comparisons now continue past the cutoff position deviding the subject in a
-lhs and a rhs, pushing the division point to the position where the lhs
-patterns succeeds. Previously this point repeatedly was moved one byte until
-the lhs pattern either succeeded or definitely failed. The optimization is
-turned off for alternating patterns and for all but the first pattern in a
-chain of patterns connected by : operators.
-
-The normal (non-string) match is not optimized. It is questionable whether that
-would be worthwhile. Not many patterns require repeated elongation of the part
-of the subject left of the division point.
-
-However, CUTOFFSUGGEST is set to 0. The overhead does seem to outweigh the
-optimization!
-
-
-    21 December 2011
-
-The last changes had introduced a bug: the [ and ` flags were not (always) printed.
-
-    16 December 2011
-
-Repaired two bugs in doPosition. The first bug made the FENCE flag disappear
-from the result if the program was built in debug mode in VS2008, which made
-the program run as expected, the other bug was that the FENCE flag was
-returned if the first bug was removed.
-
-    14 December 2011
-
-Updated unicode case conversions with data found in the most recent 
-http://unicode.org/Public/UNIDATA/UnicodeData.txt (17-Aug-2010)
-
-    7 December 2011
-
-Introduced lambda. Syntax similar to macro.
-
-                (λx.x)y
-translates to
-                /('(x.$x))$y
-
-    1 December 2011
-
-Rewrote evalmacro to only copy data where necessary.
-Bracmat now tests ok with valid.bra and with REFCOUNTSTRESSTEST set to 1
-
-    30 November 2011
-
-Found and solved bugs in merge() that only became visible with
-REFCOUNTSTRESSTEST set to 1.
-
-    22 November 2011
-
-Rewrote evalmacro to only copy cells where necessary.
-
-    7 November 2011
-
-A result of a macro evaluation nested inside an macro was not visited by the
-macro evaluator because the heading = operator had its READY flag set.
-
-    3 November 2011
-
-Nicified find and getmember calls, collapsing the last three arguments into
-one objectStuff struct.
-
-    2 November 2011
-
-Made better sense of [<> (equivalent to [~) and [~<> (equivalent to [).
-Introduced [% prefix. The expression reigned by [% in a pattern is evaluated.
-The success or failure of the expression is the result of the match.
-This functionality is similar to patterns that are function calls: in both
-cases the current subject is stored in a local variable sjt. In contrast to
-the function call, the expression's evaluated value is not itself matched 
-against the subject.
-Contrary to other uses of the % prefix, [% CAN match a nul object.
-
-    1 November 2011
-
-Changed signature of find, getmember, naamwoord and naamwoord_w. Before, these
-functions returned TRUE or FALSE, while the binding was returned in a
-pointer-to-a-pointer. The program is a bit quicker (approx. 5%).
-
-    30 October 2011
-
-The expression    a^(b*d+c*d)
-                * (a^(b*f+c*f)+a^(e*b+e*c))
-              + -1*(a^((b+c)*(d+e))+a^((b+c)*(d+f)))
-did not evaluate to 0. Solved.
-
-    25 October 2011
-
-After a change in handling the pattern ?^? (20100806) the function fct didn't
-work anymore. The function has been completely reimplemented.
-Also changed sub so it cannot go in infinite regress.
-
-    12 September 2011
-
-Now you can do:
-    (=)=5
-This extension mirrors
-    5:?(=)
-This rather useless extension restores consistency. 
-
-    2 September 2011
-
-Corrected error in evalmacro. Inserted operator nodes where deemed to fail
-when evaluated later on.
-
-   31 August 2011
-
-The escape operator ()$ in patterns can now be used to test for flags on the
-subject. A special case is when the rhs is an empty atom with no flags. This
-pattern only matches subjects with no flags. In all other cases, if one or
-more flags are present in the rhs, the subject must have these flags as well,
-and possibly even more.
-
-If the rhs is an atomic node with a non-empty string, the rhs can only match
-atomic subjects with the same string. (But possibly with flags that are not
-specified in the rhs.)
-
-   29 August 2011
-
-The use of $ as "escape operator" is now taken one step further. One can now
-use $ to escape any operator in a pattern, so that the otherwise problematic
-operators = | & : ' $ _ can be pacified and parsed.
-
-   23 August 2011
-Inside macros the $ can be used as escape operator to insert a $ with empty
-lhs in the evaluated macro. Also, the _ operator is from now on left untouched
-in a macro unless escaped. This made it necessary to adapt a few bracmat
-scripts, e.g. the cat$ function in this file.
-
-   19 August 2011
-
-You can now do this: '($(=$x))
-Previously, you had to do this in two steps: flabber=$x & '($flabber)
-You also can do this: '('($(=$b))) which evaluates to ='$b
-
-   26 July 2011
-There was a problem with the ! and !! flags in connection with the flg 
-function. In flg$(=!a):(=?X.?Z) the assignment to X wouldn't succeed, because
-in the result (=!.a) of the evaluation of flg$(=!a), the element ! had the
-READY flag set. Now the '!' has the READY flag unset, while the 'a' has it set.
-
-   29 June 2011
-Changed a few ints to long to get rid of type casts.
-
-   21 June 2011
-Converted this source code to UTF-8.
-
-    5 May 2011
-The expression ((==.lst$its).)' tried to list an object that was gone.
-Now it works. The listed object is =.lst$its
-Notice how recursion can be implemented with a 'lambda method' that has access
-to itself ('its'):
-
-( (==a b.!arg:?a_?b&((its.)$!b)_((its.)$!a)|!arg) . ) ' (x y^g (z,8.L))
-
-This recursively swaps lhs and rhs of all operators in the argument
-
-    2 April 2011
-An expression like (x=!x)&!x now results in an endless loop, not a stack
-overflow as before.
-
-    31 March 2011
-Stackoverflow occurred if an uninitialised variable was assigned to the
-variable itself - directly or indirectly. The problem has been solved for
-cases like
-
-    !y a:?x a
-
-where the atom !y has the READY flag set when the assignment is attempted.
-
-The problem can be solved completely, but at a price, namely if
-
-    (=!y):(=?x)
-    
-is made to fail. I consider this price as too high for now.
-
-    16 March 2011
-Arithmetic more complex than adding is now done with much higher radix.
-For small numbers compuations are a little bit slower, because of conversions
-to and from character strings. For large numbers, timings are magnitudes
-better. Multiplication of two 200000 digits numbers is about 100 times faster.
-Computation of the first 1000 decimals of pi is about 20 times faster.
-
-For 32 bit systems, a radix of 10000 is chosen. For 64 bit systems
-a radix of 100000000 is found to be appropriate.
-
-    27 February 2011
-Removed a lot of dead wood and renamed a few variables to English.
-
-    21 February 2011
-Rewrite of bmalloc, bfree and initialization of memory. Memory now expands
-dynamically: when a there are no more free memory blocks of 1,2 or 3 (4, 5, 6)
-words available, a new pool of memory blocks for the depleted size is created,
-doubling the number of blocks in the already allocated pools for that size.
-Removed a bug that caused (a=7)&!(a*1) to fail.
-
-    11 January 2011
-The @ is again removed from non-nil atoms. Reason: the @ flag is used on a 
-non-nil atom to indicate that backslashes in the atomstring must be
-interpreted litterally, i.e. @"d:\bracmat" is equivalent to "d:\\bracmat"
-
-This change has no consequence for the stringmatch functionality 
-introduced 20101122.
-
-     6 January 2011
-Conditionally (NP) defined opbnowis()
-Extra parentheses in line 6932
-
-    25 November 2010
-Solved bug in merge().
-
-    22 November 2010
-In stringmatch, the % can be used to force characterwise matching if the
-pattern is a number. For that reason, the % and @ are no longer removed from
-non-nil atoms as superfluous.
-One has to take care with minusses: the patterns %"-20/5" and %-20/5 are
-different. In %"-20/5", the % is superfluous and the pattern matches
-characterwise. In %-20/5, the pattern matches 20/5 and the minus is ignored!
-
-    19 November 2010
-Some tests to check that the position flag is followed by an integer number
-and that the flag % doesn't occur.
-Made sure that mod$ and div$ fail if second argument is zero.
-
-    15 November 2010
-Evaluation of sums and products is now iterative instead of recursive.
-Also, two sums or products are neatly merged instead of appended and thereafter
-bubble sorted. Result: much faster processing of very large sums and products
-and no danger of stack overflow.
-For short sums, the implementation has become a little bit slower, because
-I reverted to older, but simpler code that makes more allocations and
-deallocations.
-
-    8 November 2010
-Made some minor changes such as int -> size_t.
-Most radical change is introduction of function Entry2 which is like Entry,
-only with lower level of indirection. Entry2 replaces Entry in three places.
-
-    3 November 2010
-Improved percolation of filter flags < > # / @ %
-
-    1 November 2010
-The built-in function now returns IMPLIEDFENCE if the subject string in
-a stringmatch is too long or if it cannot be grown to a valid UTF-8
-multibyte sequence. Previously, the FENCE flag was set, but this had
-the side effect that utf$ couldn't easily be used as the lhs of a match.
-
-Change to flt$ : flt$(0,...) now returns 0 instead of failing. Replaced
-get$(...,MEM,VAP): ... with @(...:...).
-
-    27 October 2010
-In bmalloc, all bytes are set to 0, not just the last one.
-Reason: if all elements of size X are in use, bmalloc may return
-a bigger sized element, of which the last four bytes will not be
-used at all. Instead, some earlier bytes must be set to 0.
-
-    22 October 2010
-Trailing closing parentheses were accepted on equal footing with '\0' bytes.
-
-   18 October 2010
-The function expandProduct turned off the READY flag on all processed output,
-even if the result was atomic and therefore ready.
-Consequence: (1+i)*(1+-i) was evaluated to non-ready value 2, which could
-not successfully be used in further computations.
-
-   10 September 2010
-A function call in match context not only receives a function argument in
-"arg", but also the current subject in "sjt" (from sujet or subject)
-Example:
-like=.out$!sjt&sim$(!arg,!sjt):>9/10&?|den$sim$(!sjt,):~<(den$sim$(!arg,0))&`~
-@("Dogs and Cats are my enemies":? (like$mus:?animal) ?)&out$!animal
-@("Dogs and Cats are my enemies":? (like$cat:?animal) ?)&out$!animal
-
-The return value from a failing function call in match context is not compared
-to the subject.
-
-By returning `~ a function can indicate that further attempts with lenghtened
-subjects with the same start position will fail.
-
-   6 August 2010
-Previously, a pattern with an exponential only matched a subject with an
-exponential. Now, the exponent in the pattern allowing, an exponent 1 is
-assumed.
-
-   2 August 2010
-Made variable v. So now
-    bracmat put$!v
-says:
-    Bracmat version 4, build 72 (2 August 2010)
-
-   23 July 2010
-a*b+u*(x+y) was not evaluated correctly in the previous version.
-Now it works again.
-
-   30 June 2010
-Improved error handling if BRACMATEMBEDDED is defined.
-
-   22 June 2010
-If Bracmat is running embedded (e.g. as "native code" in a Java environment)
-it may be desirable to make bracmat safer. Here are some defines that shut off
-selected parts of Bracmat:
-#define NO_C_INTERFACE no memory (de)allocation, peek and poke and C-function pointer API
-#define NO_FILE_RENAME no file renaming
-#define NO_FILE_REMOVE no file removal
-#define NO_SYSTEM_CALL no system() call
-#define NO_LOW_LEVEL_FILE_HANDLING
-                       no file handling other than get$ put$ and lst$
-#define NO_FOPEN       no calls to fopen(). (But you can still get$ put$ and lst$ to memory!)
-#define NO_EXIT_ON_NON_SEVERE_ERRORS
-
-   11 June 2010
-Had to conditionally introduce call to unlink() instead of remove() in case of Symbian (Epoc 5).
-
-   26 May 2010
-Replaced sizeof(tflags) with offsetof(sk,u.obj), which may be (and normally are,
-on 64 bit platforms at least) different, the latter taking padding into account.
-
-Removed ridiculous costly calls to expressionLength, perhaps using 3/4 of all
-CPU time when repeatedly matching large data structures!
-
-   19 April 2010
-Used gprof to find functions to optimize: opaf() (has become op() and af()), splits()
-
-   8 April 2010
-The 'its'-member that has been missing since version 3.50 is back again.
-
-   6 April 2010
-Pattern match like a b c:% c did not work as expected
-(should be same as a b c:%? c). Solved. Same goes for @(abc:% c).
-
-   30 March 2010
-Added built-in function rmv$ that removes a file.
-
-   26 March 2010
-Changed code to make Bracmat compile and run in a 64-bit environment where
-sizeof(int) == 4 and sizeof(long) == 8.
-It is assumed that the platform is 64-bit if LONG_MAX > 2147483647L
-In contrast to 32 bit platforms, the functions x2d and d2x handle
-numbers up to FFFFFFFFFFFFFFFFF hexadecimal or 18446744073709551615 decimal
-if compiled on 64-bit platforms.
-Another noteworthy difference is that the 64-bit version finds bigger prime
-numbers. Try 123465864564581765^1/2 Answer: 5^1/2*24693172912916353^1/2,
-so 24693172912916353 is prime.
-
-   12 March 2010
-errorStream is not kept open if it is not stderr or stdout, so that other
-processes also can write to the errorFile, if necessary. This also ensures
-that the message is written an saved before the program ... uhm ... crashes.
-
-   10 March 2010
-If run with command line options, bracmat's return value is the numerical
-value of the last expression evaluated. If the last evaluated expression
-is not atomic or not a string that can be scanned as an integer number
-using strtol, the exit code is 0.
-Built-in exit codes:
--1  out of memory
-116 invalid function syntax
-117 string match attempted with non-atomic argument
-
-   9 March 2010
-New built-in function arg$. If Bracmat is started with any arguments (argc > 1)
-every argument is evaluated from left to right, unless arguments are consumed
-by calls to arg$. For example,
-    bracmat get$myprog -i c:\documents\input.txt -o d:\html\index.html
-would evaluate
-    get$myprog
-    -i
-    c:\documents\input.txt
-    -o
-    d:\html\index.html
-in that order. Evaluating the last four arguments is not very meaningful,
-however: the backslashes are interpreted as escapes, which they are not.
-Moreover, the colon and the dot are interpreted as operators. However, the
-bracmat program "myprog" can call the function arg$ four times and in that way
-empty the queue of arguments. arg$ returns an atom containing an exact copy of
-the next program argument. Using string matching the arguments can be parsed,
-if necessary.
-Precautions must be taken if the path or name of the bracmat program contains
-characters that can be mistakenly interpreted. E.g. (in Windows)
-    bracmat "get$@\"c:Program Files\myprog.bra\"" -i c:\documents\input.txt -o d:\html\index.html
-In *N*X the apostrophes surrounding the first argument must be replaced by
-quotes.
-A second form is arg$N, where 0 <= N < argc. arg$0 will normally return the
-command name "bracmat" or a path leading to "bracmat".
-
-   23 February 2010
-upp$ and low$ now handle UTF-8. upp$ is a bit tricky, as some characters
-occupy more bytes when uppercased. A simple in-place replacement is tried
-first, and is fine in 99% of all cases. If an overrun is imminent, more space
-is allocated.
-
-   22 February 2010
-sim$(s1,s2) accepts UTF-8. 8-bit Latin-1 is also ok.
-chr$ fails if argument is > 255
-
-   21 February 2010
-~<> are now effective on patterns headed by $ or ' operator
-b:>(str$a)
-b:~<>(str$A)
-
-   20 February 2010
-~<> uses case insensitive compare on unicode
-
-   19 February 2010
-x2d$   converts hexadecimal number to decimal
-d2x$   converts decimal number to hexadecimal
-Both routines are restricted to decimal numbers 0 ... 4294967295 (hex 0 ... ffffffff)
-Failure if not all characters can be scanned.
-
-   12 February 2010 Simplified changeCase()
-   10 February 2010
-abc:?NN & @(!NN:!NN ?x)
-!x evaluated to "abc", not to ""
-
-   2 February 2010
-Input scanning stopped at 0x80, as in the utf-8 sequence e2 80 93 (8211 EN DASH )
-
-   27 January 2010
-~@ matches non-atomic matter, both in stringmatch and now also in match.
-
-   26 January 2010
-@ and % flags are not turned off if combined with < and/or >.
-(Previously, they were seen as "superfluous" if in combination with non-empty object.)
-Handy if you want to skip white space:
-
-@("  \r\n\t  xyz\r\n  ":?a (>@" " ?:?y) ~>%" " ?)
-
-Changed KILOKNOPEN back to 10000
-
-   16 September 2009
-Changed KILOKNOPEN to 100000 (was 10000)
-
-   3 July 2009
-
-Setting #define CODEPAGE850 0 removes all reminiscenses of DOS-codepages.
-
-Unicode (UTF-8) support
-chu$number returns a sequence of 1-6 bytes. The highest allowed value of the number is 2147483647 (7FFFFFFF hex)
-            Notice that RFC 3629 restricts UTF-8 to 4 bytes and that the highest allowed code point 10FFFF hex.
-utf$string returns the code point of the character represented by the UTF-8 sequence of bytes.
-            If the string is too short or too long, or if the sequence is an invalid UTF-8 string, the function fails.
-            It is safe to use utf$ in a pattern:
-            @(!txt:(?%c & utf$!c) ?)
-            If txt starts with an valid UTF-8 sequence, bracmat backtracks until c matches the UTF-8 sequence.
-            If txt starts with a sequence that is not UTF-8, bracmat stops backtracking when that fact has been
-            established.
-
-   30 June 2009
-bracmat now evaluates all parameters given to it, from left to right.
-
-command line:bracmat a=1 b=14 out$(!a+!b)
-output:15
-
-Previously, only the first parameter was evaluated.
-As always, if no parameter is specified, bracmat enters interactive mode.
-
-   11 February 2009
-Corrected error in flt$. All powers of ten were analysed to 1,
-for example flt$(100,2) -> 1,00*10E0
-
-   13 November 2008
-stop string also works when writing.
-fil$("file.txt",w)
-fil$(,STR," \n\r\t")
-fil$(,,,"Workers go to strike/for higher wages
-and for more kindergartens.")
-fil$("file.txt",r)
-fil$(outfile,w)
-fil$("infile.txt",STR)
-fil$(outfile,STR," \n\r\t")
-fil$(,,,"Workers go to strike for higher wages")
-
-Stop string can also be specified when reading or writing
-fil$(,,"/","Workers go to strike/for higher wages")
-fil$("infile.txt",,".!?,;")
-
-An empty stop string means: write all of the string.
-(Or read to end of file, if file mode is reading).
-
-   10 September 2008
-x^(y*(a+b))+-1*x^(a*y+b*y) -> 0 Before, the exponents were regarded as
-different. If, during comparison, a subtree of lhs has pattern ?*(?+?) and
-the corresponding subtree of the rhs ?+?, the lhs subtree is expanded to
-a sum (defactorised) and the comparison is done on the transformed lhs and
-the rhs. Notice that the most expensive exponent survives:
-x^(y*(a+b))+x^(a*y+b*y): 2*x^(y*(a+b))
-
-0^-1 succeeded and gave 0, now it fails. (0/7^-1 already failed)
-
-Strings starting with a zero and followed by another figure are not numbers
-00/7, 098
-
-Input ()k went in endless loop, because the k was interpreted as an operator.
-Now it says "malformed input".
-
-   11 February 2008
-whl' now returns function_ok instead of function_fail. Although the
-loop exits when the rhs fails and there therefore is nothing meaningful to
-"return", it led to ugly code when a whl' loop always had to be negated
-
-    ... & ~(whl'(...)) & ...
-
-or put into the lhs of an OR
-
-    & ( whl'(...) |  ) &
-
-til' is commented out. It has no future.
-
-   28 January 2008
-evalmacro did not unset the ready-bit on an inserted expression consisting of
-a variable with exclamation mark. It does now.
-
-   27 January 2008
-Introduction of flag [ for acquiring or requiring the current position during
-a (string)match. Examples:
-    a b c:? ([-1:[?endpos)
-will assign the length of the subject, 3, to variable endpos.
-    a b c d e:? [!endpos ?extramaterial
-will assign d e to extramaterial.
-Works in match and stringmatch alike, with some exceptions:
-@(:[0) succeeds, but (:[0) fails. Reason: in the first case, the subject
-is the nil element, but in the second case, the lhs is just an atom,
-although a funny one. In a certain context, this atom plays the role
-of nil element, but not in other contexts.
-
-Found out that stringmatch had a measurable side effect on the subject
-
-subject=abcdef
-@(!subject:? (d & !subject:abcd) ?
-
-This would succeed, because the string had been temporarily cut off after
-the 'd'.
-Now match and string match are much more alike and the problem is solved.
-
-Introduction of two built-in functions: whl and til. whl repeatedly evaluates
-its argument until it fails. whl always returns failure. til repeatedly
-evaluates its argument until it succeeds and returns the result of the last
-evaluation.
-There are no plans to make if...else and switch equivalents in Bracmat.
-It may be that whl and/or til are retracted later. They seem a bit superfluous.
-
-   13 January 2008
-`~a:?b will now assign `~a to b
-@(`~a:?b) will assign a to b. !a will succeed
-As before, this will assign something failing to a variable:
-dummy ~a:dummy ?m
-!m fails
-~!m gives ~a
-
-   3 January 2008
-Better implementation of the evaluation of !(=a).
-It is now possible to construct and run a loop as a datastructure with
-a closed loop of pointers. Performance-wise nothing is gained, however.
-  (loop= !i+1:<10000000:?i&!(=))
-& '$loop:(=?(loop.)) {Make closed datastructure}
-& ~!loop {loop 10.000.000 times}
-& :?(loop.) {Open the datastructure.(Otherwise you'll have a memory leak when
-             'loop' goes out of scope.)}
-
-Several functions have been factorised. evalueer() has been restructured.
-
-   2 January 2008
-I've decided that a:(~@(a:a)) means about the same as a:(~@:(a:a)), i.e. it
-fails because a is not not an atom. For the same reason a:(~@(a:b)) fails.
-~@(a:a) in an evaluation context such as x&~@(a:a) succeeds. It merely means
-a:a
-
-Use #define STRINGMATCH_CAN_BE_NEGATED 1 to allow ~@(<subject>:<pattern>)
-as a stringmatch that has its result negated after evaluation.
-
-Use #define STRINGMATCH_CAN_BE_NEGATED 0 to interpret ~@(<subject>:<pattern>)
-as the opposite of stringmatch, i.e. a normal match, the same as
-(<subject>:<pattern>) with the additional condition that <subject> is not an
-atom. Notice, however, that ~@#(abc:? b ?) succeeds, as the ~ negates #, not @
-(priority /#<>@)
-
-Succeeding tests:
-a b:(~@(? b:a %))
-~@(a b:a ?)
-~@(a:a)
-12/34:@(?x:#?a (~#%@:?y) #?b)&!y:"/"
-
-Failing tests:
-a:(~@(a:a))
-~@(a:b)
-12/34:@(#?a (~#%@:?y) #?b:?x)&!y:"/"
-    (This fails because the pattern
-        #?a (~#%@:?y) #?b
-    is in the match context 12/34:<rhs>, not in a stringmatch context.
-    Remember, the first @ says that subject is an atom, which it is in the
-    match context, but not in a stringmatch context.)
-@(12/34:@(#?a (~#%@:?y) #?b:?x)&!y:"/")
-    (This fails because 12/34 is not an atom in a stringmatch context.)
-
-   29 December 2008
-Compilation with Norcroft RISC OS ARM C vsn 3.00 [Jul 12 1989]
-This resulted in some formal corrections (signed vs unsigned int,
-int vs long, too many arguments for format in Printf,
-#if _BRACMATEMBEDDED changed to #if defined _BRACMATEMBEDDED)
-
-The changes of 20071217 were undone, because the solution did not work for
-    ~(&~@(a:a))
-New solution:
-In lex(), undo setting of
-    success == FALSE
-on : node if ~@ flags are attached to this operator.
-This is a special case. In ~@(a:b) the ~ operator must
-not negate the @ but the result of the string match.
-
-I am not convinced that this is the right decision. Perhaps we simply
-should not allow other flags than @ on : if we want it to be interpreted
-as a string match operation.
-
-   17 December 2007
-~@(a:a) didn't fail and ~@(a:b) didn't succeed. Now they do.
-
-   9 October 2007
-Removed test print from getObjectDef.
-
-   18 September 2007
-    a b "" ""
-evaluates to
-    a b ()
-instead of
-    a b
-Changed function handleLUCHT to correct this.
-
-   7 July 2007
-Differentiation: Originally, to indicate that a variable x depends on another
-variable p, one wrote x=p, or x=s and s=p. If one wrote (x=), then y\Dx
-resulted in stack overflow. The appropriate way to indicate dependeny is
-dep=(x.p) (....)
-
-The range function has been abolished. Originally the idea was that Bracmat
-not only should handle numbers and symbols, but also ranges. Thus, 2^>3 would
-give >16 and -5*>2 would give <-10. This had to be given up as ranges become
-more and more complicated to express. (>4*~>3 = ?)
-
-Code implementing a string table (COMPILE==1) has been removed
-COMPILE works not faster, but slower (about 10%) and uses more nodes.
-
-The unfinished attempt at implementing objects that can be saved and re-read
-(serialization) has been given up (OBJECTS==1) Flag: [
-
-VAX-specific code removed.
-
-   5 July 2007:
-There were problems with stringmatches:
-@(aaab:((|a) aa) b)
-This failed because the match
-    aa:aa
-prematurely ended the match with failure.
-The cause was that this match ONCED the whole match
-    aa:(|a) aa
-
-This partly undoes a change made in 200704
-
-new$hash:?h
-(h..ISO)$
-(h..insert)$(a.b)
-
-This made a division by zero, because (h..ISO) had rehashed the table
-to a table with zero size. (hashes are born with non-zero size)
-The computation of the loadfactor went wrong.
-
-    4 April 2007:
-Tail recursion optimisation in complexiteit.
-
-Solved bug in handling of strings with characters > 0x80 in expressions like
-    a å
-
-Solved bug in handling of e^(i*pi)
-
-Solved bug in handling of i:-i
-
-Solved bug in handling of -1*i^1/3
-
-lst$ now lists ALL names. Previously, names starting with character above 0x7f
-were hidden. Som hidden functions that were called from f0, f4 or f5 are
-now declared inside these functions and therefore hidden.
-
-get$ and fil$ first try to open a file interpreting the file name as a path
-relative to the current working directory. If that fails, and if the program
-is started with a fully qualified path+file name, this path is prepended to the
-name of the file to be opened. If opening the file also fails with the new
-path, get$ and fil$ fail. This functionality requires that
-1) the file mode is "reading"
-2) the file name does not contain an absolute path
-3) the program knows its path
-If the program does not know its path, it may help to start the program with
-a fully qualified path on the command line. This instruction can be put in
-a shell script or batch file.
-This improvement is especially helpful for opening the "help"-file.
-
-In string matching the expression
-    @(abcd:?u (?:%@ %@) (?z & ~))
-now makes sure that the pattern (?:%@ %@) never is presented with more than two
-characters. Before, the @ flag did not really work with string matching and the
-: operator extinguished the cut condition that arises in its rhs.
-This works now within a reasonable time:
-(do=
-  get$(help,STR):?S
-& @( !S
-   :   ?
-       ( ?:(%@:~" ":~",") %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@ %@:?x
-       & '(? ()$x ?):(=?x)
-       )
-       !x
-   )
-& !x);
-!do
-
-
-In a string, characters that also have a meaning as an operator can be escaped:
-nsc\'ere
-is the same as
-"nsc'ere"
-
-The names of cat$'s local variables are now taken from the list of names of
-predefined functions. Consequently, cat$ does not list its own local variables.
-(Previously, listing of these names was circumvented by the rule that names
-starting with high-bit-set characters are kept hidden.)
-
-Defunct ego$ and goe$ are abolished.
-
-   22 February 2007:
-    Major change in match() that speeds up matching. Found also an error in the
-    handling of an alternating pattern with an alternating pattern in the lhs
-    and a FENCE flag in the leftmost node.
-    Similar changes in stringmatch() must yet be made.
-
-   20 February 2007:
-    Changed int and unsigned long to size_t in two places to stop warnings.
-
-
-   18 January 2007:
-    Added _CONSOLE to test for Windows API
-    @(:? ?) failed. Cause: Unmotivied test for subjectstring not being empty.
-
-    20060704 caseinsensitivehash fixed
-
-   23 June 2006
-caseinsensitivehash uses lowerEquivalent without converting array index to
-unsigned int!
-
-   12 October 2005:
-    Corrected error in flt$. During rounding, the variable m could become
-    > 10. Consequently, the exponent must be increased by one and m must
-    be divided by 10 in those cases.
-
-   5 September 2005:
-    Changed C++-style comments to old fashioned C-style comments.
-    Removed enum {NoIndication,AnInteger,NotAFraction,NotANumber,AFraction,ANumber};
-
-   5 april 2005:
-    flg$<flags><atom> now returns ((=<flags>).<atom>)
-    This protects the flags from evaluation.
-
-   17 november 2004:
-    clk$ returns 0 if clock() returns -1
-    bez$ returns (<nodes>.<max nodes>.<max ref>)
-    epoc version: delete key emits ascii 8 (back space). Now, ascii(8) moves
-    the input pointer one position back, deleting the previous entered
-    character. (see mygetc)
-
-   25 sep 2004: strrev rewritten for Epoc
-
-   6 June 2004:
-1) Started to make late binding in string matching
-2) Corrected errors in assignment to and listing of objects with late bound values
-
-   20040830
-This fails:
-(obj=x=)&dbg'@("abc":?(obj.x) "c") & out$!(obj.x);
-
-This works:
-dbg'@("abc":?x "c") & out$!x;
-*/
 /*
 NOTES
 =====
@@ -1446,9 +120,6 @@ TODO list:
 20010103: Make > and < work on non-atomic stuff
 20010904: Issue warning if 'arg' is declared as a local variable
 */
-/* 20001213, There is a need to improve documentation of fil$ */
-/* 20001213, rename a file ren$(oldname.newname) */
-/* >Bracmat 16-11-91 */
 /* 20010309 evalueer on LUCHT and KOMMA strings is now iterative on the
    right descending (deep) branch, not recursive.
    (It is now possible to read long lists, e.g. dictionairies, without causing
@@ -2763,80 +1434,85 @@ static FILE * global_fpo;
 
 #if 0
 /*
-Based on UnicodeData.txt (10-03-2014 18:20:00)
+Based on UnicodeData.txt (16-May-2016 19:23)
 (Does not convert final sigma to non-final sigma)
 
 Structures created with CaseFolding.bra
 */
 struct cletter {int L:21;int range:11;};
-struct cletter Cletters[]={{0x41,25},{0x61,25},{0xAA,0},{0xB5,0},{0xBA,0},{0xC0,22},
-{0xD8,30},{0xF8,457},{0x2C6,11},{0x2E0,4},{0x2EC,0},{0x2EE,0},{0x370,4},{0x376,1},
-{0x37A,3},{0x37F,0},{0x386,0},{0x388,2},{0x38C,0},{0x38E,19},{0x3A3,82},{0x3F7,138},
-{0x48A,165},{0x531,37},{0x559,0},{0x561,38},{0x5D0,26},{0x5F0,2},{0x620,42},{0x66E,1},
-{0x671,98},{0x6D5,0},{0x6E5,1},{0x6EE,1},{0x6FA,2},{0x6FF,0},{0x710,0},{0x712,29},
-{0x74D,88},{0x7B1,0},{0x7CA,32},{0x7F4,1},{0x7FA,0},{0x800,21},{0x81A,0},{0x824,0},
-{0x828,0},{0x840,24},{0x8A0,18},{0x904,53},{0x93D,0},{0x950,0},{0x958,9},{0x971,15},
-{0x985,7},{0x98F,1},{0x993,21},{0x9AA,6},{0x9B2,0},{0x9B6,3},{0x9BD,0},{0x9CE,0},
-{0x9DC,1},{0x9DF,2},{0x9F0,1},{0xA05,5},{0xA0F,1},{0xA13,21},{0xA2A,6},{0xA32,1},
-{0xA35,1},{0xA38,1},{0xA59,3},{0xA5E,0},{0xA72,2},{0xA85,8},{0xA8F,2},{0xA93,21},
-{0xAAA,6},{0xAB2,1},{0xAB5,4},{0xABD,0},{0xAD0,0},{0xAE0,1},{0xB05,7},{0xB0F,1},
-{0xB13,21},{0xB2A,6},{0xB32,1},{0xB35,4},{0xB3D,0},{0xB5C,1},{0xB5F,2},{0xB71,0},
-{0xB83,0},{0xB85,5},{0xB8E,2},{0xB92,3},{0xB99,1},{0xB9C,0},{0xB9E,1},{0xBA3,1},
-{0xBA8,2},{0xBAE,11},{0xBD0,0},{0xC05,7},{0xC0E,2},{0xC12,22},{0xC2A,15},{0xC3D,0},
-{0xC58,1},{0xC60,1},{0xC85,7},{0xC8E,2},{0xC92,22},{0xCAA,9},{0xCB5,4},{0xCBD,0},
-{0xCDE,0},{0xCE0,1},{0xCF1,1},{0xD05,7},{0xD0E,2},{0xD12,40},{0xD3D,0},{0xD4E,0},
-{0xD60,1},{0xD7A,5},{0xD85,17},{0xD9A,23},{0xDB3,8},{0xDBD,0},{0xDC0,6},{0xE01,47},
+struct cletter Cletters[]={{0x41,25},{0x61,25},
+{0xAA,0},{0xB5,0},{0xBA,0},{0xC0,22},{0xD8,30},{0xF8,457},{0x2C6,11},{0x2E0,4},
+{0x2EC,0},{0x2EE,0},{0x370,4},{0x376,1},{0x37A,3},{0x37F,0},{0x386,0},{0x388,2},
+{0x38C,0},{0x38E,19},{0x3A3,82},{0x3F7,138},{0x48A,165},{0x531,37},{0x559,0},{0x561,38},
+{0x5D0,26},{0x5F0,2},{0x620,42},{0x66E,1},{0x671,98},{0x6D5,0},{0x6E5,1},{0x6EE,1},
+{0x6FA,2},{0x6FF,0},{0x710,0},{0x712,29},{0x74D,88},{0x7B1,0},{0x7CA,32},{0x7F4,1},
+{0x7FA,0},{0x800,21},{0x81A,0},{0x824,0},{0x828,0},{0x840,24},{0x8A0,20},{0x8B6,7},
+{0x904,53},{0x93D,0},{0x950,0},{0x958,9},{0x971,15},{0x985,7},{0x98F,1},{0x993,21},
+{0x9AA,6},{0x9B2,0},{0x9B6,3},{0x9BD,0},{0x9CE,0},{0x9DC,1},{0x9DF,2},{0x9F0,1},
+{0xA05,5},{0xA0F,1},{0xA13,21},{0xA2A,6},{0xA32,1},{0xA35,1},{0xA38,1},{0xA59,3},
+{0xA5E,0},{0xA72,2},{0xA85,8},{0xA8F,2},{0xA93,21},{0xAAA,6},{0xAB2,1},{0xAB5,4},
+{0xABD,0},{0xAD0,0},{0xAE0,1},{0xAF9,0},{0xB05,7},{0xB0F,1},{0xB13,21},{0xB2A,6},
+{0xB32,1},{0xB35,4},{0xB3D,0},{0xB5C,1},{0xB5F,2},{0xB71,0},{0xB83,0},{0xB85,5},
+{0xB8E,2},{0xB92,3},{0xB99,1},{0xB9C,0},{0xB9E,1},{0xBA3,1},{0xBA8,2},{0xBAE,11},
+{0xBD0,0},{0xC05,7},{0xC0E,2},{0xC12,22},{0xC2A,15},{0xC3D,0},{0xC58,2},{0xC60,1},
+{0xC80,0},{0xC85,7},{0xC8E,2},{0xC92,22},{0xCAA,9},{0xCB5,4},{0xCBD,0},{0xCDE,0},
+{0xCE0,1},{0xCF1,1},{0xD05,7},{0xD0E,2},{0xD12,40},{0xD3D,0},{0xD4E,0},{0xD54,2},
+{0xD5F,2},{0xD7A,5},{0xD85,17},{0xD9A,23},{0xDB3,8},{0xDBD,0},{0xDC0,6},{0xE01,47},
 {0xE32,1},{0xE40,6},{0xE81,1},{0xE84,0},{0xE87,1},{0xE8A,0},{0xE8D,0},{0xE94,3},
 {0xE99,6},{0xEA1,2},{0xEA5,0},{0xEA7,0},{0xEAA,1},{0xEAD,3},{0xEB2,1},{0xEBD,0},
 {0xEC0,4},{0xEC6,0},{0xEDC,3},{0xF00,0},{0xF40,7},{0xF49,35},{0xF88,4},{0x1000,42},
 {0x103F,0},{0x1050,5},{0x105A,3},{0x1061,0},{0x1065,1},{0x106E,2},{0x1075,12},{0x108E,0},
 {0x10A0,37},{0x10C7,0},{0x10CD,0},{0x10D0,42},{0x10FC,332},{0x124A,3},{0x1250,6},{0x1258,0},
 {0x125A,3},{0x1260,40},{0x128A,3},{0x1290,32},{0x12B2,3},{0x12B8,6},{0x12C0,0},{0x12C2,3},
-{0x12C8,14},{0x12D8,56},{0x1312,3},{0x1318,66},{0x1380,15},{0x13A0,84},{0x1401,619},{0x166F,16},
-{0x1681,25},{0x16A0,74},{0x16F1,7},{0x1700,12},{0x170E,3},{0x1720,17},{0x1740,17},{0x1760,12},
-{0x176E,2},{0x1780,51},{0x17D7,0},{0x17DC,0},{0x1820,87},{0x1880,40},{0x18AA,0},{0x18B0,69},
-{0x1900,30},{0x1950,29},{0x1970,4},{0x1980,43},{0x19C1,6},{0x1A00,22},{0x1A20,52},{0x1AA7,0},
-{0x1B05,46},{0x1B45,6},{0x1B83,29},{0x1BAE,1},{0x1BBA,43},{0x1C00,35},{0x1C4D,2},{0x1C5A,35},
-{0x1CE9,3},{0x1CEE,3},{0x1CF5,1},{0x1D00,191},{0x1E00,277},{0x1F18,5},{0x1F20,37},{0x1F48,5},
-{0x1F50,7},{0x1F59,0},{0x1F5B,0},{0x1F5D,0},{0x1F5F,30},{0x1F80,52},{0x1FB6,6},{0x1FBE,0},
-{0x1FC2,2},{0x1FC6,6},{0x1FD0,3},{0x1FD6,5},{0x1FE0,12},{0x1FF2,2},{0x1FF6,6},{0x2071,0},
-{0x207F,0},{0x2090,12},{0x2102,0},{0x2107,0},{0x210A,9},{0x2115,0},{0x2119,4},{0x2124,0},
-{0x2126,0},{0x2128,0},{0x212A,3},{0x212F,10},{0x213C,3},{0x2145,4},{0x214E,0},{0x2183,1},
-{0x2C00,46},{0x2C30,46},{0x2C60,132},{0x2CEB,3},{0x2CF2,1},{0x2D00,37},{0x2D27,0},{0x2D2D,0},
-{0x2D30,55},{0x2D6F,0},{0x2D80,22},{0x2DA0,6},{0x2DA8,6},{0x2DB0,6},{0x2DB8,6},{0x2DC0,6},
-{0x2DC8,6},{0x2DD0,6},{0x2DD8,6},{0x2E2F,0},{0x3005,1},{0x3031,4},{0x303B,1},{0x3041,85},
-{0x309D,2},{0x30A1,89},{0x30FC,3},{0x3105,40},{0x3131,93},{0x31A0,26},{0x31F0,15},{0x3400,0},
-{0x4DB5,0},{0x4E00,0},{0x9FCC,0},{0xA000,1164},{0xA4D0,45},{0xA500,268},{0xA610,15},{0xA62A,1},
-{0xA640,46},{0xA67F,30},{0xA6A0,69},{0xA717,8},{0xA722,102},{0xA78B,3},{0xA790,29},{0xA7B0,1},
-{0xA7F7,10},{0xA803,2},{0xA807,3},{0xA80C,22},{0xA840,51},{0xA882,49},{0xA8F2,5},{0xA8FB,0},
-{0xA90A,27},{0xA930,22},{0xA960,28},{0xA984,46},{0xA9CF,0},{0xA9E0,4},{0xA9E6,9},{0xA9FA,4},
-{0xAA00,40},{0xAA40,2},{0xAA44,7},{0xAA60,22},{0xAA7A,0},{0xAA7E,49},{0xAAB1,0},{0xAAB5,1},
-{0xAAB9,4},{0xAAC0,0},{0xAAC2,0},{0xAADB,2},{0xAAE0,10},{0xAAF2,2},{0xAB01,5},{0xAB09,5},
-{0xAB11,5},{0xAB20,6},{0xAB28,6},{0xAB30,42},{0xAB5C,3},{0xAB64,1},{0xABC0,34},{0xAC00,0},
-{0xD7A3,0},{0xD7B0,22},{0xD7CB,48},{0xF900,365},{0xFA70,105},{0xFB00,6},{0xFB13,4},{0xFB1D,0},
-{0xFB1F,9},{0xFB2A,12},{0xFB38,4},{0xFB3E,0},{0xFB40,1},{0xFB43,1},{0xFB46,107},{0xFBD3,362},
-{0xFD50,63},{0xFD92,53},{0xFDF0,11},{0xFE70,4},{0xFE76,134},{0xFF21,25},{0xFF41,25},{0xFF66,88},
-{0xFFC2,5},{0xFFCA,5},{0xFFD2,5},{0xFFDA,2},{0x10000,11},{0x1000D,25},{0x10028,18},{0x1003C,1},
-{0x1003F,14},{0x10050,13},{0x10080,122},{0x10280,28},{0x102A0,48},{0x10300,31},{0x10330,16},{0x10342,7},
-{0x10350,37},{0x10380,29},{0x103A0,35},{0x103C8,7},{0x10400,157},{0x10500,39},{0x10530,51},{0x10600,310},
-{0x10740,21},{0x10760,7},{0x10800,5},{0x10808,0},{0x1080A,43},{0x10837,1},{0x1083C,0},{0x1083F,22},
-{0x10860,22},{0x10880,30},{0x10900,21},{0x10920,25},{0x10980,55},{0x109BE,1},{0x10A00,0},{0x10A10,3},
-{0x10A15,2},{0x10A19,26},{0x10A60,28},{0x10A80,28},{0x10AC0,7},{0x10AC9,27},{0x10B00,53},{0x10B40,21},
-{0x10B60,18},{0x10B80,17},{0x10C00,72},{0x11003,52},{0x11083,44},{0x110D0,24},{0x11103,35},{0x11150,34},
-{0x11176,0},{0x11183,47},{0x111C1,3},{0x111DA,0},{0x11200,17},{0x11213,24},{0x112B0,46},{0x11305,7},
-{0x1130F,1},{0x11313,21},{0x1132A,6},{0x11332,1},{0x11335,4},{0x1133D,0},{0x1135D,4},{0x11480,47},
-{0x114C4,1},{0x114C7,0},{0x11580,46},{0x11600,47},{0x11644,0},{0x11680,42},{0x118A0,63},{0x118FF,0},
-{0x11AC0,56},{0x12000,920},{0x13000,1070},{0x16800,568},{0x16A40,30},{0x16AD0,29},{0x16B00,47},{0x16B40,3},
-{0x16B63,20},{0x16B7D,18},{0x16F00,68},{0x16F50,0},{0x16F93,12},{0x1B000,1},{0x1BC00,106},{0x1BC70,12},
-{0x1BC80,8},{0x1BC90,9},{0x1D400,84},{0x1D456,70},{0x1D49E,1},{0x1D4A2,0},{0x1D4A5,1},{0x1D4A9,3},
-{0x1D4AE,11},{0x1D4BB,0},{0x1D4BD,6},{0x1D4C5,64},{0x1D507,3},{0x1D50D,7},{0x1D516,6},{0x1D51E,27},
-{0x1D53B,3},{0x1D540,4},{0x1D546,0},{0x1D54A,6},{0x1D552,339},{0x1D6A8,24},{0x1D6C2,24},{0x1D6DC,30},
-{0x1D6FC,24},{0x1D716,30},{0x1D736,24},{0x1D750,30},{0x1D770,24},{0x1D78A,30},{0x1D7AA,24},{0x1D7C4,7},
-{0x1E800,196},{0x1EE00,3},{0x1EE05,26},{0x1EE21,1},{0x1EE24,0},{0x1EE27,0},{0x1EE29,9},{0x1EE34,3},
-{0x1EE39,0},{0x1EE3B,0},{0x1EE42,0},{0x1EE47,0},{0x1EE49,0},{0x1EE4B,0},{0x1EE4D,2},{0x1EE51,1},
-{0x1EE54,0},{0x1EE57,0},{0x1EE59,0},{0x1EE5B,0},{0x1EE5D,0},{0x1EE5F,0},{0x1EE61,1},{0x1EE64,0},
-{0x1EE67,3},{0x1EE6C,6},{0x1EE74,3},{0x1EE79,3},{0x1EE7E,0},{0x1EE80,9},{0x1EE8B,16},{0x1EEA1,2},
-{0x1EEA5,4},{0x1EEAB,16},{0x20000,0},{0x2A6D6,0},{0x2A700,0},{0x2B734,0},{0x2B740,0},{0x2B81D,0},
+{0x12C8,14},{0x12D8,56},{0x1312,3},{0x1318,66},{0x1380,15},{0x13A0,85},{0x13F8,5},{0x1401,619},
+{0x166F,16},{0x1681,25},{0x16A0,74},{0x16F1,7},{0x1700,12},{0x170E,3},{0x1720,17},{0x1740,17},
+{0x1760,12},{0x176E,2},{0x1780,51},{0x17D7,0},{0x17DC,0},{0x1820,87},{0x1880,4},{0x1887,33},
+{0x18AA,0},{0x18B0,69},{0x1900,30},{0x1950,29},{0x1970,4},{0x1980,43},{0x19B0,25},{0x1A00,22},
+{0x1A20,52},{0x1AA7,0},{0x1B05,46},{0x1B45,6},{0x1B83,29},{0x1BAE,1},{0x1BBA,43},{0x1C00,35},
+{0x1C4D,2},{0x1C5A,35},{0x1C80,8},{0x1CE9,3},{0x1CEE,3},{0x1CF5,1},{0x1D00,191},{0x1E00,277},
+{0x1F18,5},{0x1F20,37},{0x1F48,5},{0x1F50,7},{0x1F59,0},{0x1F5B,0},{0x1F5D,0},{0x1F5F,30},
+{0x1F80,52},{0x1FB6,6},{0x1FBE,0},{0x1FC2,2},{0x1FC6,6},{0x1FD0,3},{0x1FD6,5},{0x1FE0,12},
+{0x1FF2,2},{0x1FF6,6},{0x2071,0},{0x207F,0},{0x2090,12},{0x2102,0},{0x2107,0},{0x210A,9},
+{0x2115,0},{0x2119,4},{0x2124,0},{0x2126,0},{0x2128,0},{0x212A,3},{0x212F,10},{0x213C,3},
+{0x2145,4},{0x214E,0},{0x2183,1},{0x2C00,46},{0x2C30,46},{0x2C60,132},{0x2CEB,3},{0x2CF2,1},
+{0x2D00,37},{0x2D27,0},{0x2D2D,0},{0x2D30,55},{0x2D6F,0},{0x2D80,22},{0x2DA0,6},{0x2DA8,6},
+{0x2DB0,6},{0x2DB8,6},{0x2DC0,6},{0x2DC8,6},{0x2DD0,6},{0x2DD8,6},{0x2E2F,0},{0x3005,1},
+{0x3031,4},{0x303B,1},{0x3041,85},{0x309D,2},{0x30A1,89},{0x30FC,3},{0x3105,40},{0x3131,93},
+{0x31A0,26},{0x31F0,15},{0x3400,0},{0x4DB5,0},{0x4E00,0},{0x9FD5,0},{0xA000,1164},{0xA4D0,45},
+{0xA500,268},{0xA610,15},{0xA62A,1},{0xA640,46},{0xA67F,30},{0xA6A0,69},{0xA717,8},{0xA722,102},
+{0xA78B,35},{0xA7B0,7},{0xA7F7,10},{0xA803,2},{0xA807,3},{0xA80C,22},{0xA840,51},{0xA882,49},
+{0xA8F2,5},{0xA8FB,0},{0xA8FD,0},{0xA90A,27},{0xA930,22},{0xA960,28},{0xA984,46},{0xA9CF,0},
+{0xA9E0,4},{0xA9E6,9},{0xA9FA,4},{0xAA00,40},{0xAA40,2},{0xAA44,7},{0xAA60,22},{0xAA7A,0},
+{0xAA7E,49},{0xAAB1,0},{0xAAB5,1},{0xAAB9,4},{0xAAC0,0},{0xAAC2,0},{0xAADB,2},{0xAAE0,10},
+{0xAAF2,2},{0xAB01,5},{0xAB09,5},{0xAB11,5},{0xAB20,6},{0xAB28,6},{0xAB30,42},{0xAB5C,9},
+{0xAB70,114},{0xAC00,0},{0xD7A3,0},{0xD7B0,22},{0xD7CB,48},{0xF900,365},{0xFA70,105},{0xFB00,6},
+{0xFB13,4},{0xFB1D,0},{0xFB1F,9},{0xFB2A,12},{0xFB38,4},{0xFB3E,0},{0xFB40,1},{0xFB43,1},
+{0xFB46,107},{0xFBD3,362},{0xFD50,63},{0xFD92,53},{0xFDF0,11},{0xFE70,4},{0xFE76,134},{0xFF21,25},
+{0xFF41,25},{0xFF66,88},{0xFFC2,5},{0xFFCA,5},{0xFFD2,5},{0xFFDA,2},{0x10000,11},{0x1000D,25},
+{0x10028,18},{0x1003C,1},{0x1003F,14},{0x10050,13},{0x10080,122},{0x10280,28},{0x102A0,48},{0x10300,31},
+{0x10330,16},{0x10342,7},{0x10350,37},{0x10380,29},{0x103A0,35},{0x103C8,7},{0x10400,157},{0x104B0,35},
+{0x104D8,35},{0x10500,39},{0x10530,51},{0x10600,310},{0x10740,21},{0x10760,7},{0x10800,5},{0x10808,0},
+{0x1080A,43},{0x10837,1},{0x1083C,0},{0x1083F,22},{0x10860,22},{0x10880,30},{0x108E0,18},{0x108F4,1},
+{0x10900,21},{0x10920,25},{0x10980,55},{0x109BE,1},{0x10A00,0},{0x10A10,3},{0x10A15,2},{0x10A19,26},
+{0x10A60,28},{0x10A80,28},{0x10AC0,7},{0x10AC9,27},{0x10B00,53},{0x10B40,21},{0x10B60,18},{0x10B80,17},
+{0x10C00,72},{0x10C80,50},{0x10CC0,50},{0x11003,52},{0x11083,44},{0x110D0,24},{0x11103,35},{0x11150,34},
+{0x11176,0},{0x11183,47},{0x111C1,3},{0x111DA,0},{0x111DC,0},{0x11200,17},{0x11213,24},{0x11280,6},
+{0x11288,0},{0x1128A,3},{0x1128F,14},{0x1129F,9},{0x112B0,46},{0x11305,7},{0x1130F,1},{0x11313,21},
+{0x1132A,6},{0x11332,1},{0x11335,4},{0x1133D,0},{0x11350,0},{0x1135D,4},{0x11400,52},{0x11447,3},
+{0x11480,47},{0x114C4,1},{0x114C7,0},{0x11580,46},{0x115D8,3},{0x11600,47},{0x11644,0},{0x11680,42},
+{0x11700,25},{0x118A0,63},{0x118FF,0},{0x11AC0,56},{0x11C00,8},{0x11C0A,36},{0x11C40,0},{0x11C72,29},
+{0x12000,921},{0x12480,195},{0x13000,1070},{0x14400,582},{0x16800,568},{0x16A40,30},{0x16AD0,29},{0x16B00,47},
+{0x16B40,3},{0x16B63,20},{0x16B7D,18},{0x16F00,68},{0x16F50,0},{0x16F93,12},{0x16FE0,0},{0x17000,0},
+{0x187EC,0},{0x18800,754},{0x1B000,1},{0x1BC00,106},{0x1BC70,12},{0x1BC80,8},{0x1BC90,9},{0x1D400,84},
+{0x1D456,70},{0x1D49E,1},{0x1D4A2,0},{0x1D4A5,1},{0x1D4A9,3},{0x1D4AE,11},{0x1D4BB,0},{0x1D4BD,6},
+{0x1D4C5,64},{0x1D507,3},{0x1D50D,7},{0x1D516,6},{0x1D51E,27},{0x1D53B,3},{0x1D540,4},{0x1D546,0},
+{0x1D54A,6},{0x1D552,339},{0x1D6A8,24},{0x1D6C2,24},{0x1D6DC,30},{0x1D6FC,24},{0x1D716,30},{0x1D736,24},
+{0x1D750,30},{0x1D770,24},{0x1D78A,30},{0x1D7AA,24},{0x1D7C4,7},{0x1E800,196},{0x1E900,67},{0x1EE00,3},
+{0x1EE05,26},{0x1EE21,1},{0x1EE24,0},{0x1EE27,0},{0x1EE29,9},{0x1EE34,3},{0x1EE39,0},{0x1EE3B,0},
+{0x1EE42,0},{0x1EE47,0},{0x1EE49,0},{0x1EE4B,0},{0x1EE4D,2},{0x1EE51,1},{0x1EE54,0},{0x1EE57,0},
+{0x1EE59,0},{0x1EE5B,0},{0x1EE5D,0},{0x1EE5F,0},{0x1EE61,1},{0x1EE64,0},{0x1EE67,3},{0x1EE6C,6},
+{0x1EE74,3},{0x1EE79,3},{0x1EE7E,0},{0x1EE80,9},{0x1EE8B,16},{0x1EEA1,2},{0x1EEA5,4},{0x1EEAB,16},
+{0x20000,0},{0x2A6D6,0},{0x2A700,0},{0x2B734,0},{0x2B740,0},{0x2B81D,0},{0x2B820,0},{0x2CEA1,0},
 {0x2F800,541},{0x1FFFFF,0}};
 
 bool isAlpha(int a)
@@ -2884,9 +1560,376 @@ static int isLetter(int a)
     }
 #endif
 
-/*20140618 Based on http://unicode.org/Public/UNIDATA/UnicodeData.txt 10-03-2014 18:20:00 */
-/* structures created with uni.bra */
+/* Based on http://unicode.org/Public/UNIDATA/UnicodeData.txt 16-May-2016 19:23 */
+/* Structures created with uni.bra */
+    
+#define Y2016 1
+#if Y2016
+/* Based on http://unicode.org/Public/UNIDATA/UnicodeData.txt 16-May-2016 19:23 */
+/* Structures created with uni.bra */
+                  
+struct ccaseconv {unsigned int L:21;int range:11;unsigned int inc:2;int dif:20;};
+struct ccaseconv u2l[]={
+{0x41,25,1,32},
+{0xC0,22,1,32},
+{0xD8,6,1,32},
+{0x100,46,2,1},
+{0x130,0,0,-199},
+{0x132,4,2,1},
+{0x139,14,2,1},
+{0x14A,44,2,1},
+{0x178,0,0,-121},
+{0x179,4,2,1},
+{0x181,0,0,210},
+{0x182,2,2,1},
+{0x186,0,0,206},
+{0x187,0,0,1},
+{0x189,1,1,205},
+{0x18B,0,0,1},
+{0x18E,0,0,79},
+{0x18F,0,0,202},
+{0x190,0,0,203},
+{0x191,0,0,1},
+{0x193,0,0,205},
+{0x194,0,0,207},
+{0x196,0,0,211},
+{0x197,0,0,209},
+{0x198,0,0,1},
+{0x19C,0,0,211},
+{0x19D,0,0,213},
+{0x19F,0,0,214},
+{0x1A0,4,2,1},
+{0x1A6,0,0,218},
+{0x1A7,0,0,1},
+{0x1A9,0,0,218},
+{0x1AC,0,0,1},
+{0x1AE,0,0,218},
+{0x1AF,0,0,1},
+{0x1B1,1,1,217},
+{0x1B3,2,2,1},
+{0x1B7,0,0,219},
+{0x1B8,0,0,1},
+{0x1BC,0,0,1},
+{0x1C4,0,0,2},
+{0x1C5,0,0,1},
+{0x1C7,0,0,2},
+{0x1C8,0,0,1},
+{0x1CA,0,0,2},
+{0x1CB,16,2,1},
+{0x1DE,16,2,1},
+{0x1F1,0,0,2},
+{0x1F2,2,2,1},
+{0x1F6,0,0,-97},
+{0x1F7,0,0,-56},
+{0x1F8,38,2,1},
+{0x220,0,0,-130},
+{0x222,16,2,1},
+{0x23A,0,0,10795},
+{0x23B,0,0,1},
+{0x23D,0,0,-163},
+{0x23E,0,0,10792},
+{0x241,0,0,1},
+{0x243,0,0,-195},
+{0x244,0,0,69},
+{0x245,0,0,71},
+{0x246,8,2,1},
+{0x370,2,2,1},
+{0x376,0,0,1},
+{0x37F,0,0,116},
+{0x386,0,0,38},
+{0x388,2,1,37},
+{0x38C,0,0,64},
+{0x38E,1,1,63},
+{0x391,16,1,32},
+{0x3A3,8,1,32},
+{0x3CF,0,0,8},
+{0x3D8,22,2,1},
+{0x3F4,0,0,-60},
+{0x3F7,0,0,1},
+{0x3F9,0,0,-7},
+{0x3FA,0,0,1},
+{0x3FD,2,1,-130},
+{0x400,15,1,80},
+{0x410,31,1,32},
+{0x460,32,2,1},
+{0x48A,52,2,1},
+{0x4C0,0,0,15},
+{0x4C1,12,2,1},
+{0x4D0,94,2,1},
+{0x531,37,1,48},
+{0x10A0,36,1,7264},
+{0x10C5,2,2,7264},
+{0x10CD,0,0,7264},
+{0x13A0,79,1,38864},
+{0x13F0,5,1,8},
+{0x1E00,148,2,1},
+{0x1E9E,0,0,-7615},
+{0x1EA0,94,2,1},
+{0x1F08,7,1,-8},
+{0x1F18,5,1,-8},
+{0x1F28,7,1,-8},
+{0x1F38,7,1,-8},
+{0x1F48,5,1,-8},
+{0x1F59,6,2,-8},
+{0x1F68,7,1,-8},
+{0x1F88,7,1,-8},
+{0x1F98,7,1,-8},
+{0x1FA8,7,1,-8},
+{0x1FB8,1,1,-8},
+{0x1FBA,1,1,-74},
+{0x1FBC,0,0,-9},
+{0x1FC8,3,1,-86},
+{0x1FCC,0,0,-9},
+{0x1FD8,1,1,-8},
+{0x1FDA,1,1,-100},
+{0x1FE8,1,1,-8},
+{0x1FEA,1,1,-112},
+{0x1FEC,0,0,-7},
+{0x1FF8,1,1,-128},
+{0x1FFA,1,1,-126},
+{0x1FFC,0,0,-9},
+{0x2126,0,0,-7517},
+{0x212A,0,0,-8383},
+{0x212B,0,0,-8262},
+{0x2132,0,0,28},
+{0x2160,15,1,16},
+{0x2183,0,0,1},
+{0x24B6,25,1,26},
+{0x2C00,46,1,48},
+{0x2C60,0,0,1},
+{0x2C62,0,0,-10743},
+{0x2C63,0,0,-3814},
+{0x2C64,0,0,-10727},
+{0x2C67,4,2,1},
+{0x2C6D,0,0,-10780},
+{0x2C6E,0,0,-10749},
+{0x2C6F,0,0,-10783},
+{0x2C70,0,0,-10782},
+{0x2C72,0,0,1},
+{0x2C75,0,0,1},
+{0x2C7E,1,1,-10815},
+{0x2C80,98,2,1},
+{0x2CEB,2,2,1},
+{0x2CF2,0,0,1},
+{0xA640,44,2,1},
+{0xA680,26,2,1},
+{0xA722,12,2,1},
+{0xA732,60,2,1},
+{0xA779,2,2,1},
+{0xA77D,0,0,-35332},
+{0xA77E,8,2,1},
+{0xA78B,0,0,1},
+{0xA78D,0,0,-42280},
+{0xA790,2,2,1},
+{0xA796,18,2,1},
+{0xA7AA,0,0,-42308},
+{0xA7AB,0,0,-42319},
+{0xA7AC,0,0,-42315},
+{0xA7AD,0,0,-42305},
+{0xA7AE,0,0,-42308},
+{0xA7B0,0,0,-42258},
+{0xA7B1,0,0,-42282},
+{0xA7B2,0,0,-42261},
+{0xA7B3,0,0,928},
+{0xA7B4,2,2,1},
+{0xFF21,25,1,32},
+{0x10400,39,1,40},
+{0x104B0,35,1,40},
+{0x10C80,50,1,64},
+{0x118A0,31,1,32},
+{0x1E900,33,1,34},
+{0x1FFFFF,0,0,0}};
 
+struct ccaseconv l2u[]={
+{0x61,25,1,-32},
+{0xB5,0,0,743},
+{0xE0,22,1,-32},
+{0xF8,6,1,-32},
+{0xFF,0,0,121},
+{0x101,46,2,-1},
+{0x131,0,0,-232},
+{0x133,4,2,-1},
+{0x13A,14,2,-1},
+{0x14B,44,2,-1},
+{0x17A,4,2,-1},
+{0x17F,0,0,-300},
+{0x180,0,0,195},
+{0x183,2,2,-1},
+{0x188,0,0,-1},
+{0x18C,0,0,-1},
+{0x192,0,0,-1},
+{0x195,0,0,97},
+{0x199,0,0,-1},
+{0x19A,0,0,163},
+{0x19E,0,0,130},
+{0x1A1,4,2,-1},
+{0x1A8,0,0,-1},
+{0x1AD,0,0,-1},
+{0x1B0,0,0,-1},
+{0x1B4,2,2,-1},
+{0x1B9,0,0,-1},
+{0x1BD,0,0,-1},
+{0x1BF,0,0,56},
+{0x1C5,0,0,-1},
+{0x1C6,0,0,-2},
+{0x1C8,0,0,-1},
+{0x1C9,0,0,-2},
+{0x1CB,0,0,-1},
+{0x1CC,0,0,-2},
+{0x1CE,14,2,-1},
+{0x1DD,0,0,-79},
+{0x1DF,16,2,-1},
+{0x1F2,0,0,-1},
+{0x1F3,0,0,-2},
+{0x1F5,0,0,-1},
+{0x1F9,38,2,-1},
+{0x223,16,2,-1},
+{0x23C,0,0,-1},
+{0x23F,1,1,10815},
+{0x242,0,0,-1},
+{0x247,8,2,-1},
+{0x250,0,0,10783},
+{0x251,0,0,10780},
+{0x252,0,0,10782},
+{0x253,0,0,-210},
+{0x254,0,0,-206},
+{0x256,1,1,-205},
+{0x259,0,0,-202},
+{0x25B,0,0,-203},
+{0x25C,0,0,42319},
+{0x260,0,0,-205},
+{0x261,0,0,42315},
+{0x263,0,0,-207},
+{0x265,0,0,42280},
+{0x266,0,0,42308},
+{0x268,0,0,-209},
+{0x269,0,0,-211},
+{0x26A,0,0,42308},
+{0x26B,0,0,10743},
+{0x26C,0,0,42305},
+{0x26F,0,0,-211},
+{0x271,0,0,10749},
+{0x272,0,0,-213},
+{0x275,0,0,-214},
+{0x27D,0,0,10727},
+{0x280,0,0,-218},
+{0x283,0,0,-218},
+{0x287,0,0,42282},
+{0x288,0,0,-218},
+{0x289,0,0,-69},
+{0x28A,1,1,-217},
+{0x28C,0,0,-71},
+{0x292,0,0,-219},
+{0x29D,0,0,42261},
+{0x29E,0,0,42258},
+{0x345,0,0,84},
+{0x371,2,2,-1},
+{0x377,0,0,-1},
+{0x37B,2,1,130},
+{0x3AC,0,0,-38},
+{0x3AD,2,1,-37},
+{0x3B1,16,1,-32},
+{0x3C2,0,0,-31},
+{0x3C3,8,1,-32},
+{0x3CC,0,0,-64},
+{0x3CD,1,1,-63},
+{0x3D0,0,0,-62},
+{0x3D1,0,0,-57},
+{0x3D5,0,0,-47},
+{0x3D6,0,0,-54},
+{0x3D7,0,0,-8},
+{0x3D9,22,2,-1},
+{0x3F0,0,0,-86},
+{0x3F1,0,0,-80},
+{0x3F2,0,0,7},
+{0x3F3,0,0,-116},
+{0x3F5,0,0,-96},
+{0x3F8,0,0,-1},
+{0x3FB,0,0,-1},
+{0x430,31,1,-32},
+{0x450,15,1,-80},
+{0x461,32,2,-1},
+{0x48B,52,2,-1},
+{0x4C2,12,2,-1},
+{0x4CF,0,0,-15},
+{0x4D1,94,2,-1},
+{0x561,37,1,-48},
+{0x13F8,5,1,-8},
+{0x1C80,0,0,-6254},
+{0x1C81,0,0,-6253},
+{0x1C82,0,0,-6244},
+{0x1C83,1,1,-6242},
+{0x1C85,0,0,-6243},
+{0x1C86,0,0,-6236},
+{0x1C87,0,0,-6181},
+{0x1C88,0,0,35266},
+{0x1D79,0,0,35332},
+{0x1D7D,0,0,3814},
+{0x1E01,148,2,-1},
+{0x1E9B,0,0,-59},
+{0x1EA1,94,2,-1},
+{0x1F00,7,1,8},
+{0x1F10,5,1,8},
+{0x1F20,7,1,8},
+{0x1F30,7,1,8},
+{0x1F40,5,1,8},
+{0x1F51,6,2,8},
+{0x1F60,7,1,8},
+{0x1F70,1,1,74},
+{0x1F72,3,1,86},
+{0x1F76,1,1,100},
+{0x1F78,1,1,128},
+{0x1F7A,1,1,112},
+{0x1F7C,1,1,126},
+{0x1F80,7,1,8},
+{0x1F90,7,1,8},
+{0x1FA0,7,1,8},
+{0x1FB0,1,1,8},
+{0x1FB3,0,0,9},
+{0x1FBE,0,0,-7205},
+{0x1FC3,0,0,9},
+{0x1FD0,1,1,8},
+{0x1FE0,1,1,8},
+{0x1FE5,0,0,7},
+{0x1FF3,0,0,9},
+{0x214E,0,0,-28},
+{0x2170,15,1,-16},
+{0x2184,0,0,-1},
+{0x24D0,25,1,-26},
+{0x2C30,46,1,-48},
+{0x2C61,0,0,-1},
+{0x2C65,0,0,-10795},
+{0x2C66,0,0,-10792},
+{0x2C68,4,2,-1},
+{0x2C73,0,0,-1},
+{0x2C76,0,0,-1},
+{0x2C81,98,2,-1},
+{0x2CEC,2,2,-1},
+{0x2CF3,0,0,-1},
+{0x2D00,36,1,-7264},
+{0x2D25,2,2,-7264},
+{0x2D2D,0,0,-7264},
+{0xA641,44,2,-1},
+{0xA681,26,2,-1},
+{0xA723,12,2,-1},
+{0xA733,60,2,-1},
+{0xA77A,2,2,-1},
+{0xA77F,8,2,-1},
+{0xA78C,0,0,-1},
+{0xA791,2,2,-1},
+{0xA797,18,2,-1},
+{0xA7B5,2,2,-1},
+{0xAB53,0,0,-928},
+{0xAB70,79,1,-38864},
+{0xFF41,25,1,-32},
+{0x10428,39,1,-40},
+{0x104D8,35,1,-40},
+{0x10CC0,50,1,-64},
+{0x118C0,31,1,-32},
+{0x1E922,33,1,-34},
+{0x1FFFFF,0,0,0}};
+
+#else
 struct ccaseconv {unsigned int L:21;int range:11;unsigned int inc:2;int dif:20;};
 struct ccaseconv l2u[]={
 {0x61,25,1,-32},
@@ -3233,6 +2276,7 @@ struct ccaseconv u2l[]={
 {0x10C80,50,1,64},
 {0x118A0,31,1,32},
 {0x1FFFFF,0,0,0}};
+#endif
 
 static int convertLetter(int a,struct ccaseconv * T)
     {
