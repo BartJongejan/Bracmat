@@ -30,6 +30,15 @@ http://rosettacode.org/wiki/Rosetta_Code
       The documentation in Bracmat format. (You have to run Bracmat and issue
       'get$help' to see it properly.)
       
+    * LT4DH14.pdf and LT4DH-2016-poster.pdf
+    
+      Paper and poster presented at the Language Technology four Digital 
+      Humanities workshop in Osaka, December 2016
+      
+    * NLPwithBracmat.pdf
+    
+      Tour through Bracmat for computational linguists.
+      
 
 * epoc
     * bracmat.SIS
