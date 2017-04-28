@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "22 December 2016"
-#define VERSION "6"
-#define BUILD "209"
+#define DATUM "28 April 2017"
+#define VERSION "6 'newspeak'"
+#define BUILD "210"
 /*
 COMPILATION
 -----------
@@ -188,49 +188,36 @@ Removed 19971207
 /*
 sub must also accept . as separator between args
 */
-/* wis: 18 Maart 1997, tail recursion optimization; delete deep structures*/
-/* bezig met modernisering getallen */
-/* 16 mei 1993: constante "-i" ingevoerd om evenwicht te brengen in gedrag
-   van complexe getallen en hun complex geconjugeerde. */
-/* Nog nodig: -n*i^iets -> n*-i^iets
+/* wis: 18 March 1997, tail recursion optimization; delete deep structures*/
+/* modernising numbers */
+/* 16 May 1993: constant "-i" introduced to reinstate balance in behaviour of
+   complex numbers and their complex conjugated. */
+/* Still needed: -n*i^something -> n*-i^something
               n*i*a+m*-i*a  -> (n-m)*i*a
-   Goed doortesten !
+   Test !
 */
 
 
-/* 24 april 1992: UNOPS uitgebreid met MINUS */
-/* 26 april 1992: fct aangepast voor (a+b)^-n */
-/* 24 maart 1993: function syntax veranderd:
-   met FUNC defined oude stijl: foo = fun$(loc'(x,y,z),!arg);
-   zonder FUNC define:          foo = x,y,z.!arg */
+/* 24 April 1992: UNOPS extended with MINUS */
+/* 26 April 1992: fct adapted for (a+b)^-n */
+/* 24 March 1993: function syntax changed:
+   with FUNC defined old style: foo = fun$(loc'(x,y,z),!arg);
+   without FUNC define:         foo = x,y,z.!arg */
 
 /* 30 juli 1993: structure:
-   het is nu mogelijk om aan een expressie als naam=Bart een andere waarde
-   toe te kennen. In feite wordt de rechter operand van de = operator
-   stomweg vervangen door de nieuwe waarde, waardoor circulaire data-
-   structuren mogelijk worden! BJO 4 Jan 1996
+   Now it is possible to assign a new value to an expression like name=Bart
+   In fact the right hand side operand of the = operator is simply replaced by
+   the new value, making it possible to create circular data-structures!
+   BJO 4 Jan 1996
 
-   voorbeeld:
+   example:
 
    {?} x==(name=Bart).(age=40)
    {?} !x
    {!} =(name=Bart).(age=40)
-   {?} !!x
-   {!} Bart.40
-   {?} !x:(=?naam.?leeftijd)
-   {?} Bart Jongejan:?!naam
-   {?} !!x
-   {!} Bart Jongejan.40
-   {?} x..age=veertig                          BJO 4 Jan 1996
-   {?} !!x
-   {!} Bart Jongejan.veertig
-
-   x..name.first=Bart vervangt Jan door Bart in
-
-   x==(name=(first=Jan).(family=Abbens)).(age=33)
-
-   Merk op dat de = operator z'n speciale betekenis in patterns kwijt is
-   ~=(% %) moet dus voortaan geschreven worden als ((% %) & `~|?)
+   {?} x..age=forty
+   {?} !x
+   {!} =(name=Bart).(age=forty)
 */
 
 #if 0 && defined __GNUC__ && !defined sparc && !defined __hpux && !defined __hpux__
@@ -251,8 +238,8 @@ typedef struct {
 #define O_S 0
 #endif
 
-/* aanwijzingen voor het compileren
-   (met een ANSI-C compiler of iets wat daar dichtbij in de buurt komt)
+/* How to compile
+   (with a ANSI-C compiler or newer)
 
 Archimedes ANSI-C release 3:
 *up
@@ -261,7 +248,7 @@ Archimedes ANSI-C release 3:
 *cc bracmat
 *spool
 
-Met RISC_OS functies:
+With RISC_OS functions:
 
 cc bracmat
 
@@ -282,7 +269,7 @@ link -o %0 o.%0 RAM:$.RISC_OSLib.o.RISC_OSLib RAM:$.Clib.o.Stubs
 spool
 if Sys$ReturnCode = 0 then squeeze %0 else echo |G
 
-Microsoft QUICKC (MS-DOS) (compact en large model kunnen allebei)
+Microsoft QUICKC (MS-DOS) (compact and large model both possible)
 qcl /Ox /AC /F D000 bracmat.c
 Microsoft optimizing compiler V5.1
 cl /Ox /AC /F D000 bracmat.c
@@ -290,15 +277,15 @@ cl /Ox /AC /F D000 bracmat.c
 Borland TURBOC (MS-DOS) V2.0
 tcc -w -f- -r- -mc -K- bracmat
 
-Atari : definieer -DATARI i.v.m. BIGENDIAN en extern int _stksize = -1;
-               en -DW32   doch alleen als (int)==(long)
+Atari : define -DATARI because of BIGENDIAN and extern int _stksize = -1;
+               and -DW32   but only if (int)==(long)
 */
 
-/* optionele #defines voor debuggen en aanpassing aan machine */
+/* optional #defines for debugging and adaptation to machine */
 
-#define TELMAX  1 /* maximaal aantal gealloceerde nodes laten zien */
-#define TELLING 0 /* idem,uitgebreid met huidige allocatie, per groep van
-                       4,8,12 en >12 bytes */
+#define TELMAX  1 /* Show the maximum number of allocated nodes. */
+#define TELLING 0 /* Same, plus current number of allocated nodes, in groups of
+                       4,8,12 and >12 bytes */
 #if TELLING
 #if TELMAX == 0
 #undef TELMAX
@@ -309,11 +296,11 @@ Atari : definieer -DATARI i.v.m. BIGENDIAN en extern int _stksize = -1;
 #endif
 #endif
 
-/*#define reslt hreslt  om in resultaat ALLE haakjes te laten zien*/
-#define INTSCMP 0   /* linke manier om strings te vergelijken */
-#define ICPY 0      /* woord voor woord copieren, i.p.v. byte voor byte */
+/*#define reslt hreslt  to show ALL parentheses (one pair for each operator)*/
+#define INTSCMP 0   /* dangerous way of comparing strings */
+#define ICPY 0      /* copy word by word instead of byte by byte */
 
-/* hieronder zijn geen optionele #defines meer */
+/* There are no optional #defines below this line. */
 #if defined __BYTE_ORDER && defined __LITTLE_ENDIAN /* gcc on linux defines these */
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 #define BIGENDIAN 0
@@ -454,9 +441,10 @@ typedef   signed long  INT32_T;
 #define APPENDTXT "a"
 
 #define LOGWORDLENGTH 2
-/* vlaggen in knoop */
+/* flags (prefixes) in knoop */
 #define NOT              1      /* ~ */
-     /* zo houden ivm vermenging logische en bit operatoren && || | ^ & */
+     /* Keep definition of NOT like this because of mixing of logical and bit 
+	    operators && || | ^ & */
 #define SUCCESS         (1<< 1)
 #define READY           (1<< 2)
 #define POSITION        (1<< 3) /* [ */
@@ -625,7 +613,7 @@ typedef struct
 #define CHR O('C','H','R')
 #define DEC O('D','E','C')
 #define CUR O('C','U','R')
-#define END O('E','N','D')/*SEEK_END hoeft niet te werken voor binary file !!*/
+#define END O('E','N','D')/*SEEK_END no guarantee that this works !!*/
 #define SET O('S','E','T')
 #define STRt O('S','T','R')
 #define TEL O('T','E','L')
@@ -985,7 +973,7 @@ typedef struct ngetal
 typedef struct varia
     {
     struct varia *prev; /* verdi[-1] */
-    psk verdi[1];       /* verdi[0], arraysize wordt door psh aangepast */
+    psk verdi[1];       /* verdi[0], arraysize is adjusted by psh */
     } varia;
 
 struct Vars /* sizeof(vars) = n * 4 bytes */
@@ -997,7 +985,7 @@ struct Vars /* sizeof(vars) = n * 4 bytes */
     vars *next;
     int n;
     int selector;
-    varia *pvaria; /* kan ook entry[0] bevatten (als n == 0) */
+    varia *pvaria; /* Can also contain entry[0]   (if n == 0) */
 #if PVNAME
 /*    unsigned char *vname;*/
 #else
@@ -2436,7 +2424,7 @@ static clock_t delayDueToInput = 0;
 #define DEFAULT_INPUT_BUFFER_SIZE 0x2000
 #else
 #ifdef _MSC_VER
-#define DEFAULT_INPUT_BUFFER_SIZE 0x7F00 /* Microsoft C staat 32k automatic data toe */
+#define DEFAULT_INPUT_BUFFER_SIZE 0x7F00 /* Microsoft C allows 32k automatic data */
 
 #else
 #ifdef __BORLANDC__
@@ -3843,9 +3831,9 @@ static void icpy(LONG *d,LONG *b,int words)
 
 static psk icopievan(psk kn)
     {
-    /* EISEN : Na de afsluitende 0 van string moeten eventuele resterende bytes
-    van het betreffende computerwoord ook 0 zijn.
-    Beide argumenten moeten op een woordgrens beginnen. */
+    /* REQUIREMENTS : After the string delimiting 0 all remaining bytes in the
+	current computer word must be 0 as well.
+    Argument must start on a word boundary. */
     psk ret;
     size_t len;
     len = sizeof(unsigned LONG)+strlen((char *)POBJ(kn));
@@ -3920,8 +3908,8 @@ return pknoop;
 #ifndef reslt
 static void reslt(psk wortel,int nivo,int ind,int space)
 {
-static int ouder,kind,/* 18 Maart 1997:*/newind;
-while(is_op(wortel))/* 18 Maart 1997: */
+static int ouder,kind,/* 18 March 1997:*/newind;
+while(is_op(wortel))/* 18 March 1997: */
     {
     if(kop(wortel) == WORDT)
         wortel->RIGHT = Head(wortel->RIGHT);
@@ -3968,7 +3956,7 @@ eindknoop(wortel,space);
 
 static void reslts(psk wortel,int nivo,int ind,int space,psk snijaf)
     {
-    static int ouder,kind,/* 18 Maart 1997:*/newind;
+    static int ouder,kind,/* 18 March 1997:*/newind;
     if(is_op(wortel))/* 11 May 2004: */
         {
         if(kop(wortel) == WORDT)
@@ -4009,7 +3997,7 @@ static void reslts(psk wortel,int nivo,int ind,int space,psk snijaf)
                 }
             wortel = wortel->RIGHT;
             }
-        while(is_op(wortel));/* 18 Maart 1997: */
+        while(is_op(wortel));/* 18 March 1997: */
         }
     else
         {
@@ -4409,7 +4397,6 @@ static psk lex(int * nxt,int priority,int Flags,int opsflgs)
 #else
 static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
 #endif
-/* tbw zoekt een expressie of subexpressie */
 /* *nxt (if nxt != 0) is set to the character following the expression. */
     {
     int op_of_0;
@@ -4461,10 +4448,10 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
         Flags &= ~MINUS;/* 20110831 Bitwise, operators cannot have the - flag. */
         do
             {
-            /* op_of_0 == een operator */
+            /* op_of_0 == an operator */
             psk operatorNode;
             int child_op_of_0;
-            if(optab[op_of_0] < priority) /* 'op_of_0' heeft te lage prioriteit */
+            if(optab[op_of_0] < priority) /* 'op_of_0' has too low priority */
                 {
 #if STRINGMATCH_CAN_BE_NEGATED
                 if(  (Flgs & (NOT|FILTERS)) == (NOT|ATOM)
@@ -4497,8 +4484,8 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
             operatorNode->v.fl = optab[op_of_0] | SUCCESS;
             /*operatorNode->v.fl ^= Flgs;*/
             operatorNode->LEFT = pkn;
-            pkn = operatorNode;/* 'op_of_0' heeft voldoende prioriteit */
-            if(optab[op_of_0] == priority) /* 'op_of_0' heeft zelfde prioriteit */
+            pkn = operatorNode;/* 'op_of_0' has sufficient priority */
+            if(optab[op_of_0] == priority) /* 'op_of_0' has same priority */
                 {
                 (pkn)->v.fl ^= Flags; /*19970821*/
                 operatorNode->RIGHT = NULL;
@@ -4761,7 +4748,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
 #endif
     if((fpi == stdin) && (stdinEOF == TRUE))
         exit(0); /*20121128*/
-    maxwijzer = lijst + (DEFAULT_INPUT_BUFFER_SIZE - 1);/* er moet ruimte zijn voor afsluitende 0 */
+    maxwijzer = lijst + (DEFAULT_INPUT_BUFFER_SIZE - 1);/* there must be room  for terminating 0 */
     /* Array of pointers to inputbuffers. Initially 2 elements,
        large enough for small inputs (< DEFAULT_INPUT_BUFFER_SIZE)*/
     InputArray = (inputBuffer *)bmalloc(__LINE__,2*sizeof(inputBuffer));
@@ -5245,7 +5232,7 @@ static int is_constant(psk kn)
     while(is_op(kn))
         {
         /* return is_constant(kn->LEFT) && is_constant(kn->RIGHT);
-        18 Maart 1997 */
+        18 March 1997 */
         if(!is_constant(kn->LEFT))
             return FALSE;
         kn = kn->RIGHT;
@@ -5394,9 +5381,9 @@ static method_pnt findBuiltInMethodByName(typedObjectknoop * object,const char *
 
 static void wis(psk top)
     {
-    while(!shared(top)) /* 18 Maart 1997, tail recursion optimisation; delete deep structures*/
+    while(!shared(top)) /* 18 March 1997, tail recursion optimisation; delete deep structures*/
         {
-        psk kn = NULL; /* 18 Maart 1997 */
+        psk kn = NULL; /* 18 March 1997 */
         if(is_object(top) && ISCREATEDWITHNEW((objectknoop*)top))
             {
             adr[1] = top->RIGHT;
@@ -5415,8 +5402,8 @@ static void wis(psk top)
         if(is_op(top))
             {
             wis(top->LEFT);
-            kn = top; /* 18 Maart 1997 */
-            top = top->RIGHT; /* 18 Maart 1997 */
+            kn = top; /* 18 March 1997 */
+            top = top->RIGHT; /* 18 March 1997 */
             pskfree(kn);
             }
         else
@@ -5433,7 +5420,7 @@ static void wis(psk top)
     }
 
 static int macht2(int n)
-/* retourneert MSB van n */
+/* returns MSB of n */
     {
     int m;
     for( m = 1
@@ -5448,18 +5435,18 @@ static ppsk Entry(int n,int index,varia **pv)
     {
     if(n == 0)
         {
-        return (ppsk)pv;  /* er zijn geen varia records nodig voor 1 entry */
+        return (ppsk)pv;  /* no varia records are needed for 1 entry */
         }
     else
         {
         varia *hv;
         int MSB = macht2(n);
-        for( hv = *pv /* begin bij langste varia record */
+        for( hv = *pv /* begin with longest varia record */
            ; MSB > 1 && index < MSB
            ; MSB >>= 1
            )
            hv = hv->prev;
-        index -= MSB;   /* als index == 0, dan wordt index -1 */
+        index -= MSB;   /* if index == 0, then index becomes -1 */
         return &hv->verdi[index];  /* verdi[-1] == (psk)*prev */
         }
     }
@@ -5468,25 +5455,25 @@ static psk Entry2(int n,int index,varia * pv)
     {
     if(n == 0)
         {
-        return (psk)pv;  /* er zijn geen varia records nodig voor 1 entry */
+        return (psk)pv;  /* no varia records needed for 1 entry */
         }
     else
         {
         varia *hv;
         int MSB = macht2(n);
-        for( hv = pv /* begin bij langste varia record */
+        for( hv = pv /* begin with longest varia record */
            ; MSB > 1 && index < MSB
            ; MSB >>= 1
            )
            hv = hv->prev;
-        index -= MSB;   /* als index == 0, dan wordt index -1 */
+        index -= MSB;   /* if index == 0, then index becomes -1 */
         return hv->verdi[index];  /* verdi[-1] == (psk)*prev */
         }
     }
 
 #if INTSCMP
-static int intscmp(LONG *s1,LONG *s2) /* deze routine geeft verschillende resultaten
-                                  afhankelijk van BIGENDIAN */
+static int intscmp(LONG *s1,LONG *s2) /* this routine produces different results
+                                  depending on BIGENDIAN */
 {
 while(*((char *)s1 + 3))
     {
@@ -5650,7 +5637,7 @@ static psk numberNode2(ngetal * g)
         else
             {
             memcpy((void*)POBJ(res),g->number,g->length);
-            /*(char *)POBJ(res) + g.length = '\0'; hoeft niet, gebeurt in bmalloc */
+            /*(char *)POBJ(res) + g.length = '\0'; not necessary, is done in bmalloc */
             }
         bfree(g->alloc);
         }
@@ -8322,7 +8309,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
 
 static int psh(psk name,psk pknoop,psk dim)
     {
-    /* string dient aan de eisen van icpy te voldoen */
+    /* string must fulfill requirements of icpy */
     vars *navar,*voorvar;
     varia *nvaria;
     psk cknoop;
@@ -8330,7 +8317,7 @@ static int psh(psk name,psk pknoop,psk dim)
     while(is_op(name))
         {
         /* return psh(name->LEFT,pknoop,dim) && psh(name->RIGHT,pknoop,dim);
-        18 Maart 1997 */
+        18 March 1997 */
         if(!psh(name->LEFT,pknoop,dim))
             return FALSE;
         name = name->RIGHT;
@@ -8387,7 +8374,7 @@ static int psh(psk name,psk pknoop,psk dim)
     else
         m22 = m2 << 1;
     if(navar->n >= m22)
-        /* alloceren */
+        /* allocate */
         {
         for(;navar->n >= m22;m22 <<= 1)
             {
@@ -8397,7 +8384,7 @@ static int psh(psk name,psk pknoop,psk dim)
             }
         }
     else if(navar->n < m2)
-        /* dealloceren */
+        /* deallocate */
         {
         for(;m2 && navar->n < m2;m2 >>= 1)
             {
@@ -8420,7 +8407,7 @@ static int psh(psk name,psk pknoop,psk dim)
             }
         }
     /*else
-       geen allocatie
+       no allocation
         {
         }*/
     assert(navar->pvaria);
@@ -9242,7 +9229,7 @@ static int deleteNode(psk name)
             if(navar->vname != OBJ(nilk))
                 bfree(navar->vname);
 #endif
-            bfree(navar); /* nieuw */
+            bfree(navar);
             }
         return TRUE;
         }
@@ -9295,9 +9282,8 @@ static psk Naamwoord(psk variabele,int *newval,int twolevelsofindirection)
                     a=b=(c.d)
                     c=(d=e)
                     f:?!!(a.b)
-                    dan sta ik hier met (c.d)
-                    bedoeling is dat ik e vind, zodat
-                    ik f kan toekennen aan e.
+                    !e 
+                    f
                     */
                     peval = eval(peval);
                     if(  !isSUCCESS(peval)
@@ -9958,19 +9944,21 @@ static char stringmatch
 #endif
     {
 /*
-s.c.lmr of s.c.rmr hebben 3 onafhankelijke vlaggen : TRUE/FALSE, ONCE en FENCE.
-TRUE/FALSE Het slagen van de match.
-ONCE       Onbereidheid van het patroon om andere subjecten te matchen.
-           Van belang voor patroon met spatie, + of * operator.
-           Wordt in patronen aangezet door de `@#/ vlaggen en de operatoren
-           anders dan spatie + * _ & : | = $ '.
-           Wordt uitgezet in patroon met spatie + * of | operator.
-FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
-           te worden. Van belang voor de | en : operatoren in een patroon.
-           Wordt aangezet door ` vlag (al dan niet in een patroon).
-           Wordt uitgezet in patroon met spatie + * | of : operator.
-           (Bij | en : operatoren geldt dit alleen voor de linkeroperand,
-           bij de andere voor alle behalve de laatste operand in een lijst.)
+s.c.lmr and s.c.rmr have 3 independent bit fields : TRUE/FALSE, ONCE en FENCE.
+TRUE/FALSE Whether the match succeeds or fails.
+ONCE       Unwillingness of the pattern to match subjects that start in
+           the same position, but end further "to the right".
+           Of importance for pattern with space, + or * operator.
+           Is turned on in pattern by the `@#/ prefixes and by the operators
+           other than space + * _ & : | = $ '.
+           Is turned of in pattern with space + * or | operator.
+FENCE      Unwillingness of the subject to be matched by alternative patterns.
+           Of importance for the | and : operators in a pattern.
+           Is turned on by the ` prefix (whether or not in a pattern).
+           Is turned off in pattern with space + * | or : operator.
+           (With | and : operators this is only the case for the left operand,
+           with the other operators this is the case for all except the last 
+		   operand in a list.)
 */
     psk loc;
     char * sloc;
@@ -10114,7 +10102,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                             s.c.rmr = TRUE;
                         }
                     }
-                else if (Flgs & INDIRECT)        /* ! of !! */
+                else if (Flgs & INDIRECT)        /* ! or !! */
                     {
                     if ((loc=Naamwoord_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
                         {
@@ -10200,7 +10188,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                         s.c.lmr &= ~ONCE;
                     while(sloc < snijaf)                            /* C    while divisionPoint */
                         {
-                        if(s.c.lmr & TRUE)                          /* D        if leftResult.succes */
+                        if(s.c.lmr & TRUE)                          /* D        if leftResult.success */
                             {
 #if CUTOFFSUGGEST
                             if(s.c.lmr & ONCE)
@@ -10278,7 +10266,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
 #endif
                         }
                     
-                    if(s.c.lmr & TRUE)                              /* J    if leftResult.succes */
+                    if(s.c.lmr & TRUE)                              /* J    if leftResult.success */
                         {
 #if CUTOFFSUGGEST
                         s.c.rmr = stringmatch(ind+1,"J",sloc,snijaf /* K        rightResult=0(P):cdr(pat) */
@@ -10670,7 +10658,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                      * dwz   ~?[`][!][!]
                      */
                     }
-                else if (Flgs & INDIRECT)        /* ! of !! */
+                else if (Flgs & INDIRECT)        /* ! or !! */
                     {
                     if ((loc=Naamwoord_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
                         {
@@ -10697,13 +10685,13 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     A       divisionPoint=S
                     B       leftResult=0(P):car(P)
                     C       while divisionPoint
-                    D           if leftResult.succes
+                    D           if leftResult.success
                     E               rightResult=SR:cdr(P)
                     F           if(done)
                     G               return
                     H           SL,SR=shift_right divisionPoint
                     I           leftResult=SL:car(P)
-                    J       if leftResult.succes
+                    J       if leftResult.success
                     K           rightResult=0(P):cdr(pat)
                     L       return
 
@@ -10714,10 +10702,10 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     /* A    divisionPoint=S */
                     /* B    leftResult=0(P):car(P) */
                     /* C    while divisionPoint */
-                    /* D        if leftResult.succes */
+                    /* D        if leftResult.success */
                     /* E            rightResult=SR:cdr(P) */
                     /* F        if(done) */
-                        /* done =  (1) full succes */
+                        /* done =  (1) full success */
                         /*      or (2) may not be shifted.
                            ad (2): In the first pass, a position
                            flag on car(P) counts as criterion for being done. */
@@ -10744,7 +10732,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                         /* SL = lhs divisionPoint S, SR = rhs divisionPoint S
                         */
                     /* I        leftResult=SL:car(P) */
-                    /* J    if leftResult.succes */
+                    /* J    if leftResult.success */
                     /* K        rightResult=0(P):cdr(pat) */
                     /* L    return */
                         /* Return true if full success.
@@ -10774,7 +10762,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     s.c.lmr &= ~ONCE;                               
                     while(loc)                                      /* C    while divisionPoint */  
                         {
-                        if(s.c.lmr & TRUE)                          /* D        if leftResult.succes */
+                        if(s.c.lmr & TRUE)                          /* D        if leftResult.success */
                             {                                       /* E            rightResult=SR:cdr(P) */
                             s.c.rmr = match(ind+1,loc,pat->RIGHT,snijaf,locpos,expr,op);
                             if(!(s.c.lmr & ONCE))
@@ -10831,7 +10819,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     /* I        leftResult=SL:car(P) */
                         s.c.lmr = match(ind+1,sub, pat->LEFT, loc,pposition,sub,kop(pat));
                         }
-                    /* J    if leftResult.succes */
+                    /* J    if leftResult.success */
                     if(s.c.lmr & TRUE)
                     /* K        rightResult=0(P):cdr(pat) */
                         {
@@ -10976,12 +10964,12 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
 #endif
                             )
 #if CUTOFFSUGGEST
-                            s.c.rmr = (char)(stringmatch(ind+1,"U",SPOBJ(sub),NULL,pat->RIGHT, sub,0,strlen((char*)SPOBJ(sub)),NULL,0) & TRUE /* TODO stringmatch code doesn't have & TRUE */);
+                            s.c.rmr = (char)(stringmatch(ind+1,"U",SPOBJ(sub),NULL,pat->RIGHT, sub,0,strlen((char*)SPOBJ(sub)),NULL,0) & TRUE);
 #else
                             s.c.rmr = (char)(stringmatch(ind+1,"U",POBJ(sub),NULL,pat->RIGHT, sub,0,strlen((char*)POBJ(sub))) & TRUE /* TODO stringmatch code doesn't have & TRUE */);
 #endif
                         else
-                            s.c.rmr = (char)(match(ind+1,sub, pat->RIGHT, snijaf,pposition,expr,op) & TRUE /* TODO stringmatch code doesn't have & TRUE */);
+                            s.c.rmr = (char)(match(ind+1,sub, pat->RIGHT, snijaf,pposition,expr,op) & TRUE);
                         }
                     else
                         s.c.rmr = FALSE;
@@ -11128,7 +11116,7 @@ b b h h h a b c d:?X (|b c|x) d)
                             s.c.rmr = ONCE; /* '~ as return value from function stops stretching subject */
                         }
                     wis(loc);
-                    /* doorvallen */
+                    /* fall through */
                 default:
                     if(is_op(pat))
                         {
@@ -11469,10 +11457,10 @@ static psk evalmacro(psk pkn)
                 if(left != NULL)
                     {
                     /* copy backbone from evalmacro's argument to current pkn
-                    // release lhs of copy of current and replace with 'left'
-                    // assign copy to 'pkn'
-                    // evalmacro current, if not null, replace current
-                    // return current
+                       release lhs of copy of current and replace with 'left'
+                       assign copy to 'pkn'
+                       evalmacro current, if not null, replace current
+                       return current
                     */
                     psk ret;
                     psk first = NULL;
@@ -11655,10 +11643,10 @@ static psk lambda(psk pkn,psk name,psk Arg)
                 if(left != NULL)
                     {
                     /* copy backbone from lambda's argument to current pkn
-                    // release lhs of copy of current and replace with 'left'
-                    // assign copy to 'pkn'
-                    // lambda current, if not null, replace current
-                    // return current
+                       release lhs of copy of current and replace with 'left'
+                       assign copy to 'pkn'
+                       lambda current, if not null, replace current
+                       return current
                     */
                     psk ret;
                     psk first = NULL;
@@ -11845,7 +11833,7 @@ static int is_afhankelyk_van(psk el,psk lijst)
              return ret;
             }/*
         / * return is_afhankelyk_van(el,(kop(lijst) == KOMMA) ? lijst->RIGHT : NULL);
-        18 Maart 1997 * /
+        18 March 1997 * /
         lijst = (kop(lijst) == KOMMA) ? lijst->RIGHT : NULL;
         }
     return FALSE;*/
@@ -11856,7 +11844,7 @@ static int zoekopt(psk kn,LONG opt)
     while(is_op(kn))
         {
         /*return zoekopt(kn->LEFT,opt) || zoekopt(kn->RIGHT,opt);
-        18 Maart 1997 */
+        18 March 1997 */
         if(zoekopt(kn->LEFT,opt))
             return TRUE;
         kn = kn->RIGHT;
@@ -11981,7 +11969,7 @@ static void lst(psk kn)
             {
             lst(kn->LEFT);
             /* lst(kn->RIGHT);
-            18 Maart 1997 */
+            18 March 1997 */
             kn = kn->RIGHT;
             }
         }
@@ -12122,7 +12110,7 @@ static LONG someopt(psk kn,LONG opt[])
     assert(!is_op(kn));/*while(is_op(kn))
         {
         / * return someopt(kn->LEFT,opt) || someopt(kn->RIGHT,opt);
-        18 Maart 1997 * /
+        18 March 1997 * /
         if(someopt(kn->LEFT,opt))
             return TRUE;
         kn = kn->RIGHT;
@@ -12766,7 +12754,7 @@ READ
             size_t readbytes = fh->size * fh->getal; /*20121226*/
             if(readbytes >= INPUTBUFFERSIZE)
                 bbuffer = (unsigned char *)bmalloc(__LINE__,readbytes+1);
-                          /* +1 added 18 Maart 1997 */
+                          /* +1 added 18 March 1997 */
             else
                 bbuffer = buffer;
             if( (readbytes = fread((char *)bbuffer,(size_t)fh->size,(size_t)fh->getal,fh->fp)) == 0
@@ -12837,7 +12825,7 @@ static int allopts(psk kn,LONG opt[])
     while(is_op(kn))
         {
         /* return allopts(kn->LEFT,opt) && allopts(kn->RIGHT,opt);
-        18 Maart 1997 */
+        18 March 1997 */
         if(!allopts(kn->LEFT,opt))
             return FALSE;
         kn = kn->RIGHT;
@@ -12984,18 +12972,18 @@ static LONG simil
     LONG max;
     LONG len1;
     LONG len2 = 0;
-    /* beschouw elk teken van s1 als mogelijk startpunt voor match */
+    /* regard each character in s1 as possible starting point for match */
     for(max = 0,ls1 = s1,len1 = 0
        ;ls1 < s1end
        ;getCodePoint2(&ls1,putf1),++len1)
         {
         const char * ls2;
-        /* vergelijk met s2 */
+        /* compare with s2 */
         for(ls2 = s2,len2 = 0;ls2 < s2end;getCodePoint2(&ls2,putf2),++len2)
             {
             const char * lls1 = ls1;
             const char * lls2 = ls2;
-            /* bepaal lengte gelijke stukken */
+            /* determine lenght of equal parts */
             LONG len12 = 0;
             for(;;)
                    {
@@ -13016,12 +13004,12 @@ static LONG simil
                    else
                        break;
                    }
-            /* pas evt score aan */
+            /* adapt score if needed */
             if(len12 > max)
                 {
                 max = len12;
-                /* onthou eindpunten van linkerstrings en
-                beginpunten rechterstrings */
+                /* remember end points of left strings and start points of 
+				   right strings */
                 s1l = ls1;
                 s1r = lls1;
                 s2l = ls2;
@@ -13195,7 +13183,7 @@ static int hasSubObject(psk src)
         else
             {
             /*return hasSubObject(src->LEFT) || hasSubObject(src->RIGHT);
-            18 Maart 1997*/
+            18 March 1997*/
             if(hasSubObject(src->LEFT))
                 return TRUE;
             src = src->RIGHT;
@@ -13839,7 +13827,7 @@ static function_return_type functies(psk pkn)
             pkn = scopy((const char *)klad);
             return functionOk(pkn);
             }
-        CASE(KAR) /* chr $ getal */
+        CASE(KAR) /* chr $ number */
             {
             if(is_op(rknoop) || !INTEGER_POS(rknoop))
                 return functionFail(pkn);
@@ -13905,7 +13893,7 @@ static function_return_type functies(psk pkn)
             }
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
 #if !defined NO_FOPEN
-        CASE(FIL) /* fil $ (<naam>,[<offset>,[set|cur|end]]) */
+        CASE(FIL) /* fil $ (<name>,[<offset>,[set|cur|end]]) */
             {
             return fil(&pkn) ? functionOk(pkn) : functionFail(pkn);
             }
@@ -14382,7 +14370,7 @@ static function_return_type functies(psk pkn)
             }
 #endif
 #endif
-        CASE(TBL) /* tbl$(varnaam,lengte) */
+        CASE(TBL) /* tbl$(varname,length) */
             {
             if(is_op(rknoop))
                 return psh(rknoop->LEFT,&nulk,rknoop->RIGHT) ? functionOk(pkn) : functionFail(pkn);
@@ -14414,7 +14402,7 @@ The same effect is obtained by <expr>:?!(=)
             return functionOk(pkn);
             }
 
-        CASE(SIM) /* sim$(<atoom>,<atoom>) , fuzzy compare (percentage) */
+        CASE(SIM) /* sim$(<atom>,<atom>) , fuzzy compare (percentage) */
             {
             if(is_op(rknoop) /*20121014 dropped requirement for comma*/
             && !is_op(rlknoop = rknoop->LEFT)
@@ -14551,7 +14539,7 @@ The same effect is obtained by <expr>:?!(=)
                 for(navar = variabelen[rknoop->u.obj];
                     navar && (STRCMP(VARNAME(navar),POBJ(rknoop)) < 0);
                     navar = navar->next);
-                /* eerste naam in een rij gelijke wordt gevonden */
+                /* find first name in a row of equal names */
                 if(navar && !STRCMP(VARNAME(navar),POBJ(rknoop)))
                     {
                     navar->selector =
@@ -14593,7 +14581,7 @@ static psk stapelmacht(psk pkn)
         {
         done = TRUE;
         pkn->LEFT = lknoop = prive(lknoop);
-        lknoop->v.fl &= ~READY & ~OPERATOR;/* READY vlag uitzetten */
+        lknoop->v.fl &= ~READY & ~OPERATOR;/* turn off READY flag */
         lknoop->ops |= MAAL;
         adr[1] = lknoop->LEFT;
         adr[2] = lknoop->RIGHT;
@@ -14652,8 +14640,8 @@ static psk stapelmacht(psk pkn)
                         {
                         return pkn; /*{?} -3^2/3 => -3^2/3 */
                         }
-                    /* hier ontbreekt n^m, met m > 2.
-                       Dit wordt in casemacht behandeld. */
+                    /* Missing here is n^m, with m > 2.
+                       That case is handled in casemacht. */
                     }
                 else if(PLOBJ(lknoop) == IM)
                     {
@@ -14772,7 +14760,7 @@ static psk stapelmacht(psk pkn)
                 for(ind = 0; ind < 20; wipe[ind++] = TRUE);
                 ind = 0;
                 conc = (char **)bmalloc(__LINE__,20 * sizeof(char **));
-                   /* 20 is veilige waarde voor ULONGs */
+                   /* 20 is safe value for ULONGs */
                 adr[1] = pkn->RIGHT;
                 if(RAT_RAT_COMP(pkn->LEFT))
                     {
