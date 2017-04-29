@@ -21,7 +21,7 @@ email: bartj@hum.ku.dk
 */
 #define DATUM "28 April 2017"
 #define VERSION "6 'newspeak'"
-#define BUILD "212"
+#define BUILD "213"
 /*
 COMPILATION
 -----------
@@ -403,56 +403,56 @@ typedef   signed long  INT32_T;
 #define GREATER_THAN    (1<< 9) /* > */
 #define SMALLER_THAN    (1<<10) /* < */
 #define NUMBER          (1<<11) /* # */
-#define BREUK           (1<<12) /* / */
+#define FRACTION           (1<<12) /* / */
 #define UNIFY           (1<<13) /* ? */
 #define IDENT           (1<<14)
 #define IMPLIEDFENCE    (1<<15) /* 20070222 */
 
 #define VISIBLE_FLAGS_WEAK      (INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)
-#define VISIBLE_FLAGS_NON_COMP  (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|BREUK|UNIFY) /* allows < > ~< and ~> as flags on numbers */
-#define VISIBLE_FLAGS_POS0      (INDIRECT|DOUBLY_INDIRECT|NONIDENT|QBREUK|UNIFY|QGETAL)
-#define VISIBLE_FLAGS_POS       (INDIRECT|DOUBLY_INDIRECT|NONIDENT|QBREUK|UNIFY|QGETAL|NOT|GREATER_THAN|SMALLER_THAN)
-#define VISIBLE_FLAGS           (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|BREUK|UNIFY|NOT|GREATER_THAN|SMALLER_THAN|FENCE|POSITION)
+#define VISIBLE_FLAGS_NON_COMP  (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|FRACTION|UNIFY) /* allows < > ~< and ~> as flags on numbers */
+#define VISIBLE_FLAGS_POS0      (INDIRECT|DOUBLY_INDIRECT|NONIDENT|QFRACTION|UNIFY|QNUMBER)
+#define VISIBLE_FLAGS_POS       (INDIRECT|DOUBLY_INDIRECT|NONIDENT|QFRACTION|UNIFY|QNUMBER|NOT|GREATER_THAN|SMALLER_THAN)
+#define VISIBLE_FLAGS           (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|FRACTION|UNIFY|NOT|GREATER_THAN|SMALLER_THAN|FENCE|POSITION)
 
 #define HAS_VISIBLE_FLAGS_OR_MINUS(psk) ((psk)->ops & (VISIBLE_FLAGS|MINUS))
-#define RATIONAAL(psk)      (((psk)->ops & (QGETAL|IS_OPERATOR|VISIBLE_FLAGS)) == QGETAL)
-#define RATIONAAL_COMP(psk) (((psk)->ops & (QGETAL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QGETAL)
-#define RATIONAAL_COMP_NOT_NUL(psk) (((psk)->ops & (QGETAL|QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QGETAL)
-#define RATIONAAL_WEAK(psk) (((psk)->ops & (QGETAL|IS_OPERATOR|INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)) == QGETAL)/* allows < > ~< and ~> as flags on numbers */
-#define       LESS(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QGETAL|SMALLER_THAN))
-#define LESS_EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QGETAL|NOT|GREATER_THAN))
-#define MORE_EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QGETAL|NOT|SMALLER_THAN))
-#define       MORE(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QGETAL|GREATER_THAN))
-#define    UNEQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QGETAL|NOT))
-#define LESSORMORE(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QGETAL|SMALLER_THAN|GREATER_THAN))
-#define      EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == QGETAL)
-#define NOTLESSORMORE(psk) (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QGETAL|NOT|SMALLER_THAN|GREATER_THAN))
+#define RATIONAL(psk)      (((psk)->ops & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS)) == QNUMBER)
+#define RATIONAL_COMP(psk) (((psk)->ops & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
+#define RATIONAL_COMP_NOT_NUL(psk) (((psk)->ops & (QNUMBER|QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
+#define RATIONAL_WEAK(psk) (((psk)->ops & (QNUMBER|IS_OPERATOR|INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)) == QNUMBER)/* allows < > ~< and ~> as flags on numbers */
+#define       LESS(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN))
+#define LESS_EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|GREATER_THAN))
+#define MORE_EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN))
+#define       MORE(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|GREATER_THAN))
+#define    UNEQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT))
+#define LESSORMORE(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN|GREATER_THAN))
+#define      EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == QNUMBER)
+#define NOTLESSORMORE(psk) (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN|GREATER_THAN))
 
-#define INTEGER(kn)               (((kn)->ops & (QGETAL|QBREUK|IS_OPERATOR|VISIBLE_FLAGS))                      == QGETAL)
-#define INTEGER_COMP(kn)          (((kn)->ops & (QGETAL|QBREUK|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))             == QGETAL)
+#define INTEGER(kn)               (((kn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                      == QNUMBER)
+#define INTEGER_COMP(kn)          (((kn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))             == QNUMBER)
 
-#define INTEGER_NIET_NEG(kn)      (((kn)->ops & (QGETAL|MINUS|QBREUK|IS_OPERATOR|VISIBLE_FLAGS))                == QGETAL)
-#define INTEGER_NIET_NEG_COMP(kn) (((kn)->ops & (QGETAL|MINUS|QBREUK|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))       == QGETAL)
+#define INTEGER_NOT_NEG(kn)       (((kn)->ops & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                == QNUMBER)
+#define INTEGER_NOT_NEG_COMP(kn)  (((kn)->ops & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))       == QNUMBER)
 
-#define INTEGER_POS(kn)           (((kn)->ops & (QGETAL|MINUS|QNUL|QBREUK|IS_OPERATOR|VISIBLE_FLAGS))           == QGETAL)
-#define INTEGER_POS_COMP(kn)      (((kn)->ops & (QGETAL|MINUS|QNUL|QBREUK|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))  == QGETAL)
+#define INTEGER_POS(kn)           (((kn)->ops & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))           == QNUMBER)
+#define INTEGER_POS_COMP(kn)      (((kn)->ops & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))  == QNUMBER)
 
-#define INTEGER_NIET_NUL_COMP(kn) (((kn)->ops & (QGETAL|QNUL|QBREUK|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))        == QGETAL)
+#define INTEGER_NOT_NUL_COMP(kn) (((kn)->ops & (QNUMBER|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))        == QNUMBER)
 #define HAS_MINUS_SIGN(kn)         (((kn)->ops & (MINUS|IS_OPERATOR)) == MINUS)
 
 #define RAT_NUL(kn) (((kn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS)) == QNUL)
 #define RAT_NUL_COMP(kn) (((kn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUL)
-#define RAT_NEG(kn) (((kn)->ops & (QGETAL|MINUS|IS_OPERATOR|VISIBLE_FLAGS)) \
-                                == (QGETAL|MINUS))
-#define RAT_NEG_COMP(kn) (((kn)->ops & (QGETAL|MINUS|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) \
-                                == (QGETAL|MINUS))
+#define RAT_NEG(kn) (((kn)->ops & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS)) \
+                                == (QNUMBER|MINUS))
+#define RAT_NEG_COMP(kn) (((kn)->ops & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) \
+                                == (QNUMBER|MINUS))
 
-#define RAT_RAT(kn) (((kn)->ops & (QGETAL|QBREUK|IS_OPERATOR|VISIBLE_FLAGS))\
-                                == (QGETAL|QBREUK))
+#define RAT_RAT(kn) (((kn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))\
+                                == (QNUMBER|QFRACTION))
 
-#define RAT_RAT_COMP(kn) (((kn)->ops & (QGETAL|QBREUK|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))\
-                                == (QGETAL|QBREUK))
-#define IS_EEN(kn) ((kn)->u.lobj == EEN && !((kn)->ops & (MINUS | VISIBLE_FLAGS)))
+#define RAT_RAT_COMP(kn) (((kn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))\
+                                == (QNUMBER|QFRACTION))
+#define IS_ONE(kn) ((kn)->u.lobj == ONE && !((kn)->ops & (MINUS | VISIBLE_FLAGS)))
 
 
 #include <string.h>
@@ -588,7 +588,7 @@ typedef struct
 #endif
 
 #define ECH O('E','C','H')
-#define EEN O('1', 0 , 0 )
+#define ONE O('1', 0 , 0 )
 /* err$foo redirects error messages to foo */
 #define ERR O('e','r','r')
 #define EXT O('E','X','T')
@@ -606,7 +606,7 @@ typedef struct
 #define REV O('r','e','v') /* strrev */
 #define LST O('l','s','t')
 #define MEM O('M','E','M')
-#define MINEEN O('-','1',0)
+#define MINONE O('-','1',0)
 #define ML  O('M','L',0)
 #define MMF O('m','e','m')
 #define MOD O('m','o','d')
@@ -621,7 +621,7 @@ typedef struct
 #define STG O('S','T','R')
 #define TBL O('t','b','l')
 #define TRM O('T','R','M')
-#define TWEE O('2', 0 , 0 )
+#define TWO O('2', 0 , 0 )
 #define TXT O('T','X','T')
 #define UPP O('u','p','p')
 #define UTF O('u','t','f')
@@ -674,21 +674,21 @@ extern int JSONtext(FILE * fpi,char * bron);
 /*#define REF_COUNT_BITS 1 */ /* stress test!*/
 #define NON_REF_COUNT_BITS (16-REF_COUNT_BITS)
 
-#define FILTERS     (BREUK | NUMBER | SMALLER_THAN | GREATER_THAN | ATOM | NONIDENT)
-#define ATOMFILTERS (BREUK | NUMBER | SMALLER_THAN | GREATER_THAN | ATOM | FENCE | IDENT)
+#define FILTERS     (FRACTION | NUMBER | SMALLER_THAN | GREATER_THAN | ATOM | NONIDENT)
+#define ATOMFILTERS (FRACTION | NUMBER | SMALLER_THAN | GREATER_THAN | ATOM | FENCE | IDENT)
 #define SATOMFILTERS (/*ATOM | */FENCE | IDENT)
 
 #define FLGS (FILTERS | FENCE | DOUBLY_INDIRECT | INDIRECT | POSITION)
 
-#define ONTKENNING(Flgs,flag)  ((Flgs & NOT ) && \
-                                (Flgs & FILTERS) >= (flag) && \
-                                (Flgs & FILTERS) < ((flag) << 1))
+#define NEGATION(Flgs,flag)  ((Flgs & NOT ) && \
+                             (Flgs & FILTERS) >= (flag) && \
+                             (Flgs & FILTERS) < ((flag) << 1))
 #define ANYNEGATION(Flgs)  ((Flgs & NOT ) && (Flgs & FILTERS))
-#define ASSERTIVE(Flgs,flag) ((Flgs & flag) && !ONTKENNING(Flgs,flag))
-#define FAAL (pat->v.fl & NOT)
-#define NIKS(p) (((p)->v.fl & NOT) && !((p)->v.fl & FILTERS))
-#define NIKSF(Flgs) ((Flgs & NOT) && !(Flgs & FILTERS))
-#define ERFENIS (FILTERS | FENCE | UNIFY)
+#define ASSERTIVE(Flgs,flag) ((Flgs & flag) && !NEGATION(Flgs,flag))
+#define FAIL (pat->v.fl & NOT)
+#define NOTHING(p) (((p)->v.fl & NOT) && !((p)->v.fl & FILTERS))
+#define NOTHINGF(Flgs) ((Flgs & NOT) && !(Flgs & FILTERS))
+#define BEQUEST (FILTERS | FENCE | UNIFY)
 #define UNOPS (UNIFY | FLGS | NOT | MINUS)
 #define HAS_UNOPS(a) ((a)->v.fl & UNOPS)
 #define HAS__UNOPS(a) (is_op(a) && (a)->v.fl & (UNIFY | FLGS | NOT))
@@ -911,7 +911,7 @@ typedef struct ngetal
     int sign; /* 0: positive, QNUL: zero, MINUS: negative number */
     } ngetal;
 
-#define NGETALIS1(x) ((x)->sign == 0 && (x)->length == 1 && ((char*)((x)->number))[0] == '1')
+#define NNUMBERIS1(x) ((x)->sign == 0 && (x)->length == 1 && ((char*)((x)->number))[0] == '1')
 
 #define Qgetal psk
 
@@ -1029,14 +1029,14 @@ typedef struct typedObjectknoop /* createdWithNew == 1 */
     } typedObjectknoop;
 
 #ifdef BUILTIN
-#define INCREFCOUNT(a) { ((objectknoop*)a)->u.s.refcount++;(a)->ops &= ((~ALL_REFCOUNT_BITS_SET)|ONE); }
+#define INCREFCOUNT(a) { ((objectknoop*)a)->u.s.refcount++;(a)->ops &= ((~ALL_REFCOUNT_BITS_SET)|ONEREF); }
 #define DECREFCOUNT(a) { ((objectknoop*)a)->u.s.refcount--;(a)->ops |= ALL_REFCOUNT_BITS_SET; }
 #define REFCOUNTNONZERO(a) ((a)->u.s.refcount)
 #define ISBUILTIN(a) ((a)->u.s.built_in)
 #define ISCREATEDWITHNEW(a) ((a)->u.s.createdWithNew)
 #define SETCREATEDWITHNEW(a) (a)->u.s.createdWithNew = 1
 #else
-#define INCREFCOUNT(a) { (a)->refcount++;(a)->ops &= ((~ALL_REFCOUNT_BITS_SET)|ONE); }
+#define INCREFCOUNT(a) { (a)->refcount++;(a)->ops &= ((~ALL_REFCOUNT_BITS_SET)|ONEREF); }
 #define DECREFCOUNT(a) { (a)->refcount--;(a)->ops |= ALL_REFCOUNT_BITS_SET; }
 #define REFCOUNTNONZERO(a) ((a)->refcount)
 #define ISBUILTIN(a) ((a)->built_in)
@@ -1124,15 +1124,15 @@ Flgs 0                   NOT
      9                GREATER_THAN
     10                SMALLER_THAN
     11                  NUMBER
-    12                  BREUK
+    12                  FRACTION
     13                  UNIFY
     14                  IDENT
     15               IMPLIEDFENCE
 ops 16  0             IS_OPERATOR
-    17  1   (operators 0-14)      QGETAL
+    17  1   (operators 0-14)      QNUMBER
     18  2       "                 MINUS
     19  3       "                 QNUL
-    20  4       "                 QBREUK
+    20  4       "                 QFRACTION
     21  5             LATEBIND                        NOOP
     22  6          (reference count)
     23  7                 "
@@ -1185,13 +1185,13 @@ static const char opchar[16] =
 
 
 #define NOOP                (OPERATOR+1)
-#define QGETAL              (1 << (SHL+1))
+#define QNUMBER             (1 << (SHL+1))
 #define MINUS               (1 << (SHL+2))
 #define QNUL                (1 << (SHL+3))
-#define QBREUK              (1 << (SHL+4))
+#define QFRACTION           (1 << (SHL+4))
 #define LATEBIND            (1 << (SHL+5))
 #define DEFINITELYNONUMBER  (1 << (SHL+6)) /* this is not stored in a node! */
-#define ONE   (unsigned int)(1 << (SHL+NON_REF_COUNT_BITS))
+#define ONEREF   (unsigned int)(1 << (SHL+NON_REF_COUNT_BITS))
 
 #define ALL_REFCOUNT_BITS_SET \
        ((((unsigned int)(~0)) >> (SHL+NON_REF_COUNT_BITS)) << (SHL+NON_REF_COUNT_BITS))
@@ -1208,7 +1208,7 @@ static int all_refcount_bits_set(psk kn)
 static void dec_refcount(psk kn)
     {
     assert(kn->ops & ALL_REFCOUNT_BITS_SET);
-    kn->ops -= ONE;
+    kn->ops -= ONEREF;
     if((kn->ops & (OPERATOR|ALL_REFCOUNT_BITS_SET)) == EQUALS)
         {
         if(REFCOUNTNONZERO((objectknoop*)kn))
@@ -3522,7 +3522,7 @@ static int printflags(psk wortel)
         (*verwerk)('~');
         ++count;
         }
-    if(Flgs & BREUK)
+    if(Flgs & FRACTION)
         {
         (*verwerk)('/');
         ++count;
@@ -3579,7 +3579,7 @@ static void eindknoop(psk wortel,int space)
     int q,ikar;
 #if CHECKALLOCBOUNDS
     if(POINT)
-        printf("\n[%p %d]",wortel,(wortel->ops & ALL_REFCOUNT_BITS_SET)/ ONE);
+        printf("\n[%p %d]",wortel,(wortel->ops & ALL_REFCOUNT_BITS_SET)/ ONEREF);
 #endif
     if(!wortel->u.obj
         && !HAS_UNOPS(wortel)
@@ -3670,7 +3670,7 @@ static psk zelfde_als_w(psk kn)
     {
     if(shared(kn) != ALL_REFCOUNT_BITS_SET)
         {
-        (kn)->ops += ONE;
+        (kn)->ops += ONEREF;
         return kn;
         }
     else if(is_object(kn))
@@ -3689,7 +3689,7 @@ static psk zelfde_als_w_2(ppsk pkn)
     psk kn = *pkn;
     if(shared(kn) != ALL_REFCOUNT_BITS_SET)
         {
-        kn->ops += ONE;
+        kn->ops += ONEREF;
         return kn;
         }
     else if(is_object(kn))
@@ -3813,7 +3813,7 @@ while(is_op(wortel))
         extraspatie = 1;
 #if CHECKALLOCBOUNDS
     if(POINT)
-        printf("\n[%p %d]",wortel,(wortel->ops & ALL_REFCOUNT_BITS_SET)/ ONE);
+        printf("\n[%p %d]",wortel,(wortel->ops & ALL_REFCOUNT_BITS_SET)/ ONEREF);
 #endif
     bewerk(opchar[klopcode(wortel)]);
     ouder = kop(wortel);
@@ -3921,7 +3921,7 @@ if(is_op(wortel))
         extraspatie = 1;
 #if CHECKALLOCBOUNDS
     if(POINT)
-        printf("\n[%p %d]",wortel,(wortel->ops & ALL_REFCOUNT_BITS_SET)/ ONE);
+        printf("\n[%p %d]",wortel,(wortel->ops & ALL_REFCOUNT_BITS_SET)/ ONEREF);
 #endif
     bewerk(opchar[klopcode(wortel)]);
     ouder = kop(wortel);
@@ -4059,7 +4059,7 @@ static int numbercheck(const char *begin)
     int needNonZeroDigit = FALSE;
     if(!*begin)
         return 0;
-    check = QGETAL;
+    check = QNUMBER;
     op_of_0 = *begin;
 
     if(op_of_0 >= '0' && op_of_0 <= '9')
@@ -4071,7 +4071,7 @@ static int numbercheck(const char *begin)
             if(op_of_0 == '/')
                 {
                 /* check &= ~QNUL;*/
-                if(check & QBREUK)
+                if(check & QFRACTION)
                     {
                     check = DEFINITELYNONUMBER;
                     break;
@@ -4079,7 +4079,7 @@ static int numbercheck(const char *begin)
                 else
                     {
                     needNonZeroDigit = TRUE;
-                    check |= QBREUK;
+                    check |= QFRACTION;
                     }
                 }
             else if(op_of_0 < '0' || op_of_0 > '9')
@@ -4091,7 +4091,7 @@ static int numbercheck(const char *begin)
                 {
                 /* initial zero followed by
                                  0 <= k <= 9 makes no number */
-                if((check & (QNUL|QBREUK)) == QNUL)
+                if((check & (QNUL|QFRACTION)) == QNUL)
                     {
                     check = DEFINITELYNONUMBER;
                     break;
@@ -4173,7 +4173,7 @@ for(;;start++)
             Flgs |= NUMBER;
             continue;
         case '/' :
-            Flgs |= BREUK;
+            Flgs |= FRACTION;
             continue;
         case '@' :
             Flgs |= ATOM;
@@ -4243,7 +4243,7 @@ static psk atoom(int Flgs,int opsflgs)
         }
     else
         {
-        if(ONTKENNING(Flgs,NUMBER))
+        if(NEGATION(Flgs,NUMBER))
             (pkn)->v.fl = (Flgs ^ (READY|SUCCESS));
         else
             (pkn)->v.fl = (Flgs ^ (READY|SUCCESS)) | (numbercheck(SPOBJ(pkn)) & ~DEFINITELYNONUMBER);
@@ -5076,7 +5076,7 @@ static psk subboomcopie(psk src)
 
 static int getal_graad(psk kn)
     {
-    if(RATIONAAL_COMP(kn))
+    if(RATIONAL_COMP(kn))
         return 4;
     switch(PLOBJ(kn))
         {
@@ -5141,11 +5141,11 @@ static psk prive(psk pkn)
 
 static psk setflgs(psk pokn,int Flgs)
     {
-    if((Flgs & ERFENIS) || !(Flgs & SUCCESS))
+    if((Flgs & BEQUEST) || !(Flgs & SUCCESS))
         {
         pokn = prive(pokn);
         pokn->v.fl ^= ((Flgs & SUCCESS) ^ SUCCESS);
-        pokn->v.fl |= (Flgs & ERFENIS);
+        pokn->v.fl |= (Flgs & BEQUEST);
         if(ANYNEGATION(Flgs))
             pokn->v.fl |= NOT;
         }
@@ -5456,7 +5456,7 @@ static psk inumberNode(ngetal * g)
         iconvert2decimal(g,(char *)POBJ(res));
         }
 
-    res->v.fl = READY | SUCCESS | QGETAL;
+    res->v.fl = READY | SUCCESS | QNUMBER;
     res->ops |= g->sign;
     return res;
     }
@@ -5499,7 +5499,7 @@ static psk numberNode2(ngetal * g)
             }
         bfree(g->alloc);
         }
-    res->v.fl = READY | SUCCESS | QGETAL;
+    res->v.fl = READY | SUCCESS | QNUMBER;
     res->ops |= g->sign;
     return res;
     }
@@ -5544,7 +5544,7 @@ static char * isplits(Qgetal _qget,ngetal * ptel,ngetal * pnoem)
     pnoem->sign = 0;
     pnoem->alloc = ptel->alloc = NULL;
     ptel->number = (char *)POBJ(_qget);
-    if(_qget->v.fl & QBREUK)
+    if(_qget->v.fl & QFRACTION)
         {
         char * on = strchr(ptel->number,'/');
         assert(on);
@@ -5557,7 +5557,7 @@ static char * isplits(Qgetal _qget,ngetal * ptel,ngetal * pnoem)
         }
     else
         {
-        assert(!(_qget->v.fl & QBREUK));
+        assert(!(_qget->v.fl & QFRACTION));
         ptel->length = strlen(ptel->number);
         pnoem->number = "1";
         pnoem->length = 1;
@@ -5574,7 +5574,7 @@ static char * splits(Qgetal _qget,ngetal * ptel,ngetal * pnoem)
     pnoem->alloc = ptel->alloc = NULL;
     ptel->number = (char *)POBJ(_qget);
 
-    if(_qget->v.fl & QBREUK)
+    if(_qget->v.fl & QFRACTION)
         {
         char * on = strchr(ptel->number,'/');
         assert(on);
@@ -5585,7 +5585,7 @@ static char * splits(Qgetal _qget,ngetal * ptel,ngetal * pnoem)
         }
     else
         {
-        assert(!(_qget->v.fl & QBREUK));
+        assert(!(_qget->v.fl & QFRACTION));
         ptel->length = strlen(ptel->number);
         pnoem->number = "1";
         pnoem->length = 1;
@@ -6198,7 +6198,7 @@ static Qgetal nn2q(ngetal * num,ngetal * den)
         *endp++ = '/';
         endp = iconvert2decimal(den,endp);
         assert(endp - (char *)res <= len);
-        res->v.fl = READY | SUCCESS | QGETAL | QBREUK;
+        res->v.fl = READY | SUCCESS | QNUMBER | QFRACTION;
         res->ops |= num->sign;
         }
     return res;
@@ -6707,9 +6707,9 @@ static psk _qdenominator(psk pkn)
     splits(_qx,&xt,&xn);
     len = offsetof(sk,u.obj) + 1 + xn.length;
     res = (psk)bmalloc(__LINE__,len);
-    assert(!(xn.sign & QNUL)); /*Because RATIONAAL_COMP(_qx)*/
+    assert(!(xn.sign & QNUL)); /*Because RATIONAL_COMP(_qx)*/
     memcpy((void*)POBJ(res),xn.number,xn.length);
-    res->v.fl = READY | SUCCESS | QGETAL;
+    res->v.fl = READY | SUCCESS | QNUMBER;
     res->ops |= xn.sign;
     wis(pkn);
     return res;
@@ -6751,9 +6751,9 @@ static int equal(psk kn1,psk kn2)
             }
         else if(is_op(kn2))
             return -1;
-        else if(RATIONAAL_COMP(kn1))
+        else if(RATIONAL_COMP(kn1))
             {
-            if(RATIONAAL_COMP(kn2))
+            if(RATIONAL_COMP(kn2))
                 {
                 switch(_qvergelijk(kn1,kn2))
                     {
@@ -6768,7 +6768,7 @@ static int equal(psk kn1,psk kn2)
             else
                 return -1;
             }
-        else if(RATIONAAL_COMP(kn2))
+        else if(RATIONAL_COMP(kn2))
             {
             return 1;
             }
@@ -6850,9 +6850,9 @@ static int vgl(psk kn1,psk kn2)
             }
         else if(is_op(kn2))
             return -1;
-        else if(RATIONAAL_COMP(kn1))
+        else if(RATIONAL_COMP(kn1))
             {
-            if(RATIONAAL_COMP(kn2))
+            if(RATIONAL_COMP(kn2))
                 {
                 switch(_qvergelijk(kn1,kn2))
                     {
@@ -6867,7 +6867,7 @@ static int vgl(psk kn1,psk kn2)
             else
                 return -1;
             }
-        else if(RATIONAAL_COMP(kn2))
+        else if(RATIONAL_COMP(kn2))
             {
             return 1;
             }
@@ -7074,10 +7074,10 @@ static int copy_insert(psk name,psk pknoop,psk snijaf)
         if((shared(pknoop) != ALL_REFCOUNT_BITS_SET) && !all_refcount_bits_set(snijaf))
             {/* snijaf: either node with headroom in the small refcounter 
                         or object */
-            DBGSRC(printf("name:[");result(name);printf("] pknoop:[");result(pknoop);printf("] snijaf(%d):[",snijaf->v.fl/ONE);result(snijaf);printf("]\n");)
+            DBGSRC(printf("name:[");result(name);printf("] pknoop:[");result(pknoop);printf("] snijaf(%d):[",snijaf->v.fl/ONEREF);result(snijaf);printf("]\n");)
             kn = new_operator_like(pknoop);
             kn->ops = (pknoop->ops & ~ALL_REFCOUNT_BITS_SET) | LATEBIND;
-            pknoop->ops += ONE;
+            pknoop->ops += ONEREF;
             if(shared(snijaf) == ALL_REFCOUNT_BITS_SET)
                 {
 /*
@@ -7104,7 +7104,7 @@ Thereafter copies must be made.}
                 INCREFCOUNT(snijaf);
                 }
             else
-                snijaf->ops += ONE;
+                snijaf->ops += ONEREF;
 
             kn->LEFT = pknoop;
             kn->RIGHT = snijaf;
@@ -7422,22 +7422,22 @@ static int strcasecmpDOS(const char *s, const char *p)
     }
 #endif
 
-#define NIET ((p->v.fl & NOT) && (p->v.fl & FLGS) < NUMBER)
+#define PNOT ((p->v.fl & NOT) && (p->v.fl & FLGS) < NUMBER)
 #define PGRT (p->v.fl & GREATER_THAN)
-#define PKLN (p->v.fl & SMALLER_THAN)
-#define PONG  (PGRT && PKLN)
-#define EPGRT (PGRT && !PKLN)
-#define EPKLN (PKLN && !PGRT)
+#define PSML (p->v.fl & SMALLER_THAN)
+#define PUNQ  (PGRT && PSML)
+#define EPGRT (PGRT && !PSML)
+#define EPSML (PSML && !PGRT)
 
 static int compare(psk s,psk p)
     {
     int teken;
-    if(RATIONAAL_COMP(s) && RATIONAAL_WEAK(p))
+    if(RATIONAL_COMP(s) && RATIONAL_WEAK(p))
         teken = _qvergelijk /*bereken_verschil*/(s,p);
     else
         {
         if(is_op(s))
-            return NIKS(p);
+            return NOTHING(p);
         if(PLOBJ(s) == IM && PLOBJ(p) == IM)
             {
             int TMP = ((s->v.fl & MINUS) ^ (p->v.fl & MINUS));
@@ -7449,7 +7449,7 @@ static int compare(psk s,psk p)
             int R = !ee && (Niet ^ ul ^ !TMP);
             return R;
             }
-        if((p->v.fl & (NOT|BREUK|NUMBER|GREATER_THAN|SMALLER_THAN)) == (NOT|GREATER_THAN|SMALLER_THAN))
+        if((p->v.fl & (NOT|FRACTION|NUMBER|GREATER_THAN|SMALLER_THAN)) == (NOT|GREATER_THAN|SMALLER_THAN))
             { /* Case insensitive match: ~<> means "not different" */
             teken = strcasecomp((char *)POBJ(s),(char *)POBJ(p));
             }
@@ -7468,15 +7468,15 @@ static int compare(psk s,psk p)
         {
         case 0 :
             {
-            return NIET ^ (PGRT && 1);
+            return PNOT ^ (PGRT && 1);
             }
         case QNUL :
             {
-            return !NIET ^ (PGRT || PKLN);
+            return !PNOT ^ (PGRT || PSML);
             }
         default :
             {
-            return NIET ^ (PKLN && 1);
+            return PNOT ^ (PSML && 1);
             }
         }
     }
@@ -7514,43 +7514,43 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
     enum {NoIndication,AnInteger,NotAFraction,NotANumber,AFraction,ANumber};
     int status = NoIndication;
 
-    if(ONTKENNING(Flgs, NONIDENT))
+    if(NEGATION(Flgs, NONIDENT))
         {
         Flgs &= ~(NOT|NONIDENT);
         }
-    if(ONTKENNING(Flgs, BREUK))
+    if(NEGATION(Flgs, FRACTION))
         {
-        Flgs &= ~(NOT|BREUK);
+        Flgs &= ~(NOT|FRACTION);
         if(Flgs & NUMBER)
             status = AnInteger;
         else
             status = NotAFraction;
         }
-    else if(ONTKENNING(Flgs, NUMBER))
+    else if(NEGATION(Flgs, NUMBER))
         {
         Flgs &= ~(NOT|NUMBER);
         status = NotANumber;
         }
-    else if(Flgs & BREUK)
+    else if(Flgs & FRACTION)
         status = AFraction;
     else if(Flgs & NUMBER)
         status = ANumber;
 
 
     if(  !(Flgs & NONIDENT) /* % as flag on number forces comparison as string, not as number */
-      && RATIONAAL_WEAK(p)
+      && RATIONAL_WEAK(p)
       && (status != NotANumber)
-      && (  (  ((Flgs & (QBREUK|IS_OPERATOR)) == QBREUK)
+      && (  (  ((Flgs & (QFRACTION|IS_OPERATOR)) == QFRACTION)
             && (status != NotAFraction)
             )
-         || (  ((Flgs & (QBREUK|QGETAL|IS_OPERATOR)) == QGETAL)
+         || (  ((Flgs & (QFRACTION|QNUMBER|IS_OPERATOR)) == QNUMBER)
             && (status != AFraction   )
             )
          )
       )
         {
         int check = sfullnumbercheck(s,snijaf);
-        if(check & QGETAL)
+        if(check & QNUMBER)
             {
             int anythingGoes = 0;
             psk n = NULL;
@@ -7792,10 +7792,10 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                         }
                     }
                 }
-            /* End (check & QGETAL) == TRUE. */
+            /* End (check & QNUMBER) == TRUE. */
             /*printf("Not expected here!");getchar();*/
             }
-        else if(((s == snijaf) && (Flgs & (NUMBER|BREUK))) 
+        else if(((s == snijaf) && (Flgs & (NUMBER|FRACTION))) 
                || (   (s < snijaf)
                   && (  ((*s == '-') && (snijaf < s + 2))
                      || snijaf[-1] == '/'
@@ -7812,7 +7812,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
 
     P = (char *)SPOBJ(p);
 
-    if((Flgs & (NOT|BREUK|NUMBER|GREATER_THAN|SMALLER_THAN)) == (NOT|GREATER_THAN|SMALLER_THAN))
+    if((Flgs & (NOT|FRACTION|NUMBER|GREATER_THAN|SMALLER_THAN)) == (NOT|GREATER_THAN|SMALLER_THAN))
         { /* Case insensitive match: ~<> means "not different" */
         teken = strcasecompu(&s,&P,snijaf); /* Additional argument snijaf */
         }
@@ -9112,12 +9112,12 @@ first finds (=B), which is an object that should not obtain the flags !! as in
     if((pbinding = Naamwoord(variabele,&newval,twolevelsofindirection)) != NULL)
         {
         unsigned int nameflags,valueflags;
-        nameflags = (variabele->v.fl & (ERFENIS|SUCCESS));
+        nameflags = (variabele->v.fl & (BEQUEST|SUCCESS));
         if(ANYNEGATION(variabele->v.fl))
             nameflags |= NOT;
 
         valueflags = (pbinding)->v.fl;
-        valueflags |= (nameflags & (ERFENIS|NOT));
+        valueflags |= (nameflags & (BEQUEST|NOT));
         valueflags ^= ((nameflags & SUCCESS) ^ SUCCESS);
 
         assert(pbinding != NULL);
@@ -9202,7 +9202,7 @@ static int stringOncePattern(psk pat)
         return FALSE;
         }
     else if (  IS_VARIABLE(pat)
-            || NIKS(pat)
+            || NOTHING(pat)
             || (pat->v.fl & NONIDENT) /* @(abc:% c) */
             )
         {
@@ -9275,7 +9275,7 @@ static int oncePattern(psk pat)
         {
         return TRUE;
         }
-    if((pat->v.fl & ATOM) && ONTKENNING(pat->v.fl, ATOM))
+    if((pat->v.fl & ATOM) && NEGATION(pat->v.fl, ATOM))
         {
         return FALSE;
         }
@@ -9285,7 +9285,7 @@ static int oncePattern(psk pat)
         return TRUE;
         }
     else if (  IS_VARIABLE(pat)
-            || NIKS(pat)
+            || NOTHING(pat)
             || (pat->v.fl & NONIDENT) /*{?} a b c:% c => a b c */
             )
         return FALSE;
@@ -9418,7 +9418,7 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
     LONG pos;
     Flgs = pat->v.fl;
 #if CUTOFFSUGGEST
-    if(  ((Flgs & (SUCCESS|VISIBLE_FLAGS_POS0|IS_OPERATOR)) == (SUCCESS|QGETAL))
+    if(  ((Flgs & (SUCCESS|VISIBLE_FLAGS_POS0|IS_OPERATOR)) == (SUCCESS|QNUMBER))
       && mayMoveStartOfSubject 
       && *mayMoveStartOfSubject != 0
       )
@@ -9537,7 +9537,7 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
         return (char)(ONCE | POSITION_ONCE | s.c.rmr);
         }
 
-    if( ((pat->v.fl & (SUCCESS|VISIBLE_FLAGS_POS0|IS_OPERATOR)) == (SUCCESS|QGETAL)))
+    if( ((pat->v.fl & (SUCCESS|VISIBLE_FLAGS_POS0|IS_OPERATOR)) == (SUCCESS|QNUMBER)))
         {
         pos = toLong(pat); /* [20 */
         DBGSRC(Printf("pat:");result(pat);Printf("\n");)
@@ -9734,7 +9734,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
         snijaf = sub+stringLength;
 #if CUTOFFSUGGEST
     if(  (pat->flgs & ATOM)
-      ||    (NIKS(pat) 
+      ||    (NOTHING(pat) 
          && (  is_op(pat) 
             || !pat->u.obj)
             )
@@ -9779,7 +9779,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
             );
         }
     if(!(  (  (Flgs & NONIDENT)
-           && ( ONTKENNING(Flgs, NONIDENT)
+           && ( NEGATION(Flgs, NONIDENT)
               ? ( (s.c.once = ONCE)
                 , snijaf > sub
                 )
@@ -9787,7 +9787,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
               )
            )
         || (  (Flgs & ATOM)
-           && ( ONTKENNING(Flgs, ATOM)
+           && ( NEGATION(Flgs, ATOM)
               ?    (snijaf < sub + 2) /*!(sub[0] && sub[1])*/
               :    snijaf > sub
                 && ( (s.c.once = ONCE)
@@ -9795,13 +9795,13 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                    )
               )
            )
-        || (  (Flgs & (BREUK|NUMBER))
+        || (  (Flgs & (FRACTION|NUMBER))
            && ( (ci = sfullnumbercheck(sub,snijaf))
-              , (  (  (Flgs & BREUK)
-                   && ((ci != (QBREUK | QGETAL)) ^ ONTKENNING(Flgs, BREUK))
+              , (  (  (Flgs & FRACTION)
+                   && ((ci != (QFRACTION | QNUMBER)) ^ NEGATION(Flgs, FRACTION))
                    )
                 || (  (Flgs & NUMBER)
-                   && (((ci & QGETAL) == 0)      ^ ONTKENNING(Flgs, NUMBER))
+                   && (((ci & QNUMBER) == 0)      ^ NEGATION(Flgs, NUMBER))
                    )
                 )
               )
@@ -9830,7 +9830,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                 {
                 if (Flgs & UNIFY)        /* ?  */
                     {
-                    if (!NIKS(pat) || snijaf > sub)
+                    if (!NOTHING(pat) || snijaf > sub)
                         {
                         if (  is_op(pat)
                            || pat->u.obj
@@ -9851,7 +9851,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                                     wis(loc);
                                     }
                                 else
-                                    s.c.rmr = (char)NIKS(pat);
+                                    s.c.rmr = (char)NOTHING(pat);
                                 }
                             else
                                 {
@@ -9875,15 +9875,15 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                         s.c.rmr = (char)(stringmatch(ind+1,"A",sub,snijaf,loc,subkn,pposition,stringLength
                             ,suggestedCutOff
                             ,0
-                            ) ^ NIKS(pat));
+                            ) ^ NOTHING(pat));
 #else
                         s.c.rmr = (char)(stringmatch(ind+1,"A",sub,snijaf,loc,subkn,pposition,stringLength
-                            ) ^ NIKS(pat));
+                            ) ^ NOTHING(pat));
 #endif
                         wis(loc);
                         }
                     else
-                        s.c.rmr = (char)NIKS(pat);
+                        s.c.rmr = (char)NOTHING(pat);
                     }
                 }
             }
@@ -10004,7 +10004,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                                 }                                       /* or by looking at whether both lhs and rhs  */
                             else if(!(s.c.lmr & ONCE))                  /* results indicated this, in which case both */
                                 s.c.rmr &= ~ONCE;                       /* sides must be non-zero size subjects.      */
-                            return s.c.rmr ^ (char)NIKS(pat);
+                            return s.c.rmr ^ (char)NOTHING(pat);
                             }
                                                                     /* H        SL,SR=shift_right divisionPoint */
                                                                         /* SL = lhs divisionPoint S, SR = rhs divisionPoint S */
@@ -10048,7 +10048,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                         s.c.rmr |= ONCE;
                         s.c.rmr |= (char)(pat->v.fl & FENCE);
                         }
-                    return s.c.rmr ^ (char)NIKS(pat);               /* end */
+                    return s.c.rmr ^ (char)NOTHING(pat);               /* end */
                     }
                 case UNDERSCORE:
                     if(snijaf > sub + 1)
@@ -10184,9 +10184,9 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                         if (equal(pat, loc))
                             {
 #if CUTOFFSUGGEST
-                            s.c.rmr = (char)(stringmatch(ind+1,"T",sub,snijaf,loc,subkn,pposition,stringLength,NULL,0) ^ NIKS(loc));
+                            s.c.rmr = (char)(stringmatch(ind+1,"T",sub,snijaf,loc,subkn,pposition,stringLength,NULL,0) ^ NOTHING(loc));
 #else
-                            s.c.rmr = (char)(stringmatch(ind+1,"T",sub,snijaf,loc,subkn,pposition,stringLength) ^ NIKS(loc));
+                            s.c.rmr = (char)(stringmatch(ind+1,"T",sub,snijaf,loc,subkn,pposition,stringLength) ^ NOTHING(loc));
 #endif
                             wis(loc);
                             break;
@@ -10203,7 +10203,7 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                     if(!is_op(pat))
                         {
                         if (  !pat->u.obj
-                           && (Flgs & (BREUK | NUMBER | NONIDENT | ATOM | IDENT))
+                           && (Flgs & (FRACTION | NUMBER | NONIDENT | ATOM | IDENT))
                            )
                             {         /* e.g.    a b c : % */
                             s.c.rmr = TRUE;
@@ -10213,7 +10213,7 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 #if CUTOFFSUGGEST
                             s.c.rmr = (char)(scompare("b",(char *)sub,snijaf, pat
                                                 , ( (  !(Flgs & ATOM)
-                                                    || ONTKENNING(Flgs, ATOM)
+                                                    || NEGATION(Flgs, ATOM)
                                                     ) 
                                                     ? suggestedCutOff
                                                     : NULL
@@ -10247,7 +10247,7 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
             mooi = redMooi;hum = redhum;\
             Printf(") s.c.rmr %d (B)",s.c.rmr);\
             if(pat->v.fl & POSITION) Printf("POSITION ");\
-            if(pat->v.fl & BREUK)Printf("BREUK ");\
+            if(pat->v.fl & FRACTION)Printf("FRACTION ");\
             if(pat->v.fl & NUMBER)Printf("NUMBER ");\
             if(pat->v.fl & SMALLER_THAN)Printf("SMALLER_THAN ");\
             if(pat->v.fl & GREATER_THAN) Printf("GREATER_THAN ");\
@@ -10257,7 +10257,7 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
             Printf("\n");)
         }
     if(is_op(pat))
-        s.c.rmr ^= (char)NIKS(pat);
+        s.c.rmr ^= (char)NOTHING(pat);
     if(name)
         wis(name);
     return (char)(s.c.once | s.c.rmr);
@@ -10348,10 +10348,10 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                    ,op
                    );
         }
-    if ( !(  ((Flgs & NONIDENT) && (((sub->v.fl & IDENT) && 1) ^ ONTKENNING(Flgs, NONIDENT)))
-          || ((Flgs & ATOM    ) && ((is_op(sub)          && 1) ^ ONTKENNING(Flgs, ATOM    )))
-          || ((Flgs & BREUK   ) && ( !RAT_RAT(sub)             ^ ONTKENNING(Flgs, BREUK   )))
-          || ((Flgs & NUMBER  ) && ( !RATIONAAL_COMP(sub)      ^ ONTKENNING(Flgs, NUMBER  )))
+    if ( !(  ((Flgs & NONIDENT) && (((sub->v.fl & IDENT) && 1) ^ NEGATION(Flgs, NONIDENT)))
+          || ((Flgs & ATOM    ) && ((is_op(sub)          && 1) ^ NEGATION(Flgs, ATOM    )))
+          || ((Flgs & FRACTION   ) && ( !RAT_RAT(sub)             ^ NEGATION(Flgs, FRACTION   )))
+          || ((Flgs & NUMBER  ) && ( !RATIONAL_COMP(sub)      ^ NEGATION(Flgs, NUMBER  )))
           )
        )
         {
@@ -10374,7 +10374,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                 {
                 if (Flgs & UNIFY)        /* ?  */
                     {
-                    if (!NIKS(pat) || is_op(sub) || (sub->u.obj))
+                    if (!NOTHING(pat) || is_op(sub) || (sub->u.obj))
                         {
                         if (  is_op(pat)
                            || pat->u.obj
@@ -10396,7 +10396,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                                     wis(loc);
                                     }
                                 else
-                                    s.c.rmr = (char)NIKS(pat);
+                                    s.c.rmr = (char)NOTHING(pat);
                                 }
                             else
                                 {
@@ -10408,7 +10408,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                             s.c.rmr = TRUE;
                         }
                     /*
-                     * else NIKS(pat) && !is_op(sub) && !sub->u.obj
+                     * else NOTHING(pat) && !is_op(sub) && !sub->u.obj
                      * which means   ~?[`][!][!]
                      */
                     }
@@ -10417,11 +10417,11 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     if ((loc=Naamwoord_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
                         {
                         cleanOncePattern(loc);
-                        s.c.rmr = (char)(match(ind+1,sub, loc, snijaf,pposition,expr,op) ^ NIKS(pat));
+                        s.c.rmr = (char)(match(ind+1,sub, loc, snijaf,pposition,expr,op) ^ NOTHING(pat));
                         wis(loc);
                         }
                     else
-                        s.c.rmr = (char)NIKS(pat);
+                        s.c.rmr = (char)NOTHING(pat);
                     }
                 }
             }
@@ -10548,7 +10548,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
 #ifndef NDEBUG
                             DBGSRC(printMatchState("EXIT-MID",s,pposition,0);)
 #endif
-                            DBGSRC(if(pat->v.fl & BREUK) Printf("BREUK ");\
+                            DBGSRC(if(pat->v.fl & FRACTION) Printf("FRACTION ");\
                                 if(pat->v.fl & NUMBER) Printf("NUMBER ");\
                                 if(pat->v.fl & SMALLER_THAN)\
                                     Printf("SMALLER_THAN ");\
@@ -10558,7 +10558,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                                 if(pat->v.fl & FENCE) Printf("FENCE ");\
                                 if(pat->v.fl & IDENT) Printf("IDENT");\
                                 Printf("\n");)
-                            return s.c.rmr ^ (char)NIKS(pat);
+                            return s.c.rmr ^ (char)NOTHING(pat);
                             }
                     /* H        SL,SR=shift_right divisionPoint */
                         if(  kop(loc) == kop(pat)
@@ -10606,7 +10606,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                            the pattern or in the result of the lhs or the rhs.
                            (Not necessary that both have this flag.)
                         */
-                    s.c.rmr ^= (char)NIKS(pat);
+                    s.c.rmr ^= (char)NOTHING(pat);
                     return s.c.rmr;
                     /* end */
                     }
@@ -10703,7 +10703,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                         {
                         if((pat->v.fl & ATOM)
 #if !STRINGMATCH_CAN_BE_NEGATED
-                            && !ONTKENNING(pat->v.fl,ATOM)
+                            && !NEGATION(pat->v.fl,ATOM)
 #endif
                             )
 #if CUTOFFSUGGEST
@@ -10848,7 +10848,7 @@ b b h h h a b c d:?X (|b c|x) d)
                         loc = setflgs(loc,pat->v.fl);
                         if (equal(pat, loc))
                             {
-                            s.c.rmr = (char)(match(ind+1,sub, loc, snijaf,pposition,expr,op) ^ NIKS(loc));
+                            s.c.rmr = (char)(match(ind+1,sub, loc, snijaf,pposition,expr,op) ^ NOTHING(loc));
                             wis(loc);
                             break;
                             }
@@ -10886,7 +10886,7 @@ b b h h h a b c d:?X (|b c|x) d)
                     else
                         {
                         if (  pat->u.obj
-                           || !(Flgs & (BREUK | NUMBER | NONIDENT | ATOM | IDENT))
+                           || !(Flgs & (FRACTION | NUMBER | NONIDENT | ATOM | IDENT))
                            )
                             {
 
@@ -10910,7 +10910,7 @@ b b h h h a b c d:?X (|b c|x) d)
                     s.b.brmr_true,s.b.brmr_once,s.b.brmr_position_once,s.b.brmr_position_max_reached,s.b.brmr_fence);)
 #endif
         DBGSRC(if(pat->v.fl & POSITION) Printf("POSITION ");\
-            if(pat->v.fl & BREUK) Printf("BREUK ");\
+            if(pat->v.fl & FRACTION) Printf("FRACTION ");\
             if(pat->v.fl & NUMBER) Printf("NUMBER ");\
             if(pat->v.fl & SMALLER_THAN) Printf("SMALLER_THAN ");\
             if(pat->v.fl & GREATER_THAN) Printf("GREATER_THAN ");\
@@ -10920,7 +10920,7 @@ b b h h h a b c d:?X (|b c|x) d)
             Printf("\n");)
         }
     if(is_op(pat))
-        s.c.rmr ^= (char)NIKS(pat);
+        s.c.rmr ^= (char)NOTHING(pat);
     if(name)
         wis(name);
     return s.c.rmr;
@@ -11488,7 +11488,7 @@ static psk lambda(psk pkn,psk name,psk Arg)
                     }
                 }
             else if (  kop(pkn) == FUU 
-                    && (pkn->v.fl & BREUK)
+                    && (pkn->v.fl & FRACTION)
                     && kop(pkn->RIGHT) == DOT
                     && !equal(name,pkn->RIGHT->LEFT)
                     )
@@ -11512,7 +11512,7 @@ int lflgs;
 if((lflgs = kn->LEFT->v.fl & UNOPS) != 0)
     {
     kn->RIGHT = prive(kn->RIGHT);
-    if(NIKSF(lflgs))
+    if(NOTHINGF(lflgs))
         {
         kn->RIGHT->v.fl |= lflgs & ~NOT;
         kn->RIGHT->v.fl ^= NOT|SUCCESS;
@@ -12815,7 +12815,7 @@ static function_return_type find_func(psk pkn)
             }
         }
     else if (  (kop(pkn->LEFT) == FUU)
-            && (pkn->LEFT->v.fl & BREUK)
+            && (pkn->LEFT->v.fl & FRACTION)
             && (kop(pkn->LEFT->RIGHT) == DOT)
             && (!is_op(pkn->LEFT->RIGHT->LEFT))
             )
@@ -13140,7 +13140,7 @@ static psk swi(psk pkn,psk rlknoop,psk rrknoop)
         {
         rrknoop = rrknoop->RIGHT;
         rlknoop = is_op(rrknoop) ? rrknoop->LEFT : rrknoop;
-        if(is_op(rlknoop) || !INTEGER_NIET_NEG(rlknoop))
+        if(is_op(rlknoop) || !INTEGER_NOT_NEG(rlknoop))
             return functionFail(pkn);
         u.i[i++] = (unsigned int)
             strtoul((char *)POBJ(rlknoop),(char **)NULL,10);
@@ -13453,7 +13453,7 @@ static function_return_type functies(psk pkn)
             {
             char * endptr;
             unsigned LONG val;
-            if(is_op(rknoop) || !INTEGER_NIET_NEG(rknoop))
+            if(is_op(rknoop) || !INTEGER_NOT_NEG(rknoop))
                 return functionFail(pkn);
 #ifdef __BORLANDC__
             if(  strlen((char *)POBJ(rknoop)) > 10
@@ -13561,7 +13561,7 @@ static function_return_type functies(psk pkn)
                 adr[2]->v.fl &= ~READY; /* {?} flg$(=!a):(=?X.?)&lst$X */
                 adr[3]->v.fl |= READY;  /* {?} flg$(=!a):(=?.?Y)&!Y */
                 }
-            if(NIKSF(intVal))
+            if(NOTHINGF(intVal))
                 {
                 adr[2]->v.fl ^= SUCCESS;
                 adr[3]->v.fl ^= SUCCESS;
@@ -13584,7 +13584,7 @@ static function_return_type functies(psk pkn)
                 adr[3] = zelfde_als_w(rknoop->RIGHT->RIGHT);
                 adr[3] = prive(adr[3]);
                 adr[3]->v.fl |= intVal;
-                if(NIKSF(intVal))
+                if(NOTHINGF(intVal))
                     {
                     adr[3]->v.fl ^= SUCCESS;
                     }
@@ -13604,15 +13604,15 @@ static function_return_type functies(psk pkn)
             {
 #if MAXSTACK
 #if defined _WIN32
-            sprintf(klad,"%lu.%lu.%u.%d",(unsigned long)globalloc,(unsigned long)maxgloballoc,maxbez / ONE,maxstack);
+            sprintf(klad,"%lu.%lu.%u.%d",(unsigned long)globalloc,(unsigned long)maxgloballoc,maxbez / ONEREF,maxstack);
 #else
-            sprintf(klad,"%zu.%zu.%u.%d",globalloc,maxgloballoc,maxbez / ONE,maxstack);
+            sprintf(klad,"%zu.%zu.%u.%d",globalloc,maxgloballoc,maxbez / ONEREF,maxstack);
 #endif
 #else
 #if defined _WIN32
-            sprintf(klad,"%lu.%lu.%u",(unsigned long)globalloc,(unsigned long)maxgloballoc,maxbez / ONE);
+            sprintf(klad,"%lu.%lu.%u",(unsigned long)globalloc,(unsigned long)maxgloballoc,maxbez / ONEREF);
 #else
-            sprintf(klad,"%zu.%zu.%u",globalloc,maxgloballoc,maxbez / ONE);
+            sprintf(klad,"%zu.%zu.%u",globalloc,maxgloballoc,maxbez / ONEREF);
 #endif
 #endif
             pkn = opb(pkn,klad,NULL);
@@ -13629,8 +13629,8 @@ static function_return_type functies(psk pkn)
             }
         CASE(MOD)
             {
-            if(RATIONAAL_COMP(rlknoop = rknoop->LEFT) &&
-               RATIONAAL_COMP_NOT_NUL(rrknoop = rknoop->RIGHT))
+            if(RATIONAL_COMP(rlknoop = rknoop->LEFT) &&
+               RATIONAL_COMP_NOT_NUL(rrknoop = rknoop->RIGHT))
                 {
                 psk kn;
                 kn = _qmodulo(rlknoop,rrknoop);
@@ -13704,8 +13704,8 @@ static function_return_type functies(psk pkn)
         CASE(DIV)
             {
             if(  is_op(rknoop)
-              && RATIONAAL_COMP(rlknoop = rknoop->LEFT)
-              && RATIONAAL_COMP_NOT_NUL(rrknoop = rknoop->RIGHT)
+              && RATIONAL_COMP(rlknoop = rknoop->LEFT)
+              && RATIONAL_COMP_NOT_NUL(rrknoop = rknoop->RIGHT)
               )
                 {
                 psk kn;
@@ -13718,7 +13718,7 @@ static function_return_type functies(psk pkn)
             }
         CASE(DEN)
             {
-            if(RATIONAAL_COMP(rknoop))
+            if(RATIONAL_COMP(rknoop))
                 {
                 pkn = _qdenominator(pkn);
                 }
@@ -13835,7 +13835,7 @@ static function_return_type functies(psk pkn)
             if(PLOBJ(rknoop) != '\0')
                 {
                 LONG val;
-                if(!INTEGER_NIET_NEG(rknoop))
+                if(!INTEGER_NOT_NEG(rknoop))
                     return functionFail(pkn);
                 val = STRTOUL((char *)POBJ(rknoop),(char **)NULL,10);
                 if(val >= ARGC)
@@ -14124,7 +14124,7 @@ The same effect is obtained by <expr>:?!(=)
                 if(!HAS_UNOPS(pkn->LEFT))
                     {
                     intVal = pkn->v.fl & UNOPS;
-                    if(  intVal == BREUK 
+                    if(  intVal == FRACTION 
                       && is_op(pkn->RIGHT)
                       && kop(pkn->RIGHT) == DOT
                       && !is_op(pkn->RIGHT->LEFT)
@@ -14236,7 +14236,7 @@ static psk stapelmacht(psk pkn)
                 wis(pkn);
                 return copievan(&eenk);
                 }
-            if(IS_EEN(rknoop))
+            if(IS_ONE(rknoop))
                 {
                 return linkertak(pkn);
                 }
@@ -14244,14 +14244,14 @@ static psk stapelmacht(psk pkn)
         lknoop = pkn->LEFT;
         if(!is_op(lknoop))
             {
-            if((RAT_NUL(lknoop) && !RAT_NEG_COMP(rknoop)) || IS_EEN(lknoop))
+            if((RAT_NUL(lknoop) && !RAT_NEG_COMP(rknoop)) || IS_ONE(lknoop))
                 {
                 return linkertak(pkn);
                 }
 
-            if(!is_op(rknoop) && RATIONAAL_COMP(rknoop))
+            if(!is_op(rknoop) && RATIONAL_COMP(rknoop))
                 {
-                if(RATIONAAL_COMP(lknoop))
+                if(RATIONAL_COMP(lknoop))
                     {
                     if(RAT_NEG_COMP(rknoop) && abseen(rknoop))
                         {
@@ -14333,13 +14333,13 @@ static psk stapelmacht(psk pkn)
             return opb(pkn,"\1^\3*\2^\3",NULL);
             }
 
-        if(RATIONAAL_COMP(lknoop))
+        if(RATIONAL_COMP(lknoop))
             {
             static const char
                 haakmineen[] = ")^-1",
                 haakhekje1macht[] = "(\1^",
                 macht2maaleenmacht[] = ")^2*\1^";
-            if(INTEGER_NIET_NUL_COMP(rknoop) && !abseen(rknoop))
+            if(INTEGER_NOT_NUL_COMP(rknoop) && !abseen(rknoop))
                 {
                 adr[1] = lknoop;
                 if(INTEGER_POS_COMP(rknoop))
@@ -14455,7 +14455,7 @@ static void splitProduct_number_im_rest(psk pknoop,ppsk N,ppsk I,ppsk NNNI)
     psk temp;
     if(kop(pknoop) == TIMES)
         {
-        if(RATIONAAL_COMP(pknoop->LEFT))
+        if(RATIONAL_COMP(pknoop->LEFT))
             {/* 17*x */
             *N = pknoop->LEFT;
             temp = pknoop->RIGHT;
@@ -14685,9 +14685,9 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
     rechteroperand_and_tail(top,&Rterm,&Rtail);
     linkeroperand_and_tail(top,&Lterm,&Ltail);
     assert(Ltail == NULL);
-    if(RATIONAAL_COMP(Lterm))
+    if(RATIONAL_COMP(Lterm))
         {
-        if(RATIONAAL_COMP(Rterm))
+        if(RATIONAL_COMP(Rterm))
             {
             conc[0] = hekje6;
             if(Lterm == Rterm)
@@ -14712,7 +14712,7 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
             }
         return pkn;
         }
-    else if(RATIONAAL_COMP(Rterm))
+    else if(RATIONAL_COMP(Rterm))
         {
         adr[1] = Rterm;
         adr[2] = L;
@@ -15047,7 +15047,7 @@ static psk substmaal(psk pkn)
         rvar = NULL; /* (f.e)*(y.s) */
     else
         {
-        if(IS_EEN(rkn))
+        if(IS_ONE(rkn))
             {
             return linkertak(pkn); /*{?} (a=7)&!(a*1) => 7 */
             }
@@ -15069,13 +15069,13 @@ static psk substmaal(psk pkn)
             }
         lvar = lkn;
 
-        if(IS_EEN(lkn))
+        if(IS_ONE(lkn))
             {
             return rechtertak(pkn); /*{?} 1*-1 => -1 */
             }
-        else if(RATIONAAL_COMP(lkn) && rvar)
+        else if(RATIONAL_COMP(lkn) && rvar)
             {
-            if(RATIONAAL_COMP(rkn))
+            if(RATIONAL_COMP(rkn))
                 {
                 if(rkn == lkn)
                     lvar = (pkn->LEFT = prive(lkn)); /*{?} 1/10*1/10 => 1/100 */
@@ -15310,13 +15310,13 @@ lloper = a * x
 */
 static int vglplus(psk kn1,psk kn2)
     {
-    if(RATIONAAL_COMP(kn2))
+    if(RATIONAL_COMP(kn2))
         {
-        if(RATIONAAL_COMP(kn1))
+        if(RATIONAL_COMP(kn1))
             return 0;
         return 1; /* switch places */
         }
-    else if(RATIONAAL_COMP(kn1))
+    else if(RATIONAL_COMP(kn1))
         return -1;
     else
         {
@@ -15578,7 +15578,7 @@ static psk substlog(psk pkn)
         int ok;
         return tryq(pkn,f5,&ok); /*{?} x\L(a*x^n*z) => n+x\L(a*z) */
         }
-    else if(IS_EEN(rknoop))  /*{?} x\L1 => 0 */ /*{!} 0 */
+    else if(IS_ONE(rknoop))  /*{?} x\L1 => 0 */ /*{!} 0 */
         {
         wis(pkn);
         return copievan(&nulk);
@@ -15589,11 +15589,11 @@ static psk substlog(psk pkn)
         return pkn;
     else if(RAT_NUL(lknoop))   /*{?} 0\Lx => 0\Lx */
         return pkn;
-    else if(IS_EEN(lknoop))   /*{?} 1\Lx => 1\Lx */
+    else if(IS_ONE(lknoop))   /*{?} 1\Lx => 1\Lx */
         return pkn;
     else if(RAT_NEG(lknoop))  /*{?} -7\Lx => -7\Lx */
         return pkn;
-    else if(RATIONAAL_COMP(rknoop))  /*{?} x\L7 => x\L7 */
+    else if(RATIONAL_COMP(rknoop))  /*{?} x\L7 => x\L7 */
         {
         if(_qvergelijk(rknoop,&nulk) & MINUS)
             {
@@ -15602,7 +15602,7 @@ static psk substlog(psk pkn)
             adr[2] = rknoop;
             return opb(pkn,"(i*pi*e\016\1^-1+\1\016(-1*\2))",NULL);
             }
-        else if(RATIONAAL_COMP(lknoop)) /* m\Ln */ /*{?} 7\L9 => 1+7\L9/7 */
+        else if(RATIONAL_COMP(lknoop)) /* m\Ln */ /*{?} 7\L9 => 1+7\L9/7 */
             {
             if(_qvergelijk(lknoop,&eenk) & MINUS)
                 {
@@ -15912,7 +15912,7 @@ static psk eval(psk pkn)
                         if(lkn.flgs & ATOM) /* should other flags be
                                             excluded, including ~ ?*/
 #else
-                        if((lkn.flgs & ATOM) && !ONTKENNING(lkn.flgs,ATOM))
+                        if((lkn.flgs & ATOM) && !NEGATION(lkn.flgs,ATOM))
 #endif
                             {
 #if CUTOFFSUGGEST
@@ -16286,38 +16286,38 @@ int startProc(
     nilk.flgs = READY | SUCCESS | IDENT;
     nilk.u.lobj = 0L;
 
-    nulk.flgs = READY | SUCCESS | IDENT | QGETAL | QNUL;
+    nulk.flgs = READY | SUCCESS | IDENT | QNUMBER | QNUL;
     nulk.u.lobj = 0L;
     nulk.u.obj = '0';
 
     eenk.u.lobj = 0L;
     eenk.u.obj = '1';
-    eenk.flgs = READY | SUCCESS | IDENT | QGETAL;
+    eenk.flgs = READY | SUCCESS | IDENT | QNUMBER;
     *(&(eenk.u.obj)+1) = 0;
 
     mintweek.u.lobj = 0L;
     mintweek.u.obj = '2';
-    mintweek.flgs = READY | SUCCESS | QGETAL | MINUS;
+    mintweek.flgs = READY | SUCCESS | QNUMBER | MINUS;
     *(&(mintweek.u.obj)+1) = 0;
 
     mineenk.u.lobj = 0L;
     mineenk.u.obj = '1';
-    mineenk.flgs = READY | SUCCESS | QGETAL | MINUS;
+    mineenk.flgs = READY | SUCCESS | QNUMBER | MINUS;
     *(&(mineenk.u.obj)+1) = 0;
 
     tweek.u.lobj = 0L;
     tweek.u.obj = '2';
-    tweek.flgs = READY | SUCCESS | QGETAL;
+    tweek.flgs = READY | SUCCESS | QNUMBER;
     *(&(tweek.u.obj)+1) = 0;
 
     vierk.u.lobj = 0L;
     vierk.u.obj = '4';
-    vierk.flgs = READY | SUCCESS | QGETAL;
+    vierk.flgs = READY | SUCCESS | QNUMBER;
     *(&(vierk.u.obj)+1) = 0;
 
     minvierk.u.lobj = 0L;
     minvierk.u.obj = '4';
-    minvierk.flgs = READY | SUCCESS | QGETAL | MINUS;
+    minvierk.flgs = READY | SUCCESS | QNUMBER | MINUS;
     *(&(minvierk.u.obj)+1) = 0;
 
     m0 = opb(m0,"?*(%+%)^~/#>1*?" , NULL);
@@ -16573,7 +16573,7 @@ int mainlus(int argc,char *argv[])
         "OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED\\n"
         "TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY\\n"
         "YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER\\n"
-        "PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE\\n"
+        "PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BONE ADVISED OF THE\\n"
         "POSSIBILITY OF SUCH DAMAGES.\\n\")&"
         "out$!v&"
         "out$\"Copyright (C) 2002 Bart Jongejan\\n"
