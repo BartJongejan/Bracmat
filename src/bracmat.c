@@ -21,7 +21,7 @@ email: bartj@hum.ku.dk
 */
 #define DATUM "28 April 2017"
 #define VERSION "6 'newspeak'"
-#define BUILD "211"
+#define BUILD "212"
 /*
 COMPILATION
 -----------
@@ -108,11 +108,6 @@ Bracmat was also extended with a few operators that makes this programming
 language interesting in the field of computational linguistics, namely the
 blank " ", the comma "," and the full stop ".". (The interpunction symbols
 "?", "!" and ";" were already 'taken' to serve other purposes.)
-
-You may find the source code difficult to read at some places. You are best
-off if you understand English and Dutch (and perhaps Danish). Only if the
-program arises enough interest I will invest the effort to streamline the
-source text and make it more understandable for the general programmer.
 */
 
 /*
@@ -120,7 +115,7 @@ TODO list:
 20010103: Make > and < work on non-atomic stuff
 20010904: Issue warning if 'arg' is declared as a local variable
 */
-/* 20010309 evalueer on LUCHT and KOMMA strings is now iterative on the
+/* 20010309 evalueer on WHITE and COMMA strings is now iterative on the
    right descending (deep) branch, not recursive.
    (It is now possible to read long lists, e.g. dictionairies, without causing
    stack overflow when evaluating the list.)
@@ -141,7 +136,7 @@ TODO list:
 /* 
 About reference counting.
 Most nodes can be shared by no more than 1024 referers. Copies must be made as needed.
-Objects (nodes with = ('WORDT' in Dutch) are objects and cane be shared by almost 2^40 referers.
+Objects (nodes with = ('EQUALS') are objects and cane be shared by almost 2^40 referers.
 
 small refcounter       large refcounter              comment
 (10 bits, all nodes)   (30 bits, only objects)
@@ -734,7 +729,7 @@ typedef union
 
             unsigned int IS_OPERATOR     :1;
             unsigned int binop           :4;
-            /* WORDT DOT KOMMA OF EN MATCH LUCHT PLUS MAAL EXP LOG DIF FUU FUN STREEP */
+            /* EQUALS DOT COMMA OR AND MATCH WHITE PLUS TIMES EXP LOG DIF FUU FUN UNDERSCORE */
             unsigned int latebind        :1;
             unsigned int refcount        :10;
             } node;
@@ -1155,21 +1150,21 @@ Reference count starts with 0, not 1
 
 #define OPSH (SHL+1)
 #define IS_OPERATOR (1 << SHL)
-#define WORDT   (( 0<<OPSH) + IS_OPERATOR)
-#define DOT     (( 1<<OPSH) + IS_OPERATOR)
-#define KOMMA   (( 2<<OPSH) + IS_OPERATOR)
-#define OF      (( 3<<OPSH) + IS_OPERATOR)
-#define EN      (( 4<<OPSH) + IS_OPERATOR)
-#define MATCH   (( 5<<OPSH) + IS_OPERATOR)
-#define LUCHT   (( 6<<OPSH) + IS_OPERATOR)
-#define PLUS    (( 7<<OPSH) + IS_OPERATOR)
-#define MAAL    (( 8<<OPSH) + IS_OPERATOR)
-#define EXP     (( 9<<OPSH) + IS_OPERATOR)
-#define LOG     ((10<<OPSH) + IS_OPERATOR)
-#define DIF     ((11<<OPSH) + IS_OPERATOR)
-#define FUU     ((12<<OPSH) + IS_OPERATOR)
-#define FUN     ((13<<OPSH) + IS_OPERATOR)
-#define STREEP  ((14<<OPSH) + IS_OPERATOR) /* dummy */
+#define EQUALS     (( 0<<OPSH) + IS_OPERATOR)
+#define DOT        (( 1<<OPSH) + IS_OPERATOR)
+#define COMMA      (( 2<<OPSH) + IS_OPERATOR)
+#define OR         (( 3<<OPSH) + IS_OPERATOR)
+#define AND        (( 4<<OPSH) + IS_OPERATOR)
+#define MATCH      (( 5<<OPSH) + IS_OPERATOR)
+#define WHITE      (( 6<<OPSH) + IS_OPERATOR)
+#define PLUS       (( 7<<OPSH) + IS_OPERATOR)
+#define TIMES      (( 8<<OPSH) + IS_OPERATOR)
+#define EXP        (( 9<<OPSH) + IS_OPERATOR)
+#define LOG        ((10<<OPSH) + IS_OPERATOR)
+#define DIF        ((11<<OPSH) + IS_OPERATOR)
+#define FUU        ((12<<OPSH) + IS_OPERATOR)
+#define FUN        ((13<<OPSH) + IS_OPERATOR)
+#define UNDERSCORE ((14<<OPSH) + IS_OPERATOR) /* dummy */
 
 static const psk knil[16] =
 {NULL,NULL,NULL,NULL,NULL,NULL,&nilk,&nulk,
@@ -1183,7 +1178,7 @@ static const char opchar[16] =
 #define kop(kn) ((kn)->ops & OPERATOR)
 #define kopo(kn) ((kn).ops & OPERATOR)
 #define is_op(kn) ((kn)->ops & IS_OPERATOR)
-#define is_object(kn) (((kn)->ops & OPERATOR) == WORDT)
+#define is_object(kn) (((kn)->ops & OPERATOR) == EQUALS)
 #define klopcode(kn) (kop(kn) >> OPSH)
 
 #define nil(p) knil[klopcode(p)]
@@ -1214,7 +1209,7 @@ static void dec_refcount(psk kn)
     {
     assert(kn->ops & ALL_REFCOUNT_BITS_SET);
     kn->ops -= ONE;
-    if((kn->ops & (OPERATOR|ALL_REFCOUNT_BITS_SET)) == WORDT)
+    if((kn->ops & (OPERATOR|ALL_REFCOUNT_BITS_SET)) == EQUALS)
         {
         if(REFCOUNTNONZERO((objectknoop*)kn))
             {
@@ -1343,7 +1338,7 @@ static int hum = 1;
 static int listWithName = 1;
 static int mooi = TRUE;
 static int optab[256];
-static int dummy_op = LUCHT;
+static int dummy_op = WHITE;
 #if DEBUGBRACMAT
 static int debug = 0;
 #endif
@@ -3179,7 +3174,7 @@ static void result(psk wortel);
 
 static psk new_operator_like(psk kn)
     {
-    if(kop(kn) == WORDT)
+    if(kop(kn) == EQUALS)
         {
         DBGSRC(printf("new_operator_like:");result(kn);printf("\n");)
         assert(!ISBUILTIN((objectknoop*)kn));
@@ -3398,22 +3393,22 @@ static size_t complexiteit(psk wortel,size_t max)
         {
         switch(kop(wortel))
             {
-            case OF :
-            case EN :
+            case OR :
+            case AND :
                 max += COMPLEX_MAX/5;
                 break;
-            case WORDT :
+            case EQUALS :
             case MATCH :
                 max += COMPLEX_MAX/10;
                 break;
             case DOT :
-            case KOMMA :
-            case LUCHT :
+            case COMMA :
+            case WHITE :
                 switch(kop(wortel->LEFT))
                     {
                     case DOT:
-                    case KOMMA:
-                    case LUCHT :
+                    case COMMA:
+                    case WHITE :
                         max += COMPLEX_MAX/10;
                         break;
                     default:
@@ -3429,7 +3424,7 @@ static size_t complexiteit(psk wortel,size_t max)
             max += (2 * COMPLEX_MAX)/LINELENGTH; /* 2 parentheses */
 
         kind = kop(wortel->RIGHT);
-        if(HAS__UNOPS(wortel->RIGHT) || ouder > kind || (ouder == kind && ouder > MAAL))
+        if(HAS__UNOPS(wortel->RIGHT) || ouder > kind || (ouder == kind && ouder > TIMES))
             max += (2 * COMPLEX_MAX)/LINELENGTH; /* 2 parentheses */
 
         if(max > COMPLEX_MAX)
@@ -3794,8 +3789,8 @@ if(pknoop->ops & LATEBIND)
 return pknoop;
 }
 
-#define RSP (ouder == LUCHT ? RHS : 0)
-#define LSP (ouder == LUCHT ? LHS : 0)
+#define RSP (ouder == WHITE ? RHS : 0)
+#define LSP (ouder == WHITE ? LHS : 0)
 
 #ifndef reslt
 static void reslt(psk wortel,int nivo,int ind,int space)
@@ -3803,7 +3798,7 @@ static void reslt(psk wortel,int nivo,int ind,int space)
 static int ouder,kind,newind;
 while(is_op(wortel))
     {
-    if(kop(wortel) == WORDT)
+    if(kop(wortel) == EQUALS)
         wortel->RIGHT = Head(wortel->RIGHT);
     ouder = kop(wortel);
     kind = kop(wortel->LEFT);
@@ -3823,7 +3818,7 @@ while(is_op(wortel))
     bewerk(opchar[klopcode(wortel)]);
     ouder = kop(wortel);
     kind = kop(wortel->RIGHT);
-    if(HAS__UNOPS(wortel->RIGHT) || ouder > kind || (ouder == kind && ouder > MAAL))
+    if(HAS__UNOPS(wortel->RIGHT) || ouder > kind || (ouder == kind && ouder > TIMES))
         {
         hreslt(wortel->RIGHT,nivo+1,FALSE,LSP | (space & RHS));
         return;
@@ -3851,7 +3846,7 @@ static void reslts(psk wortel,int nivo,int ind,int space,psk snijaf)
     static int ouder,kind,newind;
     if(is_op(wortel))
         {
-        if(kop(wortel) == WORDT)
+        if(kop(wortel) == EQUALS)
             wortel->RIGHT = Head(wortel->RIGHT);
 
         do
@@ -3875,7 +3870,7 @@ static void reslts(psk wortel,int nivo,int ind,int space,psk snijaf)
             bewerk(opchar[klopcode(wortel)]);
             ouder = kop(wortel);
             kind = kop(wortel->RIGHT);
-            if(HAS__UNOPS(wortel->RIGHT) || ouder > kind || (ouder == kind && ouder > MAAL))
+            if(HAS__UNOPS(wortel->RIGHT) || ouder > kind || (ouder == kind && ouder > TIMES))
                 hreslts(wortel->RIGHT,nivo+1,FALSE,LSP | (space & RHS),snijaf);
             else if(ouder < kind)
                 {
@@ -3906,7 +3901,7 @@ static int ouder,kind;
 if(is_op(wortel))
     {
     int number_of_flags;
-    if(kop(wortel) == WORDT)
+    if(kop(wortel) == EQUALS)
         wortel->RIGHT = Head(wortel->RIGHT);
     indent(wortel,nivo,-1);
     number_of_flags = printflags(wortel);
@@ -3932,7 +3927,7 @@ if(is_op(wortel))
     ouder = kop(wortel);
 
     kind = kop(wortel->RIGHT);
-    if(HAS__UNOPS(wortel->RIGHT) || ouder > kind || (ouder == kind && ouder > MAAL))
+    if(HAS__UNOPS(wortel->RIGHT) || ouder > kind || (ouder == kind && ouder > TIMES))
         hreslt(wortel->RIGHT,nivo+1,FALSE,LSP);
     else if(ouder < kind)
         reslt(wortel->RIGHT,nivo+1,FALSE,LSP);
@@ -3966,7 +3961,7 @@ else
 static int testMul(char * txt,psk variabele,psk pbinding,int doit)
     {
     if(  doit 
-      || is_op(pbinding) && kop(pbinding) == MAAL && pbinding->LEFT->u.obj == 'a'
+      || is_op(pbinding) && kop(pbinding) == TIMES && pbinding->LEFT->u.obj == 'a'
       )
         {
         POINT = 1;
@@ -3995,7 +3990,7 @@ static int ouder,kind;
 if(is_op(wortel))
     {
     int number_of_flags;
-    if(kop(wortel) == WORDT)
+    if(kop(wortel) == EQUALS)
         wortel->RIGHT = Head(wortel->RIGHT);
     if(snijaf && wortel->RIGHT == snijaf)
         {
@@ -4021,7 +4016,7 @@ if(is_op(wortel))
     bewerk(opchar[klopcode(wortel)]);
     ouder = kop(wortel);
     kind = kop(wortel->RIGHT);
-    if(HAS__UNOPS(wortel->RIGHT) || ouder > kind || (ouder == kind && ouder > MAAL))
+    if(HAS__UNOPS(wortel->RIGHT) || ouder > kind || (ouder == kind && ouder > TIMES))
         hreslts(wortel->RIGHT,nivo+1,FALSE,LSP,snijaf);
     else if(ouder < kind)
         reslts(wortel->RIGHT,nivo+1,FALSE,LSP,snijaf);
@@ -4343,7 +4338,7 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
                     *nxt = op_of_0;
                 return pkn;
                 }
-            if(optab[op_of_0] == WORDT)
+            if(optab[op_of_0] == EQUALS)
                 {
                 operatorNode = (psk)bmalloc(__LINE__,sizeof(objectknoop));
         /*        ((objectknoop*)psk)->refcount = 0; done by bmalloc */
@@ -4838,7 +4833,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
                         break;
                     default :
                         {
-                        if(  optab[ikar] == LUCHT
+                        if(  optab[ikar] == WHITE
                           && (  ikar != '\n' 
                              || fpi != stdin
                              || parentheses
@@ -5115,21 +5110,21 @@ static void init_opcode(void)
             {
             case 0   :
             case ')' : optab[tel] = -1   ;break;
-            case '=' : optab[tel] = WORDT;break;
+            case '=' : optab[tel] = EQUALS;break;
             case '.' : optab[tel] = DOT  ;break;
-            case ',' : optab[tel] = KOMMA;break;
-            case '|' : optab[tel] = OF   ;break;
-            case '&' : optab[tel] = EN   ;break;
+            case ',' : optab[tel] = COMMA;break;
+            case '|' : optab[tel] = OR   ;break;
+            case '&' : optab[tel] = AND   ;break;
             case ':' : optab[tel] = MATCH;break;
             case '+' : optab[tel] = PLUS ;break;
-            case '*' : optab[tel] = MAAL ;break;
+            case '*' : optab[tel] = TIMES ;break;
             case '^' : optab[tel] = EXP  ;break;
             case 016 : optab[tel] = LOG  ;break;
             case 017 : optab[tel] = DIF  ;break;
             case '$' : optab[tel] = FUN  ;break;
             case '\'': optab[tel] = FUU  ;break;
-            case '_' : optab[tel] = STREEP;break;
-            default  : optab[tel] = (tel <= ' ') ? LUCHT : NOOP;
+            case '_' : optab[tel] = UNDERSCORE;break;
+            default  : optab[tel] = (tel <= ' ') ? WHITE : NOOP;
             }
         }
     }
@@ -6813,7 +6808,7 @@ static int vgl(psk kn1,psk kn2)
                 if(r)
                     {
                     /*{?} x^(y*(a+b))+-1*x^(a*y+b*y) => 0 */ /*{!} 0 */
-                    if(  kop(kn1) == MAAL
+                    if(  kop(kn1) == TIMES
                       && kop(kn2) == PLUS
                       && is_op(kn1->RIGHT)
                       && kop(kn1->RIGHT) == PLUS
@@ -6821,7 +6816,7 @@ static int vgl(psk kn1,psk kn2)
                         {
                         return vglsub(kn1,kn2);
                         }
-                    else if(  kop(kn2) == MAAL
+                    else if(  kop(kn2) == TIMES
                       && kop(kn1) == PLUS
                       && is_op(kn2->RIGHT)
                       && kop(kn2->RIGHT) == PLUS
@@ -6891,7 +6886,7 @@ static int setmember(psk name,psk tree,psk nieuw)
     {
     while(is_op(tree))
         {
-        if(kop(tree) == WORDT)
+        if(kop(tree) == EQUALS)
             {
             psk nname;
             if(kop(name) == DOT)
@@ -6933,7 +6928,7 @@ static int update(psk name,psk pknoop) /* name = tree with DOT in root */
     vars * voorvar;
     if(is_op(name->LEFT))
         {
-        if(kop(name->LEFT) == WORDT)
+        if(kop(name->LEFT) == EQUALS)
             /*{?} x:?((=(a=) (b=)).b) => x */
             /*          ^              */
             return setmember(name->RIGHT,name->LEFT->RIGHT,pknoop);
@@ -6943,7 +6938,7 @@ static int update(psk name,psk pknoop) /* name = tree with DOT in root */
             return FALSE;
             }
         }
-    if(kop(name) == WORDT) /* {?} (=a+b)=5 ==> =5 */
+    if(kop(name) == EQUALS) /* {?} (=a+b)=5 ==> =5 */
         {
         wis(name->RIGHT);
         name->RIGHT = zelfde_als_w(pknoop);
@@ -6969,7 +6964,7 @@ static int insert(psk name,psk pknoop)
 
     if(is_op(name))
         {
-        if(kop(name) == WORDT)
+        if(kop(name) == EQUALS)
             {
             wis(name->RIGHT);
             name->RIGHT = zelfde_als_w(pknoop);  /*{?} monk2:?(=monk1) => monk2 */
@@ -8320,7 +8315,7 @@ static psk removeFromHash(Hash * temp,psk Arg)
         {
         while(*pr)
             {
-            if(kop((*pr)->entry) == LUCHT)
+            if(kop((*pr)->entry) == WHITE)
                 {
                 if(!(*temp->cmpfunc)(key,(const char *)POBJ((*pr)->entry->LEFT->LEFT)))
                     break;
@@ -8357,7 +8352,7 @@ static psk inserthash(Hash * temp,psk Arg)
     else
         while(r)
             {
-            if(kop(r->entry) == LUCHT)
+            if(kop(r->entry) == WHITE)
                 {
                 if(!(*temp->cmpfunc)(key,(const char *)POBJ(r->entry->LEFT->LEFT)))
                     {
@@ -8376,7 +8371,7 @@ static psk inserthash(Hash * temp,psk Arg)
     if(r)
         {
         psk goal = (psk)bmalloc(__LINE__,sizeof(kknoop));
-        goal->v.fl = LUCHT | SUCCESS;
+        goal->v.fl = WHITE | SUCCESS;
         goal->ops &= ~ALL_REFCOUNT_BITS_SET;
         goal->LEFT = zelfde_als_w(Arg);
         goal->RIGHT = r->entry;
@@ -8408,7 +8403,7 @@ static psk findhash(Hash * temp,psk Arg)
         {
         while(r)
             {
-            if(kop(r->entry) == LUCHT)
+            if(kop(r->entry) == WHITE)
                 {
                 if(!(*temp->cmpfunc)(key,(const char *)POBJ(r->entry->LEFT->LEFT)))
                     break;
@@ -8528,7 +8523,7 @@ static void rehash(Hash ** ptemp,int loadFactor/*1-100*/)
                 while(r)
                     {
                     psk pkn = r->entry;
-                    while(is_op(pkn) && kop(pkn) == LUCHT)
+                    while(is_op(pkn) && kop(pkn) == WHITE)
                         {
                         inserthash(newtable,pkn->LEFT);
                         pkn = pkn->RIGHT;
@@ -8766,7 +8761,7 @@ static psk getmember(psk name,psk tree,objectStuff * Object)
     DBGSRC(Printf("getmember(");result(name);Printf(",");result(tree);Printf(")\n");)
     while(is_op(tree))
         {
-        if(kop(tree) == WORDT)
+        if(kop(tree) == EQUALS)
             {
             psk nname;
             if(  Object
@@ -8854,7 +8849,7 @@ must be equivalent
         {
         switch(kop(naamknoop))
             {
-            case WORDT: /* Lambda function: (=.out$!arg)$HELLO -> naamknoop == (=.out$!arg) */
+            case EQUALS: /* Lambda function: (=.out$!arg)$HELLO -> naamknoop == (=.out$!arg) */
                 {
                 *newval = TRUE;
                 naamknoop->RIGHT = Head(naamknoop->RIGHT);
@@ -8887,7 +8882,7 @@ must be equivalent
                 int nieuw = FALSE;
                 if(is_op(naamknoop->LEFT))
                     {
-                    if(kop(naamknoop->LEFT) == WORDT) /* naamknoop->LEFT == (=  (a=2) (b=3))   */
+                    if(kop(naamknoop->LEFT) == EQUALS) /* naamknoop->LEFT == (=  (a=2) (b=3))   */
                         {
                         if(  Object
                           && ISBUILTIN((objectknoop*)(naamknoop->LEFT))
@@ -9030,7 +9025,7 @@ static psk Naamwoord(psk variabele,int *newval,int twolevelsofindirection)
                 peval = eval(peval);
                 if(  !isSUCCESS(peval)
                   || (  is_op(peval)
-                     && kop(peval) != WORDT
+                     && kop(peval) != EQUALS
                      && kop(peval) != DOT
                      )
                   )
@@ -9062,7 +9057,7 @@ static psk Naamwoord(psk variabele,int *newval,int twolevelsofindirection)
                     peval = eval(peval);
                     if(  !isSUCCESS(peval)
                       || (  is_op(peval)
-                         && kop(peval) != WORDT
+                         && kop(peval) != EQUALS
                          && kop(peval) != DOT
                          )
                       )
@@ -9128,7 +9123,7 @@ first finds (=B), which is an object that should not obtain the flags !! as in
         assert(pbinding != NULL);
         DBGSRC(printf("pbinding:");result(pbinding);printf("\n");)
 
-        if(kop(pbinding) == WORDT)
+        if(kop(pbinding) == EQUALS)
             {
             if(!newval)
                 {
@@ -9145,7 +9140,7 @@ first finds (=B), which is an object that should not obtain the flags !! as in
             }
         else
             {
-            assert(kop(pbinding) != WORDT);
+            assert(kop(pbinding) != EQUALS);
             if(newval)
                 {
                 DBGSRC(printf("prive\n");)
@@ -9230,14 +9225,14 @@ static int stringOncePattern(psk pat)
         switch(kop(pat))
             {
             case DOT:
-            case KOMMA:
-            case WORDT:
+            case COMMA:
+            case EQUALS:
             case EXP:
             case LOG:
             case DIF:
                 pat->v.fl |= IMPLIEDFENCE;
                 return TRUE;
-            case OF:
+            case OR:
                 if(stringOncePattern(pat->LEFT) && stringOncePattern(pat->RIGHT))
                     {
                     pat->v.fl |= IMPLIEDFENCE;
@@ -9251,7 +9246,7 @@ static int stringOncePattern(psk pat)
                     return TRUE;
                     }
                 break;
-            case EN:
+            case AND:
                 if(stringOncePattern(pat->LEFT))
                     {
                     pat->v.fl |= IMPLIEDFENCE;
@@ -9303,13 +9298,13 @@ static int oncePattern(psk pat)
         switch(kop(pat))
         {
             case DOT:
-            case KOMMA:
-            case WORDT:
+            case COMMA:
+            case EQUALS:
             case LOG:
             case DIF:
                 pat->v.fl |= IMPLIEDFENCE;
                 return TRUE;
-            case OF:
+            case OR:
                 if(oncePattern(pat->LEFT) && oncePattern(pat->RIGHT))
                     {
                     pat->v.fl |= IMPLIEDFENCE;
@@ -9323,7 +9318,7 @@ static int oncePattern(psk pat)
                     return TRUE;
                     }
                 break;
-            case EN:
+            case AND:
                 if(oncePattern(pat->LEFT))
                     {
                     pat->v.fl |= IMPLIEDFENCE;
@@ -9897,9 +9892,9 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
             switch (kop(pat))
                 {
                 case PLUS:
-                case MAAL:
+                case TIMES:
                     break;
-                case LUCHT:
+                case WHITE:
                     {
                     LONG locpos = pposition;
 #if CUTOFFSUGGEST
@@ -10055,7 +10050,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                         }
                     return s.c.rmr ^ (char)NIKS(pat);               /* end */
                     }
-                case STREEP:
+                case UNDERSCORE:
                     if(snijaf > sub + 1)
                         {
 #if CUTOFFSUGGEST
@@ -10071,12 +10066,12 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
 #endif
                           )
                             {
-                            dummy_op = LUCHT;
+                            dummy_op = WHITE;
                             }
                         s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE));
                         }
                     break;
-                case EN:
+                case AND:
 #if CUTOFFSUGGEST
                     if ((s.c.lmr = stringmatch(ind+1,"O",sub,snijaf, pat->LEFT, subkn,pposition,stringLength,suggestedCutOff,mayMoveStartOfSubject)) & TRUE)
 #else
@@ -10125,7 +10120,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                         s.c.rmr = FALSE;
                     s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE | POSITION_MAX_REACHED));
                     break;
-                case OF:
+                case OR:
 #if CUTOFFSUGGEST
                     if(mayMoveStartOfSubject) 
                         *mayMoveStartOfSubject = 0;
@@ -10331,7 +10326,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
         result(pat);Printf(")");Printf("\n");)
     if (is_op(sub))
         {
-        if(kop(sub) == WORDT)
+        if(kop(sub) == EQUALS)
             sub->RIGHT = Head(sub->RIGHT);
 
         if (sub->RIGHT == snijaf)
@@ -10433,9 +10428,9 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
         else
             switch (kop(pat))
                 {
-                case LUCHT:
+                case WHITE:
                 case PLUS:
-                case MAAL:
+                case TIMES:
                     {
                     LONG locpos = pposition;
                     /* Optimal sructure for this code:
@@ -10454,7 +10449,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     K           rightResult=0(P):cdr(pat)
                     L       return
 
-                    0(P)=nil(pat): nil(LUCHT)="", nil(+)=0,nil(*)=1
+                    0(P)=nil(pat): nil(WHITE)="", nil(+)=0,nil(*)=1
                     In stringmatch, there is no need for L0; the empty string ""
                     is part of the string.
                     */
@@ -10634,10 +10629,10 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                         }
                     s.c.rmr &= ~POSITION_MAX_REACHED;
                     break;
-                case STREEP:
+                case UNDERSCORE:
                     if (is_op(sub))
                         {
-                        if(kop(sub) == WORDT)
+                        if(kop(sub) == EQUALS)
                             {
                             if(ISBUILTIN((objectknoop*)sub))
                                 {
@@ -10664,13 +10659,13 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                             dummy_op = kop(sub);
                             }
 #ifndef NDEBUG
-                        DBGSRC(printMatchState("STREEP:EXIT-MID",s,pposition,0);)
+                        DBGSRC(printMatchState("UNDERSCORE:EXIT-MID",s,pposition,0);)
 #endif
                             switch( kop(sub))
                             {
-                            case LUCHT:
+                            case WHITE:
                             case PLUS:
-                            case MAAL:
+                            case TIMES:
                                 break;
                             default:
                                 s.c.rmr &= ~POSITION_MAX_REACHED;
@@ -10682,7 +10677,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     if (s.c.lmr != PRISTINE)
                         s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE));
                     break;
-                case EN:
+                case AND:
                     if ((s.c.lmr = match(ind+1,sub, pat->LEFT, snijaf,pposition,expr,op)) & TRUE)
                         {
                         loc = zelfde_als_w(pat->RIGHT);
@@ -10731,7 +10726,7 @@ wrong: jf
 correct: jk
 */
                     break;
-                case OF:
+                case OR:
                     if ( (s.c.lmr = (char)match(ind+1,sub, pat->LEFT, snijaf,pposition,expr,op))
                        & (TRUE | FENCE)
                        )
@@ -10762,7 +10757,7 @@ correct: jk
                             }
                         }
                     DBGSRC(Printf("%d%*s",ind,ind,"");\
-                        Printf("OF s.c.lmr %d s.c.rmr %d\n",s.c.lmr,s.c.rmr);)
+                        Printf("OR s.c.lmr %d s.c.rmr %d\n",s.c.lmr,s.c.rmr);)
 /*
 :?W:?X:?Y:?Z & dbg'(a b c d:?X (((a ?:?W) & ~`|?Y)|?Z) d) & out$(X !X W !W Y !Y Z !Z)
 erroneous: X a W a b c d Y b c Z
@@ -10872,7 +10867,7 @@ b b h h h a b c d:?X (|b c|x) d)
                             {
                             if((s.c.lmr = match(ind+1,sub->LEFT, pat->LEFT, NULL,0,sub->LEFT,4432)) & TRUE)
                                 {
-                                if(kop(sub) == WORDT)
+                                if(kop(sub) == EQUALS)
                                     {
                                     loc = zelfde_als_w(sub->RIGHT); /* Object might change as a side effect!*/
                                     s.c.rmr = match(ind+1,loc, pat->RIGHT, NULL,0,loc,2234);
@@ -11005,9 +11000,6 @@ char *pstring;
 pstring = SPOBJ(kn);
 return(*pstring == '1' && *++pstring == 0);
 }
-
-
-#define UNDERSCORE 1
 
 static psk _linkertak(psk pkn)
 {
@@ -11168,7 +11160,7 @@ psk temp;
 unsigned int teken;
 temp = (pkn->RIGHT);
 return((teken = kop(pkn)) == kop(temp) &&
-        (teken == PLUS || teken == MAAL || teken == LUCHT) ?
+        (teken == PLUS || teken == TIMES || teken == WHITE) ?
        temp->LEFT : temp);
 }
 
@@ -11222,7 +11214,7 @@ static psk evalmacro(psk pkn)
                 }
             else if(kop(pkn) == FUN)
                 {
-                if(kop(pkn->RIGHT) == STREEP)
+                if(kop(pkn->RIGHT) == UNDERSCORE)
                     {
                     int Flgs;
                     psk h;
@@ -11231,7 +11223,7 @@ static psk evalmacro(psk pkn)
                     psk * last;
                     Flgs = pkn->v.fl & (UNOPS|SUCCESS);
                     h = subboomcopie(pkn->RIGHT);
-                    if(dummy_op == WORDT)
+                    if(dummy_op == EQUALS)
                         {
                         psk becomes = (psk)bmalloc(__LINE__,sizeof(objectknoop));
 #ifdef BUILTIN
@@ -11306,7 +11298,7 @@ static psk evalmacro(psk pkn)
                         int Flgs;
                         psk first = NULL;
                         psk * last;
-                        if((kop(h) == WORDT) && ISBUILTIN((objectknoop *)h))
+                        if((kop(h) == EQUALS) && ISBUILTIN((objectknoop *)h))
                             {
                             if(!newval)
                                 h = zelfde_als_w(h);
@@ -11328,7 +11320,7 @@ static psk evalmacro(psk pkn)
                                 {
                                 h->v.fl &= ~READY;
                                 }
-                            else if(kop(h) == WORDT)
+                            else if(kop(h) == EQUALS)
                                 { 
                                 h->v.fl &= ~READY;
                                 }
@@ -11408,7 +11400,7 @@ static psk lambda(psk pkn,psk name,psk Arg)
                 }
             else if(kop(pkn) == FUN)
                 {
-                if(kop(pkn->RIGHT) == STREEP)
+                if(kop(pkn->RIGHT) == UNDERSCORE)
                     {
                     int Flgs;
                     psk h;
@@ -11417,7 +11409,7 @@ static psk lambda(psk pkn,psk name,psk Arg)
                     psk * last;
                     Flgs = pkn->v.fl & (UNOPS|SUCCESS);
                     h = subboomcopie(pkn->RIGHT);
-                    if(dummy_op == WORDT)
+                    if(dummy_op == EQUALS)
                         {
                         psk becomes = (psk)bmalloc(__LINE__,sizeof(objectknoop));
 #ifdef BUILTIN
@@ -11484,7 +11476,7 @@ static psk lambda(psk pkn,psk name,psk Arg)
                         {
                         h->v.fl &= ~READY;
                         }
-                    else if(is_op(h) && kop(h) == WORDT)
+                    else if(is_op(h) && kop(h) == EQUALS)
                         { 
                         h->v.fl &= ~READY;
                         }
@@ -11573,7 +11565,7 @@ for(alfabet = 0;alfabet < 256/*0x80*/;alfabet++)
         navar = navar->next)
         {
         goal = *pgoal = (psk)bmalloc(__LINE__,sizeof(kknoop));
-        goal->v.fl = LUCHT | SUCCESS;
+        goal->v.fl = WHITE | SUCCESS;
         if(ext && navar->n > 0)
             {
             goal = goal->LEFT = (psk)bmalloc(__LINE__,sizeof(kknoop));
@@ -11648,7 +11640,7 @@ static void lst(psk kn)
     {
     while(is_op(kn))
         {
-        if(kop(kn) == WORDT)
+        if(kop(kn) == EQUALS)
             {
             mooi = FALSE;
             myprintf("(",NULL);
@@ -12537,7 +12529,7 @@ FILE *redfpo;
 psk rknoop,rlknoop,rrknoop,rrrknoop;
 static LONG opts[] =
     {APP,BIN,CON,EXT,MEM,LIN,NEW,RAW,TXT,VAP,0L};
-if(kop(rknoop = (*pkn)->RIGHT) == KOMMA)
+if(kop(rknoop = (*pkn)->RIGHT) == COMMA)
    {
    redfpo = global_fpo;
    rlknoop = rknoop->LEFT;
@@ -12572,7 +12564,7 @@ if(kop(rknoop = (*pkn)->RIGHT) == KOMMA)
             adr[2] = rlknoop;
             }
         }
-    else if(kop(rrknoop) == KOMMA
+    else if(kop(rrknoop) == COMMA
          && !is_op(rrknoop->LEFT)
          && allopts((rrrknoop = rrknoop->RIGHT),opts))
         {
@@ -12857,7 +12849,7 @@ static int hasSubObject(psk src)
     {
     while(is_op(src))
         {
-        if(kop(src) == WORDT)
+        if(kop(src) == EQUALS)
             return TRUE;
         else
             {
@@ -12971,7 +12963,7 @@ static psk getObjectDef(psk source)
         if(df->vtab)
             {
             dest = (typedObjectknoop *)bmalloc(__LINE__,sizeof(typedObjectknoop));
-            dest->v.fl = WORDT | SUCCESS;
+            dest->v.fl = EQUALS | SUCCESS;
             dest->links = zelfde_als_w(&nilk);
             dest->rechts = zelfde_als_w(source);
 #ifdef BUILTIN
@@ -12985,7 +12977,7 @@ static psk getObjectDef(psk source)
             return (psk)dest;
             }
         }
-    else if(kop(source) == WORDT)
+    else if(kop(source) == EQUALS)
         {
         source->RIGHT = Head(source->RIGHT);
         return objectcopie(source);
@@ -12996,7 +12988,7 @@ static psk getObjectDef(psk source)
     if((def = Naamwoord_w(source,source->v.fl & DOUBLY_INDIRECT)) != NULL)
         {
         dest = (typedObjectknoop *)bmalloc(__LINE__,sizeof(typedObjectknoop));
-        dest->v.fl = WORDT | SUCCESS;
+        dest->v.fl = EQUALS | SUCCESS;
         dest->links = zelfde_als_w(&nilk);
         dest->rechts = objectcopie(def); /* TODO Head(&def) ? */
         wis(def);
@@ -14093,7 +14085,7 @@ The same effect is obtained by <expr>:?!(=)
             }
         CASE(New) /* new$<object>*/
             {
-            if(kop(rknoop) == KOMMA)
+            if(kop(rknoop) == COMMA)
                 {
                 adr[2] = getObjectDef(rknoop->LEFT);
                 if(!adr[2])
@@ -14151,7 +14143,7 @@ The same effect is obtained by <expr>:?!(=)
                         UNSETCREATEDWITHNEW((typedObjectknoop*)rrknoop);
                         UNSETBUILTIN((typedObjectknoop*)rrknoop);
 #endif
-                        rrknoop->v.fl = WORDT | SUCCESS;
+                        rrknoop->v.fl = EQUALS | SUCCESS;
                         rrknoop->LEFT = zelfde_als_w(&nilk);
                         if(rknoop)
                             {
@@ -14219,7 +14211,7 @@ static psk stapelmacht(psk pkn)
         done = TRUE;
         pkn->LEFT = lknoop = prive(lknoop);
         lknoop->v.fl &= ~READY & ~OPERATOR;/* turn off READY flag */
-        lknoop->ops |= MAAL;
+        lknoop->ops |= TIMES;
         adr[1] = lknoop->LEFT;
         adr[2] = lknoop->RIGHT;
         adr[3] = pkn->RIGHT;
@@ -14333,7 +14325,7 @@ static psk stapelmacht(psk pkn)
                 }
             }
 
-        if(kop(lknoop) == MAAL)
+        if(kop(lknoop) == TIMES)
             {
             adr[1] = lknoop->LEFT;
             adr[2] = lknoop->RIGHT;
@@ -14461,7 +14453,7 @@ be tremendously faster. e.g. (1+a+b+c)^30+1&ready evaluates in about
 static void splitProduct_number_im_rest(psk pknoop,ppsk N,ppsk I,ppsk NNNI)
     {
     psk temp;
-    if(kop(pknoop) == MAAL)
+    if(kop(pknoop) == TIMES)
         {
         if(RATIONAAL_COMP(pknoop->LEFT))
             {/* 17*x */
@@ -14473,7 +14465,7 @@ static void splitProduct_number_im_rest(psk pknoop,ppsk N,ppsk I,ppsk NNNI)
             *N = NULL;
             temp = pknoop;
             }/* temp */
-        if(kop(temp) == MAAL)
+        if(kop(temp) == TIMES)
             {
             if(!is_op(temp->LEFT) && PLOBJ(temp->LEFT) == IM)
                 {/* N*i*x */
@@ -14563,7 +14555,7 @@ static psk expandProduct(psk pkn,int * ok)
     {
     switch(kop(pkn))
         {
-        case MAAL :
+        case TIMES :
         case EXP  :
             {
             if(  (  (match(0,pkn,m0,NULL,0,pkn,3333) & TRUE)
@@ -15695,7 +15687,7 @@ static psk substdiff(psk pkn)
         adr[3] = rknoop->RIGHT;
         switch(kop(rknoop))
             {
-            case MAAL :
+            case TIMES :
                 pkn = opb(pkn,"(\001\017\2*\3+\2*\001\017\3)",NULL);
                 break;
             case EXP:
@@ -15732,12 +15724,12 @@ static void PeekMsg(void)
 #endif
 
 /*
-Iterative handling of LUCHT operator in evalueer.
+Iterative handling of WHITE operator in evalueer.
 Can now handle very deep structures without stack overflow
 */
 
 static psk handleLUCHT(psk pkn)
-    { /* assumption: (kop(*pkn) == LUCHT) && !((*pkn)->v.fl & READY) */
+    { /* assumption: (kop(*pkn) == WHITE) && !((*pkn)->v.fl & READY) */
     static psk hulp;
     psk luchtknoop;
     psk next;
@@ -15759,7 +15751,7 @@ static psk handleLUCHT(psk pkn)
             prevpluchtknoop = pluchtknoop;
             pluchtknoop = &(luchtknoop->RIGHT);
             }
-        if(kop(luchtknoop = *pluchtknoop) == LUCHT && !(luchtknoop->v.fl & READY))
+        if(kop(luchtknoop = *pluchtknoop) == WHITE && !(luchtknoop->v.fl & READY))
             {
             if(shared(*pluchtknoop))
                 *pluchtknoop = copyop(*pluchtknoop);
@@ -15778,7 +15770,7 @@ static psk handleLUCHT(psk pkn)
         }
 
     luchtknoop = pkn;
-    while(kop(luchtknoop) == LUCHT)
+    while(kop(luchtknoop) == WHITE)
         {
         next = luchtknoop->RIGHT;
         rechtsbrengen(luchtknoop);
@@ -15790,15 +15782,15 @@ static psk handleLUCHT(psk pkn)
     return pkn;
     }
 /*
-Iterative handling of KOMMA operator in evalueer.
+Iterative handling of COMMA operator in evalueer.
 Can now handle very deep structures without stack overflow
 */
 static psk handleKOMMA(psk pkn)
-    { /* assumption: (kop(*pkn) == KOMMA) && !((*pkn)->v.fl & READY) */
+    { /* assumption: (kop(*pkn) == COMMA) && !((*pkn)->v.fl & READY) */
     psk kommaknoop = pkn;
     psk next;
     ppsk pkommaknoop;
-    while(kop(kommaknoop->RIGHT) == KOMMA && !(kommaknoop->RIGHT->v.fl & READY))
+    while(kop(kommaknoop->RIGHT) == COMMA && !(kommaknoop->RIGHT->v.fl & READY))
         {
         kommaknoop->LEFT = eval(kommaknoop->LEFT);
         pkommaknoop = &(kommaknoop->RIGHT);
@@ -15811,7 +15803,7 @@ static psk handleKOMMA(psk pkn)
     kommaknoop->LEFT = eval(kommaknoop->LEFT);
     kommaknoop->RIGHT = eval(kommaknoop->RIGHT);
     kommaknoop = pkn;
-    while(kop(kommaknoop) == KOMMA)
+    while(kop(kommaknoop) == COMMA)
         {
         next = kommaknoop->RIGHT;
         rechtsbrengen(kommaknoop);
@@ -15897,7 +15889,7 @@ static psk eval(psk pkn)
         if(is_op(pkn))
             {
             sk lkn = *pkn;
-            /* The operators MATCH, EN and OF are treated in another way than
+            /* The operators MATCH, AND and OR are treated in another way than
             the other operators. These three operators are the only 'volatile'
             operators: they cannot occur in a fully evaluated tree. For that reason
             there is no need to allocate space for an evaluated version of such
@@ -15958,8 +15950,8 @@ static psk eval(psk pkn)
                         else Printf(" FENCE\n");)
                     break;
                     }
-                    /* The operators EN and OF are tail-recursion optimised. */
-                case EN :
+                    /* The operators AND and OR are tail-recursion optimised. */
+                case AND :
                     {
                     privatized(pkn,&lkn);
                     lkn.LEFT = eval(lkn.LEFT);
@@ -15969,7 +15961,7 @@ static psk eval(psk pkn)
                         pkn = _linkertak(&lkn);/* FAIL */
                     break;
                     }
-                case OF :
+                case OR :
                     {
                     privatized(pkn,&lkn);
                     lkn.LEFT = eval(lkn.LEFT);
@@ -15980,7 +15972,7 @@ static psk eval(psk pkn)
                     break;
                     }
                     /* Operators that can occur in evaluated expressions: */
-                case WORDT :
+                case EQUALS :
                     if(ISBUILTIN((objectknoop *)pkn))
                         {
                         pkn->v.fl |= READY;
@@ -16047,7 +16039,7 @@ static psk eval(psk pkn)
                         }
                     break;
                     }
-                case KOMMA :
+                case COMMA :
                     if(shared(pkn))
                         {
                         pkn = copyop(pkn);
@@ -16059,7 +16051,7 @@ static psk eval(psk pkn)
                         pkn = evalvar(pkn);
                         }
                     break;
-                case LUCHT :
+                case WHITE :
                     if(shared(pkn))
                         {
                         pkn = copyop(pkn);
@@ -16086,7 +16078,7 @@ static psk eval(psk pkn)
                         pkn = evalvar(pkn);
                         }
                     break;
-                case MAAL :
+                case TIMES :
                     if(shared(pkn))
                         {
                         pkn = copyop(pkn);
@@ -16178,13 +16170,13 @@ static psk eval(psk pkn)
                         pkn = evalvar(pkn);
                         }
                     break;
-                case STREEP :
+                case UNDERSCORE :
                     if(shared(pkn))
                         {
                         pkn = copyop(pkn);
                         }
                     pkn->v.fl |= READY;
-                    if(dummy_op == WORDT)
+                    if(dummy_op == EQUALS)
                         {
                         psk old = pkn;
                         pkn = (psk)bmalloc(__LINE__,sizeof(objectknoop));
@@ -16216,7 +16208,7 @@ static psk eval(psk pkn)
             so we don't need to test for this condition.*/
             pkn = evalvar(pkn);
             /* After evaluation of a variable, the loop continues.
-            Together with how & and | (EN and OF) are treated, this ensures that
+            Together with how & and | (AND and OR) are treated, this ensures that
             a loop can run indefinitely, without using stack space. */
             }
         }
