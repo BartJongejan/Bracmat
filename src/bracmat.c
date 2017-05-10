@@ -21,7 +21,7 @@ email: bartj@hum.ku.dk
 */
 #define DATUM "10 May 2017"
 #define VERSION "6"
-#define BUILD "215"
+#define BUILD "216"
 /*
 COMPILATION
 -----------
@@ -3176,9 +3176,10 @@ static psk new_operator_like(psk pnode)
     {
     if(Op(pnode) == EQUALS)
         {
+        objectnode * goal;
         DBGSRC(printf("new_operator_like:");result(pnode);printf("\n");)
         assert(!ISBUILTIN((objectnode*)pnode));
-        objectnode * goal = (objectnode *)bmalloc(__LINE__,sizeof(objectnode));
+        goal = (objectnode *)bmalloc(__LINE__,sizeof(objectnode));
 #ifdef BUILTIN
         goal->u.Int = 0;
 #else
@@ -4504,11 +4505,11 @@ void putLeafChar(int c)
 
 void writeError(psk Pnode)
     {
-    FILE *redfpo;
+    FILE *saveFpo;
     int saveNice;
     saveNice = nice;
     nice = FALSE;
-    redfpo = global_fpo;
+    saveFpo = global_fpo;
     global_fpo = errorStream;
 #if !defined NO_FOPEN
     if(global_fpo == NULL && errorFileName != NULL)
@@ -4527,7 +4528,7 @@ void writeError(psk Pnode)
 #endif
         }
 /*#endif*/
-    global_fpo = redfpo;
+    global_fpo = saveFpo;
     nice = saveNice;
     }
 
@@ -11522,11 +11523,12 @@ if((lflgs = pnode->LEFT->v.fl & UNOPS) != 0)
 }
 
 
-static int is_afhankelyk_van(psk el,psk input_buffer)
+static int is_dependent_of(psk el,psk input_buffer)
     {
     int ret;
+    psk pnode;
     assert(!is_op(input_buffer));
-    psk pnode = NULL;
+    pnode = NULL;
     addr[1] = input_buffer;
     addr[2] = el;
     pnode = build_up(pnode,"(!dep:(? (\1.? \2 ?) ?)",NULL);
@@ -11536,11 +11538,11 @@ static int is_afhankelyk_van(psk el,psk input_buffer)
     return ret;
     }
 
-static int zoekopt(psk pnode,LONG opt)
+static int search_opt(psk pnode,LONG opt)
     {
     while(is_op(pnode))
         {
-        if(zoekopt(pnode->LEFT,opt))
+        if(search_opt(pnode->LEFT,opt))
             return TRUE;
         pnode = pnode->RIGHT;
         }
@@ -11554,7 +11556,7 @@ ppsk pgoal;
 vars *nxtvar;
 int alphabet,ext;
 char dim[22];
-ext = zoekopt(*PPnode,EXT);
+ext = search_opt(*PPnode,EXT);
 wipe(*PPnode);
 pgoal = PPnode;
 for(alphabet = 0;alphabet < 256/*0x80*/;alphabet++)
@@ -11875,7 +11877,7 @@ If the file mode differs from the current file mode,
 If the file is known but has been closed (e.g. to save file handles),
     open the file with the memorized file mode and go to the memorized position
 */
-static filehendel *zoekfp(char *name,LONG mode)
+static filehendel *search_fp(char *name,LONG mode)
     {
     filehendel *fh;
     for(fh = fh0;fh;fh = fh->next)
@@ -12009,7 +12011,7 @@ if(kns[1] && kns[1]->u.obj)
         if(fh)
             fh = preparefp(fh,name,mode.l);
         else
-            fh = zoekfp(name,mode.l);
+            fh = search_fp(name,mode.l);
         if(fh == NULL)
             {
             if((fh=myfopen(name,(char *)&mode,FALSE)) == NULL)
@@ -12045,7 +12047,7 @@ if(kns[1] && kns[1]->u.obj)
             }
         else
             {
-            fh = zoekfp(name,0L);
+            fh = search_fp(name,0L);
             }
 
 
@@ -12197,7 +12199,7 @@ else
         }
     else
         {
-        fh = zoekfp(name,0L);
+        fh = search_fp(name,0L);
         }
     }
 
@@ -12522,43 +12524,43 @@ static int flush(void)
     }
 
 
-static int output(ppsk PPnode,void (*hoe)(psk k))
+static int output(ppsk PPnode,void (*how)(psk k))
 {
-FILE *redfpo;
+FILE *saveFpo;
 psk rightnode,rlnode,rrightnode,rrrightnode;
 static LONG opts[] =
     {APP,BIN,CON,EXT,MEM,LIN,NEW,RAW,TXT,VAP,0L};
 if(Op(rightnode = (*PPnode)->RIGHT) == COMMA)
    {
-   redfpo = global_fpo;
+   saveFpo = global_fpo;
    rlnode = rightnode->LEFT;
    rrightnode = rightnode->RIGHT;
-   hum = !zoekopt(rrightnode,LIN);
-   listWithName = !zoekopt(rrightnode,RAW);
+   hum = !search_opt(rrightnode,LIN);
+   listWithName = !search_opt(rrightnode,RAW);
    if(allopts(rrightnode,opts))
         {
-        if(zoekopt(rrightnode,MEM))
+        if(search_opt(rrightnode,MEM))
             {
             psk ret;
             telling = 1;
             process = tel;
             global_fpo = NULL;
-            (*hoe)(rlnode);
+            (*how)(rlnode);
             ret = (psk)bmalloc(__LINE__,sizeof(unsigned LONG)+telling);
             ret->v.fl = READY | SUCCESS;
             process = glue;
             source = POBJ(ret);
-            (*hoe)(rlnode);
+            (*how)(rlnode);
             hum = 1;
             process = myputc;
             wipe(*PPnode);
             *PPnode = ret;
-            global_fpo = redfpo;
+            global_fpo = saveFpo;
             return TRUE;
             }
         else
             {
-            (*hoe)(rlnode);
+            (*how)(rlnode);
             flush();
             addr[2] = rlnode;
             }
@@ -12568,10 +12570,10 @@ if(Op(rightnode = (*PPnode)->RIGHT) == COMMA)
          && allopts((rrrightnode = rrightnode->RIGHT),opts))
         {
 #if !defined NO_FOPEN
-        int binmode = ((hoe == lst) && !zoekopt(rrrightnode,TXT)) || zoekopt(rrrightnode,BIN);
+        int binmode = ((how == lst) && !search_opt(rrrightnode,TXT)) || search_opt(rrrightnode,BIN);
         filehendel * fh = 
             myfopen((char *)POBJ(rrightnode->LEFT),
-                      zoekopt(rrrightnode,NEW) 
+                      search_opt(rrrightnode,NEW) 
                     ? ( binmode
                       ? WRITEBIN 
                       : WRITETXT
@@ -12587,16 +12589,16 @@ if(Op(rightnode = (*PPnode)->RIGHT) == COMMA)
         if(fh == NULL)
             {
             errorprintf("cannot open %s\n",POBJ(rrightnode->LEFT));
-            global_fpo = redfpo;
+            global_fpo = saveFpo;
             hum = 1;
             return FALSE;
             }
         else
             {
             global_fpo = fh->fp;
-            (*hoe)(rlnode);
+            (*how)(rlnode);
             deallocateFilehendel(fh);
-            global_fpo = redfpo;
+            global_fpo = saveFpo;
             addr[2] = rlnode;
             }
 #else
@@ -12606,7 +12608,7 @@ if(Op(rightnode = (*PPnode)->RIGHT) == COMMA)
         }
     else
         {
-        (*hoe)(rightnode);
+        (*how)(rightnode);
         flush();
         addr[2] = rightnode;
         }
@@ -12614,7 +12616,7 @@ if(Op(rightnode = (*PPnode)->RIGHT) == COMMA)
     }
 else
     {
-    (*hoe)(rightnode);
+    (*how)(rightnode);
     flush();
     *PPnode = rightbranch(*PPnode);
     }
@@ -13670,7 +13672,7 @@ static function_return_type functies(psk Pnode)
             else if(!is_op(rlnode = rightnode->LEFT))
                 pnode = changeCase(rlnode
 #if CODEPAGE850
-                ,zoekopt(rightnode->RIGHT,DOS)
+                ,search_opt(rightnode->RIGHT,DOS)
 #endif
                 ,TRUE);
             else
@@ -13691,7 +13693,7 @@ static function_return_type functies(psk Pnode)
             else if(!is_op(rlnode = rightnode->LEFT))
                 pnode = changeCase(rlnode
 #if CODEPAGE850
-                ,zoekopt(rightnode->RIGHT,DOS)
+                ,search_opt(rightnode->RIGHT,DOS)
 #endif
                 ,FALSE);
             else
@@ -13863,17 +13865,17 @@ static function_return_type functies(psk Pnode)
                 if(is_op(rlnode = rightnode->LEFT))
                     return functionFail(Pnode);
                 rrightnode = rightnode->RIGHT;
-                intVal = (zoekopt(rrightnode,ECH) << SHIFT_ECH)
-                       + (zoekopt(rrightnode,MEM) << SHIFT_MEM)
-                       + (zoekopt(rrightnode,VAP) << SHIFT_VAP)
-                       + (zoekopt(rrightnode,STG) << SHIFT_STR)
-                       + (zoekopt(rrightnode,ML ) << SHIFT_ML)
-                       + (zoekopt(rrightnode,TRM) << SHIFT_TRM)
-                       + (zoekopt(rrightnode,HT)  << SHIFT_HT)
-                       + (zoekopt(rrightnode,X)   << SHIFT_X)
-                       + (zoekopt(rrightnode,JSN) << SHIFT_JSN)
-                       + (zoekopt(rrightnode,TXT) << SHIFT_TXT)
-                       + (zoekopt(rrightnode,BIN) << SHIFT_BIN);
+                intVal = (search_opt(rrightnode,ECH) << SHIFT_ECH)
+                       + (search_opt(rrightnode,MEM) << SHIFT_MEM)
+                       + (search_opt(rrightnode,VAP) << SHIFT_VAP)
+                       + (search_opt(rrightnode,STG) << SHIFT_STR)
+                       + (search_opt(rrightnode,ML ) << SHIFT_ML)
+                       + (search_opt(rrightnode,TRM) << SHIFT_TRM)
+                       + (search_opt(rrightnode,HT)  << SHIFT_HT)
+                       + (search_opt(rrightnode,X)   << SHIFT_X)
+                       + (search_opt(rrightnode,JSN) << SHIFT_JSN)
+                       + (search_opt(rrightnode,TXT) << SHIFT_TXT)
+                       + (search_opt(rrightnode,BIN) << SHIFT_BIN);
                 }
             else
                 {
@@ -13898,9 +13900,9 @@ static function_return_type functies(psk Pnode)
                 if(rlnode->u.obj && strcmp((char *)POBJ(rlnode),"stdin"))
                     {
 #if !defined NO_FOPEN
-                    FILE *red;
+                    FILE *saveFp;
                     filehendel * fh;
-                    red = global_fpi;
+                    saveFp = global_fpi;
                     fh = myfopen((char *)POBJ(rlnode),(intVal & OPT_TXT) ? READTXT : READBIN
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
                         ,TRUE
@@ -13908,7 +13910,7 @@ static function_return_type functies(psk Pnode)
                         );
                     if(fh == NULL)
                         {
-                        global_fpi = red;
+                        global_fpi = saveFp;
                         return functionFail(Pnode);
                         }
                     else
@@ -13921,7 +13923,7 @@ static function_return_type functies(psk Pnode)
                         Pnode = eval(Pnode);
                         }
                     deallocateFilehendel(fh);
-                    global_fpi = red;
+                    global_fpi = saveFp;
 #else
                     return functionFail(Pnode);
 #endif
@@ -15659,7 +15661,7 @@ static psk substdiff(psk Pnode)
         Pnode = copyof(&oneNode);
         }
     else if(  !is_op(rightnode)
-           && is_afhankelyk_van(lnode,rightnode)
+           && is_dependent_of(lnode,rightnode)
            )
         {
         ;

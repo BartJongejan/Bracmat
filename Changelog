@@ -1,3 +1,8 @@
+  10 May 2017
+'localised' source code to English, so you no longer need some knowledge of
+Dutch and Danish to understand the code.
+Moved two declarations to start of block (this is still C!)
+
    7 February 2017
 Added LT4DH/2016 paper. Updated README.md.
 
