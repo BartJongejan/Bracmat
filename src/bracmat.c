@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "28 April 2017"
-#define VERSION "6 'newspeak'"
-#define BUILD "213"
+#define DATUM "10 May 2017"
+#define VERSION "6"
+#define BUILD "215"
 /*
 COMPILATION
 -----------
@@ -115,7 +115,7 @@ TODO list:
 20010103: Make > and < work on non-atomic stuff
 20010904: Issue warning if 'arg' is declared as a local variable
 */
-/* 20010309 evalueer on WHITE and COMMA strings is now iterative on the
+/* 20010309 evaluate on WHITE and COMMA strings is now iterative on the
    right descending (deep) branch, not recursive.
    (It is now possible to read long lists, e.g. dictionairies, without causing
    stack overflow when evaluating the list.)
@@ -243,7 +243,7 @@ Atari : define -DATARI because of BIGENDIAN and extern int _stksize = -1;
 #endif
 #endif
 
-/*#define reslt hreslt */ /* to show ALL parentheses (one pair for each operator)*/
+/*#define reslt parenthesised_result */ /* to show ALL parentheses (one pair for each operator)*/
 #define INTSCMP 0   /* dangerous way of comparing strings */
 #define ICPY 0      /* copy word by word instead of byte by byte */
 
@@ -388,7 +388,7 @@ typedef   signed long  INT32_T;
 #define APPENDTXT "a"
 
 #define LOGWORDLENGTH 2
-/* flags (prefixes) in knoop */
+/* flags (prefixes) in node */
 #define NOT              1      /* ~ */
      /* Keep definition of NOT like this because of mixing of logical and bit 
 	    operators && || | ^ & */
@@ -428,31 +428,31 @@ typedef   signed long  INT32_T;
 #define      EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == QNUMBER)
 #define NOTLESSORMORE(psk) (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN|GREATER_THAN))
 
-#define INTEGER(kn)               (((kn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                      == QNUMBER)
-#define INTEGER_COMP(kn)          (((kn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))             == QNUMBER)
+#define INTEGER(pn)               (((pn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                      == QNUMBER)
+#define INTEGER_COMP(pn)          (((pn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))             == QNUMBER)
 
-#define INTEGER_NOT_NEG(kn)       (((kn)->ops & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                == QNUMBER)
-#define INTEGER_NOT_NEG_COMP(kn)  (((kn)->ops & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))       == QNUMBER)
+#define INTEGER_NOT_NEG(pn)       (((pn)->ops & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                == QNUMBER)
+#define INTEGER_NOT_NEG_COMP(pn)  (((pn)->ops & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))       == QNUMBER)
 
-#define INTEGER_POS(kn)           (((kn)->ops & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))           == QNUMBER)
-#define INTEGER_POS_COMP(kn)      (((kn)->ops & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))  == QNUMBER)
+#define INTEGER_POS(pn)           (((pn)->ops & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))           == QNUMBER)
+#define INTEGER_POS_COMP(pn)      (((pn)->ops & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))  == QNUMBER)
 
-#define INTEGER_NOT_NUL_COMP(kn) (((kn)->ops & (QNUMBER|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))        == QNUMBER)
-#define HAS_MINUS_SIGN(kn)         (((kn)->ops & (MINUS|IS_OPERATOR)) == MINUS)
+#define INTEGER_NOT_NUL_COMP(pn) (((pn)->ops & (QNUMBER|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))        == QNUMBER)
+#define HAS_MINUS_SIGN(pn)         (((pn)->ops & (MINUS|IS_OPERATOR)) == MINUS)
 
-#define RAT_NUL(kn) (((kn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS)) == QNUL)
-#define RAT_NUL_COMP(kn) (((kn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUL)
-#define RAT_NEG(kn) (((kn)->ops & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS)) \
+#define RAT_NUL(pn) (((pn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS)) == QNUL)
+#define RAT_NUL_COMP(pn) (((pn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUL)
+#define RAT_NEG(pn) (((pn)->ops & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS)) \
                                 == (QNUMBER|MINUS))
-#define RAT_NEG_COMP(kn) (((kn)->ops & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) \
+#define RAT_NEG_COMP(pn) (((pn)->ops & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) \
                                 == (QNUMBER|MINUS))
 
-#define RAT_RAT(kn) (((kn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))\
+#define RAT_RAT(pn) (((pn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))\
                                 == (QNUMBER|QFRACTION))
 
-#define RAT_RAT_COMP(kn) (((kn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))\
+#define RAT_RAT_COMP(pn) (((pn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))\
                                 == (QNUMBER|QFRACTION))
-#define IS_ONE(kn) ((kn)->u.lobj == ONE && !((kn)->ops & (MINUS | VISIBLE_FLAGS)))
+#define IS_ONE(pn) ((pn)->u.lobj == ONE && !((pn)->ops & (MINUS | VISIBLE_FLAGS)))
 
 
 #include <string.h>
@@ -499,8 +499,8 @@ typedef struct
 #endif
 #endif
 
-#define RIGHT u.p.rechts
-#define LEFT  u.p.links
+#define RIGHT u.p.right
+#define LEFT  u.p.left
 #define TRUE 1
 #define FALSE 0
 #define PRISTINE (1<<2)
@@ -657,12 +657,12 @@ typedef struct
 #define OPT_TRM (1 << SHIFT_TRM)
 #define OPT_HT  (1 << SHIFT_HT)
 #define OPT_X   (1 << SHIFT_X)
-extern void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml);
+extern void XMLtext(FILE * fpi,char * source,int trim,int html,int xml);
 #endif
 
 #if READJSON
 #define OPT_JSON (1 << SHIFT_JSN)
-extern int JSONtext(FILE * fpi,char * bron);
+extern int JSONtext(FILE * fpi,char * source);
 #endif
 
 
@@ -777,7 +777,7 @@ typedef struct sk
         {
         struct
             {
-            struct sk *links,*rechts;
+            struct sk *left,*right;
             } p;
         LONG lobj; /* This part of the structure can be used for comparisons
                       with short strings that fit into one word in one machine
@@ -787,7 +787,7 @@ typedef struct sk
         } u;
     } sk;
 
-static sk nilk,nulk,eenk,argk,selfkn,Selfkn,mintweek,mineenk,tweek,minvierk,vierk,sjt;
+static sk nilNode,zeroNode,oneNode,argNode,selfNode,SelfNode,minusTwoNode,minusOneNode,twoNode,minusFourNode,fourNode,sjtNode;
 
 #if !defined NO_FOPEN
 static char * targetPath = NULL; /* Path that can be prepended to filenames. */
@@ -796,7 +796,7 @@ static char * targetPath = NULL; /* Path that can be prepended to filenames. */
 typedef  sk * psk;
 typedef psk * ppsk;
 
-static psk adr[7],m0 = NULL,m1 = NULL,f0 = NULL,f1 = NULL,f4 = NULL,f5 = NULL;
+static psk addr[7],m0 = NULL,m1 = NULL,f0 = NULL,f1 = NULL,f4 = NULL,f5 = NULL;
 
 /*
 0:?n&whl'(1+!n:<100000:?n&57265978465924376578234566767834625978465923745729775787627876873875436743934786450097*53645235643259824350824580457283955438957043287250857432895703498700987123454567897656:?T)&!T
@@ -898,7 +898,7 @@ NEWMULT
 
 #define RADIX2 (RADIX * RADIX)
 
-typedef struct ngetal
+typedef struct nnumber
     {
     ptrdiff_t length;
     ptrdiff_t ilength;
@@ -909,16 +909,16 @@ typedef struct ngetal
     size_t allocated;
     size_t iallocated;
     int sign; /* 0: positive, QNUL: zero, MINUS: negative number */
-    } ngetal;
+    } nnumber;
 
 #define NNUMBERIS1(x) ((x)->sign == 0 && (x)->length == 1 && ((char*)((x)->number))[0] == '1')
 
-#define Qgetal psk
+#define Qnumber psk
 
 typedef struct varia
     {
-    struct varia *prev; /* verdi[-1] */
-    psk verdi[1];       /* verdi[0], arraysize is adjusted by psh */
+    struct varia *prev; /* variableValue[-1] */
+    psk variableValue[1];       /* variableValue[0], arraysize is adjusted by psh */
     } varia;
 
 struct Vars /* sizeof(vars) = n * 4 bytes */
@@ -941,23 +941,23 @@ struct Vars /* sizeof(vars) = n * 4 bytes */
 #endif
     };
 
-static vars * variabelen[256];
+static vars * variables[256];
 
 static int ARGC = 0;
 static char ** ARGV = NULL;
 
-typedef struct kknoop
+typedef struct knode
     {
     tFlags v;
-    psk links,rechts;
-    } kknoop;
+    psk left,right;
+    } knode;
 
 #define BUILTIN (1 << 30)
 
-typedef struct objectknoop /* createdWithNew == 0 */
+typedef struct objectnode /* createdWithNew == 0 */
     {
     tFlags v;
-    psk links,rechts;
+    psk left,right;
 #ifdef BUILTIN
     union
         {
@@ -974,23 +974,23 @@ typedef struct objectknoop /* createdWithNew == 0 */
     unsigned int built_in:1;
     unsigned int createdWithNew:1;
 #endif
-    } objectknoop;
+    } objectnode;
 
-typedef struct stringrefknoop
+typedef struct stringrefnode
     {
     tFlags v;
-    psk kn;
+    psk pnode;
     char * str;
     size_t length;
-    } stringrefknoop;
+    } stringrefnode;
 
 typedef psk function_return_type;
 
 #define functionFail(x) ((x)->v.fl ^= SUCCESS,(x))
 #define functionOk(x) (x)
 
-struct typedObjectknoop;
-typedef Boolean (*method_pnt)(struct typedObjectknoop * This,ppsk pkn);
+struct typedObjectnode;
+typedef Boolean (*method_pnt)(struct typedObjectnode * This,ppsk arg);
 
 typedef struct method
     {
@@ -1000,10 +1000,10 @@ typedef struct method
 
 struct Hash;
 
-typedef struct typedObjectknoop /* createdWithNew == 1 */
+typedef struct typedObjectnode /* createdWithNew == 1 */
     {
     tFlags v;
-    psk links,rechts; /* links == nil, rechts == data (if vtab == NULL)
+    psk left,right; /* left == nil, right == data (if vtab == NULL)
             or name of object type, e.g. [set], [hash], [file], [float] (if vtab != NULL)*/
 #ifdef BUILTIN
     union
@@ -1026,11 +1026,11 @@ typedef struct typedObjectknoop /* createdWithNew == 1 */
     #define VOID(x) x->voiddata
     #define PHASH(x) (Hash**)&(x->voiddata)
     method * vtab; /* The last element n of the array must have vtab[n].name == NULL */
-    } typedObjectknoop;
+    } typedObjectnode;
 
 #ifdef BUILTIN
-#define INCREFCOUNT(a) { ((objectknoop*)a)->u.s.refcount++;(a)->ops &= ((~ALL_REFCOUNT_BITS_SET)|ONEREF); }
-#define DECREFCOUNT(a) { ((objectknoop*)a)->u.s.refcount--;(a)->ops |= ALL_REFCOUNT_BITS_SET; }
+#define INCREFCOUNT(a) { ((objectnode*)a)->u.s.refcount++;(a)->ops &= ((~ALL_REFCOUNT_BITS_SET)|ONEREF); }
+#define DECREFCOUNT(a) { ((objectnode*)a)->u.s.refcount--;(a)->ops |= ALL_REFCOUNT_BITS_SET; }
 #define REFCOUNTNONZERO(a) ((a)->u.s.refcount)
 #define ISBUILTIN(a) ((a)->u.s.built_in)
 #define ISCREATEDWITHNEW(a) ((a)->u.s.createdWithNew)
@@ -1058,7 +1058,7 @@ static FILE * errorStream = NULL;
 enum {NoPending,Writing,Reading};
 typedef struct filehendel
     {
-    char *naam;
+    char *fname;
     FILE *fp;
     struct filehendel *next;
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
@@ -1167,19 +1167,19 @@ Reference count starts with 0, not 1
 #define UNDERSCORE ((14<<OPSH) + IS_OPERATOR) /* dummy */
 
 static const psk knil[16] =
-{NULL,NULL,NULL,NULL,NULL,NULL,&nilk,&nulk,
-&eenk,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+{NULL,NULL,NULL,NULL,NULL,NULL,&nilNode,&zeroNode,
+&oneNode,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 
 static const char opchar[16] =
 {'=','.',',','|','&',':',' ','+','*','^','\016','\017','\'','$','_','?'};
 
 #define OPERATOR ((0xF<<OPSH) + IS_OPERATOR)
 
-#define kop(kn) ((kn)->ops & OPERATOR)
-#define kopo(kn) ((kn).ops & OPERATOR)
-#define is_op(kn) ((kn)->ops & IS_OPERATOR)
-#define is_object(kn) (((kn)->ops & OPERATOR) == EQUALS)
-#define klopcode(kn) (kop(kn) >> OPSH)
+#define Op(pn) ((pn)->ops & OPERATOR)
+#define kopo(pn) ((pn).ops & OPERATOR)
+#define is_op(pn) ((pn)->ops & IS_OPERATOR)
+#define is_object(pn) (((pn)->ops & OPERATOR) == EQUALS)
+#define klopcode(pn) (Op(pn) >> OPSH)
 
 #define nil(p) knil[klopcode(p)]
 
@@ -1196,24 +1196,24 @@ static const char opchar[16] =
 #define ALL_REFCOUNT_BITS_SET \
        ((((unsigned int)(~0)) >> (SHL+NON_REF_COUNT_BITS)) << (SHL+NON_REF_COUNT_BITS))
 
-#define shared(kn) ((kn)->ops & ALL_REFCOUNT_BITS_SET)
-#define sharedo(kn) ((kn).ops & ALL_REFCOUNT_BITS_SET)
+#define shared(pn) ((pn)->ops & ALL_REFCOUNT_BITS_SET)
+#define sharedo(pn) ((pn).ops & ALL_REFCOUNT_BITS_SET)
 
 
-static int all_refcount_bits_set(psk kn)
+static int all_refcount_bits_set(psk pnode)
     {
-    return (shared(kn) == ALL_REFCOUNT_BITS_SET) && !is_object(kn);
+    return (shared(pnode) == ALL_REFCOUNT_BITS_SET) && !is_object(pnode);
     }
 
-static void dec_refcount(psk kn)
+static void dec_refcount(psk pnode)
     {
-    assert(kn->ops & ALL_REFCOUNT_BITS_SET);
-    kn->ops -= ONEREF;
-    if((kn->ops & (OPERATOR|ALL_REFCOUNT_BITS_SET)) == EQUALS)
+    assert(pnode->ops & ALL_REFCOUNT_BITS_SET);
+    pnode->ops -= ONEREF;
+    if((pnode->ops & (OPERATOR|ALL_REFCOUNT_BITS_SET)) == EQUALS)
         {
-        if(REFCOUNTNONZERO((objectknoop*)kn))
+        if(REFCOUNTNONZERO((objectnode*)pnode))
             {
-            DECREFCOUNT(kn);
+            DECREFCOUNT(pnode);
             }
         }
     }
@@ -1257,8 +1257,8 @@ static va_list argptr;
 static unsigned char *startPos;
 
 static const char
-hekje5[] = "\5",
-hekje6[] = "\6",
+hash5[] = "\5",
+hash6[] = "\6",
 unbalanced[] =
 "unbalanced",
 
@@ -1336,7 +1336,7 @@ total bytes = 1166400
 
 static int hum = 1;
 static int listWithName = 1;
-static int mooi = TRUE;
+static int nice = TRUE;
 static int optab[256];
 static int dummy_op = WHITE;
 #if DEBUGBRACMAT
@@ -2235,11 +2235,11 @@ static int toLowerUnicode(int a)
     return convertLetter(a,u2l);
     }
 
-static const char quote[256] = {
+static const char needsquotes[256] = {
 /*
-   1 : quote if first character;
-   3 : quote always
-   4 : quote if \t and \n must be expanded
+   1 : needsquotes if first character;
+   3 : needsquotes always
+   4 : needsquotes if \t and \n must be expanded
 */
 0,0,0,0,0,0,0,0,0,4,4,0,0,0,3,3, /* \L \D */
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -2377,7 +2377,7 @@ static clock_t delayDueToInput = 0;
 #endif
 #endif
 
-static psk global_anker;
+static psk global_anchor;
 
 typedef struct inputBuffer
     {
@@ -2388,21 +2388,21 @@ typedef struct inputBuffer
 
 static inputBuffer * InputArray;
 static inputBuffer * InputElement; /* Points to member of InputArray */
-static unsigned char *start,**pstart,*bron;
-static unsigned char * wijzer;
-static unsigned char * maxwijzer; /* wijzer <= maxwijzer,
-                            if wijzer == maxwijzer, don't assign to *wijzer */
+static unsigned char *start,**pstart,*source;
+static unsigned char * inputBufferPointer;
+static unsigned char * maxInputBufferPointer; /* inputBufferPointer <= maxInputBufferPointer,
+                            if inputBufferPointer == maxInputBufferPointer, don't assign to *inputBufferPointer */
 
 
 /* FUNCTIONS */
 
-static void hreslt(psk wortel,int nivo,int ind,int space);
+static void parenthesised_result(psk Root,int level,int ind,int space);
 #if DEBUGBRACMAT
-static void hreslts(psk wortel,int nivo,int ind,int space,psk snijaf);
+static void hreslts(psk Root,int level,int ind,int space,psk cutoff);
 #endif
 
-static psk eval(psk pkn);
-#define evalueer(x) \
+static psk eval(psk Pnode);
+#define evaluate(x) \
 (    ( ((x) = eval(x))->v.fl \
      & SUCCESS\
      ) \
@@ -2415,7 +2415,7 @@ static psk eval(psk pkn);
 #define isSUCCESSorFENCE(x) ((x)->v.fl & (SUCCESS|FENCE))
 #define isFailed(x) (((x)->v.fl & (SUCCESS|FENCE)) == 0)
 
-static psk subboomcopie(psk src);
+static psk subtreecopy(psk src);
 
 #if _BRACMATEMBEDDED
 
@@ -2494,18 +2494,18 @@ static int mygetc(FILE * fpi)
     }
 #endif
 
-static void (*verwerk)(int c) = myputc;
+static void (*process)(int c) = myputc;
 
-static void myprintf(char *string,...)
+static void myprintf(char *strng,...)
 {
 char *i,*j;
 va_list ap;
-va_start(ap,string);
-i = string;
+va_start(ap,strng);
+i = strng;
 while(i)
     {
     for(j = i;*j;j++)
-        (*verwerk)(*j);
+        (*process)(*j);
     i = va_arg(ap,char *);
     }
 va_end(ap);
@@ -2674,7 +2674,7 @@ static int isFree(void * p)
     return 0;
     }
 
-static void result(psk wortel);
+static void result(psk Root);
 static int rfree(psk p)
     {
     int r = 0;
@@ -3115,7 +3115,7 @@ int memblocksort(const void * a, const void * b)
     return 1;
     }
 
-static int init_ruimte(void)
+static int init_memoryspace(void)
     {
     int i;
     global_allocations = (struct allocation *)malloc( sizeof(struct allocation)
@@ -3169,16 +3169,16 @@ static void pskfree(psk p)
     }
 
 #if defined DEBUGBRACMAT
-static void result(psk wortel);
+static void result(psk Root);
 #endif
 
-static psk new_operator_like(psk kn)
+static psk new_operator_like(psk pnode)
     {
-    if(kop(kn) == EQUALS)
+    if(Op(pnode) == EQUALS)
         {
-        DBGSRC(printf("new_operator_like:");result(kn);printf("\n");)
-        assert(!ISBUILTIN((objectknoop*)kn));
-        objectknoop * goal = (objectknoop *)bmalloc(__LINE__,sizeof(objectknoop));
+        DBGSRC(printf("new_operator_like:");result(pnode);printf("\n");)
+        assert(!ISBUILTIN((objectnode*)pnode));
+        objectnode * goal = (objectnode *)bmalloc(__LINE__,sizeof(objectnode));
 #ifdef BUILTIN
         goal->u.Int = 0;
 #else
@@ -3189,11 +3189,11 @@ static psk new_operator_like(psk kn)
         return (psk)goal;
         }
     else
-        return (psk)bmalloc(__LINE__,sizeof(kknoop));
+        return (psk)bmalloc(__LINE__,sizeof(knode));
     }
 
 static unsigned char *shift_nw(VOIDORARGPTR)
-/* Used from startboom_w and opb */
+/* Used from starttree_w and build_up */
     {
     if(startPos)
         {
@@ -3269,7 +3269,7 @@ the next buffers. These buffers are combined into one big buffer.
     }
 
 static unsigned char * vshift_w(VOIDORARGPTR)
-/* used from bouwboom_w, which receives a list of bmalloc-allocated string
+/* used from buildtree_w, which receives a list of bmalloc-allocated string
    pointers. The last string pointer must not be deallocated here */
     {
     if(InputElement->buffer && (++InputElement)->buffer)
@@ -3287,7 +3287,7 @@ static unsigned char * vshift_w(VOIDORARGPTR)
     }
 
 static unsigned char *vshift_nw(VOIDORARGPTR)
-/* Used from vopb */
+/* Used from vbuildup */
     {
     if(*pstart && *++pstart)
         start = *pstart;
@@ -3361,7 +3361,7 @@ static void pstr(int c)
                 c = 017;
                 break;
             }
-        *bron++ = (char)c;
+        *source++ = (char)c;
         }
     else if(c == '\\')
         esc = TRUE;
@@ -3370,28 +3370,28 @@ static void pstr(int c)
         if(c == '"')
             str = FALSE;
         else
-            *bron++ = (char)c;
+            *source++ = (char)c;
         }
     else if(c == '"')
         str = TRUE;
     else if(c != ' ')
-        *bron++ = (char)c;
+        *source++ = (char)c;
     }
 
-static void plak(int c)
+static void glue(int c)
     {
-    *bron++ = (char)c;
+    *source++ = (char)c;
     }
 
 #define COMPLEX_MAX 80
 #define LINELENGTH 80
 
-static size_t complexiteit(psk wortel,size_t max)
+static size_t complexity(psk Root,size_t max)
     {
-    static int ouder,kind;
-    while(is_op(wortel))
+    static int Parent,Child;
+    while(is_op(Root))
         {
-        switch(kop(wortel))
+        switch(Op(Root))
             {
             case OR :
             case AND :
@@ -3404,7 +3404,7 @@ static size_t complexiteit(psk wortel,size_t max)
             case DOT :
             case COMMA :
             case WHITE :
-                switch(kop(wortel->LEFT))
+                switch(Op(Root->LEFT))
                     {
                     case DOT:
                     case COMMA:
@@ -3418,153 +3418,153 @@ static size_t complexiteit(psk wortel,size_t max)
             default:
                 max += COMPLEX_MAX/LINELENGTH;
             }
-        ouder = kop(wortel);
-        kind = kop(wortel->LEFT);
-        if(HAS__UNOPS(wortel->LEFT) || ouder >= kind)
+        Parent = Op(Root);
+        Child = Op(Root->LEFT);
+        if(HAS__UNOPS(Root->LEFT) || Parent >= Child)
             max += (2 * COMPLEX_MAX)/LINELENGTH; /* 2 parentheses */
 
-        kind = kop(wortel->RIGHT);
-        if(HAS__UNOPS(wortel->RIGHT) || ouder > kind || (ouder == kind && ouder > TIMES))
+        Child = Op(Root->RIGHT);
+        if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
             max += (2 * COMPLEX_MAX)/LINELENGTH; /* 2 parentheses */
 
         if(max > COMPLEX_MAX)
             return max;
-        max = complexiteit(wortel->LEFT,max);
-        wortel = wortel->RIGHT;
+        max = complexity(Root->LEFT,max);
+        Root = Root->RIGHT;
         }
-    if(!is_op(wortel))
-        max += (COMPLEX_MAX*strlen((char *)POBJ(wortel))) / LINELENGTH;
+    if(!is_op(Root))
+        max += (COMPLEX_MAX*strlen((char *)POBJ(Root))) / LINELENGTH;
     return max;
     }
 
-static int indtel = 0,extraspatie = 0,number_of_flags_on_node=0;
+static int indtel = 0,extraSpc = 0,number_of_flags_on_node=0;
 
-static int indent(psk wortel,int nivo,int ind)
+static int indent(psk Root,int level,int ind)
     {
     if(hum)
         {
-        if(ind > 0 || (ind == 0 && complexiteit(wortel,2*nivo) > COMPLEX_MAX))
+        if(ind > 0 || (ind == 0 && complexity(Root,2*level) > COMPLEX_MAX))
             {  /*    blanks that start a line    */
             int p;
-            (*verwerk)('\n');
-            for(p = 2*nivo+number_of_flags_on_node;p;p--)
-                (*verwerk)(' ');
+            (*process)('\n');
+            for(p = 2*level+number_of_flags_on_node;p;p--)
+                (*process)(' ');
             ind = TRUE;
             }
         else
             {  /* blanks after an operator or parenthesis */
-            for(indtel = extraspatie + 2*indtel;indtel;indtel--)
-                (*verwerk)(' ');
+            for(indtel = extraSpc + 2*indtel;indtel;indtel--)
+                (*process)(' ');
             ind = FALSE;
             }
-        extraspatie = 0;
+        extraSpc = 0;
         }
     return ind;
     }
 
-static int moetIndent(psk wortel,int ind,int nivo)
+static int needIndent(psk Root,int ind,int level)
     {
-    return hum && !ind && complexiteit(wortel,2*nivo) > COMPLEX_MAX;
+    return hum && !ind && complexity(Root,2*level) > COMPLEX_MAX;
     }
 
-static void bewerk(int c)
+static void do_something(int c)
     {
     if(c == 016 || c == 017)
         {
-        (*verwerk)('\\');
-        (*verwerk)(c == 016 ? 'L' : 'D');
+        (*process)('\\');
+        (*process)(c == 016 ? 'L' : 'D');
         }
     else
-        (*verwerk)(c);
+        (*process)(c);
     }
 
-static int lineToLong(unsigned char *string)
+static int lineToLong(unsigned char *strng)
     {
     if(  hum
-      && strlen((const char *)string) > 10 /*LINELENGTH*/
+      && strlen((const char *)strng) > 10 /*LINELENGTH*/
       /* very short strings are allowed to keep \n and \t */
       )
         return TRUE;
     return FALSE;
     }
 
-static int haalaan(unsigned char *string)
+static int quote(unsigned char *strng)
     {
     unsigned char *pstring;
-    if(quote[*string] & 1)
+    if(needsquotes[*strng] & 1)
         return TRUE;
-    for(pstring = string;*pstring;pstring++)
-        if(quote[*pstring] & 2)
+    for(pstring = strng;*pstring;pstring++)
+        if(needsquotes[*pstring] & 2)
             return TRUE;
-        else if(  quote[*pstring] & 4
-            && lineToLong(string)
+        else if(  needsquotes[*pstring] & 4
+            && lineToLong(strng)
             )
             return TRUE;
     return FALSE;
     }
 
-static int printflags(psk wortel)
+static int printflags(psk Root)
     {
     int count = 0;
-    int Flgs = wortel->v.fl;
+    int Flgs = Root->v.fl;
     if(Flgs & FENCE)
         {
-        (*verwerk)('`');
+        (*process)('`');
         ++count;
         }
     if(Flgs & POSITION)
         {
-        (*verwerk)('[');
+        (*process)('[');
         ++count;
         }
     if(Flgs & NOT)
         {
-        (*verwerk)('~');
+        (*process)('~');
         ++count;
         }
     if(Flgs & FRACTION)
         {
-        (*verwerk)('/');
+        (*process)('/');
         ++count;
         }
     if(Flgs & NUMBER)
         {
-        (*verwerk)('#');
+        (*process)('#');
         ++count;
         }
     if(Flgs & SMALLER_THAN)
         {
-        (*verwerk)('<');
+        (*process)('<');
         ++count;
         }
     if(Flgs & GREATER_THAN)
         {
-        (*verwerk)('>');
+        (*process)('>');
         ++count;
         }
     if(Flgs & NONIDENT)
         {
-        (*verwerk)('%');
+        (*process)('%');
         ++count;
         }
     if(Flgs & ATOM)
         {
-        (*verwerk)('@');
+        (*process)('@');
         ++count;
         }
     if(Flgs & UNIFY)
         {
-        (*verwerk)('?');
+        (*process)('?');
         ++count;
         }
     if(Flgs & INDIRECT)
         {
-        (*verwerk)('!');
+        (*process)('!');
         ++count;
         }
     if(Flgs & DOUBLY_INDIRECT)
         {
-        (*verwerk)('!');
+        (*process)('!');
         ++count;
         }
     return count;
@@ -3573,47 +3573,47 @@ static int printflags(psk wortel)
 #define LHS 1
 #define RHS 2
 
-static void eindknoop(psk wortel,int space)
+static void endnode(psk Root,int space)
     {
     unsigned char *pstring;
     int q,ikar;
 #if CHECKALLOCBOUNDS
     if(POINT)
-        printf("\n[%p %d]",wortel,(wortel->ops & ALL_REFCOUNT_BITS_SET)/ ONEREF);
+        printf("\n[%p %d]",Root,(Root->ops & ALL_REFCOUNT_BITS_SET)/ ONEREF);
 #endif
-    if(!wortel->u.obj
-        && !HAS_UNOPS(wortel)
+    if(!Root->u.obj
+        && !HAS_UNOPS(Root)
         && space)
         {
-        (*verwerk)('(');
-        (*verwerk)(')');
+        (*process)('(');
+        (*process)(')');
         return;
         }
-    printflags(wortel);
-    if(wortel->ops & MINUS)
-        (*verwerk)('-');
-    if(mooi)
+    printflags(Root);
+    if(Root->ops & MINUS)
+        (*process)('-');
+    if(nice)
         {
-        for(pstring = POBJ(wortel);*pstring;pstring++)
-            bewerk(*pstring);
+        for(pstring = POBJ(Root);*pstring;pstring++)
+            do_something(*pstring);
         }
     else
         {
         Boolean longline = FALSE;
-        if((q = haalaan(POBJ(wortel))) == TRUE)
-            (*verwerk)('"');
-        for(pstring = POBJ(wortel);(ikar = *pstring) != 0;pstring++)
+        if((q = quote(POBJ(Root))) == TRUE)
+            (*process)('"');
+        for(pstring = POBJ(Root);(ikar = *pstring) != 0;pstring++)
             {
             switch(ikar)
                 {
                 case '\n' :
-                    if(longline || lineToLong(POBJ(wortel)))
-                    /* We need to call this, even though haalaan returned TRUE,
-                    because haalaan may have returned before reaching this character.
+                    if(longline || lineToLong(POBJ(Root)))
+                    /* We need to call this, even though quote returned TRUE,
+                    because quote may have returned before reaching this character.
                     */
                         {
                         longline = TRUE;
-                        (*verwerk)('\n');
+                        (*process)('\n');
                         continue;
                         }
                     ikar = 'n';
@@ -3634,13 +3634,13 @@ static void eindknoop(psk wortel,int space)
                     ikar = 'v';
                     break;
                 case '\t' :
-                    if(longline || lineToLong(POBJ(wortel)))
-                    /* We need to call this, even though haalaan returned TRUE,
-                    because haalaan may have returned before reaching this character.
+                    if(longline || lineToLong(POBJ(Root)))
+                    /* We need to call this, even though quote returned TRUE,
+                    because quote may have returned before reaching this character.
                     */
                         {
                         longline = TRUE;
-                        (*verwerk)('\t');
+                        (*process)('\t');
                         continue;
                         }
                     ikar = 't';
@@ -3655,47 +3655,47 @@ static void eindknoop(psk wortel,int space)
                     ikar = 'D';
                     break;
                 default :
-                    (*verwerk)(ikar);
+                    (*process)(ikar);
                     continue;
                 }
-            (*verwerk)('\\');
-            (*verwerk)(ikar);
+            (*process)('\\');
+            (*process)(ikar);
             }
         if(q)
-            (*verwerk)('"');
+            (*process)('"');
         }
     }
 
-static psk zelfde_als_w(psk kn)
+static psk same_as_w(psk pnode)
     {
-    if(shared(kn) != ALL_REFCOUNT_BITS_SET)
+    if(shared(pnode) != ALL_REFCOUNT_BITS_SET)
         {
-        (kn)->ops += ONEREF;
-        return kn;
+        (pnode)->ops += ONEREF;
+        return pnode;
         }
-    else if(is_object(kn))
+    else if(is_object(pnode))
         {
-        INCREFCOUNT(kn);
-        return kn;
+        INCREFCOUNT(pnode);
+        return pnode;
         }
     else
         {
-        return subboomcopie(kn);
+        return subtreecopy(pnode);
         }
     }
 
-static psk zelfde_als_w_2(ppsk pkn)
+static psk same_as_w_2(ppsk PPnode)
     {
-    psk kn = *pkn;
-    if(shared(kn) != ALL_REFCOUNT_BITS_SET)
+    psk pnode = *PPnode;
+    if(shared(pnode) != ALL_REFCOUNT_BITS_SET)
         {
-        kn->ops += ONEREF;
-        return kn;
+        pnode->ops += ONEREF;
+        return pnode;
         }
-    else if(is_object(kn))
+    else if(is_object(pnode))
         {
-        INCREFCOUNT(kn);
-        return kn;
+        INCREFCOUNT(pnode);
+        return pnode;
         }
     else
         {
@@ -3703,8 +3703,8 @@ static psk zelfde_als_w_2(ppsk pkn)
         0:?n&:?L&whl'(!n+1:?n:<10000&out$!n&XXX !L:?L)
         0:?n&:?L&whl'(!n+1:?n:<10000&out$!n&!L XXX:?L) This is not improved!
         */
-        *pkn = subboomcopie(kn);
-        return kn;
+        *PPnode = subtreecopy(pnode);
+        return pnode;
         }
     }
 
@@ -3716,242 +3716,242 @@ static void icpy(LONG *d,LONG *b,int words)
     }
 #endif
 
-static psk icopievan(psk kn)
+static psk icopievan(psk pnode)
     {
     /* REQUIREMENTS : After the string delimiting 0 all remaining bytes in the
 	current computer word must be 0 as well.
     Argument must start on a word boundary. */
     psk ret;
     size_t len;
-    len = sizeof(unsigned LONG)+strlen((char *)POBJ(kn));
+    len = sizeof(unsigned LONG)+strlen((char *)POBJ(pnode));
     ret = (psk)bmalloc(__LINE__,len+1);
 #if ICPY
-    MEMCPY(ret,kn,(len >> LOGWORDLENGTH) + 1);
+    MEMCPY(ret,pnode,(len >> LOGWORDLENGTH) + 1);
 #else
-    MEMCPY(ret,kn,((len / sizeof(LONG)) + 1) * sizeof(LONG));
+    MEMCPY(ret,pnode,((len / sizeof(LONG)) + 1) * sizeof(LONG));
 #endif
     ret->ops &= ~ALL_REFCOUNT_BITS_SET;
     return ret;
     }
 
-static void wis(psk top);
+static void wipe(psk top);
 
-static void copyToSnijaf(psk * ppknoop,psk pknoop,psk snijaf)
+static void copyToCutoff(psk * ppnode,psk pnode,psk cutoff)
     {
     for(;;)
         {
-        if(is_op(pknoop))
+        if(is_op(pnode))
             {
-            if(pknoop->RIGHT == snijaf)
+            if(pnode->RIGHT == cutoff)
                 {
-                *ppknoop = zelfde_als_w(pknoop->LEFT);
+                *ppnode = same_as_w(pnode->LEFT);
                 break;
                 }
             else
                 {
-                psk p = new_operator_like(pknoop);
-                p->ops = pknoop->ops & ~ALL_REFCOUNT_BITS_SET;
-                p->LEFT = zelfde_als_w(pknoop->LEFT);
-                *ppknoop = p;
-                ppknoop = &(p->RIGHT);
-                pknoop = pknoop->RIGHT;
+                psk p = new_operator_like(pnode);
+                p->ops = pnode->ops & ~ALL_REFCOUNT_BITS_SET;
+                p->LEFT = same_as_w(pnode->LEFT);
+                *ppnode = p;
+                ppnode = &(p->RIGHT);
+                pnode = pnode->RIGHT;
                 }
             }
         else
             {
-            *ppknoop = icopievan(pknoop);
+            *ppnode = icopievan(pnode);
             break;
             }
         }
     }
 
-static psk Head(psk pknoop)
+static psk Head(psk pnode)
 {
-if(pknoop->ops & LATEBIND)
+if(pnode->ops & LATEBIND)
     {
-    assert(!shared(pknoop));
-    if(is_op(pknoop))
+    assert(!shared(pnode));
+    if(is_op(pnode))
         {
-        psk root = pknoop;
-        copyToSnijaf(&pknoop,root->LEFT,root->RIGHT);
-        wis(root);
+        psk root = pnode;
+        copyToCutoff(&pnode,root->LEFT,root->RIGHT);
+        wipe(root);
         }
     else
         {
-        stringrefknoop * ps = (stringrefknoop *)pknoop;
-        pknoop = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + ps->length);
-        pknoop->ops = (ps->ops & ~ALL_REFCOUNT_BITS_SET & ~LATEBIND);
-        strncpy((char *)(pknoop)+sizeof(unsigned LONG),(char *)ps->str,ps->length);
-        wis(ps->kn);
+        stringrefnode * ps = (stringrefnode *)pnode;
+        pnode = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + ps->length);
+        pnode->ops = (ps->ops & ~ALL_REFCOUNT_BITS_SET & ~LATEBIND);
+        strncpy((char *)(pnode)+sizeof(unsigned LONG),(char *)ps->str,ps->length);
+        wipe(ps->pnode);
         bfree(ps);
         }
     }
-return pknoop;
+return pnode;
 }
 
-#define RSP (ouder == WHITE ? RHS : 0)
-#define LSP (ouder == WHITE ? LHS : 0)
+#define RSP (Parent == WHITE ? RHS : 0)
+#define LSP (Parent == WHITE ? LHS : 0)
 
 #ifndef reslt
-static void reslt(psk wortel,int nivo,int ind,int space)
+static void reslt(psk Root,int level,int ind,int space)
 {
-static int ouder,kind,newind;
-while(is_op(wortel))
+static int Parent,Child,newind;
+while(is_op(Root))
     {
-    if(kop(wortel) == EQUALS)
-        wortel->RIGHT = Head(wortel->RIGHT);
-    ouder = kop(wortel);
-    kind = kop(wortel->LEFT);
-    if(moetIndent(wortel,ind,nivo))
+    if(Op(Root) == EQUALS)
+        Root->RIGHT = Head(Root->RIGHT);
+    Parent = Op(Root);
+    Child = Op(Root->LEFT);
+    if(needIndent(Root,ind,level))
         indtel++;
-    if(HAS__UNOPS(wortel->LEFT) || ouder >= kind)
-        hreslt(wortel->LEFT,nivo+1,FALSE,(space & LHS) | RSP);
+    if(HAS__UNOPS(Root->LEFT) || Parent >= Child)
+        parenthesised_result(Root->LEFT,level+1,FALSE,(space & LHS) | RSP);
     else
-        reslt(wortel->LEFT,nivo+1,FALSE,(space & LHS) | RSP);
-    newind = indent(wortel,nivo,ind);
+        reslt(Root->LEFT,level+1,FALSE,(space & LHS) | RSP);
+    newind = indent(Root,level,ind);
     if(newind)
-        extraspatie = 1;
+        extraSpc = 1;
 #if CHECKALLOCBOUNDS
     if(POINT)
-        printf("\n[%p %d]",wortel,(wortel->ops & ALL_REFCOUNT_BITS_SET)/ ONEREF);
+        printf("\n[%p %d]",Root,(Root->ops & ALL_REFCOUNT_BITS_SET)/ ONEREF);
 #endif
-    bewerk(opchar[klopcode(wortel)]);
-    ouder = kop(wortel);
-    kind = kop(wortel->RIGHT);
-    if(HAS__UNOPS(wortel->RIGHT) || ouder > kind || (ouder == kind && ouder > TIMES))
+    do_something(opchar[klopcode(Root)]);
+    Parent = Op(Root);
+    Child = Op(Root->RIGHT);
+    if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
         {
-        hreslt(wortel->RIGHT,nivo+1,FALSE,LSP | (space & RHS));
+        parenthesised_result(Root->RIGHT,level+1,FALSE,LSP | (space & RHS));
         return;
         }
-    else if(ouder < kind)
+    else if(Parent < Child)
         {
-        reslt(wortel->RIGHT,nivo+1,FALSE,LSP | (space & RHS));
+        reslt(Root->RIGHT,level+1,FALSE,LSP | (space & RHS));
         return;
         }
     else if(newind != ind || ((LSP | (space & RHS)) != space))
         {
-        reslt(wortel->RIGHT,nivo,newind,LSP | (space & RHS));
+        reslt(Root->RIGHT,level,newind,LSP | (space & RHS));
         return;
         }
-    wortel = wortel->RIGHT;
+    Root = Root->RIGHT;
     }
-indent(wortel,nivo,-1);
-eindknoop(wortel,space);
+indent(Root,level,-1);
+endnode(Root,space);
 }
 
 #if DEBUGBRACMAT
 
-static void reslts(psk wortel,int nivo,int ind,int space,psk snijaf)
+static void reslts(psk Root,int level,int ind,int space,psk cutoff)
     {
-    static int ouder,kind,newind;
-    if(is_op(wortel))
+    static int Parent,Child,newind;
+    if(is_op(Root))
         {
-        if(kop(wortel) == EQUALS)
-            wortel->RIGHT = Head(wortel->RIGHT);
+        if(Op(Root) == EQUALS)
+            Root->RIGHT = Head(Root->RIGHT);
 
         do
             {
-            if(snijaf && wortel->RIGHT == snijaf)
+            if(cutoff && Root->RIGHT == cutoff)
                 {
-                reslt(wortel->LEFT,nivo,ind,space);
+                reslt(Root->LEFT,level,ind,space);
                 return;
                 }
-            ouder = kop(wortel);
-             kind = kop(wortel->LEFT);
-            if(moetIndent(wortel,ind,nivo))
+            Parent = Op(Root);
+             Child = Op(Root->LEFT);
+            if(needIndent(Root,ind,level))
                 indtel++;
-            if(HAS__UNOPS(wortel->LEFT) || ouder >= kind)
-                hreslt(wortel->LEFT,nivo+1,FALSE,(space & LHS) | RSP);
+            if(HAS__UNOPS(Root->LEFT) || Parent >= Child)
+                parenthesised_result(Root->LEFT,level+1,FALSE,(space & LHS) | RSP);
             else
-                reslt(wortel->LEFT,nivo+1,FALSE,(space & LHS) | RSP);
-            newind = indent(wortel,nivo,ind);
+                reslt(Root->LEFT,level+1,FALSE,(space & LHS) | RSP);
+            newind = indent(Root,level,ind);
             if(newind)
-                extraspatie = 1;
-            bewerk(opchar[klopcode(wortel)]);
-            ouder = kop(wortel);
-            kind = kop(wortel->RIGHT);
-            if(HAS__UNOPS(wortel->RIGHT) || ouder > kind || (ouder == kind && ouder > TIMES))
-                hreslts(wortel->RIGHT,nivo+1,FALSE,LSP | (space & RHS),snijaf);
-            else if(ouder < kind)
+                extraSpc = 1;
+            do_something(opchar[klopcode(Root)]);
+            Parent = Op(Root);
+            Child = Op(Root->RIGHT);
+            if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
+                hreslts(Root->RIGHT,level+1,FALSE,LSP | (space & RHS),cutoff);
+            else if(Parent < Child)
                 {
-                reslts(wortel->RIGHT,nivo+1,FALSE,LSP | (space & RHS),snijaf);
+                reslts(Root->RIGHT,level+1,FALSE,LSP | (space & RHS),cutoff);
                 return;
                 }
             else if(newind != ind || ((LSP | (space & RHS)) != space))
                 {
-                reslts(wortel->RIGHT,nivo,newind,LSP | (space & RHS),snijaf);
+                reslts(Root->RIGHT,level,newind,LSP | (space & RHS),cutoff);
                 return;
                 }
-            wortel = wortel->RIGHT;
+            Root = Root->RIGHT;
             }
-        while(is_op(wortel));
+        while(is_op(Root));
         }
     else
         {
-        indent(wortel,nivo,-1);
-        eindknoop(wortel,space);
+        indent(Root,level,-1);
+        endnode(Root,space);
         }
     }
 #endif /* DEBUGBRACMAT */
 #endif
 
-static void hreslt(psk wortel,int nivo,int ind,int space)
+static void parenthesised_result(psk Root,int level,int ind,int space)
 {
-static int ouder,kind;
-if(is_op(wortel))
+static int Parent,Child;
+if(is_op(Root))
     {
     int number_of_flags;
-    if(kop(wortel) == EQUALS)
-        wortel->RIGHT = Head(wortel->RIGHT);
-    indent(wortel,nivo,-1);
-    number_of_flags = printflags(wortel);
+    if(Op(Root) == EQUALS)
+        Root->RIGHT = Head(Root->RIGHT);
+    indent(Root,level,-1);
+    number_of_flags = printflags(Root);
     number_of_flags_on_node += number_of_flags;
-    (*verwerk)('(');
+    (*process)('(');
     indtel = 0;
-    if(moetIndent(wortel,ind,nivo))
-        extraspatie = 1;
-    ouder = kop(wortel);
-    kind = kop(wortel->LEFT);
-    if(HAS__UNOPS(wortel->LEFT) || ouder >= kind)
-        hreslt(wortel->LEFT,nivo+1,FALSE,RSP);
+    if(needIndent(Root,ind,level))
+        extraSpc = 1;
+    Parent = Op(Root);
+    Child = Op(Root->LEFT);
+    if(HAS__UNOPS(Root->LEFT) || Parent >= Child)
+        parenthesised_result(Root->LEFT,level+1,FALSE,RSP);
     else
-        reslt(wortel->LEFT,nivo+1,FALSE,RSP);
-    ind = indent(wortel,nivo,ind);
+        reslt(Root->LEFT,level+1,FALSE,RSP);
+    ind = indent(Root,level,ind);
     if(ind)
-        extraspatie = 1;
+        extraSpc = 1;
 #if CHECKALLOCBOUNDS
     if(POINT)
-        printf("\n[%p %d]",wortel,(wortel->ops & ALL_REFCOUNT_BITS_SET)/ ONEREF);
+        printf("\n[%p %d]",Root,(Root->ops & ALL_REFCOUNT_BITS_SET)/ ONEREF);
 #endif
-    bewerk(opchar[klopcode(wortel)]);
-    ouder = kop(wortel);
+    do_something(opchar[klopcode(Root)]);
+    Parent = Op(Root);
 
-    kind = kop(wortel->RIGHT);
-    if(HAS__UNOPS(wortel->RIGHT) || ouder > kind || (ouder == kind && ouder > TIMES))
-        hreslt(wortel->RIGHT,nivo+1,FALSE,LSP);
-    else if(ouder < kind)
-        reslt(wortel->RIGHT,nivo+1,FALSE,LSP);
+    Child = Op(Root->RIGHT);
+    if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
+        parenthesised_result(Root->RIGHT,level+1,FALSE,LSP);
+    else if(Parent < Child)
+        reslt(Root->RIGHT,level+1,FALSE,LSP);
     else
-        reslt(wortel->RIGHT,nivo,ind,LSP);
-    indent(wortel,nivo,FALSE);
-    (*verwerk)(')');
+        reslt(Root->RIGHT,level,ind,LSP);
+    indent(Root,level,FALSE);
+    (*process)(')');
     number_of_flags_on_node -= number_of_flags;
     }
 else
     {
-    indent(wortel,nivo,-1);
-    eindknoop(wortel,space);
+    indent(Root,level,-1);
+    endnode(Root,space);
     }
 }
 
-static void result(psk wortel)
+static void result(psk Root)
 {
-if(HAS__UNOPS(wortel))
+if(HAS__UNOPS(Root))
     {
-    hreslt(wortel,0,FALSE,0);
+    parenthesised_result(Root,0,FALSE,0);
     }
 else
-    reslt(wortel,0,FALSE,0);
+    reslt(Root,0,FALSE,0);
 }
 
 #if 1
@@ -3961,7 +3961,7 @@ else
 static int testMul(char * txt,psk variabele,psk pbinding,int doit)
     {
     if(  doit 
-      || is_op(pbinding) && kop(pbinding) == TIMES && pbinding->LEFT->u.obj == 'a'
+      || is_op(pbinding) && Op(pbinding) == TIMES && pbinding->LEFT->u.obj == 'a'
       )
         {
         POINT = 1;
@@ -3984,71 +3984,71 @@ static int testMul(char * txt,psk variabele,psk pbinding,int doit)
 #endif
 
 #if DEBUGBRACMAT
-static void hreslts(psk wortel,int nivo,int ind,int space,psk snijaf)
+static void hreslts(psk Root,int level,int ind,int space,psk cutoff)
 {
-static int ouder,kind;
-if(is_op(wortel))
+static int Parent,Child;
+if(is_op(Root))
     {
     int number_of_flags;
-    if(kop(wortel) == EQUALS)
-        wortel->RIGHT = Head(wortel->RIGHT);
-    if(snijaf && wortel->RIGHT == snijaf)
+    if(Op(Root) == EQUALS)
+        Root->RIGHT = Head(Root->RIGHT);
+    if(cutoff && Root->RIGHT == cutoff)
         {
-        hreslt(wortel->LEFT,nivo,ind,space);
+        parenthesised_result(Root->LEFT,level,ind,space);
         return;
         }
-    indent(wortel,nivo,-1);
-    number_of_flags = printflags(wortel);
+    indent(Root,level,-1);
+    number_of_flags = printflags(Root);
     number_of_flags_on_node += number_of_flags;
-    (*verwerk)('(');
+    (*process)('(');
     indtel = 0;
-    if(moetIndent(wortel,ind,nivo))
-        extraspatie = 1;
-    ouder = kop(wortel);
-    kind = kop(wortel->LEFT);
-    if(HAS__UNOPS(wortel->LEFT) || ouder >= kind)
-        hreslt(wortel->LEFT,nivo+1,FALSE,RSP);
+    if(needIndent(Root,ind,level))
+        extraSpc = 1;
+    Parent = Op(Root);
+    Child = Op(Root->LEFT);
+    if(HAS__UNOPS(Root->LEFT) || Parent >= Child)
+        parenthesised_result(Root->LEFT,level+1,FALSE,RSP);
     else
-        reslt(wortel->LEFT,nivo+1,FALSE,RSP);
-    ind = indent(wortel,nivo,ind);
+        reslt(Root->LEFT,level+1,FALSE,RSP);
+    ind = indent(Root,level,ind);
     if(ind)
-        extraspatie = 1;
-    bewerk(opchar[klopcode(wortel)]);
-    ouder = kop(wortel);
-    kind = kop(wortel->RIGHT);
-    if(HAS__UNOPS(wortel->RIGHT) || ouder > kind || (ouder == kind && ouder > TIMES))
-        hreslts(wortel->RIGHT,nivo+1,FALSE,LSP,snijaf);
-    else if(ouder < kind)
-        reslts(wortel->RIGHT,nivo+1,FALSE,LSP,snijaf);
+        extraSpc = 1;
+    do_something(opchar[klopcode(Root)]);
+    Parent = Op(Root);
+    Child = Op(Root->RIGHT);
+    if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
+        hreslts(Root->RIGHT,level+1,FALSE,LSP,cutoff);
+    else if(Parent < Child)
+        reslts(Root->RIGHT,level+1,FALSE,LSP,cutoff);
     else
-        reslts(wortel->RIGHT,nivo,ind,LSP,snijaf);
-    indent(wortel,nivo,FALSE);
-    (*verwerk)(')');
+        reslts(Root->RIGHT,level,ind,LSP,cutoff);
+    indent(Root,level,FALSE);
+    (*process)(')');
     number_of_flags_on_node -= number_of_flags;
     }
 else
     {
-    indent(wortel,nivo,-1);
-    eindknoop(wortel,space);
+    indent(Root,level,-1);
+    endnode(Root,space);
     }
 }
 
-static void results(psk wortel,psk snijaf)
+static void results(psk Root,psk cutoff)
 {
-if(HAS__UNOPS(wortel))
+if(HAS__UNOPS(Root))
     {
-    hreslts(wortel,0,FALSE,0,snijaf);
+    hreslts(Root,0,FALSE,0,cutoff);
     }
 else
-    reslts(wortel,0,FALSE,0,snijaf);
+    reslts(Root,0,FALSE,0,cutoff);
 }
 #endif
 
-static LONG toLong(psk kn)
+static LONG toLong(psk pnode)
     {
     LONG res;
-    res = (LONG)STRTOUL((char *)POBJ(kn),(char **)NULL,10);
-    if(kn->ops & MINUS)
+    res = (LONG)STRTOUL((char *)POBJ(pnode),(char **)NULL,10);
+    if(pnode->ops & MINUS)
         res = -res;
     return res;
     }
@@ -4139,13 +4139,13 @@ static int fullnumbercheck(const char *begin)
         return numbercheck(begin);
     }
 
-static int sfullnumbercheck(char *begin,char * snijaf)
+static int sfullnumbercheck(char *begin,char * cutoff)
     {
-    unsigned char sav = *snijaf;
+    unsigned char sav = *cutoff;
     int ret;
-    *snijaf = '\0';
+    *cutoff = '\0';
     ret = fullnumbercheck(begin);
-    *snijaf = sav;
+    *cutoff = sav;
     return ret;
     }
 
@@ -4208,13 +4208,13 @@ return Flgs;
 #define flags(OPSFLGS) flags()
 
 
-#define atoom(FLGS,OPSFLGS) atoom(FLGS)
+#define Atom(FLGS,OPSFLGS) Atom(FLGS)
 
-static psk atoom(int Flgs,int opsflgs)
+static psk Atom(int Flgs,int opsflgs)
     {
     unsigned char *begin,*eind;
     size_t af = 0;
-    psk pkn;
+    psk Pnode;
     begin = start;
 
     while(optab[*start] == NOOP)
@@ -4222,9 +4222,9 @@ static psk atoom(int Flgs,int opsflgs)
             af++;
 
     eind = start;
-    pkn = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + (size_t)(eind - begin) - af);
+    Pnode = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + (size_t)(eind - begin) - af);
     start = begin;
-    begin = POBJ(pkn);
+    begin = POBJ(Pnode);
     while(start < eind)
         {
         if(*start == 0x7F)
@@ -4239,17 +4239,17 @@ static psk atoom(int Flgs,int opsflgs)
         }
     if(Flgs & INDIRECT)
         {
-        (pkn)->v.fl = Flgs ^ SUCCESS;
+        (Pnode)->v.fl = Flgs ^ SUCCESS;
         }
     else
         {
         if(NEGATION(Flgs,NUMBER))
-            (pkn)->v.fl = (Flgs ^ (READY|SUCCESS));
+            (Pnode)->v.fl = (Flgs ^ (READY|SUCCESS));
         else
-            (pkn)->v.fl = (Flgs ^ (READY|SUCCESS)) | (numbercheck(SPOBJ(pkn)) & ~DEFINITELYNONUMBER);
+            (Pnode)->v.fl = (Flgs ^ (READY|SUCCESS)) | (numbercheck(SPOBJ(Pnode)) & ~DEFINITELYNONUMBER);
         }
 #undef opsflgs
-    return pkn;
+    return Pnode;
     }
 
 #if GLOBALARGPTR
@@ -4266,9 +4266,9 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
 /* *nxt (if nxt != 0) is set to the character following the expression. */
     {
     int op_of_0;
-    psk pkn;
+    psk Pnode;
     if(*start > 0 && *start <= '\6')
-        pkn = zelfde_als_w(adr[*start++]);
+        Pnode = same_as_w(addr[*start++]);
     else
         {
         int Flgs;
@@ -4278,14 +4278,14 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
             if(*++start == 0)
 #if GLOBALARGPTR
                 (*shift)();
-            pkn = lex(NULL,0,Flgs,locopsflgs);
+            Pnode = lex(NULL,0,Flgs,locopsflgs);
 #else
                 (*shift)(pargptr);
-            pkn = lex(NULL,0,Flgs,locopsflgs,pargptr);
+            Pnode = lex(NULL,0,Flgs,locopsflgs,pargptr);
 #endif
             }
         else
-            pkn = atoom(Flgs,locopsflgs);
+            Pnode = Atom(Flgs,locopsflgs);
         }
 
     if(*start == 0)
@@ -4295,7 +4295,7 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
 #else
         if(!*(*shift)(pargptr))
 #endif
-            return /*0*/pkn;
+            return /*0*/Pnode;
         }
 
     op_of_0 = *start;
@@ -4321,7 +4321,7 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
                 {
 #if STRINGMATCH_CAN_BE_NEGATED
                 if(  (Flgs & (NOT|FILTERS)) == (NOT|ATOM)
-                  && kop(*pkn) == MATCH
+                  && Op(*Pnode) == MATCH
                   ) /* 20071229 Undo setting of
                         success == FALSE
                        if ~@ flags are attached to : operator
@@ -4333,31 +4333,31 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
                     Flgs ^= SUCCESS;
                     }
 #endif
-                (pkn)->v.fl ^= Flags; /*19970821*/
+                (Pnode)->v.fl ^= Flags; /*19970821*/
                 if(nxt)
                     *nxt = op_of_0;
-                return pkn;
+                return Pnode;
                 }
             if(optab[op_of_0] == EQUALS)
                 {
-                operatorNode = (psk)bmalloc(__LINE__,sizeof(objectknoop));
-        /*        ((objectknoop*)psk)->refcount = 0; done by bmalloc */
+                operatorNode = (psk)bmalloc(__LINE__,sizeof(objectnode));
+        /*        ((objectnode*)psk)->refcount = 0; done by bmalloc */
                 }
             else
-                operatorNode = (psk)bmalloc(__LINE__,sizeof(kknoop));
+                operatorNode = (psk)bmalloc(__LINE__,sizeof(knode));
             assert(optab[op_of_0] != NOOP);
             assert(optab[op_of_0] >= 0);
             operatorNode->v.fl = optab[op_of_0] | SUCCESS;
             /*operatorNode->v.fl ^= Flgs;*/
-            operatorNode->LEFT = pkn;
-            pkn = operatorNode;/* 'op_of_0' has sufficient priority */
+            operatorNode->LEFT = Pnode;
+            Pnode = operatorNode;/* 'op_of_0' has sufficient priority */
             if(optab[op_of_0] == priority) /* 'op_of_0' has same priority */
                 {
-                (pkn)->v.fl ^= Flags; /*19970821*/
+                (Pnode)->v.fl ^= Flags; /*19970821*/
                 operatorNode->RIGHT = NULL;
                 if(nxt)
                     *nxt = op_of_0;
-                return pkn;
+                return Pnode;
                 }
             for(;;)
                 {
@@ -4376,14 +4376,14 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
             }
         while(op_of_0 != 0);
         }
-    (pkn)->v.fl ^= Flags; /*19970821*/
-    return /*0*/pkn;
+    (Pnode)->v.fl ^= Flags; /*19970821*/
+    return /*0*/Pnode;
     }
 
-static psk bouwboom_w(psk pkn)
+static psk buildtree_w(psk Pnode)
     {
-    if(pkn)
-        wis(pkn);
+    if(Pnode)
+        wipe(Pnode);
     InputElement = InputArray;
     if(InputElement->cutoff)
         {
@@ -4392,9 +4392,9 @@ static psk bouwboom_w(psk pkn)
     start = InputElement->buffer;
     shift = vshift_w;
 #if GLOBALARGPTR
-    pkn = lex(NULL,0,0,0);
+    Pnode = lex(NULL,0,0,0);
 #else
-    pkn = lex(NULL,0,0,0,0);
+    Pnode = lex(NULL,0,0,0,0);
 #endif
     shift = shift_nw;
     if((--InputElement)->mallocallocated)
@@ -4402,15 +4402,15 @@ static psk bouwboom_w(psk pkn)
         bfree(InputElement->buffer);
         }
     bfree(InputArray);
-    return pkn;
+    return Pnode;
     }
 
 static void lput(int c)
     {
-    if(wijzer >= maxwijzer)
+    if(inputBufferPointer >= maxInputBufferPointer)
         {
         inputBuffer * newInputArray;
-        unsigned char * lijst;
+        unsigned char * input_buffer;
         unsigned char * dest;
         int len;
     size_t L;
@@ -4419,12 +4419,12 @@ static void lput(int c)
             ;
         /* len = index of last element in InputArray array */
 
-        lijst = InputArray[len - 1].buffer;
+        input_buffer = InputArray[len - 1].buffer;
         /* The last string (probably on the stack, not on the heap) */
 
-        while(wijzer > lijst && optab[*--wijzer] == NOOP)
+        while(inputBufferPointer > input_buffer && optab[*--inputBufferPointer] == NOOP)
             ;
-        /* wijzer points at last operator (where string can be split) or at
+        /* inputBufferPointer points at last operator (where string can be split) or at
            the start of the string. */
 
         newInputArray = (inputBuffer *)bmalloc(__LINE__,(2 + len) * sizeof(inputBuffer));
@@ -4433,42 +4433,42 @@ static void lput(int c)
         newInputArray[len + 1].buffer = NULL;
         newInputArray[len + 1].cutoff = FALSE;
         newInputArray[len + 1].mallocallocated = FALSE;
-        newInputArray[len].buffer = lijst;
+        newInputArray[len].buffer = input_buffer;
     /*The buffer pointers with lower index are copied further down.*/
 
-        /*Printf("lijst %p\n",lijst);*/
+        /*Printf("input_buffer %p\n",input_buffer);*/
 
         newInputArray[len].cutoff = FALSE;
         newInputArray[len].mallocallocated = FALSE;
         /*The active buffer is still the one declared in input(),
-      so on the stack (except under EPOC).*/
+          so on the stack (except under EPOC).*/
         --len; /* point at the second last element, the one that got filled up. */
-        if(wijzer == lijst)
+        if(inputBufferPointer == input_buffer)
             {
-            /* copy the full content of lijst to the second last element */
+            /* copy the full content of input_buffer to the second last element */
             dest = newInputArray[len].buffer = (unsigned char *)bmalloc(__LINE__,DEFAULT_INPUT_BUFFER_SIZE);
-            strncpy((char *)dest,(char *)lijst,DEFAULT_INPUT_BUFFER_SIZE - 1);
-        dest[DEFAULT_INPUT_BUFFER_SIZE - 1] = '\0';
+            strncpy((char *)dest,(char *)input_buffer,DEFAULT_INPUT_BUFFER_SIZE - 1);
+            dest[DEFAULT_INPUT_BUFFER_SIZE - 1] = '\0';
             /* Make a notice that the element's string is cut-off */
             newInputArray[len].cutoff = TRUE;
             newInputArray[len].mallocallocated = TRUE;
             }
         else
             {
-            ++wijzer; /* wijzer points at first character after the operator */
-            /* maxwijzer - wijzer >= 0 */
-        L = (size_t)(wijzer - lijst);
+            ++inputBufferPointer; /* inputBufferPointer points at first character after the operator */
+            /* maxInputBufferPointer - inputBufferPointer >= 0 */
+        L = (size_t)(inputBufferPointer - input_buffer);
             dest = newInputArray[len].buffer = (unsigned char *)bmalloc(__LINE__,L + 1);
-            strncpy((char *)dest,(char *)lijst,L);
+            strncpy((char *)dest,(char *)input_buffer,L);
             dest[L] = '\0';
             newInputArray[len].cutoff = FALSE;
             newInputArray[len].mallocallocated = TRUE;
 
-            /* Now remove the substring up to wijzer from lijst */
-        L = (size_t)(maxwijzer - wijzer);
-            strncpy((char *)lijst,(char *)wijzer,L);
-        lijst[L] = '\0';
-            wijzer = lijst + L;
+            /* Now remove the substring up to inputBufferPointer from input_buffer */
+            L = (size_t)(maxInputBufferPointer - inputBufferPointer);
+            strncpy((char *)input_buffer,(char *)inputBufferPointer,L);
+            input_buffer[L] = '\0';
+            inputBufferPointer = input_buffer + L;
             }
 
         /* Copy previous element's fields */
@@ -4482,8 +4482,8 @@ static void lput(int c)
         bfree(InputArray);
         InputArray = newInputArray;
         }
-    assert(wijzer <= maxwijzer);
-    *wijzer++ = (unsigned char)c;
+    assert(inputBufferPointer <= maxInputBufferPointer);
+    *inputBufferPointer++ = (unsigned char)c;
     }
 
 /* referenced from xml.c json.c */
@@ -4502,12 +4502,12 @@ void putLeafChar(int c)
     lput(c | 0x80);
     }
 
-void writeError(psk pkn)
+void writeError(psk Pnode)
     {
     FILE *redfpo;
-    int redMooi;
-    redMooi = mooi;
-    mooi = FALSE;
+    int saveNice;
+    saveNice = nice;
+    nice = FALSE;
     redfpo = global_fpo;
     global_fpo = errorStream;
 #if !defined NO_FOPEN
@@ -4516,7 +4516,7 @@ void writeError(psk pkn)
 #endif
     if(global_fpo)
         {
-        result(pkn);
+        result(Pnode);
         myputc('\n');
 /*#if !_BRACMATEMBEDDED*/
 #if !defined NO_FOPEN
@@ -4528,7 +4528,7 @@ void writeError(psk pkn)
         }
 /*#endif*/
     global_fpo = redfpo;
-    mooi = redMooi;
+    nice = saveNice;
     }
 
 /*#if !_BRACMATEMBEDDED*/
@@ -4570,7 +4570,7 @@ static int redirectError(char * name)
     }
 /*#endif*/
 
-static void politelyWriteError(psk pkn)
+static void politelyWriteError(psk Pnode)
     {
     unsigned char name[256] = "";
 #if !_BRACMATEMBEDDED
@@ -4594,26 +4594,27 @@ static void politelyWriteError(psk pkn)
 #endif
 #endif
     if(name[0] != '.')
-        writeError(pkn);
+        writeError(Pnode);
     }
 
-static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean * GoOn)
+static psk input(FILE * fpi,psk Pnode,int echmemvapstrmltrm,Boolean * err,Boolean * GoOn)
     {
     static int stdinEOF = FALSE;
-    int braces,ikar,hasop,whiteSpaceSeen,escape,backslashesAreEscaped,inString,parentheses,error;
+    int braces, ikar, hasop, whiteSpaceSeen, escape, backslashesAreEscaped, 
+		inString, parentheses, error;
 #ifdef __SYMBIAN32__
-    unsigned char * lijst;
-    lijst = bmalloc(__LINE__,DEFAULT_INPUT_BUFFER_SIZE);
+    unsigned char * input_buffer;
+    input_buffer = bmalloc(__LINE__,DEFAULT_INPUT_BUFFER_SIZE);
 #else
-    unsigned char lijst[DEFAULT_INPUT_BUFFER_SIZE];
+    unsigned char input_buffer[DEFAULT_INPUT_BUFFER_SIZE];
 #endif
     if((fpi == stdin) && (stdinEOF == TRUE))
         exit(0);
-    maxwijzer = lijst + (DEFAULT_INPUT_BUFFER_SIZE - 1);/* there must be room  for terminating 0 */
+    maxInputBufferPointer = input_buffer + (DEFAULT_INPUT_BUFFER_SIZE - 1);/* there must be room  for terminating 0 */
     /* Array of pointers to inputbuffers. Initially 2 elements,
        large enough for small inputs (< DEFAULT_INPUT_BUFFER_SIZE)*/
     InputArray = (inputBuffer *)bmalloc(__LINE__,2*sizeof(inputBuffer));
-    InputArray[0].buffer = lijst;
+    InputArray[0].buffer = input_buffer;
     InputArray[0].cutoff = FALSE;
     InputArray[0].mallocallocated = FALSE;
     InputArray[1].buffer = NULL;
@@ -4631,40 +4632,40 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
 #if READMARKUPFAMILY
     if(echmemvapstrmltrm & OPT_ML)
         {
-        wijzer = lijst;
-        XMLtext(fpi,(char*)bron,(echmemvapstrmltrm & OPT_TRM),(echmemvapstrmltrm & OPT_HT),(echmemvapstrmltrm & OPT_X));
-        *wijzer = 0;
-        pkn = bouwboom_w(pkn);
+        inputBufferPointer = input_buffer;
+        XMLtext(fpi,(char*)source,(echmemvapstrmltrm & OPT_TRM),(echmemvapstrmltrm & OPT_HT),(echmemvapstrmltrm & OPT_X));
+        *inputBufferPointer = 0;
+        Pnode = buildtree_w(Pnode);
         if(err) *err = error;
 #ifdef __SYMBIAN32__
-        bfree(lijst);
+        bfree(input_buffer);
 #endif
         if(GoOn)
             *GoOn = FALSE;
-        return pkn;
+        return Pnode;
         }
     else
 #endif
 #if READJSON
     if(echmemvapstrmltrm & OPT_JSON)
         {
-        wijzer = lijst;
-        error = JSONtext(fpi,(char*)bron);
-        *wijzer = 0;
-        pkn = bouwboom_w(pkn);
+        inputBufferPointer = input_buffer;
+        error = JSONtext(fpi,(char*)source);
+        *inputBufferPointer = 0;
+        Pnode = buildtree_w(Pnode);
         if(err) *err = error;
 #ifdef __SYMBIAN32__
-        bfree(lijst);
+        bfree(input_buffer);
 #endif
         if(GoOn)
             *GoOn = FALSE;
-        return pkn;
+        return Pnode;
         }
     else
 #endif
         if(echmemvapstrmltrm & (OPT_VAP|OPT_STR))
         {
-        for(wijzer = lijst;;)
+        for(inputBufferPointer = input_buffer;;)
             {
             if(fpi)
                 {
@@ -4681,7 +4682,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
                     break;
                 }
             else
-                if((ikar = *bron++) == 0)
+                if((ikar = *source++) == 0)
                     break;
             if(ikar & 0x80)
                  lput(0x7F);
@@ -4694,23 +4695,23 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
                     lput(' ');
                 }
             }
-        *wijzer = 0;
-        pkn = bouwboom_w(pkn);
+        *inputBufferPointer = 0;
+        Pnode = buildtree_w(Pnode);
         if(err) *err = error;
 #ifdef __SYMBIAN32__
-        bfree(lijst);
+        bfree(input_buffer);
 #endif
         if(GoOn)
             *GoOn = FALSE;
-        return pkn;
+        return Pnode;
         }
-    for( wijzer = lijst
+    for( inputBufferPointer = input_buffer
        ;    
 #if _BRACMATEMBEDDED
             !error
          &&
 #endif
-            (ikar = fpi ? mygetc(fpi) : *bron++) != EOF
+            (ikar = fpi ? mygetc(fpi) : *source++) != EOF
          && ikar
          && parentheses >= 0
        ;
@@ -4825,7 +4826,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
                         braces = 1;
                         break;
                     case '}' :
-                        *wijzer = 0;
+                        *inputBufferPointer = 0;
                         errorprintf(
                         "\n%s brace }",
                             unbalanced);
@@ -4850,7 +4851,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
                                 case ';' :
                                     if(parentheses)
                                         {
-                                        *wijzer = 0;
+                                        *inputBufferPointer = 0;
                                         errorprintf("\n%d %s \"(\"",parentheses,unbalanced);
                                         error = TRUE;
                                         }
@@ -4859,17 +4860,17 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
                                     /* fall through */
                                 case '\n':
                                     /* You get here only directly if fpi==stdin */
-                                    *wijzer = 0;
-                                    pkn = bouwboom_w(pkn);
+                                    *inputBufferPointer = 0;
+                                    Pnode = buildtree_w(Pnode);
                                     if(error)
-                                        politelyWriteError(pkn);
+                                        politelyWriteError(Pnode);
                                     if(err) *err = error;
 #ifdef __SYMBIAN32__
-                                    bfree(lijst);
+                                    bfree(input_buffer);
 #endif
                                     if(GoOn)
                                         *GoOn = ikar == ';' && !error;
-                                    return pkn;
+                                    return Pnode;
                                 default:
                                     switch(ikar)
                                         {
@@ -4924,7 +4925,7 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
         {
         stdinEOF = TRUE;
         }
-    *wijzer = 0;
+    *inputBufferPointer = 0;
 #if _BRACMATEMBEDDED
     if(!error)
 #endif
@@ -4983,10 +4984,10 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
             Printf("\n");
         if(*InputArray[0].buffer)
             {
-            pkn = bouwboom_w(pkn);
+            Pnode = buildtree_w(Pnode);
             if(error)
                 {
-                politelyWriteError(pkn);
+                politelyWriteError(Pnode);
                 }
             }
         else
@@ -5003,11 +5004,11 @@ static psk input(FILE * fpi,psk pkn,int echmemvapstrmltrm,Boolean * err,Boolean 
     if(err)
         *err = error;
     #ifdef __SYMBIAN32__
-    bfree(lijst);
+    bfree(input_buffer);
     #endif
     if(GoOn)
         *GoOn = FALSE;
-    return pkn;
+    return Pnode;
     }
 
 #if JMP
@@ -5024,8 +5025,8 @@ void stringEval(const char *s,const char ** out,int * err)
     char * buf = (char *)malloc(strlen(s) + 7);
     sprintf(buf,"str$(%s)",s);
 #endif
-    bron = (unsigned char *)buf;
-    global_anker = input(NULL, global_anker,OPT_MEM,err,NULL); /* 4 -> OPT_MEM*/
+    source = (unsigned char *)buf;
+    global_anchor = input(NULL, global_anchor,OPT_MEM,err,NULL); /* 4 -> OPT_MEM*/
     if(err && *err)
         return;
 #if JMP
@@ -5035,38 +5036,38 @@ void stringEval(const char *s,const char ** out,int * err)
         return -1;
         }
 #endif
-    global_anker = eval(global_anker);
+    global_anchor = eval(global_anchor);
     if(out != NULL)
-        *out = is_op(global_anker) ? (const char *)"" : (const char *)POBJ(global_anker);
+        *out = is_op(global_anchor) ? (const char *)"" : (const char *)POBJ(global_anchor);
     free(buf);
     return;
     }
 
-static psk copievan(psk kn)
+static psk copyof(psk pnode)
     {
     psk res;
-    res = icopievan(kn);
+    res = icopievan(pnode);
     res->v.fl &= ~IDENT;
     return res;
     }
 
-static psk _copyop(psk pkn)
+static psk _copyop(psk Pnode)
     {
-    psk hulp;
-    hulp = new_operator_like(pkn);
-    hulp->ops = pkn->ops & ~ALL_REFCOUNT_BITS_SET;
-    hulp->LEFT = zelfde_als_w_2(&pkn->LEFT);
-    hulp->RIGHT = zelfde_als_w(pkn->RIGHT);
-    return hulp;
+    psk apnode;
+    apnode = new_operator_like(Pnode);
+    apnode->ops = Pnode->ops & ~ALL_REFCOUNT_BITS_SET;
+    apnode->LEFT = same_as_w_2(&Pnode->LEFT);
+    apnode->RIGHT = same_as_w(Pnode->RIGHT);
+    return apnode;
     }
 
-static psk copyop(psk pkn)
+static psk copyop(psk Pnode)
     {
-    dec_refcount(pkn);
-    return _copyop(pkn);
+    dec_refcount(Pnode);
+    return _copyop(Pnode);
     }
 
-static psk subboomcopie(psk src)
+static psk subtreecopy(psk src)
     {
     if(is_op(src))
         return _copyop(src);
@@ -5074,11 +5075,11 @@ static psk subboomcopie(psk src)
         return icopievan(src);
     }
 
-static int getal_graad(psk kn)
+static int number_degree(psk pnode)
     {
-    if(RATIONAL_COMP(kn))
+    if(RATIONAL_COMP(pnode))
         return 4;
-    switch(PLOBJ(kn))
+    switch(PLOBJ(pnode))
         {
         case IM: return 3;
         case PI: return 2;
@@ -5087,15 +5088,15 @@ static int getal_graad(psk kn)
         }
     }
 
-static int is_constant(psk kn)
+static int is_constant(psk pnode)
     {
-    while(is_op(kn))
+    while(is_op(pnode))
         {
-        if(!is_constant(kn->LEFT))
+        if(!is_constant(pnode->LEFT))
             return FALSE;
-        kn = kn->RIGHT;
+        pnode = pnode->RIGHT;
         }
-    return getal_graad(kn);
+    return number_degree(pnode);
     }
 
 static void init_opcode(void)
@@ -5129,21 +5130,21 @@ static void init_opcode(void)
         }
     }
 
-static psk prive(psk pkn)
+static psk isolated(psk Pnode)
     {
-    if(shared(pkn))
+    if(shared(Pnode))
         {
-        dec_refcount(pkn);
-        return subboomcopie(pkn);
+        dec_refcount(Pnode);
+        return subtreecopy(Pnode);
         }
-    return pkn;
+    return Pnode;
     }
 
 static psk setflgs(psk pokn,int Flgs)
     {
     if((Flgs & BEQUEST) || !(Flgs & SUCCESS))
         {
-        pokn = prive(pokn);
+        pokn = isolated(pokn);
         pokn->v.fl ^= ((Flgs & SUCCESS) ^ SUCCESS);
         pokn->v.fl |= (Flgs & BEQUEST);
         if(ANYNEGATION(Flgs))
@@ -5152,28 +5153,28 @@ static psk setflgs(psk pokn,int Flgs)
     return pokn;
     }
 
-static psk startboom_w(psk pkn,...)
+static psk starttree_w(psk Pnode,...)
     {
 #if !GLOBALARGPTR
     va_list argptr;
 #endif
-    if(pkn)
-        wis(pkn);
-    va_start(argptr,pkn);
+    if(Pnode)
+        wipe(Pnode);
+    va_start(argptr,Pnode);
     start = startPos = va_arg(argptr,unsigned char *);
 #if GLOBALARGPTR
-    pkn = lex(NULL,0,0,0);
+    Pnode = lex(NULL,0,0,0);
 #else
-    pkn = lex(NULL,0,0,0,&argptr);
+    Pnode = lex(NULL,0,0,0,&argptr);
 #endif
     va_end(argptr);
-    return pkn;
+    return Pnode;
     }
 
-static psk vopbnowis(psk pkn,const char *conc[])
+static psk vbuildupnowipe(psk Pnode,const char *conc[])
     {
     psk okn;
-    assert(pkn != NULL);
+    assert(Pnode != NULL);
     pstart = (unsigned char **)conc;
     start = (unsigned char *)conc[0];
     shift = vshift_nw;
@@ -5183,24 +5184,24 @@ static psk vopbnowis(psk pkn,const char *conc[])
     okn = lex(NULL,0,0,0,0);
 #endif
     shift = shift_nw;
-    okn = setflgs(okn,pkn->v.fl);
+    okn = setflgs(okn,Pnode->v.fl);
     return okn;
     }
 
-static psk vopb(psk pkn,const char *conc[])
+static psk vbuildup(psk Pnode,const char *conc[])
     {
-    psk okn = vopbnowis(pkn,conc);
-    wis(pkn);
+    psk okn = vbuildupnowipe(Pnode,conc);
+    wipe(Pnode);
     return okn;
     }
 
-static psk opb(psk pkn,...)
+static psk build_up(psk Pnode,...)
     {
     psk okn;
 #if !GLOBALARGPTR
     va_list argptr;
 #endif
-    va_start(argptr,pkn);
+    va_start(argptr,Pnode);
     start = startPos = va_arg(argptr,unsigned char *);
 #if GLOBALARGPTR
     okn = lex(NULL,0,0,0);
@@ -5208,24 +5209,24 @@ static psk opb(psk pkn,...)
     okn = lex(NULL,0,0,0,&argptr);
 #endif
     va_end(argptr);
-    if(pkn)
+    if(Pnode)
         {
-        okn = setflgs(okn,pkn->v.fl);
-        wis(pkn);
+        okn = setflgs(okn,Pnode->v.fl);
+        wipe(Pnode);
         }
     return okn;
     }
 
-static psk dopb(psk pkn,psk src)
+static psk dopb(psk Pnode,psk src)
     {
     psk okn;
-    okn = zelfde_als_w(src);
-    okn = setflgs(okn,(pkn)->v.fl);
-    wis(pkn);
+    okn = same_as_w(src);
+    okn = setflgs(okn,(Pnode)->v.fl);
+    wipe(Pnode);
     return okn;
     }
 
-static method_pnt findBuiltInMethodByName(typedObjectknoop * object,const char * name)
+static method_pnt findBuiltInMethodByName(typedObjectnode * object,const char * name)
     {
     method * methods = object->vtab;
     if(methods)
@@ -5237,38 +5238,38 @@ static method_pnt findBuiltInMethodByName(typedObjectknoop * object,const char *
     return NULL;
     }
 
-static void wis(psk top)
+static void wipe(psk top)
     {
     while(!shared(top)) /* tail recursion optimisation; delete deep structures*/
         {
-        psk kn = NULL;
-        if(is_object(top) && ISCREATEDWITHNEW((objectknoop*)top))
+        psk pnode = NULL;
+        if(is_object(top) && ISCREATEDWITHNEW((objectnode*)top))
             {
-            adr[1] = top->RIGHT;
-            kn = opb(kn,"(((=\1).die)')",NULL);
-            kn = eval(kn);
-            wis(kn);
-            if(ISBUILTIN((objectknoop*)top))
+            addr[1] = top->RIGHT;
+            pnode = build_up(pnode,"(((=\1).die)')",NULL);
+            pnode = eval(pnode);
+            wipe(pnode);
+            if(ISBUILTIN((objectnode*)top))
                 {
-                method_pnt theMethod = findBuiltInMethodByName((typedObjectknoop*)top,"Die");
+                method_pnt theMethod = findBuiltInMethodByName((typedObjectnode*)top,"Die");
                 if(theMethod)
                     {
-                    theMethod((struct typedObjectknoop *)top,NULL);
+                    theMethod((struct typedObjectnode *)top,NULL);
                     }
                 }
             }
         if(is_op(top))
             {
-            wis(top->LEFT);
-            kn = top;
+            wipe(top->LEFT);
+            pnode = top;
             top = top->RIGHT;
-            pskfree(kn);
+            pskfree(pnode);
             }
         else
             {
             if(top->ops & LATEBIND)
                 {
-                wis(((stringrefknoop*)top)->kn);
+                wipe(((stringrefnode*)top)->pnode);
                 }
             pskfree(top);
             return;
@@ -5277,7 +5278,7 @@ static void wis(psk top)
     dec_refcount(top);
     }
 
-static int macht2(int n)
+static int power2(int n)
 /* returns MSB of n */
     {
     int m;
@@ -5298,14 +5299,14 @@ static ppsk Entry(int n,int index,varia **pv)
     else
         {
         varia *hv;
-        int MSB = macht2(n);
+        int MSB = power2(n);
         for( hv = *pv /* begin with longest varia record */
            ; MSB > 1 && index < MSB
            ; MSB >>= 1
            )
            hv = hv->prev;
         index -= MSB;   /* if index == 0, then index becomes -1 */
-        return &hv->verdi[index];  /* verdi[-1] == (psk)*prev */
+        return &hv->variableValue[index];  /* variableValue[-1] == (psk)*prev */
         }
     }
 
@@ -5318,14 +5319,14 @@ static psk Entry2(int n,int index,varia * pv)
     else
         {
         varia *hv;
-        int MSB = macht2(n);
+        int MSB = power2(n);
         for( hv = pv /* begin with longest varia record */
            ; MSB > 1 && index < MSB
            ; MSB >>= 1
            )
            hv = hv->prev;
         index -= MSB;   /* if index == 0, then index becomes -1 */
-        return hv->verdi[index];  /* verdi[-1] == (psk)*prev */
+        return hv->variableValue[index];  /* variableValue[-1] == (psk)*prev */
         }
     }
 
@@ -5358,30 +5359,30 @@ else
 #endif
 
 
-static int zoeknaam(psk name,
-                    vars **pvoorvar,
-                    vars **pnavar)
+static int searchname(psk name,
+                    vars **pprevvar,
+                    vars **pnxtvar)
     {
-    unsigned char *string;
-    vars *navar,*voorvar;
-    string = POBJ(name);
-    for( voorvar = NULL,navar = variabelen[*string]
-       ;  navar && (STRCMP(VARNAME(navar),string) < 0)
-       ; voorvar = navar,navar = navar->next
+    unsigned char *strng;
+    vars *nxtvar,*prevvar;
+    strng = POBJ(name);
+    for( prevvar = NULL,nxtvar = variables[*strng]
+       ;  nxtvar && (STRCMP(VARNAME(nxtvar),strng) < 0)
+       ; prevvar = nxtvar,nxtvar = nxtvar->next
        )
        ;
-    /* voorvar < string <= navar */
-    *pvoorvar = voorvar;
-    *pnavar = navar;
-    return navar && !STRCMP(VARNAME(navar),string);
+    /* prevvar < strng <= nxtvar */
+    *pprevvar = prevvar;
+    *pnxtvar = nxtvar;
+    return nxtvar && !STRCMP(VARNAME(nxtvar),strng);
     }
 
-static Qgetal _qmaalmineen(Qgetal _qx)
+static Qnumber qTimesMinusOne(Qnumber _qx)
     {
-    Qgetal res;
+    Qnumber res;
     size_t len;
     len = offsetof(sk,u.obj) + 1 + strlen((char *)POBJ(_qx));
-    res = (Qgetal)bmalloc(__LINE__,len);
+    res = (Qnumber)bmalloc(__LINE__,len);
     memcpy(res,_qx,len);
     res->ops ^= MINUS;
     res->ops &= ~ALL_REFCOUNT_BITS_SET;
@@ -5391,23 +5392,23 @@ static Qgetal _qmaalmineen(Qgetal _qx)
 /* Create a node from a number, allocating memory for the node.
 The numbers' memory isn't deallocated. */
 
-static char * iconvert2decimal(ngetal * res, char * g)
+static char * iconvert2decimal(nnumber * res, char * g)
     {
-    LONG * iwyzer;
+    LONG * ipointer;
     g[0] = '0';
     g[1] = 0;
-    for(iwyzer = res->inumber;iwyzer < res->inumber + res->ilength;++iwyzer)
+    for(ipointer = res->inumber;ipointer < res->inumber + res->ilength;++ipointer)
         {
-        assert(*iwyzer >= 0);
-        assert(*iwyzer < RADIX);
-        if(*iwyzer)
+        assert(*ipointer >= 0);
+        assert(*ipointer < RADIX);
+        if(*ipointer)
             {
-            g += sprintf(g,LONGD,*iwyzer);
-            for(;++iwyzer < res->inumber + res->ilength;)
+            g += sprintf(g,LONGD,*ipointer);
+            for(;++ipointer < res->inumber + res->ilength;)
                 {
-                assert(*iwyzer >= 0);
-                assert(*iwyzer < RADIX);
-                g += sprintf(g,/*"%0*ld"*/LONG0nD,(int)TEN_LOG_RADIX,*iwyzer);
+                assert(*ipointer >= 0);
+                assert(*ipointer < RADIX);
+                g += sprintf(g,/*"%0*ld"*/LONG0nD,(int)TEN_LOG_RADIX,*ipointer);
                 }
             break;
             }
@@ -5415,7 +5416,7 @@ static char * iconvert2decimal(ngetal * res, char * g)
     return g;
     }
 
-static ptrdiff_t numlength(ngetal * n)
+static ptrdiff_t numlength(nnumber * n)
     {
     ptrdiff_t len;
     LONG H;
@@ -5443,7 +5444,7 @@ static ptrdiff_t numlength(ngetal * n)
     return len;
     }
 
-static psk inumberNode(ngetal * g)
+static psk inumberNode(nnumber * g)
     {
     psk res;
     size_t len;
@@ -5464,7 +5465,7 @@ static psk inumberNode(ngetal * g)
 /* Create a node from a number, only allocating memory for the node if the
 number hasn't the right size (== too large). If new memory is allocated,
 the number's memory is deallocated. */
-static psk numberNode2(ngetal * g)
+static psk numberNode2(nnumber * g)
     {
     psk res;
     size_t neededlen;
@@ -5504,41 +5505,41 @@ static psk numberNode2(ngetal * g)
     return res;
     }
 
-static Qgetal not_a_number(void)
+static Qnumber not_a_number(void)
     {
-    Qgetal res;
-    res = copievan(&nulk);
+    Qnumber res;
+    res = copyof(&zeroNode);
     res->v.fl ^= SUCCESS;
     return res;
     }
 
-static void convert2binary(ngetal * x)
+static void convert2binary(nnumber * x)
     {
-    LONG * iwyzer;
-    char * wyzer;
+    LONG * ipointer;
+    char * charpointer;
     ptrdiff_t n;
  
     x->ilength = x->iallocated = ((x->sign & QNUL ? 1 : x->length) + TEN_LOG_RADIX - 1) / TEN_LOG_RADIX;
     x->inumber = x->ialloc = (LONG *)bmalloc(__LINE__,sizeof(LONG) * x->iallocated);
  
-    for(   iwyzer = x->inumber
-         , wyzer = x->number
+    for(   ipointer = x->inumber
+         , charpointer = x->number
          , n = x->length
-       ; iwyzer < x->inumber + x->ilength
-       ; ++iwyzer
+       ; ipointer < x->inumber + x->ilength
+       ; ++ipointer
        )
         {
-        *iwyzer = 0;
+        *ipointer = 0;
         do
             {
-            *iwyzer = 10 * (*iwyzer) + *wyzer++ - '0';
+            *ipointer = 10 * (*ipointer) + *charpointer++ - '0';
             }
         while(--n % TEN_LOG_RADIX != 0);
         }
-    assert((LONG)TEN_LOG_RADIX * x->ilength >= wyzer - x->number);
+    assert((LONG)TEN_LOG_RADIX * x->ilength >= charpointer - x->number);
     }
 
-static char * isplits(Qgetal _qget,ngetal * ptel,ngetal * pnoem)
+static char * isplits(Qnumber _qget,nnumber * ptel,nnumber * pnoem)
     {
     ptel->sign = _qget->ops & (MINUS|QNUL);
     pnoem->sign = 0;
@@ -5567,7 +5568,7 @@ static char * isplits(Qgetal _qget,ngetal * ptel,ngetal * pnoem)
         }
     }
 
-static char * splits(Qgetal _qget,ngetal * ptel,ngetal * pnoem)
+static char * splits(Qnumber _qget,nnumber * ptel,nnumber * pnoem)
     {
     ptel->sign = _qget->ops & (MINUS|QNUL);
     pnoem->sign = 0;
@@ -5594,7 +5595,7 @@ static char * splits(Qgetal _qget,ngetal * ptel,ngetal * pnoem)
     }
 
 
-static int opaffinal(char * i1,char * i2,char tmp,char ** pres,char *bx)
+static int addSubtractFinal(char * i1,char * i2,char tmp,char ** pres,char *bx)
     {
     for(;i2 >= bx;)
         {
@@ -5621,13 +5622,13 @@ static int opaffinal(char * i1,char * i2,char tmp,char ** pres,char *bx)
     }
 
 
-static int op(char **pres,char *bx,char *ex,char *by,char *ey)
+static int increase(char **pres,char *bx,char *ex,char *by,char *ey)
     {
-    char *i1 = *pres,*i2 = ex,*wyzer = ey;
+    char *i1 = *pres,*i2 = ex,*ypointer = ey;
     char tmp = 0;
     do
         {
-        tmp += (*i2 + *wyzer-'0');
+        tmp += (*i2 + *ypointer-'0');
         if(tmp > '9')
             {
             *i1-- = tmp - 10;
@@ -5639,19 +5640,19 @@ static int op(char **pres,char *bx,char *ex,char *by,char *ey)
             tmp = 0;
             }
         --i2;
-        --wyzer;
+        --ypointer;
         }
-    while(wyzer >= by);
-    return opaffinal(i1,i2,tmp,pres,bx);
+    while(ypointer >= by);
+    return addSubtractFinal(i1,i2,tmp,pres,bx);
     }
 
-static int af(char **pres,char *bx,char *ex,char *by,char *ey)
+static int decrease(char **pres,char *bx,char *ex,char *by,char *ey)
     {
-    char *i1 = *pres,*i2 = ex,*wyzer = ey;
+    char *i1 = *pres,*i2 = ex,*ypointer = ey;
     char tmp = 0;
     do
         {
-        tmp += (*i2 - *wyzer + '0');
+        tmp += (*i2 - *ypointer + '0');
         if(tmp < '0')
             {
             *i1-- = tmp + 10;
@@ -5663,22 +5664,22 @@ static int af(char **pres,char *bx,char *ex,char *by,char *ey)
             tmp = 0;
             }
         --i2;
-        --wyzer;
+        --ypointer;
         }
-    while(wyzer >= by);
-    return opaffinal(i1,i2,tmp,pres,bx);
+    while(ypointer >= by);
+    return addSubtractFinal(i1,i2,tmp,pres,bx);
     }
 
 
 
-static void skipnullen(ngetal * nget,int teken)
+static void skipnullen(nnumber * nget,int Sign)
     {
     for(
        ; nget->length > 0 && *(nget->number) == '0'
        ; nget->number++,nget->length--
        )
        ;
-    nget->sign = nget->length ? (teken & MINUS) : QNUL;
+    nget->sign = nget->length ? (Sign & MINUS) : QNUL;
     }
 /*
 multiply number with 204586 digits with itself
@@ -5706,7 +5707,7 @@ static void pbint(LONG * high,LONG * low)
         }
     }
 
-static void pbin(ngetal * res)
+static void pbin(nnumber * res)
     {
     pbint(res->inumber,res->inumber + res->ilength - 1);
     }
@@ -5729,7 +5730,7 @@ static void fpbint(FILE * fp,LONG * high,LONG * low)
         }
     }
 
-static void fpbin(FILE * fp,ngetal * res)
+static void fpbin(FILE * fp,nnumber * res)
     {
     fpbint(fp,res->inumber,res->inumber + res->ilength - 1);
     }
@@ -5743,16 +5744,16 @@ static void validt(LONG * high,LONG * low)
         }
     }
 
-static void valid(ngetal * res)
+static void valid(nnumber * res)
     {
     validt(res->inumber,res->inumber + res->ilength - 1);
     }
 #endif
 
-static void nmaal(ngetal * x,ngetal * y,ngetal * product)
+static void nTimes(nnumber * x,nnumber * y,nnumber * product)
     {
     LONG *I1,*I2;
-    LONG *iwyzer,*itussen;
+    LONG *ipointer,*itussen;
 
     assert(product->length == 0);
     assert(product->ilength == 0);
@@ -5762,12 +5763,12 @@ static void nmaal(ngetal * x,ngetal * y,ngetal * product)
     assert(product->iallocated > 0);
     product->inumber = product->ialloc = (LONG *)bmalloc(__LINE__,sizeof(LONG) * product->iallocated);
 
-    for(iwyzer = product->inumber;iwyzer < product->inumber + product->ilength;*iwyzer++ = 0)
+    for(ipointer = product->inumber;ipointer < product->inumber + product->ilength;*ipointer++ = 0)
         ;
 
     for(I1 = x->inumber + x->ilength - 1;I1 >= x->inumber;I1--)
         {
-        itussen = --iwyzer; /* pointer to result, starting from LSW. */
+        itussen = --ipointer; /* pointer to result, starting from LSW. */
         assert(itussen >= product->inumber);
         for(I2 = y->inumber + y->ilength - 1;I2 >= y->inumber;I2--)
             {
@@ -5787,11 +5788,11 @@ static void nmaal(ngetal * x,ngetal * y,ngetal * product)
                 }
             assert(itussen2 >= product->inumber);
             }
-        if(*iwyzer >= RADIX)
+        if(*ipointer >= RADIX)
             {
-            LONG karry = *iwyzer/RADIX;
-            *iwyzer %= RADIX;
-            itussen = iwyzer - 1;
+            LONG karry = *ipointer/RADIX;
+            *ipointer %= RADIX;
+            itussen = ipointer - 1;
             assert(itussen >= product->inumber);
             *itussen += karry;
             while(*itussen >= HEADROOM * RADIX2/* 2000000000 */)
@@ -5805,21 +5806,21 @@ static void nmaal(ngetal * x,ngetal * y,ngetal * product)
             assert(itussen >= product->inumber);
             }
         }
-    while(iwyzer >= product->inumber)
+    while(ipointer >= product->inumber)
         {
-        if(*iwyzer >= RADIX)
+        if(*ipointer >= RADIX)
             {
-            LONG karry = *iwyzer/RADIX;
-            *iwyzer %= RADIX;
-            --iwyzer;
-            assert(iwyzer >= product->inumber);
-            *iwyzer += karry;
+            LONG karry = *ipointer/RADIX;
+            *ipointer %= RADIX;
+            --ipointer;
+            assert(ipointer >= product->inumber);
+            *ipointer += karry;
             }
         else
-            --iwyzer;
+            --ipointer;
         }
 
-    for(iwyzer = product->inumber;product->ilength > 1 && *iwyzer == 0;++iwyzer)
+    for(ipointer = product->inumber;product->ilength > 1 && *ipointer == 0;++ipointer)
         {
         --(product->ilength);
         ++(product->inumber);
@@ -5833,7 +5834,7 @@ static void nmaal(ngetal * x,ngetal * y,ngetal * product)
     product->sign = product->inumber[0] ? ((x->sign ^ y->sign) & MINUS) : QNUL;
     }
 
-static LONG iopaffinal(LONG *highRemainder,LONG * lowRemainder,LONG carry)
+static LONG iAddSubtractFinal(LONG *highRemainder,LONG * lowRemainder,LONG carry)
     {
     while(highRemainder <= lowRemainder)
         {
@@ -5867,7 +5868,7 @@ static LONG iopaffinal(LONG *highRemainder,LONG * lowRemainder,LONG carry)
     }
 
 
-static LONG iop(LONG *highRemainder,LONG *lowRemainder,LONG *highDivisor,LONG *lowDivisor)
+static LONG iAdd(LONG *highRemainder,LONG *lowRemainder,LONG *highDivisor,LONG *lowDivisor)
     {
     LONG carry = 0;
     assert(*highRemainder == 0);
@@ -5894,15 +5895,15 @@ static LONG iop(LONG *highRemainder,LONG *lowRemainder,LONG *highDivisor,LONG *l
         }
     while(highDivisor <= lowDivisor );
     assert(*highRemainder == 0);
-    return iopaffinal(highRemainder,lowRemainder,carry);
+    return iAddSubtractFinal(highRemainder,lowRemainder,carry);
     }
 
-static LONG iaf( LONG *highRemainder
-              , LONG *lowRemainder
-              , LONG *highDivisor
-              , LONG *lowDivisor
-              , LONG factor
-              )
+static LONG iSubtract( LONG *highRemainder
+                     , LONG *lowRemainder
+                     , LONG *highDivisor
+                     , LONG *lowDivisor
+                     , LONG factor
+                     )
     {
     LONG carry = 0;
     do
@@ -5929,15 +5930,15 @@ static LONG iaf( LONG *highRemainder
         --lowDivisor;
         }
     while(highDivisor <= lowDivisor );
-    return iopaffinal(highRemainder,lowRemainder,carry);
+    return iAddSubtractFinal(highRemainder,lowRemainder,carry);
     }
 
-static LONG iaf2( LONG *highRemainder
-               , LONG *lowRemainder
-               , LONG *highDivisor
-               , LONG *lowDivisor
-               , LONG factor
-               )
+static LONG iSubtract2( LONG *highRemainder
+                      , LONG *lowRemainder
+                      , LONG *highDivisor
+                      , LONG *lowDivisor
+                      , LONG factor
+                      )
     {
     int allzero = TRUE;
     LONG carry = 0;
@@ -6012,7 +6013,7 @@ static LONG iaf2( LONG *highRemainder
         }
     }
 
-static LONG nndeel(ngetal * dividend,ngetal * divisor,ngetal * quotient, ngetal * remainder)
+static LONG nnDivide(nnumber * dividend,nnumber * divisor,nnumber * quotient, nnumber * remainder)
     {
     LONG *low,*quot,*head,*oldhead;
     /* Remainder starts out as copy of dividend. As the division progresses,
@@ -6115,7 +6116,7 @@ static LONG nndeel(ngetal * dividend,ngetal * divisor,ngetal * quotient, ngetal 
                 *quot += sign * factor;
                 assert(0 <= *quot);
                 /*assert(*quot < RADIX);*/
-                nsign = iaf2( head
+                nsign = iSubtract2( head
                             , low
                             , divisor->inumber
                             , divisor->inumber + divisor->ilength - 1
@@ -6173,13 +6174,13 @@ checkBounds(quotient->ialloc);
     }
 
 
-static Qgetal nn2q(ngetal * num,ngetal * den)
+static Qnumber nn2q(nnumber * num,nnumber * den)
     {
-    Qgetal res;
+    Qnumber res;
     assert(!(num->sign & QNUL));
     assert(!(den->sign & QNUL));
 /*    if(num->sign & QNUL)
-        return copievan(&nulk);
+        return copyof(&zeroNode);
     else if(den->sign & QNUL)
         return not_a_number();*/
     
@@ -6204,19 +6205,19 @@ static Qgetal nn2q(ngetal * num,ngetal * den)
     return res;
     }
 
-static Qgetal _qndeel(ngetal * x,ngetal * y)
+static Qnumber qnDivide(nnumber * x,nnumber * y)
     {
-    Qgetal res;
-    ngetal gcd = {0},hrem = {0};
-    ngetal quotientx = {0},remainderx = {0};
-    ngetal quotienty = {0},remaindery = {0};
+    Qnumber res;
+    nnumber gcd = {0},hrem = {0};
+    nnumber quotientx = {0},remainderx = {0};
+    nnumber quotienty = {0},remaindery = {0};
 
 #ifndef NDEBUG
     valid(x);
     valid(y);
 #endif
     if(x->sign & QNUL)
-        return copievan(&nulk);
+        return copyof(&zeroNode);
     else if(y->sign & QNUL)
         return not_a_number();
 
@@ -6228,7 +6229,7 @@ static Qgetal _qndeel(ngetal * x,ngetal * y)
     hrem.ialloc = NULL;
     do
         {
-        nndeel(&gcd,&hrem,&quotientx,&remainderx);
+        nnDivide(&gcd,&hrem,&quotientx,&remainderx);
 #ifndef NDEBUG
         valid(&gcd);
         valid(&hrem);
@@ -6256,7 +6257,7 @@ static Qgetal _qndeel(ngetal * x,ngetal * y)
     if(hrem.ialloc)
         bfree(hrem.ialloc);
 
-    nndeel(x,&gcd,&quotientx,&remainderx);
+    nnDivide(x,&gcd,&quotientx,&remainderx);
 #ifndef NDEBUG
         valid(&gcd);
         valid(x);
@@ -6264,7 +6265,7 @@ static Qgetal _qndeel(ngetal * x,ngetal * y)
         valid(&remainderx);
 #endif
     bfree(remainderx.ialloc);
-    nndeel(y,&gcd,&quotienty,&remaindery);
+    nnDivide(y,&gcd,&quotienty,&remaindery);
 #ifndef NDEBUG
         valid(&gcd);
         valid(y);
@@ -6282,41 +6283,41 @@ static Qgetal _qndeel(ngetal * x,ngetal * y)
     }
 
 
-static ngetal nplus(ngetal * x,ngetal * y)
+static nnumber nPlus(nnumber * x,nnumber * y)
     {
-    ngetal res = {0};
+    nnumber res = {0};
     char *hres;
-    ptrdiff_t xgrotery;
+    ptrdiff_t xGreaterThany;
     res.length = 1+(x->length > y->length ? x->length : y->length);
     res.allocated = (size_t)res.length + offsetof(sk,u.obj);
     res.alloc = res.number = (char *)bmalloc(__LINE__,res.allocated);
     *res.number = '0';
     hres = res.number+(size_t)res.length - 1;
     if(x->length == y->length)
-        xgrotery = strncmp(x->number,y->number,(size_t)res.length);
+        xGreaterThany = strncmp(x->number,y->number,(size_t)res.length);
     else
-        xgrotery = x->length - y->length;
-    if(xgrotery < 0)
+        xGreaterThany = x->length - y->length;
+    if(xGreaterThany < 0)
         {
-        ngetal * hget = x;
+        nnumber * hget = x;
         x = y;
         y = hget;
         }
     if(x->sign == y->sign)
         {
-        if(op(&hres,x->number,x->number + x->length - 1,y->number,y->number + y->length - 1))
+        if(increase(&hres,x->number,x->number + x->length - 1,y->number,y->number + y->length - 1))
             *--hres = '1';
         }
     else
-        af(&hres,x->number,x->number + x->length - 1,y->number,y->number + y->length - 1);
+        decrease(&hres,x->number,x->number + x->length - 1,y->number,y->number + y->length - 1);
     skipnullen(&res,x->sign);
     return res;
     }
 
-static void inplus(ngetal * x,ngetal * y,ngetal * som)
+static void nnSPlus(nnumber * x,nnumber * y,nnumber * som)
     {
     LONG * hres, * px, * py, * ex;
-    ptrdiff_t xgrotery;
+    ptrdiff_t xGreaterThany;
 
     som->ilength = 1+(x->ilength > y->ilength ? x->ilength : y->ilength);
     som->iallocated = som->ilength;
@@ -6331,15 +6332,15 @@ static void inplus(ngetal * x,ngetal * y,ngetal * som)
         py = y->inumber;
         do
             {
-            xgrotery = *px++ - *py++;
+            xGreaterThany = *px++ - *py++;
             }
-        while(!xgrotery && px < ex);
+        while(!xGreaterThany && px < ex);
         }
     else
-        xgrotery = x->ilength - y->ilength;
-    if(xgrotery < 0)
+        xGreaterThany = x->ilength - y->ilength;
+    if(xGreaterThany < 0)
         {
-        ngetal * hget = x;
+        nnumber * hget = x;
         x = y;
         y = hget;
         }
@@ -6351,12 +6352,12 @@ static void inplus(ngetal * x,ngetal * y,ngetal * som)
 #ifndef NDEBUG
         LONG carry = 
 #endif
-            iop(som->inumber,som->inumber + som->ilength - 1,y->inumber,y->inumber + y->ilength - 1);
+            iAdd(som->inumber,som->inumber + som->ilength - 1,y->inumber,y->inumber + y->ilength - 1);
         assert(carry == 0);
         }
     else
         {
-        iaf(som->inumber,som->inumber + som->ilength - 1,y->inumber,y->inumber + y->ilength - 1,1);
+        iSubtract(som->inumber,som->inumber + som->ilength - 1,y->inumber,y->inumber + y->ilength - 1,1);
         }
     for(hres = som->inumber;som->ilength > 1 && *hres == 0;++hres)
         {
@@ -6367,9 +6368,9 @@ static void inplus(ngetal * x,ngetal * y,ngetal * som)
     som->sign = som->inumber[0] ? (x->sign & MINUS) : QNUL;
     }
 
-static Qgetal _qplus(Qgetal _qx,Qgetal _qy,int minus)
+static Qnumber qPlus(Qnumber _qx,Qnumber _qy,int minus)
     {
-    ngetal xt = {0},xn = {0},yt = {0},yn = {0};
+    nnumber xt = {0},xn = {0},yt = {0},yn = {0};
     
     char *xb,*yb;
     xb = splits(_qx,&xt,&xn);
@@ -6378,29 +6379,29 @@ static Qgetal _qplus(Qgetal _qx,Qgetal _qy,int minus)
 
     if(!xb && !yb)
         {
-        ngetal g = nplus(&xt,&yt);
+        nnumber g = nPlus(&xt,&yt);
         psk res = numberNode2(&g);
         return res;
         }
     else
         {
-        ngetal pa = {0},pb = {0},som = {0};
-        Qgetal res;
+        nnumber pa = {0},pb = {0},som = {0};
+        Qnumber res;
         convert2binary(&xt);
         convert2binary(&xn);
         convert2binary(&yt);
         convert2binary(&yn);
-        nmaal(&xt,&yn,&pa);
-        nmaal(&yt,&xn,&pb);
-        inplus(&pa,&pb,&som);
+        nTimes(&xt,&yn,&pa);
+        nTimes(&yt,&xn,&pb);
+        nnSPlus(&pa,&pb,&som);
         bfree(pa.ialloc);
         bfree(pb.ialloc);
         pa.ilength = 0;
         pa.ialloc = 0;
         pa.length = 0;
         pa.alloc = 0;
-        nmaal(&xn,&yn,&pa);
-        res = _qndeel(&som,&pa);
+        nTimes(&xn,&yn,&pa);
+        res = qnDivide(&som,&pa);
         if(som.ialloc)
             bfree(som.ialloc);
         bfree(pa.ialloc);
@@ -6433,14 +6434,14 @@ ok
     S   7,29 sec  (16497.31239.1022)
 */
 
-static Qgetal _qdema(ngetal * x1,ngetal * x2,ngetal * y1,ngetal * y2)
+static Qnumber qDivideMultiply(nnumber * x1,nnumber * x2,nnumber * y1,nnumber * y2)
     {
-    ngetal pa = {0},pb = {0};
-    Qgetal res;
+    nnumber pa = {0},pb = {0};
+    Qnumber res;
     
-    nmaal(x1,y1,&pa);
-    nmaal(x2,y2,&pb);
-    res = _qndeel(&pa,&pb);
+    nTimes(x1,y1,&pa);
+    nTimes(x2,y2,&pb);
+    res = qnDivide(&pa,&pb);
     bfree(pa.ialloc);
     bfree(pb.ialloc);
     return(res);
@@ -6489,43 +6490,43 @@ ok
     S   7,26 sec  (16497.31292.1022)
 */
 
-static Qgetal _qdema2(ngetal * x1,ngetal * x2,ngetal * y1,ngetal * y2)
+static Qnumber qDivideMultiply2(nnumber * x1,nnumber * x2,nnumber * y1,nnumber * y2)
     {
-    ngetal pa = {0},pb = {0};
-    Qgetal res;
-    nmaal(x1,y1,&pa);
-    nmaal(x2,y2,&pb);
+    nnumber pa = {0},pb = {0};
+    Qnumber res;
+    nTimes(x1,y1,&pa);
+    nTimes(x2,y2,&pb);
     res = nn2q(&pa,&pb);
     bfree(pa.alloc);
     bfree(pb.alloc);
     return(res);
     }
 
-static Qgetal _qmaal2(Qgetal _qx,Qgetal _qy)
+static Qnumber qTimes2(Qnumber _qx,Qnumber _qy)
     {
-    ngetal xt = {0},xn = {0},yt = {0},yn = {0};
+    nnumber xt = {0},xn = {0},yt = {0},yn = {0};
     char *xb,*yb;
     xb = splits(_qx,&xt,&xn);
     yb = splits(_qy,&yt,&yn);
     if(!xb && !yb)
         {
-        ngetal g = {0};
-        nmaal(&xt,&yt,&g);
+        nnumber g = {0};
+        nTimes(&xt,&yt,&g);
         psk res = numberNode2(&g);
         return res;
         }
     else
         {
-        Qgetal res;
-        res = _qdema2(&xt,&xn,&yt,&yn);
+        Qnumber res;
+        res = qDivideMultiply2(&xt,&xn,&yt,&yn);
         return res;
         }
     }
 
-static int _nndeel(ngetal * x,ngetal * y)
+static int nnDivide(nnumber * x,nnumber * y)
     {
     division resx,resy;
-    ngetal gcd = {0},hrem = {0};
+    nnumber gcd = {0},hrem = {0};
 
     if(x->sign & QNUL)
         return 0; /* zero */
@@ -6538,7 +6539,7 @@ static int _nndeel(ngetal * x,ngetal * y)
     hrem.alloc = NULL;
     do
         {
-        nndeel(&gcd,&hrem,&resx);
+        nnDivide(&gcd,&hrem,&resx);
         if(gcd.alloc)
             bfree(gcd.alloc);
         gcd = hrem;
@@ -6550,10 +6551,10 @@ static int _nndeel(ngetal * x,ngetal * y)
     if(hrem.alloc)
         bfree(hrem.alloc);
 
-    nndeel(x,&gcd,&resx);
+    nnDivide(x,&gcd,&resx);
     bfree(resx.remainder.alloc);
 
-    nndeel(y,&gcd,&resy);
+    nnDivide(y,&gcd,&resy);
     bfree(resy.remainder.alloc);
     if(gcd.alloc)
         bfree(gcd.alloc);
@@ -6572,16 +6573,16 @@ reduce the numerators with the denominators of the other
 number. Numerators and denominators may get smaller, speeding
 up the following multiplication.
 */
-static Qgetal _qdema(ngetal * x1,ngetal * x2,ngetal * y1,ngetal * y2)
+static Qnumber qDivideMultiply(nnumber * x1,nnumber * x2,nnumber * y1,nnumber * y2)
     {
-    Qgetal res;
-    ngetal z1 = {0},z2 = {0};
-    _nndeel(x1,y2);
-    _nndeel(y1,x2);
-    _nndeel(x1,x2);
-    _nndeel(y1,y2);
-    nmaal(x1,y1,&z1);
-    nmaal(x2,y2,&z2);
+    Qnumber res;
+    nnumber z1 = {0},z2 = {0};
+    nnDivide(x1,y2);
+    nnDivide(y1,x2);
+    nnDivide(x1,x2);
+    nnDivide(y1,y2);
+    nTimes(x1,y1,&z1);
+    nTimes(x2,y2,&z2);
     if(x1->alloc) bfree(x1->alloc);
     if(x2->alloc) bfree(x2->alloc);
     if(y1->alloc) bfree(y1->alloc);
@@ -6593,18 +6594,18 @@ static Qgetal _qdema(ngetal * x1,ngetal * x2,ngetal * y1,ngetal * y2)
     }
 #endif
 
-static Qgetal _qmaal(Qgetal _qx,Qgetal _qy)
+static Qnumber qTimes(Qnumber _qx,Qnumber _qy)
     {
-    Qgetal res;
-    ngetal xt = {0},xn = {0},yt = {0},yn = {0};
+    Qnumber res;
+    nnumber xt = {0},xn = {0},yt = {0},yn = {0};
     char *xb,*yb;
     
     xb = isplits(_qx,&xt,&xn);
     yb = isplits(_qy,&yt,&yn);
     if(!xb && !yb)
         {
-        ngetal g = {0};
-        nmaal(&xt,&yt,&g);
+        nnumber g = {0};
+        nTimes(&xt,&yt,&g);
         bfree(xt.ialloc);
         bfree(xn.ialloc);
         bfree(yt.ialloc);
@@ -6615,7 +6616,7 @@ static Qgetal _qmaal(Qgetal _qx,Qgetal _qy)
         }
     else
         {
-        res = _qdema(&xt,&xn,&yt,&yn);
+        res = qDivideMultiply(&xt,&xn,&yt,&yn);
         bfree(xt.ialloc);
         bfree(xn.ialloc);
         bfree(yt.ialloc);
@@ -6624,16 +6625,16 @@ static Qgetal _qmaal(Qgetal _qx,Qgetal _qy)
         }
     }
 
-static Qgetal _q_qdeel(Qgetal _qx,Qgetal _qy)
+static Qnumber qqDivide(Qnumber _qx,Qnumber _qy)
     {
-    ngetal xt = {0},xn = {0},yt = {0},yn = {0};
+    nnumber xt = {0},xn = {0},yt = {0},yn = {0};
     char *xb,*yb;
     
     xb = isplits(_qx,&xt,&xn);
     yb = isplits(_qy,&yt,&yn);
     if(!xb && !yb)
         {
-        Qgetal res = _qndeel(&xt,&yt);
+        Qnumber res = qnDivide(&xt,&yt);
         bfree(xt.ialloc);
         bfree(xn.ialloc);
         bfree(yt.ialloc);
@@ -6642,8 +6643,8 @@ static Qgetal _q_qdeel(Qgetal _qx,Qgetal _qy)
         }
     else
         {
-        Qgetal res;
-        res = _qdema(&xt,&xn,&yn,&yt);
+        Qnumber res;
+        res = qDivideMultiply(&xt,&xn,&yn,&yt);
         bfree(xt.ialloc);
         bfree(xn.ialloc);
         bfree(yt.ialloc);
@@ -6653,30 +6654,30 @@ static Qgetal _q_qdeel(Qgetal _qx,Qgetal _qy)
     }
 
 
-static Qgetal _qheeldeel(Qgetal _qx,Qgetal _qy)
+static Qnumber qIntegerDivision(Qnumber _qx,Qnumber _qy)
     {
-    Qgetal res,hulp;
-    ngetal xt = {0},xn = {0},yt = {0},yn = {0},p1 = {0},p2 = {0},quotient = {0},remainder = {0};
+    Qnumber res,aqnumber;
+    nnumber xt = {0},xn = {0},yt = {0},yn = {0},p1 = {0},p2 = {0},quotient = {0},remainder = {0};
 
     isplits(_qx,&xt,&xn);
     isplits(_qy,&yt,&yn);
 
-    nmaal(&xt,&yn,&p1);
-    nmaal(&xn,&yt,&p2);
-    nndeel(&p1,&p2,&quotient,&remainder);
+    nTimes(&xt,&yn,&p1);
+    nTimes(&xn,&yt,&p2);
+    nnDivide(&p1,&p2,&quotient,&remainder);
     bfree(p1.ialloc);
     bfree(p2.ialloc);
-    res = _qplus
+    res = qPlus
         (      (remainder.sign & QNUL)
             || !(_qx->ops & MINUS)
-          ? &nulk
+          ? &zeroNode
           :   (_qy->ops & MINUS)
-            ? &eenk
-            : &mineenk
-            , (hulp = inumberNode(&quotient))
+            ? &oneNode
+            : &minusOneNode
+            , (aqnumber = inumberNode(&quotient))
         , 0
         );
-    pskfree(hulp);
+    pskfree(aqnumber);
     bfree(quotient.ialloc);
     bfree(remainder.ialloc);
     bfree(xt.ialloc);
@@ -6686,24 +6687,24 @@ static Qgetal _qheeldeel(Qgetal _qx,Qgetal _qy)
     return res;
     }
 
-static Qgetal _qmodulo(Qgetal _qx,Qgetal _qy)
+static Qnumber qModulo(Qnumber _qx,Qnumber _qy)
     {
-    Qgetal res,_q2,_q3;
+    Qnumber res,_q2,_q3;
     
-    _q2 = _qheeldeel(_qx,_qy);
-    _q3 = _qmaal(_qy,_q2);
+    _q2 = qIntegerDivision(_qx,_qy);
+    _q3 = qTimes(_qy,_q2);
     pskfree(_q2);
-    res = _qplus(_qx,_q3,MINUS);
+    res = qPlus(_qx,_q3,MINUS);
     pskfree(_q3);
     return res;
     }
 
-static psk _qdenominator(psk pkn)
+static psk qDenominator(psk Pnode)
     {
-    Qgetal _qx = pkn->RIGHT;
+    Qnumber _qx = Pnode->RIGHT;
     psk res;
     size_t len;
-    ngetal xt = {0},xn = {0};
+    nnumber xt = {0},xn = {0};
     splits(_qx,&xt,&xn);
     len = offsetof(sk,u.obj) + 1 + xn.length;
     res = (psk)bmalloc(__LINE__,len);
@@ -6711,15 +6712,15 @@ static psk _qdenominator(psk pkn)
     memcpy((void*)POBJ(res),xn.number,xn.length);
     res->v.fl = READY | SUCCESS | QNUMBER;
     res->ops |= xn.sign;
-    wis(pkn);
+    wipe(Pnode);
     return res;
     }
 
-static int _qvergelijk(Qgetal _qx,Qgetal _qy)
+static int qCompare(Qnumber _qx,Qnumber _qy)
     {
-    Qgetal som;
+    Qnumber som;
     int res;
-    som = _qplus(_qx,_qy,MINUS);
+    som = qPlus(_qx,_qy,MINUS);
     res = som->ops & (MINUS|QNUL);
     pskfree(som);
     return res;
@@ -6735,7 +6736,7 @@ static int equal(psk kn1,psk kn2)
             {
             if(is_op(kn2))
                 {
-                r = (int)kop(kn2) - (int)kop(kn1);
+                r = (int)Op(kn2) - (int)Op(kn1);
                 if(r)
                     {
                     return r;
@@ -6755,7 +6756,7 @@ static int equal(psk kn1,psk kn2)
             {
             if(RATIONAL_COMP(kn2))
                 {
-                switch(_qvergelijk(kn1,kn2))
+                switch(qCompare(kn1,kn2))
                     {
                     case MINUS: return -1;
                     case QNUL:
@@ -6780,23 +6781,23 @@ static int equal(psk kn1,psk kn2)
     return 0;
     }
 
-static int vgl(psk kn1,psk kn2);
+static int cmp(psk kn1,psk kn2);
 
-static int vglsub(psk kn1,psk kn2)
+static int cmpsub(psk kn1,psk kn2)
     {
     int ret;
-    psk kn = NULL;
-    adr[1] = kn1;
-    kn = opb(kn,"1+\1+-1)",NULL);
-    kn = eval(kn);
-    ret = vgl(kn,kn2);
-    wis(kn);
+    psk pnode = NULL;
+    addr[1] = kn1;
+    pnode = build_up(pnode,"1+\1+-1)",NULL);
+    pnode = eval(pnode);
+    ret = cmp(pnode,kn2);
+    wipe(pnode);
     return ret;
     }
 
-static int vgl(psk kn1,psk kn2)
+static int cmp(psk kn1,psk kn2)
     {
-    DBGSRC(Printf("vgl      (");result(kn1);Printf(",");result(kn2);Printf(")\n");)
+    DBGSRC(Printf("cmp      (");result(kn1);Printf(",");result(kn2);Printf(")\n");)
     while(kn1 != kn2)
         {
         int r;
@@ -6804,34 +6805,34 @@ static int vgl(psk kn1,psk kn2)
             {
             if(is_op(kn2))
                 {
-                r = (int)kop(kn2) - (int)kop(kn1);
+                r = (int)Op(kn2) - (int)Op(kn1);
                 if(r)
                     {
                     /*{?} x^(y*(a+b))+-1*x^(a*y+b*y) => 0 */ /*{!} 0 */
-                    if(  kop(kn1) == TIMES
-                      && kop(kn2) == PLUS
+                    if(  Op(kn1) == TIMES
+                      && Op(kn2) == PLUS
                       && is_op(kn1->RIGHT)
-                      && kop(kn1->RIGHT) == PLUS
+                      && Op(kn1->RIGHT) == PLUS
                       )
                         {
-                        return vglsub(kn1,kn2);
+                        return cmpsub(kn1,kn2);
                         }
-                    else if(  kop(kn2) == TIMES
-                      && kop(kn1) == PLUS
+                    else if(  Op(kn2) == TIMES
+                      && Op(kn1) == PLUS
                       && is_op(kn2->RIGHT)
-                      && kop(kn2->RIGHT) == PLUS
+                      && Op(kn2->RIGHT) == PLUS
                       )
                         {
                         /*{?} a^(b*d+c*d) * (a^(b*f+c*f)+a^(e*b+e*c)) + -1*(a^((b+c)*(d+e))+a^((b+c)*(d+f))) => 0 */
-                        return -vglsub(kn2,kn1);
+                        return -cmpsub(kn2,kn1);
                         }
                     return r;
                     }
-                switch(kop(kn1))
+                switch(Op(kn1))
                     {
                     case PLUS:
                     case EXP:
-                        r = vgl(kn1->LEFT,kn2->LEFT);
+                        r = cmp(kn1->LEFT,kn2->LEFT);
                         if(r)
                             return r;
                         kn1 = kn1->RIGHT;
@@ -6854,7 +6855,7 @@ static int vgl(psk kn1,psk kn2)
             {
             if(RATIONAL_COMP(kn2))
                 {
-                switch(_qvergelijk(kn1,kn2))
+                switch(qCompare(kn1,kn2))
                     {
                     case MINUS: return -1;
                     case QNUL:
@@ -6886,10 +6887,10 @@ static int setmember(psk name,psk tree,psk nieuw)
     {
     while(is_op(tree))
         {
-        if(kop(tree) == EQUALS)
+        if(Op(tree) == EQUALS)
             {
             psk nname;
-            if(kop(name) == DOT)
+            if(Op(name) == DOT)
                 nname = name->LEFT;
             else
                 nname = name;
@@ -6899,8 +6900,8 @@ static int setmember(psk name,psk tree,psk nieuw)
                 }
             else if(nname == name)
                 {
-                wis(tree->RIGHT);
-                tree->RIGHT = zelfde_als_w(nieuw);
+                wipe(tree->RIGHT);
+                tree->RIGHT = same_as_w(nieuw);
                 return TRUE;
                 }
             else /* Found partial match for member name,
@@ -6918,38 +6919,38 @@ static int setmember(psk name,psk tree,psk nieuw)
     return FALSE;
     }
 
-static int update(psk name,psk pknoop) /* name = tree with DOT in root */
+static int update(psk name,psk pnode) /* name = tree with DOT in root */
 /*
     x:?(k.b)
     x:?((=(a=) (b=)).b)
 */
     {
-    vars * navar;
-    vars * voorvar;
+    vars * nxtvar;
+    vars * prevvar;
     if(is_op(name->LEFT))
         {
-        if(kop(name->LEFT) == EQUALS)
+        if(Op(name->LEFT) == EQUALS)
             /*{?} x:?((=(a=) (b=)).b) => x */
             /*          ^              */
-            return setmember(name->RIGHT,name->LEFT->RIGHT,pknoop);
+            return setmember(name->RIGHT,name->LEFT->RIGHT,pnode);
         else
             {
             /*{?} b:?((x.y).z) => x */
             return FALSE;
             }
         }
-    if(kop(name) == EQUALS) /* {?} (=a+b)=5 ==> =5 */
+    if(Op(name) == EQUALS) /* {?} (=a+b)=5 ==> =5 */
         {
-        wis(name->RIGHT);
-        name->RIGHT = zelfde_als_w(pknoop);
+        wipe(name->RIGHT);
+        name->RIGHT = same_as_w(pnode);
         return TRUE;
         }
-    else if(zoeknaam(name->LEFT,
-        &voorvar,
-        &navar))
+    else if(searchname(name->LEFT,
+        &prevvar,
+        &nxtvar))
         {
-        assert(navar->pvaria);
-        return setmember(name->RIGHT,Entry2(navar->n,navar->selector,navar->pvaria),pknoop);
+        assert(nxtvar->pvaria);
+        return setmember(name->RIGHT,Entry2(nxtvar->n,nxtvar->selector,nxtvar->pvaria),pnode);
         }
     else
         {
@@ -6958,47 +6959,47 @@ static int update(psk name,psk pknoop) /* name = tree with DOT in root */
     }
 
 
-static int insert(psk name,psk pknoop)
+static int insert(psk name,psk pnode)
     {
-    vars *navar,*voorvar,*nieuwvar;
+    vars *nxtvar,*prevvar,*nieuwvar;
 
     if(is_op(name))
         {
-        if(kop(name) == EQUALS)
+        if(Op(name) == EQUALS)
             {
-            wis(name->RIGHT);
-            name->RIGHT = zelfde_als_w(pknoop);  /*{?} monk2:?(=monk1) => monk2 */
+            wipe(name->RIGHT);
+            name->RIGHT = same_as_w(pnode);  /*{?} monk2:?(=monk1) => monk2 */
             return TRUE;
             }
         else
             { /* This allows, in fact, other operators than DOT, e.g. b:?(x y) */
-            return update(name,pknoop); /*{?} (borfo=klot=)&bk:?(borfo klot)&!(borfo.klot):bk => bk */
+            return update(name,pnode); /*{?} (borfo=klot=)&bk:?(borfo klot)&!(borfo.klot):bk => bk */
             }
         }
-    if(zoeknaam(name,
-                &voorvar,
-                &navar))
+    if(searchname(name,
+                &prevvar,
+                &nxtvar))
         {
-        ppsk ppkn;
-        wis(*(ppkn = Entry(navar->n,navar->selector,&navar->pvaria)));
-        *ppkn = zelfde_als_w(pknoop);
+        ppsk PPnode;
+        wipe(*(PPnode = Entry(nxtvar->n,nxtvar->selector,&nxtvar->pvaria)));
+        *PPnode = same_as_w(pnode);
         }
     else
         {
         size_t len;
-        unsigned char *string;
-        string = POBJ(name);
-        len = strlen((char *)string);
+        unsigned char *strng;
+        strng = POBJ(name);
+        len = strlen((char *)strng);
 #if PVNAME
         nieuwvar = (vars*)bmalloc(__LINE__,sizeof(vars));
-        if(*string)
+        if(*strng)
             {
 #if ICPY
             MEMCPY(nieuwvar->vname = (unsigned char *)
-                 bmalloc(__LINE__,len+1),string,(len >> LOGWORDLENGTH)+1);
+                 bmalloc(__LINE__,len+1),strng,(len >> LOGWORDLENGTH)+1);
 #else
             MEMCPY(nieuwvar->vname = (unsigned char *)
-                 bmalloc(__LINE__,len+1),string,((len / sizeof(LONG))+1) * sizeof(LONG));
+                 bmalloc(__LINE__,len+1),strng,((len / sizeof(LONG))+1) * sizeof(LONG));
 #endif
             }
 #else
@@ -7006,150 +7007,150 @@ static int insert(psk name,psk pknoop)
             nieuwvar = (vars*)bmalloc(__LINE__,sizeof(vars));
         else
             nieuwvar = (vars*)bmalloc(__LINE__,sizeof(vars) - 3 + len);
-        if(*string)
+        if(*strng)
             {
 #if ICPY
-            MEMCPY(&nieuwvar->u.Obj,string,(len / sizeof(LONG))+1);
+            MEMCPY(&nieuwvar->u.Obj,strng,(len / sizeof(LONG))+1);
 #else
-            MEMCPY(&nieuwvar->u.Obj,string,((len / sizeof(LONG))+1) * sizeof(LONG));
+            MEMCPY(&nieuwvar->u.Obj,strng,((len / sizeof(LONG))+1) * sizeof(LONG));
 #endif
             }
 #endif
         else
             {
 #if PVNAME
-            nieuwvar->vname = OBJ(nilk);
+            nieuwvar->vname = OBJ(nilNode);
 #else
-            nieuwvar->u.Lobj = LOBJ(nilk);
+            nieuwvar->u.Lobj = LOBJ(nilNode);
 #endif
             }
-        nieuwvar->next = navar;
-        if(voorvar == NULL)
-            variabelen[*string] = nieuwvar;
+        nieuwvar->next = nxtvar;
+        if(prevvar == NULL)
+            variables[*strng] = nieuwvar;
         else
-            voorvar->next = nieuwvar;
+            prevvar->next = nieuwvar;
         nieuwvar->n = 0;
         nieuwvar->selector = 0;
-        nieuwvar->pvaria = (varia*)zelfde_als_w(pknoop);
+        nieuwvar->pvaria = (varia*)same_as_w(pnode);
         }
     return TRUE;
     }
 
-static int copy_insert(psk name,psk pknoop,psk snijaf)
-    {
-    psk kn;
-    int ret;
-    assert((pknoop->RIGHT == 0 && snijaf == 0) || pknoop->RIGHT != snijaf);
-    DBGSRC(printf("copy_insert:");result(pknoop);printf("\n");)
-    if(  (pknoop->v.fl & INDIRECT) 
-      && (pknoop->v.fl & READY)
-        /*
-        {?} !dagj a:?dagj a
-        {!} !dagj
-        The test (pknoop->v.fl & READY) does not solve stackoverflow 
-        in the following examples:
+static int copy_insert(psk name, psk pnode, psk cutoff)
+	{
+	psk PNODE;
+	int ret;
+	assert((pnode->RIGHT == 0 && cutoff == 0) || pnode->RIGHT != cutoff);
+	DBGSRC(printf("copy_insert:"); result(pnode); printf("\n");)
+		if ((pnode->v.fl & INDIRECT)
+			&& (pnode->v.fl & READY)
+			/*
+			{?} !dagj a:?dagj a
+			{!} !dagj
+			The test (pnode->v.fl & READY) does not solve stackoverflow
+			in the following examples:
 
-        {?} (=!y):(=?y)
-        {?} !y
+			{?} (=!y):(=?y)
+			{?} !y
 
-        {?} (=!y):(=?x)
-        {?} (=!x):(=?y)
-        {?} !x
-        */
-      )
-        {
-        return FALSE;
-        }
-    else if(pknoop->v.fl & IDENT)
-        {
-        kn = copievan(pknoop);
-        }
-    else if(snijaf == NULL)
-        {
-        return insert(name,pknoop);
-        }
-    else
-        {
-        assert(!is_object(pknoop));
-        if((shared(pknoop) != ALL_REFCOUNT_BITS_SET) && !all_refcount_bits_set(snijaf))
-            {/* snijaf: either node with headroom in the small refcounter 
-                        or object */
-            DBGSRC(printf("name:[");result(name);printf("] pknoop:[");result(pknoop);printf("] snijaf(%d):[",snijaf->v.fl/ONEREF);result(snijaf);printf("]\n");)
-            kn = new_operator_like(pknoop);
-            kn->ops = (pknoop->ops & ~ALL_REFCOUNT_BITS_SET) | LATEBIND;
-            pknoop->ops += ONEREF;
-            if(shared(snijaf) == ALL_REFCOUNT_BITS_SET)
-                {
-/*
-(T=
-  1100:?I
-& tbl$(AA,!I)
-& (OBJ==(=a) (=b) (=c))
-&   !OBJ
-  : (
-    =   %
-        %
-        (?m:?n:?o:?p:?q:?r:?s) { increase refcount of (=c) to 7}
-    )
-&   whl
-  ' ( !I+-1:~<0:?I
-    & !OBJ:(=(% %:?(!I$?AA)) ?)
-    )
-& !I);
-{due to late binding, the refcount of (=c) has just come above 1023, and then
-late binding stops for the last 80 or so iterations. The left hand side of the
-late bound node is not an object, and therefore can only count to 1024. 
-Thereafter copies must be made.}
-*/
-                INCREFCOUNT(snijaf);
-                }
-            else
-                snijaf->ops += ONEREF;
+			{?} (=!y):(=?x)
+			{?} (=!x):(=?y)
+			{?} !x
+			*/
+			)
+			{
+			return FALSE;
+			}
+		else if (pnode->v.fl & IDENT)
+			{
+			PNODE = copyof(pnode);
+			}
+		else if (cutoff == NULL)
+			{
+			return insert(name, pnode);
+			}
+		else
+			{
+			assert(!is_object(pnode));
+			if ((shared(pnode) != ALL_REFCOUNT_BITS_SET) && !all_refcount_bits_set(cutoff))
+				{/* cutoff: either node with headroom in the small refcounter
+				 or object */
+				DBGSRC(printf("name:["); result(name); printf("] pnode:["); result(pnode); printf("] cutoff(%d):[", cutoff->v.fl / ONEREF); result(cutoff); printf("]\n");)
+					PNODE = new_operator_like(pnode);
+				PNODE->ops = (pnode->ops & ~ALL_REFCOUNT_BITS_SET) | LATEBIND;
+				pnode->ops += ONEREF;
+				if (shared(cutoff) == ALL_REFCOUNT_BITS_SET)
+					{
+					/*
+					(T=
+					1100:?I
+					& tbl$(AA,!I)
+					& (OBJ==(=a) (=b) (=c))
+					&   !OBJ
+					: (
+					=   %
+					%
+					(?m:?n:?o:?p:?q:?r:?s) { increase refcount of (=c) to 7}
+					)
+					&   whl
+					' ( !I+-1:~<0:?I
+					& !OBJ:(=(% %:?(!I$?AA)) ?)
+					)
+					& !I);
+					{due to late binding, the refcount of (=c) has just come above 1023, and then
+					late binding stops for the last 80 or so iterations. The left hand side of the
+					late bound node is not an object, and therefore can only count to 1024.
+					Thereafter copies must be made.}
+					*/
+					INCREFCOUNT(cutoff);
+					}
+				else
+					cutoff->ops += ONEREF;
 
-            kn->LEFT = pknoop;
-            kn->RIGHT = snijaf;
-            }
-        else
-            {
-            copyToSnijaf(&kn,pknoop,snijaf); /*{?} a b c:(?z:?x:?y:?a:?b) c => a b c */
-            /*{?} 0:?n&a b c:?abc&whl'(!n+1:?n:<2000&str$(v !n):?v&!abc:?!v c) =>   whl
-    ' ( !n+1:?n:<2000
-      & str$(v !n):?v
-      & !abc:?!v c
-      ) */
-            }
-        }
+				PNODE->LEFT = pnode;
+				PNODE->RIGHT = cutoff;
+				}
+			else
+				{
+				copyToCutoff(&PNODE, pnode, cutoff); /*{?} a b c:(?z:?x:?y:?a:?b) c => a b c */
+				/*{?} 0:?n&a b c:?abc&whl'(!n+1:?n:<2000&str$(v !n):?v&!abc:?!v c) =>   whl
+				' ( !n+1:?n:<2000
+				& str$(v !n):?v
+				& !abc:?!v c
+				) */
+				}
+			}
 
-    ret = insert(name,kn);
-    wis(kn);
-    return ret;
-    }
+		ret = insert(name, PNODE);
+		wipe(PNODE);
+		return ret;
+	}
 
 static psk scopy(const char * str)
     {
     int nr = fullnumbercheck(str) & ~DEFINITELYNONUMBER;
-    psk kn;
+    psk pnode;
     if(nr & MINUS)
         { /* bracmat out$arg$() -123 */
-        kn = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + strlen((const char *)str));
-        strcpy((char *)(kn)+sizeof(unsigned LONG),str + 1);
+        pnode = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + strlen((const char *)str));
+        strcpy((char *)(pnode)+sizeof(unsigned LONG),str + 1);
         }
     else
         {
-        kn = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + strlen((const char *)str));
-        strcpy((char *)(kn)+sizeof(unsigned LONG),str);
+        pnode = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + strlen((const char *)str));
+        strcpy((char *)(pnode)+sizeof(unsigned LONG),str);
         }
-    kn->v.fl = READY | SUCCESS | nr;
-    return kn;
+    pnode->v.fl = READY | SUCCESS | nr;
+    return pnode;
     }
 
 static int scopy_insert(psk name,const char * str)
     {
     int ret;
-    psk kn;
-    kn = scopy(str);
-    ret = insert(name,kn);
-    wis(kn);
+    psk pnode;
+    pnode = scopy(str);
+    ret = insert(name,pnode);
+    wipe(pnode);
     return ret;
     }
 
@@ -7160,51 +7161,51 @@ static int icopy_insert(psk name,LONG number)
     return scopy_insert(name,buf);
     }
 
-static int string_copy_insert(psk name,psk pknoop,char * str,char * snijaf)
+static int string_copy_insert(psk name,psk pnode,char * str,char * cutoff)
     {
-    char sav = *snijaf;
+    char sav = *cutoff;
     int ret;
-    *snijaf = '\0';
-    if((pknoop->v.fl & IDENT) || all_refcount_bits_set(pknoop))
+    *cutoff = '\0';
+    if((pnode->v.fl & IDENT) || all_refcount_bits_set(pnode))
         {
         ret = scopy_insert(name,str);
         }
     else
         {
-        stringrefknoop * kn;
+        stringrefnode * psnode;
         int nr;
         nr = fullnumbercheck(str) & ~DEFINITELYNONUMBER;
         if((nr & MINUS) && !(name->v.fl & NUMBER))
             nr = 0; /* "-1" is only converted to -1 if the # flag is present on the pattern */
-        kn = (stringrefknoop *)bmalloc(__LINE__,sizeof(stringrefknoop));
-        kn->ops = /*(pknoop->ops & ~(ALL_REFCOUNT_BITS_SET|VISIBLE_FLAGS)) substring doesn't inherit flags like */
+        psnode = (stringrefnode *)bmalloc(__LINE__,sizeof(stringrefnode));
+        psnode->ops = /*(pnode->ops & ~(ALL_REFCOUNT_BITS_SET|VISIBLE_FLAGS)) substring doesn't inherit flags like */
             READY | SUCCESS | LATEBIND | nr;
-        /*kn->ops |= SUCCESS;*/ /*{?} @(~`ab:%?x %?y)&!x => a */ /*{!} a */
-        kn->kn = zelfde_als_w(pknoop);
+        /*psnode->ops |= SUCCESS;*/ /*{?} @(~`ab:%?x %?y)&!x => a */ /*{!} a */
+		psnode->pnode = same_as_w(pnode);
         if(nr & MINUS)
             {
-            kn->str = str+1;
-            kn->length = snijaf - str - 1;
+            psnode->str = str+1;
+            psnode->length = cutoff - str - 1;
             }
         else
             {
-            kn->str = str;
-            kn->length = snijaf - str;
+            psnode->str = str;
+            psnode->length = cutoff - str;
             }
-        DBGSRC(int redMooi;int redhum;redMooi = mooi;\
-            redhum = hum;mooi = FALSE;hum = FALSE;\
-            Printf("str [%s] length " LONGU "\n",kn->str,(unsigned LONG int)kn->length);\
-            mooi = redMooi;hum = redhum;)
-        ret = insert(name,(psk)kn);
+        DBGSRC(int saveNice;int redhum;saveNice = nice;\
+            redhum = hum;nice = FALSE;hum = FALSE;\
+            Printf("str [%s] length " LONGU "\n",psnode->str,(unsigned LONG int)psnode->length);\
+            nice = saveNice;hum = redhum;)
+        ret = insert(name,(psk)psnode);
         if(ret)
-            dec_refcount((psk)kn);
+            dec_refcount((psk)psnode);
         else
             {
-            wis(pknoop);
-            bfree((void*)kn);
+            wipe(pnode);
+            bfree((void*)psnode);
             }
         }
-    *snijaf = sav;
+    *cutoff = sav;
     return ret;
     }
 
@@ -7359,14 +7360,14 @@ char * putCodePoint(unsigned LONG val,char * s)
     return s;
     }
 
-static int strcasecompu(char ** S, char ** P,char * snijaf)
-/* Additional argument snijaf */
+static int strcasecompu(char ** S, char ** P,char * cutoff)
+/* Additional argument cutoff */
     {
     int sutf = 1;
     int putf = 1;
     char * s = *S;
     char * p = *P;
-    while(s < snijaf && *s && *p)
+    while(s < cutoff && *s && *p)
         {
         int diff;
         char * ns = s;
@@ -7386,7 +7387,7 @@ static int strcasecompu(char ** S, char ** P,char * snijaf)
         }
     *S = s;
     *P = p;
-    return (s < snijaf ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*p;
+    return (s < cutoff ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*p;
     }
 
 
@@ -7431,9 +7432,9 @@ static int strcasecmpDOS(const char *s, const char *p)
 
 static int compare(psk s,psk p)
     {
-    int teken;
+    int Sign;
     if(RATIONAL_COMP(s) && RATIONAL_WEAK(p))
-        teken = _qvergelijk /*bereken_verschil*/(s,p);
+        Sign = qCompare(s,p);
     else
         {
         if(is_op(s))
@@ -7451,20 +7452,20 @@ static int compare(psk s,psk p)
             }
         if((p->v.fl & (NOT|FRACTION|NUMBER|GREATER_THAN|SMALLER_THAN)) == (NOT|GREATER_THAN|SMALLER_THAN))
             { /* Case insensitive match: ~<> means "not different" */
-            teken = strcasecomp((char *)POBJ(s),(char *)POBJ(p));
+            Sign = strcasecomp((char *)POBJ(s),(char *)POBJ(p));
             }
         else
             {
-            teken = strcmp((char *)POBJ(s),(char *)POBJ(p));
+            Sign = strcmp((char *)POBJ(s),(char *)POBJ(p));
             }
-        if(teken > 0)
-            teken = 0;
-        else if(teken < 0)
-            teken = MINUS;
+        if(Sign > 0)
+            Sign = 0;
+        else if(Sign < 0)
+            Sign = MINUS;
         else
-            teken = QNUL;
+            Sign = QNUL;
         }
-    switch(teken)
+    switch(Sign)
         {
         case 0 :
             {
@@ -7491,17 +7492,16 @@ static int compare(psk s,psk p)
 
 
 /*
-(1) Fractions are now matched.
-(2) With the % flag on an otherwise numeric pattern, the pattern is treated 
+With the % flag on an otherwise numeric pattern, the pattern is treated 
     as a string, not a number.
 */
 #if CUTOFFSUGGEST
-static int scompare(char * wh,char * s,char * snijaf,psk p,char ** suggestedCutOff,char ** mayMoveStartOfSubject)
+static int scompare(char * wh,char * s,char * cutoff,psk p,char ** suggestedCutOff,char ** mayMoveStartOfSubject)
 #else
-static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
+static int scompare(char * wh,unsigned char * s,unsigned char * cutoff,psk p)
 #endif
     {
-    int teken = 0;
+    int Sign = 0;
     char * P;
 #if CUTOFFSUGGEST
     char * S = s;
@@ -7549,15 +7549,15 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
          )
       )
         {
-        int check = sfullnumbercheck(s,snijaf);
+        int check = sfullnumbercheck(s,cutoff);
         if(check & QNUMBER)
             {
             int anythingGoes = 0;
             psk n = NULL;
-            sav = *snijaf;
-            *snijaf = '\0';
-            n = opb(n,s,NULL);
-            *snijaf = sav;
+            sav = *cutoff;
+            *cutoff = '\0';
+            n = build_up(n,s,NULL);
+            *cutoff = sav;
 
             if(RAT_RAT(n))
                 {
@@ -7569,7 +7569,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                 /* check whether there is a slash followed by non-zero decimal digit coming */
                 if(!RAT_RAT(n))
                     {
-                    char * t = snijaf;
+                    char * t = cutoff;
                     for(;*t;++t)
                         {
                         if(*t == '/')
@@ -7593,9 +7593,9 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                 {
                 less = smallerIfMoreDigitsAdded;
                 }
-            teken = _qvergelijk(n,p);
+            Sign = qCompare(n,p);
             samesign = ((n->v.fl & MINUS) == (p->v.fl & MINUS));
-            wis(n);
+            wipe(n);
             switch(Flgs & (NOT|GREATER_THAN|SMALLER_THAN))
                 {
                 case NOT|GREATER_THAN|SMALLER_THAN:    /* n:~<>p */
@@ -7617,7 +7617,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                             else
                                 FALSE
     */
-                    switch(teken)
+                    switch(Sign)
                         {
                         case QNUL:    /* n == p */
                             if(anythingGoes)
@@ -7653,7 +7653,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                         [n < p]
                             TRUE
     */
-                    switch(teken)
+                    switch(Sign)
                         {
                         case QNUL:    /* n == p */
                             if(anythingGoes || less)
@@ -7686,7 +7686,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                             else
                                 FALSE
     */
-                    switch(teken)
+                    switch(Sign)
                         {
                         case 0:        /* n > p */
                             return TRUE;
@@ -7716,7 +7716,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                             TRUE
 
     */
-                    switch(teken)
+                    switch(Sign)
                         {
                         case QNUL:    /* n == p */
                             return FALSE;
@@ -7741,7 +7741,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                             else
                                 FALSE
     */
-                    switch(teken)
+                    switch(Sign)
                         {
                         case QNUL:    /* n == p */
                             if(anythingGoes || !less)
@@ -7775,7 +7775,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                         [n < p]
                             TRUE
     */
-                    switch(teken)
+                    switch(Sign)
                         {
                         case QNUL:    /* n == p */
                             if(anythingGoes || less)
@@ -7795,10 +7795,10 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
             /* End (check & QNUMBER) == TRUE. */
             /*printf("Not expected here!");getchar();*/
             }
-        else if(((s == snijaf) && (Flgs & (NUMBER|FRACTION))) 
-               || (   (s < snijaf)
-                  && (  ((*s == '-') && (snijaf < s + 2))
-                     || snijaf[-1] == '/'
+        else if(((s == cutoff) && (Flgs & (NUMBER|FRACTION))) 
+               || (   (s < cutoff)
+                  && (  ((*s == '-') && (cutoff < s + 2))
+                     || cutoff[-1] == '/'
                      )
                   )
                )
@@ -7814,7 +7814,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
 
     if((Flgs & (NOT|FRACTION|NUMBER|GREATER_THAN|SMALLER_THAN)) == (NOT|GREATER_THAN|SMALLER_THAN))
         { /* Case insensitive match: ~<> means "not different" */
-        teken = strcasecompu(&s,&P,snijaf); /* Additional argument snijaf */
+        Sign = strcasecompu(&s,&P,cutoff); /* Additional argument cutoff */
         }
     else
         {
@@ -7828,12 +7828,12 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                 case GREATER_THAN|SMALLER_THAN:    /* n:<>p */
                 case NOT:                        /* n:~p */
                     {
-                    while(((teken = (s < snijaf ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*P) == 0) && *P) /* Additional argument snijaf */
+                    while(((Sign = (s < cutoff ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*P) == 0) && *P) /* Additional argument cutoff */
                         {
                         ++s;
                         ++P;
                         }
-                    if(teken > 0)
+                    if(Sign > 0)
                         {
                         switch(Flgs & (NOT|GREATER_THAN|SMALLER_THAN))
                             {
@@ -7844,7 +7844,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                                 return TRUE;
                             }
                         }
-                    else if(teken == 0)
+                    else if(Sign == 0)
                         {
                         switch(Flgs & (NOT|GREATER_THAN|SMALLER_THAN))
                             {
@@ -7860,14 +7860,14 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                     }
                 case GREATER_THAN:    /* n:>p */
                     {
-                    while(((teken = (int)(unsigned char)*s - (int)(unsigned char)*P) == 0) && *s && *P)
+                    while(((Sign = (int)(unsigned char)*s - (int)(unsigned char)*P) == 0) && *s && *P)
                         {
                         ++s;
                         ++P;
                         }
-                    if(s >= snijaf)
+                    if(s >= cutoff)
                         {
-                        if(teken > 0)
+                        if(Sign > 0)
                             *suggestedCutOff = s + 1;
                         break;
                         }
@@ -7875,15 +7875,15 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                     }
                 case NOT|GREATER_THAN|SMALLER_THAN:    /* n:~<>p */
                 case 0:                                /* n:p */
-                    while(((teken = (int)(unsigned char)*s - (int)(unsigned char)*P) == 0) && *s && *P)
+                    while(((Sign = (int)(unsigned char)*s - (int)(unsigned char)*P) == 0) && *s && *P)
                         {
                         ++s;
                         ++P;
                         }
-                    if(s >= snijaf && *P == 0)
+                    if(s >= cutoff && *P == 0)
                         {
                         *suggestedCutOff = s;
-                        /*teken = 0;*/
+                        /*Sign = 0;*/
                         if(mayMoveStartOfSubject)
                             *mayMoveStartOfSubject = 0;
                         return TRUE|ONCE;
@@ -7901,27 +7901,27 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                                 --startpos;
                             }
                         /*assert(  startpos == 0 
-                              || (startpos+strlen((char *)POBJ(p)) < snijaf - 1)
-                              || (startpos+strlen((char *)POBJ(p)) >= snijaf)
+                              || (startpos+strlen((char *)POBJ(p)) < cutoff - 1)
+                              || (startpos+strlen((char *)POBJ(p)) >= cutoff)
                               );*/
                         *mayMoveStartOfSubject = (char *)startpos;
                         return ONCE;
                         }
 
-                    if(teken > 0 || s < snijaf)
+                    if(Sign > 0 || s < cutoff)
                         {
                         return ONCE;
                         }
                     return FALSE;/*subject too short*/
                 case NOT|SMALLER_THAN:    /* n:~<p */
-                    while(((teken = (int)(unsigned char)*s - (int)(unsigned char)*P) == 0) && *s && *P)
+                    while(((Sign = (int)(unsigned char)*s - (int)(unsigned char)*P) == 0) && *s && *P)
                         {
                         ++s;
                         ++P;
                         }
-                    if(teken >= 0)
+                    if(Sign >= 0)
                         {
-                        if(s >= snijaf)
+                        if(s >= cutoff)
                             {
                             *suggestedCutOff = (*P) ? s + 1 : s;
                             }
@@ -7939,16 +7939,16 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
 #if 1
                 case NOT|GREATER_THAN|SMALLER_THAN:    /* n:~<>p */
                 case 0:                                /* n:p */
-                    while(((teken = (s < snijaf ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*P) == 0) && *s && *P)
+                    while(((Sign = (s < cutoff ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*P) == 0) && *s && *P)
                         {
                         ++s;
                         ++P;
                         }
-                    if(teken != 0 && mayMoveStartOfSubject && *mayMoveStartOfSubject != 0)
+                    if(Sign != 0 && mayMoveStartOfSubject && *mayMoveStartOfSubject != 0)
                         {
                         char * startpos;
                         char * ep = SPOBJ(p) + strlen((char*)POBJ(p));
-                        char * es = snijaf ? snijaf : S + strlen((char*)S);
+                        char * es = cutoff ? cutoff : S + strlen((char*)S);
                         while(ep > SPOBJ(p))
                             {
                             if(*--ep != *--es)
@@ -7971,7 +7971,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
 #else
                 {
 #endif
-                    while(((teken = (s < snijaf ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*P) == 0) && *P) /* Additional argument snijaf */
+                    while(((Sign = (s < cutoff ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*P) == 0) && *P) /* Additional argument cutoff */
                         {
                         ++s;
                         ++P;
@@ -7996,11 +7996,11 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                 [n < p]
                     FALSE
 */
-            if(teken == 0)
+            if(Sign == 0)
                 {
                 return TRUE|ONCE;
                 }
-            else if(teken < 0 && s >= snijaf)
+            else if(Sign < 0 && s >= cutoff)
                 {
                 return FALSE;
                 }
@@ -8017,7 +8017,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                 [n < p]
                     TRUE
 */
-            if(teken >= 0)
+            if(Sign >= 0)
                 {
                 return ONCE;
                 }
@@ -8034,11 +8034,11 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                 [n < p]
                     FALSE
 */
-            if(teken > 0)
+            if(Sign > 0)
                 {
                 return TRUE;
                 }
-            else if(teken < 0 && s < snijaf)
+            else if(Sign < 0 && s < cutoff)
                 {
                 return ONCE;
                 }
@@ -8058,7 +8058,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                     TRUE
 
 */
-            if(teken == 0)
+            if(Sign == 0)
                 {
                 return FALSE;
                 }
@@ -8075,9 +8075,9 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                 [n < p]
                     FALSE
 */
-            if(teken < 0)
+            if(Sign < 0)
                 {
-                if(s < snijaf)
+                if(s < cutoff)
                     {
                     return ONCE;
                     }
@@ -8100,11 +8100,11 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
                 [n < p]
                     TRUE
 */
-            if(teken > 0)
+            if(Sign > 0)
                 {
                 return ONCE;
                 }
-            else if(teken < 0)
+            else if(Sign < 0)
                 {
                 return TRUE;
                 }
@@ -8113,39 +8113,39 @@ static int scompare(char * wh,unsigned char * s,unsigned char * snijaf,psk p)
         }
     }
 
-static int psh(psk name,psk pknoop,psk dim)
+static int psh(psk name,psk pnode,psk dim)
     {
     /* string must fulfill requirements of icpy */
-    vars *navar,*voorvar;
+    vars *nxtvar,*prevvar;
     varia *nvaria;
-    psk cknoop;
+    psk cnode;
     int oldn,n,m2,m22;
     while(is_op(name))
         {
-        /* return psh(name->LEFT,pknoop,dim) && psh(name->RIGHT,pknoop,dim); */
-        if(!psh(name->LEFT,pknoop,dim))
+        /* return psh(name->LEFT,pnode,dim) && psh(name->RIGHT,pnode,dim); */
+        if(!psh(name->LEFT,pnode,dim))
             return FALSE;
         name = name->RIGHT;
         }
     if(dim && !INTEGER(dim))
         return FALSE;
-    if(!zoeknaam(name,
-                 &voorvar,
-                 &navar))
+    if(!searchname(name,
+                 &prevvar,
+                 &nxtvar))
         {
-        insert(name,pknoop);
+        insert(name,pnode);
         if(dim)
             {
-            zoeknaam(name,
-                     &voorvar,
-                     &navar);
+            searchname(name,
+                     &prevvar,
+                     &nxtvar);
             }
         else
             {
             return TRUE;
             }
         }
-    n = oldn = navar->n;
+    n = oldn = nxtvar->n;
     if(dim)
         {
         int newn;
@@ -8157,64 +8157,64 @@ static int psh(psk name,psk pknoop,psk dim)
             newn = oldn - newn + 1;
         if(newn < 0)
             return FALSE;
-        navar->n = newn;
-        if(oldn >= navar->n)
+        nxtvar->n = newn;
+        if(oldn >= nxtvar->n)
             {
-            assert(navar->pvaria);
-            for(;oldn >= navar->n;)
-                wis(Entry2(n,oldn--,navar->pvaria));
+            assert(nxtvar->pvaria);
+            for(;oldn >= nxtvar->n;)
+                wipe(Entry2(n,oldn--,nxtvar->pvaria));
             }
-        navar->n--;
-        if(navar->selector > navar->n)
-            navar->selector = navar->n;
+        nxtvar->n--;
+        if(nxtvar->selector > nxtvar->n)
+            nxtvar->selector = nxtvar->n;
         }
     else
         {
-        navar->n++;
-        navar->selector = navar->n;
+        nxtvar->n++;
+        nxtvar->selector = nxtvar->n;
         }
-    m2 = macht2(n);
+    m2 = power2(n);
     if(m2 == 0)
         m22 = 1;
     else
         m22 = m2 << 1;
-    if(navar->n >= m22)
+    if(nxtvar->n >= m22)
         /* allocate */
         {
-        for(;navar->n >= m22;m22 <<= 1)
+        for(;nxtvar->n >= m22;m22 <<= 1)
             {
             nvaria = (varia*)bmalloc(__LINE__,sizeof(varia) + (m22-1)*sizeof(psk));
-            nvaria->prev = navar->pvaria;
-            navar->pvaria = nvaria;
+            nvaria->prev = nxtvar->pvaria;
+            nxtvar->pvaria = nvaria;
             }
         }
-    else if(navar->n < m2)
+    else if(nxtvar->n < m2)
         /* deallocate */
         {
-        for(;m2 && navar->n < m2;m2 >>= 1)
+        for(;m2 && nxtvar->n < m2;m2 >>= 1)
             {
-            nvaria = navar->pvaria;
-            navar->pvaria = nvaria->prev;
+            nvaria = nxtvar->pvaria;
+            nxtvar->pvaria = nvaria->prev;
             bfree(nvaria);
             }
-        if(navar->n < 0)
+        if(nxtvar->n < 0)
             {
-            if(voorvar)
-                voorvar->next = navar->next;
+            if(prevvar)
+                prevvar->next = nxtvar->next;
             else
-                variabelen[*POBJ(name)] = navar->next;
+                variables[*POBJ(name)] = nxtvar->next;
 #if PVNAME
-            if(navar->vname != OBJ(nilk))
-                bfree(navar->vname);
+            if(nxtvar->vname != OBJ(nilNode))
+                bfree(nxtvar->vname);
 #endif
-            bfree(navar);
+            bfree(nxtvar);
             return TRUE;
             }
         }
-    assert(navar->pvaria);
-    for( cknoop = pknoop
-       ; ++oldn <= navar->n
-       ; cknoop = *Entry(navar->n,oldn,&navar->pvaria) = zelfde_als_w(cknoop)
+    assert(nxtvar->pvaria);
+    for( cnode = pnode
+       ; ++oldn <= nxtvar->n
+       ; cnode = *Entry(nxtvar->n,oldn,&nxtvar->pvaria) = same_as_w(cnode)
        )
        ;
     return TRUE;
@@ -8315,7 +8315,7 @@ static psk removeFromHash(Hash * temp,psk Arg)
         {
         while(*pr)
             {
-            if(kop((*pr)->entry) == WHITE)
+            if(Op((*pr)->entry) == WHITE)
                 {
                 if(!(*temp->cmpfunc)(key,(const char *)POBJ((*pr)->entry->LEFT->LEFT)))
                     break;
@@ -8352,7 +8352,7 @@ static psk inserthash(Hash * temp,psk Arg)
     else
         while(r)
             {
-            if(kop(r->entry) == WHITE)
+            if(Op(r->entry) == WHITE)
                 {
                 if(!(*temp->cmpfunc)(key,(const char *)POBJ(r->entry->LEFT->LEFT)))
                     {
@@ -8370,17 +8370,17 @@ static psk inserthash(Hash * temp,psk Arg)
             }
     if(r)
         {
-        psk goal = (psk)bmalloc(__LINE__,sizeof(kknoop));
+        psk goal = (psk)bmalloc(__LINE__,sizeof(knode));
         goal->v.fl = WHITE | SUCCESS;
         goal->ops &= ~ALL_REFCOUNT_BITS_SET;
-        goal->LEFT = zelfde_als_w(Arg);
+        goal->LEFT = same_as_w(Arg);
         goal->RIGHT = r->entry;
         r->entry = goal;
         }
     else
         {
         r = (pskRecord *)bmalloc(__LINE__,sizeof(pskRecord));
-        r->entry = zelfde_als_w(Arg);
+        r->entry = same_as_w(Arg);
         r->next = temp->hash_table[i];
         temp->hash_table[i] = r;
         ++temp->record_count;
@@ -8403,7 +8403,7 @@ static psk findhash(Hash * temp,psk Arg)
         {
         while(r)
             {
-            if(kop(r->entry) == WHITE)
+            if(Op(r->entry) == WHITE)
                 {
                 if(!(*temp->cmpfunc)(key,(const char *)POBJ(r->entry->LEFT->LEFT)))
                     break;
@@ -8431,7 +8431,7 @@ static void freehash(Hash * temp)
                 pskRecord * next;
                 while(r)
                     {
-                    wis(r->entry);
+                    wipe(r->entry);
                     next = r->next;
                     bfree(r);
                     r = next;
@@ -8522,13 +8522,13 @@ static void rehash(Hash ** ptemp,int loadFactor/*1-100*/)
                 pskRecord * r = temp->hash_table[--i];
                 while(r)
                     {
-                    psk pkn = r->entry;
-                    while(is_op(pkn) && kop(pkn) == WHITE)
+                    psk Pnode = r->entry;
+                    while(is_op(Pnode) && Op(Pnode) == WHITE)
                         {
-                        inserthash(newtable,pkn->LEFT);
-                        pkn = pkn->RIGHT;
+                        inserthash(newtable,Pnode->LEFT);
+                        Pnode = Pnode->RIGHT;
                         }
-                    inserthash(newtable,pkn);
+                    inserthash(newtable,Pnode);
                     r = r->next;
                     }
                 }
@@ -8547,7 +8547,7 @@ static int loadfactor(Hash * temp)
         return (int)(temp->record_count / (temp->hash_size/100));
     }
 
-static Boolean hashinsert(struct typedObjectknoop * This,ppsk arg)
+static Boolean hashinsert(struct typedObjectnode * This,ppsk arg)
     {
     psk Arg = (*arg)->RIGHT;
     if(is_op(Arg) && !is_op(Arg->LEFT))
@@ -8557,14 +8557,14 @@ static Boolean hashinsert(struct typedObjectknoop * This,ppsk arg)
         if(lf > 100)
             rehash((Hash **)(&(This->voiddata)),60);
         ret = inserthash(HASH(This),Arg);
-        wis(*arg);
-        *arg = zelfde_als_w(ret);
+        wipe(*arg);
+        *arg = same_as_w(ret);
         return TRUE;
         }
     return FALSE;
     }
 
-static Boolean hashfind(struct typedObjectknoop * This,ppsk arg)
+static Boolean hashfind(struct typedObjectnode * This,ppsk arg)
     {
     psk Arg = (*arg)->RIGHT;
     if(!is_op(Arg))
@@ -8572,15 +8572,15 @@ static Boolean hashfind(struct typedObjectknoop * This,ppsk arg)
         psk ret = findhash(HASH(This),Arg);
         if(ret)
             {
-            wis(*arg);
-            *arg = zelfde_als_w(ret);
+            wipe(*arg);
+            *arg = same_as_w(ret);
             return TRUE;
             }
         }
     return FALSE;
     }
 
-static Boolean hashremove(struct typedObjectknoop * This,ppsk arg)
+static Boolean hashremove(struct typedObjectnode * This,ppsk arg)
     {
     psk Arg = (*arg)->RIGHT;
     if(!is_op(Arg))
@@ -8591,7 +8591,7 @@ static Boolean hashremove(struct typedObjectknoop * This,ppsk arg)
             {
             if(loadfactor(temp) < 50 && temp->hash_size > 97)
                 rehash(PHASH(This),90);
-            wis(*arg);
+            wipe(*arg);
             *arg = ret;
             return TRUE;
             }
@@ -8599,7 +8599,7 @@ static Boolean hashremove(struct typedObjectknoop * This,ppsk arg)
     return FALSE;
     }
 
-static Boolean hashnew(struct typedObjectknoop * This,ppsk arg)
+static Boolean hashnew(struct typedObjectnode * This,ppsk arg)
     {
 /*    UNREFERENCED_PARAMETER(arg);*/
     unsigned long N = 97;
@@ -8613,7 +8613,7 @@ static Boolean hashnew(struct typedObjectknoop * This,ppsk arg)
     return TRUE;
     }
 
-static Boolean hashdie(struct typedObjectknoop * This,ppsk arg)
+static Boolean hashdie(struct typedObjectnode * This,ppsk arg)
     {
     UNREFERENCED_PARAMETER(arg);
     freehash(HASH(This));
@@ -8621,7 +8621,7 @@ static Boolean hashdie(struct typedObjectknoop * This,ppsk arg)
     }
 
 #if CODEPAGE850
-static Boolean hashDOS(struct typedObjectknoop * This,ppsk arg)
+static Boolean hashDOS(struct typedObjectnode * This,ppsk arg)
     {
     UNREFERENCED_PARAMETER(arg);
     (HASH(This))->hashfunc = caseinsensitivehashDOS;
@@ -8631,7 +8631,7 @@ static Boolean hashDOS(struct typedObjectknoop * This,ppsk arg)
     }
 #endif
 
-static Boolean hashISO(struct typedObjectknoop * This,ppsk arg)
+static Boolean hashISO(struct typedObjectnode * This,ppsk arg)
     {
     UNREFERENCED_PARAMETER(arg);
     (HASH(This))->hashfunc = caseinsensitivehash;
@@ -8640,7 +8640,7 @@ static Boolean hashISO(struct typedObjectknoop * This,ppsk arg)
     return TRUE;
     }
 
-static Boolean hashcasesensitive(struct typedObjectknoop * This,ppsk arg)
+static Boolean hashcasesensitive(struct typedObjectnode * This,ppsk arg)
     {
     UNREFERENCED_PARAMETER(arg);
     (HASH(This))->hashfunc = casesensitivehash;
@@ -8650,11 +8650,11 @@ static Boolean hashcasesensitive(struct typedObjectknoop * This,ppsk arg)
     }
 
 
-static Boolean hashforall(struct typedObjectknoop * This,ppsk arg)
+static Boolean hashforall(struct typedObjectnode * This,ppsk arg)
     {
     unsigned LONG i;
     int ret = TRUE;
-    This = (typedObjectknoop *)zelfde_als_w((psk)This);
+    This = (typedObjectnode *)same_as_w((psk)This);
     for( i = 0
         ;    ret && HASH(This)
           && i < (HASH(This))->hash_size
@@ -8666,13 +8666,13 @@ static Boolean hashforall(struct typedObjectknoop * This,ppsk arg)
         while(r)
             {
             int m;
-            psk pkn = NULL;
-            adr[2] = (*arg)->RIGHT; /* each time! adr[n] may be overwritten by evalueer (below)*/
-            adr[3] = r->entry;
-            pkn = opb(pkn,"(\2'\3)",NULL);
-            pkn = eval(pkn);
-            ret = isSUCCESSorFENCE(pkn);
-            wis(pkn);
+            psk Pnode = NULL;
+            addr[2] = (*arg)->RIGHT; /* each time! addr[n] may be overwritten by evaluate (below)*/
+            addr[3] = r->entry;
+            Pnode = build_up(Pnode,"(\2'\3)",NULL);
+            Pnode = eval(Pnode);
+            ret = isSUCCESSorFENCE(Pnode);
+            wipe(Pnode);
             if(  !ret
               || !HASH(This)
               || i >= (HASH(This))->hash_size
@@ -8688,7 +8688,7 @@ static Boolean hashforall(struct typedObjectknoop * This,ppsk arg)
             }
         ++i;
         }
-    wis((psk)This);
+    wipe((psk)This);
     return TRUE;
     }
 
@@ -8740,7 +8740,7 @@ Bart 20010222
 
 classdef classes[] = {{"hash",hash},{NULL,NULL}};
 
-static method_pnt findBuiltInMethod(typedObjectknoop * object,psk methodName)
+static method_pnt findBuiltInMethod(typedObjectnode * object,psk methodName)
     {
     if(!is_op(methodName))
         {
@@ -8761,16 +8761,16 @@ static psk getmember(psk name,psk tree,objectStuff * Object)
     DBGSRC(Printf("getmember(");result(name);Printf(",");result(tree);Printf(")\n");)
     while(is_op(tree))
         {
-        if(kop(tree) == EQUALS)
+        if(Op(tree) == EQUALS)
             {
             psk nname;
             if(  Object
-              && ISBUILTIN((objectknoop*)tree)
-              && kop(name) == DOT
+              && ISBUILTIN((objectnode*)tree)
+              && Op(name) == DOT
               )
                 {
                 Object->object = tree;  /* object == (=) */
-                Object->theMethod = findBuiltInMethod((typedObjectknoop *)tree,name->RIGHT);
+                Object->theMethod = findBuiltInMethod((typedObjectnode *)tree,name->RIGHT);
                 /* findBuiltInMethod((=),(insert)) */
                 if(Object->theMethod)
                     {
@@ -8778,7 +8778,7 @@ static psk getmember(psk name,psk tree,objectStuff * Object)
                     }
                 }
 
-            if(kop(name) == DOT)
+            if(Op(name) == DOT)
                 nname = name->LEFT;
             else
                 nname = name;
@@ -8808,9 +8808,9 @@ static psk getmember(psk name,psk tree,objectStuff * Object)
     return NULL;
     }
 
-static psk find(psk naamknoop,int *newval,objectStuff * Object)
+static psk find(psk namenode,int *newval,objectStuff * Object)
 /*
-'naamknoop' is the expression that has to lead to a binding.
+'namenode' is the expression that has to lead to a binding.
 Conceptually, expression (or its complement) and binding are separated by a '=' operator.
 E.g.
 
@@ -8843,17 +8843,17 @@ and
 must be equivalent
 */
     {
-    vars *navar;
-    DBGSRC(Printf("find(");result(naamknoop);Printf(")\n");)
-    if(is_op(naamknoop))
+    vars *nxtvar;
+    DBGSRC(Printf("find(");result(namenode);Printf(")\n");)
+    if(is_op(namenode))
         {
-        switch(kop(naamknoop))
+        switch(Op(namenode))
             {
-            case EQUALS: /* Lambda function: (=.out$!arg)$HELLO -> naamknoop == (=.out$!arg) */
+            case EQUALS: /* Lambda function: (=.out$!arg)$HELLO -> namenode == (=.out$!arg) */
                 {
                 *newval = TRUE;
-                naamknoop->RIGHT = Head(naamknoop->RIGHT);
-                return zelfde_als_w(naamknoop->RIGHT);
+                namenode->RIGHT = Head(namenode->RIGHT);
+                return same_as_w(namenode->RIGHT);
                 }
             case DOT: /*
                       e.g.
@@ -8880,30 +8880,30 @@ must be equivalent
                 psk tmp2;
                 psk doel;
                 int nieuw = FALSE;
-                if(is_op(naamknoop->LEFT))
+                if(is_op(namenode->LEFT))
                     {
-                    if(kop(naamknoop->LEFT) == EQUALS) /* naamknoop->LEFT == (=  (a=2) (b=3))   */
+                    if(Op(namenode->LEFT) == EQUALS) /* namenode->LEFT == (=  (a=2) (b=3))   */
                         {
                         if(  Object
-                          && ISBUILTIN((objectknoop*)(naamknoop->LEFT))
+                          && ISBUILTIN((objectnode*)(namenode->LEFT))
                           )
                             {
-                            Object->theMethod = findBuiltInMethod((typedObjectknoop *)(naamknoop->LEFT),naamknoop->RIGHT);
+                            Object->theMethod = findBuiltInMethod((typedObjectnode *)(namenode->LEFT),namenode->RIGHT);
                                                 /* findBuiltInMethod((=),(insert)) */
-                            Object->object = naamknoop->LEFT;  /* object == (=) */
+                            Object->object = namenode->LEFT;  /* object == (=) */
                             if(Object->theMethod)
                                 {
                                 return NULL;
                                 }
                             }
-                        tmp = naamknoop->LEFT->RIGHT; /* tmp == ((a=2) (b=3))   */
+                        tmp = namenode->LEFT->RIGHT; /* tmp == ((a=2) (b=3))   */
                         }
                     else
                         return NULL;
                     }
                 else                                   /* x */
                     {
-                    if((tmp = find(naamknoop->LEFT,&nieuw,NULL)) == NULL)
+                    if((tmp = find(namenode->LEFT,&nieuw,NULL)) == NULL)
                         return NULL;
                     /*
                     tmp == ((a=2) (b=3))
@@ -8913,7 +8913,7 @@ must be equivalent
                 if(Object)
                     Object->self = tmp; /* self == ((a=2) (b=3))   */
                 /* The number of '=' to reach the method name in 'tmp' must be one greater
-                   than the number of '.' that precedes the method name in 'naamknoop->RIGHT'
+                   than the number of '.' that precedes the method name in 'namenode->RIGHT'
 
                    e.g (= (say=.out$!arg)) and (.say) match
 
@@ -8921,12 +8921,12 @@ must be equivalent
 
                    The function getmember resolves this.
                 */
-                tmp2 = getmember(naamknoop->RIGHT,tmp,Object);
+                tmp2 = getmember(namenode->RIGHT,tmp,Object);
 
                 if(tmp2)
                     {
                     *newval = TRUE;
-                    doel = zelfde_als_w(tmp2);
+                    doel = same_as_w(tmp2);
                     }
                 else
                     doel = NULL;
@@ -8942,18 +8942,18 @@ must be equivalent
         }
     else
         {
-        for(navar = variabelen[naamknoop->u.obj];
-            navar && (STRCMP(VARNAME(navar),POBJ(naamknoop)) < 0);
-            navar = navar->next)
+        for(nxtvar = variables[namenode->u.obj];
+            nxtvar && (STRCMP(VARNAME(nxtvar),POBJ(namenode)) < 0);
+            nxtvar = nxtvar->next)
             ;
-        if(navar && !STRCMP(VARNAME(navar),POBJ(naamknoop))
-           && navar->selector <= navar->n
+        if(nxtvar && !STRCMP(VARNAME(nxtvar),POBJ(namenode))
+           && nxtvar->selector <= nxtvar->n
           )
             {
             ppsk self;
-            assert(navar->pvaria);
+            assert(nxtvar->pvaria);
             *newval = FALSE;
-            self = Entry(navar->n,navar->selector,&navar->pvaria);
+            self = Entry(nxtvar->n,nxtvar->selector,&nxtvar->pvaria);
             *self = Head(*self);
             return *self;
             }
@@ -8966,39 +8966,39 @@ must be equivalent
 
 static int deleteNode(psk name)
     {
-    vars *navar,*voorvar;
+    vars *nxtvar,*prevvar;
     varia *hv;
-    if(zoeknaam(name,
-        &voorvar,
-        &navar))
+    if(searchname(name,
+        &prevvar,
+        &nxtvar))
         {
         psk tmp;
-        assert(navar->pvaria);
-        tmp = Entry2(navar->n,navar->n,navar->pvaria);
-        wis(tmp);
-        if(navar->n)
+        assert(nxtvar->pvaria);
+        tmp = Entry2(nxtvar->n,nxtvar->n,nxtvar->pvaria);
+        wipe(tmp);
+        if(nxtvar->n)
             {
-            if((navar->n)-1 < macht2(navar->n))
+            if((nxtvar->n)-1 < power2(nxtvar->n))
                 {
-                hv = navar->pvaria;
-                navar->pvaria = hv->prev;
+                hv = nxtvar->pvaria;
+                nxtvar->pvaria = hv->prev;
                 bfree(hv);
                 }
-            navar->n--;
-            if(navar->n < navar->selector)
-                navar->selector = navar->n;
+            nxtvar->n--;
+            if(nxtvar->n < nxtvar->selector)
+                nxtvar->selector = nxtvar->n;
             }
         else
             {
-            if(voorvar)
-                voorvar->next = navar->next;
+            if(prevvar)
+                prevvar->next = nxtvar->next;
             else
-                variabelen[*POBJ(name)] = navar->next;
+                variables[*POBJ(name)] = nxtvar->next;
 #if PVNAME
-            if(navar->vname != OBJ(nilk))
-                bfree(navar->vname);
+            if(nxtvar->vname != OBJ(nilNode))
+                bfree(nxtvar->vname);
 #endif
-            bfree(navar);
+            bfree(nxtvar);
             }
         return TRUE;
         }
@@ -9006,11 +9006,9 @@ static int deleteNode(psk name)
         return FALSE;
     }
 
-static psk Naamwoord_w(psk variabele,int twolevelsofindirection);
+static psk SymbolBinding_w(psk variabele,int twolevelsofindirection);
 
-/* changed signature. Before, naamwoord and naamwoord_w returned TRUE
-  or FALSE, while the binding was returned in a pointer-to-a-pointer.*/
-static psk Naamwoord(psk variabele,int *newval,int twolevelsofindirection)
+static psk SymbolBinding(psk variabele,int *newval,int twolevelsofindirection)
     {
     psk pbinding;
     if((pbinding = find(variabele,newval,NULL)) != NULL)
@@ -9021,20 +9019,20 @@ static psk Naamwoord(psk variabele,int *newval,int twolevelsofindirection)
             
             if(pbinding->v.fl & INDIRECT)
                 {
-                peval = subboomcopie(pbinding);
+                peval = subtreecopy(pbinding);
                 peval = eval(peval);
                 if(  !isSUCCESS(peval)
                   || (  is_op(peval)
-                     && kop(peval) != EQUALS
-                     && kop(peval) != DOT
+                     && Op(peval) != EQUALS
+                     && Op(peval) != DOT
                      )
                   )
                     {
-                    wis(peval);
+                    wipe(peval);
                     return 0;
                     }
                 if(*newval)
-                    wis(pbinding);
+                    wipe(pbinding);
                 *newval = TRUE;
                 pbinding = peval;
                 }
@@ -9042,11 +9040,11 @@ static psk Naamwoord(psk variabele,int *newval,int twolevelsofindirection)
                 {
                 if(is_object(pbinding))
                     {
-                    peval = zelfde_als_w(pbinding);
+                    peval = same_as_w(pbinding);
                     }
                 else
                     {
-                    peval = subboomcopie(pbinding);
+                    peval = subtreecopy(pbinding);
                     /*
                     a=b=(c.d)
                     c=(d=e)
@@ -9057,16 +9055,16 @@ static psk Naamwoord(psk variabele,int *newval,int twolevelsofindirection)
                     peval = eval(peval);
                     if(  !isSUCCESS(peval)
                       || (  is_op(peval)
-                         && kop(peval) != EQUALS
-                         && kop(peval) != DOT
+                         && Op(peval) != EQUALS
+                         && Op(peval) != DOT
                          )
                       )
                         {
-                        wis(peval);
+                        wipe(peval);
                         if(*newval)
                             {
                             *newval = FALSE;
-                            wis(pbinding);
+                            wipe(pbinding);
                             }
                         return NULL;
                         }
@@ -9075,20 +9073,20 @@ static psk Naamwoord(psk variabele,int *newval,int twolevelsofindirection)
                 if(*newval)
                     {
                     *newval = FALSE;
-                    wis(pbinding);
+                    wipe(pbinding);
                     }
-                pbinding = Naamwoord(peval,newval,(peval->v.fl & DOUBLY_INDIRECT));
-                wis(peval);
+                pbinding = SymbolBinding(peval,newval,(peval->v.fl & DOUBLY_INDIRECT));
+                wipe(peval);
                 }
             else
                 {
                 int newv = *newval;
                 psk binding;
                 *newval = FALSE;
-                binding = Naamwoord(pbinding,newval,pbinding->v.fl & DOUBLY_INDIRECT);
+                binding = SymbolBinding(pbinding,newval,pbinding->v.fl & DOUBLY_INDIRECT);
                 if(newv)
                     {
-                    wis(pbinding);
+                    wipe(pbinding);
                     }
                 pbinding = binding;
                 }
@@ -9097,7 +9095,7 @@ static psk Naamwoord(psk variabele,int *newval,int twolevelsofindirection)
     return pbinding;
     }
 
-static psk Naamwoord_w(psk variabele,int twolevelsofindirection)
+static psk SymbolBinding_w(psk variabele,int twolevelsofindirection)
 /* twolevelsofindirection because the variable not always can have the
 bangs. Example: 
   (A==B)  &  a b c:? [?!!A
@@ -9108,8 +9106,8 @@ first finds (=B), which is an object that should not obtain the flags !! as in
     psk pbinding;
     int newval;
     newval = FALSE;
-    DBGSRC(printf("Naamwoord_w(");result(variabele);printf(")\n");)
-    if((pbinding = Naamwoord(variabele,&newval,twolevelsofindirection)) != NULL)
+    DBGSRC(printf("SymbolBinding_w(");result(variabele);printf(")\n");)
+    if((pbinding = SymbolBinding(variabele,&newval,twolevelsofindirection)) != NULL)
         {
         unsigned int nameflags,valueflags;
         nameflags = (variabele->v.fl & (BEQUEST|SUCCESS));
@@ -9123,33 +9121,33 @@ first finds (=B), which is an object that should not obtain the flags !! as in
         assert(pbinding != NULL);
         DBGSRC(printf("pbinding:");result(pbinding);printf("\n");)
 
-        if(kop(pbinding) == EQUALS)
+        if(Op(pbinding) == EQUALS)
             {
             if(!newval)
                 {
                 pbinding->RIGHT = Head(pbinding->RIGHT);
-                pbinding = zelfde_als_w(pbinding);
+                pbinding = same_as_w(pbinding);
                 }
             }
         else if((pbinding)->v.fl == valueflags)
             {
             if(!newval)
                 {
-                pbinding = zelfde_als_w(pbinding);
+                pbinding = same_as_w(pbinding);
                 }
             }
         else
             {
-            assert(kop(pbinding) != EQUALS);
+            assert(Op(pbinding) != EQUALS);
             if(newval)
                 {
-                DBGSRC(printf("prive\n");)
-                pbinding = prive(pbinding);
+                DBGSRC(printf("isolated\n");)
+                pbinding = isolated(pbinding);
                 }
             else
                 {
-                DBGSRC(printf("subboomcopie\n");)
-                pbinding = subboomcopie(pbinding);
+                DBGSRC(printf("subtreecopy\n");)
+                pbinding = subtreecopy(pbinding);
                 }
             (pbinding)->v.fl = valueflags & ~ALL_REFCOUNT_BITS_SET;
             }
@@ -9222,7 +9220,7 @@ static int stringOncePattern(psk pat)
         }
     else
         {
-        switch(kop(pat))
+        switch(Op(pat))
             {
             case DOT:
             case COMMA:
@@ -9295,7 +9293,7 @@ static int oncePattern(psk pat)
         return TRUE;
         }
     else
-        switch(kop(pat))
+        switch(Op(pat))
         {
             case DOT:
             case COMMA:
@@ -9390,17 +9388,17 @@ static void printMatchState(const char * msg,matchstate s,int pos,int len)
 #endif
 #endif
 
-static LONG expressionLength(psk pkn,unsigned int op)
+static LONG expressionLength(psk Pnode,unsigned int op)
     {
-    if(!is_op(pkn) && pkn->u.lobj == knil[op >> OPSH]->u.lobj)
+    if(!is_op(Pnode) && Pnode->u.lobj == knil[op >> OPSH]->u.lobj)
         return 0;
     else
         {
         LONG len = 1;
-        while(kop(pkn) == op)
+        while(Op(Pnode) == op)
             {
             ++len;
-            pkn = pkn->RIGHT;
+            Pnode = Pnode->RIGHT;
             }
         return len;
         }
@@ -9450,29 +9448,29 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
     Flgs = pat->v.fl & (UNIFY|INDIRECT|DOUBLY_INDIRECT);
 
     DBGSRC(printf("patA:");result(pat);printf("\n");)
-    name = subboomcopie(pat);
+    name = subtreecopy(pat);
     name->v.fl |= SUCCESS;
     if((Flgs & UNIFY) && (is_op(pat) || (Flgs & INDIRECT)))
         {
         name->v.fl &= ~VISIBLE_FLAGS;
         if(!is_op(name))
             name->v.fl |= READY;
-        s.c.rmr = (char)evalueer(name) & TRUE;
+        s.c.rmr = (char)evaluate(name) & TRUE;
 
         if (!(s.c.rmr))
             {
-            wis(name);
+            wipe(name);
             return FALSE;
             }
         }
     else
         {
         DBGSRC(printf("patA:");result(pat);printf("\n");)
-        s.c.rmr = (char)evalueer(name) & TRUE;
+        s.c.rmr = (char)evaluate(name) & TRUE;
 
         if (!(s.c.rmr))
             { 
-            wis(name);
+            wipe(name);
             return FALSE;
             }
 
@@ -9490,17 +9488,17 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
             if (Flgs & INDIRECT)        /* ?! of ?!! */
                 {
                 psk loc;
-                if ((loc=Naamwoord_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
+                if ((loc=SymbolBinding_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
                     {
                     if (is_object(loc))
                         s.c.rmr = (char)icopy_insert(loc,pposition);
                     else
                         {
-                        s.c.rmr = (char)evalueer(loc) & (TRUE|FENCE);
+                        s.c.rmr = (char)evaluate(loc) & (TRUE|FENCE);
                         if(!icopy_insert(loc,pposition))
                             s.c.rmr = FALSE;
                         }
-                    wis(loc);
+                    wipe(loc);
                     }
                 else
                     s.c.rmr = FALSE;
@@ -9514,7 +9512,7 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
             s.c.rmr = TRUE;
 
         if(name)
-            wis(name); /* [?a */
+            wipe(name); /* [?a */
         /*
           (   ( CharacterLength
               =   length c p q
@@ -9620,26 +9618,26 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
         {
         s.c.rmr = FALSE;
         }
-    wis(pat); /* [20 */
+    wipe(pat); /* [20 */
     s.c.rmr |= ONCE | POSITION_ONCE;
     return s.c.rmr;
     }
 
-static int atomtest(psk kn)
+static int atomtest(psk pnode)
     {
-    return (!is_op(kn) && !HAS_UNOPS(kn)) ? (int)kn->u.obj : -1;
+    return (!is_op(pnode) && !HAS_UNOPS(pnode)) ? (int)pnode->u.obj : -1;
     }
 
-static char sdoEval(char * sub,char * snijaf, psk pat, psk subkn)
+static char sdoEval(char * sub,char * cutoff, psk pat, psk subkn)
     {
     char ret;
     psk loc;
-    psh(&sjt,&nilk,NULL);
-    string_copy_insert(&sjt,subkn,sub,snijaf);
-    loc = subboomcopie(pat);
+    psh(&sjtNode,&nilNode,NULL);
+    string_copy_insert(&sjtNode,subkn,sub,cutoff);
+    loc = subtreecopy(pat);
     loc->v.fl &= ~(POSITION|NONIDENT|IMPLIEDFENCE|ONCE);
     loc = eval(loc);
-    deleteNode(&sjt);
+    deleteNode(&sjtNode);
     if(isSUCCESS(loc))
         {
         ret = (loc->v.fl & FENCE) ? (TRUE|ONCE) : TRUE;
@@ -9648,7 +9646,7 @@ static char sdoEval(char * sub,char * snijaf, psk pat, psk subkn)
         {
         ret = (loc->v.fl & FENCE) ? ONCE : FALSE;
         }
-    wis(loc);
+    wipe(loc);
     return ret;
     }
 
@@ -9656,16 +9654,16 @@ static char sdoEval(char * sub,char * snijaf, psk pat, psk subkn)
     ( Dogs and Cats are friends: ? [%(out$(!sjt SJT)&~) (|))&
     ( Dogs and Cats are friends: ? [%(out$(!sjt)&~) (|))&
 */
-static char doEval(psk sub,psk snijaf, psk pat)
+static char doEval(psk sub,psk cutoff, psk pat)
     {
     char ret;
     psk loc;
-    psh(&sjt,&nilk,NULL);
-    copy_insert(&sjt, sub, snijaf);
-    loc = subboomcopie(pat);
+    psh(&sjtNode,&nilNode,NULL);
+    copy_insert(&sjtNode, sub, cutoff);
+    loc = subtreecopy(pat);
     loc->v.fl &= ~(POSITION|NONIDENT|IMPLIEDFENCE|ONCE);
     loc = eval(loc);
-    deleteNode(&sjt);
+    deleteNode(&sjtNode);
     if(isSUCCESS(loc))
         {
         ret = (loc->v.fl & FENCE) ? (TRUE|ONCE) : TRUE;
@@ -9674,7 +9672,7 @@ static char doEval(psk sub,psk snijaf, psk pat)
         {
         ret = (loc->v.fl & FENCE) ? ONCE : FALSE;
         }
-    wis(loc);
+    wipe(loc);
     
     return ret;
     }
@@ -9685,7 +9683,7 @@ static char stringmatch
         (int ind
         ,char * wh
         ,char * sub
-        ,char * snijaf
+        ,char * cutoff
         , psk pat
         , psk subkn
         , LONG pposition
@@ -9698,7 +9696,7 @@ static char stringmatch
         (int ind
         ,char * wh
         ,unsigned char * sub
-        ,unsigned char * snijaf
+        ,unsigned char * cutoff
         , psk pat
         , psk subkn
         , LONG pposition
@@ -9730,8 +9728,8 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
     int ci;
     psk name = NULL;
     assert(sizeof(s) == 4);
-    if(!snijaf)
-        snijaf = sub+stringLength;
+    if(!cutoff)
+        cutoff = sub+stringLength;
 #if CUTOFFSUGGEST
     if(  (pat->flgs & ATOM)
       ||    (NOTHING(pat) 
@@ -9743,8 +9741,8 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
         suggestedCutOff = NULL;
         }
 #endif
-    DBGSRC(int redMooi;int redhum;redMooi = mooi;redhum = hum;mooi = FALSE;\
-        hum = FALSE;Printf("%d  %.*s|%s",ind,snijaf-sub,sub,snijaf);\
+    DBGSRC(int saveNice;int redhum;saveNice = nice;redhum = hum;nice = FALSE;\
+        hum = FALSE;Printf("%d  %.*s|%s",ind,cutoff-sub,sub,cutoff);\
         Printf(":");result(pat);\
         Printf  (",pos=%ld,sLen=%ld,sugCut=%s,mayMoveStart=%s)"\
                 ,pposition\
@@ -9752,20 +9750,20 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                 ,suggestedCutOff ? *suggestedCutOff ? *suggestedCutOff : (char*)"(0)" : (char*)"0"\
                 ,mayMoveStartOfSubject ? *mayMoveStartOfSubject ? *mayMoveStartOfSubject : (char*)"(0)" : (char*)"0"\
                 );\
-        Printf("\n");mooi = redMooi;hum = redhum;)
+        Printf("\n");nice = saveNice;hum = redhum;)
     s.i = (PRISTINE << SHIFT_LMR) + (PRISTINE << SHIFT_RMR);
 
     Flgs = pat->v.fl;
     if(Flgs & POSITION)
         {
         if(Flgs & NONIDENT)
-            return sdoEval(sub,snijaf,pat,subkn);
-        else if(snijaf > sub)
+            return sdoEval(sub,cutoff,pat,subkn);
+        else if(cutoff > sub)
             {
 #if CUTOFFSUGGEST
             if(mayMoveStartOfSubject && *mayMoveStartOfSubject)
                 {
-                *mayMoveStartOfSubject = snijaf;
+                *mayMoveStartOfSubject = cutoff;
                 }
 #endif
             return FALSE | ONCE | POSITION_ONCE;
@@ -9781,22 +9779,22 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
     if(!(  (  (Flgs & NONIDENT)
            && ( NEGATION(Flgs, NONIDENT)
               ? ( (s.c.once = ONCE)
-                , snijaf > sub
+                , cutoff > sub
                 )
-              : snijaf == sub
+              : cutoff == sub
               )
            )
         || (  (Flgs & ATOM)
            && ( NEGATION(Flgs, ATOM)
-              ?    (snijaf < sub + 2) /*!(sub[0] && sub[1])*/
-              :    snijaf > sub
+              ?    (cutoff < sub + 2) /*!(sub[0] && sub[1])*/
+              :    cutoff > sub
                 && ( (s.c.once = ONCE)
-                   , snijaf > sub + 1 /*sub[1]*/
+                   , cutoff > sub + 1 /*sub[1]*/
                    )
               )
            )
         || (  (Flgs & (FRACTION|NUMBER))
-           && ( (ci = sfullnumbercheck(sub,snijaf))
+           && ( (ci = sfullnumbercheck(sub,cutoff))
               , (  (  (Flgs & FRACTION)
                    && ((ci != (QFRACTION | QNUMBER)) ^ NEGATION(Flgs, FRACTION))
                    )
@@ -9818,10 +9816,10 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
             if(is_op(pat))
                 {
                 unsigned int saveflgs = Flgs & VISIBLE_FLAGS;
-                name = subboomcopie(pat);
+                name = subtreecopy(pat);
                 name->v.fl &= ~VISIBLE_FLAGS;
                 name->v.fl |= SUCCESS;
-                if ((s.c.rmr = (char)evalueer(name)) != TRUE)
+                if ((s.c.rmr = (char)evaluate(name)) != TRUE)
                     ok = FALSE;
                 name->v.fl |= saveflgs;
                 pat = name;
@@ -9830,7 +9828,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                 {
                 if (Flgs & UNIFY)        /* ?  */
                     {
-                    if (!NOTHING(pat) || snijaf > sub)
+                    if (!NOTHING(pat) || cutoff > sub)
                         {
                         if (  is_op(pat)
                            || pat->u.obj
@@ -9838,24 +9836,24 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                             {
                             if (Flgs & INDIRECT)        /* ?! of ?!! */
                                 {
-                                if ((loc=Naamwoord_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
+                                if ((loc=SymbolBinding_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
                                     {
                                     if (is_object(loc))
-                                        s.c.rmr = (char)string_copy_insert(loc,subkn,sub,snijaf);
+                                        s.c.rmr = (char)string_copy_insert(loc,subkn,sub,cutoff);
                                     else
                                         {
-                                        s.c.rmr = (char)evalueer(loc);
-                                        if(!string_copy_insert(loc,subkn,sub,snijaf))
+                                        s.c.rmr = (char)evaluate(loc);
+                                        if(!string_copy_insert(loc,subkn,sub,cutoff))
                                             s.c.rmr = FALSE;
                                         }
-                                    wis(loc);
+                                    wipe(loc);
                                     }
                                 else
                                     s.c.rmr = (char)NOTHING(pat);
                                 }
                             else
                                 {
-                                s.c.rmr = (char)string_copy_insert(pat,subkn,sub,snijaf);
+                                s.c.rmr = (char)string_copy_insert(pat,subkn,sub,cutoff);
                                 }
                             }
                         else
@@ -9864,7 +9862,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                     }
                 else if (Flgs & INDIRECT)        /* ! or !! */
                     {
-                    if ((loc=Naamwoord_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
+                    if ((loc=SymbolBinding_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
                         {
                         cleanOncePattern(loc);
 #if CUTOFFSUGGEST
@@ -9872,15 +9870,15 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                             {
                             *mayMoveStartOfSubject = 0;
                             }
-                        s.c.rmr = (char)(stringmatch(ind+1,"A",sub,snijaf,loc,subkn,pposition,stringLength
+                        s.c.rmr = (char)(stringmatch(ind+1,"A",sub,cutoff,loc,subkn,pposition,stringLength
                             ,suggestedCutOff
                             ,0
                             ) ^ NOTHING(pat));
 #else
-                        s.c.rmr = (char)(stringmatch(ind+1,"A",sub,snijaf,loc,subkn,pposition,stringLength
+                        s.c.rmr = (char)(stringmatch(ind+1,"A",sub,cutoff,loc,subkn,pposition,stringLength
                             ) ^ NOTHING(pat));
 #endif
-                        wis(loc);
+                        wipe(loc);
                         }
                     else
                         s.c.rmr = (char)NOTHING(pat);
@@ -9889,7 +9887,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
             }
         else
             {
-            switch (kop(pat))
+            switch (Op(pat))
                 {
                 case PLUS:
                 case TIMES:
@@ -9922,17 +9920,17 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
 #if CUTOFFSUGGEST
                     if(suggested_Cut_Off > sloc)
                         {
-                        if(snijaf && suggested_Cut_Off > snijaf)
+                        if(cutoff && suggested_Cut_Off > cutoff)
                             {
                             if(suggestedCutOff)
                                 {
                                 locpos += suggested_Cut_Off - sloc;
-                                snijaf = sloc = *suggestedCutOff = suggested_Cut_Off;
+                                cutoff = sloc = *suggestedCutOff = suggested_Cut_Off;
                                 }
                             else
                                 {
-                                locpos += snijaf - sloc;
-                                sloc = snijaf;
+                                locpos += cutoff - sloc;
+                                sloc = cutoff;
                                 s.c.lmr &= ~TRUE;
                                 }
                             }
@@ -9946,7 +9944,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                     else
 #endif
                         s.c.lmr &= ~ONCE;
-                    while(sloc < snijaf)                            /* C    while divisionPoint */
+                    while(sloc < cutoff)                            /* C    while divisionPoint */
                         {
                         if(s.c.lmr & TRUE)                          /* D        if leftResult.success */
                             {
@@ -9956,7 +9954,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                             else if(may_Move_Start_Of_Subject != 0)
                                 may_Move_Start_Of_Subject = sloc;
                             s.c.rmr = stringmatch(ind+1,"J",sloc    /* E            rightResult=SR:cdr(P) */
-                                ,snijaf, pat->RIGHT, subkn
+                                ,cutoff, pat->RIGHT, subkn
                                 ,locpos,stringLength,suggestedCutOff
                                 ,&may_Move_Start_Of_Subject);
                             if(may_Move_Start_Of_Subject != sloc && may_Move_Start_Of_Subject != 0)
@@ -9971,7 +9969,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                                 ++locpos;
                                 }
 #else
-                            s.c.rmr = stringmatch(ind+1,"J",sloc,snijaf, pat->RIGHT, subkn,locpos,stringLength);
+                            s.c.rmr = stringmatch(ind+1,"J",sloc,cutoff, pat->RIGHT, subkn,locpos,stringLength);
                             ++sloc;
                             ++locpos;
 #endif
@@ -10014,7 +10012,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                         s.c.lmr = stringmatch(ind+1,"I",sub,sloc, pat->LEFT, subkn,/* 0 ? */pposition,/* strlen(sub) ? */ stringLength,&suggested_Cut_Off,mayMoveStartOfSubject);
                         if(suggested_Cut_Off > sloc)
                             {
-                            if(!(snijaf && suggested_Cut_Off > snijaf))
+                            if(!(cutoff && suggested_Cut_Off > cutoff))
                                 {
                                 assert(suggested_Cut_Off > sloc);
                                 locpos += suggested_Cut_Off - sloc;
@@ -10029,18 +10027,18 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                     if(s.c.lmr & TRUE)                              /* J    if leftResult.success */
                         {
 #if CUTOFFSUGGEST
-                        s.c.rmr = stringmatch(ind+1,"J",sloc,snijaf /* K        rightResult=0(P):cdr(pat) */
+                        s.c.rmr = stringmatch(ind+1,"J",sloc,cutoff /* K        rightResult=0(P):cdr(pat) */
                             ,pat->RIGHT, subkn,locpos,stringLength
                             ,suggestedCutOff,mayMoveStartOfSubject);
 #else
-                        s.c.rmr = stringmatch(ind+1,"J",sloc,snijaf,pat->RIGHT, subkn,locpos,stringLength);
+                        s.c.rmr = stringmatch(ind+1,"J",sloc,cutoff,pat->RIGHT, subkn,locpos,stringLength);
 #endif
                         s.c.rmr &= ~ONCE;
                         }
                     /* L    return */
                     if(!(s.c.rmr & POSITION_MAX_REACHED))
                         s.c.rmr &= ~POSITION_ONCE;
-                    if(/*(snijaf > sub) &&*/ stringOncePattern(pat))    /* The test snijaf > sub merely avoids that stringOncePattern is called when it is useless. */
+                    if(/*(cutoff > sub) &&*/ stringOncePattern(pat))    /* The test cutoff > sub merely avoids that stringOncePattern is called when it is useless. */
                         {/* Test:
                          @(abcde:`(a ?x) (?z:d) ? )
                           z=b
@@ -10051,7 +10049,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                     return s.c.rmr ^ (char)NOTHING(pat);               /* end */
                     }
                 case UNDERSCORE:
-                    if(snijaf > sub + 1)
+                    if(cutoff > sub + 1)
                         {
 #if CUTOFFSUGGEST
                         s.c.lmr = stringmatch(ind+1,"M",sub,sub+1,pat->LEFT,subkn,pposition,stringLength,NULL,mayMoveStartOfSubject);
@@ -10060,9 +10058,9 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
 #endif
                         if(  (s.c.lmr & TRUE)
 #if CUTOFFSUGGEST
-                          && ((s.c.rmr = stringmatch(ind+1,"N",sub+1,snijaf,pat->RIGHT, subkn,pposition,stringLength,suggestedCutOff,mayMoveStartOfSubject)) & TRUE)
+                          && ((s.c.rmr = stringmatch(ind+1,"N",sub+1,cutoff,pat->RIGHT, subkn,pposition,stringLength,suggestedCutOff,mayMoveStartOfSubject)) & TRUE)
 #else
-                          && ((s.c.rmr = stringmatch(ind+1,"N",sub+1,snijaf,pat->RIGHT, subkn,pposition,stringLength)) & TRUE)
+                          && ((s.c.rmr = stringmatch(ind+1,"N",sub+1,cutoff,pat->RIGHT, subkn,pposition,stringLength)) & TRUE)
 #endif
                           )
                             {
@@ -10073,12 +10071,12 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                     break;
                 case AND:
 #if CUTOFFSUGGEST
-                    if ((s.c.lmr = stringmatch(ind+1,"O",sub,snijaf, pat->LEFT, subkn,pposition,stringLength,suggestedCutOff,mayMoveStartOfSubject)) & TRUE)
+                    if ((s.c.lmr = stringmatch(ind+1,"O",sub,cutoff, pat->LEFT, subkn,pposition,stringLength,suggestedCutOff,mayMoveStartOfSubject)) & TRUE)
 #else
-                    if ((s.c.lmr = stringmatch(ind+1,"O",sub,snijaf, pat->LEFT, subkn,pposition,stringLength)) & TRUE)
+                    if ((s.c.lmr = stringmatch(ind+1,"O",sub,cutoff, pat->LEFT, subkn,pposition,stringLength)) & TRUE)
 #endif
                         {
-                        loc = zelfde_als_w(pat->RIGHT);
+                        loc = same_as_w(pat->RIGHT);
                         loc = eval(loc);
                         if (loc->v.fl & SUCCESS)
                             {
@@ -10094,26 +10092,26 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                             if (loc->v.fl & IMPLIEDFENCE) /* (for function utf$) */
                                 s.c.rmr |= ONCE;
                             }
-                        wis(loc);
+                        wipe(loc);
                         }
                     s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE));
                     break;
                 case MATCH:
 #if CUTOFFSUGGEST
-                    if ((s.c.lmr = stringmatch(ind+1,"P",sub,snijaf, pat->LEFT, subkn,pposition,stringLength,suggestedCutOff,mayMoveStartOfSubject)) & TRUE)
+                    if ((s.c.lmr = stringmatch(ind+1,"P",sub,cutoff, pat->LEFT, subkn,pposition,stringLength,suggestedCutOff,mayMoveStartOfSubject)) & TRUE)
 #else
-                    if ((s.c.lmr = stringmatch(ind+1,"P",sub,snijaf, pat->LEFT, subkn,pposition,stringLength)) & TRUE)
+                    if ((s.c.lmr = stringmatch(ind+1,"P",sub,cutoff, pat->LEFT, subkn,pposition,stringLength)) & TRUE)
 #endif
                         {
 #if CUTOFFSUGGEST
-                        if(suggestedCutOff && *suggestedCutOff > snijaf)
+                        if(suggestedCutOff && *suggestedCutOff > cutoff)
                             {
-                            snijaf = *suggestedCutOff;
+                            cutoff = *suggestedCutOff;
                             }
 
-                        s.c.rmr = (char)(stringmatch(ind+1,"Q",sub,snijaf,pat->RIGHT,subkn,pposition,stringLength,0,0));
+                        s.c.rmr = (char)(stringmatch(ind+1,"Q",sub,cutoff,pat->RIGHT,subkn,pposition,stringLength,0,0));
 #else
-                        s.c.rmr = (char)(stringmatch(ind+1,"Q",sub,snijaf,pat->RIGHT,subkn,pposition,stringLength));
+                        s.c.rmr = (char)(stringmatch(ind+1,"Q",sub,cutoff,pat->RIGHT,subkn,pposition,stringLength));
 #endif
                         }
                     else
@@ -10124,9 +10122,9 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
 #if CUTOFFSUGGEST
                     if(mayMoveStartOfSubject) 
                         *mayMoveStartOfSubject = 0;
-                    if ( (s.c.lmr = (char)( stringmatch(ind+1,"R",sub,snijaf,pat->LEFT,subkn,pposition,stringLength,NULL,0)))
+                    if ( (s.c.lmr = (char)( stringmatch(ind+1,"R",sub,cutoff,pat->LEFT,subkn,pposition,stringLength,NULL,0)))
 #else
-                    if ( (s.c.lmr = (char)( stringmatch(ind+1,"R",sub,snijaf,pat->LEFT,subkn,pposition,stringLength)))
+                    if ( (s.c.lmr = (char)( stringmatch(ind+1,"R",sub,cutoff,pat->LEFT,subkn,pposition,stringLength)))
 #endif
                        & (TRUE | FENCE)
                        )
@@ -10143,9 +10141,9 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                     else
                         {
 #if CUTOFFSUGGEST
-                        s.c.rmr = stringmatch(ind+1,"S",sub,snijaf,pat->RIGHT, subkn,pposition,stringLength,NULL,0);
+                        s.c.rmr = stringmatch(ind+1,"S",sub,cutoff,pat->RIGHT, subkn,pposition,stringLength,NULL,0);
 #else
-                        s.c.rmr = stringmatch(ind+1,"S",sub,snijaf,pat->RIGHT, subkn,pposition,stringLength);
+                        s.c.rmr = stringmatch(ind+1,"S",sub,cutoff,pat->RIGHT, subkn,pposition,stringLength);
 #endif
                         if(  (s.c.rmr & ONCE)
                           && !(s.c.lmr & ONCE)
@@ -10169,11 +10167,11 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 */
                 case FUN:
                 case FUU:
-                    psh(&sjt,&nilk,NULL);
-                    string_copy_insert(&sjt,subkn,sub,snijaf);
-                    loc = zelfde_als_w(pat);
+                    psh(&sjtNode,&nilNode,NULL);
+                    string_copy_insert(&sjtNode,subkn,sub,cutoff);
+                    loc = same_as_w(pat);
                     loc = eval(loc);
-                    deleteNode(&sjt);
+                    deleteNode(&sjtNode);
 #if CUTOFFSUGGEST
                     if(mayMoveStartOfSubject)
                         *mayMoveStartOfSubject = 0;
@@ -10184,11 +10182,11 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                         if (equal(pat, loc))
                             {
 #if CUTOFFSUGGEST
-                            s.c.rmr = (char)(stringmatch(ind+1,"T",sub,snijaf,loc,subkn,pposition,stringLength,NULL,0) ^ NOTHING(loc));
+                            s.c.rmr = (char)(stringmatch(ind+1,"T",sub,cutoff,loc,subkn,pposition,stringLength,NULL,0) ^ NOTHING(loc));
 #else
-                            s.c.rmr = (char)(stringmatch(ind+1,"T",sub,snijaf,loc,subkn,pposition,stringLength) ^ NOTHING(loc));
+                            s.c.rmr = (char)(stringmatch(ind+1,"T",sub,cutoff,loc,subkn,pposition,stringLength) ^ NOTHING(loc));
 #endif
-                            wis(loc);
+                            wipe(loc);
                             break;
                             }
                         }
@@ -10197,7 +10195,7 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                         if(loc->v.fl & (FENCE|IMPLIEDFENCE))
                             s.c.rmr = ONCE; /* '~ as return value from function stops stretching subject */
                         }
-                    wis(loc);
+                    wipe(loc);
                     break;
                 default:
                     if(!is_op(pat))
@@ -10211,7 +10209,7 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                         else
                             {
 #if CUTOFFSUGGEST
-                            s.c.rmr = (char)(scompare("b",(char *)sub,snijaf, pat
+                            s.c.rmr = (char)(scompare("b",(char *)sub,cutoff, pat
                                                 , ( (  !(Flgs & ATOM)
                                                     || NEGATION(Flgs, ATOM)
                                                     ) 
@@ -10222,9 +10220,9 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
                                                 )
                                              );
 #else
-                            s.c.rmr = (char)(scompare("b",(unsigned char *)sub,snijaf, pat));
+                            s.c.rmr = (char)(scompare("b",(unsigned char *)sub,cutoff, pat));
 #endif
-                            DBGSRC(Printf("%s %d%*sscompare(%.*s,",wh,ind,ind,"",snijaf-sub,sub);result(pat);Printf(") ");\
+                            DBGSRC(Printf("%s %d%*sscompare(%.*s,",wh,ind,ind,"",cutoff-sub,sub);result(pat);Printf(") ");\
                                 if(s.c.rmr & ONCE) Printf("ONCE|");\
                                 if(s.c.rmr & TRUE) Printf("TRUE"); else Printf("FALSE");\
                                 Printf("\n");)
@@ -10240,11 +10238,11 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
     if(stringOncePattern(pat) || /* @("abXk":(|? b|`) X ?id) must fail*/ (s.c.rmr & (TRUE|FENCE|ONCE)) == FENCE)
         {
         s.c.rmr |= ONCE;
-        DBGSRC(int redMooi;int redhum;redMooi = mooi;redhum = hum;\
-            mooi = FALSE;hum = FALSE;\
-            Printf("%d%*sstringmatch(%.*s",ind,ind,"",snijaf-sub,sub);\
+        DBGSRC(int saveNice;int redhum;saveNice = nice;redhum = hum;\
+            nice = FALSE;hum = FALSE;\
+            Printf("%d%*sstringmatch(%.*s",ind,ind,"",cutoff-sub,sub);\
             Printf(":");result(pat);\
-            mooi = redMooi;hum = redhum;\
+            nice = saveNice;hum = redhum;\
             Printf(") s.c.rmr %d (B)",s.c.rmr);\
             if(pat->v.fl & POSITION) Printf("POSITION ");\
             if(pat->v.fl & FRACTION)Printf("FRACTION ");\
@@ -10259,13 +10257,13 @@ dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
     if(is_op(pat))
         s.c.rmr ^= (char)NOTHING(pat);
     if(name)
-        wis(name);
+        wipe(name);
     return (char)(s.c.once | s.c.rmr);
     }
 
 
 
-static char match(int ind,psk sub, psk pat, psk snijaf,LONG pposition,psk expr,unsigned int op)
+static char match(int ind,psk sub, psk pat, psk cutoff,LONG pposition,psk expr,unsigned int op)
     {
 /*
 s.c.lmr or s.c.rmr have three independent flags: TRUE/FALSE, ONCE and FENCE.
@@ -10311,25 +10309,26 @@ ONCE       Unwillingness of the pattern to match longer substrings from the
 (once=a b c d:?X (`|?) d & out$(X !X))
 (once=a b c d:?X (`c|?) d & out$(X !X))
 
-FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
-           te worden. Van belang voor de | en : operatoren in een patroon.
-           Wordt aangezet door ` vlag (al dan niet in een patroon).
-           Wordt uitgezet in patroon met spatie + * | of : operator.
-           (Bij | en : operatoren geldt dit alleen voor de linkeroperand,
-           bij de andere voor alle behalve de laatste operand in een lijst.)
-*/
+FENCE      Unwillingness of the subject to be matched by alternative patterns.
+		   Of importance for the | and : operators in a pattern.
+		   Is turned on by the ` prefix (whether or not in a pattern).
+		   Is turned off in pattern with space + * | or : operator.
+		   (With | and : operators this is only the case for the left operand,
+		   with the other operators this is the case for all except the last
+		   operand in a list.)
+		   */
     matchstate s;
     psk loc;
     unsigned int Flgs;
     psk name = NULL;
-    DBGSRC(Printf("%d%*smatch(",ind,ind,"");results(sub,snijaf);Printf(":");\
+    DBGSRC(Printf("%d%*smatch(",ind,ind,"");results(sub,cutoff);Printf(":");\
         result(pat);Printf(")");Printf("\n");)
     if (is_op(sub))
         {
-        if(kop(sub) == EQUALS)
+        if(Op(sub) == EQUALS)
             sub->RIGHT = Head(sub->RIGHT);
 
-        if (sub->RIGHT == snijaf)
+        if (sub->RIGHT == cutoff)
             return match(ind+1,sub->LEFT, pat, NULL,pposition,expr,op);
         }
     s.i = (PRISTINE << SHIFT_LMR) + (PRISTINE << SHIFT_RMR);
@@ -10337,8 +10336,8 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
     if(Flgs & POSITION)
         {
         if(Flgs & NONIDENT)
-            return doEval(sub,snijaf,pat);
-        else if(snijaf || !(sub->v.fl & IDENT))
+            return doEval(sub,cutoff,pat);
+        else if(cutoff || !(sub->v.fl & IDENT))
             return FALSE | ONCE | POSITION_ONCE;
         else
             return doPosition(s,pat,pposition,0,expr
@@ -10362,10 +10361,10 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                 {
                 unsigned int saveflgs = Flgs & VISIBLE_FLAGS;
                 DBGSRC(printf("pat:");result(pat);printf("\n");)
-                name = subboomcopie(pat);
+                name = subtreecopy(pat);
                 name->v.fl &= ~VISIBLE_FLAGS;
                 name->v.fl |= SUCCESS;
-                if ((s.c.rmr = (char)evalueer(name)) != TRUE)
+                if ((s.c.rmr = (char)evaluate(name)) != TRUE)
                     ok = FALSE;
                 name->v.fl |= saveflgs;
                 pat = name;
@@ -10381,26 +10380,26 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                            )
                             if (Flgs & INDIRECT)        /* ?! of ?!! */
                                 {
-                                if ((loc=Naamwoord_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
+                                if ((loc=SymbolBinding_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
                                     {
                                     if (is_object(loc))
-                                        s.c.rmr = (char)copy_insert(loc, sub, snijaf);
+                                        s.c.rmr = (char)copy_insert(loc, sub, cutoff);
                                     else
                                         {
-                                        s.c.rmr = (char) evalueer(loc);
-                                        if(!copy_insert(loc, sub, snijaf))
+                                        s.c.rmr = (char) evaluate(loc);
+                                        if(!copy_insert(loc, sub, cutoff))
                                             s.c.rmr = FALSE;
                                             /* Previously, s.c.rmr was not influenced by failure of copy_insert */
 
                                         }
-                                    wis(loc);
+                                    wipe(loc);
                                     }
                                 else
                                     s.c.rmr = (char)NOTHING(pat);
                                 }
                             else
                                 {
-                                s.c.rmr = (char)copy_insert(pat, sub, snijaf);
+                                s.c.rmr = (char)copy_insert(pat, sub, cutoff);
                                 /* Previously, s.c.rmr was unconditionally set to TRUE */
                                 }
 
@@ -10414,11 +10413,11 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     }
                 else if (Flgs & INDIRECT)        /* ! or !! */
                     {
-                    if ((loc=Naamwoord_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
+                    if ((loc=SymbolBinding_w(pat,Flgs & DOUBLY_INDIRECT)) != NULL)
                         {
                         cleanOncePattern(loc);
-                        s.c.rmr = (char)(match(ind+1,sub, loc, snijaf,pposition,expr,op) ^ NOTHING(pat));
-                        wis(loc);
+                        s.c.rmr = (char)(match(ind+1,sub, loc, cutoff,pposition,expr,op) ^ NOTHING(pat));
+                        wipe(loc);
                         }
                     else
                         s.c.rmr = (char)NOTHING(pat);
@@ -10426,7 +10425,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                 }
             }
         else
-            switch (kop(pat))
+            switch (Op(pat))
                 {
                 case WHITE:
                 case PLUS:
@@ -10512,13 +10511,13 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                                                                     /* B    leftResult=0(P):car(P) */
                     s.c.lmr = (char)match(ind+1,nil(pat),pat->LEFT  /* a*b+c*d:?+[1+?*[1*%@?q*?+?            (q = c) */
                                          ,NULL,pposition,expr       /* a b c d:? [1 (? [1 %@?q ?) ?          (q = b) */
-                                         ,kop(pat));                /* a b c d:? [1  ? [1 %@?q ?  ?          (q = b) */
+                                         ,Op(pat));                /* a b c d:? [1  ? [1 %@?q ?  ?          (q = b) */
                     s.c.lmr &= ~ONCE;                               
                     while(loc)                                      /* C    while divisionPoint */  
                         {
                         if(s.c.lmr & TRUE)                          /* D        if leftResult.success */
                             {                                       /* E            rightResult=SR:cdr(P) */
-                            s.c.rmr = match(ind+1,loc,pat->RIGHT,snijaf,locpos,expr,op);
+                            s.c.rmr = match(ind+1,loc,pat->RIGHT,cutoff,locpos,expr,op);
                             if(!(s.c.lmr & ONCE))
                                 s.c.rmr &= ~ONCE;
                             }
@@ -10544,7 +10543,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                             else if(!(s.c.lmr & ONCE))                  
                                 s.c.rmr &= ~ONCE;
                             DBGSRC(Printf("%d%*smatch(",ind,ind,"");\
-                                results(sub,snijaf);Printf(":");result(pat);)
+                                results(sub,cutoff);Printf(":");result(pat);)
 #ifndef NDEBUG
                             DBGSRC(printMatchState("EXIT-MID",s,pposition,0);)
 #endif
@@ -10561,8 +10560,8 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                             return s.c.rmr ^ (char)NOTHING(pat);
                             }
                     /* H        SL,SR=shift_right divisionPoint */
-                        if(  kop(loc) == kop(pat)
-                          && loc->RIGHT != snijaf
+                        if(  Op(loc) == Op(pat)
+                          && loc->RIGHT != cutoff
                           )
                             loc = loc->RIGHT;
                         else
@@ -10571,13 +10570,13 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                         */
                         ++locpos;
                     /* I        leftResult=SL:car(P) */
-                        s.c.lmr = match(ind+1,sub, pat->LEFT, loc,pposition,sub,kop(pat));
+                        s.c.lmr = match(ind+1,sub, pat->LEFT, loc,pposition,sub,Op(pat));
                         }
                     /* J    if leftResult.success */
                     if(s.c.lmr & TRUE)
                     /* K        rightResult=0(P):cdr(pat) */
                         {
-                        s.c.rmr = match(ind+1,nil(pat),pat->RIGHT, NULL,locpos,expr,kop(pat));
+                        s.c.rmr = match(ind+1,nil(pat),pat->RIGHT, NULL,locpos,expr,Op(pat));
                         s.c.rmr &= ~ONCE;
                         }
                     /* L    return */
@@ -10590,8 +10589,8 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                         /* Also return whether the pattern as a whole doesn't
                            want longer subjects, which can be found out by
                            looking at the pattern. */
-                    if(/*snijaf &&*/ oncePattern(pat))
-                        /* The test snijaf != NULL merely avoids that
+                    if(/*cutoff &&*/ oncePattern(pat))
+                        /* The test cutoff != NULL merely avoids that
                         oncePattern is called when it is useless. */
                         { /* Test:
                           a b c d e:`(a ?x) (?z:d) ?
@@ -10611,7 +10610,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                     /* end */
                     }
                 case EXP:
-                    if(kop(sub) == EXP)
+                    if(Op(sub) == EXP)
                         {
                         if ((s.c.lmr = match(ind+1,sub->LEFT, pat->LEFT, NULL,0,sub->LEFT,12345)) & TRUE)
                             s.c.rmr = match(ind+1,sub->RIGHT, pat->RIGHT, NULL,0,sub->RIGHT,12345);
@@ -10621,8 +10620,8 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                         s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE)); /* a*b^2*c:?x*?y^(~1:?t)*?z */
                         }
                     if  ( !(s.c.rmr & TRUE)
-                        && ((s.c.lmr = match(ind+1,sub, pat->LEFT, snijaf,pposition,expr,op)) & TRUE)
-                        && ((s.c.rmr = match(ind+1,&eenk, pat->RIGHT, NULL,0,&eenk,1234567)) & TRUE)
+                        && ((s.c.lmr = match(ind+1,sub, pat->LEFT, cutoff,pposition,expr,op)) & TRUE)
+                        && ((s.c.rmr = match(ind+1,&oneNode, pat->RIGHT, NULL,0,&oneNode,1234567)) & TRUE)
                         )
                         { /* a^2*b*c*d^3 : ?x^(?s:~1)*?y^?t*?z^(>2:?u) */
                         s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE));
@@ -10632,9 +10631,9 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                 case UNDERSCORE:
                     if (is_op(sub))
                         {
-                        if(kop(sub) == EQUALS)
+                        if(Op(sub) == EQUALS)
                             {
-                            if(ISBUILTIN((objectknoop*)sub))
+                            if(ISBUILTIN((objectnode*)sub))
                                 {
                                 errorprintf("You cannot match an object '=' with '_' if the object is built-in\n");
                                 s.c.rmr = ONCE;
@@ -10643,25 +10642,25 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                                 {
                                 if((s.c.lmr = match(ind+1,sub->LEFT, pat->LEFT, NULL,0,sub->LEFT,12345)) & TRUE)
                                     {
-                                    loc = zelfde_als_w(sub->RIGHT); /* Object might change as a side effect!*/
-                                    if((s.c.rmr = match(ind+1,loc, pat->RIGHT, snijaf,0,loc,123)) & TRUE)
+                                    loc = same_as_w(sub->RIGHT); /* Object might change as a side effect!*/
+                                    if((s.c.rmr = match(ind+1,loc, pat->RIGHT, cutoff,0,loc,123)) & TRUE)
                                         {
-                                        dummy_op = kop(sub);
+                                        dummy_op = Op(sub);
                                         }
-                                    wis(loc);
+                                    wipe(loc);
                                     }
                                 }
                             }
                         else if(  ((s.c.lmr = match(ind+1,sub->LEFT, pat->LEFT, NULL,0,sub->LEFT,12345)) & TRUE)
-                               && ((s.c.rmr = match(ind+1,sub->RIGHT, pat->RIGHT, snijaf,0,sub->RIGHT,123)) & TRUE)
+                               && ((s.c.rmr = match(ind+1,sub->RIGHT, pat->RIGHT, cutoff,0,sub->RIGHT,123)) & TRUE)
                                )
                             {
-                            dummy_op = kop(sub);
+                            dummy_op = Op(sub);
                             }
 #ifndef NDEBUG
                         DBGSRC(printMatchState("UNDERSCORE:EXIT-MID",s,pposition,0);)
 #endif
-                            switch( kop(sub))
+                            switch( Op(sub))
                             {
                             case WHITE:
                             case PLUS:
@@ -10678,9 +10677,9 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                         s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE));
                     break;
                 case AND:
-                    if ((s.c.lmr = match(ind+1,sub, pat->LEFT, snijaf,pposition,expr,op)) & TRUE)
+                    if ((s.c.lmr = match(ind+1,sub, pat->LEFT, cutoff,pposition,expr,op)) & TRUE)
                         {
-                        loc = zelfde_als_w(pat->RIGHT);
+                        loc = same_as_w(pat->RIGHT);
                         loc = eval(loc);
                         if (loc->v.fl & SUCCESS)
                             {
@@ -10694,12 +10693,12 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                             if (loc->v.fl & FENCE)
                                 s.c.rmr |= (FENCE | ONCE);
                             }
-                        wis(loc);
+                        wipe(loc);
                         }
                     s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE));
                     break;
                 case MATCH:
-                    if ((s.c.lmr = match(ind+1,sub, pat->LEFT, snijaf,pposition,expr,op)) & TRUE)
+                    if ((s.c.lmr = match(ind+1,sub, pat->LEFT, cutoff,pposition,expr,op)) & TRUE)
                         {
                         if((pat->v.fl & ATOM)
 #if !STRINGMATCH_CAN_BE_NEGATED
@@ -10712,7 +10711,7 @@ FENCE      Onbereidheid van het subject om door alternatieve patronen gematcht
                             s.c.rmr = (char)(stringmatch(ind+1,"U",POBJ(sub),NULL,pat->RIGHT, sub,0,strlen((char*)POBJ(sub))) & TRUE);
 #endif
                         else
-                            s.c.rmr = (char)(match(ind+1,sub, pat->RIGHT, snijaf,pposition,expr,op) & TRUE);
+                            s.c.rmr = (char)(match(ind+1,sub, pat->RIGHT, cutoff,pposition,expr,op) & TRUE);
                         }
                     else
                         s.c.rmr = FALSE;
@@ -10727,7 +10726,7 @@ correct: jk
 */
                     break;
                 case OR:
-                    if ( (s.c.lmr = (char)match(ind+1,sub, pat->LEFT, snijaf,pposition,expr,op))
+                    if ( (s.c.lmr = (char)match(ind+1,sub, pat->LEFT, cutoff,pposition,expr,op))
                        & (TRUE | FENCE)
                        )
                         {
@@ -10742,7 +10741,7 @@ correct: jk
                         }
                     else
                         {
-                        s.c.rmr = match(ind+1,sub, pat->RIGHT, snijaf,pposition,expr,op);
+                        s.c.rmr = match(ind+1,sub, pat->RIGHT, cutoff,pposition,expr,op);
                         if(  (s.c.rmr & ONCE)
                           && !(s.c.lmr & ONCE)
                           )
@@ -10783,7 +10782,7 @@ b b h h h a b c d:?X (|b c|x) d)
                             {
                             if(is_op(pat->RIGHT))
                                 {
-                                if(kop(sub) == kop(pat->RIGHT))
+                                if(Op(sub) == Op(pat->RIGHT))
                                     {
                                     if ((s.c.lmr = match(ind+1,sub->LEFT, pat->RIGHT->LEFT, NULL,0,sub->LEFT,9999)) & TRUE)
                                         s.c.rmr = match(ind+1,sub->RIGHT, pat->RIGHT->RIGHT, NULL,0,sub->RIGHT,8888);
@@ -10838,18 +10837,18 @@ b b h h h a b c d:?X (|b c|x) d)
                         }
                     /* fall through */
                 case FUU:
-                    psh(&sjt,&nilk,NULL);
-                    copy_insert(&sjt, sub, snijaf);
-                    loc = zelfde_als_w(pat);
+                    psh(&sjtNode,&nilNode,NULL);
+                    copy_insert(&sjtNode, sub, cutoff);
+                    loc = same_as_w(pat);
                     loc = eval(loc);
-                    deleteNode(&sjt);
+                    deleteNode(&sjtNode);
                     if(isSUCCESS(loc))
                         {
                         loc = setflgs(loc,pat->v.fl);
                         if (equal(pat, loc))
                             {
-                            s.c.rmr = (char)(match(ind+1,sub, loc, snijaf,pposition,expr,op) ^ NOTHING(loc));
-                            wis(loc);
+                            s.c.rmr = (char)(match(ind+1,sub, loc, cutoff,pposition,expr,op) ^ NOTHING(loc));
+                            wipe(loc);
                             break;
                             }
                         }
@@ -10858,20 +10857,20 @@ b b h h h a b c d:?X (|b c|x) d)
                         if(loc->v.fl & FENCE)
                             s.c.rmr = ONCE; /* '~ as return value from function stops stretching subject */
                         }
-                    wis(loc);
+                    wipe(loc);
                     /* fall through */
                 default:
                     if(is_op(pat))
                         {
-                        if(kop(sub) == kop(pat))
+                        if(Op(sub) == Op(pat))
                             {
                             if((s.c.lmr = match(ind+1,sub->LEFT, pat->LEFT, NULL,0,sub->LEFT,4432)) & TRUE)
                                 {
-                                if(kop(sub) == EQUALS)
+                                if(Op(sub) == EQUALS)
                                     {
-                                    loc = zelfde_als_w(sub->RIGHT); /* Object might change as a side effect!*/
+                                    loc = same_as_w(sub->RIGHT); /* Object might change as a side effect!*/
                                     s.c.rmr = match(ind+1,loc, pat->RIGHT, NULL,0,loc,2234);
-                                    wis(loc);
+                                    wipe(loc);
                                     }
                                 else                                    
                                     s.c.rmr = match(ind+1,sub->RIGHT, pat->RIGHT, NULL,0,sub->RIGHT,2234);
@@ -10903,7 +10902,7 @@ b b h h h a b c d:?X (|b c|x) d)
         {
         s.c.rmr |= (char)(pat->v.fl & FENCE);
         s.c.rmr |= ONCE;
-        DBGSRC(Printf("%d%*smatch(",ind,ind,"");results(sub,snijaf);\
+        DBGSRC(Printf("%d%*smatch(",ind,ind,"");results(sub,cutoff);\
             Printf(":");result(pat);Printf(") (B)");)
 #ifndef NDEBUG
         DBGSRC(Printf(" rmr t %d o %d p %d m %d f %d ",\
@@ -10922,11 +10921,11 @@ b b h h h a b c d:?X (|b c|x) d)
     if(is_op(pat))
         s.c.rmr ^= (char)NOTHING(pat);
     if(name)
-        wis(name);
+        wipe(name);
     return s.c.rmr;
     }
 
-static int subroot(ngetal * ag,char *conc[],int *pind)
+static int subroot(nnumber * ag,char *conc[],int *pind)
     {
     int macht,i;
     unsigned LONG g,smalldivisor;
@@ -10994,158 +10993,158 @@ static int subroot(ngetal * ag,char *conc[],int *pind)
     return TRUE;
     }
 
-static int abseen(psk kn)
+static int absone(psk pnode)
 {
 char *pstring;
-pstring = SPOBJ(kn);
+pstring = SPOBJ(pnode);
 return(*pstring == '1' && *++pstring == 0);
 }
 
-static psk _linkertak(psk pkn)
+static psk _leftbranch(psk Pnode)
 {
-psk lknoop;
-lknoop = pkn->LEFT;
-if(!(pkn->v.fl & SUCCESS))
+psk lnode;
+lnode = Pnode->LEFT;
+if(!(Pnode->v.fl & SUCCESS))
     {
-    lknoop = prive(lknoop);
-    lknoop->v.fl ^= SUCCESS;
+    lnode = isolated(lnode);
+    lnode->v.fl ^= SUCCESS;
     }
-if((pkn->v.fl & FENCE) && !(lknoop->v.fl & FENCE))
+if((Pnode->v.fl & FENCE) && !(lnode->v.fl & FENCE))
     {
-    lknoop = prive(lknoop);
-    lknoop->v.fl |= FENCE;
+    lnode = isolated(lnode);
+    lnode->v.fl |= FENCE;
     }
-wis(pkn->RIGHT);
-return lknoop;
+wipe(Pnode->RIGHT);
+return lnode;
 }
 
-static psk linkertak(psk pkn)
+static psk leftbranch(psk Pnode)
 {
-psk lknoop = _linkertak(pkn);
-pskfree(pkn);
-return lknoop;
+psk lnode = _leftbranch(Pnode);
+pskfree(Pnode);
+return lnode;
 }
 
-static psk _flinkertak(psk pkn)
+static psk _fleftbranch(psk Pnode)
 {
-psk lknoop;
-lknoop = pkn->LEFT;
-if(pkn->v.fl & SUCCESS)
+psk lnode;
+lnode = Pnode->LEFT;
+if(Pnode->v.fl & SUCCESS)
     {
-    lknoop = prive(lknoop);
-    lknoop->v.fl ^= SUCCESS;
+    lnode = isolated(lnode);
+    lnode->v.fl ^= SUCCESS;
     }
-if((pkn->v.fl & FENCE) && !(lknoop->v.fl & FENCE))
+if((Pnode->v.fl & FENCE) && !(lnode->v.fl & FENCE))
     {
-    lknoop = prive(lknoop);
-    lknoop->v.fl |= FENCE;
+    lnode = isolated(lnode);
+    lnode->v.fl |= FENCE;
     }
-wis(pkn->RIGHT);
-return lknoop;
+wipe(Pnode->RIGHT);
+return lnode;
 }
 
-static psk flinkertak(psk pkn)
+static psk fleftbranch(psk Pnode)
 {
-psk lknoop = _flinkertak(pkn);
-pskfree(pkn);
-return lknoop;
+psk lnode = _fleftbranch(Pnode);
+pskfree(Pnode);
+return lnode;
 }
 
-static psk _fencelinkertak(psk pkn)
+static psk _fenceleftbranch(psk Pnode)
 {
-psk lknoop;
-lknoop = pkn->LEFT;
-if(!(pkn->v.fl & SUCCESS))
+psk lnode;
+lnode = Pnode->LEFT;
+if(!(Pnode->v.fl & SUCCESS))
     {
-    lknoop = prive(lknoop);
-    lknoop->v.fl ^= SUCCESS;
+    lnode = isolated(lnode);
+    lnode->v.fl ^= SUCCESS;
     }
-if(pkn->v.fl & FENCE)
+if(Pnode->v.fl & FENCE)
     {
-    if(!(lknoop->v.fl & FENCE))
+    if(!(lnode->v.fl & FENCE))
         {
-        lknoop = prive(lknoop);
-        lknoop->v.fl |= FENCE;
+        lnode = isolated(lnode);
+        lnode->v.fl |= FENCE;
         }
     }
-else if(lknoop->v.fl & FENCE)
+else if(lnode->v.fl & FENCE)
     {
-    lknoop = prive(lknoop);
-    lknoop->v.fl &= ~FENCE;
+    lnode = isolated(lnode);
+    lnode->v.fl &= ~FENCE;
     }
-wis(pkn->RIGHT);
-return lknoop;
+wipe(Pnode->RIGHT);
+return lnode;
 }
 
-static psk _rechtertak(psk pkn)
+static psk _rightbranch(psk Pnode)
 {
-psk rknoop;
-rknoop = pkn->RIGHT;
-if(!(pkn->v.fl & SUCCESS))
+psk rightnode;
+rightnode = Pnode->RIGHT;
+if(!(Pnode->v.fl & SUCCESS))
     {
-    rknoop = prive(rknoop);
-    rknoop->v.fl ^= SUCCESS;
+    rightnode = isolated(rightnode);
+    rightnode->v.fl ^= SUCCESS;
     }
-if((pkn->v.fl & FENCE) && !(rknoop->v.fl & FENCE))
+if((Pnode->v.fl & FENCE) && !(rightnode->v.fl & FENCE))
     {
-    rknoop = prive(rknoop);
-    rknoop->v.fl |= FENCE;
+    rightnode = isolated(rightnode);
+    rightnode->v.fl |= FENCE;
     }
-wis(pkn->LEFT);
-return rknoop;
+wipe(Pnode->LEFT);
+return rightnode;
 }
 
-static psk rechtertak(psk pkn)
+static psk rightbranch(psk Pnode)
 {
-psk rknoop = _rechtertak(pkn);
-pskfree(pkn);
-return rknoop;
+psk rightnode = _rightbranch(Pnode);
+pskfree(Pnode);
+return rightnode;
 }
 
-static void pop(psk kn)
+static void pop(psk pnode)
     {
-    while(is_op(kn))
+    while(is_op(pnode))
         {
-        pop(kn->LEFT);
-        kn = kn->RIGHT;
+        pop(pnode->LEFT);
+        pnode = pnode->RIGHT;
         }
-    deleteNode(kn);
+    deleteNode(pnode);
     }
 
-static psk tryq(psk pkn,psk fun,Boolean * ok)
+static psk tryq(psk Pnode,psk fun,Boolean * ok)
     {
-    psk anker;
-    psh(&argk,pkn,NULL);
-    pkn->v.fl |= READY;
+    psk anchor;
+    psh(&argNode,Pnode,NULL);
+    Pnode->v.fl |= READY;
 
-    anker = subboomcopie(fun->RIGHT);
+    anchor = subtreecopy(fun->RIGHT);
 
-    psh(fun->LEFT,&nulk,NULL);
-    anker = eval(anker);
+    psh(fun->LEFT,&zeroNode,NULL);
+    anchor = eval(anchor);
     pop(fun->LEFT);
-    if(anker->v.fl & SUCCESS)
+    if(anchor->v.fl & SUCCESS)
         {
         *ok = TRUE;
-        wis(pkn);
-        pkn = anker;
+        wipe(Pnode);
+        Pnode = anchor;
         }
     else
         {
         *ok = FALSE;
-        wis(anker);
+        wipe(anchor);
         }
-    deleteNode(&argk);
-    return pkn;
+    deleteNode(&argNode);
+    return Pnode;
     }
 
-static psk * backbone(psk arg,psk pkn,psk * pfirst)
+static psk * backbone(psk arg,psk Pnode,psk * pfirst)
     {
-    psk first = *pfirst = subboomcopie(arg);
+    psk first = *pfirst = subtreecopy(arg);
     psk * plast = pfirst;
-    while(arg != pkn)
+    while(arg != Pnode)
         {
-        psk R = subboomcopie((*plast)->RIGHT);
-        wis((*plast)->RIGHT);
+        psk R = subtreecopy((*plast)->RIGHT);
+        wipe((*plast)->RIGHT);
         (*plast)->RIGHT = R;
         plast = &((*plast)->RIGHT);
         arg = arg->RIGHT;
@@ -11154,49 +11153,49 @@ static psk * backbone(psk arg,psk pkn,psk * pfirst)
     return plast;
     }
 
-static psk rechteroperand(psk pkn)
+static psk rightoperand(psk Pnode)
 {
 psk temp;
-unsigned int teken;
-temp = (pkn->RIGHT);
-return((teken = kop(pkn)) == kop(temp) &&
-        (teken == PLUS || teken == TIMES || teken == WHITE) ?
+unsigned int Sign;
+temp = (Pnode->RIGHT);
+return((Sign = Op(Pnode)) == Op(temp) &&
+        (Sign == PLUS || Sign == TIMES || Sign == WHITE) ?
        temp->LEFT : temp);
 }
 
-static psk evalmacro(psk pkn)
+static psk evalmacro(psk Pnode)
     {
-    if(!is_op(pkn))
+    if(!is_op(Pnode))
         {
         return NULL;
         }
     else
         {
-        psk arg = pkn;
-        while(!(pkn->v.fl & READY))
+        psk arg = Pnode;
+        while(!(Pnode->v.fl & READY))
             {
-            if(atomtest(pkn->LEFT) != 0)
+            if(atomtest(Pnode->LEFT) != 0)
                 {
-                psk left = evalmacro(pkn->LEFT);
+                psk left = evalmacro(Pnode->LEFT);
                 if(left != NULL)
                     {
-                    /* copy backbone from evalmacro's argument to current pkn
+                    /* copy backbone from evalmacro's argument to current Pnode
                        release lhs of copy of current and replace with 'left'
-                       assign copy to 'pkn'
+                       assign copy to 'Pnode'
                        evalmacro current, if not null, replace current
                        return current
                     */
                     psk ret;
                     psk first = NULL;
-                    psk * last = backbone(arg,pkn,&first);
-                    wis((*last)->LEFT);
+                    psk * last = backbone(arg,Pnode,&first);
+                    wipe((*last)->LEFT);
                     (*last)->LEFT = left;
-                    if(atomtest((*last)->LEFT) == 0 && kop((*last)) == FUN)
+                    if(atomtest((*last)->LEFT) == 0 && Op((*last)) == FUN)
                         {
                         ret = evalmacro(*last);
                         if(ret)
                             {
-                            wis(*last);
+                            wipe(*last);
                             *last = ret;
                             }
                         }
@@ -11205,59 +11204,59 @@ static psk evalmacro(psk pkn)
                         psk right = evalmacro((*last)->RIGHT);
                         if(right)
                             {
-                            wis((*last)->RIGHT);
+                            wipe((*last)->RIGHT);
                             (*last)->RIGHT = right;
                             }
                         }
                     return first;
                     }
                 }
-            else if(kop(pkn) == FUN)
+            else if(Op(Pnode) == FUN)
                 {
-                if(kop(pkn->RIGHT) == UNDERSCORE)
+                if(Op(Pnode->RIGHT) == UNDERSCORE)
                     {
                     int Flgs;
                     psk h;
                     psk hh;
                     psk first = NULL;
                     psk * last;
-                    Flgs = pkn->v.fl & (UNOPS|SUCCESS);
-                    h = subboomcopie(pkn->RIGHT);
+                    Flgs = Pnode->v.fl & (UNOPS|SUCCESS);
+                    h = subtreecopy(Pnode->RIGHT);
                     if(dummy_op == EQUALS)
                         {
-                        psk becomes = (psk)bmalloc(__LINE__,sizeof(objectknoop));
+                        psk becomes = (psk)bmalloc(__LINE__,sizeof(objectnode));
 #ifdef BUILTIN
-                        ((typedObjectknoop*)becomes)->u.Int = 0;
+                        ((typedObjectnode*)becomes)->u.Int = 0;
 #else
-                        ((typedObjectknoop*)*R)->refcount = 0;
-                        UNSETCREATEDWITHNEW((typedObjectknoop*)*R);
-                        UNSETBUILTIN((typedObjectknoop*)*R);
+                        ((typedObjectnode*)*R)->refcount = 0;
+                        UNSETCREATEDWITHNEW((typedObjectnode*)*R);
+                        UNSETBUILTIN((typedObjectnode*)*R);
 #endif
-                        becomes->LEFT = zelfde_als_w(h->LEFT);
-                        becomes->RIGHT = zelfde_als_w(h->RIGHT);
-                        wis(h);
+                        becomes->LEFT = same_as_w(h->LEFT);
+                        becomes->RIGHT = same_as_w(h->RIGHT);
+                        wipe(h);
                         h = becomes;
                         }
                     h->v.fl = dummy_op | Flgs;
                     hh = evalmacro(h->LEFT);
                     if(hh)
                         {
-                        wis(h->LEFT);
+                        wipe(h->LEFT);
                         h->LEFT = hh;
                         }
                     hh = evalmacro(h->RIGHT);
                     if(hh)
                         {
-                        wis(h->RIGHT);
+                        wipe(h->RIGHT);
                         h->RIGHT = hh;
                         }
-                    last = backbone(arg,pkn,&first);
-                    wis(*last);
+                    last = backbone(arg,Pnode,&first);
+                    wipe(*last);
                     *last = h;
                     return first;
                     }
-                else if(  kop(pkn->RIGHT) == FUN
-                       && atomtest(pkn->RIGHT->LEFT) == 0
+                else if(  Op(Pnode->RIGHT) == FUN
+                       && atomtest(Pnode->RIGHT->LEFT) == 0
                        )
                     {
                     int Flgs;
@@ -11265,31 +11264,31 @@ static psk evalmacro(psk pkn)
                     psk hh;
                     psk first = NULL;
                     psk * last;
-                    Flgs = pkn->v.fl & UNOPS;
-                    h = subboomcopie(pkn->RIGHT);
+                    Flgs = Pnode->v.fl & UNOPS;
+                    h = subtreecopy(Pnode->RIGHT);
                     h->v.fl |= Flgs;
                     assert(atomtest(h->LEFT) == 0);
                     /* hh = evalmacro(h->LEFT);
                     if(hh)
                         {
-                        wis(h->LEFT);
+                        wipe(h->LEFT);
                         h->LEFT = hh;
                         }*/
                     hh = evalmacro(h->RIGHT);
                     if(hh)
                         {
-                        wis(h->RIGHT);
+                        wipe(h->RIGHT);
                         h->RIGHT = hh;
                         }
-                    last = backbone(arg,pkn,&first);
-                    wis(*last);
+                    last = backbone(arg,Pnode,&first);
+                    wipe(*last);
                     *last = h;
                     return first;
                     }
                 else
                     {
                     int newval;
-                    psk tmp = zelfde_als_w(pkn->RIGHT);
+                    psk tmp = same_as_w(Pnode->RIGHT);
                     psk h;
                     tmp = eval(tmp);
 
@@ -11298,17 +11297,17 @@ static psk evalmacro(psk pkn)
                         int Flgs;
                         psk first = NULL;
                         psk * last;
-                        if((kop(h) == EQUALS) && ISBUILTIN((objectknoop *)h))
+                        if((Op(h) == EQUALS) && ISBUILTIN((objectnode *)h))
                             {
                             if(!newval)
-                                h = zelfde_als_w(h);
+                                h = same_as_w(h);
                             }
                         else
                             {
-                            Flgs = pkn->v.fl & (UNOPS);
+                            Flgs = Pnode->v.fl & (UNOPS);
                             if(!newval)
                                 {
-                                h = subboomcopie(h);
+                                h = subtreecopy(h);
                                 }
                             if(Flgs)
                                 {
@@ -11320,28 +11319,28 @@ static psk evalmacro(psk pkn)
                                 {
                                 h->v.fl &= ~READY;
                                 }
-                            else if(kop(h) == EQUALS)
+                            else if(Op(h) == EQUALS)
                                 { 
                                 h->v.fl &= ~READY;
                                 }
                             }
 
-                        wis(tmp);
-                        last = backbone(arg,pkn,&first);
-                        wis(*last);
+                        wipe(tmp);
+                        last = backbone(arg,Pnode,&first);
+                        wipe(*last);
                         *last = h;
                         return first;
                         }
                     else
                         {
-                        errorprintf("\nmacro evaluation fails because rhs of $ operator is not bound to a value");writeError(pkn->RIGHT);errorprintf("\n");
-                        wis(tmp);
+                        errorprintf("\nmacro evaluation fails because rhs of $ operator is not bound to a value");writeError(Pnode->RIGHT);errorprintf("\n");
+                        wipe(tmp);
                         return NULL;
                         }
                     }
                 }
-            pkn = pkn->RIGHT;
-            if(!is_op(pkn))
+            Pnode = Pnode->RIGHT;
+            if(!is_op(Pnode))
                 {
                 break;
                 }
@@ -11350,39 +11349,39 @@ static psk evalmacro(psk pkn)
     return NULL;
     }
 
-static psk lambda(psk pkn,psk name,psk Arg)
+static psk lambda(psk Pnode,psk name,psk Arg)
     {
-    if(!is_op(pkn))
+    if(!is_op(Pnode))
         {
         return NULL;
         }
     else
         {
-        psk arg = pkn;
-        while(!(pkn->v.fl & READY))
+        psk arg = Pnode;
+        while(!(Pnode->v.fl & READY))
             {
-            if(atomtest(pkn->LEFT) != 0)
+            if(atomtest(Pnode->LEFT) != 0)
                 {
-                psk left = lambda(pkn->LEFT,name,Arg);
+                psk left = lambda(Pnode->LEFT,name,Arg);
                 if(left != NULL)
                     {
-                    /* copy backbone from lambda's argument to current pkn
+                    /* copy backbone from lambda's argument to current Pnode
                        release lhs of copy of current and replace with 'left'
-                       assign copy to 'pkn'
+                       assign copy to 'Pnode'
                        lambda current, if not null, replace current
                        return current
                     */
                     psk ret;
                     psk first = NULL;
-                    psk * last = backbone(arg,pkn,&first);
-                    wis((*last)->LEFT);
+                    psk * last = backbone(arg,Pnode,&first);
+                    wipe((*last)->LEFT);
                     (*last)->LEFT = left;
-                    if(atomtest((*last)->LEFT) == 0 && kop((*last)) == FUN)
+                    if(atomtest((*last)->LEFT) == 0 && Op((*last)) == FUN)
                         {
                         ret = lambda(*last,name,Arg);
                         if(ret)
                             {
-                            wis(*last);
+                            wipe(*last);
                             *last = ret;
                             }
                         }
@@ -11391,59 +11390,59 @@ static psk lambda(psk pkn,psk name,psk Arg)
                         psk right = lambda((*last)->RIGHT,name,Arg);
                         if(right)
                             {
-                            wis((*last)->RIGHT);
+                            wipe((*last)->RIGHT);
                             (*last)->RIGHT = right;
                             }
                         }
                     return first;
                     }
                 }
-            else if(kop(pkn) == FUN)
+            else if(Op(Pnode) == FUN)
                 {
-                if(kop(pkn->RIGHT) == UNDERSCORE)
+                if(Op(Pnode->RIGHT) == UNDERSCORE)
                     {
                     int Flgs;
                     psk h;
                     psk hh;
                     psk first = NULL;
                     psk * last;
-                    Flgs = pkn->v.fl & (UNOPS|SUCCESS);
-                    h = subboomcopie(pkn->RIGHT);
+                    Flgs = Pnode->v.fl & (UNOPS|SUCCESS);
+                    h = subtreecopy(Pnode->RIGHT);
                     if(dummy_op == EQUALS)
                         {
-                        psk becomes = (psk)bmalloc(__LINE__,sizeof(objectknoop));
+                        psk becomes = (psk)bmalloc(__LINE__,sizeof(objectnode));
 #ifdef BUILTIN
-                        ((typedObjectknoop*)becomes)->u.Int = 0;
+                        ((typedObjectnode*)becomes)->u.Int = 0;
 #else
-                        ((typedObjectknoop*)*R)->refcount = 0;
-                        UNSETCREATEDWITHNEW((typedObjectknoop*)*R);
-                        UNSETBUILTIN((typedObjectknoop*)*R);
+                        ((typedObjectnode*)*R)->refcount = 0;
+                        UNSETCREATEDWITHNEW((typedObjectnode*)*R);
+                        UNSETBUILTIN((typedObjectnode*)*R);
 #endif
-                        becomes->LEFT = zelfde_als_w(h->LEFT);
-                        becomes->RIGHT = zelfde_als_w(h->RIGHT);
-                        wis(h);
+                        becomes->LEFT = same_as_w(h->LEFT);
+                        becomes->RIGHT = same_as_w(h->RIGHT);
+                        wipe(h);
                         h = becomes;
                         }
                     h->v.fl = dummy_op | Flgs;
                     hh = lambda(h->LEFT,name,Arg);
                     if(hh)
                         {
-                        wis(h->LEFT);
+                        wipe(h->LEFT);
                         h->LEFT = hh;
                         }
                     hh = lambda(h->RIGHT,name,Arg);
                     if(hh)
                         {
-                        wis(h->RIGHT);
+                        wipe(h->RIGHT);
                         h->RIGHT = hh;
                         }
-                    last = backbone(arg,pkn,&first);
-                    wis(*last);
+                    last = backbone(arg,Pnode,&first);
+                    wipe(*last);
                     *last = h;
                     return first;
                     }
-                else if(  kop(pkn->RIGHT) == FUN
-                       && atomtest(pkn->RIGHT->LEFT) == 0
+                else if(  Op(Pnode->RIGHT) == FUN
+                       && atomtest(Pnode->RIGHT->LEFT) == 0
                        )
                     {
                     int Flgs;
@@ -11451,52 +11450,52 @@ static psk lambda(psk pkn,psk name,psk Arg)
                     psk hh;
                     psk first = NULL;
                     psk * last;
-                    Flgs = pkn->v.fl & UNOPS;
-                    h = subboomcopie(pkn->RIGHT);
+                    Flgs = Pnode->v.fl & UNOPS;
+                    h = subtreecopy(Pnode->RIGHT);
                     h->v.fl |= Flgs;
                     assert(atomtest(h->LEFT) == 0);
                     hh = lambda(h->RIGHT,name,Arg);
                     if(hh)
                         {
-                        wis(h->RIGHT);
+                        wipe(h->RIGHT);
                         h->RIGHT = hh;
                         }
-                    last = backbone(arg,pkn,&first);
-                    wis(*last);
+                    last = backbone(arg,Pnode,&first);
+                    wipe(*last);
                     *last = h;
                     return first;
                     }
-                else if(!equal(name,pkn->RIGHT))
+                else if(!equal(name,Pnode->RIGHT))
                     {
                     psk h;
                     psk first;
                     psk * last;
-                    h = subboomcopie(Arg);
+                    h = subtreecopy(Arg);
                     if(h->v.fl & INDIRECT)
                         {
                         h->v.fl &= ~READY;
                         }
-                    else if(is_op(h) && kop(h) == EQUALS)
+                    else if(is_op(h) && Op(h) == EQUALS)
                         { 
                         h->v.fl &= ~READY;
                         }
 
-                    last = backbone(arg,pkn,&first);
-                    wis(*last);
+                    last = backbone(arg,Pnode,&first);
+                    wipe(*last);
                     *last = h;
                     return first;
                     }
                 }
-            else if (  kop(pkn) == FUU 
-                    && (pkn->v.fl & FRACTION)
-                    && kop(pkn->RIGHT) == DOT
-                    && !equal(name,pkn->RIGHT->LEFT)
+            else if (  Op(Pnode) == FUU 
+                    && (Pnode->v.fl & FRACTION)
+                    && Op(Pnode->RIGHT) == DOT
+                    && !equal(name,Pnode->RIGHT->LEFT)
                     )
                 {
                 return NULL;
                 }
-            pkn = pkn->RIGHT;
-            if(!is_op(pkn))
+            Pnode = Pnode->RIGHT;
+            if(!is_op(Pnode))
                 {
                 break;
                 }
@@ -11506,120 +11505,120 @@ static psk lambda(psk pkn,psk name,psk Arg)
     }
 
 
-static void combiflags(psk kn)
+static void combiflags(psk pnode)
 {
 int lflgs;
-if((lflgs = kn->LEFT->v.fl & UNOPS) != 0)
+if((lflgs = pnode->LEFT->v.fl & UNOPS) != 0)
     {
-    kn->RIGHT = prive(kn->RIGHT);
+    pnode->RIGHT = isolated(pnode->RIGHT);
     if(NOTHINGF(lflgs))
         {
-        kn->RIGHT->v.fl |= lflgs & ~NOT;
-        kn->RIGHT->v.fl ^= NOT|SUCCESS;
+        pnode->RIGHT->v.fl |= lflgs & ~NOT;
+        pnode->RIGHT->v.fl ^= NOT|SUCCESS;
         }
     else
-        kn->RIGHT->v.fl |= lflgs;
+        pnode->RIGHT->v.fl |= lflgs;
     }
 }
 
 
-static int is_afhankelyk_van(psk el,psk lijst)
+static int is_afhankelyk_van(psk el,psk input_buffer)
     {
     int ret;
-    assert(!is_op(lijst));
-    psk kn = NULL;
-    adr[1] = lijst;
-    adr[2] = el;
-    kn = opb(kn,"(!dep:(? (\1.? \2 ?) ?)",NULL);
-    kn = eval(kn);
-    ret = isSUCCESS(kn);
-    wis(kn);
+    assert(!is_op(input_buffer));
+    psk pnode = NULL;
+    addr[1] = input_buffer;
+    addr[2] = el;
+    pnode = build_up(pnode,"(!dep:(? (\1.? \2 ?) ?)",NULL);
+    pnode = eval(pnode);
+    ret = isSUCCESS(pnode);
+    wipe(pnode);
     return ret;
     }
 
-static int zoekopt(psk kn,LONG opt)
+static int zoekopt(psk pnode,LONG opt)
     {
-    while(is_op(kn))
+    while(is_op(pnode))
         {
-        if(zoekopt(kn->LEFT,opt))
+        if(zoekopt(pnode->LEFT,opt))
             return TRUE;
-        kn = kn->RIGHT;
+        pnode = pnode->RIGHT;
         }
-    return PLOBJ(kn) == opt;
+    return PLOBJ(pnode) == opt;
     }
 
-static void mmf(ppsk pk)
+static void mmf(ppsk PPnode)
 {
 psk goal;
 ppsk pgoal;
-vars *navar;
-int alfabet,ext;
+vars *nxtvar;
+int alphabet,ext;
 char dim[22];
-ext = zoekopt(*pk,EXT);
-wis(*pk);
-pgoal = pk;
-for(alfabet = 0;alfabet < 256/*0x80*/;alfabet++)
+ext = zoekopt(*PPnode,EXT);
+wipe(*PPnode);
+pgoal = PPnode;
+for(alphabet = 0;alphabet < 256/*0x80*/;alphabet++)
     {
-    for(navar = variabelen[alfabet];
-        navar;
-        navar = navar->next)
+    for(nxtvar = variables[alphabet];
+        nxtvar;
+        nxtvar = nxtvar->next)
         {
-        goal = *pgoal = (psk)bmalloc(__LINE__,sizeof(kknoop));
+        goal = *pgoal = (psk)bmalloc(__LINE__,sizeof(knode));
         goal->v.fl = WHITE | SUCCESS;
-        if(ext && navar->n > 0)
+        if(ext && nxtvar->n > 0)
             {
-            goal = goal->LEFT = (psk)bmalloc(__LINE__,sizeof(kknoop));
+            goal = goal->LEFT = (psk)bmalloc(__LINE__,sizeof(knode));
             goal->v.fl = DOT | SUCCESS;
-            sprintf(dim,"%d.%d",navar->n,navar->selector);
+            sprintf(dim,"%d.%d",nxtvar->n,nxtvar->selector);
             goal->RIGHT = NULL;
-            goal->RIGHT = opb(goal->RIGHT,dim,NULL);
+            goal->RIGHT = build_up(goal->RIGHT,dim,NULL);
             }
         goal = goal->LEFT =
-            (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + strlen((char *)VARNAME(navar)));
+            (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + strlen((char *)VARNAME(nxtvar)));
         goal->v.fl = (READY|SUCCESS);
-        strcpy((char *)(goal)+sizeof(unsigned LONG),(char *)VARNAME(navar));
+        strcpy((char *)(goal)+sizeof(unsigned LONG),(char *)VARNAME(nxtvar));
         pgoal = &(*pgoal)->RIGHT;
         }
     }
-*pgoal = zelfde_als_w(&nilk);
+*pgoal = same_as_w(&nilNode);
 }
 
-static void lstsub(psk kn)
+static void lstsub(psk pnode)
 {
-vars *navar;
-unsigned char *naam;
-int alfabet,n;
-mooi = FALSE;
-naam = POBJ(kn);
-for(alfabet = 0;alfabet<256;alfabet++)
+vars *nxtvar;
+unsigned char *name;
+int alphabet,n;
+nice = FALSE;
+name = POBJ(pnode);
+for(alphabet = 0;alphabet<256;alphabet++)
     {
-    for(navar = variabelen[alfabet];
-        navar;
-        navar = navar->next)
+    for(nxtvar = variables[alphabet];
+        nxtvar;
+        nxtvar = nxtvar->next)
         {
-        if((kn->u.obj == 0 && alfabet < 0x80) || !STRCMP(VARNAME(navar),naam))
+        if((pnode->u.obj == 0 && alphabet < 0x80) || !STRCMP(VARNAME(nxtvar),name))
             {
-            for(n = navar->n;n >= 0;n--)
+            for(n = nxtvar->n;n >= 0;n--)
                 {
                 ppsk tmp;
                 if(listWithName)
                     {
                     if(global_fpo == stdout)
                         {
-                        if(navar->n > 0)
-                            Printf("%c%d (",n == navar->selector ? '>' : ' ',n);
+                        if(nxtvar->n > 0)
+                            Printf("%c%d (",n == nxtvar->selector ? '>' : ' ',n);
                         else
                             Printf("(");
                         }
-                    if(haalaan(VARNAME(navar)))
-                        myprintf("\"",(char *)VARNAME(navar),"\"=",NULL);
+                    if(quote(VARNAME(nxtvar)))
+                        myprintf("\"",(char *)VARNAME(nxtvar),"\"=",NULL);
                     else
-                        myprintf((char *)VARNAME(navar),"=",NULL);
+                        myprintf((char *)VARNAME(nxtvar),"=",NULL);
                     if(hum)
                         myprintf("\n",NULL);
                     }
-                assert(navar->pvaria);
-                tmp = Entry(navar->n,n,&navar->pvaria);
+                assert(nxtvar->pvaria);
+                tmp = Entry(nxtvar->n,n,&nxtvar->pvaria);
                 result(*tmp = Head(*tmp));
                 if (listWithName)
                     {
@@ -11633,40 +11632,40 @@ for(alfabet = 0;alfabet<256;alfabet++)
             }
         }
     }
-mooi = TRUE;
+nice = TRUE;
 }
 
-static void lst(psk kn)
+static void lst(psk pnode)
     {
-    while(is_op(kn))
+    while(is_op(pnode))
         {
-        if(kop(kn) == EQUALS)
+        if(Op(pnode) == EQUALS)
             {
-            mooi = FALSE;
+            nice = FALSE;
             myprintf("(",NULL);
             if(hum)
                 myprintf("\n",NULL);
             if(listWithName)
                 {
-                result(kn);
+                result(pnode);
                 }
             else
                 {
-                result(kn->RIGHT);
+                result(pnode->RIGHT);
                 }
             if(hum)
                 myprintf("\n",NULL);
             myprintf(")\n",NULL);
-            mooi = TRUE;
+            nice = TRUE;
             return;
             }
         else
             {
-            lst(kn->LEFT);
-            kn = kn->RIGHT;
+            lst(pnode->LEFT);
+            pnode = pnode->RIGHT;
             }
         }
-    lstsub(kn);
+    lstsub(pnode);
     }
 
 #if !defined NO_FOPEN
@@ -11677,7 +11676,7 @@ static filehendel * findFilehendelByName(const char * name)
        ; fh
        ; fh = fh->next
        )
-        if(!strcmp(fh->naam,name))
+        if(!strcmp(fh->fname,name))
             return fh;
     return NULL;
     }
@@ -11689,8 +11688,8 @@ static filehendel * allocateFilehendel(const char * name,FILE * fp
                                        )
     {
     filehendel * fh = (filehendel*)bmalloc(__LINE__,sizeof(filehendel));
-    fh->naam = (char *)bmalloc(__LINE__,strlen(name) + 1);
-    strcpy(fh->naam,name);
+    fh->fname = (char *)bmalloc(__LINE__,strlen(name) + 1);
+    strcpy(fh->fname,name);
     fh->fp = fp;
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
     fh->dontcloseme = dontcloseme;
@@ -11714,7 +11713,7 @@ static void deallocateFilehendel(filehendel * fh)
         fh0 = fh->next;
     if(fh->fp)
         fclose(fh->fp);
-    bfree(fh->naam);
+    bfree(fh->fname);
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
     if(fh->stop)
 #ifdef BMALLLOC
@@ -11797,12 +11796,12 @@ filehendel * myfopen(const char * filename,const char * mode
 #endif
 
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
-static LONG someopt(psk kn,LONG opt[])
+static LONG someopt(psk pnode,LONG opt[])
     {
     int i;
-    assert(!is_op(kn));
+    assert(!is_op(pnode));
     for(i=0;opt[i];i++)
-        if(PLOBJ(kn) == opt[i])
+        if(PLOBJ(pnode) == opt[i])
             return opt[i];
     return 0L;
     }
@@ -11837,28 +11836,28 @@ static int closeAFile(void)
     return TRUE;
     }
 #if defined NDEBUG
-#define preparefp(fh,naam,mode) preparefp(fh,mode)
+#define preparefp(fh,name,mode) preparefp(fh,mode)
 #endif
 
-static filehendel * preparefp(filehendel * fh,char * naam,LONG mode)
+static filehendel * preparefp(filehendel * fh,char * name,LONG mode)
     {
     assert(fh != NULL);
-    assert(!strcmp(fh->naam,naam));
+    assert(!strcmp(fh->fname,name));
     if( mode != 0L
     &&  mode != fh->mode
     && fh->fp != NULL)
         {
         fh->mode = mode;
-        if((fh->fp = freopen(fh->naam,(char *)&(fh->mode),fh->fp)) == NULL)
+        if((fh->fp = freopen(fh->fname,(char *)&(fh->mode),fh->fp)) == NULL)
             return NULL;
         fh->rwstatus = NoPending;
         }
     else if(fh->filepos >= 0L)
         {
-        if((fh->fp = fopen(fh->naam,(char *)&(fh->mode))) == NULL)
+        if((fh->fp = fopen(fh->fname,(char *)&(fh->mode))) == NULL)
             {
             if(closeAFile())
-                fh->fp = fopen(fh->naam,(char *)&(fh->mode));
+                fh->fp = fopen(fh->fname,(char *)&(fh->mode));
             }
         if(fh->fp == NULL)
             return NULL;
@@ -11876,12 +11875,12 @@ If the file mode differs from the current file mode,
 If the file is known but has been closed (e.g. to save file handles),
     open the file with the memorized file mode and go to the memorized position
 */
-static filehendel *zoekfp(char *naam,LONG mode)
+static filehendel *zoekfp(char *name,LONG mode)
     {
     filehendel *fh;
     for(fh = fh0;fh;fh = fh->next)
-        if(!strcmp(naam,fh->naam))
-            return preparefp(fh,naam,mode);
+        if(!strcmp(name,fh->fname))
+            return preparefp(fh,name,mode);
     return NULL;
     }
 
@@ -11898,15 +11897,15 @@ static void setStop(filehendel *fh,char * stopstring)
     strcpy(fh->stop,stopstring);
     }
 
-static int fil(ppsk pkn)
+static int fil(ppsk PPnode)
 {
 FILE *fp;
 psk kns[4];
 LONG ind;
 int sh;
-psk kn;
+psk pnode;
 static filehendel *fh = NULL;
-char *naam;
+char *name;
 
 static LONG types[]={CHR,DEC,STRt,0L};
 static LONG whences[]={SET,CUR,END,0L};
@@ -11928,7 +11927,7 @@ O('a','+','b'),
 O('a','b','+'),/*append;open binary file or create for update, writing at eof*/
 0L};
 
-static LONG type,numwaarde,whence;
+static LONG type,numericalvalue,whence;
 union
     {
     LONG l;
@@ -11945,17 +11944,17 @@ union
 /*
 Fail if there are more than four arguments or if an argument is non-atomic
 */
-for(ind = 0,kn = (*pkn)->RIGHT;
-    is_op(kn);
-    kn = kn->RIGHT)
+for(ind = 0,pnode = (*PPnode)->RIGHT;
+    is_op(pnode);
+    pnode = pnode->RIGHT)
     {
-    if(is_op(kn->LEFT) || ind > 2)
+    if(is_op(pnode->LEFT) || ind > 2)
         {
         return FALSE;
         }
-    kns[ind++] = kn->LEFT;
+    kns[ind++] = pnode->LEFT;
     }
-kns[ind++] = kn;
+kns[ind++] = pnode;
 for(;ind < 4;)
     kns[ind++] = NULL;
 
@@ -11970,8 +11969,8 @@ for(;ind < 4;)
 */
 if(kns[0]->u.obj)
     {
-    naam = (char *)POBJ(kns[0]);
-    if(fh && strcmp(naam,fh->naam))
+    name = (char *)POBJ(kns[0]);
+    if(fh && strcmp(name,fh->fname))
         {
         fh = NULL;
         }
@@ -11979,7 +11978,7 @@ if(kns[0]->u.obj)
 else
     {
     if(fh)
-        naam = fh->naam;
+        name = fh->fname;
     else
         {
         return FALSE;
@@ -11992,7 +11991,7 @@ else
                 the file handel is found and adapted to the  mode
                 or a new file handel is made
         else
-                file handel is set to current naam
+                file handel is set to current name
 
         If the second argument is set, fil$ does never read or write!
 */
@@ -12008,15 +12007,15 @@ if(kns[1] && kns[1]->u.obj)
     if((mode.l = someopt(kns[1],modes)) != 0L)
         {
         if(fh)
-            fh = preparefp(fh,naam,mode.l);
+            fh = preparefp(fh,name,mode.l);
         else
-            fh = zoekfp(naam,mode.l);
+            fh = zoekfp(name,mode.l);
         if(fh == NULL)
             {
-            if((fh=myfopen(naam,(char *)&mode,FALSE)) == NULL)
+            if((fh=myfopen(name,(char *)&mode,FALSE)) == NULL)
                 {
                 if(closeAFile())
-                    fh=myfopen(naam,(char *)&mode,FALSE);
+                    fh=myfopen(name,(char *)&mode,FALSE);
                 }
             if(fh == NULL)
                 {
@@ -12042,11 +12041,11 @@ if(kns[1] && kns[1]->u.obj)
     */
         if(fh)
             {
-            fh = preparefp(fh,naam,0L);
+            fh = preparefp(fh,name,0L);
             }
         else
             {
-            fh = zoekfp(naam,0L);
+            fh = zoekfp(name,0L);
             }
 
 
@@ -12177,8 +12176,8 @@ if(kns[1] && kns[1]->u.obj)
             {
             char pos[11];
             sprintf(pos,LONGD,FTELL(fh->fp));
-            wis(*pkn);
-            *pkn = scopy((const char *)pos);
+            wipe(*PPnode);
+            *PPnode = scopy((const char *)pos);
             return TRUE;
             }
         else
@@ -12194,11 +12193,11 @@ else
     {
     if(fh)
         {
-        fh = preparefp(fh,naam,0L);
+        fh = preparefp(fh,name,0L);
         }
     else
         {
-        fh = zoekfp(naam,0L);
+        fh = zoekfp(name,0L);
         }
     }
 
@@ -12277,26 +12276,26 @@ WRITE
         fh->rwstatus = Writing;
         if(type == DEC)
             {
-            numwaarde = toLong(kns[3]);
+            numericalvalue = toLong(kns[3]);
             for(ind=0;ind < fh->getal;ind++)
                 switch((int)fh->size)
                     {
                     case 1 :
-                        fputc((int)numwaarde & 0xFF,fh->fp);
-                        numwaarde >>= 8;
+                        fputc((int)numericalvalue & 0xFF,fh->fp);
+                        numericalvalue >>= 8;
                         break;
                     case 2 :
-                        snum.s = (short)(numwaarde & 0xFFFF);
+                        snum.s = (short)(numericalvalue & 0xFFFF);
                         fwrite(snum.c,1,2,fh->fp);
-                        numwaarde >>= 16;
+                        numericalvalue >>= 16;
                         break;
                     case 4 :
-                        snum.i = (INT32_T)(numwaarde & 0xFFFFFFFF);
+                        snum.i = (INT32_T)(numericalvalue & 0xFFFFFFFF);
                         fwrite(snum.c,1,4,fh->fp);
                         assert(fh->getal == 1);
                         break;
                     default :
-                        fwrite((char *)&numwaarde,1,4,fh->fp);
+                        fwrite((char *)&numericalvalue,1,4,fh->fp);
                         break;
                     }
             }
@@ -12406,7 +12405,7 @@ READ
                 else
                     bbuffer = buffer;
                 }
-            bron = bbuffer;
+            source = bbuffer;
             lpkn = input(NULL,lpkn,1,NULL,NULL);
             if(kar == EOF)
                 bbuffer[0] = '\0';
@@ -12415,15 +12414,15 @@ READ
                 bbuffer[0] = (char)kar;
                 bbuffer[1] = '\0';
                 }
-            bron = bbuffer;
+            source = bbuffer;
             rpkn = input(NULL,rpkn,1,NULL,NULL);
             conc[0] = "(\1.\2)";
-            adr[1] = lpkn;
-            adr[2] = rpkn;
+            addr[1] = lpkn;
+            addr[2] = rpkn;
             conc[1] = NULL;
-            *pkn = vopb(*pkn,(const char **)conc);
-            wis(adr[1]);
-            wis(adr[2]);
+            *PPnode = vbuildup(*PPnode,(const char **)conc);
+            wipe(addr[1]);
+            wipe(addr[2]);
             }
         else
             {
@@ -12447,36 +12446,36 @@ READ
             *(bbuffer+(int)readbytes) = 0;
             if(type == DEC)
                 {
-                numwaarde = 0L;
+                numericalvalue = 0L;
                 sh = 0;
                 for(ind = 0;ind < fh->getal;)
                     {
                     switch((int)fh->size)
                         {
                         case 1 :
-                            numwaarde += (LONG)bbuffer[ind++] << sh;
+                            numericalvalue += (LONG)bbuffer[ind++] << sh;
                             sh += 8;
                             continue;
                         case 2 :
-                            numwaarde += (LONG)(*(short*)(bbuffer+ind)) << sh;
+                            numericalvalue += (LONG)(*(short*)(bbuffer+ind)) << sh;
                             ind += 2;
                             sh += 16;
                             continue;
                         case 4 :
-                            numwaarde += (LONG)(*(INT32_T*)(bbuffer+ind)) << sh;
+                            numericalvalue += (LONG)(*(INT32_T*)(bbuffer+ind)) << sh;
                             ind += 4;
                             sh += 32;
                             continue;
                         default :
-                            numwaarde += *(LONG*)bbuffer;
+                            numericalvalue += *(LONG*)bbuffer;
                             break;
                         }
                     break;
                     }
-                sprintf((char *)bbuffer,LONGD,numwaarde);
+                sprintf((char *)bbuffer,LONGD,numericalvalue);
                 }
-            bron = bbuffer;
-            *pkn = input(NULL,*pkn,1,NULL,NULL);
+            source = bbuffer;
+            *PPnode = input(NULL,*PPnode,1,NULL,NULL);
             }
         if(bbuffer != (unsigned char *)&buffer[0])
             bfree(bbuffer);
@@ -12492,17 +12491,17 @@ return TRUE;
 #endif
 #endif
 
-static int allopts(psk kn,LONG opt[])
+static int allopts(psk pnode,LONG opt[])
     {
     int i;
-    while(is_op(kn))
+    while(is_op(pnode))
         {
-        if(!allopts(kn->LEFT,opt))
+        if(!allopts(pnode->LEFT,opt))
             return FALSE;
-        kn = kn->RIGHT;
+        pnode = pnode->RIGHT;
         }
     for(i=0;opt[i];i++)
-        if(PLOBJ(kn) == opt[i])
+        if(PLOBJ(pnode) == opt[i])
             return TRUE;
     return FALSE;
     }
@@ -12523,56 +12522,56 @@ static int flush(void)
     }
 
 
-static int output(ppsk pkn,void (*hoe)(psk k))
+static int output(ppsk PPnode,void (*hoe)(psk k))
 {
 FILE *redfpo;
-psk rknoop,rlknoop,rrknoop,rrrknoop;
+psk rightnode,rlnode,rrightnode,rrrightnode;
 static LONG opts[] =
     {APP,BIN,CON,EXT,MEM,LIN,NEW,RAW,TXT,VAP,0L};
-if(kop(rknoop = (*pkn)->RIGHT) == COMMA)
+if(Op(rightnode = (*PPnode)->RIGHT) == COMMA)
    {
    redfpo = global_fpo;
-   rlknoop = rknoop->LEFT;
-   rrknoop = rknoop->RIGHT;
-   hum = !zoekopt(rrknoop,LIN);
-   listWithName = !zoekopt(rrknoop,RAW);
-   if(allopts(rrknoop,opts))
+   rlnode = rightnode->LEFT;
+   rrightnode = rightnode->RIGHT;
+   hum = !zoekopt(rrightnode,LIN);
+   listWithName = !zoekopt(rrightnode,RAW);
+   if(allopts(rrightnode,opts))
         {
-        if(zoekopt(rrknoop,MEM))
+        if(zoekopt(rrightnode,MEM))
             {
             psk ret;
             telling = 1;
-            verwerk = tel;
+            process = tel;
             global_fpo = NULL;
-            (*hoe)(rlknoop);
+            (*hoe)(rlnode);
             ret = (psk)bmalloc(__LINE__,sizeof(unsigned LONG)+telling);
             ret->v.fl = READY | SUCCESS;
-            verwerk = plak;
-            bron = POBJ(ret);
-            (*hoe)(rlknoop);
+            process = glue;
+            source = POBJ(ret);
+            (*hoe)(rlnode);
             hum = 1;
-            verwerk = myputc;
-            wis(*pkn);
-            *pkn = ret;
+            process = myputc;
+            wipe(*PPnode);
+            *PPnode = ret;
             global_fpo = redfpo;
             return TRUE;
             }
         else
             {
-            (*hoe)(rlknoop);
+            (*hoe)(rlnode);
             flush();
-            adr[2] = rlknoop;
+            addr[2] = rlnode;
             }
         }
-    else if(kop(rrknoop) == COMMA
-         && !is_op(rrknoop->LEFT)
-         && allopts((rrrknoop = rrknoop->RIGHT),opts))
+    else if(Op(rrightnode) == COMMA
+         && !is_op(rrightnode->LEFT)
+         && allopts((rrrightnode = rrightnode->RIGHT),opts))
         {
 #if !defined NO_FOPEN
-        int binmode = ((hoe == lst) && !zoekopt(rrrknoop,TXT)) || zoekopt(rrrknoop,BIN);
+        int binmode = ((hoe == lst) && !zoekopt(rrrightnode,TXT)) || zoekopt(rrrightnode,BIN);
         filehendel * fh = 
-            myfopen((char *)POBJ(rrknoop->LEFT),
-                      zoekopt(rrrknoop,NEW) 
+            myfopen((char *)POBJ(rrightnode->LEFT),
+                      zoekopt(rrrightnode,NEW) 
                     ? ( binmode
                       ? WRITEBIN 
                       : WRITETXT
@@ -12587,7 +12586,7 @@ if(kop(rknoop = (*pkn)->RIGHT) == COMMA)
                     );
         if(fh == NULL)
             {
-            errorprintf("cannot open %s\n",POBJ(rrknoop->LEFT));
+            errorprintf("cannot open %s\n",POBJ(rrightnode->LEFT));
             global_fpo = redfpo;
             hum = 1;
             return FALSE;
@@ -12595,10 +12594,10 @@ if(kop(rknoop = (*pkn)->RIGHT) == COMMA)
         else
             {
             global_fpo = fh->fp;
-            (*hoe)(rlknoop);
+            (*hoe)(rlnode);
             deallocateFilehendel(fh);
             global_fpo = redfpo;
-            adr[2] = rlknoop;
+            addr[2] = rlnode;
             }
 #else
         hum = 1;
@@ -12607,17 +12606,17 @@ if(kop(rknoop = (*pkn)->RIGHT) == COMMA)
         }
     else
         {
-        (*hoe)(rknoop);
+        (*hoe)(rightnode);
         flush();
-        adr[2] = rknoop;
+        addr[2] = rightnode;
         }
-    *pkn = dopb(*pkn,adr[2]);
+    *PPnode = dopb(*PPnode,addr[2]);
     }
 else
     {
-    (*hoe)(rknoop);
+    (*hoe)(rightnode);
     flush();
-    *pkn = rechtertak(*pkn);
+    *PPnode = rightbranch(*PPnode);
     }
 hum = 1;
 listWithName = 1;
@@ -12708,42 +12707,42 @@ static LONG simil
     return max;
     }
 
-static void Sim(char * klad,char * str1,char * str2)
+static void Sim(char * draft,char * str1,char * str2)
     {
     int utf1 = 1;
     int utf2 = 1;
     LONG len1 = 0;
     LONG len2 = 0;
     LONG sim = simil(str1,str1+strlen((char *)str1),str2,str2+strlen((char *)str2),&utf1,&utf2,&len1,&len2);
-    sprintf(klad,LONGD "/" LONGD,(2L*(LONG)sim),len1+len2);
+    sprintf(draft,LONGD "/" LONGD,(2L*(LONG)sim),len1+len2);
     }
 
-static function_return_type find_func(psk pkn)
+static function_return_type find_func(psk Pnode)
     {
-    psk lknoop = pkn->LEFT;
+    psk lnode = Pnode->LEFT;
     objectStuff Object = {0,0,0};
     int nieuw = FALSE;
-    adr[1] = NULL;
-    DBGSRC(Printf("find_func(");result(pkn);Printf(")\n");)
-    adr[1] = find(lknoop,&nieuw,&Object);
-    if(adr[1])
+    addr[1] = NULL;
+    DBGSRC(Printf("find_func(");result(Pnode);Printf(")\n");)
+    addr[1] = find(lnode,&nieuw,&Object);
+    if(addr[1])
         {
-        if(  is_op(adr[1])
-          && kop(adr[1]) == DOT
+        if(  is_op(addr[1])
+          && Op(addr[1]) == DOT
           )
             {
-            psh(&argk,pkn->RIGHT,NULL);
+            psh(&argNode,Pnode->RIGHT,NULL);
             if(Object.self)
                 {
-                psh(&selfkn,Object.self,NULL);
+                psh(&selfNode,Object.self,NULL);
                 }
-            pkn = dopb(pkn,adr[1]);
+            Pnode = dopb(Pnode,addr[1]);
             if(nieuw)
-                wis(adr[1]);
+                wipe(addr[1]);
             if(Object.self)
                 {
                 /*
-                psh(&selfkn,self,NULL); Must precede dopb(...).
+                psh(&selfNode,self,NULL); Must precede dopb(...).
                 Example where this is relevant:
 
                 {?} ((==.lst$its).)'
@@ -12754,53 +12753,53 @@ static function_return_type find_func(psk pkn)
                 */
                 if(Object.object)
                     {
-                    psh(&Selfkn,Object.object,NULL);
-                    if(kop(pkn) == DOT)
+                    psh(&SelfNode,Object.object,NULL);
+                    if(Op(Pnode) == DOT)
                         {
-                        psh(pkn->LEFT,&nulk,NULL);
-                        pkn = eval(pkn);
-                        pop(pkn->LEFT);
-                        pkn = dopb(pkn,pkn->RIGHT);
+                        psh(Pnode->LEFT,&zeroNode,NULL);
+                        Pnode = eval(Pnode);
+                        pop(Pnode->LEFT);
+                        Pnode = dopb(Pnode,Pnode->RIGHT);
                         }
-                    deleteNode(&argk);
-                    deleteNode(&selfkn);
-                    deleteNode(&Selfkn);
-                    return functionOk(pkn);
+                    deleteNode(&argNode);
+                    deleteNode(&selfNode);
+                    deleteNode(&SelfNode);
+                    return functionOk(Pnode);
                     }
                 else
                     {
-                    if(kop(pkn) == DOT)
+                    if(Op(Pnode) == DOT)
                         {
-                        psh(pkn->LEFT,&nulk,NULL);
-                        pkn = eval(pkn);
-                        pop(pkn->LEFT);
-                        pkn = dopb(pkn,pkn->RIGHT);
+                        psh(Pnode->LEFT,&zeroNode,NULL);
+                        Pnode = eval(Pnode);
+                        pop(Pnode->LEFT);
+                        Pnode = dopb(Pnode,Pnode->RIGHT);
                         }
-                    deleteNode(&argk);
-                    deleteNode(&selfkn);
-                    return functionOk(pkn);
+                    deleteNode(&argNode);
+                    deleteNode(&selfNode);
+                    return functionOk(Pnode);
                     }
                 }
             else
                 {
-                if(kop(pkn) == DOT)
+                if(Op(Pnode) == DOT)
                     {
-                    psh(pkn->LEFT,&nulk,NULL);
-                    pkn = eval(pkn);
-                    pop(pkn->LEFT);
-                    pkn = dopb(pkn,pkn->RIGHT);
+                    psh(Pnode->LEFT,&zeroNode,NULL);
+                    Pnode = eval(Pnode);
+                    pop(Pnode->LEFT);
+                    Pnode = dopb(Pnode,Pnode->RIGHT);
                     }
-                deleteNode(&argk);
-                return functionOk(pkn);
+                deleteNode(&argNode);
+                return functionOk(Pnode);
                 }
             }
         else
             {
 #if defined NO_EXIT_ON_NON_SEVERE_ERRORS
-            return functionFail(pkn);
+            return functionFail(Pnode);
 #else
             errorprintf("(Syntax error) The following is not a function:\n\n  ");
-            writeError(lknoop);
+            writeError(lnode);
             exit(116);
 #endif
             }
@@ -12808,48 +12807,48 @@ static function_return_type find_func(psk pkn)
     else if(Object.theMethod)
         {
         DBGSRC(printf("Object.theMethod\n");)
-        if(Object.theMethod((struct typedObjectknoop *)Object.object,&pkn))
+        if(Object.theMethod((struct typedObjectnode *)Object.object,&Pnode))
             {
-            DBGSRC(printf("functionOk");result(pkn);printf("\n");)
-            return functionOk(pkn);
+            DBGSRC(printf("functionOk");result(Pnode);printf("\n");)
+            return functionOk(Pnode);
             }
         }
-    else if (  (kop(pkn->LEFT) == FUU)
-            && (pkn->LEFT->v.fl & FRACTION)
-            && (kop(pkn->LEFT->RIGHT) == DOT)
-            && (!is_op(pkn->LEFT->RIGHT->LEFT))
+    else if (  (Op(Pnode->LEFT) == FUU)
+            && (Pnode->LEFT->v.fl & FRACTION)
+            && (Op(Pnode->LEFT->RIGHT) == DOT)
+            && (!is_op(Pnode->LEFT->RIGHT->LEFT))
             )
         {
-        psk rknoop;
-        rknoop = lambda(pkn->LEFT->RIGHT->RIGHT,pkn->LEFT->RIGHT->LEFT,pkn->RIGHT);
-        if(rknoop)
+        psk rightnode;
+        rightnode = lambda(Pnode->LEFT->RIGHT->RIGHT,Pnode->LEFT->RIGHT->LEFT,Pnode->RIGHT);
+        if(rightnode)
             {
-            wis(pkn);
-            pkn = rknoop;
+            wipe(Pnode);
+            Pnode = rightnode;
             }
         else
             {
-            psk npkn = subboomcopie(pkn->LEFT->RIGHT->RIGHT);
-            wis(pkn);
-            pkn = npkn;
-            if(!is_op(pkn) && !(pkn->v.fl & INDIRECT))
-                pkn->v.fl |= READY;
+            psk npkn = subtreecopy(Pnode->LEFT->RIGHT->RIGHT);
+            wipe(Pnode);
+            Pnode = npkn;
+            if(!is_op(Pnode) && !(Pnode->v.fl & INDIRECT))
+                Pnode->v.fl |= READY;
             }
-        return functionOk(pkn);
+        return functionOk(Pnode);
         }
     else
         {
-        DBGSRC(errorprintf("Function not found");writeError(pkn);\
+        DBGSRC(errorprintf("Function not found");writeError(Pnode);\
             Printf("\n");)
         }
-    return functionFail(pkn);
+    return functionFail(Pnode);
     }
 
 static int hasSubObject(psk src)
     {
     while(is_op(src))
         {
-        if(kop(src) == EQUALS)
+        if(Op(src) == EQUALS)
             return TRUE;
         else
             {
@@ -12868,14 +12867,14 @@ static psk objectcopiesub2(psk src) /* src is NOT an object */
     psk goal;
     if(is_op(src) && hasSubObject(src))
         {
-        goal = (psk)bmalloc(__LINE__,sizeof(kknoop));
+        goal = (psk)bmalloc(__LINE__,sizeof(knode));
         goal->ops = src->ops & ~ALL_REFCOUNT_BITS_SET;
         goal->LEFT = objectcopiesub(src->LEFT);
         goal->RIGHT = objectcopiesub(src->RIGHT);
         return goal;
         }
     else
-        return zelfde_als_w(src);
+        return same_as_w(src);
     }
 
 static psk objectcopiesub(psk src)
@@ -12883,26 +12882,26 @@ static psk objectcopiesub(psk src)
     psk goal;
     if(is_object(src))
         {
-        if(ISBUILTIN((objectknoop*)src))
+        if(ISBUILTIN((objectnode*)src))
             {
-            return zelfde_als_w(src);
+            return same_as_w(src);
            }
         else
             {
-            goal = (psk)bmalloc(__LINE__,sizeof(objectknoop));
+            goal = (psk)bmalloc(__LINE__,sizeof(objectnode));
 #ifdef BUILTIN
-            ((typedObjectknoop*)goal)->u.Int = 0;
+            ((typedObjectnode*)goal)->u.Int = 0;
 #else
-            ((typedObjectknoop*)goal)->refcount = 0;
-            UNSETBUILTIN((typedObjectknoop*)goal);
+            ((typedObjectnode*)goal)->refcount = 0;
+            UNSETBUILTIN((typedObjectnode*)goal);
 #endif
             }
 #ifndef BUILTIN
-        UNSETCREATEDWITHNEW((typedObjectknoop*)goal);
+        UNSETCREATEDWITHNEW((typedObjectnode*)goal);
 #endif
         goal->ops = src->ops & ~ALL_REFCOUNT_BITS_SET;
-        goal->LEFT = zelfde_als_w(src->LEFT);
-        goal->RIGHT = zelfde_als_w(src->RIGHT);
+        goal->LEFT = same_as_w(src->LEFT);
+        goal->RIGHT = same_as_w(src->RIGHT);
         return goal;
         }
     else
@@ -12914,34 +12913,34 @@ static psk objectcopie(psk src)
     psk goal;
     if(is_object(src))                              /* Make a copy of this '=' node ... */
         {
-        if(ISBUILTIN((objectknoop*)src))
+        if(ISBUILTIN((objectnode*)src))
             {
-            goal = (psk)bmalloc(__LINE__,sizeof(typedObjectknoop));
+            goal = (psk)bmalloc(__LINE__,sizeof(typedObjectnode));
 #ifdef BUILTIN
-            ((typedObjectknoop*)goal)->u.Int = BUILTIN;
+            ((typedObjectnode*)goal)->u.Int = BUILTIN;
 #else
-            ((typedObjectknoop*)goal)->refcount = 0;
-            UNSETCREATEDWITHNEW((typedObjectknoop*)goal);/*TODO: This line seems to be superfluous*/
-            SETBUILTIN((typedObjectknoop*)goal);
+            ((typedObjectnode*)goal)->refcount = 0;
+            UNSETCREATEDWITHNEW((typedObjectnode*)goal);/*TODO: This line seems to be superfluous*/
+            SETBUILTIN((typedObjectnode*)goal);
 #endif
-            ((typedObjectknoop*)goal)->vtab = ((typedObjectknoop*)src)->vtab;
-            ((typedObjectknoop*)goal)->voiddata = NULL;
+            ((typedObjectnode*)goal)->vtab = ((typedObjectnode*)src)->vtab;
+            ((typedObjectnode*)goal)->voiddata = NULL;
             }
         else
             {
-            goal = (psk)bmalloc(__LINE__,sizeof(objectknoop));
+            goal = (psk)bmalloc(__LINE__,sizeof(objectnode));
 #ifdef BUILTIN
-            ((typedObjectknoop*)goal)->u.Int = 0;
+            ((typedObjectnode*)goal)->u.Int = 0;
 #else
-            ((typedObjectknoop*)goal)->refcount = 0;
-            UNSETBUILTIN((typedObjectknoop*)goal);
+            ((typedObjectnode*)goal)->refcount = 0;
+            UNSETBUILTIN((typedObjectnode*)goal);
 #endif
             }
 #ifndef BUILTIN
-        UNSETCREATEDWITHNEW((typedObjectknoop*)goal);
+        UNSETCREATEDWITHNEW((typedObjectnode*)goal);
 #endif
         goal->ops = src->ops & ~ALL_REFCOUNT_BITS_SET;
-        goal->LEFT = zelfde_als_w(src->LEFT);
+        goal->LEFT = same_as_w(src->LEFT);
         /*?? This adds an extra level of copying, but ONLY for objects that have a '=' node as the lhs of the main '=' node*/
         /* What is it good for? Bart 20010220 */
         goal->RIGHT = objectcopiesub(src->RIGHT); /* and of all '=' child nodes (but not of grandchildren!) */
@@ -12954,7 +12953,7 @@ static psk objectcopie(psk src)
 static psk getObjectDef(psk source)
     {
     psk def;
-    typedObjectknoop * dest;
+    typedObjectnode * dest;
     if(!is_op(source))
         {
         classdef * df = classes;
@@ -12962,10 +12961,10 @@ static psk getObjectDef(psk source)
             ;
         if(df->vtab)
             {
-            dest = (typedObjectknoop *)bmalloc(__LINE__,sizeof(typedObjectknoop));
+            dest = (typedObjectnode *)bmalloc(__LINE__,sizeof(typedObjectnode));
             dest->v.fl = EQUALS | SUCCESS;
-            dest->links = zelfde_als_w(&nilk);
-            dest->rechts = zelfde_als_w(source);
+            dest->left = same_as_w(&nilNode);
+            dest->right = same_as_w(source);
 #ifdef BUILTIN
             dest->u.Int = BUILTIN;
 #else
@@ -12977,7 +12976,7 @@ static psk getObjectDef(psk source)
             return (psk)dest;
             }
         }
-    else if(kop(source) == EQUALS)
+    else if(Op(source) == EQUALS)
         {
         source->RIGHT = Head(source->RIGHT);
         return objectcopie(source);
@@ -12985,13 +12984,13 @@ static psk getObjectDef(psk source)
 
 
 
-    if((def = Naamwoord_w(source,source->v.fl & DOUBLY_INDIRECT)) != NULL)
+    if((def = SymbolBinding_w(source,source->v.fl & DOUBLY_INDIRECT)) != NULL)
         {
-        dest = (typedObjectknoop *)bmalloc(__LINE__,sizeof(typedObjectknoop));
+        dest = (typedObjectnode *)bmalloc(__LINE__,sizeof(typedObjectnode));
         dest->v.fl = EQUALS | SUCCESS;
-        dest->links = zelfde_als_w(&nilk);
-        dest->rechts = objectcopie(def); /* TODO Head(&def) ? */
-        wis(def);
+        dest->left = same_as_w(&nilNode);
+        dest->right = objectcopie(def); /* TODO Head(&def) ? */
+        wipe(def);
 #ifdef BUILTIN
         dest->u.Int = 0;
 #else
@@ -13005,17 +13004,17 @@ static psk getObjectDef(psk source)
     return NULL;
     }
 
-static psk changeCase(psk pkn
+static psk changeCase(psk Pnode
 #if CODEPAGE850
                       ,int dos
 #endif
                       ,int low)
     {
     const char * s;
-    psk kn;
+    psk pnode;
     size_t len;
-    kn = zelfde_als_w(pkn);
-    s = SPOBJ(pkn);
+    pnode = same_as_w(Pnode);
+    s = SPOBJ(Pnode);
     len = strlen((const char *)s);
     if(len > 0)
         {
@@ -13023,8 +13022,8 @@ static psk changeCase(psk pkn
         char * dwarn;
         char * buf = NULL;
         char * obuf;
-        kn = prive(kn);
-        d = SPOBJ(kn);
+        pnode = isolated(pnode);
+        d = SPOBJ(pnode);
         obuf = d;
         dwarn = obuf + strlen((const char*)obuf) - 6;
 #if CODEPAGE850
@@ -13066,7 +13065,7 @@ static psk changeCase(psk pkn
                             dwarn = buf + 2*((dwarn+6) - obuf) - 6;
                             memcpy(buf,obuf,d - obuf);
                             d = buf + (d - obuf);
-                            if(obuf != SPOBJ(kn))
+                            if(obuf != SPOBJ(pnode))
                                 bfree(obuf);
                             obuf = buf;
                             }
@@ -13079,13 +13078,13 @@ static psk changeCase(psk pkn
             *d = 0;
             if(buf)
                 {
-                wis(kn);
-                kn = scopy(buf);
+                wipe(pnode);
+                pnode = scopy(buf);
                 bfree(buf);
                 }
             }
         }
-    return kn;
+    return pnode;
     }
 
 #if !defined NO_C_INTERFACE
@@ -13119,7 +13118,7 @@ static void pointerToStr(char * pc,void * p)
 #endif
 
 #if O_S
-static psk swi(psk pkn,psk rlknoop,psk rrknoop)
+static psk swi(psk Pnode,psk rlnode,psk rrightnode)
     {
     int i;
     union
@@ -13134,18 +13133,18 @@ static psk swi(psk pkn,psk rlknoop,psk rrknoop)
     char pc[121];
     for(i = 0;i < sizeof(os_regset)/sizeof(int);i++)
         u.s.regs.r[i] = 0;
-    rrknoop = pkn;
+    rrightnode = Pnode;
     i=0;
     do
         {
-        rrknoop = rrknoop->RIGHT;
-        rlknoop = is_op(rrknoop) ? rrknoop->LEFT : rrknoop;
-        if(is_op(rlknoop) || !INTEGER_NOT_NEG(rlknoop))
-            return functionFail(pkn);
+        rrightnode = rrightnode->RIGHT;
+        rlnode = is_op(rrightnode) ? rrightnode->LEFT : rrightnode;
+        if(is_op(rlnode) || !INTEGER_NOT_NEG(rlnode))
+            return functionFail(Pnode);
         u.i[i++] = (unsigned int)
-            strtoul((char *)POBJ(rlknoop),(char **)NULL,10);
+            strtoul((char *)POBJ(rlnode),(char **)NULL,10);
         }
-    while(is_op(rrknoop) && i < 10);
+    while(is_op(rrightnode) && i < 10);
 #ifdef __TURBOC__
     intr(u.s.swicode,(struct REGPACK *)&u.s.regs);
     sprintf(pc,"0.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
@@ -13160,7 +13159,7 @@ static psk swi(psk pkn,psk rlknoop,psk rrknoop)
         u.i[6],u.i[7],u.i[8],u.i[9],u.i[10]);
 #endif
 #endif
-    return opb(pkn,pc,NULL);
+    return build_up(Pnode,pc,NULL);
     }
 #endif
 
@@ -13204,67 +13203,67 @@ static void print_clock(char * pklad,clock_t time)
 #endif
 
 
-static function_return_type functies(psk pkn)
+static function_return_type functies(psk Pnode)
     {
-    static char klad[22];
-    psk lknoop,rknoop,rrknoop,rlknoop;
+    static char draft[22];
+    psk lnode,rightnode,rrightnode,rlnode;
     int intVal;
-    if(is_op(lknoop = pkn->LEFT))
-        return find_func(pkn);
-    rknoop = pkn->RIGHT;
+    if(is_op(lnode = Pnode->LEFT))
+        return find_func(Pnode);
+    rightnode = Pnode->RIGHT;
     {
-    SWITCH(PLOBJ(lknoop))
+    SWITCH(PLOBJ(lnode))
         {
         FIRSTCASE(STR) /* str$(arg arg arg .. ..) */
             {
-            mooi = FALSE;
+            nice = FALSE;
             hum = 0;
             telling = 1;
-            verwerk = tstr;
-            result(rknoop);
-            rlknoop = (psk)bmalloc(__LINE__, sizeof(unsigned LONG) + telling);
-            verwerk = pstr;
-            bron = POBJ(rlknoop);
-            result(rknoop);
-            rlknoop->v.fl = (READY | SUCCESS) | (numbercheck(SPOBJ(rlknoop)) & ~DEFINITELYNONUMBER);
-            mooi = TRUE;
+            process = tstr;
+            result(rightnode);
+            rlnode = (psk)bmalloc(__LINE__, sizeof(unsigned LONG) + telling);
+            process = pstr;
+            source = POBJ(rlnode);
+            result(rightnode);
+            rlnode->v.fl = (READY | SUCCESS) | (numbercheck(SPOBJ(rlnode)) & ~DEFINITELYNONUMBER);
+            nice = TRUE;
             hum = 1;
-            verwerk = myputc;
-            wis(pkn);
-            pkn = rlknoop;
-            return functionOk(pkn);
+            process = myputc;
+            wipe(Pnode);
+            Pnode = rlnode;
+            return functionOk(Pnode);
             }
 #if O_S
         CASE(SWI) /* swi$(<interrupt number>.(input regs)) */
             {
-            pkn = swi(pkn,rlknoop,rrknoop);
-            return functionOk(pkn);
+            Pnode = swi(Pnode,rlnode,rrightnode);
+            return functionOk(Pnode);
             }
 #endif
 #if _BRACMATEMBEDDED
 #if defined PYTHONINTERFACE
         CASE(NI) /* Ni$"Statements to be executed by Python" */
             {
-            if(Ni && !is_op(rknoop) && !HAS_VISIBLE_FLAGS_OR_MINUS(rknoop))
+            if(Ni && !is_op(rightnode) && !HAS_VISIBLE_FLAGS_OR_MINUS(rightnode))
                 {
-                Ni((const char *)POBJ(rknoop));
-                return functionOk(pkn);
+                Ni((const char *)POBJ(rightnode));
+                return functionOk(Pnode);
                 }
             else
-                return functionFail(pkn);
+                return functionFail(Pnode);
             }
         CASE(NII) /* Ni!$"Expression to be evaluated by Python" */
             {
-            if(Nii && !is_op(rknoop) && !HAS_VISIBLE_FLAGS_OR_MINUS(rknoop))
+            if(Nii && !is_op(rightnode) && !HAS_VISIBLE_FLAGS_OR_MINUS(rightnode))
                 {
                 const char * val;
-                val = Nii((const char *)POBJ(rknoop));
-                wis(pkn);
-                pkn = scopy((const char *)val);
-                return functionOk(pkn);
+                val = Nii((const char *)POBJ(rightnode));
+                wipe(Pnode);
+                Pnode = scopy((const char *)val);
+                return functionOk(Pnode);
                 }
             else
-                return functionFail(pkn);
+                return functionFail(Pnode);
             }
 #endif
 #endif
@@ -13273,12 +13272,12 @@ static function_return_type functies(psk pkn)
 /*#if !_BRACMATEMBEDDED*/
         CASE(ERR) /* err $ <file name to direct errorStream to> */
             {
-            if(!is_op(rknoop))
+            if(!is_op(rightnode))
                 {
-                if(redirectError((char *)POBJ(rknoop)))
-                    return functionOk(pkn);
+                if(redirectError((char *)POBJ(rightnode)))
+                    return functionOk(Pnode);
                 }
-            return functionFail(pkn);
+            return functionFail(Pnode);
             }
 /*#endif*/
 #endif
@@ -13286,35 +13285,35 @@ static function_return_type functies(psk pkn)
         CASE(ALC)  /* alc $ <number of bytes> */
             {
             void *p;
-            if(is_op(rknoop)
-            || !INTEGER_POS(rknoop)
-            || (p = bmalloc(__LINE__,(int)strtoul((char *)POBJ(rknoop),(char **)NULL,10)))
+            if(is_op(rightnode)
+            || !INTEGER_POS(rightnode)
+            || (p = bmalloc(__LINE__,(int)strtoul((char *)POBJ(rightnode),(char **)NULL,10)))
                   == NULL)
-                return functionFail(pkn);
-            pointerToStr(klad,p);
-            wis(pkn);
-            pkn = scopy((const char *)klad);
-            return functionOk(pkn);
+                return functionFail(Pnode);
+            pointerToStr(draft,p);
+            wipe(Pnode);
+            Pnode = scopy((const char *)draft);
+            return functionOk(Pnode);
             }
         CASE(FRE) /* fre $ <pointer> */
             {
             void * p;
-            if(is_op(rknoop) || !INTEGER_POS(rknoop))
-                return functionFail(pkn);
-            p = strToPointer((char *)POBJ(rknoop));
+            if(is_op(rightnode) || !INTEGER_POS(rightnode))
+                return functionFail(Pnode);
+            p = strToPointer((char *)POBJ(rightnode));
             pskfree((psk)p);
-            return functionOk(pkn);
+            return functionOk(Pnode);
             }
         CASE(PEE) /* pee $ (<pointer>[,<number of bytes>]) (1,2,4,8)*/
             {
             void *p;
             intVal = 1;
-            if(is_op(rknoop))
+            if(is_op(rightnode))
                 {
-                rlknoop = rknoop->LEFT;
-                rrknoop = rknoop->RIGHT;
-                if(!is_op(rrknoop))
-                    switch(rrknoop->u.obj)
+                rlnode = rightnode->LEFT;
+                rrightnode = rightnode->RIGHT;
+                if(!is_op(rrightnode))
+                    switch(rrightnode->u.obj)
                         {
                         case '2':
                             intVal = 2;
@@ -13325,52 +13324,52 @@ static function_return_type functies(psk pkn)
                         }
                 }
             else
-                rlknoop = rknoop;
-            if(is_op(rlknoop) || !INTEGER_POS(rlknoop))
-                return functionFail(pkn);
-            p = strToPointer((char *)POBJ(rlknoop));
+                rlnode = rightnode;
+            if(is_op(rlnode) || !INTEGER_POS(rlnode))
+                return functionFail(Pnode);
+            p = strToPointer((char *)POBJ(rlnode));
             p = (void*)((char *)p - (ptrdiff_t)((size_t)p % intVal));
             switch(intVal)
                 {
                 case 2:
-                    sprintf(klad,"%hu",*(short unsigned int*)p);
+                    sprintf(draft,"%hu",*(short unsigned int*)p);
                     break;
                 case 4:
-                    sprintf(klad,"%lu",(unsigned long)*(UINT32_T*)p);
+                    sprintf(draft,"%lu",(unsigned long)*(UINT32_T*)p);
                     break;
 #ifndef __BORLANDC__
 #if (!defined ARM || defined __SYMBIAN32__)
                 case 8:
-                    sprintf(klad,"%llu",*(unsigned long long*)p);
+                    sprintf(draft,"%llu",*(unsigned long long*)p);
                     break;
 #endif
 #endif                    
                 case 1:
                 default:
-                    sprintf(klad,"%u",(int)*(unsigned char *)p);
+                    sprintf(draft,"%u",(int)*(unsigned char *)p);
                     break;
                 }
-            wis(pkn);
-            pkn = scopy((const char *)klad);
-            return functionOk(pkn);
+            wipe(Pnode);
+            Pnode = scopy((const char *)draft);
+            return functionOk(Pnode);
             }
         CASE(POK) /* pok $ (<pointer>,<number>[,<number of bytes>]) */
             {
-            psk rrlknoop;
+            psk rrlnode;
             void *p;
             LONG val;
             intVal = 1;
-            if(!is_op(rknoop))
-                return functionFail(pkn);
-            rlknoop = rknoop->LEFT;
-            rrknoop = rknoop->RIGHT;
-            if(is_op(rrknoop))
+            if(!is_op(rightnode))
+                return functionFail(Pnode);
+            rlnode = rightnode->LEFT;
+            rrightnode = rightnode->RIGHT;
+            if(is_op(rrightnode))
                 {
-                psk rrrknoop;
-                rrrknoop = rrknoop->RIGHT;
-                rrlknoop = rrknoop->LEFT;
-                if(!is_op(rrrknoop))
-                    switch(rrrknoop->u.obj)
+                psk rrrightnode;
+                rrrightnode = rrightnode->RIGHT;
+                rrlnode = rrightnode->LEFT;
+                if(!is_op(rrrightnode))
+                    switch(rrrightnode->u.obj)
                         {
                         case '2':
                             intVal = 2;
@@ -13386,13 +13385,13 @@ static function_return_type functies(psk pkn)
                         }
                 }
             else
-                rrlknoop = rrknoop;
-            if(is_op(rlknoop) || !INTEGER_POS(rlknoop)
-            || is_op(rrlknoop) || !INTEGER(rrlknoop))
-                return functionFail(pkn);
-            p = strToPointer((char *)POBJ(rlknoop));
+                rrlnode = rrightnode;
+            if(is_op(rlnode) || !INTEGER_POS(rlnode)
+            || is_op(rrlnode) || !INTEGER(rrlnode))
+                return functionFail(Pnode);
+            p = strToPointer((char *)POBJ(rlnode));
             p = (void*)((char *)p - (ptrdiff_t)((size_t)p % intVal));
-            val = toLong(rrlknoop);
+            val = toLong(rrlnode);
             switch(intVal)
                 {
                 case 2:
@@ -13411,7 +13410,7 @@ static function_return_type functies(psk pkn)
                     *(unsigned char *)p = (unsigned char)val;
                     break;
                 }
-            return functionOk(pkn);
+            return functionOk(Pnode);
             }
         CASE(FNC) /* fnc $ (<function pointer>.<struct pointer>) */
             {
@@ -13423,89 +13422,89 @@ static function_return_type functies(psk pkn)
                                have different sizes. */
                 } u;
             void * argStruct;
-            if(sizeof(int (*)(void *)) != sizeof(void *) || !is_op(rknoop))
-                return functionFail(pkn);
-            u.vp = strToPointer((char *)POBJ(rknoop->LEFT));
+            if(sizeof(int (*)(void *)) != sizeof(void *) || !is_op(rightnode))
+                return functionFail(Pnode);
+            u.vp = strToPointer((char *)POBJ(rightnode->LEFT));
             if(!u.pfnc)
-                return functionFail(pkn);
-            argStruct = strToPointer((char *)POBJ(rknoop->RIGHT));
-            return u.pfnc(argStruct) ? functionOk(pkn) : functionFail(pkn);
+                return functionFail(Pnode);
+            argStruct = strToPointer((char *)POBJ(rightnode->RIGHT));
+            return u.pfnc(argStruct) ? functionOk(Pnode) : functionFail(Pnode);
             }
 #endif
         CASE(X2D) /* x2d $ hexnumber */
             {
             char * endptr;
             unsigned LONG val;
-            if(  is_op(rknoop)
-              || HAS_VISIBLE_FLAGS_OR_MINUS(rknoop)
+            if(  is_op(rightnode)
+              || HAS_VISIBLE_FLAGS_OR_MINUS(rightnode)
               )
-                return functionFail(pkn);
+                return functionFail(Pnode);
             errno = 0;
-            val = STRTOUL((char *)POBJ(rknoop),&endptr,16);
+            val = STRTOUL((char *)POBJ(rightnode),&endptr,16);
             if(errno == ERANGE || (endptr && *endptr))
-                return functionFail(pkn); /*not all characters scanned*/
-            sprintf(klad,LONGU,val);
-            wis(pkn);
-            pkn = scopy((const char *)klad);
-            return functionOk(pkn);
+                return functionFail(Pnode); /*not all characters scanned*/
+            sprintf(draft,LONGU,val);
+            wipe(Pnode);
+            Pnode = scopy((const char *)draft);
+            return functionOk(Pnode);
             }
         CASE(D2X) /* d2x $ decimalnumber */
             {
             char * endptr;
             unsigned LONG val;
-            if(is_op(rknoop) || !INTEGER_NOT_NEG(rknoop))
-                return functionFail(pkn);
+            if(is_op(rightnode) || !INTEGER_NOT_NEG(rightnode))
+                return functionFail(Pnode);
 #ifdef __BORLANDC__
-            if(  strlen((char *)POBJ(rknoop)) > 10
-              ||    strlen((char *)POBJ(rknoop)) == 10
-                 && strcmp((char *)POBJ(rknoop),"4294967295") > 0
+            if(  strlen((char *)POBJ(rightnode)) > 10
+              ||    strlen((char *)POBJ(rightnode)) == 10
+                 && strcmp((char *)POBJ(rightnode),"4294967295") > 0
               )
-                return functionFail(pkn); /*not all characters scanned*/
+                return functionFail(Pnode); /*not all characters scanned*/
 #endif
             errno = 0;
-            val = STRTOUL((char *)POBJ(rknoop),&endptr,10);
+            val = STRTOUL((char *)POBJ(rightnode),&endptr,10);
             if(  errno == ERANGE
               || (endptr && *endptr)
               )
-                return functionFail(pkn); /*not all characters scanned*/
-            sprintf(klad,LONGX,val);
-            wis(pkn);
-            pkn = scopy((const char *)klad);
-            return functionOk(pkn);
+                return functionFail(Pnode); /*not all characters scanned*/
+            sprintf(draft,LONGX,val);
+            wipe(Pnode);
+            Pnode = scopy((const char *)draft);
+            return functionOk(Pnode);
             }
         CASE(KAR) /* chr $ number */
             {
-            if(is_op(rknoop) || !INTEGER_POS(rknoop))
-                return functionFail(pkn);
-            intVal = strtoul((char *)POBJ(rknoop),(char **)NULL,10);
+            if(is_op(rightnode) || !INTEGER_POS(rightnode))
+                return functionFail(Pnode);
+            intVal = strtoul((char *)POBJ(rightnode),(char **)NULL,10);
             if(intVal > 255)
-                return functionFail(pkn);
-            klad[0] = (char)intVal;
-            klad[1] = 0;
-            wis(pkn);
-            pkn = scopy((const char *)klad);
-            return functionOk(pkn);
+                return functionFail(Pnode);
+            draft[0] = (char)intVal;
+            draft[1] = 0;
+            wipe(Pnode);
+            Pnode = scopy((const char *)draft);
+            return functionOk(Pnode);
             }
         CASE(KAU) /* chu $ number */
             {
             unsigned LONG val;
-            if(is_op(rknoop) || !INTEGER_POS(rknoop))
-                return functionFail(pkn);
-            val = STRTOUL((char *)POBJ(rknoop),(char **)NULL,10);
-            if(putCodePoint(val,(char *)klad) == NULL)
-                return functionFail(pkn);
-            wis(pkn);
-            pkn = scopy((const char *)klad);
-            return functionOk(pkn);
+            if(is_op(rightnode) || !INTEGER_POS(rightnode))
+                return functionFail(Pnode);
+            val = STRTOUL((char *)POBJ(rightnode),(char **)NULL,10);
+            if(putCodePoint(val,(char *)draft) == NULL)
+                return functionFail(Pnode);
+            wipe(Pnode);
+            Pnode = scopy((const char *)draft);
+            return functionOk(Pnode);
             }
         CASE(ASC) /* asc $ character */
             {
-            if(is_op(rknoop))
-                return functionFail(pkn);
-            sprintf(klad,"%d",(int)rknoop->u.obj);
-            wis(pkn);
-            pkn = scopy((const char *)klad);
-            return functionOk(pkn);
+            if(is_op(rightnode))
+                return functionFail(Pnode);
+            sprintf(draft,"%d",(int)rightnode->u.obj);
+            wipe(Pnode);
+            Pnode = scopy((const char *)draft);
+            return functionOk(Pnode);
             }
         CASE(UTF)
             {
@@ -13513,234 +13512,234 @@ static function_return_type functies(psk pkn)
 @(abcædef:? (%@>"~" ?:?a & utf$!a) ?)
 @(str$(abc chu$200 def):? (%@>"~" ?:?a & utf$!a) ?)
 */
-            if(is_op(rknoop))
+            if(is_op(rightnode))
                 {
-                pkn->v.fl |= FENCE;
-                return functionFail(pkn);
+                Pnode->v.fl |= FENCE;
+                return functionFail(Pnode);
                 }
             else
                 {
-                const char * s = (const char *)POBJ(rknoop);
+                const char * s = (const char *)POBJ(rightnode);
                 intVal = getCodePoint(&s);
                 if(intVal < 0 || *s)
                     {
                     if(intVal != -2)
                         {
-                        pkn->v.fl |= IMPLIEDFENCE;
+                        Pnode->v.fl |= IMPLIEDFENCE;
                         }
-                    return functionFail(pkn);
+                    return functionFail(Pnode);
                     }
-                sprintf(klad,"%d",intVal);
-                wis(pkn);
-                pkn = scopy((const char *)klad);
-                return functionOk(pkn);
+                sprintf(draft,"%d",intVal);
+                wipe(Pnode);
+                Pnode = scopy((const char *)draft);
+                return functionOk(Pnode);
                 }
             }
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
 #if !defined NO_FOPEN
         CASE(FIL) /* fil $ (<name>,[<offset>,[set|cur|end]]) */
             {
-            return fil(&pkn) ? functionOk(pkn) : functionFail(pkn);
+            return fil(&Pnode) ? functionOk(Pnode) : functionFail(Pnode);
             }
 #endif
 #endif
         CASE(FLG) /* flg $ <expr>  or flg$(=<expr>) */
             {
-            if(is_object(rknoop) && !(rknoop->LEFT->v.fl & VISIBLE_FLAGS))
-                rknoop = rknoop->RIGHT;
-            intVal = rknoop->v.fl;
-            adr[3] = zelfde_als_w(rknoop);
-            adr[3] = prive(adr[3]);
-            adr[3]->v.fl = adr[3]->v.fl & ~VISIBLE_FLAGS;
-            adr[2] = zelfde_als_w(&nilk);
-            adr[2] = prive(adr[2]);
-            adr[2]->v.fl &= ~VISIBLE_FLAGS;
-            adr[2]->v.fl |= VISIBLE_FLAGS & intVal;
-            if(adr[2]->v.fl & INDIRECT)
+            if(is_object(rightnode) && !(rightnode->LEFT->v.fl & VISIBLE_FLAGS))
+                rightnode = rightnode->RIGHT;
+            intVal = rightnode->v.fl;
+            addr[3] = same_as_w(rightnode);
+            addr[3] = isolated(addr[3]);
+            addr[3]->v.fl = addr[3]->v.fl & ~VISIBLE_FLAGS;
+            addr[2] = same_as_w(&nilNode);
+            addr[2] = isolated(addr[2]);
+            addr[2]->v.fl &= ~VISIBLE_FLAGS;
+            addr[2]->v.fl |= VISIBLE_FLAGS & intVal;
+            if(addr[2]->v.fl & INDIRECT)
                 {
-                adr[2]->v.fl &= ~READY; /* {?} flg$(=!a):(=?X.?)&lst$X */
-                adr[3]->v.fl |= READY;  /* {?} flg$(=!a):(=?.?Y)&!Y */
+                addr[2]->v.fl &= ~READY; /* {?} flg$(=!a):(=?X.?)&lst$X */
+                addr[3]->v.fl |= READY;  /* {?} flg$(=!a):(=?.?Y)&!Y */
                 }
             if(NOTHINGF(intVal))
                 {
-                adr[2]->v.fl ^= SUCCESS;
-                adr[3]->v.fl ^= SUCCESS;
+                addr[2]->v.fl ^= SUCCESS;
+                addr[3]->v.fl ^= SUCCESS;
                 }
-            sprintf(klad,"=\2.\3");
-            pkn = opb(pkn,klad,NULL);
-            wis(adr[2]);
-            wis(adr[3]);
-            return functionOk(pkn);
+            sprintf(draft,"=\2.\3");
+            Pnode = build_up(Pnode,draft,NULL);
+            wipe(addr[2]);
+            wipe(addr[3]);
+            return functionOk(Pnode);
             }
         CASE(GLF) /* glf $ (=<flags>.<exp>) : (=?a)  a=<flags><exp> */
             {
-            if(  is_object(rknoop)
-              && kop(rknoop->RIGHT) == DOT
+            if(  is_object(rightnode)
+              && Op(rightnode->RIGHT) == DOT
               )
                 {
-                intVal = rknoop->RIGHT->LEFT->v.fl & VISIBLE_FLAGS;
-                if(intVal && (rknoop->RIGHT->RIGHT->v.fl & intVal))
-                    return functionFail(pkn);
-                adr[3] = zelfde_als_w(rknoop->RIGHT->RIGHT);
-                adr[3] = prive(adr[3]);
-                adr[3]->v.fl |= intVal;
+                intVal = rightnode->RIGHT->LEFT->v.fl & VISIBLE_FLAGS;
+                if(intVal && (rightnode->RIGHT->RIGHT->v.fl & intVal))
+                    return functionFail(Pnode);
+                addr[3] = same_as_w(rightnode->RIGHT->RIGHT);
+                addr[3] = isolated(addr[3]);
+                addr[3]->v.fl |= intVal;
                 if(NOTHINGF(intVal))
                     {
-                    adr[3]->v.fl ^= SUCCESS;
+                    addr[3]->v.fl ^= SUCCESS;
                     }
                 if(intVal & INDIRECT)
                     {
-                    adr[3]->v.fl &= ~READY;/* ^= --> &= ~ */
+                    addr[3]->v.fl &= ~READY;/* ^= --> &= ~ */
                     }
-                sprintf(klad,"=\3");
-                pkn = opb(pkn,klad,NULL);
-                wis(adr[3]);
-                return functionOk(pkn);
+                sprintf(draft,"=\3");
+                Pnode = build_up(Pnode,draft,NULL);
+                wipe(addr[3]);
+                return functionOk(Pnode);
                 }
-            return functionFail(pkn);
+            return functionFail(Pnode);
             }
 #if TELMAX
         CASE(BEZ) /* bez $  */
             {
 #if MAXSTACK
 #if defined _WIN32
-            sprintf(klad,"%lu.%lu.%u.%d",(unsigned long)globalloc,(unsigned long)maxgloballoc,maxbez / ONEREF,maxstack);
+            sprintf(draft,"%lu.%lu.%u.%d",(unsigned long)globalloc,(unsigned long)maxgloballoc,maxbez / ONEREF,maxstack);
 #else
-            sprintf(klad,"%zu.%zu.%u.%d",globalloc,maxgloballoc,maxbez / ONEREF,maxstack);
+            sprintf(draft,"%zu.%zu.%u.%d",globalloc,maxgloballoc,maxbez / ONEREF,maxstack);
 #endif
 #else
 #if defined _WIN32
-            sprintf(klad,"%lu.%lu.%u",(unsigned long)globalloc,(unsigned long)maxgloballoc,maxbez / ONEREF);
+            sprintf(draft,"%lu.%lu.%u",(unsigned long)globalloc,(unsigned long)maxgloballoc,maxbez / ONEREF);
 #else
-            sprintf(klad,"%zu.%zu.%u",globalloc,maxgloballoc,maxbez / ONEREF);
+            sprintf(draft,"%zu.%zu.%u",globalloc,maxgloballoc,maxbez / ONEREF);
 #endif
 #endif
-            pkn = opb(pkn,klad,NULL);
+            Pnode = build_up(Pnode,draft,NULL);
 #if TELLING
             bezetting();
 #endif
-            return functionOk(pkn);
+            return functionOk(Pnode);
             }
 #endif
         CASE(MMF) /* mem $ [EXT] */
             {
-            mmf(&pkn);
-            return functionOk(pkn);
+            mmf(&Pnode);
+            return functionOk(Pnode);
             }
         CASE(MOD)
             {
-            if(RATIONAL_COMP(rlknoop = rknoop->LEFT) &&
-               RATIONAL_COMP_NOT_NUL(rrknoop = rknoop->RIGHT))
+            if(RATIONAL_COMP(rlnode = rightnode->LEFT) &&
+               RATIONAL_COMP_NOT_NUL(rrightnode = rightnode->RIGHT))
                 {
-                psk kn;
-                kn = _qmodulo(rlknoop,rrknoop);
-                wis(pkn);
-                pkn = kn;
-                return functionOk(pkn);
+                psk pnode;
+                pnode = qModulo(rlnode,rrightnode);
+                wipe(Pnode);
+                Pnode = pnode;
+                return functionOk(Pnode);
                 }
-            return functionFail(pkn);
+            return functionFail(Pnode);
             }
         CASE(REV)
             {
-            if(!is_op(rknoop))
+            if(!is_op(rightnode))
                 {
-                size_t len = strlen((char *)POBJ(rknoop));
-                psk kn;
-                kn = zelfde_als_w(rknoop);
+                size_t len = strlen((char *)POBJ(rightnode));
+                psk pnode;
+                pnode = same_as_w(rightnode);
                 if(len > 1)
                     {
-                    kn = prive(kn);
-                    stringreverse((char *)POBJ(kn),len);
+                    pnode = isolated(pnode);
+                    stringreverse((char *)POBJ(pnode),len);
                     }
-                wis(pkn);
-                pkn = kn;
-                return functionOk(pkn);
+                wipe(Pnode);
+                Pnode = pnode;
+                return functionOk(Pnode);
                 }
             else
-                return functionFail(pkn);
+                return functionFail(Pnode);
             }
         CASE(LOW)
             {
-            psk kn;
-            if(!is_op(rknoop))
-                kn = changeCase(rknoop
+            psk pnode;
+            if(!is_op(rightnode))
+                pnode = changeCase(rightnode
 #if CODEPAGE850
                 ,FALSE
 #endif
                 ,TRUE);
-            else if(!is_op(rlknoop = rknoop->LEFT))
-                kn = changeCase(rlknoop
+            else if(!is_op(rlnode = rightnode->LEFT))
+                pnode = changeCase(rlnode
 #if CODEPAGE850
-                ,zoekopt(rknoop->RIGHT,DOS)
+                ,zoekopt(rightnode->RIGHT,DOS)
 #endif
                 ,TRUE);
             else
-                return functionFail(pkn);
-            wis(pkn);
-            pkn = kn;
-            return functionOk(pkn);
+                return functionFail(Pnode);
+            wipe(Pnode);
+            Pnode = pnode;
+            return functionOk(Pnode);
             }
         CASE(UPP)
             {
-            psk kn;
-            if(!is_op(rknoop))
-                kn = changeCase(rknoop
+            psk pnode;
+            if(!is_op(rightnode))
+                pnode = changeCase(rightnode
 #if CODEPAGE850
                 ,FALSE
 #endif
                 ,FALSE);
-            else if(!is_op(rlknoop = rknoop->LEFT))
-                kn = changeCase(rlknoop
+            else if(!is_op(rlnode = rightnode->LEFT))
+                pnode = changeCase(rlnode
 #if CODEPAGE850
-                ,zoekopt(rknoop->RIGHT,DOS)
+                ,zoekopt(rightnode->RIGHT,DOS)
 #endif
                 ,FALSE);
             else
-                return functionFail(pkn);
-            wis(pkn);
-            pkn = kn;
-            return functionOk(pkn);
+                return functionFail(Pnode);
+            wipe(Pnode);
+            Pnode = pnode;
+            return functionOk(Pnode);
             }
         CASE(DIV)
             {
-            if(  is_op(rknoop)
-              && RATIONAL_COMP(rlknoop = rknoop->LEFT)
-              && RATIONAL_COMP_NOT_NUL(rrknoop = rknoop->RIGHT)
+            if(  is_op(rightnode)
+              && RATIONAL_COMP(rlnode = rightnode->LEFT)
+              && RATIONAL_COMP_NOT_NUL(rrightnode = rightnode->RIGHT)
               )
                 {
-                psk kn;
-                kn = _qheeldeel(rlknoop,rrknoop);
-                wis(pkn);
-                pkn = kn;
-                return functionOk(pkn);
+                psk pnode;
+                pnode = qIntegerDivision(rlnode,rrightnode);
+                wipe(Pnode);
+                Pnode = pnode;
+                return functionOk(Pnode);
                 }
-            return functionFail(pkn);
+            return functionFail(Pnode);
             }
         CASE(DEN)
             {
-            if(RATIONAL_COMP(rknoop))
+            if(RATIONAL_COMP(rightnode))
                 {
-                pkn = _qdenominator(pkn);
+                Pnode = qDenominator(Pnode);
                 }
-            return functionOk(pkn);
+            return functionOk(Pnode);
             }
         CASE(LST)
             {
-            return output(&pkn,lst) ? functionOk(pkn) : functionFail(pkn);
+            return output(&Pnode,lst) ? functionOk(Pnode) : functionFail(Pnode);
             }
 #if !defined NO_FILE_RENAME
         CASE(REN)
             {
-            if(   is_op(rknoop)
-              && !is_op(rlknoop = rknoop->LEFT)
-              && !is_op(rrknoop = rknoop->RIGHT)
+            if(   is_op(rightnode)
+              && !is_op(rlnode = rightnode->LEFT)
+              && !is_op(rrightnode = rightnode->RIGHT)
               )
                 {
-                intVal = rename((const char *)POBJ(rlknoop),(const char *)POBJ(rrknoop));
+                intVal = rename((const char *)POBJ(rlnode),(const char *)POBJ(rrightnode));
                 if(intVal)
                     {
 #ifndef EACCES
-                    sprintf(klad,"%d",intVal);
+                    sprintf(draft,"%d",intVal);
 #else
                     switch(errno)
                         {
@@ -13750,50 +13749,50 @@ static function_return_type functies(psk pkn)
                             could not be created (invalid path); or oldname is a directory
                             and newname specifies a different path.
                             */
-                            strcpy(klad,"EACCES");
+                            strcpy(draft,"EACCES");
                             break;
                         case ENOENT:
                             /*
                             File or path specified by oldname not found.
                             */
-                            strcpy(klad,"ENOENT");
+                            strcpy(draft,"ENOENT");
                             break;
                         case EINVAL:
                             /*
                             Name contains invalid characters.
                             */
-                            strcpy(klad,"EINVAL");
+                            strcpy(draft,"EINVAL");
                             break;
                         default:
-                            sprintf(klad,"%d",errno);
+                            sprintf(draft,"%d",errno);
                             break;
                         }
 #endif
                     }
                 else
-                    strcpy(klad,"0");
-                wis(pkn);
-                pkn = scopy((const char *)klad);
-                return functionOk(pkn);
+                    strcpy(draft,"0");
+                wipe(Pnode);
+                Pnode = scopy((const char *)draft);
+                return functionOk(Pnode);
                 }
             else
-                return functionFail(pkn);
+                return functionFail(Pnode);
             }
 #endif
 #if !defined NO_FILE_REMOVE
         CASE(RMV)
             {
-            if(!is_op(rknoop))
+            if(!is_op(rightnode))
                 {
 #if defined __SYMBIAN32__
-                intVal = unlink((const char *)POBJ(rknoop));
+                intVal = unlink((const char *)POBJ(rightnode));
 #else
-                intVal = remove((const char *)POBJ(rknoop));
+                intVal = remove((const char *)POBJ(rightnode));
 #endif
                 if(intVal)
                     {
 #ifndef EACCES
-                    sprintf(klad,"%d",intVal);
+                    sprintf(draft,"%d",intVal);
 #else
                     switch(errno)
                         {
@@ -13803,106 +13802,106 @@ static function_return_type functies(psk pkn)
                             could not be created (invalid path); or oldname is a directory
                             and newname specifies a different path.
                             */
-                            strcpy(klad,"EACCES");
+                            strcpy(draft,"EACCES");
                             break;
                         case ENOENT:
                             /*
                             File or path specified by oldname not found.
                             */
-                            strcpy(klad,"ENOENT");
+                            strcpy(draft,"ENOENT");
                             break;
                         default:
-                            sprintf(klad,"%d",errno);
+                            sprintf(draft,"%d",errno);
                             break;
                         }
 #endif
                     }
                 else
-                    strcpy(klad,"0");
-                wis(pkn);
-                pkn = scopy((const char *)klad);
-                return functionOk(pkn);
+                    strcpy(draft,"0");
+                wipe(Pnode);
+                Pnode = scopy((const char *)draft);
+                return functionOk(Pnode);
                 }
             else
-                return functionFail(pkn);
+                return functionFail(Pnode);
             }
 #endif
         CASE(ARG) /* arg$ or arg$N  (N == 0,1,... and N < argc) */
             {
             static int argno = 0;
-            if(is_op(rknoop))
-                return functionFail(pkn);
-            if(PLOBJ(rknoop) != '\0')
+            if(is_op(rightnode))
+                return functionFail(Pnode);
+            if(PLOBJ(rightnode) != '\0')
                 {
                 LONG val;
-                if(!INTEGER_NOT_NEG(rknoop))
-                    return functionFail(pkn);
-                val = STRTOUL((char *)POBJ(rknoop),(char **)NULL,10);
+                if(!INTEGER_NOT_NEG(rightnode))
+                    return functionFail(Pnode);
+                val = STRTOUL((char *)POBJ(rightnode),(char **)NULL,10);
                 if(val >= ARGC)
-                    return functionFail(pkn);
-                wis(pkn);
-                pkn = scopy((const char *)ARGV[val]);
-                return functionOk(pkn);
+                    return functionFail(Pnode);
+                wipe(Pnode);
+                Pnode = scopy((const char *)ARGV[val]);
+                return functionOk(Pnode);
                 }
             if(argno < ARGC)
                 {
-                wis(pkn);
-                pkn = scopy((const char *)ARGV[argno++]);
-                return functionOk(pkn);
+                wipe(Pnode);
+                Pnode = scopy((const char *)ARGV[argno++]);
+                return functionOk(Pnode);
                 }
             else
                 {
-                return functionFail(pkn);
+                return functionFail(Pnode);
                 }
             }
         CASE(GET) /* get$file */
             {
             Boolean GoOn;
             int err = 0;
-            if(is_op(rknoop))
+            if(is_op(rightnode))
                 {
-                if(is_op(rlknoop = rknoop->LEFT))
-                    return functionFail(pkn);
-                rrknoop = rknoop->RIGHT;
-                intVal = (zoekopt(rrknoop,ECH) << SHIFT_ECH)
-                       + (zoekopt(rrknoop,MEM) << SHIFT_MEM)
-                       + (zoekopt(rrknoop,VAP) << SHIFT_VAP)
-                       + (zoekopt(rrknoop,STG) << SHIFT_STR)
-                       + (zoekopt(rrknoop,ML ) << SHIFT_ML)
-                       + (zoekopt(rrknoop,TRM) << SHIFT_TRM)
-                       + (zoekopt(rrknoop,HT)  << SHIFT_HT)
-                       + (zoekopt(rrknoop,X)   << SHIFT_X)
-                       + (zoekopt(rrknoop,JSN) << SHIFT_JSN)
-                       + (zoekopt(rrknoop,TXT) << SHIFT_TXT)
-                       + (zoekopt(rrknoop,BIN) << SHIFT_BIN);
+                if(is_op(rlnode = rightnode->LEFT))
+                    return functionFail(Pnode);
+                rrightnode = rightnode->RIGHT;
+                intVal = (zoekopt(rrightnode,ECH) << SHIFT_ECH)
+                       + (zoekopt(rrightnode,MEM) << SHIFT_MEM)
+                       + (zoekopt(rrightnode,VAP) << SHIFT_VAP)
+                       + (zoekopt(rrightnode,STG) << SHIFT_STR)
+                       + (zoekopt(rrightnode,ML ) << SHIFT_ML)
+                       + (zoekopt(rrightnode,TRM) << SHIFT_TRM)
+                       + (zoekopt(rrightnode,HT)  << SHIFT_HT)
+                       + (zoekopt(rrightnode,X)   << SHIFT_X)
+                       + (zoekopt(rrightnode,JSN) << SHIFT_JSN)
+                       + (zoekopt(rrightnode,TXT) << SHIFT_TXT)
+                       + (zoekopt(rrightnode,BIN) << SHIFT_BIN);
                 }
             else
                 {
                 intVal = 0;
-                rlknoop = rknoop;
+                rlnode = rightnode;
                 }
             if(intVal & OPT_MEM)
                 {
-                adr[1] = zelfde_als_w(rlknoop);
-                bron = POBJ(adr[1]);
+                addr[1] = same_as_w(rlnode);
+                source = POBJ(addr[1]);
                 for(;;)
                     {
-                    pkn = input(NULL,pkn,intVal,&err,&GoOn);
+                    Pnode = input(NULL,Pnode,intVal,&err,&GoOn);
                     if(!GoOn || err)
                         break;
-                    pkn = eval(pkn);
+                    Pnode = eval(Pnode);
                     }
-                wis(adr[1]);
+                wipe(addr[1]);
                 }
             else
                 {
-                if(rlknoop->u.obj && strcmp((char *)POBJ(rlknoop),"stdin"))
+                if(rlnode->u.obj && strcmp((char *)POBJ(rlnode),"stdin"))
                     {
 #if !defined NO_FOPEN
                     FILE *red;
                     filehendel * fh;
                     red = global_fpi;
-                    fh = myfopen((char *)POBJ(rlknoop),(intVal & OPT_TXT) ? READTXT : READBIN
+                    fh = myfopen((char *)POBJ(rlnode),(intVal & OPT_TXT) ? READTXT : READBIN
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
                         ,TRUE
 #endif
@@ -13910,21 +13909,21 @@ static function_return_type functies(psk pkn)
                     if(fh == NULL)
                         {
                         global_fpi = red;
-                        return functionFail(pkn);
+                        return functionFail(Pnode);
                         }
                     else
                         global_fpi = fh->fp;
                     for(;;)
                         {
-                        pkn = input(global_fpi,pkn,intVal,&err,&GoOn);
+                        Pnode = input(global_fpi,Pnode,intVal,&err,&GoOn);
                         if(!GoOn || err)
                             break;
-                        pkn = eval(pkn);
+                        Pnode = eval(Pnode);
                         }
                     deallocateFilehendel(fh);
                     global_fpi = red;
 #else
-                    return functionFail(pkn);
+                    return functionFail(Pnode);
 #endif
                     }
                 else
@@ -13935,41 +13934,41 @@ static function_return_type functies(psk pkn)
                         {
                         clock_t time0;
                         time0 = clock();
-                        pkn = input(stdin,pkn,intVal,&err,&GoOn);
+                        Pnode = input(stdin,Pnode,intVal,&err,&GoOn);
                         delayDueToInput += clock() - time0;
                         if(!GoOn || err)
                             break;
-                        pkn = eval(pkn);
+                        Pnode = eval(Pnode);
                         }
 #else
                     for(;;)
                         {
-                        pkn = input(stdin,pkn,intVal,&err,&GoOn);
+                        Pnode = input(stdin,Pnode,intVal,&err,&GoOn);
                         if(!GoOn || err)
                             break;
-                        pkn = eval(pkn);
+                        Pnode = eval(Pnode);
                         }
 #endif
                     }
                 }
-            return err ? functionFail(pkn) : functionOk(pkn);
+            return err ? functionFail(Pnode) : functionOk(Pnode);
             }
-        CASE(PUT) /* put$(file,mode,knoop) of put$knoop */
+        CASE(PUT) /* put$(file,mode,node) of put$node */
             {
-            return output(&pkn,result) ? functionOk(pkn) : functionFail(pkn);
+            return output(&Pnode,result) ? functionOk(Pnode) : functionFail(Pnode);
             }
 #if !defined __SYMBIAN32__
 #if !defined NO_SYSTEM_CALL
         CASE(SYS)
             {
-            if(is_op(rknoop) || (PLOBJ(rknoop) == '\0'))
-                return functionFail(pkn);
+            if(is_op(rightnode) || (PLOBJ(rightnode) == '\0'))
+                return functionFail(Pnode);
             else
                 {
-                intVal = system((const char *)POBJ(rknoop));
+                intVal = system((const char *)POBJ(rightnode));
                 if(intVal)
 #ifndef E2BIG
-                    sprintf(klad,"%d",intVal);
+                    sprintf(draft,"%d",intVal);
 #else
                     switch(errno)
                         {
@@ -13977,19 +13976,19 @@ static function_return_type functies(psk pkn)
                             /*
                             Argument list (which is system-dependent) is too big.
                             */
-                            strcpy(klad,"E2BIG");
+                            strcpy(draft,"E2BIG");
                             break;
                         case ENOENT:
                             /*
                             Command interpreter cannot be found.
                             */
-                            strcpy(klad,"ENOENT");
+                            strcpy(draft,"ENOENT");
                             break;
                         case ENOEXEC:
                             /*
                             Command-interpreter file has invalid format and is not executable.
                             */
-                            strcpy(klad,"ENOEXEC");
+                            strcpy(draft,"ENOEXEC");
                             break;
                         case ENOMEM:
                             /*
@@ -13997,28 +13996,28 @@ static function_return_type functies(psk pkn)
                             memory has been corrupted; or invalid block exists, indicating
                             that process making call was not allocated properly.
                             */
-                            strcpy(klad,"ENOMEM");
+                            strcpy(draft,"ENOMEM");
                             break;
                         default:
-                            sprintf(klad,"%d",errno);
+                            sprintf(draft,"%d",errno);
                             break;
                         }
 #endif
                 else
-                    strcpy(klad,"0");
-                wis(pkn);
-                pkn = scopy((const char *)klad);
-                return functionOk(pkn);
+                    strcpy(draft,"0");
+                wipe(Pnode);
+                Pnode = scopy((const char *)draft);
+                return functionOk(Pnode);
                 }
             }
 #endif
 #endif
         CASE(TBL) /* tbl$(varname,length) */
             {
-            if(is_op(rknoop))
-                return psh(rknoop->LEFT,&nulk,rknoop->RIGHT) ? functionOk(pkn) : functionFail(pkn);
+            if(is_op(rightnode))
+                return psh(rightnode->LEFT,&zeroNode,rightnode->RIGHT) ? functionOk(Pnode) : functionFail(Pnode);
             else
-                return functionFail(pkn);
+                return functionFail(Pnode);
             }
 #if 0
 /*
@@ -14026,11 +14025,11 @@ The same effect is obtained by <expr>:?!(=)
 */
         CASE(PRV) /* "?"$<expr> */
             {
-            if((rknoop->v.fl & SUCCESS)
-            && (is_op(rknoop) || rknoop->u.obj || HAS_UNOPS(rknoop)))
-                insert(&nilk,rknoop);
-            pkn = rechtertak(pkn);
-            return functionOk(pkn);
+            if((rightnode->v.fl & SUCCESS)
+            && (is_op(rightnode) || rightnode->u.obj || HAS_UNOPS(rightnode)))
+                insert(&nilNode,rightnode);
+            Pnode = rightbranch(Pnode);
+            return functionOk(Pnode);
             }
 #endif
         CASE(CLK) /* clk' */
@@ -14039,357 +14038,354 @@ The same effect is obtained by <expr>:?!(=)
 #ifdef DELAY_DUE_TO_INPUT
             time -= delayDueToInput;
 #endif
-            print_clock(klad,time);
-            wis(pkn);
-            pkn = scopy((const char *)klad);
-            return functionOk(pkn);
+            print_clock(draft,time);
+            wipe(Pnode);
+            Pnode = scopy((const char *)draft);
+            return functionOk(Pnode);
             }
 
         CASE(SIM) /* sim$(<atom>,<atom>) , fuzzy compare (percentage) */
             {
-            if(is_op(rknoop)
-            && !is_op(rlknoop = rknoop->LEFT)
-            && !is_op(rrknoop = rknoop->RIGHT))
+            if(is_op(rightnode)
+            && !is_op(rlnode = rightnode->LEFT)
+            && !is_op(rrightnode = rightnode->RIGHT))
                 {
-                Sim(klad,(char *)POBJ(rlknoop),(char *)POBJ(rrknoop));
-                wis(pkn);
-                pkn = scopy((const char *)klad);
-                return functionOk(pkn);
+                Sim(draft,(char *)POBJ(rlnode),(char *)POBJ(rrightnode));
+                wipe(Pnode);
+                Pnode = scopy((const char *)draft);
+                return functionOk(Pnode);
                 }
             else
-                return functionFail(pkn);
+                return functionFail(Pnode);
             }
 #if DEBUGBRACMAT
         CASE(DBG) /* dbg$<expr> */
             {
             ++debug;
-            if(kop(pkn) != FUU)
+            if(Op(Pnode) != FUU)
                 {
                 errorprintf("Use dbg'(expression), not dbg$(expression)!\n");
-                writeError(pkn);
+                writeError(Pnode);
                 }
-            pkn = rechtertak(pkn);
-            pkn = eval(pkn);
+            Pnode = rightbranch(Pnode);
+            Pnode = eval(Pnode);
             --debug;
-            return functionOk(pkn);
+            return functionOk(Pnode);
             }
 #endif
         CASE(WHL)
             {
-            while(isSUCCESSorFENCE(rknoop = eval(zelfde_als_w(pkn->RIGHT))))
+            while(isSUCCESSorFENCE(rightnode = eval(same_as_w(Pnode->RIGHT))))
                 {
-                wis(rknoop);
+                wipe(rightnode);
                 }
-            wis(rknoop);
-            return functionOk(pkn);
+            wipe(rightnode);
+            return functionOk(Pnode);
             }
         CASE(New) /* new$<object>*/
             {
-            if(kop(rknoop) == COMMA)
+            if(Op(rightnode) == COMMA)
                 {
-                adr[2] = getObjectDef(rknoop->LEFT);
-                if(!adr[2])
-                    return functionFail(pkn);
-                adr[3] = rknoop->RIGHT;
-                if(ISBUILTIN((objectknoop*)adr[2]))
-                    pkn = opb(pkn,"(((\2.New)'\3)|)&\2",NULL);
+                addr[2] = getObjectDef(rightnode->LEFT);
+                if(!addr[2])
+                    return functionFail(Pnode);
+                addr[3] = rightnode->RIGHT;
+                if(ISBUILTIN((objectnode*)addr[2]))
+                    Pnode = build_up(Pnode,"(((\2.New)'\3)|)&\2",NULL);
     /* We might be able to call 'new' if 'New' had attached the argument
         (containing the definition of a 'new' method) to the rhs of the '='.
        This cannot be done in a general way without introducing new syntax rules for the new$ function.
     */
                 else
-                    pkn = opb(pkn,"(((\2.new)'\3)|)&\2",NULL);
+                    Pnode = build_up(Pnode,"(((\2.new)'\3)|)&\2",NULL);
                 }
             else
                 {
-                adr[2] = getObjectDef(rknoop);
-                DBGSRC(printf("adr[2]:");result(adr[2]);printf("\n");)
-                if(!adr[2])
-                    return functionFail(pkn);
-                if(ISBUILTIN((objectknoop*)adr[2]))
-                    pkn = opb(pkn,"(((\2.New)')|)&\2",NULL);
+                addr[2] = getObjectDef(rightnode);
+                DBGSRC(printf("addr[2]:");result(addr[2]);printf("\n");)
+                if(!addr[2])
+                    return functionFail(Pnode);
+                if(ISBUILTIN((objectnode*)addr[2]))
+                    Pnode = build_up(Pnode,"(((\2.New)')|)&\2",NULL);
                 /* There cannot be a user-defined 'new' method on a built-in object if there is no way to supply it*/
                 /* 'die' CAN be user-supplied. The built-in function is 'Die' */
                 else
-                    pkn = opb(pkn,"(((\2.new)')|)&\2",NULL);
+                    Pnode = build_up(Pnode,"(((\2.new)')|)&\2",NULL);
                 }
-            SETCREATEDWITHNEW((objectknoop*)adr[2]);
-            wis(adr[2]);
-            return functionOk(pkn);
+            SETCREATEDWITHNEW((objectnode*)addr[2]);
+            wipe(addr[2]);
+            return functionOk(Pnode);
             }
         CASE(0) /* $<expr>  '<expr> */
             {
-            if(kop(pkn) == FUU)
+            if(Op(Pnode) == FUU)
                 {
-                if(!HAS_UNOPS(pkn->LEFT))
+                if(!HAS_UNOPS(Pnode->LEFT))
                     {
-                    intVal = pkn->v.fl & UNOPS;
+                    intVal = Pnode->v.fl & UNOPS;
                     if(  intVal == FRACTION 
-                      && is_op(pkn->RIGHT)
-                      && kop(pkn->RIGHT) == DOT
-                      && !is_op(pkn->RIGHT->LEFT)
+                      && is_op(Pnode->RIGHT)
+                      && Op(Pnode->RIGHT) == DOT
+                      && !is_op(Pnode->RIGHT->LEFT)
                       )
                         { /* /('(a.a+2))*/
-                        return functionOk(pkn);
+                        return functionOk(Pnode);
                         }
                     else
                         {
-                        rknoop = evalmacro(pkn->RIGHT);
-                        rrknoop = (psk)bmalloc(__LINE__,sizeof(objectknoop));
+                        rightnode = evalmacro(Pnode->RIGHT);
+                        rrightnode = (psk)bmalloc(__LINE__,sizeof(objectnode));
 #ifdef BUILTIN
-                        ((typedObjectknoop*)rrknoop)->u.Int = 0;
+                        ((typedObjectnode*)rrightnode)->u.Int = 0;
 #else
-                        ((typedObjectknoop*)rrknoop)->refcount = 0;
-                        UNSETCREATEDWITHNEW((typedObjectknoop*)rrknoop);
-                        UNSETBUILTIN((typedObjectknoop*)rrknoop);
+                        ((typedObjectnode*)rrightnode)->refcount = 0;
+                        UNSETCREATEDWITHNEW((typedObjectnode*)rrightnode);
+                        UNSETBUILTIN((typedObjectnode*)rrightnode);
 #endif
-                        rrknoop->v.fl = EQUALS | SUCCESS;
-                        rrknoop->LEFT = zelfde_als_w(&nilk);
-                        if(rknoop)
+                        rrightnode->v.fl = EQUALS | SUCCESS;
+                        rrightnode->LEFT = same_as_w(&nilNode);
+                        if(rightnode)
                             {
-                            rrknoop->RIGHT = rknoop;
+                            rrightnode->RIGHT = rightnode;
                             }
                         else
                             {
-                            rrknoop->RIGHT = zelfde_als_w(pkn->RIGHT);
+                            rrightnode->RIGHT = same_as_w(Pnode->RIGHT);
                             }
-                        wis(pkn);
-                        pkn = rrknoop;
-                        pkn->v.fl |= intVal; /* (a=b)&!('$a)*/
+                        wipe(Pnode);
+                        Pnode = rrightnode;
+                        Pnode->v.fl |= intVal; /* (a=b)&!('$a)*/
                         }
                     }
                 else
                     {
-                    combiflags(pkn);
-                    pkn = rechtertak(pkn);
+                    combiflags(Pnode);
+                    Pnode = rightbranch(Pnode);
                     }
-                return functionOk(pkn);
+                return functionOk(Pnode);
                 }
             else
                 {
-                return functionFail(pkn);
+                return functionFail(Pnode);
                 }
             }
         DEFAULT
             {
-            if(INTEGER(lknoop))
+            if(INTEGER(lnode))
                 {
-                vars *navar;
-                if(is_op(rknoop))
-                    return functionFail(pkn);
-                for(navar = variabelen[rknoop->u.obj];
-                    navar && (STRCMP(VARNAME(navar),POBJ(rknoop)) < 0);
-                    navar = navar->next);
+                vars *nxtvar;
+                if(is_op(rightnode))
+                    return functionFail(Pnode);
+                for(nxtvar = variables[rightnode->u.obj];
+                    nxtvar && (STRCMP(VARNAME(nxtvar),POBJ(rightnode)) < 0);
+                    nxtvar = nxtvar->next);
                 /* find first name in a row of equal names */
-                if(navar && !STRCMP(VARNAME(navar),POBJ(rknoop)))
+                if(nxtvar && !STRCMP(VARNAME(nxtvar),POBJ(rightnode)))
                     {
-                    navar->selector =
-                       (int)toLong(lknoop)
-                     % (navar->n + 1);
-                    if(navar->selector < 0)
-                        navar->selector += (navar->n + 1);
-                    pkn = rechtertak(pkn);
-                    return functionOk(pkn);
+                    nxtvar->selector =
+                       (int)toLong(lnode)
+                     % (nxtvar->n + 1);
+                    if(nxtvar->selector < 0)
+                        nxtvar->selector += (nxtvar->n + 1);
+                    Pnode = rightbranch(Pnode);
+                    return functionOk(Pnode);
                     }
                 }
-            if(!(rknoop->v.fl & SUCCESS))
-                return functionFail(pkn);
-            adr[1] = NULL;
-            return find_func(pkn);
+            if(!(rightnode->v.fl & SUCCESS))
+                return functionFail(Pnode);
+            addr[1] = NULL;
+            return find_func(Pnode);
             }
         }
         }
-    /*return functionOk(pkn); 20 Dec 1995, unreachable code in Borland C */
+    /*return functionOk(Pnode); 20 Dec 1995, unreachable code in Borland C */
     }
 
-static psk stapelmacht(psk pkn)
+static psk stapelmacht(psk Pnode)
     {
-    psk lknoop;
+    psk lnode;
     Boolean done = FALSE;
-    for(;((lknoop = pkn->LEFT)->v.fl & READY) && kop(lknoop) == EXP;)
+    for(;((lnode = Pnode->LEFT)->v.fl & READY) && Op(lnode) == EXP;)
         {
         done = TRUE;
-        pkn->LEFT = lknoop = prive(lknoop);
-        lknoop->v.fl &= ~READY & ~OPERATOR;/* turn off READY flag */
-        lknoop->ops |= TIMES;
-        adr[1] = lknoop->LEFT;
-        adr[2] = lknoop->RIGHT;
-        adr[3] = pkn->RIGHT;
-        pkn = opb(pkn,"(\1^(\2*\3))",NULL);
+        Pnode->LEFT = lnode = isolated(lnode);
+        lnode->v.fl &= ~READY & ~OPERATOR;/* turn off READY flag */
+        lnode->ops |= TIMES;
+        addr[1] = lnode->LEFT;
+        addr[2] = lnode->RIGHT;
+        addr[3] = Pnode->RIGHT;
+        Pnode = build_up(Pnode,"(\1^(\2*\3))",NULL);
         }
     if(done)
         {
-        return pkn;
+        return Pnode;
         }
     else
         {
         static const char * conc_arr[] = {NULL,NULL,NULL,NULL,NULL,NULL};
 
-        Qgetal iexponent,
+        Qnumber iexponent,
         hiexponent;
 
-        psk rknoop;
-        if(!is_op(rknoop = pkn->RIGHT))
+        psk rightnode;
+        if(!is_op(rightnode = Pnode->RIGHT))
             {
-            if(RAT_NUL(rknoop))
+            if(RAT_NUL(rightnode))
                 {
-                wis(pkn);
-                return copievan(&eenk);
+                wipe(Pnode);
+                return copyof(&oneNode);
                 }
-            if(IS_ONE(rknoop))
+            if(IS_ONE(rightnode))
                 {
-                return linkertak(pkn);
+                return leftbranch(Pnode);
                 }
             }
-        lknoop = pkn->LEFT;
-        if(!is_op(lknoop))
+        lnode = Pnode->LEFT;
+        if(!is_op(lnode))
             {
-            if((RAT_NUL(lknoop) && !RAT_NEG_COMP(rknoop)) || IS_ONE(lknoop))
+            if((RAT_NUL(lnode) && !RAT_NEG_COMP(rightnode)) || IS_ONE(lnode))
                 {
-                return linkertak(pkn);
+                return leftbranch(Pnode);
                 }
 
-            if(!is_op(rknoop) && RATIONAL_COMP(rknoop))
+            if(!is_op(rightnode) && RATIONAL_COMP(rightnode))
                 {
-                if(RATIONAL_COMP(lknoop))
+                if(RATIONAL_COMP(lnode))
                     {
-                    if(RAT_NEG_COMP(rknoop) && abseen(rknoop))
+                    if(RAT_NEG_COMP(rightnode) && absone(rightnode))
                         {
                         conc_arr[1] = NULL;
-                        conc_arr[2] = hekje6;
+                        conc_arr[2] = hash6;
                         conc_arr[3] = NULL;
-                        adr[6] = _q_qdeel(&eenk,lknoop);
-                        assert(lknoop == pkn->LEFT);
-                        pkn = vopb(pkn, conc_arr +2);
-                        wis(adr[6]);
-                        return pkn;
+                        addr[6] = qqDivide(&oneNode,lnode);
+                        assert(lnode == Pnode->LEFT);
+                        Pnode = vbuildup(Pnode, conc_arr +2);
+                        wipe(addr[6]);
+                        return Pnode;
                         }
-                    else if(RAT_NEG_COMP(lknoop) && RAT_RAT_COMP(rknoop))
+                    else if(RAT_NEG_COMP(lnode) && RAT_RAT_COMP(rightnode))
                         {
-                        return pkn; /*{?} -3^2/3 => -3^2/3 */
+                        return Pnode; /*{?} -3^2/3 => -3^2/3 */
                         }
                     /* Missing here is n^m, with m > 2.
                        That case is handled in casemacht. */
                     }
-                else if(PLOBJ(lknoop) == IM)
+                else if(PLOBJ(lnode) == IM)
                     {
-                    if(_qvergelijk(rknoop,&nulk) & MINUS)
+                    if(qCompare(rightnode,&zeroNode) & MINUS)
                         { /* i^-n -> -i^n */ /*{?} i^-7 => i */
                           /* -i^-n -> i^n */ /*{?} -i^-7 => -i */
                         conc_arr[0] = "(\2^\3)";
-                        adr[2] = _qmaalmineen(lknoop);
-                        adr[3] = _qmaalmineen(rknoop);
+                        addr[2] = qTimesMinusOne(lnode);
+                        addr[3] = qTimesMinusOne(rightnode);
                         conc_arr[1] = NULL;
-                        pkn = vopb(pkn, conc_arr);
-                        wis(adr[2]);
-                        wis(adr[3]);
-                        return pkn;
+                        Pnode = vbuildup(Pnode, conc_arr);
+                        wipe(addr[2]);
+                        wipe(addr[3]);
+                        return Pnode;
                         }
-                    else if(_qvergelijk(&tweek,rknoop) & (QNUL|MINUS))
+                    else if(qCompare(&twoNode,rightnode) & (QNUL|MINUS))
                         {
-                        iexponent = _qmodulo(rknoop,&vierk);
+                        iexponent = qModulo(rightnode,&fourNode);
                         if(iexponent->ops & QNUL)
                             {
-                            wis(pkn); /*{?} i^4 => 1 */
-                            pkn = copievan(&eenk);
+                            wipe(Pnode); /*{?} i^4 => 1 */
+                            Pnode = copyof(&oneNode);
                             }
                         else
                             {
-                            int teken;
-                            teken = _qvergelijk(iexponent,&tweek);
-                            if(teken & QNUL)
+                            int Sign;
+                            Sign = qCompare(iexponent,&twoNode);
+                            if(Sign & QNUL)
                                 {
-                                wis(pkn);
-                                pkn = copievan(&mineenk);
+                                wipe(Pnode);
+                                Pnode = copyof(&minusOneNode);
                                 }
                             else
                                 {
-                                if(!(teken & MINUS))
+                                if(!(Sign & MINUS))
                                     {
                                     hiexponent = iexponent;
-                                    iexponent = _qplus(&vierk,hiexponent,MINUS);
-                                    wis(hiexponent);
+                                    iexponent = qPlus(&fourNode,hiexponent,MINUS);
+                                    wipe(hiexponent);
                                     }
-                                adr[2] = lknoop;
-                                adr[6] = iexponent;
+                                addr[2] = lnode;
+                                addr[6] = iexponent;
                                 conc_arr[0] = "(-1*\2)^";
                                 conc_arr[1] = "(\6)";
                                 conc_arr[2] = NULL;
-                                pkn = vopb(pkn, conc_arr);
+                                Pnode = vbuildup(Pnode, conc_arr);
                                 }
                             }
-                        wis(iexponent);
-                        return pkn;
+                        wipe(iexponent);
+                        return Pnode;
                         }
                     }
                 }
             }
 
-        if(kop(lknoop) == TIMES)
+        if(Op(lnode) == TIMES)
             {
-            adr[1] = lknoop->LEFT;
-            adr[2] = lknoop->RIGHT;
-            adr[3] = pkn->RIGHT;
-            return opb(pkn,"\1^\3*\2^\3",NULL);
+            addr[1] = lnode->LEFT;
+            addr[2] = lnode->RIGHT;
+            addr[3] = Pnode->RIGHT;
+            return build_up(Pnode,"\1^\3*\2^\3",NULL);
             }
 
-        if(RATIONAL_COMP(lknoop))
+        if(RATIONAL_COMP(lnode))
             {
-            static const char
-                haakmineen[] = ")^-1",
-                haakhekje1macht[] = "(\1^",
-                macht2maaleenmacht[] = ")^2*\1^";
-            if(INTEGER_NOT_NUL_COMP(rknoop) && !abseen(rknoop))
+			static const char parenonepow[] = "(\1^";
+            if(INTEGER_NOT_NUL_COMP(rightnode) && !absone(rightnode))
                 {
-                adr[1] = lknoop;
-                if(INTEGER_POS_COMP(rknoop))
+                addr[1] = lnode;
+                if(INTEGER_POS_COMP(rightnode))
                     {
-                    if(_qvergelijk(&tweek,rknoop) & MINUS)
+                    if(qCompare(&twoNode,rightnode) & MINUS)
                         {
                         /* m^n = (m^(n\2))^2*m^(n mod 2) */ /*{?} 9^7 => 4782969 */
-                        conc_arr[0] = haakhekje1macht;
-                        conc_arr[1] = hekje5;
-                        conc_arr[3] = hekje6;
+                        conc_arr[0] = parenonepow;
+                        conc_arr[1] = hash5;
+                        conc_arr[3] = hash6;
                         conc_arr[4] = NULL;
-                        adr[5] = _qheeldeel(rknoop,&tweek);
-                        conc_arr[2] = macht2maaleenmacht;
-                        adr[6] = _qmodulo(rknoop,&tweek);
-                        pkn = vopb(pkn, conc_arr);
-                        wis(adr[5]);
-                        wis(adr[6]);
+                        addr[5] = qIntegerDivision(rightnode,&twoNode);
+						conc_arr[2] = ")^2*\1^";
+                        addr[6] = qModulo(rightnode,&twoNode);
+                        Pnode = vbuildup(Pnode, conc_arr);
+                        wipe(addr[5]);
+                        wipe(addr[6]);
                         }
                     else
                         {
                         /* m^2 = m*m */
-                        pkn = opb(pkn,"(\1*\1)",NULL);
+                        Pnode = build_up(Pnode,"(\1*\1)",NULL);
                         }
                     }
                 else
                     {
                     /*{?} 7^-13 => 1/96889010407 */
-                    conc_arr[0] = haakhekje1macht;
-                    conc_arr[1] = hekje6;
-                    adr[6] = _qmaalmineen(rknoop);
-                    conc_arr[2] = haakmineen;
+                    conc_arr[0] = parenonepow;
+                    conc_arr[1] = hash6;
+                    addr[6] = qTimesMinusOne(rightnode);
+					conc_arr[2] = ")^-1";
                     conc_arr[3] = 0;
-                    pkn = vopb(pkn, conc_arr);
-                    wis(adr[6]);
+                    Pnode = vbuildup(Pnode, conc_arr);
+                    wipe(addr[6]);
                     }
-                return pkn;
+                return Pnode;
                 }
-            else if(RAT_RAT(rknoop))
+            else if(RAT_RAT(rightnode))
                 {
                 char **conc,slash = 0;
                 int wipe[20],ind;
-                ngetal teller = {0},noemer = {0};
+                nnumber teller = {0},noemer = {0};
                 for(ind = 0; ind < 20; wipe[ind++] = TRUE);
                 ind = 0;
                 conc = (char **)bmalloc(__LINE__,20 * sizeof(char **));
                    /* 20 is safe value for ULONGs */
-                adr[1] = pkn->RIGHT;
-                if(RAT_RAT_COMP(pkn->LEFT))
+                addr[1] = Pnode->RIGHT;
+                if(RAT_RAT_COMP(Pnode->LEFT))
                     {
-                    splits(pkn->LEFT,&teller,&noemer);
+                    splits(Pnode->LEFT,&teller,&noemer);
                     if(!subroot(&teller,conc,&ind))
                         {
                         wipe[ind] = FALSE;
@@ -14414,33 +14410,33 @@ static psk stapelmacht(psk pkn)
                     }
                 else
                     {
-                    teller.number = (char *)POBJ(pkn->LEFT);
+                    teller.number = (char *)POBJ(Pnode->LEFT);
                     teller.alloc = NULL;
                     teller.length = strlen(teller.number);
                     if(!subroot(&teller,conc,&ind))
                         {
                         bfree(conc);
-                        return pkn;
+                        return Pnode;
                         }
                     }
                 conc[ind--] = NULL;
-                pkn = vopb(pkn,(const char **)conc);
+                Pnode = vbuildup(Pnode,(const char **)conc);
                 if(slash)
                     teller.number[teller.length] = slash;
                 for(;ind >= 0;ind--)
                    if(wipe[ind])
                        bfree(conc[ind]);
                 bfree(conc);
-                return pkn;
+                return Pnode;
                 }
             }
         }
-    if(is_op(pkn->RIGHT))
+    if(is_op(Pnode->RIGHT))
         {
         int ok;
-        pkn = tryq(pkn,f4,&ok);
+        Pnode = tryq(Pnode,f4,&ok);
         }
-    return pkn;
+    return Pnode;
     }
 
 /*
@@ -14450,22 +14446,22 @@ is found iteratively, not recursively. This also causes some operations to
 be tremendously faster. e.g. (1+a+b+c)^30+1&ready evaluates in about
 4,5 seconds now, previously in 330 seconds! (AST Bravo MS 5233M 233 MHz MMX Pentium)
 */
-static void splitProduct_number_im_rest(psk pknoop,ppsk N,ppsk I,ppsk NNNI)
+static void splitProduct_number_im_rest(psk pnode,ppsk N,ppsk I,ppsk NNNI)
     {
     psk temp;
-    if(kop(pknoop) == TIMES)
+    if(Op(pnode) == TIMES)
         {
-        if(RATIONAL_COMP(pknoop->LEFT))
+        if(RATIONAL_COMP(pnode->LEFT))
             {/* 17*x */
-            *N = pknoop->LEFT;
-            temp = pknoop->RIGHT;
+            *N = pnode->LEFT;
+            temp = pnode->RIGHT;
             }/* N*temp */
         else
             {
             *N = NULL;
-            temp = pknoop;
+            temp = pnode;
             }/* temp */
-        if(kop(temp) == TIMES)
+        if(Op(temp) == TIMES)
             {
             if(!is_op(temp->LEFT) && PLOBJ(temp->LEFT) == IM)
                 {/* N*i*x */
@@ -14492,26 +14488,26 @@ static void splitProduct_number_im_rest(psk pknoop,ppsk N,ppsk I,ppsk NNNI)
                 }/* N*NNNI */
             }
         }
-    else if(!is_op(pknoop) && PLOBJ(pknoop) == IM)
+    else if(!is_op(pnode) && PLOBJ(pnode) == IM)
         {/* i */
         *N = NULL;
-        *I = pknoop;
+        *I = pnode;
         *NNNI = NULL;
         }/* I */
     else
         {/* x */
         *N = NULL;
         *I = NULL;
-        *NNNI = pknoop;
+        *NNNI = pnode;
         }/* NNNI */
     }
 
-static psk rechteroperand_and_tail(psk pkn,ppsk head,ppsk tail)
+static psk rightoperand_and_tail(psk Pnode,ppsk head,ppsk tail)
     {
     psk temp;
-    assert(is_op(pkn));
-    temp = pkn->RIGHT;
-    if(kop(pkn) == kop(temp))
+    assert(is_op(Pnode));
+    temp = Pnode->RIGHT;
+    if(Op(Pnode) == Op(temp))
         {
         *head = temp->LEFT;
         *tail = temp->RIGHT;
@@ -14524,12 +14520,12 @@ static psk rechteroperand_and_tail(psk pkn,ppsk head,ppsk tail)
     return temp;
     }
 
-static psk linkeroperand_and_tail(psk pkn,ppsk head,ppsk tail)
+static psk linkeroperand_and_tail(psk Pnode,ppsk head,ppsk tail)
     {
     psk temp;
-    assert(is_op(pkn));
-    temp = pkn->LEFT;
-    if(kop(pkn) == kop(temp))
+    assert(is_op(Pnode));
+    temp = Pnode->LEFT;
+    if(Op(Pnode) == Op(temp))
         {
         *head = temp->LEFT;
         *tail = temp->RIGHT;
@@ -14544,43 +14540,43 @@ static psk linkeroperand_and_tail(psk pkn,ppsk head,ppsk tail)
 
 #define EXPAND 0
 #if EXPAND
-static psk expandDummy(psk pkn,int * ok)
+static psk expandDummy(psk Pnode,int * ok)
     {
     *ok = FALSE;
-    return pkn;
+    return Pnode;
     }
 #endif
 
-static psk expandProduct(psk pkn,int * ok)
+static psk expandProduct(psk Pnode,int * ok)
     {
-    switch(kop(pkn))
+    switch(Op(Pnode))
         {
         case TIMES :
         case EXP  :
             {
-            if(  (  (match(0,pkn,m0,NULL,0,pkn,3333) & TRUE)
-                 && ((pkn = tryq(pkn,f0,ok)),*ok)
+            if(  (  (match(0,Pnode,m0,NULL,0,Pnode,3333) & TRUE)
+                 && ((Pnode = tryq(Pnode,f0,ok)),*ok)
                  )
-              || (  (match(0,pkn,m1,NULL,0,pkn,4444) & TRUE)
-                 && ((pkn = tryq(pkn,f1,ok)),*ok)
+              || (  (match(0,Pnode,m1,NULL,0,Pnode,4444) & TRUE)
+                 && ((Pnode = tryq(Pnode,f1,ok)),*ok)
                  )
               )
                 {
-                if(is_op(pkn)) /*{?} (1+i)*(1+-i)+Z => 2+Z */
-                    pkn->v.fl &= ~READY;
-                return pkn;
+                if(is_op(Pnode)) /*{?} (1+i)*(1+-i)+Z => 2+Z */
+                    Pnode->v.fl &= ~READY;
+                return Pnode;
                 }
             break;
             }
         }
     *ok = FALSE;
-    return pkn;
+    return Pnode;
     }
 
-static psk plus_samenvoegen_of_sorteren(psk pkn)
+static psk plus_samenvoegen_of_sorteren(psk Pnode)
     {
     /*
-    Split pkn in left L and right R argument
+    Split Pnode in left L and right R argument
 
     If L is zero,
         return R
@@ -14639,7 +14635,7 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
     */
     static const char *conc[] = {NULL,NULL,NULL,NULL};
     int res = FALSE;
-    psk top = pkn;
+    psk top = Pnode;
 
     psk L = top->LEFT;
     psk Lterm,Ltail;
@@ -14653,14 +14649,14 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
     if(!is_op(L) && RAT_NUL_COMP(L))
         {
         /* 0+x -> x */
-        return rechtertak(top);
+        return rightbranch(top);
         }
 
     R = top->RIGHT;
     if(!is_op(R) && RAT_NUL_COMP(R))
         {
         /*{?} x+0 => x */
-        return linkertak(top);
+        return leftbranch(top);
         }
 
     if(  is_op(L)
@@ -14679,43 +14675,43 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
         }
     if(res)
         {
-        (pkn)->v.fl &= ~READY;
-        return pkn;
+        (Pnode)->v.fl &= ~READY;
+        return Pnode;
         }
-    rechteroperand_and_tail(top,&Rterm,&Rtail);
+    rightoperand_and_tail(top,&Rterm,&Rtail);
     linkeroperand_and_tail(top,&Lterm,&Ltail);
     assert(Ltail == NULL);
     if(RATIONAL_COMP(Lterm))
         {
         if(RATIONAL_COMP(Rterm))
             {
-            conc[0] = hekje6;
+            conc[0] = hash6;
             if(Lterm == Rterm)
                 {
                 /* 7+7 -> 2*7 */ /*{?} 7+7 => 14 */
-                adr[6] = _qmaal(&tweek,Rterm);
+                addr[6] = qTimes(&twoNode,Rterm);
                 }
             else
                 {
                 /* 4+7 -> 11 */ /*{?} 4+7 => 11 */
-                adr[6] = _qplus(Lterm,Rterm,0);
+                addr[6] = qPlus(Lterm,Rterm,0);
                 }
             conc[1] = NULL;
             conc[2] = NULL;
             if(Rtail != NULL)
                 {
-                adr[4] = Rtail;
+                addr[4] = Rtail;
                 conc[1] = "+\4";
                 }
-            pkn = vopb     (top,conc);
-            wis(adr[6]);
+            Pnode = vbuildup     (top,conc);
+            wipe(addr[6]);
             }
-        return pkn;
+        return Pnode;
         }
     else if(RATIONAL_COMP(Rterm))
         {
-        adr[1] = Rterm;
-        adr[2] = L;
+        addr[1] = Rterm;
+        addr[2] = L;
         if(Rtail)
             {
          /* How to get here?
@@ -14729,30 +14725,30 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
          Rterm is 1+a+b+a*b
          Rtail is a+b+a*b
          */
-            adr[3] = Rtail;
-            return opb     (top,"\1+\2+\3",NULL);
+            addr[3] = Rtail;
+            return build_up     (top,"\1+\2+\3",NULL);
             }
         else
             {
             /* 4*(x+7)+p+-4*x */
-            return opb     (top,"\1+\2",NULL);
+            return build_up     (top,"\1+\2",NULL);
             }
         }
 
-    if(  kop(Lterm) == LOG
-      && kop(Rterm) == LOG
+    if(  Op(Lterm) == LOG
+      && Op(Rterm) == LOG
       && !equal(Lterm->LEFT,Rterm->LEFT)
       )
         {
-        adr[1] = Lterm->LEFT;
-        adr[2] = Lterm->RIGHT;
-        adr[3] = Rterm->RIGHT;
+        addr[1] = Lterm->LEFT;
+        addr[2] = Lterm->RIGHT;
+        addr[3] = Rterm->RIGHT;
         if(Rtail == NULL)
-            return opb     (top,"\1\016(\2*\3)",NULL); /*{?} 2\L3+2\L9 => 4+2\L27/16 */
+            return build_up     (top,"\1\016(\2*\3)",NULL); /*{?} 2\L3+2\L9 => 4+2\L27/16 */
         else
             {
-            adr[4] = Rtail;
-            return opb     (top,"\1\016(\2*\3)+\4",NULL); /*{?} 2\L3+2\L9+3\L123 => 8+2\L27/16+3\L41/27 */
+            addr[4] = Rtail;
+            return build_up     (top,"\1\016(\2*\3)+\4",NULL); /*{?} 2\L3+2\L9+3\L123 => 8+2\L27/16+3\L41/27 */
             }
         }
 
@@ -14760,15 +14756,15 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
 
     if(LtermI)
         {
-        ppsk loper = &pkn;
+        ppsk runner = &Pnode;
         splitProduct_number_im_rest(Rterm,&RtermN,&RtermI,&RtermNNNI);
         while(  RtermI == NULL
-             && kop((*loper)->RIGHT) == PLUS
+             && Op((*runner)->RIGHT) == PLUS
              )
             {
-            loper = &(*loper)->RIGHT;
-            *loper = prive(*loper);
-            rechteroperand_and_tail((*loper),&Rterm,&Rtail);
+            runner = &(*runner)->RIGHT;
+            *runner = isolated(*runner);
+            rightoperand_and_tail((*runner),&Rterm,&Rtail);
             splitProduct_number_im_rest(Rterm,&RtermN,&RtermI,&RtermNNNI);/*{?} i*x+-i*x+a => a */
             }
         if(RtermI != NULL)
@@ -14784,13 +14780,13 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
                 {
                 assert(RtermNNNI != NULL);
                 dif = equal(LtermNNNI,RtermNNNI);
-                assert(dif <= 0 || kop((*loper)->RIGHT) != PLUS);
+                assert(dif <= 0 || Op((*runner)->RIGHT) != PLUS);
                 }
             if(dif == 0)
                 {                        /*{?} i*x+-i*x => 0 */
                 if(RtermN)
                     {
-                    adr[2] = RtermN; /*{?} i*x+3*i*x => 4*i*x */
+                    addr[2] = RtermN; /*{?} i*x+3*i*x => 4*i*x */
                     if(LtermN == NULL)
                         {
                         /* a+n*a */ /*{?} i*x+3*i*x => 4*i*x */
@@ -14818,7 +14814,7 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
                     else
                         {
                         /* n*a+m*a */ /*{?} 3*-i*x+-3*i*x => 6*-i*x */
-                        adr[3] = LtermN;
+                        addr[3] = LtermN;
                         if(HAS_MINUS_SIGN(LtermI))
                             {
                             if(HAS_MINUS_SIGN(RtermI))
@@ -14843,11 +14839,11 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
                     }
                 else
                     {                        /*{?} i*x+-i*x => 0 */
-                    adr[1] = LtermNNNI;
+                    addr[1] = LtermNNNI;
                     if(LtermN != NULL)
                         {
                         /* m*a+a */
-                        adr[2] = LtermN; /*{?} 3*i*x+i*x => 4*i*x */
+                        addr[2] = LtermN; /*{?} 3*i*x+i*x => 4*i*x */
                         if(HAS_MINUS_SIGN(LtermI))
 
                             if(HAS_MINUS_SIGN(RtermI))
@@ -14896,7 +14892,7 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
                     }
                 if(LtermNNNI != NULL)
                     {                        /*{?} i*x+-i*x => 0 */
-                    adr[1] = RtermNNNI;
+                    addr[1] = RtermNNNI;
                     conc[1] = "*\1";
                     indx = 2;
                     }
@@ -14904,41 +14900,41 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
                     indx = 1; /*{?} i+-i => 0 */
                 if(Rtail != NULL)
                     {
-                    adr[4] = Rtail; /*{?} -i+-i+i*y => 2*-i+i*y */
+                    addr[4] = Rtail; /*{?} -i+-i+i*y => 2*-i+i*y */
                     conc[indx++] = "+\4";
                     }
                 conc[indx] = NULL;                        /*{?} i*x+-i*x => 0 */
-                (*loper)->RIGHT = vopb((*loper)->RIGHT,conc);
-                if(loper != &pkn)
+                (*runner)->RIGHT = vbuildup((*runner)->RIGHT,conc);
+                if(runner != &Pnode)
                     {
-                    (*loper)->v.fl &= ~READY;/*{?} i*x+-i*x+a => a */
-                    *loper = eval(*loper);
+                    (*runner)->v.fl &= ~READY;/*{?} i*x+-i*x+a => a */
+                    *runner = eval(*runner);
                     }
-                return rechtertak(top);                        /*{?} i*x+-i*x => 0 */
+                return rightbranch(top);                        /*{?} i*x+-i*x => 0 */
                 }
             assert(dif <= 0);
-            assert((*loper) == top);
+            assert((*runner) == top);
             assert(Ltail == NULL);
             }
         else  /* LtermI != NULL && RtermI == NULL */
             {
-            adr[1] = Rterm; /*{?} i*x+-i*x+a => a */
-            adr[2] = L;
-            (*loper)->RIGHT = opb((*loper)->RIGHT,"\1+\2",NULL);
-            (*loper)->RIGHT->v.fl |= READY;
-            return rechtertak(top);
+            addr[1] = Rterm; /*{?} i*x+-i*x+a => a */
+            addr[2] = L;
+            (*runner)->RIGHT = build_up((*runner)->RIGHT,"\1+\2",NULL);
+            (*runner)->RIGHT->v.fl |= READY;
+            return rightbranch(top);
             }
         }
     else /* LtermI == NULL */
         {
-        ppsk loper = &pkn;
+        ppsk runner = &Pnode;
         int dif = 1;
         assert(LtermNNNI != NULL);
         splitProduct_number_im_rest(Rterm,&RtermN,&RtermI,&RtermNNNI);
         while(  RtermNNNI != NULL
              && RtermI == NULL
-             && (dif = vgl(LtermNNNI,RtermNNNI)) > 0
-             && kop((*loper)->RIGHT) == PLUS
+             && (dif = cmp(LtermNNNI,RtermNNNI)) > 0
+             && Op((*runner)->RIGHT) == PLUS
              )
             {
             /*
@@ -14952,9 +14948,9 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
             a^(b*d+c*d) * (a^(b*f+c*f)+a^(e*b+e*c)) + -1*(a^((b+c)*(d+e))+a^((b+c)*(d+f))) => 0
             -1 * a^(b*d+c*d) * (a^(b*f+c*f)+a^(e*b+e*c)) + a^((b+c)*(d+e)) + a^((b+c)*(d+f)) => 0
             */
-            loper = &(*loper)->RIGHT; /*{?} (b^3+c^3)+b^3+c+b^3 => c+3*b^3+c^3 */
-            *loper = prive(*loper);
-            rechteroperand_and_tail((*loper),&Rterm,&Rtail);
+            runner = &(*runner)->RIGHT; /*{?} (b^3+c^3)+b^3+c+b^3 => c+3*b^3+c^3 */
+            *runner = isolated(*runner);
+            rightoperand_and_tail((*runner),&Rterm,&Rtail);
             splitProduct_number_im_rest(Rterm,&RtermN,&RtermI,&RtermNNNI);
             }
         if(RtermI != NULL)
@@ -14963,8 +14959,8 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
             {
             if(RtermN)
                 {
-                adr[1] = RtermNNNI;
-                adr[2] = RtermN;
+                addr[1] = RtermNNNI;
+                addr[2] = RtermN;
                 if(LtermN == NULL)
                     /*{?} a+n*a => a+a*n */
                     conc[0] = "(1+\2)*\1";
@@ -14972,18 +14968,18 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
                 else
                     {
                     /*{?} n*a+m*a => a*m+a*n */ /*{?} 7*a+9*a => 16*a */
-                    adr[3] = LtermN;
+                    addr[3] = LtermN;
                     conc[0] = "(\3+\2)*\1";
                     /* (n+m)*a */
                     }
                 }
             else
                 {
-                adr[1] = LtermNNNI;
+                addr[1] = LtermNNNI;
                 if(LtermN != NULL)
                     {
                     /* m*a+a */
-                    adr[2] = LtermN;
+                    addr[2] = LtermN;
                     conc[0] = "(1+\2)*\1"; /*{?} 3*a+a => 4*a */
                     /* (1+m)*a */
                     }
@@ -14999,49 +14995,49 @@ static psk plus_samenvoegen_of_sorteren(psk pkn)
             conc[2] = NULL;
             if(Rtail != NULL)
                 {
-                adr[4] = Rtail;
+                addr[4] = Rtail;
                 conc[1] = "+\4";
                 }
-            (*loper)->RIGHT = vopb((*loper)->RIGHT,conc);
-            if(loper != &pkn)
+            (*runner)->RIGHT = vbuildup((*runner)->RIGHT,conc);
+            if(runner != &Pnode)
                 {
-                (*loper)->v.fl &= ~READY;
+                (*runner)->v.fl &= ~READY;
                 /*{?} (b^3+c^3)+b^3+c+b^3 => c+3*b^3+c^3 */
                 /* This would evaluate to c+(1+2)*b^3+c^3 if READY flag wasn't turned off */
                 /* Correct evaluation: c+3*b^3+c^3 */
-                *loper = eval(*loper);
+                *runner = eval(*runner);
                 }
-            return rechtertak(top);
+            return rightbranch(top);
             }
         else if(dif > 0)  /*{?} b+a => a+b */
             {
-            adr[1] = Rterm;
-            adr[2] = L;
-            (*loper)->RIGHT = opb((*loper)->RIGHT,"\1+\2",NULL);
-            (*loper)->RIGHT->v.fl |= READY;
-            return rechtertak(top);
+            addr[1] = Rterm;
+            addr[2] = L;
+            (*runner)->RIGHT = build_up((*runner)->RIGHT,"\1+\2",NULL);
+            (*runner)->RIGHT->v.fl |= READY;
+            return rightbranch(top);
             }
-        else if((*loper) != top) /* b + a + c */
+        else if((*runner) != top) /* b + a + c */
             {
-            adr[1] = L;
-            adr[2] = (*loper)->RIGHT;
-            (*loper)->RIGHT = opb((*loper)->RIGHT,"\1+\2",NULL);
-            (*loper)->RIGHT = eval((*loper)->RIGHT);
-            return rechtertak(top);          /* (1+a+b+c)^30+1 */
+            addr[1] = L;
+            addr[2] = (*runner)->RIGHT;
+            (*runner)->RIGHT = build_up((*runner)->RIGHT,"\1+\2",NULL);
+            (*runner)->RIGHT = eval((*runner)->RIGHT);
+            return rightbranch(top);          /* (1+a+b+c)^30+1 */
             }
         assert(Ltail == NULL);
         }
-    return pkn;
+    return Pnode;
     }
 
-static psk substmaal(psk pkn)
+static psk substtimes(psk Pnode)
     {
     static const char *conc[] = {NULL,NULL,NULL,NULL};
     psk rkn,lkn;
     psk rvar,lvar;
-    psk temp,llknoop,rlknoop;
-    int knverschil;
-    rkn = rechteroperand(pkn);
+    psk temp,llnode,rlnode;
+    int nodedifference;
+    rkn = rightoperand(Pnode);
 
     if(is_op(rkn))
         rvar = NULL; /* (f.e)*(y.s) */
@@ -15049,173 +15045,173 @@ static psk substmaal(psk pkn)
         {
         if(IS_ONE(rkn))
             {
-            return linkertak(pkn); /*{?} (a=7)&!(a*1) => 7 */
+            return leftbranch(Pnode); /*{?} (a=7)&!(a*1) => 7 */
             }
         else if(RAT_NUL(rkn))/*{?} -1*140/1000 => -7/50 */
             {
-            wis(pkn); /*{?} x*0 => 0 */
-            return copievan(&nulk);
+            wipe(Pnode); /*{?} x*0 => 0 */
+            return copyof(&zeroNode);
             }
         rvar = rkn; /*{?} a*a => a^2 */
         }
 
-    lkn = pkn->LEFT;
+    lkn = Pnode->LEFT;
     if(!is_op(lkn))
         {
         if(RAT_NUL(lkn)) /*{?} -1*140/1000 => -7/50 */
             {
-            wis(pkn); /*{?} 0*x => 0 */
-            return copievan(&nulk);
+            wipe(Pnode); /*{?} 0*x => 0 */
+            return copyof(&zeroNode);
             }
         lvar = lkn;
 
         if(IS_ONE(lkn))
             {
-            return rechtertak(pkn); /*{?} 1*-1 => -1 */
+            return rightbranch(Pnode); /*{?} 1*-1 => -1 */
             }
         else if(RATIONAL_COMP(lkn) && rvar)
             {
             if(RATIONAL_COMP(rkn))
                 {
                 if(rkn == lkn)
-                    lvar = (pkn->LEFT = prive(lkn)); /*{?} 1/10*1/10 => 1/100 */
-                conc[0] = hekje6;
-                adr[6] = _qmaal(rvar,lvar);
-                if(rkn == pkn->RIGHT)
+                    lvar = (Pnode->LEFT = isolated(lkn)); /*{?} 1/10*1/10 => 1/100 */
+                conc[0] = hash6;
+                addr[6] = qTimes(rvar,lvar);
+                if(rkn == Pnode->RIGHT)
                     conc[1] = NULL; /*{?} -1*140/1000 => -7/50 */
                 else
                     {
-                    adr[1] = pkn->RIGHT->RIGHT; /*{?} -1*1/4*e^(2*i*x) => -1/4*e^(2*i*x) */
+                    addr[1] = Pnode->RIGHT->RIGHT; /*{?} -1*1/4*e^(2*i*x) => -1/4*e^(2*i*x) */
                     conc[1] = "*\1";
                     }
-                pkn = vopb(pkn,conc);
-                wis(adr[6]);
-                return pkn;
+                Pnode = vbuildup(Pnode,conc);
+                wipe(addr[6]);
+                return Pnode;
                 }
             else
                 {
                 if(PLOBJ(rkn) == IM && RAT_NEG_COMP(lkn))
                     {
                     conc[0] = "(\2*\3)";
-                    adr[2] = _qmaalmineen(lkn);
-                    adr[3] = _qmaalmineen(rkn);
-                    if(rkn == pkn->RIGHT)
+                    addr[2] = qTimesMinusOne(lkn);
+                    addr[3] = qTimesMinusOne(rkn);
+                    if(rkn == Pnode->RIGHT)
                         conc[1] = NULL; /*{?} -1*i => -i */
                     else
                         {
-                        adr[1] = pkn->RIGHT->RIGHT; /*{?} -3*i*x => 3*-i*x */
+                        addr[1] = Pnode->RIGHT->RIGHT; /*{?} -3*i*x => 3*-i*x */
                         conc[1] = "*\1";
                         }
-                    pkn = vopb(pkn,conc);
-                    wis(adr[2]);
-                    wis(adr[3]);
-                    return pkn;
+                    Pnode = vbuildup(Pnode,conc);
+                    wipe(addr[2]);
+                    wipe(addr[3]);
+                    return Pnode;
                     }
                 }
             }
         }
 
 
-    rlknoop = kop(rkn) == EXP ? rkn->LEFT : rkn; /*{?} (f.e)*(y.s) => (f.e)*(y.s) */
-    llknoop = kop(lkn) == EXP ? lkn->LEFT : lkn;
-    if((knverschil = equal(llknoop,rlknoop)) == 0)
+    rlnode = Op(rkn) == EXP ? rkn->LEFT : rkn; /*{?} (f.e)*(y.s) => (f.e)*(y.s) */
+    llnode = Op(lkn) == EXP ? lkn->LEFT : lkn;
+    if((nodedifference = equal(llnode,rlnode)) == 0)
         {
         /* a^n*a^m */
-        if(rlknoop != rkn)
+        if(rlnode != rkn)
             {
-            adr[1] = rlknoop; /*{?} e^(i*x)*e^(-i*x) => 1 */
-            adr[2] = rkn->RIGHT;
-            if(llknoop == lkn)
+            addr[1] = rlnode; /*{?} e^(i*x)*e^(-i*x) => 1 */
+            addr[2] = rkn->RIGHT;
+            if(llnode == lkn)
                 {
                 conc[0] = "\1^(1+\2)"; /*{?} a*a^n => a^(1+n) */
                 }/* a^(1+n) */
             else
                 {
                 /* a^n*a^m */
-                adr[3] = lkn->RIGHT; /*{?} e^(i*x)*e^(-i*x) => 1 */
+                addr[3] = lkn->RIGHT; /*{?} e^(i*x)*e^(-i*x) => 1 */
                 conc[0] = "\1^(\3+\2)";
                 /* a^(n+m) */
                 }
             }
         else
             {
-            if(llknoop != lkn)
+            if(llnode != lkn)
                 {
-                adr[1] = llknoop;     /*{?} a^m*a => a^(1+m) */
-                adr[2] = lkn->RIGHT;
+                addr[1] = llnode;     /*{?} a^m*a => a^(1+m) */
+                addr[2] = lkn->RIGHT;
                 conc[0] = "\1^(1+\2)";
                 /* a^(m+1) */
                 }
             else
                 {
                 /*{?} a*a => a^2 */
-                adr[1] = llknoop; /*{?} i*i*(-1/2*e^(i*a)+1/2*e^(-i*a))*(-1/2*e^(i*b)+1/2*e^(-i*b)) => -1*(-1/2*e^(i*a)+1/2*e^(-i*a))*(-1/2*e^(i*b)+1/2*e^(-i*b)) */
+                addr[1] = llnode; /*{?} i*i*(-1/2*e^(i*a)+1/2*e^(-i*a))*(-1/2*e^(i*b)+1/2*e^(-i*b)) => -1*(-1/2*e^(i*a)+1/2*e^(-i*a))*(-1/2*e^(i*b)+1/2*e^(-i*b)) */
                 conc[0] = "\1^2";
                 /* a^2 */
                 }
             }
-        if(rkn != (temp = pkn->RIGHT))
+        if(rkn != (temp = Pnode->RIGHT))
             {
-            adr[4] = temp->RIGHT; /*{?} i*i*(-1/2*e^(i*a)+1/2*e^(-i*a))*(-1/2*e^(i*b)+1/2*e^(-i*b)) => -1*(-1/2*e^(i*a)+1/2*e^(-i*a))*(-1/2*e^(i*b)+1/2*e^(-i*b)) */
+            addr[4] = temp->RIGHT; /*{?} i*i*(-1/2*e^(i*a)+1/2*e^(-i*a))*(-1/2*e^(i*b)+1/2*e^(-i*b)) => -1*(-1/2*e^(i*a)+1/2*e^(-i*a))*(-1/2*e^(i*b)+1/2*e^(-i*b)) */
             conc[1] = "*\4";
             }
         else
             conc[1] = NULL; /*{?} e^(i*x)*e^(-i*x) => 1 */
-        return vopb(pkn,(const char **)conc);
+        return vbuildup(Pnode,(const char **)conc);
         }
     else
         {
-        int graad;
-        graad = getal_graad(rlknoop) - getal_graad(llknoop); /*{?} (f.e)*(y.s) => (f.e)*(y.s) */
-        if(graad > 0
-        || (graad == 0 && (knverschil > 0)))
+        int degree;
+        degree = number_degree(rlnode) - number_degree(llnode); /*{?} (f.e)*(y.s) => (f.e)*(y.s) */
+        if(degree > 0
+        || (degree == 0 && (nodedifference > 0)))
             {
             /* b^n*a^m */
             /* l^n*a^m */
-            if((temp = pkn->RIGHT) == rkn)
+            if((temp = Pnode->RIGHT) == rkn)
                 {
-                pkn->RIGHT = lkn; /*{?} x*2 => 2*x */
-                pkn->LEFT = rkn;
-                pkn->v.fl &= ~READY;
+                Pnode->RIGHT = lkn; /*{?} x*2 => 2*x */
+                Pnode->LEFT = rkn;
+                Pnode->v.fl &= ~READY;
                 }
             else
                 {
-                adr[1] = lkn; /*{?} i*2*x => 2*i*x */
-                adr[2] = temp->LEFT;
-                adr[3] = temp->RIGHT;
-                pkn = opb(pkn,"\2*\1*\3",NULL);
+                addr[1] = lkn; /*{?} i*2*x => 2*i*x */
+                addr[2] = temp->LEFT;
+                addr[3] = temp->RIGHT;
+                Pnode = build_up(Pnode,"\2*\1*\3",NULL);
                 }
-            return pkn;
+            return Pnode;
             /* a^m*b^n */
             /* a^m*l^n */
             }
-        else if(PLOBJ(rlknoop) == IM)
+        else if(PLOBJ(rlnode) == IM)
             {
-            if(PLOBJ(llknoop) == IM) /*{?} -1*i^1/3 => -i^5/3 */
+            if(PLOBJ(llnode) == IM) /*{?} -1*i^1/3 => -i^5/3 */
                 {
                 /*{?} i^n*-i^m => i^(-1*m+n) */
-                if(rlknoop != rkn)
+                if(rlnode != rkn)
                     {
-                    adr[1] = llknoop;
-                    adr[2] = rkn->RIGHT;
-                    if(llknoop == lkn)
+                    addr[1] = llnode;
+                    addr[2] = rkn->RIGHT;
+                    if(llnode == lkn)
                         /*{?} i*-i^n => i^(1+-1*n) */
                         conc[0] = "\1^(1+-1*\2)";
                         /* i^(1-n) */
                     else
                         {
-                        adr[3] = lkn->RIGHT; /*{?} i^n*-i^m => i^(-1*m+n) */
+                        addr[3] = lkn->RIGHT; /*{?} i^n*-i^m => i^(-1*m+n) */
                         conc[0] = "\1^(\3+-1*\2)";
                         /* i^(n-m) */
                         }
                     }
                 else
                     {
-                    if(llknoop != lkn)
+                    if(llnode != lkn)
                         {
                         /*{?} i^m*-i => i^(-1+m) */
-                        adr[1] = llknoop;
-                        adr[2] = lkn->RIGHT;
+                        addr[1] = llnode;
+                        addr[2] = lkn->RIGHT;
                         conc[0] = "\1^(-1+\2)";
                         /* i^(m-1) */
                         }
@@ -15227,56 +15223,56 @@ static psk substmaal(psk pkn)
                         }
                     }
                 }
-            else if(  RAT_NEG_COMP(llknoop)
+            else if(  RAT_NEG_COMP(llnode)
                 /* -n*i^m -> n*-i^(2+m) */
                 /*{?} -7*i^9 => 7*i */ /*{!} 7*-i^11 */
                 /* -n*-i^m -> n*i^(2+m) */
                 /*{?} -7*-i^9 => 7*-i */ /*{!}-> 7*i^11 */
-                   && rlknoop != rkn
-                   && llknoop == lkn
+                   && rlnode != rkn
+                   && llnode == lkn
                    )
                 { /*{?} -1*i^1/3 => -i^5/3 */
-                adr[1] = llknoop;
-                adr[2] = rkn->LEFT;
-                adr[3] = rkn->RIGHT;
-                adr[4] = &tweek;
+                addr[1] = llnode;
+                addr[2] = rkn->LEFT;
+                addr[3] = rkn->RIGHT;
+                addr[4] = &twoNode;
                 conc[0] = "(-1*\1)*\2^(\3+\4)";
                 }
             else
-                return pkn; /*{?} 2*i*x => 2*i*x */
-            if(rkn != (temp = pkn->RIGHT))
+                return Pnode; /*{?} 2*i*x => 2*i*x */
+            if(rkn != (temp = Pnode->RIGHT))
                 {
-                adr[4] = temp->RIGHT; /*{?} i^n*-i^m*z => i^(-1*m+n)*z */
+                addr[4] = temp->RIGHT; /*{?} i^n*-i^m*z => i^(-1*m+n)*z */
                 conc[1] = "*\4";
                 }
             else
                 conc[1] = NULL; /*{?} -1*i^1/3 => -i^5/3 */ /*{?} i^n*-i^m => i^(-1*m+n) */
-            return vopb(pkn,(const char **)conc);
+            return vbuildup(Pnode,(const char **)conc);
             }
         else
-            return pkn; /*{?} (f.e)*(y.s) => (f.e)*(y.s) */
+            return Pnode; /*{?} (f.e)*(y.s) => (f.e)*(y.s) */
         }
     }
 
-static int rechtsbrengen(psk kn)
+static int bringright(psk pnode)
     {
     /* (a*b*c*d)*a*b*c*d -> a*b*c*d*a*b*c*d */
-    psk lknoop;
-    int gedaan;
-    gedaan = FALSE;
-    for(;kop(lknoop = kn->LEFT) == kop(kn);)
+    psk lnode;
+    int done;
+    done = FALSE;
+    for(;Op(lnode = pnode->LEFT) == Op(pnode);)
         {
-        lknoop = prive(lknoop);
-        lknoop->v.fl &= ~READY;
-        kn->LEFT = lknoop->LEFT;
-        lknoop->LEFT = lknoop->RIGHT;
-        lknoop->RIGHT = kn->RIGHT;
-        kn->v.fl &= ~READY;
-        kn->RIGHT = lknoop;
-        kn = lknoop;
-        gedaan = TRUE;
+        lnode = isolated(lnode);
+        lnode->v.fl &= ~READY;
+        pnode->LEFT = lnode->LEFT;
+        lnode->LEFT = lnode->RIGHT;
+        lnode->RIGHT = pnode->RIGHT;
+        pnode->v.fl &= ~READY;
+        pnode->RIGHT = lnode;
+        pnode = lnode;
+        done = TRUE;
         }
-    return gedaan;
+    return done;
     }
 /*
        1*
@@ -15292,14 +15288,14 @@ ltail = x
 rhead = b
 rtail = c
 
-repol = NIL
-loper = (a * x) * b * c
+rennur = NIL
+runner = (a * x) * b * c
 lloper = a * x
 
   2*
   / \
  a
- repol = a*NIL
+ rennur = a*NIL
 
 
              1*
@@ -15308,7 +15304,7 @@ lloper = a * x
                / \
               b   c
 */
-static int vglplus(psk kn1,psk kn2)
+static int cmpplus(psk kn1,psk kn2)
     {
     if(RATIONAL_COMP(kn2))
         {
@@ -15358,20 +15354,20 @@ static int vglplus(psk kn1,psk kn2)
         }
     }
 
-static int vglmaal(psk kn1,psk kn2)
+static int cmptimes(psk kn1,psk kn2)
     {
     int diff;
-    if(kop(kn1) == EXP)
+    if(Op(kn1) == EXP)
         kn1 = kn1->LEFT;
-    if(kop(kn2) == EXP)
+    if(Op(kn2) == EXP)
         kn2 = kn2->LEFT;
 
-    diff = getal_graad(kn2);
+    diff = number_degree(kn2);
     if(diff != 4)
-        diff -= getal_graad(kn1);
+        diff -= number_degree(kn1);
     else
         {
-        diff = -getal_graad(kn1);
+        diff = -number_degree(kn1);
         if(!diff)
             return 0; /* two numbers */
         }
@@ -15400,7 +15396,7 @@ static int vglmaal(psk kn1,psk kn2)
     }
 
 static psk merge
-            (psk pkn
+            (psk Pnode
             ,int (*comp)(psk,psk)
             ,psk (*combine)(psk)
 #if EXPAND
@@ -15409,33 +15405,33 @@ static psk merge
             )
     {
     psk lhead,ltail,rhead,rtail;
-    psk Repol = &nilk; /* Will contain all evaluated nodes in inverse order.*/
+    psk Rennur = &nilNode; /* Will contain all evaluated nodes in inverse order.*/
     psk tmp;
     for(;;)
         {/* traverse from left to right to evaluate left side branches */
 #if EXPAND
         Boolean ok;
 #endif
-        pkn = prive(pkn);
-        assert(!shared(pkn));
-        pkn->v.fl |= READY;
+        Pnode = isolated(Pnode);
+        assert(!shared(Pnode));
+        Pnode->v.fl |= READY;
 #if EXPAND
         do
             {
-            pkn->LEFT = eval(pkn->LEFT);
-            pkn->LEFT = expand(pkn->LEFT,&ok);
+            Pnode->LEFT = eval(Pnode->LEFT);
+            Pnode->LEFT = expand(Pnode->LEFT,&ok);
             }
             while(ok);
 #else
-        pkn->LEFT = eval(pkn->LEFT);
+        Pnode->LEFT = eval(Pnode->LEFT);
 #endif
-        tmp = pkn->RIGHT;
+        tmp = Pnode->RIGHT;
         if(tmp->v.fl & READY)
             {
             break;
             }
         if(  !is_op(tmp)
-          || kop(pkn) != kop(tmp)
+          || Op(Pnode) != Op(tmp)
           )
             {
 #if EXPAND
@@ -15445,262 +15441,262 @@ static psk merge
                 tmp = expand(tmp,&ok);
                 }
                 while(ok);
-            pkn->RIGHT = tmp;
+            Pnode->RIGHT = tmp;
 #else
-            pkn->RIGHT = eval(tmp);
+            Pnode->RIGHT = eval(tmp);
 #endif
             break;
             }
-        pkn->RIGHT = Repol;
-        Repol = pkn;
-        pkn = tmp;
+        Pnode->RIGHT = Rennur;
+        Rennur = Pnode;
+        Pnode = tmp;
         }
     for(;;)
         { /* From right to left, prepend sorted elements to result */
-        psk repol = &nilk; /*Will contain branches in inverse sorted order*/
-        psk L = linkeroperand_and_tail(pkn,&lhead,&ltail);
-        psk R = rechteroperand_and_tail(pkn,&rhead,&rtail);
+        psk rennur = &nilNode; /*Will contain branches in inverse sorted order*/
+        psk L = linkeroperand_and_tail(Pnode,&lhead,&ltail);
+        psk R = rightoperand_and_tail(Pnode,&rhead,&rtail);
         for(;;)
             { /* From right to left, prepend smallest of lhs and rhs
-                 to repol
+                 to rennur
               */
             assert(rhead->v.fl & READY);
             assert((L == lhead && ltail == NULL) || L->RIGHT == ltail);
             assert((L == lhead && ltail == NULL) || L->LEFT == lhead);
-            assert(pkn->LEFT == L);
+            assert(Pnode->LEFT == L);
             assert((R == rhead && rtail == NULL) || R->RIGHT == rtail);
             assert((R == rhead && rtail == NULL) || R->LEFT == rhead);
-            assert(pkn->RIGHT == R);
+            assert(Pnode->RIGHT == R);
             assert(L->v.fl & READY);
-            assert(pkn->RIGHT->v.fl & READY);
+            assert(Pnode->RIGHT->v.fl & READY);
             if(comp(lhead,rhead) <= 0) /* a * b */
                 {
                 if(ltail == NULL)   /* a * (b*c) */
                     {
-                    assert(pkn->RIGHT->v.fl & READY);
+                    assert(Pnode->RIGHT->v.fl & READY);
                     break;
                     }
                 else                /* (a*d) * (b*c) */
                     {
-                    L = prive(L);
+                    L = isolated(L);
                     assert(!shared(L));
                     if(ltail != L->RIGHT)
                         {
-                        wis(L->RIGHT); /* rare, set REFCOUNTSTRESSTEST 1 */
-                        ltail = zelfde_als_w(ltail);
+                        wipe(L->RIGHT); /* rare, set REFCOUNTSTRESSTEST 1 */
+                        ltail = same_as_w(ltail);
                         }
-                    L->RIGHT = repol;
-                    repol = L;
-                    assert(!shared(pkn));
-                    pkn = prive(pkn);
-                    assert(!shared(pkn));
-                    pkn->LEFT = ltail;
-                    L = linkeroperand_and_tail(pkn,&lhead,&ltail);
-                    }               /* repol := a*repol */
+                    L->RIGHT = rennur;
+                    rennur = L;
+                    assert(!shared(Pnode));
+                    Pnode = isolated(Pnode);
+                    assert(!shared(Pnode));
+                    Pnode->LEFT = ltail;
+                    L = linkeroperand_and_tail(Pnode,&lhead,&ltail);
+                    }               /* rennur := a*rennur */
                 /* d * (b*c) */
                 }
             else /* Wrong order */
                 {
-                pkn = prive(pkn);
-                assert(!shared(pkn));
+                Pnode = isolated(Pnode);
+                assert(!shared(Pnode));
                 assert(L->v.fl & READY);
                 if(rtail == NULL) /* (b*c) * a */
                     {
-                    pkn->LEFT = R;
+                    Pnode->LEFT = R;
                     assert(L->v.fl & READY);
-                    pkn->RIGHT = L;
+                    Pnode->RIGHT = L;
                     break;
                     }             /* a * (b*c) */
                 else          /* (b*c) * (a*d)         c * (b*a) */
                     {
-                    R = prive(R);
+                    R = isolated(R);
                     assert(!shared(R));
                     if(R->RIGHT != rtail)
                         {
-                        wis(R->RIGHT); /* rare, set REFCOUNTSTRESSTEST 1 */
-                        rtail = zelfde_als_w(rtail);
+                        wipe(R->RIGHT); /* rare, set REFCOUNTSTRESSTEST 1 */
+                        rtail = same_as_w(rtail);
                         }
-                    R->RIGHT = repol;
-                    repol = R;
-                    assert(!shared(pkn));
-                    pkn->RIGHT = rtail;
-                    R = rechteroperand_and_tail(pkn,&rhead,&rtail);
-                    }         /* repol :=  a*repol    repol := b*repol */
+                    R->RIGHT = rennur;
+                    rennur = R;
+                    assert(!shared(Pnode));
+                    Pnode->RIGHT = rtail;
+                    R = rightoperand_and_tail(Pnode,&rhead,&rtail);
+                    }         /* rennur :=  a*rennur    rennur := b*rennur */
                 /* (b*c) * d */
                 }
             }
         for(;;)
             { /*Combine combinable elements and prepend to result*/
-            pkn->v.fl |= READY;
-            pkn = combine(pkn);
-            if(!(pkn->v.fl & READY))
+            Pnode->v.fl |= READY;
+            Pnode = combine(Pnode);
+            if(!(Pnode->v.fl & READY))
                 { /*This may results in recursive call to merge
                     if the result of the evaluation is not in same
                     sorting position as unevaluated expression. */
-                assert(!shared(pkn));
-                pkn = eval(pkn);
+                assert(!shared(Pnode));
+                Pnode = eval(Pnode);
                 }
-            if(repol != &nilk)
+            if(rennur != &nilNode)
                 {
-                psk n = repol->RIGHT;
-                assert(!shared(repol));
-                repol->RIGHT = pkn;
-                pkn = repol;
-                repol = n;
+                psk n = rennur->RIGHT;
+                assert(!shared(rennur));
+                rennur->RIGHT = Pnode;
+                Pnode = rennur;
+                rennur = n;
                 }
             else
                 break;
             }
-        if(Repol == &nilk)
+        if(Rennur == &nilNode)
             break;
-        tmp = Repol->RIGHT;
-        assert(!shared(Repol));
-        Repol->RIGHT = pkn;
-        pkn = Repol;
-        assert(!shared(pkn));
-        pkn->v.fl |= READY;
-        Repol = tmp;
+        tmp = Rennur->RIGHT;
+        assert(!shared(Rennur));
+        Rennur->RIGHT = Pnode;
+        Pnode = Rennur;
+        assert(!shared(Pnode));
+        Pnode->v.fl |= READY;
+        Rennur = tmp;
         }
-    return pkn;
+    return Pnode;
     }
 
-static psk substlog(psk pkn)
+static psk substlog(psk Pnode)
     {
     static const char *conc[] = {NULL,NULL,NULL,NULL};
-    psk lknoop = pkn->LEFT,rknoop = pkn->RIGHT;
-    if(!equal(lknoop,rknoop))
+    psk lnode = Pnode->LEFT,rightnode = Pnode->RIGHT;
+    if(!equal(lnode,rightnode))
         {
-        wis(pkn);
-        return copievan(&eenk);
+        wipe(Pnode);
+        return copyof(&oneNode);
         }
-    else if(is_op(rknoop))  /*{?} x\L(2+y) => x\L(2+y) */
+    else if(is_op(rightnode))  /*{?} x\L(2+y) => x\L(2+y) */
         {
         int ok;
-        return tryq(pkn,f5,&ok); /*{?} x\L(a*x^n*z) => n+x\L(a*z) */
+        return tryq(Pnode,f5,&ok); /*{?} x\L(a*x^n*z) => n+x\L(a*z) */
         }
-    else if(IS_ONE(rknoop))  /*{?} x\L1 => 0 */ /*{!} 0 */
+    else if(IS_ONE(rightnode))  /*{?} x\L1 => 0 */ /*{!} 0 */
         {
-        wis(pkn);
-        return copievan(&nulk);
+        wipe(Pnode);
+        return copyof(&zeroNode);
         }
-    else if(RAT_NUL(rknoop)) /*{?} z\L0 => z\L0 */
-        return pkn;
-    else if(is_op(lknoop)) /*{?} (x+y)\Lz => (x+y)\Lz */
-        return pkn;
-    else if(RAT_NUL(lknoop))   /*{?} 0\Lx => 0\Lx */
-        return pkn;
-    else if(IS_ONE(lknoop))   /*{?} 1\Lx => 1\Lx */
-        return pkn;
-    else if(RAT_NEG(lknoop))  /*{?} -7\Lx => -7\Lx */
-        return pkn;
-    else if(RATIONAL_COMP(rknoop))  /*{?} x\L7 => x\L7 */
+    else if(RAT_NUL(rightnode)) /*{?} z\L0 => z\L0 */
+        return Pnode;
+    else if(is_op(lnode)) /*{?} (x+y)\Lz => (x+y)\Lz */
+        return Pnode;
+    else if(RAT_NUL(lnode))   /*{?} 0\Lx => 0\Lx */
+        return Pnode;
+    else if(IS_ONE(lnode))   /*{?} 1\Lx => 1\Lx */
+        return Pnode;
+    else if(RAT_NEG(lnode))  /*{?} -7\Lx => -7\Lx */
+        return Pnode;
+    else if(RATIONAL_COMP(rightnode))  /*{?} x\L7 => x\L7 */
         {
-        if(_qvergelijk(rknoop,&nulk) & MINUS)
+        if(qCompare(rightnode,&zeroNode) & MINUS)
             {
             /* (nL-m = i*pi/eLn+nLm)  */ /*{?} 7\L-9 => 1+7\L9/7+i*pi*e\L7^-1 */ /*{!} i*pi/e\L7+7\L9)  */
-            adr[1] = lknoop;
-            adr[2] = rknoop;
-            return opb(pkn,"(i*pi*e\016\1^-1+\1\016(-1*\2))",NULL);
+            addr[1] = lnode;
+            addr[2] = rightnode;
+            return build_up(Pnode,"(i*pi*e\016\1^-1+\1\016(-1*\2))",NULL);
             }
-        else if(RATIONAL_COMP(lknoop)) /* m\Ln */ /*{?} 7\L9 => 1+7\L9/7 */
+        else if(RATIONAL_COMP(lnode)) /* m\Ln */ /*{?} 7\L9 => 1+7\L9/7 */
             {
-            if(_qvergelijk(lknoop,&eenk) & MINUS)
+            if(qCompare(lnode,&oneNode) & MINUS)
                 {
                                         /* (1/n)Lm = -1*nLm */ /*{?} 1/7\L9 => -1*(1+7\L9/7) */ /*{!} -1*nLm */
-                adr[1] = rknoop;
+                addr[1] = rightnode;
                 conc[0] = "(-1*";
-                conc[1] = hekje6;
-                adr[6] = _q_qdeel(&eenk,lknoop);
+                conc[1] = hash6;
+                addr[6] = qqDivide(&oneNode,lnode);
                 conc[2] = "\016\1)";
-                pkn = vopb(pkn,conc);
-                wis(adr[6]);
-                return pkn;
+                Pnode = vbuildup(Pnode,conc);
+                wipe(addr[6]);
+                return Pnode;
                 }
-            else if(_qvergelijk(lknoop,rknoop) & MINUS)
+            else if(qCompare(lnode,rightnode) & MINUS)
                 {
                                     /* nL(n+m) = 1+nL((n+m)/n) */ /*{?} 7\L(7+9) => 1+7\L16/7 */ /*{!} 1+nL((n+m)/n) */
                 conc[0] = "(1+\1\016";
-                assert(lknoop != rknoop);
-                adr[1] = lknoop;
-                conc[1] = hekje6;
-                adr[6] = _q_qdeel(rknoop,lknoop);
+                assert(lnode != rightnode);
+                addr[1] = lnode;
+                conc[1] = hash6;
+                addr[6] = qqDivide(rightnode,lnode);
                 conc[2] = ")";
-                pkn = vopb(pkn,conc);
-                wis(adr[6]);
-                return pkn;
+                Pnode = vbuildup(Pnode,conc);
+                wipe(addr[6]);
+                return Pnode;
                 }
-            else if(_qvergelijk(rknoop,&eenk) & MINUS)
+            else if(qCompare(rightnode,&oneNode) & MINUS)
                 {
                                     /* nL(1/m) = -1+nL(n/m) */ /*{?} 7\L1/9 => -2+7\L49/9 */ /*{!} -1+nL(n/m) */
                 conc[0] = "(-1+\1\016";
-                assert(lknoop != rknoop);
-                adr[1] = lknoop;
-                conc[1] = hekje6;
-                adr[6] = _qmaal(rknoop,lknoop);
+                assert(lnode != rightnode);
+                addr[1] = lnode;
+                conc[1] = hash6;
+                addr[6] = qTimes(rightnode,lnode);
                 conc[2] = ")";
-                pkn = vopb(pkn,conc);
-                wis(adr[6]);
-                return pkn;
+                Pnode = vbuildup(Pnode,conc);
+                wipe(addr[6]);
+                return Pnode;
                 }
             }
         }
-    return pkn;
+    return Pnode;
     }
 
-static psk substdiff(psk pkn)
+static psk substdiff(psk Pnode)
     {
-    psk lknoop,rknoop;
-    lknoop = pkn->LEFT;
-    rknoop = pkn->RIGHT;
-    if(is_constant(lknoop) || is_constant(rknoop))
+    psk lnode,rightnode;
+    lnode = Pnode->LEFT;
+    rightnode = Pnode->RIGHT;
+    if(is_constant(lnode) || is_constant(rightnode))
         {
-        wis(pkn);
-        pkn = copievan(&nulk);
+        wipe(Pnode);
+        Pnode = copyof(&zeroNode);
         }
-    else if(!equal(lknoop,rknoop))
+    else if(!equal(lnode,rightnode))
         {
-        wis(pkn);
-        pkn = copievan(&eenk);
+        wipe(Pnode);
+        Pnode = copyof(&oneNode);
         }
-    else if(  !is_op(rknoop)
-           && is_afhankelyk_van(lknoop,rknoop)
+    else if(  !is_op(rightnode)
+           && is_afhankelyk_van(lnode,rightnode)
            )
         {
         ;
         }
-    else if(!is_op(rknoop))
+    else if(!is_op(rightnode))
         {
-        wis(pkn);
-        pkn = copievan(&nulk);
+        wipe(Pnode);
+        Pnode = copyof(&zeroNode);
         }
-    else if(kop(rknoop) == PLUS)
+    else if(Op(rightnode) == PLUS)
         {
-        adr[1] = lknoop;
-        adr[2] = rknoop->LEFT;
-        adr[3] = rknoop->RIGHT;
-        pkn = opb(pkn,"((\1\017\2)+(\1\017\3))",NULL);
+        addr[1] = lnode;
+        addr[2] = rightnode->LEFT;
+        addr[3] = rightnode->RIGHT;
+        Pnode = build_up(Pnode,"((\1\017\2)+(\1\017\3))",NULL);
         }
-    else if(is_op(rknoop))
+    else if(is_op(rightnode))
         {
-        adr[2] = rknoop->LEFT;
-        adr[1] = lknoop;
-        adr[3] = rknoop->RIGHT;
-        switch(kop(rknoop))
+        addr[2] = rightnode->LEFT;
+        addr[1] = lnode;
+        addr[3] = rightnode->RIGHT;
+        switch(Op(rightnode))
             {
             case TIMES :
-                pkn = opb(pkn,"(\001\017\2*\3+\2*\001\017\3)",NULL);
+                Pnode = build_up(Pnode,"(\001\017\2*\3+\2*\001\017\3)",NULL);
                 break;
             case EXP:
-                pkn = opb(pkn,
+                Pnode = build_up(Pnode,
                     "(\2^(-1+\3)*\3*\001\017\2+\2^\3*e\016\2*\001\017\3)",NULL);
                 break;
             case LOG :
-                pkn = opb(pkn,
+                Pnode = build_up(Pnode,
                     "(\2^-1*e\016\2^-2*e\016\3*\001\017\2+\3^-1*e\016\2^-1*\001\017\3)",NULL);
                 break;
             }
         }
-    return pkn;
+    return Pnode;
     }
 
 
@@ -15724,182 +15720,182 @@ static void PeekMsg(void)
 #endif
 
 /*
-Iterative handling of WHITE operator in evalueer.
+Iterative handling of WHITE operator in evaluate.
 Can now handle very deep structures without stack overflow
 */
 
-static psk handleLUCHT(psk pkn)
-    { /* assumption: (kop(*pkn) == WHITE) && !((*pkn)->v.fl & READY) */
-    static psk hulp;
-    psk luchtknoop;
+static psk handleLUCHT(psk Pnode)
+    { /* assumption: (Op(*Pnode) == WHITE) && !((*Pnode)->v.fl & READY) */
+    static psk apnode;
+    psk whitespacenode;
     psk next;
-    ppsk pluchtknoop = &pkn;
-    ppsk prevpluchtknoop = NULL;
+    ppsk pwhitespacenode = &Pnode;
+    ppsk prevpwhitespacenode = NULL;
     for(;;)
         {
-        luchtknoop = *pluchtknoop;
-        luchtknoop->LEFT = eval(luchtknoop->LEFT);
-        if  (  !is_op(hulp=luchtknoop->LEFT)
-            && !(hulp->u.obj)
-            && !HAS_UNOPS(hulp)
+        whitespacenode = *pwhitespacenode;
+        whitespacenode->LEFT = eval(whitespacenode->LEFT);
+        if  (  !is_op(apnode=whitespacenode->LEFT)
+            && !(apnode->u.obj)
+            && !HAS_UNOPS(apnode)
             )
             {
-            *pluchtknoop = rechtertak(luchtknoop);
+            *pwhitespacenode = rightbranch(whitespacenode);
             }
         else
             {
-            prevpluchtknoop = pluchtknoop;
-            pluchtknoop = &(luchtknoop->RIGHT);
+            prevpwhitespacenode = pwhitespacenode;
+            pwhitespacenode = &(whitespacenode->RIGHT);
             }
-        if(kop(luchtknoop = *pluchtknoop) == WHITE && !(luchtknoop->v.fl & READY))
+        if(Op(whitespacenode = *pwhitespacenode) == WHITE && !(whitespacenode->v.fl & READY))
             {
-            if(shared(*pluchtknoop))
-                *pluchtknoop = copyop(*pluchtknoop);
+            if(shared(*pwhitespacenode))
+                *pwhitespacenode = copyop(*pwhitespacenode);
             }
         else
             {
-            *pluchtknoop = eval(*pluchtknoop);
-            if(  prevpluchtknoop
-              && !is_op(luchtknoop = *pluchtknoop)
-              && !((luchtknoop)->u.obj)
-              && !HAS_UNOPS(luchtknoop)
+            *pwhitespacenode = eval(*pwhitespacenode);
+            if(  prevpwhitespacenode
+              && !is_op(whitespacenode = *pwhitespacenode)
+              && !((whitespacenode)->u.obj)
+              && !HAS_UNOPS(whitespacenode)
               )
-                *prevpluchtknoop = linkertak(*prevpluchtknoop);
+                *prevpwhitespacenode = leftbranch(*prevpwhitespacenode);
             break;
             }
         }
 
-    luchtknoop = pkn;
-    while(kop(luchtknoop) == WHITE)
+    whitespacenode = Pnode;
+    while(Op(whitespacenode) == WHITE)
         {
-        next = luchtknoop->RIGHT;
-        rechtsbrengen(luchtknoop);
+        next = whitespacenode->RIGHT;
+        bringright(whitespacenode);
         if(next->v.fl & READY)
             break;
-        luchtknoop = next;
-        luchtknoop->v.fl |= READY;
+        whitespacenode = next;
+        whitespacenode->v.fl |= READY;
         }
-    return pkn;
+    return Pnode;
     }
 /*
-Iterative handling of COMMA operator in evalueer.
+Iterative handling of COMMA operator in evaluate.
 Can now handle very deep structures without stack overflow
 */
-static psk handleKOMMA(psk pkn)
-    { /* assumption: (kop(*pkn) == COMMA) && !((*pkn)->v.fl & READY) */
-    psk kommaknoop = pkn;
+static psk handleKOMMA(psk Pnode)
+    { /* assumption: (Op(*Pnode) == COMMA) && !((*Pnode)->v.fl & READY) */
+    psk commanode = Pnode;
     psk next;
-    ppsk pkommaknoop;
-    while(kop(kommaknoop->RIGHT) == COMMA && !(kommaknoop->RIGHT->v.fl & READY))
+    ppsk pcommanode;
+    while(Op(commanode->RIGHT) == COMMA && !(commanode->RIGHT->v.fl & READY))
         {
-        kommaknoop->LEFT = eval(kommaknoop->LEFT);
-        pkommaknoop = &(kommaknoop->RIGHT);
-        kommaknoop = kommaknoop->RIGHT;
-        if(shared(kommaknoop))
+        commanode->LEFT = eval(commanode->LEFT);
+        pcommanode = &(commanode->RIGHT);
+        commanode = commanode->RIGHT;
+        if(shared(commanode))
             {
-            *pkommaknoop = kommaknoop = copyop(kommaknoop);
+            *pcommanode = commanode = copyop(commanode);
             }
         }
-    kommaknoop->LEFT = eval(kommaknoop->LEFT);
-    kommaknoop->RIGHT = eval(kommaknoop->RIGHT);
-    kommaknoop = pkn;
-    while(kop(kommaknoop) == COMMA)
+    commanode->LEFT = eval(commanode->LEFT);
+    commanode->RIGHT = eval(commanode->RIGHT);
+    commanode = Pnode;
+    while(Op(commanode) == COMMA)
         {
-        next = kommaknoop->RIGHT;
-        rechtsbrengen(kommaknoop);
+        next = commanode->RIGHT;
+        bringright(commanode);
         if(next->v.fl & READY)
             break;
-        kommaknoop = next;
-        kommaknoop->v.fl |= READY;
+        commanode = next;
+        commanode->v.fl |= READY;
         }
-    return pkn;
+    return Pnode;
     }
 
-static psk evalvar(psk pkn)
+static psk evalvar(psk Pnode)
     {
-    psk loc_adr = Naamwoord_w(pkn, pkn->v.fl & DOUBLY_INDIRECT);
+    psk loc_adr = SymbolBinding_w(Pnode, Pnode->v.fl & DOUBLY_INDIRECT);
     if(loc_adr != NULL)
         {
-        wis(pkn);
-        pkn = loc_adr;
+        wipe(Pnode);
+        Pnode = loc_adr;
         }
     else
         {
-        DBGSRC(printf("evalvar  (");result(pkn);printf("\n");)
-        if(shared(pkn))
+        DBGSRC(printf("evalvar  (");result(Pnode);printf("\n");)
+        if(shared(Pnode))
             {
             /*You can get here if a !variable is unitialized*/
-            dec_refcount(pkn);
-            pkn = icopievan(pkn);
+            dec_refcount(Pnode);
+            Pnode = icopievan(Pnode);
             }
-        assert(!shared(pkn));
-        (pkn)->v.fl |= READY;
-        (pkn)->v.fl ^= SUCCESS;
+        assert(!shared(Pnode));
+        (Pnode)->v.fl |= READY;
+        (Pnode)->v.fl ^= SUCCESS;
         }
-    return pkn;
+    return Pnode;
     }
 
-static void privatized(psk pkn,psk plkn)
+static void privatized(psk Pnode,psk plkn)
     {
-    *plkn = *pkn;
+    *plkn = *Pnode;
     if(shared(plkn))
         {
-        dec_refcount(pkn);
-        plkn->LEFT = zelfde_als_w(plkn->LEFT);
-        plkn->RIGHT = zelfde_als_w(plkn->RIGHT);
+        dec_refcount(Pnode);
+        plkn->LEFT = same_as_w(plkn->LEFT);
+        plkn->RIGHT = same_as_w(plkn->RIGHT);
         }
     else
-        pskfree(pkn);
+        pskfree(Pnode);
     }
 
-static psk __rechtertak(psk pkn)
+static psk __rightbranch(psk Pnode)
     {
     psk ret;
-    int success = pkn->v.fl & SUCCESS;
-    if(shared(pkn))
+    int success = Pnode->v.fl & SUCCESS;
+    if(shared(Pnode))
         {
-        ret = zelfde_als_w(pkn->RIGHT);
-        dec_refcount(pkn);
+        ret = same_as_w(Pnode->RIGHT);
+        dec_refcount(Pnode);
         }
     else
         {
-        ret = pkn->RIGHT;
-        wis(pkn->LEFT);
-        pskfree(pkn);
+        ret = Pnode->RIGHT;
+        wipe(Pnode->LEFT);
+        pskfree(Pnode);
         }
     if(!success)
         {
-        ret = prive(ret);
+        ret = isolated(ret);
         ret->v.fl ^= SUCCESS;
         }
     return ret;
     }
 
 
-static psk eval(psk pkn)
+static psk eval(psk Pnode)
     {
     ASTACK
     /*
     Notice the low number of local variables on the stack. This ensures maximal
     utilisation of stack-depth for recursion.
     */
-    DBGSRC(Printf("evaluate :");result(pkn);Printf("\n");)
-    while(!(pkn->v.fl & READY))
+    DBGSRC(Printf("evaluate :");result(Pnode);Printf("\n");)
+    while(!(Pnode->v.fl & READY))
         {
-        if(is_op(pkn))
+        if(is_op(Pnode))
             {
-            sk lkn = *pkn;
+            sk lkn = *Pnode;
             /* The operators MATCH, AND and OR are treated in another way than
             the other operators. These three operators are the only 'volatile'
             operators: they cannot occur in a fully evaluated tree. For that reason
             there is no need to allocate space for an evaluated version of such
             operators on the stack. Instead the local variable lkn is used.
             */
-            switch(kop(pkn))
+            switch(Op(Pnode))
                 {
                 case MATCH :
                     {
-                    privatized(pkn,&lkn);
+                    privatized(Pnode,&lkn);
                     lkn.LEFT = eval(lkn.LEFT);
                     if(isSUCCESSorFENCE(lkn.LEFT))
                         /*
@@ -15920,7 +15916,7 @@ static psk eval(psk pkn)
 #else
                             if(!is_op(lkn.LEFT) && stringmatch(0,"V",POBJ(lkn.LEFT),NULL,lkn.RIGHT, lkn.LEFT,0,strlen((char*)POBJ(lkn.LEFT))) & TRUE)
 #endif
-                                pkn = _linkertak(&lkn); /* ~@(a:a) is now treated like ~(a:a)*/
+                                Pnode = _leftbranch(&lkn); /* ~@(a:a) is now treated like ~(a:a)*/
                             else
                                 {
                                 if(is_op(lkn.LEFT))
@@ -15930,162 +15926,162 @@ static psk eval(psk pkn)
                                     exit(117);
 #endif
                                     }
-                                pkn = _flinkertak(&lkn);/* ~@(a:b) is now treated like ~(a:b)*/
+                                Pnode = _fleftbranch(&lkn);/* ~@(a:b) is now treated like ~(a:b)*/
                                 }
                             }
                         else
                             {
                             if(match(0,lkn.LEFT,lkn.RIGHT,NULL,0,lkn.LEFT,5555) & TRUE)
-                                pkn = _linkertak(&lkn);
+                                Pnode = _leftbranch(&lkn);
                             else
-                                pkn = _flinkertak(&lkn);
+                                Pnode = _fleftbranch(&lkn);
                             }
                         }
                     else
                         {
-                        pkn = _linkertak(&lkn);
+                        Pnode = _leftbranch(&lkn);
                         }
-                    DBGSRC(Printf("after match:");result(pkn);Printf("\n");\
-                        if((pkn)->v.fl & SUCCESS) Printf(" SUCCESS\n");\
+                    DBGSRC(Printf("after match:");result(Pnode);Printf("\n");\
+                        if((Pnode)->v.fl & SUCCESS) Printf(" SUCCESS\n");\
                         else Printf(" FENCE\n");)
                     break;
                     }
                     /* The operators AND and OR are tail-recursion optimised. */
                 case AND :
                     {
-                    privatized(pkn,&lkn);
+                    privatized(Pnode,&lkn);
                     lkn.LEFT = eval(lkn.LEFT);
                     if(isSUCCESSorFENCE(lkn.LEFT))
-                        pkn = _rechtertak(&lkn);/* TRUE or FENCE */
+                        Pnode = _rightbranch(&lkn);/* TRUE or FENCE */
                     else
-                        pkn = _linkertak(&lkn);/* FAIL */
+                        Pnode = _leftbranch(&lkn);/* FAIL */
                     break;
                     }
                 case OR :
                     {
-                    privatized(pkn,&lkn);
+                    privatized(Pnode,&lkn);
                     lkn.LEFT = eval(lkn.LEFT);
                     if(isSUCCESSorFENCE(lkn.LEFT))
-                        pkn = _fencelinkertak(&lkn);/* FENCE or TRUE */
+                        Pnode = _fenceleftbranch(&lkn);/* FENCE or TRUE */
                     else
-                        pkn = _rechtertak(&lkn);/* FAIL */
+                        Pnode = _rightbranch(&lkn);/* FAIL */
                     break;
                     }
                     /* Operators that can occur in evaluated expressions: */
                 case EQUALS :
-                    if(ISBUILTIN((objectknoop *)pkn))
+                    if(ISBUILTIN((objectnode *)Pnode))
                         {
-                        pkn->v.fl |= READY;
+                        Pnode->v.fl |= READY;
                         break;
                         }
 
-                    if(  !is_op(pkn->LEFT)
-                      && !pkn->LEFT->u.obj
-                      && (pkn->v.fl & INDIRECT)
-                      && !(pkn->v.fl & DOUBLY_INDIRECT)
+                    if(  !is_op(Pnode->LEFT)
+                      && !Pnode->LEFT->u.obj
+                      && (Pnode->v.fl & INDIRECT)
+                      && !(Pnode->v.fl & DOUBLY_INDIRECT)
                       )
                         {
                         static int fl;
-                        fl = pkn->v.fl & (UNOPS & ~INDIRECT);
-                        pkn = __rechtertak(pkn);
+                        fl = Pnode->v.fl & (UNOPS & ~INDIRECT);
+                        Pnode = __rightbranch(Pnode);
                         if(fl)
                             {
-                            pkn = prive(pkn);
-                            pkn->v.fl |= fl; /* {?} <>#@`/%?!(=b) => /#<>%@?`b */
+                            Pnode = isolated(Pnode);
+                            Pnode->v.fl |= fl; /* {?} <>#@`/%?!(=b) => /#<>%@?`b */
                             }
                         break;
 
-                        /*                    pkn = pkn->RIGHT;*/
+                        /*                    Pnode = Pnode->RIGHT;*/
                         }
                     else
                         {
-                        if(shared(pkn))
+                        if(shared(Pnode))
                             {
-                            pkn = copyop(pkn);
+                            Pnode = copyop(Pnode);
                             }
-                        pkn->v.fl |= READY;
-                        pkn->LEFT = eval(pkn->LEFT);
-                        if(is_op(pkn->LEFT))
+                        Pnode->v.fl |= READY;
+                        Pnode->LEFT = eval(Pnode->LEFT);
+                        if(is_op(Pnode->LEFT))
                             {
-                            if(update(pkn->LEFT,pkn->RIGHT))
-                                pkn = linkertak(pkn);
+                            if(update(Pnode->LEFT,Pnode->RIGHT))
+                                Pnode = leftbranch(Pnode);
                             else
-                                pkn = flinkertak(pkn);
+                                Pnode = fleftbranch(Pnode);
                             }
-                        else if(pkn->LEFT->u.obj)
+                        else if(Pnode->LEFT->u.obj)
                             {
-                            insert(pkn->LEFT,pkn->RIGHT);
-                            pkn = linkertak(pkn);
+                            insert(Pnode->LEFT,Pnode->RIGHT);
+                            Pnode = leftbranch(Pnode);
                             }
-                        else if(pkn->v.fl & INDIRECT)
+                        else if(Pnode->v.fl & INDIRECT)
                             /* !(=a) -> a */
                             {
-                            pkn = evalvar(pkn);
+                            Pnode = evalvar(Pnode);
                             }
                         }
                     break;
                 case DOT :
                     {
-                    if(shared(pkn))
+                    if(shared(Pnode))
                         {
-                        pkn = copyop(pkn);
+                        Pnode = copyop(Pnode);
                         }
-                    pkn->v.fl |= READY;
-                    pkn->LEFT = eval(pkn->LEFT);
-                    pkn->RIGHT = eval(pkn->RIGHT);
-                    if(pkn->v.fl & INDIRECT)
+                    Pnode->v.fl |= READY;
+                    Pnode->LEFT = eval(Pnode->LEFT);
+                    Pnode->RIGHT = eval(Pnode->RIGHT);
+                    if(Pnode->v.fl & INDIRECT)
                         {
-                        pkn = evalvar(pkn);
+                        Pnode = evalvar(Pnode);
                         }
                     break;
                     }
                 case COMMA :
-                    if(shared(pkn))
+                    if(shared(Pnode))
                         {
-                        pkn = copyop(pkn);
+                        Pnode = copyop(Pnode);
                         }
-                    pkn->v.fl |= READY;
-                    pkn = handleKOMMA(pkn);/* do not recurse, iterate! */
+                    Pnode->v.fl |= READY;
+                    Pnode = handleKOMMA(Pnode);/* do not recurse, iterate! */
                     if(lkn.v.fl & INDIRECT)
                         {
-                        pkn = evalvar(pkn);
+                        Pnode = evalvar(Pnode);
                         }
                     break;
                 case WHITE :
-                    if(shared(pkn))
+                    if(shared(Pnode))
                         {
-                        pkn = copyop(pkn);
+                        Pnode = copyop(Pnode);
                         }
-                    pkn->v.fl |= READY;
-                    pkn = handleLUCHT(pkn);/* do not recurse, iterate! */
+                    Pnode->v.fl |= READY;
+                    Pnode = handleLUCHT(Pnode);/* do not recurse, iterate! */
                     if(lkn.v.fl & INDIRECT)
                         {
-                        pkn = evalvar(pkn);
+                        Pnode = evalvar(Pnode);
                         }
                     break;
                 case PLUS :
-                    if(shared(pkn))
+                    if(shared(Pnode))
                         {
-                        pkn = copyop(pkn);
+                        Pnode = copyop(Pnode);
                         }
-                    pkn = merge(pkn,vglplus,plus_samenvoegen_of_sorteren
+                    Pnode = merge(Pnode,cmpplus,plus_samenvoegen_of_sorteren
 #if EXPAND
                         ,expandProduct
 #endif
                         );
                     if(lkn.v.fl & INDIRECT)
                         {
-                        pkn = evalvar(pkn);
+                        Pnode = evalvar(Pnode);
                         }
                     break;
                 case TIMES :
-                    if(shared(pkn))
+                    if(shared(Pnode))
                         {
-                        pkn = copyop(pkn);
+                        Pnode = copyop(Pnode);
                         }
-                    pkn->v.fl |= READY;
+                    Pnode->v.fl |= READY;
                     {
-                    pkn = merge(pkn,vglmaal,substmaal
+                    Pnode = merge(Pnode,cmptimes,substtimes
 #if EXPAND
                         ,expandDummy
 #endif
@@ -16093,111 +16089,111 @@ static psk eval(psk pkn)
                     }
                     if(lkn.v.fl & INDIRECT)
                         {
-                        pkn = evalvar(pkn);                             /* {?} a=7 & !(a*1) */
+                        Pnode = evalvar(Pnode);                             /* {?} a=7 & !(a*1) */
                         }
                     break;
                 case EXP :
-                    if(shared(pkn))
+                    if(shared(Pnode))
                         {
-                        pkn = copyop(pkn);
+                        Pnode = copyop(Pnode);
                         }
-                    pkn->v.fl |= READY;
-                    if(  evalueer((pkn->LEFT)) == TRUE
-                      && evalueer((pkn->RIGHT)) == TRUE
+                    Pnode->v.fl |= READY;
+                    if(  evaluate((Pnode->LEFT)) == TRUE
+                      && evaluate((Pnode->RIGHT)) == TRUE
                       )
                         {
-                        pkn = stapelmacht(pkn);
+                        Pnode = stapelmacht(Pnode);
                         }
                     else
-                        pkn->v.fl ^= SUCCESS;
+                        Pnode->v.fl ^= SUCCESS;
                     if(lkn.v.fl & INDIRECT)
                         {
-                        pkn = evalvar(pkn);
+                        Pnode = evalvar(Pnode);
                         }
                     break;
                 case LOG :
-                    if(shared(pkn))
+                    if(shared(Pnode))
                         {
-                        pkn = copyop(pkn);
+                        Pnode = copyop(Pnode);
                         }
-                    pkn->v.fl |= READY;
-                    if(  evalueer((pkn->LEFT)) == TRUE
-                      && evalueer((pkn->RIGHT)) == TRUE
+                    Pnode->v.fl |= READY;
+                    if(  evaluate((Pnode->LEFT)) == TRUE
+                      && evaluate((Pnode->RIGHT)) == TRUE
                       )
                         {
-                        pkn = substlog(pkn);
+                        Pnode = substlog(Pnode);
                         }
                     else
                         {
-                        pkn->v.fl ^= SUCCESS;
+                        Pnode->v.fl ^= SUCCESS;
                         }
                     if(lkn.v.fl & INDIRECT)
                         {
-                        pkn = evalvar(pkn);
+                        Pnode = evalvar(Pnode);
                         }
                     break;
                 case DIF :
-                    if(shared(pkn))
+                    if(shared(Pnode))
                         {
-                        pkn = copyop(pkn);
+                        Pnode = copyop(Pnode);
                         }
-                    pkn->v.fl |= READY;
+                    Pnode->v.fl |= READY;
                     if(  !(lkn.v.fl & INDIRECT)
-                      && evalueer((pkn->LEFT)) == TRUE
-                      && evalueer((pkn->RIGHT)) == TRUE
+                      && evaluate((Pnode->LEFT)) == TRUE
+                      && evaluate((Pnode->RIGHT)) == TRUE
                       )
                         {
-                        pkn = substdiff(pkn);
+                        Pnode = substdiff(Pnode);
                         break;
                         }
-                    pkn->v.fl ^= SUCCESS;
+                    Pnode->v.fl ^= SUCCESS;
                     break;
                 case FUN :
                 case FUU :
-                    if(shared(pkn))
+                    if(shared(Pnode))
                         {
-                        pkn = copyop(pkn);
+                        Pnode = copyop(Pnode);
                         }
-                    pkn->v.fl |= READY;
-                    pkn->LEFT = eval(pkn->LEFT);
-                    if(kop(pkn) == FUN)
+                    Pnode->v.fl |= READY;
+                    Pnode->LEFT = eval(Pnode->LEFT);
+                    if(Op(Pnode) == FUN)
                         {
-                        pkn->RIGHT = eval(pkn->RIGHT);
+                        Pnode->RIGHT = eval(Pnode->RIGHT);
                         }
-                    pkn = functies(pkn);
+                    Pnode = functies(Pnode);
                     if(lkn.v.fl & INDIRECT)
                         {
-                        pkn = evalvar(pkn);
+                        Pnode = evalvar(Pnode);
                         }
                     break;
                 case UNDERSCORE :
-                    if(shared(pkn))
+                    if(shared(Pnode))
                         {
-                        pkn = copyop(pkn);
+                        Pnode = copyop(Pnode);
                         }
-                    pkn->v.fl |= READY;
+                    Pnode->v.fl |= READY;
                     if(dummy_op == EQUALS)
                         {
-                        psk old = pkn;
-                        pkn = (psk)bmalloc(__LINE__,sizeof(objectknoop));
+                        psk old = Pnode;
+                        Pnode = (psk)bmalloc(__LINE__,sizeof(objectnode));
 #ifdef BUILTIN
-                        ((typedObjectknoop*)(pkn))->u.Int = 0;
+                        ((typedObjectnode*)(Pnode))->u.Int = 0;
 #else
-                        ((typedObjectknoop*)(pkn))->refcount = 0;
-                        UNSETCREATEDWITHNEW((typedObjectknoop*)pkn);
-                        UNSETBUILTIN((typedObjectknoop*)pkn);
+                        ((typedObjectnode*)(Pnode))->refcount = 0;
+                        UNSETCREATEDWITHNEW((typedObjectnode*)Pnode);
+                        UNSETBUILTIN((typedObjectnode*)Pnode);
 #endif
-                        pkn->LEFT = subboomcopie(old->LEFT);
+                        Pnode->LEFT = subtreecopy(old->LEFT);
                         old->RIGHT = Head(old->RIGHT);
-                        pkn->RIGHT = subboomcopie(old->RIGHT);
-                        wis(old);
+                        Pnode->RIGHT = subtreecopy(old->RIGHT);
+                        wipe(old);
                         }
-                    pkn->v.fl &= (~OPERATOR & ~READY);
-                    pkn->ops |= dummy_op;
-                    pkn->v.fl |= SUCCESS;
+                    Pnode->v.fl &= (~OPERATOR & ~READY);
+                    Pnode->ops |= dummy_op;
+                    Pnode->v.fl |= SUCCESS;
                     if(lkn.v.fl & INDIRECT)
                         {/* (a=b=127)&(.):(_)&!(a_b) */
-                        pkn = evalvar(pkn);
+                        Pnode = evalvar(Pnode);
                         }
                     break;
                 }
@@ -16206,7 +16202,7 @@ static psk eval(psk pkn)
             {
             /* An unevaluated leaf can only be an atom with ! or !!,
             so we don't need to test for this condition.*/
-            pkn = evalvar(pkn);
+            Pnode = evalvar(Pnode);
             /* After evaluation of a variable, the loop continues.
             Together with how & and | (AND and OR) are treated, this ensures that
             a loop can run indefinitely, without using stack space. */
@@ -16216,7 +16212,7 @@ static psk eval(psk pkn)
     PeekMsg();
 #endif
     ZSTACK
-    return pkn;
+    return Pnode;
     }
 
 int startProc(
@@ -16262,67 +16258,67 @@ int startProc(
 #endif
         }
 #endif
-    for(tel = 0;tel<256;variabelen[tel++] = NULL)
+    for(tel = 0;tel<256;variables[tel++] = NULL)
         ;
-    if(!init_ruimte())
+    if(!init_memoryspace())
         return 0;
     init_opcode();
-    global_anker = NULL;
+    global_anchor = NULL;
     global_fpi = stdin;
     global_fpo = stdout;
 
-    argk.flgs = READY | SUCCESS;
-    argk.u.lobj = O('a','r','g');
+    argNode.flgs = READY | SUCCESS;
+    argNode.u.lobj = O('a','r','g');
 
-    sjt.flgs = READY | SUCCESS;
-    sjt.u.lobj = O('s','j','t');
+    sjtNode.flgs = READY | SUCCESS;
+    sjtNode.u.lobj = O('s','j','t');
 
-    selfkn.flgs = READY | SUCCESS;
-    selfkn.u.lobj = O('i','t','s');
+    selfNode.flgs = READY | SUCCESS;
+    selfNode.u.lobj = O('i','t','s');
 
-    Selfkn.flgs = READY | SUCCESS;
-    Selfkn.u.lobj = O('I','t','s');
+    SelfNode.flgs = READY | SUCCESS;
+    SelfNode.u.lobj = O('I','t','s');
 
-    nilk.flgs = READY | SUCCESS | IDENT;
-    nilk.u.lobj = 0L;
+    nilNode.flgs = READY | SUCCESS | IDENT;
+    nilNode.u.lobj = 0L;
 
-    nulk.flgs = READY | SUCCESS | IDENT | QNUMBER | QNUL;
-    nulk.u.lobj = 0L;
-    nulk.u.obj = '0';
+    zeroNode.flgs = READY | SUCCESS | IDENT | QNUMBER | QNUL;
+    zeroNode.u.lobj = 0L;
+    zeroNode.u.obj = '0';
 
-    eenk.u.lobj = 0L;
-    eenk.u.obj = '1';
-    eenk.flgs = READY | SUCCESS | IDENT | QNUMBER;
-    *(&(eenk.u.obj)+1) = 0;
+    oneNode.u.lobj = 0L;
+    oneNode.u.obj = '1';
+    oneNode.flgs = READY | SUCCESS | IDENT | QNUMBER;
+    *(&(oneNode.u.obj)+1) = 0;
 
-    mintweek.u.lobj = 0L;
-    mintweek.u.obj = '2';
-    mintweek.flgs = READY | SUCCESS | QNUMBER | MINUS;
-    *(&(mintweek.u.obj)+1) = 0;
+    minusTwoNode.u.lobj = 0L;
+    minusTwoNode.u.obj = '2';
+    minusTwoNode.flgs = READY | SUCCESS | QNUMBER | MINUS;
+    *(&(minusTwoNode.u.obj)+1) = 0;
 
-    mineenk.u.lobj = 0L;
-    mineenk.u.obj = '1';
-    mineenk.flgs = READY | SUCCESS | QNUMBER | MINUS;
-    *(&(mineenk.u.obj)+1) = 0;
+    minusOneNode.u.lobj = 0L;
+    minusOneNode.u.obj = '1';
+    minusOneNode.flgs = READY | SUCCESS | QNUMBER | MINUS;
+    *(&(minusOneNode.u.obj)+1) = 0;
 
-    tweek.u.lobj = 0L;
-    tweek.u.obj = '2';
-    tweek.flgs = READY | SUCCESS | QNUMBER;
-    *(&(tweek.u.obj)+1) = 0;
+    twoNode.u.lobj = 0L;
+    twoNode.u.obj = '2';
+    twoNode.flgs = READY | SUCCESS | QNUMBER;
+    *(&(twoNode.u.obj)+1) = 0;
 
-    vierk.u.lobj = 0L;
-    vierk.u.obj = '4';
-    vierk.flgs = READY | SUCCESS | QNUMBER;
-    *(&(vierk.u.obj)+1) = 0;
+    fourNode.u.lobj = 0L;
+    fourNode.u.obj = '4';
+    fourNode.flgs = READY | SUCCESS | QNUMBER;
+    *(&(fourNode.u.obj)+1) = 0;
 
-    minvierk.u.lobj = 0L;
-    minvierk.u.obj = '4';
-    minvierk.flgs = READY | SUCCESS | QNUMBER | MINUS;
-    *(&(minvierk.u.obj)+1) = 0;
+    minusFourNode.u.lobj = 0L;
+    minusFourNode.u.obj = '4';
+    minusFourNode.flgs = READY | SUCCESS | QNUMBER | MINUS;
+    *(&(minusFourNode.u.obj)+1) = 0;
 
-    m0 = opb(m0,"?*(%+%)^~/#>1*?" , NULL);
-    m1 = opb(m1,"?*(%+%)*?" , NULL);
-    f0 = opb(f0,"(g,k,pow"
+    m0 = build_up(m0,"?*(%+%)^~/#>1*?" , NULL);
+    m1 = build_up(m1,"?*(%+%)*?" , NULL);
+    f0 = build_up(f0,"(g,k,pow"
                 ".(pow"
                   "=b,c,d,l,s,f"
                   ".!arg:(%?b+%?c)^?d"
@@ -16339,10 +16335,10 @@ int startProc(
                   ")"
                   "&!arg:?g*((%+%)^~/#>1:?arg)*?k"
                   "&!g*pow$!arg*!k)",NULL);
-    f1 = opb(f1,
+    f1 = build_up(f1,
         "((\177g,\177h,\177i).!arg:?\177g*(%?\177h+%?\177i)*",
         "?arg&!\177g*!\177h*!arg+!\177g*!\177i*!arg)",NULL);
-    f4 = opb(f4,  "l,a,b,c,e,f"
+    f4 = build_up(f4,  "l,a,b,c,e,f"
                 ".(a"
                  "=j,g,h,i"
                   ".!arg:?l^(?j+?g*!l\016?h*?i+?arg)"
@@ -16387,7 +16383,7 @@ int startProc(
                      ")"
                    "&e^!l$!arg*!l"
                  ")",NULL);
-    f5 = opb(f5,
+    f5 = build_up(f5,
          "l,d"
          ".(d"
           "=j,g,h"
@@ -16396,7 +16392,7 @@ int startProc(
           "&!arg:?l\016(?*!l^?*?)"
           "&d$!arg", NULL);
 
-    global_anker = startboom_w(global_anker ,
+    global_anchor = starttree_w(global_anchor ,
         "(cat=flt,sin,tay,fct,cos,out,sgn.!arg:((?flt,(?sin,?tay)|?sin&:?tay)|?flt&:?sin:"
         "?tay)&(fct=.!arg:%?cos ?arg&!cos:((?out.?)|?out)&'(? ($out|($out.?)"
         ") ?):(=?sgn)&(!flt:!sgn&!(glf$(=~.!sin:!sgn))&!cos|) fct$!arg|)&(:!flt:!sin&mem$!tay|(:!flt&mem$:?flt"
@@ -16493,7 +16489,7 @@ int startProc(
     if(setjmp(jumper) != 0)
         return;
 #endif
-    global_anker = eval(global_anker);
+    global_anchor = eval(global_anchor);
     stringEval("(v=\"Bracmat version " VERSION ", build " BUILD " (" DATUM ")\")",NULL,&err);
     return 1;
 }
@@ -16560,7 +16556,7 @@ int mainlus(int argc,char *argv[])
         "(w=\"11. BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY\\n"
         "FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW.  EXCEPT WHEN\\n"
         "OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES\\n"
-        "PROVIDE THE PROGRAM \\\"AS IS\\\" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED\\n"
+        "PROVIDE THE PROGRAM \\\"AS IS\\\" WITHOUT WARRANTY OF ANY Child, EITHER EXPRESSED\\n"
         "OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF\\n"
         "MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.  THE ENTIRE RISK AS\\n"
         "TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU.  SHOULD THE\\n"
