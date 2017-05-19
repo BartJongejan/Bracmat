@@ -352,8 +352,8 @@ Xobject=
           | Out$(24 x !x y !y)
           )
           (       get
-                $ ( "The pacifier or shortcut flag is inherited by higher levels, it percolates
-towards operators that are closer to the root of the tree, until it is
+                $ ( "The pacifier or shortcut flag is inherited by higher levels, it percolates\r
+towards operators that are closer to the root of the tree, until it is\r
 subsumed in situations like the above ones."
                   , MEM
                   , VAP
@@ -364,20 +364,20 @@ subsumed in situations like the above ones."
                   & ~(!g:?h "," ?&!h:~)
                   )
             &   str$!f
-              : "The pacifier or shortcut flag is inherited by higher levels, it percolates
+              : "The pacifier or shortcut flag is inherited by higher levels, it percolates\r
 towards operators that are closer to the root of the tree"
           | Out$(25 str$("f=[" !f "]"))
           )
           (       get
-                $ ( "The pacifier or shortcut flag is inherited by higher levels, it percolates
-towards operators that are closer to the root of the tree, until it is
+                $ ( "The pacifier or shortcut flag is inherited by higher levels, it percolates\r
+towards operators that are closer to the root of the tree, until it is\r
 subsumed in situations like the above ones."
                   , MEM
                   , VAP
                   )
               : ?f "," (("," ?|~(? "," ?)):?g)
             &   str$!f
-              : "The pacifier or shortcut flag is inherited by higher levels, it percolates
+              : "The pacifier or shortcut flag is inherited by higher levels, it percolates\r
 towards operators that are closer to the root of the tree"
           | Out$(26 str$("f=[" !f "]"))
           )
@@ -422,10 +422,10 @@ towards operators that are closer to the root of the tree"
           & !y:"/"
           & Out$"28k outer stringmatch must have atom as subject."
           )
-          "   (This fails because the pattern 
-          #?a (~#%@:?y) #?b 
-          is in the match context 12/34:<rhs>, not in a stringmatch context.
-          Remember, the first @ says that subject is an atom, which it is in the 
+          "   (This fails because the pattern \r
+          #?a (~#%@:?y) #?b \r
+          is in the match context 12/34:<rhs>, not in a stringmatch context.\r
+          Remember, the first @ says that subject is an atom, which it is in the \r
           match context, but not in a stringmatch context.)"
           ( @( 12/34:@(#?a (~#%@:?y) #?b:?x)
              & !y:"/"
@@ -3308,14 +3308,14 @@ towards operators that are closer to the root of the tree"
                   )
                 $ 10
               : 3628800
-            & "recursive lambda function computing factorial of 10.
-               g := λr. λn.(1, if n = 0; else n × (r r (n-1)))
-               f := g g
-               or, translated to Bracmat
-               ( (=(r.!arg:?r&'(.!arg:0&1|!arg*(($r)$($r))$(!arg+-1)))):?g
-               & (!g$!g):?f
-               & !f$10
-                 )
+            & "recursive lambda function computing factorial of 10.\r
+               g := λr. λn.(1, if n = 0; else n × (r r (n-1)))\r
+               f := g g\r
+               or, translated to Bracmat\r
+               ( (=(r.!arg:?r&'(.!arg:0&1|!arg*(($r)$($r))$(!arg+-1)))):?g\r
+               & (!g$!g):?f\r
+               & !f$10\r
+                 )\r
                See http://en.wikipedia.org/wiki/Lambda_calculus"
           | Out$435
           )
@@ -3897,10 +3897,10 @@ towards operators that are closer to the root of the tree"
           (   ( W
               = whl'(1+!n:?n:~>1100&!W)
               )
-            & "Microsoft VC++ 2008
-            	32 bit:		16056 debug: 1119
-                64 bit:	     5384
-                Borland BC5			 8618
+            & "Microsoft VC++ 2008\r
+            	32 bit:		16056 debug: 1119\r
+                64 bit:	     5384\r
+                Borland BC5			 8618\r
                 gcc 4.1.2 20080704	23807"
             & 0:?n
             & !W
@@ -3915,10 +3915,10 @@ towards operators that are closer to the root of the tree"
                   )
                 & !loop
               )
-            & "Microsoft VC++ 2008
-            	32 bit:		28546 debug: 4016
-                64 bit:	     9231
-                Borland BC5	        28730
+            & "Microsoft VC++ 2008\r
+            	32 bit:		28546 debug: 4016\r
+                64 bit:	     9231\r
+                Borland BC5	        28730\r
                 gcc 4.1.2 20080704  157128"
             & 0:?n
             & `!L
@@ -4148,9 +4148,9 @@ towards operators that are closer to the root of the tree"
             &   !G3
               : (=(A&X:?(G3.)) B)
               : (=A B)
-            & "The value of G3, =A B, is not evaluated. When !G3 is evaluated,
-               a copy of the = is created, with the READY flag set.
-               The assignment X:?(G3.) assigns to the original, unevaluated,
+            & "The value of G3, =A B, is not evaluated. When !G3 is evaluated,\r
+               a copy of the = is created, with the READY flag set.\r
+               The assignment X:?(G3.) assigns to the original, unevaluated,\r
                object, dereferencing A, B and the operator connecting them."
             & A
             & !loss
@@ -4608,11 +4608,11 @@ towards operators that are closer to the root of the tree"
             & rmv$taytestest
           | Out$616
           )
-          (   put$("{comment line 1
-{comment line 2}
+          (   put$("{comment line 1\r
+{comment line 2}\r
 }",taytesttest,NEW)
-            & put$("\"sting line 1
-string line 2\"
+            & put$("\"sting line 1\r
+string line 2\"\r
 ;",taytesttest,APP)
             & lst$(tay,taytesttest,APP)
             & get$(taytesttest,ECH):tay
@@ -5629,58 +5629,58 @@ string line 2\"
           ( img^jpg:(img^jpg)^?n&1:!n
           | Out$886
           )
-          (     "[{},{},    
-    {    
-        \"a\": \"b\\\"\",    
-        \"d\\\\\": \"e\",    
-        \"g\\/\": {    
-            \"\\/x\\b\\f\\n\\r\\t\": {}    
-        }    
-    },    
-    \"A	\",    
-    [    
-        \"x\",    
-        \"t\"    
-    ],    
-    \"B\",    
-    [],    
-    [    
-        \"y\",    
-        \"z\",    
-        \"o\"    
-    ],    
-    \"true\",    
-    true,    
-    false,    
-    3.4,    
-    0.00987654321 ,    
-    0e0,    
-    0.0000006e+007,    
-    0.0000006e-007,    
-    56.78,    
-    56.780,    
-    -0,    
-    0,    
-    -1,    
-    286E4,    
-    17E123,    
-    17.87E123,    
-    0.87E123,    
-    17E123,    
-	10.01,    
-    -286E4,    
-    -17E123,    
-    -17.87E123,    
-    -0.87E123,    
-    -17E123,    
-	-10.01,    
-	0.123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789    ,    
-	1234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567.89123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789    ,    
-	null,    
-    \"I \\u042F je \\u044f\"    
-]    
-    
-    
+          (     "[{},{},    \r
+    {    \r
+        \"a\": \"b\\\"\",    \r
+        \"d\\\\\": \"e\",    \r
+        \"g\\/\": {    \r
+            \"\\/x\\b\\f\\n\\r\\t\": {}    \r
+        }    \r
+    },    \r
+    \"A	\",    \r
+    [    \r
+        \"x\",    \r
+        \"t\"    \r
+    ],    \r
+    \"B\",    \r
+    [],    \r
+    [    \r
+        \"y\",    \r
+        \"z\",    \r
+        \"o\"    \r
+    ],    \r
+    \"true\",    \r
+    true,    \r
+    false,    \r
+    3.4,    \r
+    0.00987654321 ,    \r
+    0e0,    \r
+    0.0000006e+007,    \r
+    0.0000006e-007,    \r
+    56.78,    \r
+    56.780,    \r
+    -0,    \r
+    0,    \r
+    -1,    \r
+    286E4,    \r
+    17E123,    \r
+    17.87E123,    \r
+    0.87E123,    \r
+    17E123,    \r
+	10.01,    \r
+    -286E4,    \r
+    -17E123,    \r
+    -17.87E123,    \r
+    -0.87E123,    \r
+    -17E123,    \r
+	-10.01,    \r
+	0.123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789    ,    \r
+	1234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567891234567.89123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789123456789    ,    \r
+	null,    \r
+    \"I \\u042F je \\u044f\"    \r
+]    \r
+    \r
+    \r
    "
               : ?jsontest
             &   get$(!jsontest,MEM,JSN)
@@ -5911,7 +5911,7 @@ r=
   get$("valid.bra",TXT)
 & rmv$"valid.bak"
 & ren$("valid.bra","valid.bak")
-& put$("{valid.bra}
+& put$("{valid.bra}\r
 ","valid.bra",NEW,BIN)
 & lst$(Xobject,"valid.bra",APP)
 & put$(\n,"valid.bra",APP,BIN)
