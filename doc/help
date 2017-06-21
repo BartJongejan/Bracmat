@@ -2,7 +2,7 @@ help=
   ( streep,verwerk,lusmenu,whatIsBracmat,filosofie,colofon
   . syntax,atotxt,evaltxt,gettxt,contxt,binovztxt,patternm
   . savtxt,dumtxt,binprotxt,prostutxt1,prostutxt2,funmactxt
-  . unops,naamloos,algtxt,unpattxt,binmenu,pattxttxt,
+  . unops,naamloos,algtxt,unpattxt,binmenu,pattxttxt, maptxt
   . pattxt,asstxt,unopsmenu,unstuurtxt,varsmenu,funcmenu
   . varmattxt,varprotxt,progsmenu,debugtxt,debugtxt2,debugtxt3
   . inbltmenu,alctxt,aligntxt,asctxt,utftxt,chrtxt,charset
@@ -168,41 +168,43 @@ lex lexical analysis of help file"
     convert to lower case
 18 |_lst_|
     list un-evaluated expression(s) or value(s) of variable(s)
-19 |_mem_|
+19 |_map_|
+    apply function to each member of a list
+20 |_mem_|
     list existing variable names
-20 |_mod_|
+21 |_mod_|
     remainder
-21 |_new_|
+22 |_new_|
     create new object as a copy of another object
-22 |_pee_|
+23 |_pee_|
     get value from address (peek) (low level)
-23 |_pok_|
+24 |_pok_|
     put value at address (poke) (low level)
-24 |_put_|
+25 |_put_|
     write output
-25 |_ren_|
+26 |_ren_|
     rename file or directory or move file
-26 |_rev_|
+27 |_rev_|
     string reverse
-27 |_rmv_|
+28 |_rmv_|
     remove file
-28 |_sim_|
+29 |_sim_|
     similarity between two atoms
-29 |_str_|
+30 |_str_|
     stringize expression into atom
-30 |_swi_|
+31 |_swi_|
     software interrupt (low level)
-31 |_sys_|
+32 |_sys_|
     command line shell
-32 |_tbl_|
+33 |_tbl_|
     create array, remove array/variable
-33 |_upp_|
+34 |_upp_|
     convert to upper case
-34 |_utf_|
+35 |_utf_|
     convert UTF-8 character to Unicode codepoint
-35 |_whl_|
+36 |_whl_|
     while loop
-36 |_x2d_|
+37 |_x2d_|
     convert hexadecimal number to decimal number x2d$BABEFACE:3133078222
 "
       ,   (1,seltxt)
@@ -223,24 +225,25 @@ lex lexical analysis of help file"
           (16,gettxt)
           (17,lowtxt DOSopttxt)
           (18,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt)
-          (19,memtxt)
-          (20,modtxt)
-          (21,newobjecttxt)
-          (22,peetxt)
-          (23,poktxt)
-          (24,puttxt1 humtxt puttxt2 puttxt3 newtxt)
-          (25,rentxt)
-          (26,rmvtxt)
-          (27,revtxt)
-          (28,simtxt)
-          (29,strtxt)
-          (30,switxt)
-          (31,systxt)
-          (32,tbltxt)
-          (33,upptxt DOSopttxt)
-          (34,utftxt)
-          (35,whltxt)
-          (36,x2dtxt)
+          (19,maptxt)
+          (20,memtxt)
+          (21,modtxt)
+          (22,newobjecttxt)
+          (23,peetxt)
+          (24,poktxt)
+          (25,puttxt1 humtxt puttxt2 puttxt3 newtxt)
+          (26,rentxt)
+          (27,rmvtxt)
+          (28,revtxt)
+          (29,simtxt)
+          (30,strtxt)
+          (31,switxt)
+          (32,systxt)
+          (33,tbltxt)
+          (34,upptxt DOSopttxt)
+          (35,utftxt)
+          (36,whltxt)
+          (37,x2dtxt)
     )
   & ( intro
     =   M
@@ -3300,6 +3303,36 @@ Code that has been saved with lst$ can be reloaded with get$.
     { write all current code without indentations to file \"all\" }
 {?} lst$(tay,taylor,NEW)
     { save function tay$ to file \"taylor\" in indented format }"
+    )
+  & ( maptxt
+    =   T
+      , "map$(<fnc>.<list>)"
+      , "map$ produces a list containing the results of applying <fnc> to each member
+in <list>. <fnc> can be the name of a function, a function definition
+('anonymous function') or a lambda abstraction. <fnc> can also be the name of
+a built-in function. (See the first example.) The members in <list> must be
+separated by the space operator.
+{?} map$(rev.aap noot mies)
+{!} paa toon seim
+{?} map$(/('(x.$x^2)).1 2 3 4)
+{!} 1 4 9 16
+{?} map$((=.!arg^2).1 2 3 4)
+{!} 1 4 9 16
+{?} (square=.!arg^2)&map$(square.1 2 3 4)
+{!} 1 4 9 16"
+"{?} (  map
+    $ ( (
+        =   x
+          .     !arg:?*?^%?x*?*?^!x*?
+              & (!arg.\"same exponent\" !x)
+            | (!arg.)
+        )
+      . a*b^3*c^2 d*f^3*g^2*h*j^3 o*p
+      )
+    )
+{!} (a*b^3*c^2.)
+    (d*f^3*g^2*h*j^3.same exponent 3)
+    (o*p.)"
     )
   & ( memtxt
     =   T
