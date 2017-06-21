@@ -630,6 +630,7 @@ typedef struct
 #define X   O('X', 0 , 0 )
 #define X2D O('x','2','d') /* hex -> dec */
 #define D2X O('d','2','x') /* dec -> hex */
+#define MAP O('m','a','p')
 #define XX  O('e', 0 , 0 )
 
 
@@ -13728,6 +13729,41 @@ static function_return_type functions(psk Pnode)
         CASE(LST)
             {
             return output(&Pnode,lst) ? functionOk(Pnode) : functionFail(Pnode);
+            }
+        CASE(MAP) /* map $ (<function>.<list>) */
+            {
+            if (is_op(rightnode))
+                {/*XXX*/
+                psk pnode = rightnode->RIGHT;
+                psk nnode;
+                psk nPnode;
+                ppsk ppnode = &nPnode;
+                while (is_op(pnode) && Op(pnode) == WHITE)
+                    {
+                    psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                    wnode->ops = WHITE|SUCCESS;
+                    *ppnode = wnode;
+                    ppnode = &(wnode->RIGHT);
+                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                    nnode->v.fl = Pnode->v.fl;
+                    nnode->ops &= ~ALL_REFCOUNT_BITS_SET;
+                    nnode->LEFT = same_as_w(rightnode->LEFT);
+                    nnode->RIGHT = same_as_w(pnode->LEFT);
+                    nnode = functions(nnode);
+                    wnode->LEFT = nnode;
+                    pnode = pnode->RIGHT;
+                    }
+                nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                nnode->v.fl = Pnode->v.fl;
+                nnode->ops &= ~ALL_REFCOUNT_BITS_SET;
+                nnode->LEFT = same_as_w(rightnode->LEFT);
+                nnode->RIGHT = same_as_w(pnode);
+                nnode = functions(nnode);
+                *ppnode = nnode;
+                wipe(Pnode);
+                Pnode = nPnode;
+                }
+            return functionOk(Pnode);
             }
 #if !defined NO_FILE_RENAME
         CASE(REN)
