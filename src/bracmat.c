@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "19 May 2017"
+#define DATUM "21 June 2017"
 #define VERSION "6"
-#define BUILD "217"
+#define BUILD "218"
 /*
 COMPILATION
 -----------
