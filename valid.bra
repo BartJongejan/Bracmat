@@ -1,4 +1,4 @@
-{valid.bra}
+{valid.bra}
 Xobject=
   (donit=.)
   ( doit
@@ -5895,6 +5895,35 @@ string line 2\"\r
           | Out$923
           )
           (sim$(abbcd.abcd):8/9|Out$924)
+          ( map$(rev.aap noot mies):paa toon seim
+          | Out$925
+          )
+          (   map$(/('(x.$x^2)).1 2 3 4)
+            : 1 4 9 16
+          | Out$926
+          )
+          (   map$((=.!arg^2).1 2 3 4)
+            : 1 4 9 16
+          | Out$927
+          )
+          (   (square=.!arg^2)
+            & map$(square.1 2 3 4):1 4 9 16
+          | Out$928
+          )
+          (     map
+              $ ( ( 
+                  =   x
+                    .     !arg:?*?^%?x*?*?^!x*?
+                        & (!arg."same exponent" !x)
+                      | (!arg.)
+                  )
+                . a*b^3*c^2 d*f^3*g^2*h*j^3 o*p
+                )
+            :   (a*b^3*c^2.)
+                (d*f^3*g^2*h*j^3."same exponent" 3)
+                (o*p.)
+          | Out$929
+          )
       &   out
         $ ( str
           $ ( "Done. "
