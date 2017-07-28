@@ -1,3 +1,6 @@
+  28 July 2017
+Uses UnicodeData.txt 2017-04-14, 05:40:18 GMT, no change of behaviour.
+
   21 June 2017
 Added a built-in map function. Usage: map$(<fnc>.<space separated list>)
 
