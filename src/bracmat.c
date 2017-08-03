@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "28 July 2017"
+#define DATUM "1 August 2017"
 #define VERSION "6"
-#define BUILD "219"
+#define BUILD "220"
 /*
 COMPILATION
 -----------
@@ -16498,11 +16498,11 @@ int startProc(
         "&\177F$!\177e),",
 
         "(MLencoding=N M J h m R.:?N&(R=? (charset.?N) ?|? (content.@(?:? "
-        "charset ? \275 ?N)) ?)&(M=? (~<>M.(!R,?)|!R) ?)&(J=? (~<>head.(?,!M)|"
-        "?&~`) ?|? (~<>head:?h.?) ?m (.!h.) ?&!m:!M)&(!arg:(@ (\277.@(?:~<>XML"
-        " (? encoding ? \275 ? (\242 ?N \242|\247 ?N \247) ?|?&utf\255\270:?N)"
-        ")) ?|? (~<>html.(?,!J)|?&~`) ?|? (~<>html.?) !J)|)&(!N:~|!arg:? ("
-        "\241DOCTYPE.@(?:? html ?)) ?&utf\255\270|)),",
+        "charset ? \275 ?N)) ?)&(M=? (~<>meta.(!R,?)|!R) ?)&(J=? (~<>head.(?,"
+        "!M)|?&~`) ?|? (~<>head:?h.?) ?m (.!h.) ?&!m:!M)&(!arg:(@ (\277.@(?:"
+        "~<>XML (? encoding ? \275 ? (\242 ?N \242|\247 ?N \247) ?|?&"
+        "utf\255\270:?N))) ?|? (~<>html.(?,!J)|?&~`) ?|? (~<>html.?) !J)|)&(!N"
+        ":~|!arg:? (\241DOCTYPE.@(?:? html ?)) ?&utf\255\270|)),",
         "(nestML=a L B s e x.:?L&whl'(!arg:%?a ?arg&!a !L:?L)&!L:?arg&:?L:?B:"
         "?s&whl'(!arg:%?a ?arg&(!a:(.?e.)&(!L.) !B:?B&:?L&!e !s:?s|(!a:(?e.?,?"
         ")&!a|!a:(?e.?x)&(!s:!e ?s&(!e.!x,!L) (!B:(%?L.) ?B&)|!a)|!a) !L:?L))&"

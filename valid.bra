@@ -1,4 +1,4 @@
-{valid.bra}
+{valid.bra}
 Xobject=
   (donit=.)
   ( doit
@@ -5923,6 +5923,31 @@ string line 2\"\r
                 (d*f^3*g^2*h*j^3."same exponent" 3)
                 (o*p.)
           | Out$929
+          )
+          (     toML
+              $ (get$("<html><body>&gvertneqq;</body></html>",MEM,HT ML))
+            : "<html><body>&#8809;&#65024;</body></html>"
+          | Out$930
+          )
+          (     toML
+              $ ( get
+                $ ( "<html><head><meta content='text/html; charset=UTF-8' /></head><body>&gvertneqq;</body></html>"
+                  , MEM
+                  , HT ML
+                  )
+                )
+            : "<html><head><meta content=\"text/html; charset=UTF-8\" /></head><body>≩︀</body></html>"
+          | Out$931
+          )
+          (     toML
+              $ ( get
+                $ ( "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html><body>&gvertneqq;</body></html>"
+                  , MEM
+                  , HT ML
+                  )
+                )
+            : "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html><body>≩︀</body></html>"
+          | Out$932
           )
       &   out
         $ ( str
