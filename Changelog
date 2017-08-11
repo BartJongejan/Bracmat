@@ -1,3 +1,11 @@
+  11 Augiust 2017
+lex.bra: ignore anonymous functions in the list of undeclared functions. 
+
+   1 August 2017
+In xml.c: much extended list of HTML entities. Corrected typo in the
+predefined function MLencoding that determines the encoding of an XML or HTML
+file.
+
   28 July 2017
 Uses UnicodeData.txt 2017-04-14, 05:40:18 GMT, no change of behaviour.
 

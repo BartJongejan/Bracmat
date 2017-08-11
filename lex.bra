@@ -125,6 +125,7 @@ Usage:
                       & "******** FUNCTION CALL (function$parameters or function'parameters) ********"
                       & (!lhs:~|^):?lhs
                       & ( !builtins+!predefs:?+!lhs+?
+                        | !lhs:(=?.?)
                         |   (     testDeclaration
                                 $ (!context.!lhs.!vars.!unrefs)
                               : ?unrefs
