@@ -1,11 +1,11 @@
-{lex.bra
-
-analyse bracmat code for lexicality
-
-Usage:
- lex$<symbol>
-}
-
+{lex.bra
+
+analyse bracmat code for lexicality
+
+Usage:
+ lex$<symbol>
+}
+
 "sOme wEiRdN→ame"=
   new
 =   
@@ -53,6 +53,7 @@ Usage:
             + get
             + low
             + lst
+            + map
             + mem
             + mod
             + new
@@ -73,7 +74,8 @@ Usage:
             + x2d
             + "?"
           : ?builtins
-        & cat+cos+flt+out+sin+tay:?predefs
+        &   cat+cos+fct+flt+jsn+nestML+out+sin+tay+toML
+          : ?predefs
         &   0
           : ?notreffunc
           : ?unusedLocals
@@ -252,23 +254,23 @@ Usage:
           | Y$(...'($arg=$!arg)):?unrefs
           )
         &   put
-          $ ( "==========================================================
-Lexical analysis. See program code further down this file.
-==========================================================
-
- ----------------------
-{ Undeclared functions }
- ----------------------
+          $ ( "==========================================================\r
+Lexical analysis. See program code further down this file.\r
+==========================================================\r
+\r
+ ----------------------\r
+{ Undeclared functions }\r
+ ----------------------\r
 "
             , "lex.txt"
             , NEW
             )
         & lst$(notdeclfuncs,"lex.txt",APP)
         &   put
-          $ ( "
- ----------------------
-{ Undeclared variables }
- ----------------------
+          $ ( "\r
+ ----------------------\r
+{ Undeclared variables }\r
+ ----------------------\r
 "
             , "lex.txt"
             , APP
@@ -282,95 +284,96 @@ Lexical analysis. See program code further down this file.
             & !A (!M.!AA+!ZZ) !Z:?reffunc
             )
         &   put
-          $ ( "
- ------------------------
-{ Unused local variables }
- ------------------------
+          $ ( "\r
+ ------------------------\r
+{ Unused local variables }\r
+ ------------------------\r
 "
             , "lex.txt"
             , APP
             )
         & lst$(unusedLocals,"lex.txt",APP)
         &   put
-          $ ( "
- ----------------
-{ Not referenced }
- ----------------
+          $ ( "\r
+ ----------------\r
+{ Not referenced }\r
+ ----------------\r
 "
             , "lex.txt"
             , APP
             )
         & lst$(unrefs,"lex.txt",APP)
         &   put
-          $ ( "
- -------------------
-{ Defined functions }
- -------------------
+          $ ( "\r
+ -------------------\r
+{ Defined functions }\r
+ -------------------\r
 "
             , "lex.txt"
             , APP
             )
         & lst$(definedfuncs,"lex.txt",APP)
         &   put
-          $ ( "
- ---------------------
-{ Undefined functions }
- ---------------------
+          $ ( "\r
+ ---------------------\r
+{ Undefined functions }\r
+ ---------------------\r
 "
             , "lex.txt"
             , APP
             )
         & lst$(undefinedfuncs,"lex.txt",APP)
         &   put
-          $ ( "
- ------------------------
-{ Unreferenced functions }
- ------------------------
+          $ ( "\r
+ ------------------------\r
+{ Unreferenced functions }\r
+ ------------------------\r
 "
             , "lex.txt"
             , APP
             )
         & lst$(notreffunc,"lex.txt",APP)
         &   put
-          $ ( "
- ----------------------
-{ Referenced functions }
- ----------------------
+          $ ( "\r
+ ----------------------\r
+{ Referenced functions }\r
+ ----------------------\r
 "
             , "lex.txt"
             , APP
             )
         & lst$(reffunc,"lex.txt",APP)
         &   put
-          $ ( "
- ------------------
-{ Global variables }
- ------------------
+          $ ( "\r
+ ------------------\r
+{ Global variables }\r
+ ------------------\r
 "
             , "lex.txt"
             , APP
             )
         & lst$(globalvars,"lex.txt",APP)
         &   put
-          $ ( "
- ------------------
-{ Global functions }
- ------------------
+          $ ( "\r
+ ------------------\r
+{ Global functions }\r
+ ------------------\r
 "
             , "lex.txt"
             , APP
             )
         & lst$(globalfuncs,"lex.txt",APP)
-        & put$("
-
-============
-Program code
-============
+        &   put
+          $ ("\r
+\r
+============\r
+Program code\r
+============\r
 ","lex.txt",APP)
         & lst$(!arg,"lex.txt",APP)
-        & "
-===========
-See lex.txt
+        & "\r
+===========\r
+See lex.txt\r
 ==========="
     );
 
@@ -379,14 +382,14 @@ rr=
 & rmv$(str$(lex ".bak"))
 & ren$("lex.bra".str$(lex ".bak"))
 &   put
-  $ ( "{lex.bra
-
-analyse bracmat code for lexicality
-
-Usage:
- lex$<symbol>
-}
-
+  $ ( "{lex.bra\r
+\r
+analyse bracmat code for lexicality\r
+\r
+Usage:\r
+ lex$<symbol>\r
+}\r
+\r
 "
     , "lex.bra"
     , NEW
@@ -394,8 +397,8 @@ Usage:
 & lst'("sOme wEiRdN→ame","lex.bra",APP)
 & put'(\n,"lex.bra",APP)
 & lst'(rr,"lex.bra",APP)
-& put$("
-new'\"sOme wEiRdN→ame\";
+& put$("\r
+new'\"sOme wEiRdN→ame\";\r
 ","lex.bra",APP);
-
-new'"sOme wEiRdN→ame";
+
+new'"sOme wEiRdN→ame";
