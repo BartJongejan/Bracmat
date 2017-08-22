@@ -1,4 +1,8 @@
-  11 Augiust 2017
+  22 August 2017
+Tested #define'd options and made minor fixes to make bracmat.c compile with
+every option turned on and off.
+
+  11 August 2017
 lex.bra: ignore anonymous functions in the list of undeclared functions. 
 
    1 August 2017
