@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "1 August 2017"
+#define DATUM "22 August 2017"
 #define VERSION "6"
-#define BUILD "220"
+#define BUILD "221"
 /*
 COMPILATION
 -----------
@@ -2266,8 +2266,8 @@ static const char needsquotes[256] = {
 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ` */
 0,0,0,0,0,0,0,0,0,0,0,3,3,3,1,0};/* { | } ~ */
 
-/*#define LATIN_1*/
-#ifdef LATIN_1 /* ISO8859 */ /* NOT DOS compatible! */
+
+/* ISO8859 */ /* NOT DOS compatible! */
 static const unsigned char lowerEquivalent[256] =
 {
       0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,
@@ -2307,7 +2307,6 @@ static const unsigned char upperEquivalent[256] =
     192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
     208, 209, 210, 211, 212, 213, 214, 247, 216, 217, 218, 219, 220, 221, 222, 255 /* ij */
 };
-#endif
 
 #if CODEPAGE850
 static unsigned char ISO8859toCodePage850(unsigned char kar)
@@ -4278,7 +4277,7 @@ static psk Atom(int Flgs,int opsflgs)
 #if GLOBALARGPTR
 static psk lex(int * nxt,int priority,int Flags,int opsflgs)
 #else
-static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
+static psk lex(int * nxt,int priority,int Flags,int opsflgs,va_list * pargptr)
 #endif
 /* *nxt (if nxt != 0) is set to the character following the expression. */
     {
@@ -4337,8 +4336,8 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
             if(optab[op_of_0] < priority) /* 'op_of_0' has too low priority */
                 {
 #if STRINGMATCH_CAN_BE_NEGATED
-                if(  (Flgs & (NOT|FILTERS)) == (NOT|ATOM)
-                  && Op(*Pnode) == MATCH
+                if(  (Flags & (NOT|FILTERS)) == (NOT|ATOM)
+                  && Op(Pnode) == MATCH
                   ) /* 20071229 Undo setting of
                         success == FALSE
                        if ~@ flags are attached to : operator
@@ -4347,7 +4346,7 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
                        not negate the @ but the result of the string match.
                     */
                     {
-                    Flgs ^= SUCCESS;
+                    Flags ^= SUCCESS;
                     }
 #endif
                 (Pnode)->v.fl ^= Flags; /*19970821*/
@@ -4365,7 +4364,7 @@ static psk lex(int * nxt,int priority,int Flgs,int opsflgs,va_list * pargptr)
             assert(optab[op_of_0] != NOOP);
             assert(optab[op_of_0] >= 0);
             operatorNode->v.fl = optab[op_of_0] | SUCCESS;
-            /*operatorNode->v.fl ^= Flgs;*/
+            /*operatorNode->v.fl ^= Flags;*/
             operatorNode->LEFT = Pnode;
             Pnode = operatorNode;/* 'op_of_0' has sufficient priority */
             if(optab[op_of_0] == priority) /* 'op_of_0' has same priority */
@@ -13028,7 +13027,10 @@ static psk changeCase(psk Pnode
 #endif
                       ,int low)
     {
-    const char * s;
+#if !CODEPAGE850
+    const 
+#endif
+          char * s;
     psk pnode;
     size_t len;
     pnode = same_as_w(Pnode);
