@@ -5949,6 +5949,46 @@ string line 2\"
             : "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html><body>≩︀</body></html>"
           | Out$932
           )
+          (   ( f
+              =   
+                .   !sjt:(a|b|c)
+                  & ?
+              )
+            & a:f$
+            & @(a:f$)
+            & d:~(f$)
+            & @(d:~(f$))
+          | Out$933
+          )
+          (   ( f
+              =   
+                .   !sjt:(a|b|c)
+                  & ?
+              )
+            & ( a:~(f$)
+              | @(a:~(f$))
+              | d:f$
+              | @(d:f$)
+              )
+            & Out$934
+          | 
+          )
+          (   (f=.!sjt:&?)
+            & :f$
+            & @(:f$)
+            & d:~(f$)
+            & @(d:~(f$))
+          | Out$935
+          )
+          (   (f=.!sjt:&?)
+            & ( :~(f$)
+              | @(:~(f$))
+              | d:f$
+              | @(d:f$)
+              )
+            & Out$936
+          | 
+          )
       &   out
         $ ( str
           $ ( "Done. "
