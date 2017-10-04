@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "22 August 2017"
+#define DATUM "4 October 2017"
 #define VERSION "6"
-#define BUILD "221"
+#define BUILD "222"
 /*
 COMPILATION
 -----------
@@ -4973,9 +4973,7 @@ static psk input(FILE * fpi,psk Pnode,int echmemvapstrmltrm,Boolean * err,Boolea
                 }
             else if(!fpi || fpi == stdin)
                 {
-                Printf(
-                "\nend session? (y/n)"
-                );
+                Printf("\nend session? (y/n)");
                 while((ikar = mygetc(stdin)) != 'n')
                     {
                     if(ikar == 'j' || ikar == 'J' || ikar == 'y' || ikar == 'Y')
@@ -9905,306 +9903,321 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
             {
             switch (Op(pat))
                 {
-                case PLUS:
-                case TIMES:
-                    break;
-                case WHITE:
-                    {
-                    LONG locpos = pposition;
-#if CUTOFFSUGGEST
-                    char * suggested_Cut_Off = sub;
-                    char * may_Move_Start_Of_Subject;
-                    may_Move_Start_Of_Subject = sub;
-#endif
-                    /* This code mirrors that of match(). (see below)*/
-                    
-                    sloc = sub;                                     /* A    divisionPoint=S */
-                                                                    
-#if CUTOFFSUGGEST
-                    s.c.lmr = stringmatch(ind+1,"I",sub, sloc       /* B    leftResult=0(P):car(P) */
-                                ,pat->LEFT,subkn,pposition
-                                ,stringLength,&suggested_Cut_Off
-                                ,mayMoveStartOfSubject);
-                    if((s.c.lmr & ONCE) && mayMoveStartOfSubject && *mayMoveStartOfSubject > sub)
-                        {
-                        return ONCE;
-                        }
-#else
-                    s.c.lmr = stringmatch(ind+1,"I",sub, sloc, pat->LEFT, subkn,pposition,stringLength);
-#endif
-                    
-#if CUTOFFSUGGEST
-                    if(suggested_Cut_Off > sloc)
-                        {
-                        if(cutoff && suggested_Cut_Off > cutoff)
+                    case PLUS:
+                    case TIMES:
+                        break;
+                    case WHITE:
                             {
-                            if(suggestedCutOff)
-                                {
-                                locpos += suggested_Cut_Off - sloc;
-                                cutoff = sloc = *suggestedCutOff = suggested_Cut_Off;
-                                }
-                            else
-                                {
-                                locpos += cutoff - sloc;
-                                sloc = cutoff;
-                                s.c.lmr &= ~TRUE;
-                                }
-                            }
-                        else
-                            {
-                            assert(suggested_Cut_Off > sloc);
-                            locpos += suggested_Cut_Off - sloc;
-                            sloc = suggested_Cut_Off;
-                            }
-                        }
-                    else
-#endif
-                        s.c.lmr &= ~ONCE;
-                    while(sloc < cutoff)                            /* C    while divisionPoint */
-                        {
-                        if(s.c.lmr & TRUE)                          /* D        if leftResult.success */
-                            {
+                            LONG locpos = pposition;
 #if CUTOFFSUGGEST
-                            if(s.c.lmr & ONCE)
-                                may_Move_Start_Of_Subject = 0;
-                            else if(may_Move_Start_Of_Subject != 0)
-                                may_Move_Start_Of_Subject = sloc;
-                            s.c.rmr = stringmatch(ind+1,"J",sloc    /* E            rightResult=SR:cdr(P) */
-                                ,cutoff, pat->RIGHT, subkn
-                                ,locpos,stringLength,suggestedCutOff
-                                ,&may_Move_Start_Of_Subject);
-                            if(may_Move_Start_Of_Subject != sloc && may_Move_Start_Of_Subject != 0)
+                            char * suggested_Cut_Off = sub;
+                            char * may_Move_Start_Of_Subject;
+                            may_Move_Start_Of_Subject = sub;
+#endif
+                            /* This code mirrors that of match(). (see below)*/
+
+                            sloc = sub;                                     /* A    divisionPoint=S */
+
+#if CUTOFFSUGGEST
+                            s.c.lmr = stringmatch(ind + 1, "I", sub, sloc       /* B    leftResult=0(P):car(P) */
+                                                  , pat->LEFT, subkn, pposition
+                                                  , stringLength, &suggested_Cut_Off
+                                                  , mayMoveStartOfSubject);
+                            if ((s.c.lmr & ONCE) && mayMoveStartOfSubject && *mayMoveStartOfSubject > sub)
                                 {
-                                assert(may_Move_Start_Of_Subject > sloc);
-                                locpos += may_Move_Start_Of_Subject - sloc;
-                                sloc = may_Move_Start_Of_Subject;
-                                }
-                            else
-                                {
-                                ++sloc;
-                                ++locpos;
+                                return ONCE;
                                 }
 #else
-                            s.c.rmr = stringmatch(ind+1,"J",sloc,cutoff, pat->RIGHT, subkn,locpos,stringLength);
-                            ++sloc;
-                            ++locpos;
+                            s.c.lmr = stringmatch(ind+1,"I",sub, sloc, pat->LEFT, subkn,pposition,stringLength);
 #endif
-                            if(!(s.c.lmr & ONCE))
+
+#if CUTOFFSUGGEST
+                            if (suggested_Cut_Off > sloc)
+                                {
+                                if (cutoff && suggested_Cut_Off > cutoff)
+                                    {
+                                    if (suggestedCutOff)
+                                        {
+                                        locpos += suggested_Cut_Off - sloc;
+                                        cutoff = sloc = *suggestedCutOff = suggested_Cut_Off;
+                                        }
+                                    else
+                                        {
+                                        locpos += cutoff - sloc;
+                                        sloc = cutoff;
+                                        s.c.lmr &= ~TRUE;
+                                        }
+                                    }
+                                else
+                                    {
+                                    assert(suggested_Cut_Off > sloc);
+                                    locpos += suggested_Cut_Off - sloc;
+                                    sloc = suggested_Cut_Off;
+                                    }
+                                }
+                            else
+#endif
+                                s.c.lmr &= ~ONCE;
+                            while (sloc < cutoff)                            /* C    while divisionPoint */
+                                {
+                                if (s.c.lmr & TRUE)                          /* D        if leftResult.success */
+                                    {
+#if CUTOFFSUGGEST
+                                    if (s.c.lmr & ONCE)
+                                        may_Move_Start_Of_Subject = 0;
+                                    else if (may_Move_Start_Of_Subject != 0)
+                                        may_Move_Start_Of_Subject = sloc;
+                                    s.c.rmr = stringmatch(ind + 1, "J", sloc    /* E            rightResult=SR:cdr(P) */
+                                                          , cutoff, pat->RIGHT, subkn
+                                                          , locpos, stringLength, suggestedCutOff
+                                                          , &may_Move_Start_Of_Subject);
+                                    if (may_Move_Start_Of_Subject != sloc && may_Move_Start_Of_Subject != 0)
+                                        {
+                                        assert(may_Move_Start_Of_Subject > sloc);
+                                        locpos += may_Move_Start_Of_Subject - sloc;
+                                        sloc = may_Move_Start_Of_Subject;
+                                        }
+                                    else
+                                        {
+                                        ++sloc;
+                                        ++locpos;
+                                        }
+#else
+                                    s.c.rmr = stringmatch(ind+1,"J",sloc,cutoff, pat->RIGHT, subkn,locpos,stringLength);
+                                    ++sloc;
+                                    ++locpos;
+#endif
+                                    if (!(s.c.lmr & ONCE))
+                                        s.c.rmr &= ~ONCE;
+                                    }
+                                else
+                                    {
+                                    ++sloc;
+                                    ++locpos;
+                                    }
+                                if ((s.c.rmr & TRUE)                       /* F        if(1) full success */
+                                    || (s.c.lmr & (POSITION_ONCE                  /*     or (2) may not be shifted. In the first pass, a position flag on car(P) counts as criterion for being done. */
+                                    | ONCE
+                                    )
+                                    )                                          /* In all but the first pass, the left and right */
+                                    || (s.c.rmr & (ONCE                           /* results can indicate that the loop is done.   */
+                                    | POSITION_MAX_REACHED           /* In all passes a position_max_reached on the   */
+                                    )                               /* rightResult indicates that the loop is done.  */
+                                    )
+                                    )
+                                    {                                       /* G            return */
+                                    if (sloc > sub + 1)                          /* Also return whether sub has reached max position.*/
+                                        s.c.rmr &= ~POSITION_MAX_REACHED;       /* This flag is reason to stop increasing the position of the division any further, but it must not be signalled back to the caller if the lhs is not nil ... */
+                                    s.c.rmr |= (char)(s.c.lmr & POSITION_MAX_REACHED); /* ... unless it is the lhs that signals it. */
+                                    if (stringOncePattern(pat))                  /* Also return whether the pattern as a whole */
+                                        {                                       /* doesn't want longer subjects, which can be */
+                                        s.c.rmr |= ONCE;                        /* found out by looking at the pattern        */
+                                        s.c.rmr |= (char)(pat->v.fl & FENCE);
+                                        }                                       /* or by looking at whether both lhs and rhs  */
+                                    else if (!(s.c.lmr & ONCE))                  /* results indicated this, in which case both */
+                                        s.c.rmr &= ~ONCE;                       /* sides must be non-zero size subjects.      */
+                                    return s.c.rmr ^ (char)NOTHING(pat);
+                                    }
+                                /* H        SL,SR=shift_right divisionPoint */
+                                /* SL = lhs divisionPoint S, SR = rhs divisionPoint S */
+                                /* I        leftResult=SL:car(P) */
+#if CUTOFFSUGGEST
+                                suggested_Cut_Off = sub;
+                                s.c.lmr = stringmatch(ind + 1, "I", sub, sloc, pat->LEFT, subkn,/* 0 ? */pposition,/* strlen(sub) ? */ stringLength, &suggested_Cut_Off, mayMoveStartOfSubject);
+                                if (suggested_Cut_Off > sloc)
+                                    {
+                                    if (!(cutoff && suggested_Cut_Off > cutoff))
+                                        {
+                                        assert(suggested_Cut_Off > sloc);
+                                        locpos += suggested_Cut_Off - sloc;
+                                        sloc = suggested_Cut_Off;
+                                        }
+                                    }
+#else
+                                s.c.lmr = stringmatch(ind+1,"I",sub,sloc, pat->LEFT, subkn,/* 0 ? */pposition,/* strlen(sub) ? */ stringLength);
+#endif
+                                }
+
+                            if (s.c.lmr & TRUE)                              /* J    if leftResult.success */
+                                {
+#if CUTOFFSUGGEST
+                                s.c.rmr = stringmatch(ind + 1, "J", sloc, cutoff /* K        rightResult=0(P):cdr(pat) */
+                                                      , pat->RIGHT, subkn, locpos, stringLength
+                                                      , suggestedCutOff, mayMoveStartOfSubject);
+#else
+                                s.c.rmr = stringmatch(ind+1,"J",sloc,cutoff,pat->RIGHT, subkn,locpos,stringLength);
+#endif
                                 s.c.rmr &= ~ONCE;
-                            }
-                        else
-                            {
-                            ++sloc;
-                            ++locpos;
-                            }
-                        if(  (s.c.rmr & TRUE)                       /* F        if(1) full success */
-                          || (s.c.lmr & (POSITION_ONCE                  /*     or (2) may not be shifted. In the first pass, a position flag on car(P) counts as criterion for being done. */
-                                        | ONCE                          
-                                        )                               
-                             )                                          /* In all but the first pass, the left and right */
-                          || (s.c.rmr & (ONCE                           /* results can indicate that the loop is done.   */
-                                        |POSITION_MAX_REACHED           /* In all passes a position_max_reached on the   */
-                                        )                               /* rightResult indicates that the loop is done.  */
-                             )
-                          )
-                            {                                       /* G            return */
-                            if(sloc > sub + 1)                          /* Also return whether sub has reached max position.*/
-                                s.c.rmr &= ~POSITION_MAX_REACHED;       /* This flag is reason to stop increasing the position of the division any further, but it must not be signalled back to the caller if the lhs is not nil ... */
-                            s.c.rmr |= (char)(s.c.lmr & POSITION_MAX_REACHED); /* ... unless it is the lhs that signals it. */
-                            if(stringOncePattern(pat))                  /* Also return whether the pattern as a whole */
-                                {                                       /* doesn't want longer subjects, which can be */
-                                s.c.rmr |= ONCE;                        /* found out by looking at the pattern        */
-                                s.c.rmr |= (char)(pat->v.fl & FENCE);
-                                }                                       /* or by looking at whether both lhs and rhs  */
-                            else if(!(s.c.lmr & ONCE))                  /* results indicated this, in which case both */
-                                s.c.rmr &= ~ONCE;                       /* sides must be non-zero size subjects.      */
-                            return s.c.rmr ^ (char)NOTHING(pat);
-                            }
-                                                                    /* H        SL,SR=shift_right divisionPoint */
-                                                                        /* SL = lhs divisionPoint S, SR = rhs divisionPoint S */
-                                                                    /* I        leftResult=SL:car(P) */
-#if CUTOFFSUGGEST
-                        suggested_Cut_Off = sub;
-                        s.c.lmr = stringmatch(ind+1,"I",sub,sloc, pat->LEFT, subkn,/* 0 ? */pposition,/* strlen(sub) ? */ stringLength,&suggested_Cut_Off,mayMoveStartOfSubject);
-                        if(suggested_Cut_Off > sloc)
-                            {
-                            if(!(cutoff && suggested_Cut_Off > cutoff))
-                                {
-                                assert(suggested_Cut_Off > sloc);
-                                locpos += suggested_Cut_Off - sloc;
-                                sloc = suggested_Cut_Off;
                                 }
+                            /* L    return */
+                            if (!(s.c.rmr & POSITION_MAX_REACHED))
+                                s.c.rmr &= ~POSITION_ONCE;
+                            if (/*(cutoff > sub) &&*/ stringOncePattern(pat))    /* The test cutoff > sub merely avoids that stringOncePattern is called when it is useless. */
+                                {/* Test:
+                                 @(abcde:`(a ?x) (?z:d) ? )
+                                 z=b
+                                 */
+                                s.c.rmr |= ONCE;
+                                s.c.rmr |= (char)(pat->v.fl & FENCE);
+                                }
+                            return s.c.rmr ^ (char)NOTHING(pat);               /* end */
                             }
-#else
-                        s.c.lmr = stringmatch(ind+1,"I",sub,sloc, pat->LEFT, subkn,/* 0 ? */pposition,/* strlen(sub) ? */ stringLength);
-#endif
-                        }
-                    
-                    if(s.c.lmr & TRUE)                              /* J    if leftResult.success */
-                        {
-#if CUTOFFSUGGEST
-                        s.c.rmr = stringmatch(ind+1,"J",sloc,cutoff /* K        rightResult=0(P):cdr(pat) */
-                            ,pat->RIGHT, subkn,locpos,stringLength
-                            ,suggestedCutOff,mayMoveStartOfSubject);
-#else
-                        s.c.rmr = stringmatch(ind+1,"J",sloc,cutoff,pat->RIGHT, subkn,locpos,stringLength);
-#endif
-                        s.c.rmr &= ~ONCE;
-                        }
-                    /* L    return */
-                    if(!(s.c.rmr & POSITION_MAX_REACHED))
-                        s.c.rmr &= ~POSITION_ONCE;
-                    if(/*(cutoff > sub) &&*/ stringOncePattern(pat))    /* The test cutoff > sub merely avoids that stringOncePattern is called when it is useless. */
-                        {/* Test:
-                         @(abcde:`(a ?x) (?z:d) ? )
-                          z=b
-                         */
-                        s.c.rmr |= ONCE;
-                        s.c.rmr |= (char)(pat->v.fl & FENCE);
-                        }
-                    return s.c.rmr ^ (char)NOTHING(pat);               /* end */
-                    }
-                case UNDERSCORE:
-                    if(cutoff > sub + 1)
-                        {
-#if CUTOFFSUGGEST
-                        s.c.lmr = stringmatch(ind+1,"M",sub,sub+1,pat->LEFT,subkn,pposition,stringLength,NULL,mayMoveStartOfSubject);
-#else
-                        s.c.lmr = stringmatch(ind+1,"M",sub,sub+1,pat->LEFT,subkn,pposition,stringLength);
-#endif
-                        if(  (s.c.lmr & TRUE)
-#if CUTOFFSUGGEST
-                          && ((s.c.rmr = stringmatch(ind+1,"N",sub+1,cutoff,pat->RIGHT, subkn,pposition,stringLength,suggestedCutOff,mayMoveStartOfSubject)) & TRUE)
-#else
-                          && ((s.c.rmr = stringmatch(ind+1,"N",sub+1,cutoff,pat->RIGHT, subkn,pposition,stringLength)) & TRUE)
-#endif
-                          )
+                    case UNDERSCORE:
+                        if (cutoff > sub + 1)
                             {
-                            dummy_op = WHITE;
+#if CUTOFFSUGGEST
+                            s.c.lmr = stringmatch(ind + 1, "M", sub, sub + 1, pat->LEFT, subkn, pposition, stringLength, NULL, mayMoveStartOfSubject);
+#else
+                            s.c.lmr = stringmatch(ind+1,"M",sub,sub+1,pat->LEFT,subkn,pposition,stringLength);
+#endif
+                            if ((s.c.lmr & TRUE)
+#if CUTOFFSUGGEST
+                                && ((s.c.rmr = stringmatch(ind + 1, "N", sub + 1, cutoff, pat->RIGHT, subkn, pposition, stringLength, suggestedCutOff, mayMoveStartOfSubject)) & TRUE)
+#else
+                                && ((s.c.rmr = stringmatch(ind+1,"N",sub+1,cutoff,pat->RIGHT, subkn,pposition,stringLength)) & TRUE)
+#endif
+                                )
+                                {
+                                dummy_op = WHITE;
+                                }
+                            s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE));
+                            }
+                        break;
+                    case AND:
+#if CUTOFFSUGGEST
+                        if ((s.c.lmr = stringmatch(ind + 1, "O", sub, cutoff, pat->LEFT, subkn, pposition, stringLength, suggestedCutOff, mayMoveStartOfSubject)) & TRUE)
+#else
+                        if ((s.c.lmr = stringmatch(ind+1,"O",sub,cutoff, pat->LEFT, subkn,pposition,stringLength)) & TRUE)
+#endif
+                            {
+                            loc = same_as_w(pat->RIGHT);
+                            loc = eval(loc);
+                            if (loc->v.fl & SUCCESS)
+                                {
+                                s.c.rmr = TRUE;
+                                if (loc->v.fl & FENCE)
+                                    s.c.rmr |= ONCE;
+                                }
+                            else
+                                {
+                                s.c.rmr = FALSE;
+                                if (loc->v.fl & FENCE)
+                                    s.c.rmr |= (FENCE | ONCE);
+                                if (loc->v.fl & IMPLIEDFENCE) /* (for function utf$) */
+                                    s.c.rmr |= ONCE;
+                                }
+                            wipe(loc);
                             }
                         s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE));
-                        }
-                    break;
-                case AND:
+                        break;
+                    case MATCH:
 #if CUTOFFSUGGEST
-                    if ((s.c.lmr = stringmatch(ind+1,"O",sub,cutoff, pat->LEFT, subkn,pposition,stringLength,suggestedCutOff,mayMoveStartOfSubject)) & TRUE)
+                        if ((s.c.lmr = stringmatch(ind + 1, "P", sub, cutoff, pat->LEFT, subkn, pposition, stringLength, suggestedCutOff, mayMoveStartOfSubject)) & TRUE)
 #else
-                    if ((s.c.lmr = stringmatch(ind+1,"O",sub,cutoff, pat->LEFT, subkn,pposition,stringLength)) & TRUE)
+                        if ((s.c.lmr = stringmatch(ind+1,"P",sub,cutoff, pat->LEFT, subkn,pposition,stringLength)) & TRUE)
 #endif
-                        {
-                        loc = same_as_w(pat->RIGHT);
-                        loc = eval(loc);
-                        if (loc->v.fl & SUCCESS)
                             {
-                            s.c.rmr = TRUE;
-                            if (loc->v.fl & FENCE)
-                                s.c.rmr |= ONCE;
-                            }
-                        else
-                            {
-                            s.c.rmr = FALSE;
-                            if (loc->v.fl & FENCE)
-                                s.c.rmr |= (FENCE | ONCE);
-                            if (loc->v.fl & IMPLIEDFENCE) /* (for function utf$) */
-                                s.c.rmr |= ONCE;
-                            }
-                        wipe(loc);
-                        }
-                    s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE));
-                    break;
-                case MATCH:
 #if CUTOFFSUGGEST
-                    if ((s.c.lmr = stringmatch(ind+1,"P",sub,cutoff, pat->LEFT, subkn,pposition,stringLength,suggestedCutOff,mayMoveStartOfSubject)) & TRUE)
-#else
-                    if ((s.c.lmr = stringmatch(ind+1,"P",sub,cutoff, pat->LEFT, subkn,pposition,stringLength)) & TRUE)
-#endif
-                        {
-#if CUTOFFSUGGEST
-                        if(suggestedCutOff && *suggestedCutOff > cutoff)
-                            {
-                            cutoff = *suggestedCutOff;
-                            }
+                            if (suggestedCutOff && *suggestedCutOff > cutoff)
+                                {
+                                cutoff = *suggestedCutOff;
+                                }
 
-                        s.c.rmr = (char)(stringmatch(ind+1,"Q",sub,cutoff,pat->RIGHT,subkn,pposition,stringLength,0,0));
+                            s.c.rmr = (char)(stringmatch(ind + 1, "Q", sub, cutoff, pat->RIGHT, subkn, pposition, stringLength, 0, 0));
 #else
-                        s.c.rmr = (char)(stringmatch(ind+1,"Q",sub,cutoff,pat->RIGHT,subkn,pposition,stringLength));
+                            s.c.rmr = (char)(stringmatch(ind+1,"Q",sub,cutoff,pat->RIGHT,subkn,pposition,stringLength));
 #endif
-                        }
-                    else
-                        s.c.rmr = FALSE;
-                    s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE | POSITION_MAX_REACHED));
-                    break;
-                case OR:
+                            }
+                        else
+                            s.c.rmr = FALSE;
+                        s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE | POSITION_MAX_REACHED));
+                        break;
+                    case OR:
 #if CUTOFFSUGGEST
-                    if(mayMoveStartOfSubject) 
-                        *mayMoveStartOfSubject = 0;
-                    if ( (s.c.lmr = (char)( stringmatch(ind+1,"R",sub,cutoff,pat->LEFT,subkn,pposition,stringLength,NULL,0)))
+                        if (mayMoveStartOfSubject)
+                            *mayMoveStartOfSubject = 0;
+                        if ((s.c.lmr = (char)(stringmatch(ind + 1, "R", sub, cutoff, pat->LEFT, subkn, pposition, stringLength, NULL, 0)))
 #else
-                    if ( (s.c.lmr = (char)( stringmatch(ind+1,"R",sub,cutoff,pat->LEFT,subkn,pposition,stringLength)))
+                        if ( (s.c.lmr = (char)( stringmatch(ind+1,"R",sub,cutoff,pat->LEFT,subkn,pposition,stringLength)))
 #endif
-                       & (TRUE | FENCE)
-                       )
-                        {
-                        if((s.c.lmr & ONCE) && !stringOncePattern(pat->RIGHT))
+                            & (TRUE | FENCE)
+                            )
                             {
-                            s.c.rmr = (char)(s.c.lmr & TRUE);
+                            if ((s.c.lmr & ONCE) && !stringOncePattern(pat->RIGHT))
+                                {
+                                s.c.rmr = (char)(s.c.lmr & TRUE);
+                                }
+                            else
+                                {
+                                s.c.rmr = (char)(s.c.lmr & (TRUE | ONCE));
+                                }
                             }
                         else
                             {
-                            s.c.rmr = (char)(s.c.lmr & (TRUE|ONCE));
-                            }
-                        }
-                    else
-                        {
 #if CUTOFFSUGGEST
-                        s.c.rmr = stringmatch(ind+1,"S",sub,cutoff,pat->RIGHT, subkn,pposition,stringLength,NULL,0);
+                            s.c.rmr = stringmatch(ind + 1, "S", sub, cutoff, pat->RIGHT, subkn, pposition, stringLength, NULL, 0);
 #else
-                        s.c.rmr = stringmatch(ind+1,"S",sub,cutoff,pat->RIGHT, subkn,pposition,stringLength);
+                            s.c.rmr = stringmatch(ind+1,"S",sub,cutoff,pat->RIGHT, subkn,pposition,stringLength);
 #endif
-                        if(  (s.c.rmr & ONCE)
-                          && !(s.c.lmr & ONCE)
-                          )
-                            {
-                            s.c.rmr &= ~(ONCE|POSITION_ONCE);
+                            if ((s.c.rmr & ONCE)
+                                && !(s.c.lmr & ONCE)
+                                )
+                                {
+                                s.c.rmr &= ~(ONCE | POSITION_ONCE);
+                                }
+                            if ((s.c.rmr & POSITION_MAX_REACHED)
+                                && !(s.c.lmr & POSITION_MAX_REACHED)
+                                )
+                                {
+                                s.c.rmr &= ~(POSITION_MAX_REACHED | POSITION_ONCE);
+                                }
                             }
-                        if(  (s.c.rmr & POSITION_MAX_REACHED)
-                          && !(s.c.lmr & POSITION_MAX_REACHED)
-                          )
+                        break;
+                        /*
+                        This is now much quicker than previously, because the whole expression
+                        (|bc|x) is ONCE if the start of the subject does not match the start of any of
+                        the alternations:
+                        dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbhhhabcd:?X (|bc|x) d)
+                        */
+                    case FUN:
+                    case FUU:
+                        psh(&sjtNode, &nilNode, NULL);
+                        string_copy_insert(&sjtNode, subkn, sub, cutoff);
+                        /*loc = same_as_w(pat);*/
+                        loc = _copyop(pat);
+                        if (NOTHING(loc))
                             {
-                            s.c.rmr &= ~(POSITION_MAX_REACHED|POSITION_ONCE);
+                            loc->v.fl &= ~NOT;
+                            loc->v.fl |= SUCCESS;
                             }
-                        }
-                    break;
-/*
-This is now much quicker than previously, because the whole expression
-(|bc|x) is ONCE if the start of the subject does not match the start of any of
-the alternations:
-dbg'@(hhhhhhhhhbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbhhhabcd:?X (|bc|x) d)
-*/
-                case FUN:
-                case FUU:
-                    psh(&sjtNode,&nilNode,NULL);
-                    string_copy_insert(&sjtNode,subkn,sub,cutoff);
-                    loc = same_as_w(pat);
-                    loc = eval(loc);
-                    deleteNode(&sjtNode);
+                        loc = eval(loc);
+                        deleteNode(&sjtNode);
 #if CUTOFFSUGGEST
-                    if(mayMoveStartOfSubject)
-                        *mayMoveStartOfSubject = 0;
+                        if (mayMoveStartOfSubject)
+                            *mayMoveStartOfSubject = 0;
 #endif
-                    if(isSUCCESS(loc))
-                        {
-                        loc = setflgs(loc,pat->v.fl);
-                        if (equal(pat, loc))
+                        if (isSUCCESS(loc))
                             {
+                            if (((loc->v.fl & (UNIFY | FILTERS)) == UNIFY) && !is_op(loc) && !loc->u.obj)
+                                {
+                                s.c.rmr = (char)TRUE;
+                                wipe(loc);
+                                break;
+                                }
+                            else
+                                {
+                                loc = setflgs(loc, pat->v.fl);
+                                if (equal(pat, loc))
+                                    {
 #if CUTOFFSUGGEST
-                            s.c.rmr = (char)(stringmatch(ind+1,"T",sub,cutoff,loc,subkn,pposition,stringLength,NULL,0) ^ NOTHING(loc));
+                                    s.c.rmr = (char)(stringmatch(ind + 1, "T", sub, cutoff, loc, subkn, pposition, stringLength, NULL, 0) ^ NOTHING(loc));
 #else
-                            s.c.rmr = (char)(stringmatch(ind+1,"T",sub,cutoff,loc,subkn,pposition,stringLength) ^ NOTHING(loc));
+                                    s.c.rmr = (char)(stringmatch(ind + 1, "T", sub, cutoff, loc, subkn, pposition, stringLength) ^ NOTHING(loc));
 #endif
-                            wipe(loc);
-                            break;
-                            }
+                                    wipe(loc);
+                                    break;
+                                    }
+                                }
                         }
                     else
                         {
@@ -10855,17 +10868,32 @@ b b h h h a b c d:?X (|b c|x) d)
                 case FUU:
                     psh(&sjtNode,&nilNode,NULL);
                     copy_insert(&sjtNode, sub, cutoff);
-                    loc = same_as_w(pat);
+                    /*loc = same_as_w(pat);*/
+                    loc = _copyop(pat);
+                    if (NOTHING(loc))
+                        {
+                        loc->v.fl &= ~NOT;
+                        loc->v.fl |= SUCCESS;
+                        }
                     loc = eval(loc);
                     deleteNode(&sjtNode);
                     if(isSUCCESS(loc))
                         {
-                        loc = setflgs(loc,pat->v.fl);
-                        if (equal(pat, loc))
+                        if (((loc->v.fl & (UNIFY | FILTERS)) == UNIFY) && !is_op(loc) && !loc->u.obj)
                             {
-                            s.c.rmr = (char)(match(ind+1,sub, loc, cutoff,pposition,expr,op) ^ NOTHING(loc));
+                            s.c.rmr = (char)TRUE;
                             wipe(loc);
                             break;
+                            }
+                        else
+                            {
+                            loc = setflgs(loc, pat->v.fl);
+                            if (equal(pat, loc))
+                                {
+                                s.c.rmr = (char)(match(ind + 1, sub, loc, cutoff, pposition, expr, op) ^ NOTHING(loc));
+                                wipe(loc);
+                                break;
+                                }
                             }
                         }
                     else /*"cat" as return value is used as pattern, ~"cat" however is not, because the function failed. */
