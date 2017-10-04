@@ -1,3 +1,6 @@
+   4 October 2017
+Pattern functions that return ? on success can be negated. 
+
   22 August 2017
 Tested #define'd options and made minor fixes to make bracmat.c compile with
 every option turned on and off.
