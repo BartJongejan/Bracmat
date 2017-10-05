@@ -1,3 +1,6 @@
+   5 October 2017
+Avoid unnecessary memory (de)allocation in solution made yesterday.
+
    4 October 2017
 Pattern functions that return ? on success can be negated. 
 
