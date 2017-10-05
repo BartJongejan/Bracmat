@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "4 October 2017"
+#define DATUM "5 October 2017"
 #define VERSION "6"
-#define BUILD "222"
+#define BUILD "223"
 /*
 COMPILATION
 -----------
@@ -10183,13 +10183,14 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                     case FUU:
                         psh(&sjtNode, &nilNode, NULL);
                         string_copy_insert(&sjtNode, subkn, sub, cutoff);
-                        /*loc = same_as_w(pat);*/
-                        loc = _copyop(pat);
-                        if (NOTHING(loc))
+                        if (NOTHING(pat))
                             {
+                            loc = _copyop(pat);
                             loc->v.fl &= ~NOT;
                             loc->v.fl |= SUCCESS;
                             }
+                        else
+                            loc = same_as_w(pat);
                         loc = eval(loc);
                         deleteNode(&sjtNode);
 #if CUTOFFSUGGEST
@@ -10868,13 +10869,14 @@ b b h h h a b c d:?X (|b c|x) d)
                 case FUU:
                     psh(&sjtNode,&nilNode,NULL);
                     copy_insert(&sjtNode, sub, cutoff);
-                    /*loc = same_as_w(pat);*/
-                    loc = _copyop(pat);
-                    if (NOTHING(loc))
+                    if (NOTHING(pat))
                         {
+                        loc = _copyop(pat);
                         loc->v.fl &= ~NOT;
                         loc->v.fl |= SUCCESS;
                         }
+                    else
+                        loc = same_as_w(pat);
                     loc = eval(loc);
                     deleteNode(&sjtNode);
                     if(isSUCCESS(loc))
@@ -11377,7 +11379,7 @@ static psk evalmacro(psk Pnode)
                         }
                     else
                         {
-                        errorprintf("\nmacro evaluation fails because rhs of $ operator is not bound to a value");writeError(Pnode->RIGHT);errorprintf("\n");
+                        errorprintf("\nmacro evaluation fails because rhs of $ operator is not bound to a value: "); writeError(Pnode); errorprintf("\n");
                         wipe(tmp);
                         return NULL;
                         }
