@@ -288,6 +288,8 @@ usage: start Bracmat in interactve mode and write
 
 **What others say**
 
+From https://chat.stackoverflow.com/transcript/10/2015/10/8/19-20
+
     this programming language Bracmat
 
     & (   !table:? (!country.?len) ?
@@ -307,6 +309,5 @@ usage: start Bracmat in interactve mode and write
                
     beats Perl in terms of line noise
 
-(https://chat.stackoverflow.com/transcript/10/2015/10/8/19-20)
  
-This code in full length is found here:  http://rosettacode.org/wiki/IBAN#Bracmat
+The code cited in this citation can be found in full length here:  http://rosettacode.org/wiki/IBAN#Bracmat
