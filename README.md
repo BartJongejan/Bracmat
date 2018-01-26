@@ -288,24 +288,24 @@ usage: start Bracmat in interactve mode and write
 
 **What others say**
 
-  this programming language Bracmat
+    this programming language Bracmat
 
-   & (   !table:? (!country.?len) ?
-      & :?N
-      & ( @( !arg
-           :   ?
-               ( %@?c ?
-               & ( !c:#
-                 |   !c:~<A:~>Z
-                   & asc$!c+-1*asc$A+10:?c
-                   & 1+!len:?len
-                 | !c:" "&:?c
-                 |
-                 )
-               & !N !c:?N
-               & ~
+    & (   !table:? (!country.?len) ?
+       & :?N
+       & ( @( !arg
+            :   ?
+                ( %@?c ?
+                & ( !c:#
+                  |   !c:~<A:~>Z
+                    & asc$!c+-1*asc$A+10:?c
+                    & 1+!len:?len
+                  | !c:" "&:?c
+                  |
+                  )
+                & !N !c:?N
+                & ~
                
-  beats Perl in terms of line noise
+    beats Perl in terms of line noise
 
 (https://chat.stackoverflow.com/transcript/10/2015/10/8/19-20)
  
