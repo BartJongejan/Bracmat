@@ -3,7 +3,7 @@ help=
   . syntax,atotxt,evaltxt,gettxt,contxt,binovztxt,patternm
   . savtxt,dumtxt,binprotxt,prostutxt1,prostutxt2,funmactxt
   . unops,naamloos,algtxt,unpattxt,binmenu,pattxttxt, maptxt
-  . pattxt,asstxt,unopsmenu,unstuurtxt,varsmenu,funcmenu
+  . pattxt,asstxt,unopsmenu,unstuurtxt,varsmenu,funcmenu, vaptxt
   . varmattxt,varprotxt,progsmenu,debugtxt,debugtxt2,debugtxt3
   . inbltmenu,alctxt,aligntxt,asctxt,utftxt,chrtxt,charset
   . chutxt,dbgtxt,dentxt,escappattxt,lambda,morexmlps,jsntxt
@@ -202,9 +202,11 @@ lex lexical analysis of help file"
     convert to upper case
 35 |_utf_|
     convert UTF-8 character to Unicode codepoint
-36 |_whl_|
+36 |_vap_|
+    deconstruct a string character-wise or according to specified separator
+37 |_whl_|
     while loop
-37 |_x2d_|
+38 |_x2d_|
     convert hexadecimal number to decimal number x2d$BABEFACE:3133078222
 "
       ,   (1,seltxt)
@@ -242,8 +244,9 @@ lex lexical analysis of help file"
           (33,tbltxt)
           (34,upptxt DOSopttxt)
           (35,utftxt)
-          (36,whltxt)
-          (37,x2dtxt)
+          (36,vaptxt)
+          (37,whltxt)
+          (38,x2dtxt)
     )
   & ( intro
     =   M
@@ -3334,6 +3337,23 @@ separated by the space operator.
     (d*f^3*g^2*h*j^3.same exponent 3)
     (o*p.)"
     )
+  & ( vaptxt
+    =   T
+      , "vap$(<fnc>.<string>) or vap$(<fnc>.<string>.<separator>)"
+      , "The version without specified separator splits the string in a list of
+characters and applies fnc$ to each character. vap$ checks whether the string
+is valid UTF-8 before splitting the string. If not, it splits the string in
+8-byte characters, even if some substrings could be interpreted as valid UTF-8.
+
+The version with a specified separator splits the string at each occurrence
+of the separator. The separator can be any non-zero length string. The
+separator does not become part of the output. This version is especially
+useful for reading CSV files and tab-separated files. Note that, if the last
+character of the input string is a separator, the last call to fnc$ is with
+a zero-length string. This will often happen if a newline character terminates
+every line in the input string and the newline character is specified as a
+separator.
+")
   & ( memtxt
     =   T
       , "mem$[EXT]"

@@ -5989,6 +5989,29 @@ string line 2\"
             & Out$936
           | 
           )
+          (     vap
+              $ ( (=..vap$((=.!arg).!arg.\t))
+                . ab\tc\nd\tef\n
+                . \n
+                )
+            : (.ab c) (.d ef) (.)
+          | Out$937
+          )
+          (   vap$((=.asc$!arg).str$(chr$200 chu$200))
+            : 200 195 136
+          | Out$938
+          )
+          ( vap$((=.!arg).abc.)&Out$939
+          | 
+          )
+          (   vap$((=.!arg).ab c.";")
+            & out$940
+          | 
+          )
+          ( vap$((=.!arg).ab c):ab
+          | out$941
+          | 
+          )
       &   out
         $ ( str
           $ ( "Done. "

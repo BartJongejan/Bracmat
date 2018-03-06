@@ -1,3 +1,9 @@
+   6 February 2018
+New function vap that does with strings what map does with lists.
+vap can deconstruct a string character-wise or split it at every
+separator. The separator, if defined, can be any string. vap knows
+about UTF-8.
+
    5 October 2017
 Avoid unnecessary memory (de)allocation in solution made yesterday.
 
