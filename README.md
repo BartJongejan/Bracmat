@@ -144,10 +144,12 @@ http://rosettacode.org/wiki/Rosetta_Code
       A Bracmat script that edits the output of the emscripten C-to-Javascript
       compiler and creates a HTML page containing Javascript embodying Bracmat.
       
-    * emscriptenHowToHTML.bat
+    * emscriptenHowToHTML.sh
     
-      Windows batch file that runs emscripten and does some postprocessing,
-      creating a Javascript version of Bracmat.
+      Linux batch file that runs emscripten and does some postprocessing,
+      creating a Javascript version of Bracmat, bracmatJS.html.
+      Requirement: emscripten 1.37.21
+      emcc and bracmat must be in PATH to run this script.
       
     * json.c
     
