@@ -285,3 +285,29 @@ usage: start Bracmat in interactve mode and write
 
     get$"valid.bra"
     !r
+
+**What others say**
+
+From https://chat.stackoverflow.com/transcript/10/2015/10/8/19-20
+
+    this programming language Bracmat
+
+    & (   !table:? (!country.?len) ?
+       & :?N
+       & ( @( !arg
+            :   ?
+                ( %@?c ?
+                & ( !c:#
+                  |   !c:~<A:~>Z
+                    & asc$!c+-1*asc$A+10:?c
+                    & 1+!len:?len
+                  | !c:" "&:?c
+                  |
+                  )
+                & !N !c:?N
+                & ~
+               
+    beats Perl in terms of line noise
+
+ 
+The code cited in this citation can be found in full length here:  http://rosettacode.org/wiki/IBAN#Bracmat
