@@ -21,7 +21,7 @@ email: bartj@hum.ku.dk
 */
 #define DATUM "6 February 2018"
 #define VERSION "6.1"
-#define BUILD "224"
+#define BUILD "225"
 /*
 COMPILATION
 -----------
@@ -7162,13 +7162,13 @@ static psk scopy(const char * str)
 static psk charcopy(const char * strt, const char * until)
     {
     int  nr = 0;
+    psk pnode;
     if ('0' <= *strt && *strt <= '9')
         {
         nr = QNUMBER;
         if (*strt == '0')
             nr |= QNUL;
         }
-    psk pnode;
     pnode = (psk)bmalloc(__LINE__, sizeof(unsigned LONG) + 1 + (until - strt));
     strncpy((char *)(pnode)+sizeof(unsigned LONG), strt, until - strt);
     pnode->v.fl = READY | SUCCESS | nr;
