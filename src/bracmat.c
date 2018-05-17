@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "6 February 2018"
-#define VERSION "6.1"
-#define BUILD "225"
+#define DATUM "17 May 2018"
+#define VERSION "6.2"
+#define BUILD "226"
 /*
 COMPILATION
 -----------
@@ -13912,7 +13912,7 @@ static function_return_type functions(psk Pnode)
                     {
                     /* second form */
                     const char * subject = &pnode->u.sobj;
-                    psk nPnode;
+                    psk nPnode = 0;
                     ppsk ppnode = &nPnode;
                     const char * oldsubject = subject;
                     int k;
@@ -13967,7 +13967,7 @@ static function_return_type functions(psk Pnode)
                             }
                         }
                     wipe(Pnode);
-                    Pnode = nPnode;
+                    Pnode = nPnode ? nPnode : same_as_w(&nilNode);
                     return functionOk(Pnode);
                     }
                 }

@@ -1,3 +1,7 @@
+  17 May 2018
+Fixed uninstantiated-pointer error in vap$ function. (When given en empty
+string as input.)
+
    6 February 2018
 New function vap that does with strings what map does with lists.
 vap can deconstruct a string character-wise or split it at every
