@@ -15,6 +15,33 @@ X=
       & out$(removed !stl)
       & str$(!a !z)
   )
+  ( replaceStyle =.
+  @(!arg:?A "<style>" ? "</style>" ?Z)
+  & str$(!A "<style>
+body {
+font-family: arial;
+margin: 0;
+padding: 10px;
+}
+
+#input, #output {
+width: 98%;
+height: 230px;
+margin: 0 auto;
+margin-top: 10px;
+margin-bottom: 10px;
+border-left: 0px;
+border-right: 0px;
+padding: 10px;
+display: block;
+background-color: white;
+color: black;
+font-family: 'Lucida Console', Monaco, monospace;
+outline: ridge;
+}
+</style>
+" !Z)
+  )
   ( removeElement
   =   html elstart elend a z
     .   !arg:(?html.?elstart.?elend)
@@ -70,6 +97,32 @@ X=
       & out$(deleted !code)
       & str$(!a !z)
   )
+  ( insertPrint
+  =   A Z
+    .   out$insertPrint
+      & !arg:?XYZ
+      & lst$(XYZ,XYZ,NEW)
+      &  @(!arg:?A "Module['printErr'] = typeof printErr" ?Z)
+      & out$Found
+      &   str
+        $ ( !A
+            "Module['print'] =  (function () {
+    var element = document.getElementById('output');
+    if (element) element.value = ''; // clear browser cache
+    return function (text) {
+        if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+        console.log(text);
+        if (element) {
+            element.value += text;
+            element.scrollTop = element.scrollHeight; // focus on bottom
+        }
+    };
+})();"
+            \n
+            "Module['printErr'] = typeof printErr"
+            !Z
+          )
+  )
   ( doit
   =   
     .     ( "The text in the file 'safereadme', as constructed by the next
@@ -98,6 +151,7 @@ X=
         & (its.removeStyle)$(!html."#progress"):?html
         & (its.removeStyle)$(!html."#controls"):?html
         & (its.removeStyle)$(!html."canvas.emscripten"):?html
+        & (its.replaceStyle)$!html:?html
         &     (its.removeElement)
             $ (!html."<a href=\"http://emscripten.org\">"."</a>")
           : ?html
@@ -118,14 +172,21 @@ X=
         &     (its.removeElement)
             $ (!html."<div class=\"emscripten_border\">"."</div>")
           : ?html
-        & (|(its.removeSVG)$!html:?html)
-        & out$"removed SVG"
-        &   (its.deleteJS)$(!html."Module.setStatus('Downloading...');")
-          : ?html
-        &   (its.deleteJS)$(!html."setStatus: function(text) {" ? "},")
-          : ?html
-        &   (its.deleteJS)$(!html."canvas: (function() {" ? "})(),")
-          : ?html
+        & (   out$"removing SVG"
+            & (its.removeSVG)$!html:?html
+            & out$"removed SVG"
+          | 
+          )
+        & ( 
+          |       (its.deleteJS)
+                $ (!html."Module.setStatus('Downloading...');")
+              : ?html
+            &     (its.deleteJS)
+                $ (!html."setStatus: function(text) {" ? "},")
+              : ?html
+            &   (its.deleteJS)$(!html."canvas: (function() {" ? "})(),")
+              : ?html
+          )
         &   "<h1>Bracmat ... in your browser ...</h1>
            <p>This is Bracmat, translated to JavaScript, with almost complete functionality.<br>
               Read the <a href=\"http://jongejan.dk/bracmat.html\">documentation</a>. 
@@ -190,14 +251,14 @@ final result. }
     function execute(text) {
       var out;
       var cstyle_ptr = allocate(intArrayFromString(text), 'i8', ALLOC_NORMAL);
-      Module.print(\"{?} \"+text+\"\\n{!} \");
+      Module['print'](\"{?} \"+text+\"\\n{!} \");
       out = _oneShot(cstyle_ptr);
     }
     function takeinput() {
     var text = document.getElementById('input').value;
     execute(text);
     }
-    _startProc();
+//    _startProc();
 //    execute(\"4:?a;!a^2+1;\");
     </script>
  </body>"
@@ -205,6 +266,7 @@ final result. }
               )
           : ?html
         & (its.includeJS)$(!html.!js):?html
+        & (~|(its.insertPrint)$!html:?html)
         & out$"all replacements done"
         & put$(!html,"bracmatJS.html",TXT,NEW)
         & out$"edit succeeded"

@@ -1227,8 +1227,8 @@ static void dec_refcount(psk pnode)
 
 #include <stdarg.h>
 
-#if defined EMSCRIPTEN /* This is set if compiling with emscripten. */
-#define EMSCRIPTEN_HTML 1 /* set to 1 if using emscripten to convert this file to HTML*/
+#if defined __EMSCRIPTEN__ /* This is set if compiling with __EMSCRIPTEN__. */
+#define EMSCRIPTEN_HTML 1 /* set to 1 if using __EMSCRIPTEN__ to convert this file to HTML*/
 #define GLOBALARGPTR 0
 
 #define NO_C_INTERFACE
@@ -1245,9 +1245,9 @@ static void dec_refcount(psk pnode)
 #endif
 
 #if EMSCRIPTEN_HTML
- /* must be 0: compiling with emcc (emscripten C to JavaScript compiler) */
+ /* must be 0: compiling with emcc (__EMSCRIPTEN__ C to JavaScript compiler) */
 #else
-#define GLOBALARGPTR 1 /* 0 if compiling with emcc (emscripten C to JavaScript compiler) */
+#define GLOBALARGPTR 1 /* 0 if compiling with emcc (__EMSCRIPTEN__ C to JavaScript compiler) */
 #endif
 
 #if GLOBALARGPTR
@@ -16761,7 +16761,7 @@ void endProc(void)
 
 #include <stddef.h>
 
-#if defined EMSCRIPTEN
+#if defined __EMSCRIPTEN__
 int oneShot(char * inp)
     {
     int err;
@@ -16782,7 +16782,7 @@ int mainLoop(int argc,char *argv[])
     int err;
     char * mainLoopExpression;
     const char * ret = 0;
-#if defined EMSCRIPTEN
+#if defined __EMSCRIPTEN__
     if(argc == 2)
         { /* to get here, e.g.: ./bracmat out$hello */
         return oneShot(argv[1]);
@@ -16848,6 +16848,14 @@ int mainLoop(int argc,char *argv[])
 extern void JSONtest(void);
 
 #if EMSCRIPTEN_HTML
+int main()
+    {
+    int ret = 0;
+    errorStream = stderr;
+    if (!startProc())
+        return -1;
+    return ret;
+    }
 #else
 int main(int argc,char *argv[])
     {
@@ -16887,7 +16895,7 @@ int main(int argc,char *argv[])
         }
 #endif
     assert(sizeof(tFlags) == sizeof(unsigned int));
-#if !defined EMSCRIPTEN
+#if !defined __EMSCRIPTEN__
     while(--p >= argv[0])
         if(*p == '\\' || *p == '/')
             {
