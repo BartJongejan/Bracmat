@@ -32,7 +32,7 @@ cdef const char * NiiFunc(const char * strng):
     py = py_string.decode('UTF-8')
     val = eval(py,globals(),locals())
     JsOn = json.dumps(val)
-    return JsOn.decode('UTF-8')
+    return JsOn.encode('UTF-8')
 
 cdef extern from "bracmat.h":
     ctypedef struct startStruct "startStruct":
@@ -60,7 +60,7 @@ def init():
 def HolyGrail(Str):
     cdef const char * Sout
     cdef int Err
-    stringEval(Str,&Sout,&Err)
+    stringEval(bytes(Str,'iso8859-1'),&Sout,&Err)
     cdef bytes py_string = Sout
     return py_string.decode('UTF-8')
 
