@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Emscripten-Generated Code</title>
+    <title>Bracmat</title>
     <style>
 body {
 font-family: arial;
@@ -42,13 +42,29 @@ outline: ridge;
     
     
     <h1>Bracmat ... in your browser ...</h1>
-           <p>This is Bracmat, translated to JavaScript, with almost complete functionality.<br>
-              Read the <a href="http://jongejan.dk/bracmat.html">documentation</a>. 
-              Find the full, more than 100 times faster version of the program on <a href="https://github.com/BartJongejan/Bracmat">GitHub</a>.<br>
-              See some examples on <a href="http://rosettacode.org/wiki/Category:Bracmat">rosettacode.org</a>.</p>
-<textarea class="emscripten" id="input" value="" cols="80" rows="20">({Dinesman's
- multiple-dwelling problem. See 
-rosettacode.org/wiki/Dinesman's_multiple-dwelling_problem}
+           <p>Write Bracmat expressions in the upper text box.
+           After pressing the <strong>evaluate</strong> button,
+           the result of the evaluation of your expressions
+           will eventually appear in the lower text box.<br />
+           Bracmat is a programming language for symbolic computation with
+           an exquisite programming construct for pattern matching.
+           Read the 
+           <a href="http://jongejan.dk/bracmat.html">documentation</a>, and
+           see many more examples on
+           <a href="http://rosettacode.org/wiki/Category:Bracmat">rosettacode.org</a>.
+           <br />
+           For this demo version the C source code in which Bracmat is
+           written, is translated to JavaScript, so the demo runs within
+           the confines of your browser, with all the limitations that follow, 
+           such as the inability to read and write files.
+           <br />
+           Full, more than 100 times faster versions of Bracmat compiled and
+           linked for Windows, macOS and Linux, together with the C source
+           code, can be found on 
+           <a href="https://github.com/BartJongejan/Bracmat">GitHub</a>.<br>
+           </p>
+<textarea class="emscripten" id="input" value="" cols="80" rows="20">({Dinesman's multiple-dwelling problem. See 
+http://rosettacode.org/wiki/Dinesman's_multiple-dwelling_problem#Bracmat}
     
     Baker Cooper Fletcher Miller Smith:?people
   &amp; ( constraints
