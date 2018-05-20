@@ -99,6 +99,7 @@ if [ -d /usr/local/jboss ]; then
 else 
     if [ -d /usr/share/tomcat7/lib ]; then
         sudo cp -p ./bracmat.jar /usr/share/tomcat7/lib/
+#       sudo java -classpath /usr/share/tomcat7/lib/bracmat.jar:. bracmattest
     fi
 fi
 
