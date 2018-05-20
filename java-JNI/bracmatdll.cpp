@@ -6,7 +6,7 @@
 #include <windows.h>
 #include "bracmatdll.h"
 
-#include "bracmat.h"
+#include "../src/bracmat.h"
 
 int braIn()
     {

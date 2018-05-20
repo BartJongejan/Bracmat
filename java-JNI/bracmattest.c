@@ -1,4 +1,4 @@
-#include "bracmat.h"
+#include "../src/bracmat.h"
 #include <stdio.h>
 
 /* Compile with BRACMATEMBEDDED defined */

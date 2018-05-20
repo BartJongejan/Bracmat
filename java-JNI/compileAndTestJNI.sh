@@ -1,20 +1,13 @@
 #!/bin/bash 
 
-# Run these lines on devtools, not infra!
-# After running these lines, go to infra and continue with
-# deploying bracmat.jar. See bottom of this file.
 # WARNING! deploying bracmat.jar 
-#
-# Edit the scp commandos to copy stuff to your own home directory on infra.
-#
-# CWD must contain bracmat.c, e.g. 
-# /home/bart/trunk/dkclarin-services/tools/Bracmat
+
 # Copy one block of text (consecutive lines without intervening blank lines)
 # at a time to the command line and check that the test at the end of a 
 # block went ok. (If there is a test.)
 
 # Create stand-alone bracmat.
-gcc -std=c99 -pedantic -Wall -O2 -DNDEBUG bracmat.c xml.c json.c
+gcc -std=c99 -pedantic -Wall -O2 -DNDEBUG ../src/bracmat.c ../src/xml.c ../src/json.c
 mv a.out bracmat
 # Test the stand-alone version of Bracmat.
 # Expect a line only saying 'bracmat alife and kicking'.
@@ -22,9 +15,9 @@ mv a.out bracmat
 
 # Compile bracmat.c as relocatable code for shared object
 # Create bracmatso.o, xml.o and json.o
-gcc -std=c99 -pedantic -Wall -O2 -c -fPIC -DNDEBUG bracmatso.c xml.c json.c
-cd java
+gcc -std=c99 -pedantic -Wall -O2 -c -fPIC -DNDEBUG bracmatso.c ../src/xml.c ../src/json.c
 
+cd java
 JDK_DIRS="/usr/lib/jvm/java /usr/lib/jvm/default-java ${OPENJDKS} /usr/lib/jvm/java-6-openjdk /usr/lib/jvm/java-6-sun /usr/lib/jvm/java-7-oracle"
 # Look for the right JVM to use
 for jdir in $JDK_DIRS; do
@@ -141,7 +134,6 @@ fi
 # -------------------------
 #
 # cd java
-# // next lines are in java\compileme.bat as well
 # javac ./dk/cst/*.java
 # jar cfv "%CATALINA_HOME%/lib/bracmat.jar" dk/cst/bracmat.class
 # javac -classpath "%CATALINA_HOME%/lib/bracmat.jar" ./bracmattest.java
