@@ -15,7 +15,7 @@ mv a.out bracmat
 
 # Compile bracmat.c as relocatable code for shared object
 # Create bracmatso.o, xml.o and json.o
-gcc -std=c99 -pedantic -Wall -O2 -c -fPIC -DNDEBUG bracmatso.c ../src/xml.c ../src/json.c
+gcc -std=c99 -pedantic -Wall -O2 -c -fPIC -DNDEBUG ../safe/bracmatso.c ../src/xml.c ../src/json.c
 
 cd java
 JDK_DIRS="/usr/lib/jvm/java /usr/lib/jvm/default-java ${OPENJDKS} /usr/lib/jvm/java-6-openjdk /usr/lib/jvm/java-6-sun /usr/lib/jvm/java-7-oracle"
