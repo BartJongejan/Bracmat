@@ -5,7 +5,15 @@ complex data. Bracmat employs a pattern matching technique that can
 handle string data (text) as well as structured data (XML, HTML, JSON,
 algebraic expressions, email, program code, ...).
 
-Over hundred and fifty examples of Bracmat code can be found at
+The programming language construct for pattern matching supports associative
+pattern matching (known from regular expressions), and expression evaluation
+during pattern matching (comparable to guards in functional languages). The
+combination of pattern matching in (semi-)structured data with associative
+patterns that allow embedded expression evaluation is almost unique.
+
+Bracmat is a good choice for tasks that require dynamic programming.
+
+Almost three hundred examples of Bracmat code can be found at
 http://rosettacode.org/wiki/Rosetta_Code
 
 **This distribution contains the following directories and files:**
@@ -27,7 +35,7 @@ http://rosettacode.org/wiki/Rosetta_Code
 
     * launch.py
 
-      Python program that demonstrates evaluation of Bracmat expressions, also call back to Python
+      Python program that demonstrates evaluation of Bracmat expressions, also call back to Python. 
       Tests the prythat module.  
 
     * prythat.pyx
@@ -94,17 +102,19 @@ http://rosettacode.org/wiki/Rosetta_Code
 
     * bracmattest.java
         
-          Example program showing how to evaluate a Bracmat expression from
-          within a Java program
+      Example program showing how to evaluate a Bracmat expression from
+      within a Java program
           
     * dk
-          * cst
-                * bracmat.java
+
+      * cst
+
+        * bracmat.java
                 
-                  Java code that loads the Bracmat dynamic library.
+          Java code that loads the Bracmat dynamic library.
     
   * bracmatdll.cpp, 
-  * bracmatdll.h
+    bracmatdll.h
     
       Source and header files that are needed for building the Windows version
       of a Bracmat JNI, which requires Bracmat to be in a dynamic linked
@@ -287,7 +297,7 @@ Bracmat has been compiled and run on the following platforms:
 * HP-UNIX (gcc, cc)
 * Solaris (gcc)
 * Linux   (gcc)
-* nacOS   (xcode, gcc)
+* macOS   (xcode, gcc)
 
 If you have plans to run Bracmat from Python, you need Python and Cython besides a C-compiler.
 The software has been tested on Windows 10, 64 bit, using _Cython version 0.28.2_ and 
