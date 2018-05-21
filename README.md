@@ -9,27 +9,50 @@ Over hundred and fifty examples of Bracmat code can be found at
 http://rosettacode.org/wiki/Rosetta_Code
 
 **This distribution contains the following directories and files:**
+* Linux
+    * bracmat
+
+      64 bit statically linked executable for Linux (tested with Ubuntu 16.04)
+
+* Python-module
+
+      Python and Cython source code for creating a Python module 'prythat' so
+      the Bracmat evaluator can be called from the Python programming language
+
+    * build-launch.bat
+
+      Windows batch file for creating a Bracmat module that can be included in Python programs.
+      Contains two lines. The first line compiles and links the module,
+      the second tests the result.
+
+    * launch.py
+
+      Python program that demonstrates evaluation of Bracmat expressions, also call back to Python
+      Tests the prythat module.  
+
+    * prythat.pyx
+
+      Cython source code that interfaces Python with Bracmat and vv.
+
+    * setup.py
+
+      Makefile for buidling the module.
+
+* Windows
+    * bracmat.exe
+
+      32 bit executable for Windows
+
+    * bracmat64.exe
+
+      64 bit executable for Windows
+
 * doc
-    * bracmat.html
-
-      The documentation in HTML format, automatically generated from the file
-      'help'.
-
-    * bracmat-table.html
-
-      The documentation in HTML format, automatically generated from the file
-      'help' and using an alternative lay-out with tables.
-
     * CLIN26-poster.pdf
     
       Poster presented at the 26th Meeting of Computational Linguistics in the
       Netherlands (CLIN26) in Amsterdam on December 18, 2015.
 
-    * help
-
-      The documentation in Bracmat format. (You have to run Bracmat and issue
-      'get$help' to see it properly.)
-      
     * LT4DH14.pdf and LT4DH-2016-poster.pdf
     
       Paper and poster presented at the Language Technology four Digital 
@@ -39,19 +62,36 @@ http://rosettacode.org/wiki/Rosetta_Code
     
       Tour through Bracmat for computational linguists.
       
+    * bracmat-table.html
+
+      The documentation in HTML format, automatically generated from the file
+      'help' and using an alternative lay-out with tables.
+
+    * bracmat.html
+
+      The documentation in HTML format, automatically generated from the file
+      'help'.
+
+    * help
+
+      The documentation in Bracmat format. (You have to run Bracmat and issue
+      'get$help' to see it properly.)
 
 * epoc
     * bracmat.SIS
     
       Installation program for Psion 5MX and Ericsson MC218 PDAs. This file is
       not always up to date.
-      
-* src
-    * java
+
+* java-JNI
     
-      Java source code for creating a JNI (Java Native Interface) so the
-      Bracmat evaluator can be called from the Java programming language.
-      
+  Java and C source code for creating a JNI (Java Native Interface) so the
+  Bracmat evaluator can be called from the Java programming language.
+  
+  * java
+
+    Java code
+
         * bracmattest.java
         
           Example program showing how to evaluate a Bracmat expression from
@@ -63,28 +103,50 @@ http://rosettacode.org/wiki/Rosetta_Code
                 
                   Java code that loads the Bracmat dynamic library.
     
-    * Python
+  * bracmatdll.cpp, 
+  * bracmatdll.h
+    
+      Source and header files that are needed for building the Windows version
+      of a Bracmat JNI, which requires Bracmat to be in a dynamic linked
+      library.
+
+  * bracmattest.c
+    
+      Program source that links with a Bracmat dynamic library. For Linux.
       
-      Python and Cython source code for creating a Python module 'prythat' so
-      the Bracmat evaluator can be called from the Python programming language
-        
-        * build-launch.bat
+  * compileAndTestJNI.sh
+    
+      Linux script to create a Bracmat JNI. This file contains a comment that
+      describes the steps to create a Bracmat JNI for the Windows platform
+      using Visual C++.
+      
+  * dk_cst_bracmat.c,
+    dk_cst_bracmat.h
+      
+      Source and header files that are needed for building a Bracmat JNI,
+      which requires Bracmat to be in a dynamic linked
+      library.
+      
+  * makeJNI.bat
+    
+      Batch file for Windows to create a Bracmat JNI. Should work with a number
+      of versions of Microsoft's C-compiler.
 
-          Contains two lines. The first line compiles and links the module,
-          the second tests the result.
-        
-        * launch.py
-        
-          Tests the prythat module.  
+* macOS
+    * bracmat
 
-        * prythat.pyx
+      executable for Apple computers
+      
+* safe
 
-          Cython source code that interfaces Python with Bracmat and vv.
-
-        * setup.py
-
-          Makefile for buidling the module.
-                      
+    * bracmatso.c
+    
+      Source file that includes bracmat.c after turning off functionality
+      that we don't want in a JNI or Python module running in a production
+      system: low level file manipulations, system() calls, and exit() which
+      would bring the application container down.
+    
+* src
     * Makefile
       
       Builds the standard edition of bracmat, a "safe" version of bracmat,
@@ -98,46 +160,23 @@ http://rosettacode.org/wiki/Rosetta_Code
     
       An optional header file, if you want to compile Bracmat as a library.
       
+    * json.c
+    
+      Source code that implements support for reading JSON-files
+      
+    * xml.c
+    
+      Source code that implements support for reading XML-files
+
+* web
+
+   All that is needed to create a version of Bracmat that runs in a browser.  
+
     * bracmatJS.html
     
       Bracmat compiled to Javascript using emscripten, embedded in a single
       HTML-page. Nice for toy scripts, slow.
       
-    * bracmatdll.cpp, 
-    * bracmatdll.h
-    
-      Source and header files that are needed for building the Windows version
-      of a Bracmat JNI, which requires Bracmat to be in a dynamic linked
-      library.
-      
-    * bracmatso.c
-    
-      Source file that includes bracmat.c after turning off functionality
-      that we don't want in a JNI running in a production system: low level
-      file manipulations, system() calls, and exit() which would bring the
-      application container down.
-      
-    * bracmattest.c
-    
-      Program source that links with a Bracmat dynamic library. For Linux.
-      
-    * compileAndTestJNI.sh
-    
-      Linux script to create a Bracmat JNI. This file contains a comment that
-      describes the steps to create a Bracmat JNI for the Windows platform
-      using Visual C++.
-      
-    * dk_cst_bracmat.c,
-      dk_cst_bracmat.h
-      
-      Source and header files that are needed for building a Bracmat JNI,
-      which requires Bracmat to be in a dynamic linked
-      library.
-      
-    * dlltest.cpp,
-      dlltest.h
-      
-      Program source that links with a Bracmat dynamic library. For Windows.
       
     * editbracmatjs.bra
     
@@ -151,19 +190,6 @@ http://rosettacode.org/wiki/Rosetta_Code
       Requirement: emscripten 1.37.21
       emcc and bracmat must be in PATH to run this script.
       
-    * json.c
-    
-      Source code that implements support for reading JSON-files
-      
-    * makeJNI.bat
-    
-      Batch file for Windows to create a Bracmat JNI. Should work with a number
-      of versions of Microsoft's C-compiler.
-      
-    * xml.c
-    
-      Source code that implements support for reading XML-files
-    
 * Changelog
   
   A document describing changes between versions.
