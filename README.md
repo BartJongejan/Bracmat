@@ -16,8 +16,8 @@ http://rosettacode.org/wiki/Rosetta_Code
 
 * Python-module
 
-      Python and Cython source code for creating a Python module 'prythat' so
-      the Bracmat evaluator can be called from the Python programming language
+    Python and Cython source code for creating a Python module 'prythat' so
+    the Bracmat evaluator can be called from the Python programming language
 
     * build-launch.bat
 
@@ -92,13 +92,13 @@ http://rosettacode.org/wiki/Rosetta_Code
 
     Java code
 
-        * bracmattest.java
+    * bracmattest.java
         
           Example program showing how to evaluate a Bracmat expression from
           within a Java program
           
-        * dk
-            * cst
+    * dk
+          * cst
                 * bracmat.java
                 
                   Java code that loads the Bracmat dynamic library.
@@ -187,7 +187,7 @@ http://rosettacode.org/wiki/Rosetta_Code
     
       Linux batch file that runs emscripten and does some postprocessing,
       creating a Javascript version of Bracmat, bracmatJS.html.
-      Requirement: emscripten 1.37.21
+      Requirement: emscripten 1.38.0
       emcc and bracmat must be in PATH to run this script.
       
 * Changelog
@@ -287,17 +287,11 @@ Bracmat has been compiled and run on the following platforms:
 * HP-UNIX (gcc, cc)
 * Solaris (gcc)
 * Linux   (gcc)
-* MacOS   (xcode)
+* nacOS   (xcode, gcc)
 
 If you have plans to run Bracmat from Python, you need Python and Cython besides a C-compiler.
-If you want to do this on a Windows platform, you need Visual Studio C++ 2008 (Correct me if there
-are ways to use other C++ compilers). The software has been tested on Windows 7 and 8.1, 
-both 64 bit platforms, using _Cython version 0.22.1_ and 
-_Python 2.7.3 (default, Apr 10 2012, 23:31:26) [MSC v.1500 32 bit (Intel)] on win32_ 
-(or _Python 2.7.10 (default, May 23 2015, 09:40:32) [MSC v.1500 32 bit (Intel)] on win32_).
-On Linux ( _Ubuntu 14.04.2 LTS_ 64 bit), the software is tested with _Cython version 0.22_, 
-_Python 2.7.6 (default, Mar 22 2014, 22:59:56)_ and _gcc version 4.8.2_.
-Contact me if you want a compiled module for Windows and do not have the compiler to build it.
+The software has been tested on Windows 10, 64 bit, using _Cython version 0.28.2_ and 
+_Python 3.6.3_. 
 
 **Testing**
 
