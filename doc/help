@@ -1124,12 +1124,22 @@ options :
     The input is parsed as JSON.
 |_ML_|
     <present>
-    The input is parsed as markup (SGML,XML or HTML)
+    The input is parsed as markup (SGML,XML or HTML). Any unrecognised entity
+    reference is preceded by a DEL character (ASCII code 127 (decimal)). Any
+    DEL character in the input is also preceded by a DEL character, similar to
+    how the traditional escape character '\\' is itself represented by doubling
+    it: '\\\\'.
 |_HT_| (together with ML)
     <present>
     HTML entities are translated to UTF-8 characters.
     <not present>
     Only XML entities are translated to UTF-8 characters.
+|_X_| (together with ML)
+    <present>
+    Only XML entities are translated to UTF-8 characters. Processing
+    instructions are assumed to have the syntax |_<?...?>_|.
+    <not present>
+    Processing instructions are assumed to have the syntax |_<?...>_|.
 |_TRM_| (together with ML)
     <present>
     Heading and trailing white space is cut down to a single space in character data.
@@ -1929,21 +1939,21 @@ an example that reverses (|_rev$_|) and lowercases (|_low$_|) all leaves, but
 keeps everything else the same: prefixes, operators - even those that play
 special roles inside patterns, such as the |_!_| prefix and the |_ _ _| operator.
 
-{?} ( tr\r
-    =   a b f\r
-      .   flg$!arg:(=?f.?arg)\r
-        &   glf\r
-          $ (\r
-            ' ( $f\r
-              .\r
-                $ (   '$arg:(=?a_?b)\r
-                    & '$($(tr$('$a)))_($(tr$('$b)))\r
-                  | low$rev$!arg:?arg&arg\r
-                  )\r
-              )\r
-            )\r
-    )\r
-{?} tr$(=foo\L\"STRing\" ~!(sin$4/56) !and_?<UNDERSCORE)\r
+{?} ( tr
+    =   a b f
+      .   flg$!arg:(=?f.?arg)
+        &   glf
+          $ (
+            ' ( $f
+              .
+                $ (   '$arg:(=?a_?b)
+                    & '$($(tr$('$a)))_($(tr$('$b)))
+                  | low$rev$!arg:?arg&arg
+                  )
+              )
+            )
+    )
+{?} tr$(=foo\L\"STRing\" ~!(sin$4/56) !and_?<UNDERSCORE)
 {!} (=oof\Lgnirts ~!(nis$65/4) !dna_<?erocsrednu)"
     )
   & ( unops
@@ -3955,7 +3965,7 @@ An open file is closed by specifying an impossible file position."
                       ' ( @(!t:?s \n ?t)
                         & wr$(detag$!s)
                         )
-                    & wr$!t
+                    & wr$detag$!t
                     & putout$!arg
                   | 
               )
