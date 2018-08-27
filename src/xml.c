@@ -2490,7 +2490,6 @@ static char * endElementName;
 static void cbEndElementName(void)
     {
     nxput(StaRt,endElementName ? endElementName : ch);
-/*    nxput(StaRt,ch);*/
     putOperatorChar('.');
     endElementName = NULL;
     }
@@ -2568,7 +2567,6 @@ static estate def_cdata(int kar)
         {
         case '<':
             tagState = lt_cdata;
-/*            cbStartMarkUp();*/
             return tag;
         default:
             return notag;
@@ -2593,14 +2591,6 @@ static estate lt(int kar)
         case '/':
             tagState = endtag;
             /* fall through */
-            /*
-        case 0xA0:
-        case ' ':
-        case '\f':
-        case '\n':
-        case '\r':
-        case '\t':
-        */
             return tag;
         case 's':
         case 'S':
@@ -2612,7 +2602,7 @@ static estate lt(int kar)
                 }
             /* fall through */
         default:
-            if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
+            if(':' == kar || ('A' <= kar && kar <= 'Z') || '_' == kar || ('a' <= kar && kar <= 'z') || (kar & 0x80))
                 {
                 tagState = element;
                 StaRt = ch;
@@ -2633,14 +2623,6 @@ static estate lt_cdata(int kar)
         case '/':
             tagState = lts_cdata;
             return tag;
-            /*
-        case ' ':
-        case '\f':
-        case '\n':
-        case '\r':
-        case '\t':
-            return notag;
-            */
         default:
             tagState = def_cdata;
             return notag;            
@@ -2667,7 +2649,6 @@ static estate scriptOrStyleEndElement(int kar) /* <sc or <SC or <Sc or <sC or <s
         else
             ++scriptstylei2;
         ret = element(kar);
-        /*tagState = scriptOrStyleElement;*/
         return ret;
         }
     else
@@ -2712,32 +2693,19 @@ static estate scriptOrStyleEndElementL(int kar) /* <sc or <SC or <Sc or <sC or <
 
 static estate lts_cdata(int kar)
     {
-        /*
-    switch(kar)
+    scriptstyleimax = ScriptStyleiMax;
+    scriptstylei2 = 0;
+    if(  kar == elementEndNameLower[scriptstylei2]
+      || kar == elementEndNameUpper[scriptstylei2]
+      )
         {
-        case ' ':
-        case '\f':
-        case '\n':
-        case '\r':
-        case '\t':
-            return tag;
-        default:
-            */
-            scriptstyleimax = ScriptStyleiMax;
-            scriptstylei2 = 0;
-            if(  kar == elementEndNameLower[scriptstylei2]
-              || kar == elementEndNameUpper[scriptstylei2]
-              )
-                {
-                StaRt = ch;
-                ++scriptstylei2;
-                tagState = scriptOrStyleEndElement;
-                return tag;            
-                }
-            tagState = def_cdata;
-            return notag;
-            /*
-        }*/
+        StaRt = ch;
+        ++scriptstylei2;
+        tagState = scriptOrStyleEndElement;
+        return tag;            
+        }
+    tagState = def_cdata;
+    return notag;
     }
 
 
@@ -2885,14 +2853,6 @@ static estate emptytag(int kar)
         case '>':
             tagState = def;
             return endoftag;
-            /*
-        case 0xA0:
-        case ' ':
-        case '\f':
-        case '\n':
-        case '\r':
-        case '\t':
-            return tag;*/
         default:
             tagState = def;
             return notag;
@@ -2925,7 +2885,7 @@ static estate atts(int kar)
             tagState = emptytag;
             return tag;
         default:
-            if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
+            if(':' == kar || ('A' <= kar && kar <= 'Z') || '_' == kar || ('a' <= kar && kar <= 'z') || (kar & 0x80))
                 {
                 putOperatorChar('(');
                 StaRt = ch;
@@ -3016,17 +2976,9 @@ static estate value(int kar)
             tagState = doublequotes;
             return tag;
         default:
-/*            if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
-                {*/
                 StaRt = ch;
                 tagState = invalue;
                 return tag;
-/*                }
-            else
-                {
-                tagState = def;
-                return notag;
-                }*/
         }
     }
 
@@ -3046,8 +2998,8 @@ static estate atts_or_value(int kar)
             putOperatorChar(')');
             return endoftag;
         case '-':
-        case '_':
-        case ':':
+        /*case '_':
+        case ':':*/
         case '.':
             tagState = def;
             return notag;
@@ -3068,7 +3020,7 @@ static estate atts_or_value(int kar)
             tagState = value;
             return tag;
         default:
-            if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
+            if(':' == kar || ('A' <= kar && kar <= 'Z') || '_' == kar || ('a' <= kar && kar <= 'z') || (kar & 0x80))
                 {
                 cbEndAttribute();
                 putOperatorChar('(');
@@ -3122,18 +3074,7 @@ static estate invalue(int kar)
             tagState = emptytag;
             return tag;
         default:
-/*            if(('0' <= kar && kar <= '9') || ('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
-                {*/
-                return tag;
-/* Returning notag does not solve the problem, 
-because we can't undo the already emitted name and attributes.
-*/
-               /* }
-            else
-                {
-                tagState = def;
-                return notag;
-                }*/
+            return tag;
         }
     }
 
@@ -3628,42 +3569,19 @@ static estate h3(int kar) /* <!--  - */
     }
 
 static estate endtag(int kar)
-    {/*
-    switch(kar)
+    {
+    if(':' == kar || ('A' <= kar && kar <= 'Z') || '_' == kar || ('a' <= kar && kar <= 'z') || (kar & 0x80))
         {
-        case '<':
-            tagState = lt;
-            cbEndElementName();
-            putOperatorChar(')');
-            cbStartMarkUp();
-            return endoftag_startoftag;
-        case '>':
-            tagState = def;
-            cbEndElementName();
-            putOperatorChar(')');
-            return endoftag;
-       */     /*
-        case 0xA0:
-        case ' ':
-        case '\f':
-        case '\n':
-        case '\r':
-        case '\t':
-            return tag;*/
-        /*default:*/
-            if(('A' <= kar && kar <= 'Z') || ('a' <= kar && kar <= 'z') || (kar & 0x80))
-                {
-                endElementName = NULL;
-                tagState = elementonly;
-                StaRt = ch;
-                return tag;
-                }
-            else
-                {
-                tagState = def;
-                return notag;
-                }
-/*        }*/
+        endElementName = NULL;
+        tagState = elementonly;
+        StaRt = ch;
+        return tag;
+        }
+    else
+        {
+        tagState = def;
+        return notag;
+        }
     }
 
 void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)

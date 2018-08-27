@@ -1,3 +1,6 @@
+  27 August 2018
+Added ':' and '_' as valid start characters in XML (and html) names.
+
   17 May 2018
 Fixed uninstantiated-pointer error in vap$ function. (When given en empty
 string as input.)
