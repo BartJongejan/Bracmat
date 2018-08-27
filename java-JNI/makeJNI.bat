@@ -3,11 +3,12 @@ REM Edit JAVA_HOME and CATALINA_HOME as needed
 REM Stop the Tomcat service
 REM Run this script as administrator. (Required when the script copies bracmat.dll to the Tomcat bin catalogue.)
 
-REM First parameter: x86 | amd64 | x86_amd64 | x86_arm | x86_arm64 | amd64_x86 | amd64_arm | amd64_arm64
+REM First parameter: x64 | x86 | amd64 | x86_amd64 | x86_arm | x86_arm64 | amd64_x86 | amd64_arm | amd64_arm64
 REM second parameter: 10 | 12 | 2017
+REM For example:  makeJNI.bat x64 2017
 
 @echo off
-
+SET dirvar=%cd%
 if "%1" == "" goto :usage
 
 rem set "JAVA_HOME=C:\Program Files\Java\jdk1.7.0_45"
@@ -42,18 +43,21 @@ call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary
 goto :compile
 
 :compile
+cd %dirvar%
+
 cl /I"%JAVA_HOME%\include" /I"%JAVA_HOME%\include\win32" /O2 /Oi /GL /DWIN32 /DNDEBUG /D_WINDOWS /D_USRDLL /DBRACMATDLL_EXPORTS /D_WINDLL /MT /Gy /Gd bracmatdll.cpp ../safe/bracmatso.c dk_cst_bracmat.c ../src/json.c ../src/xml.c /link /OUT:"bracmat.dll" /DLL /OPT:REF /OPT:ICF /MACHINE:%1
 
+SET dirvar=%cd%
 cd java
 javac ./dk/cst/*.java
 javah -d ../ dk.cst.bracmat
 jar cfv bracmat.jar dk/cst/bracmat.class
 javac -classpath bracmat.jar ./bracmattest.java
 java -D"java.library.path=../" -classpath bracmat.jar;. bracmattest
-copy bracmat.jar "%CATALINA_HOME%\lib\bracmat.jar"
-cd ..
+copy /Y bracmat.jar "%CATALINA_HOME%\lib\bracmat.jar"
+cd %dirvar%
 
-move bracmat.dll "%CATALINA_HOME%\bin\bracmat.dll"
+move /Y bracmat.dll "%CATALINA_HOME%\bin\bracmat.dll"
 goto :eof
 
 :usage
