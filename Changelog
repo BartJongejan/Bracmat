@@ -1,3 +1,12 @@
+  28 October 2018
+Changed behaviour: get$<filename> returns the result of evaluation of the
+last expression. If the last non-white character in the file is a semicolon,
+then the last expression evaluates to an empty string. Previously, the returned
+value was the result of evaluating the last expression that did not consist of
+white spaces, or, if there was no such expression (i.e. an empty file), the
+get$<filename> expression itself. The latter could have very undesirable side-
+effects.
+
   27 August 2018
 Added ':' and '_' as valid start characters in XML (and html) names.
 

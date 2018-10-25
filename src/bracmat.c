@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "27 August 2018"
-#define VERSION "6.3"
-#define BUILD "227"
+#define DATUM "26 October 2018"
+#define VERSION "6.4"
+#define BUILD "228"
 /*
 COMPILATION
 -----------
@@ -4997,7 +4997,7 @@ static psk input(FILE * fpi,psk Pnode,int echmemvapstrmltrm,Boolean * err,Boolea
             }
         if(echmemvapstrmltrm & OPT_ECH)
             Printf("\n");
-        if(*InputArray[0].buffer)
+       /*if(*InputArray[0].buffer)*/
             {
             Pnode = buildtree_w(Pnode);
             if(error)
@@ -5005,10 +5005,10 @@ static psk input(FILE * fpi,psk Pnode,int echmemvapstrmltrm,Boolean * err,Boolea
                 politelyWriteError(Pnode);
                 }
             }
-        else
+        /*else
             {
             bfree(InputArray);
-            }
+            }*/
         }
 #if _BRACMATEMBEDDED
     else

@@ -4615,7 +4615,8 @@ towards operators that are closer to the root of the tree"
 string line 2\"
 ;",taytesttest,APP)
             & lst$(tay,taytesttest,APP)
-            & get$(taytesttest,ECH):tay
+            & get$(taytesttest,ECH):
+            & "New behaviour! 20181026"
             & rmv$taytestest
           | Out$617
           )
