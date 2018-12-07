@@ -1,3 +1,7 @@
+  7 December 2018
+Fixed Bracmat JNI not being thread safe in Windows. This is now solved by
+using the C++ std::mutex implementation.
+
   28 October 2018
 Changed behaviour: get$<filename> returns the result of evaluation of the
 last expression. If the last non-white character in the file is a semicolon,

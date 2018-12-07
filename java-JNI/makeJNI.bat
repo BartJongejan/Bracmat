@@ -45,7 +45,7 @@ goto :compile
 :compile
 cd %dirvar%
 
-cl /I"%JAVA_HOME%\include" /I"%JAVA_HOME%\include\win32" /O2 /Oi /GL /DWIN32 /DNDEBUG /D_WINDOWS /D_USRDLL /DBRACMATDLL_EXPORTS /D_WINDLL /MT /Gy /Gd bracmatdll.cpp ../safe/bracmatso.c dk_cst_bracmat.c ../src/json.c ../src/xml.c /link /OUT:"bracmat.dll" /DLL /OPT:REF /OPT:ICF /MACHINE:%1
+cl /I"%JAVA_HOME%\include" /I"%JAVA_HOME%\include\win32" /O2 /Oi /GL /DWIN32 /DNDEBUG /D_WINDOWS /D_USRDLL /DBRACMATDLL_EXPORTS /D_WINDLL /MT /Gy /Gd bracmatdll.cpp ../safe/bracmatso.c dk_cst_bracmat.c mutex.cpp ../src/json.c ../src/xml.c /link /OUT:"bracmat.dll" /DLL /OPT:REF /OPT:ICF /MACHINE:%1
 
 SET dirvar=%cd%
 cd java

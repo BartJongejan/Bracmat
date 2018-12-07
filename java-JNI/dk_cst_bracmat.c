@@ -18,13 +18,19 @@ JNIEXPORT jstring JNICALL Java_dk_cst_bracmat_eval(JNIEnv * env, jobject obj, js
     int err;
     jstring ret;
     const char * str;
-#if !defined WIN32
+#if defined WIN32
+    void mutexLockOut();
+    void mutexUnlockOut();
+    mutexLockOut();
+#else
     pthread_mutex_lock( &mutexout);
 #endif
     str = (*env)->GetStringUTFChars(env, expr, NULL);
     stringEval(str,&out,&err);
     ret = (*env)->NewStringUTF(env, out);
-#if !defined WIN32
+#if defined WIN32
+    mutexUnlockOut();
+#else
     pthread_mutex_unlock(&mutexout);
 #endif
     return ret;
@@ -34,7 +40,11 @@ JNIEXPORT jint JNICALL Java_dk_cst_bracmat_init(JNIEnv * env, jobject obj, jstri
     {
     int err;
     jint ret;
-#if !defined WIN32
+#if defined WIN32
+    void mutexLockInit();
+    void mutexUnlockInit();
+    mutexLockInit();
+#else
     pthread_mutex_lock( &mutexinit);
 #endif
     ret = startProc(0);
@@ -43,7 +53,9 @@ JNIEXPORT jint JNICALL Java_dk_cst_bracmat_init(JNIEnv * env, jobject obj, jstri
         const char * str = (*env)->GetStringUTFChars(env, expr, NULL);
         stringEval((const char *)str,&out,&err); /*initialize, e.g. read program file*/
         }
-#if !defined WIN32
+#if defined WIN32
+    mutexUnlockInit();
+#else
     pthread_mutex_unlock(&mutexinit);
 #endif
     return ret;
@@ -51,11 +63,17 @@ JNIEXPORT jint JNICALL Java_dk_cst_bracmat_init(JNIEnv * env, jobject obj, jstri
 
 JNIEXPORT void JNICALL Java_dk_cst_bracmat_end(JNIEnv * env, jobject obj)
     {
-#if !defined WIN32
+#if defined WIN32
+    void mutexLockEnd();
+    void mutexUnlockEnd();
+    mutexLockEnd();
+#else
     pthread_mutex_lock( &mutexend);
 #endif
     endProc();
-#if !defined WIN32
+#if defined WIN32
+    mutexUnlockEnd();
+#else
     pthread_mutex_unlock(&mutexend);
 #endif
     }
