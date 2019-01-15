@@ -208,7 +208,7 @@ http://rosettacode.org/wiki/Rosetta_Code
 
   This file.
   
-* gpl.txt
+* LICENSE
 
   The full text of the GNU public licence.
 
