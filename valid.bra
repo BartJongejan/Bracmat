@@ -6054,6 +6054,18 @@ string line 2\"
             : "<:text lix=\"45.61\" :ovix=\"70.39\" _nk=\"1.09\" i:d=\"aa01a\"><_sentence i-d=\"e248e955-e24865ce\" _geo.context=\"|\" /></:text>"
           | Out$946
           )
+          (     map
+              $ ( (=.!arg:~3|)
+                . 1 2 3 4 3 2 1
+                )
+            : 1 2 4 2 1
+          | Out$20190131a
+          )
+          (   map$((=.called).4 3):called called
+            & map$((=.called).4):called
+            & map$((=.called).):
+          | Out$20190131b
+          )
       &   out
         $ ( str
           $ ( "Done. "
