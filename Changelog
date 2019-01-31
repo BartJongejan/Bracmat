@@ -1,3 +1,10 @@
+ 31 January 2019
+map function: If the mapped function returns a leaf node with an empty string,
+then that node will not be appended to the resulting list. Previously it was
+added and afterwards deleted. Also, if the list is empty (only a leaf node
+with empty string), then the mapped function is not even called. Instead, the
+result of the map function is the same empty list.
+
   7 December 2018
 Fixed Bracmat JNI not being thread safe in Windows. This is now solved by
 using the C++ std::mutex implementation.

@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "26 October 2018"
-#define VERSION "6.4"
-#define BUILD "228"
+#define DATUM "31 January 2019"
+#define VERSION "6.5"
+#define BUILD "229"
 /*
 COMPILATION
 -----------
@@ -453,6 +453,7 @@ typedef   signed long  INT32_T;
 #define RAT_RAT_COMP(pn) (((pn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))\
                                 == (QNUMBER|QFRACTION))
 #define IS_ONE(pn) ((pn)->u.lobj == ONE && !((pn)->ops & (MINUS | VISIBLE_FLAGS)))
+#define IS_NIL(pn) ((pn)->u.lobj == 0   && !((pn)->ops & (MINUS | VISIBLE_FLAGS)))
 
 
 #include <string.h>
@@ -13814,26 +13815,40 @@ static function_return_type functions(psk Pnode)
                 ppsk ppnode = &nPnode;
                 while (is_op(pnode) && Op(pnode) == WHITE)
                     {
-                    psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                    wnode->ops = WHITE|SUCCESS;
-                    *ppnode = wnode;
-                    ppnode = &(wnode->RIGHT);
                     nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
                     nnode->ops &= ~ALL_REFCOUNT_BITS_SET;
                     nnode->LEFT = same_as_w(rightnode->LEFT);
                     nnode->RIGHT = same_as_w(pnode->LEFT);
                     nnode = functions(nnode);
-                    wnode->LEFT = nnode;
+                    if (!is_op(nnode) && IS_NIL(nnode))
+                        {
+                        wipe(nnode);
+                        }
+                    else
+                        {
+                        psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                        wnode->ops = WHITE | SUCCESS;
+                        *ppnode = wnode;
+                        ppnode = &(wnode->RIGHT);
+                        wnode->LEFT = nnode;
+                        }
                     pnode = pnode->RIGHT;
                     }
-                nnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                nnode->v.fl = Pnode->v.fl;
-                nnode->ops &= ~ALL_REFCOUNT_BITS_SET;
-                nnode->LEFT = same_as_w(rightnode->LEFT);
-                nnode->RIGHT = same_as_w(pnode);
-                nnode = functions(nnode);
-                *ppnode = nnode;
+                if (is_op(pnode) || !IS_NIL(pnode))
+                    {
+                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                    nnode->v.fl = Pnode->v.fl;
+                    nnode->ops &= ~ALL_REFCOUNT_BITS_SET;
+                    nnode->LEFT = same_as_w(rightnode->LEFT);
+                    nnode->RIGHT = same_as_w(pnode);
+                    nnode = functions(nnode);
+                    *ppnode = nnode;
+                    }
+                else
+                    {
+                    *ppnode = same_as_w(pnode);
+                    }
                 wipe(Pnode);
                 Pnode = nPnode;
                 return functionOk(Pnode);
