@@ -19,8 +19,8 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "31 January 2019"
-#define VERSION "6.5"
+#define DATUM "7 February 2019"
+#define VERSION "6.6"
 #define BUILD "229"
 /*
 COMPILATION
@@ -790,7 +790,10 @@ typedef struct sk
         } u;
     } sk;
 
-static sk nilNode,zeroNode,oneNode,argNode,selfNode,SelfNode,minusTwoNode,minusOneNode,twoNode,minusFourNode,fourNode,sjtNode;
+static sk nilNode, nilNodeNotNeutral, 
+        zeroNode, zeroNodeNotNeutral, 
+        oneNode,oneNodeNotNeutral,
+        argNode,selfNode,SelfNode,minusTwoNode,minusOneNode,twoNode,minusFourNode,fourNode,sjtNode;
 
 #if !defined NO_FOPEN
 static char * targetPath = NULL; /* Path that can be prepended to filenames. */
@@ -2270,6 +2273,7 @@ static const char needsquotes[256] = {
 
 
 /* ISO8859 */ /* NOT DOS compatible! */
+#if 0
 static const unsigned char lowerEquivalent[256] =
 {
       0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,
@@ -2309,7 +2313,7 @@ static const unsigned char upperEquivalent[256] =
     192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
     208, 209, 210, 211, 212, 213, 214, 247, 216, 217, 218, 219, 220, 221, 222, 255 /* ij */
 };
-
+#endif
 #if CODEPAGE850
 static unsigned char ISO8859toCodePage850(unsigned char kar)
 
@@ -10490,6 +10494,29 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                 case TIMES:
                     {
                     LONG locpos = pposition;
+                    if (Op(pat) == WHITE)
+                        {
+                        if (sub == &zeroNode /*&& Op(pat) != PLUS*/)
+                            {
+                            sub = &zeroNodeNotNeutral;
+                            locpos = 0;
+                            }
+                        else if (sub == &oneNode)
+                            {
+                            sub = &oneNodeNotNeutral;
+                            locpos = 0;
+                            }
+                        }
+                    else if (sub == &nilNode)
+                        {
+                        sub = &nilNodeNotNeutral;
+                        locpos = 0;
+                        }
+                    else if (sub == &oneNode && Op(pat) == PLUS)
+                        {
+                        sub = &oneNodeNotNeutral;
+                        locpos = 0;
+                        }
                     /* Optimal sructure for this code:
                                 A0 (B A)* B0
                     S:P ::=
@@ -16544,14 +16571,26 @@ int startProc(
     nilNode.flgs = READY | SUCCESS | IDENT;
     nilNode.u.lobj = 0L;
 
+    nilNodeNotNeutral.flgs = READY | SUCCESS;
+    nilNodeNotNeutral.u.lobj = 0L;
+
     zeroNode.flgs = READY | SUCCESS | IDENT | QNUMBER | QNUL;
     zeroNode.u.lobj = 0L;
     zeroNode.u.obj = '0';
+
+    zeroNodeNotNeutral .flgs = READY | SUCCESS | QNUMBER | QNUL;
+    zeroNodeNotNeutral.u.lobj = 0L;
+    zeroNodeNotNeutral.u.obj = '0';
 
     oneNode.u.lobj = 0L;
     oneNode.u.obj = '1';
     oneNode.flgs = READY | SUCCESS | IDENT | QNUMBER;
     *(&(oneNode.u.obj)+1) = 0;
+
+    oneNodeNotNeutral.u.lobj = 0L;
+    oneNodeNotNeutral.u.obj = '1';
+    oneNodeNotNeutral.flgs = READY | SUCCESS | QNUMBER;
+    *(&(oneNode.u.obj) + 1) = 0;
 
     minusTwoNode.u.lobj = 0L;
     minusTwoNode.u.obj = '2';

@@ -2220,6 +2220,13 @@ this may change in later versions of the program."
       ,   "In patterns, atoms and expressions within parentheses may be preceded by
 prefixes that control the matching process.
 
+Below, use the term 'trivial elements' for elements that either are neutral or
+zero. A list expression (an expression that links elements with the space
+operator) has the empty string as neutral element. In sums, |_0_| (zero) is the
+neutral element. In products, |_1_| is the neutral element. So the empty string,
+|_0_| and |_1_| are trivial elements in lists, sums and products, respectively. In
+addition, |_0_| is also a trivial element in products. Lists and sums do not have
+'zeros'.
 
 |_!_| and |_!!_|
     in front of an non-nil atom or an expression denoting a member of an
@@ -2229,9 +2236,8 @@ prefixes that control the matching process.
     causes backtracking if the pattern did not successfully unify with a 
     non-trivial element of the subject-list. A list is an expression
     consisting of terms (|_+_| operator), factors (|_*_| operator) or words
-    (white-space operator). Trivial elements are 0 in a sum, 1 in a product
-    and a word without characters in a list of words. In non-sophisticated
-    patterns, |_`_| means simply : unify with at most one non-trivial element.
+    (white-space operator). In non-sophisticated  patterns, |_`_| means
+    simply : unify with at most one non-trivial element.
     Zero non-trivial elements are allowed, in which case unification takes
     place with an implicit trivial element: Bracmat sees 0's everywhere in a
     sum, 1's in a product and zero length words in a sentence.
@@ -2320,7 +2326,7 @@ the first of them. The most useful combinations are:
 |_[%_|
     The current subject is stored in the variable |_sjt_| and the expression
     carrying this prefix combination is evaluated. If the evaluation succeeds,
-    the match succeeds and vice versa. The subject can be a trivial element of
+    the match succeeds and vice versa. The subject can be a neutral element of
     the subject list.
 
 Many of these combinations can be combined further, e.g. ~/#?!! accepts only
@@ -2887,7 +2893,7 @@ same debugging protocol applies as with other programming languages :
   you intended, use lst$(<function-name>,<file-name>) and inspect the
   code that is output into <file-name>.
 * Errors that are easily made are :
-  - Forget that Bracmat may see trivial elements (0 terms, 1 factors, zero
+  - Forget that Bracmat may see neutral elements (0 terms, 1 factors, zero
     length words) at places where this is not what you intend. Are all
     % ` and @ prefixes in place?
   - Forget the grouping of operators.

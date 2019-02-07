@@ -1,3 +1,15 @@
+ 7 February 2019
+The implied exponent "1" in a:a^(?exponent+[?Len) was regarded as a neutral
+element (because a^1==a), and therefore the value of Len was computed to be 0,
+which is not correct, since "1" is not a neutral element under addition or
+concatenation, but only under multiplication. This is fixed.
+Also, the % prefix did not always forbid matching neutral and zero elements
+(empty string in a concatenated list, 0 in a sum, 0 and 1 in a product). This
+is also fixed. This is fixed. An attempt was made to only forbid matching
+neutral elements in the presence of the % prefix, but this broke backward
+compatibility. For example, the built in 'fct' (factorization) function did not
+work under that regime.
+
  31 January 2019
 map function: If the mapped function returns a leaf node with an empty string,
 then that node will not be appended to the resulting list. Previously it was
