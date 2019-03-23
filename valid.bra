@@ -6147,6 +6147,24 @@ string line 2\"
             & Out$20190207q
           | 
           )
+          (   (a^b c)*(x^y z):(%?g^?gp ?go)*?gs
+            & !g:1
+            & !gp:1
+            & !go:
+            & !gs:(a^b c)*(x^y z)
+          | Out$20190207r
+          )
+          (   (a^b c)*(x^y z):%(%?g^?gp ?go)*?gs
+            & !g:a
+            & !gp:b
+            & !go:c
+            & !gs:x^y z
+          | Out$20190207s
+          )
+          ( (=a^1):(=a^%)
+          | Out$20190207t
+          )
+          (a:a^%&Out$20190207u|)
       &   out
         $ ( str
           $ ( "Done. "
