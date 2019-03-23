@@ -1,3 +1,7 @@
+23 March 2019
+Created a new Bracmat installation file for the Ericsson MC218 
+(and the Psion 5MX).
+
  7 February 2019
 The implied exponent "1" in a:a^(?exponent+[?Len) was regarded as a neutral
 element (because a^1==a), and therefore the value of Len was computed to be 0,
