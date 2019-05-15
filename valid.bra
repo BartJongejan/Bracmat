@@ -5184,7 +5184,7 @@ string line 2\"
                   | 
                   )
                 & (rmv$cfil:ENOENT|Out$726b)
-              | Out$724
+              | Out$(str$("724: rmv returns [" !Rmv "]"))
               )
             & ( fil$(bfil,SET,-1)&Out$727
               | 
