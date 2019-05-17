@@ -1,3 +1,8 @@
+17 May 2019
+In valid.bra, changed all file names to upper case and added an extension.
+Also made sure that all generated files are also deleted again, with the
+exception of valid.txt.
+
 15 May 2019
 Added details of problematic output to error notification 724.
 

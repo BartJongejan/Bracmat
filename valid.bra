@@ -1719,15 +1719,15 @@ towards operators that are closer to the root of the tree"
             : 2*x^(y*(a+b))
           | Out$150
           )
-          (   fil$("file98741lfn.txt",w)
+          (   fil$("FILE98741LFN.TXT",w)
             & fil$(,STR," \n\r\t")
             & fil$(,,,"Workers lost their jobs.")
-            & fil$("file98741lfn.txt",r)
+            & fil$("FILE98741LFN.TXT",r)
             & fil$(,STR)
             & fil$(,,".!?,;"):(?str.?stop)
             & !str:Workers
             & !stop:
-            & fil$("file98741lfn.txt","a+")
+            & fil$("FILE98741LFN.TXT","a+")
             & fil$(,STR)
             &   fil
               $ ( 
@@ -1735,7 +1735,7 @@ towards operators that are closer to the root of the tree"
                 , cv
                 , " of the world, unite! Proletarier aller Länder, vereinigt euch!"
                 )
-            & fil$("file98741lfn.txt",r)
+            & fil$("FILE98741LFN.TXT",r)
             & fil$(,STR)
             & fil$(,,".!?,;"):(?str.?stop)
             & !str:"Workers of the world"
@@ -1748,7 +1748,7 @@ towards operators that are closer to the root of the tree"
             & !str:"änder, "
             & !stop:
             & ~(fil$(,SET,-1))
-            & rmv$"file98741lfn.txt"
+            & rmv$"FILE98741LFN.TXT"
           | Out$151
           )
           (   0:?pos
@@ -1920,10 +1920,10 @@ towards operators that are closer to the root of the tree"
           (@(abcde:ab ~@(?:?) e)|Out$170)
           (   8211:?"EN DASH"
             & chu$!"EN DASH":?endash
-            & lst$(endash,"endash.bra",NEW)
+            & lst$(endash,"ENDASH.BRA",NEW)
             & :?endash
-            & get'"endash.bra"
-            & rmv$"endash.bra"
+            & get'"ENDASH.BRA"
+            & rmv$"ENDASH.BRA"
             & utf$!endash:8211
           | Out$171
           )
@@ -3894,15 +3894,25 @@ towards operators that are closer to the root of the tree"
           | Out$497
           )
           out$498
-          (   ( W
-              = whl'(1+!n:?n:~>1100&!W)
-              )
+          (   0:?n
+            & 745:?depth
             & "Microsoft VC++ 2008
             	32 bit:		16056 debug: 1119
                 64 bit:	     5384
                 Borland BC5			 8618
-                gcc 4.1.2 20080704	23807"
-            & 0:?n
+                gcc 4.1.2 20080704	23807
+               Microsoft VC++ 2019
+                32 bit:           debug: 742"
+            & ( W
+              = whl'(1+!n:?n:~>!depth&!W)
+              )
+            &   out
+              $ ( str
+                $ ( "Testing stack depth "
+                    !depth
+                    " (This test may cause stack overflow. In that case, set depth to a lower number and report.)"
+                  )
+                )
             & !W
           | Out$498
           )
@@ -4403,9 +4413,9 @@ towards operators that are closer to the root of the tree"
                 & !ii !buf:?buf
                 )
             & str$!buf:?buf
-            & put$(!buf,bufa76dlw,NEW)
-            & get$bufa76dlw:?buf2
-            & rmv$bufa76dlw
+            & put$(!buf,"BUFA76DLW.TST",NEW)
+            & get$"BUFA76DLW.TST":?buf2
+            & rmv$"BUFA76DLW.TST"
             & !buf:!buf2
           | Out$563
           )
@@ -4415,8 +4425,8 @@ towards operators that are closer to the root of the tree"
                     hjhkhfsadlfkjasdf
                   )
               : ?kk
-            & lst$(kk,haafhdlaggan,NEW)
-            & rmv$haafhdlaggan
+            & lst$(kk,"HAAFHDLAG.GAN",NEW)
+            & rmv$"HAAFHDLAG.GAN"
           | Out$564
           )
           (   (S="str$(\\a \\b \\v \\n \\f \\r a\\Lb \\t (=\\D))")
@@ -4570,10 +4580,10 @@ towards operators that are closer to the root of the tree"
             & Out$604
           | 
           )
-          (   rmv$FOPENTEST
-            & (rmv$FOPENTEST:ENOENT|Out$605)
-            & (get$FOPENTEST&Out$606|)
-            & ( get$(FOPENTEST,STR)&Out$607
+          (   rmv$"FOPEN.TST"
+            & (rmv$"FOPEN.TST":ENOENT|Out$605)
+            & (get$"FOPEN.TST"&Out$606|)
+            & ( get$("FOPEN.TST",STR)&Out$607
               | 
               )
           | Out$608
@@ -4592,32 +4602,31 @@ towards operators that are closer to the root of the tree"
           | Out$612
           )
           (glf$(=!,l)&Out$613|)
-          (   lst$(tay,taytesttest,NEW)
-            & @(get$(taytesttest,STR):"tay=\n  f," ?)
-            & rmv$taytestest
+          (   lst$(tay,"TAYTEST.TST",NEW)
+            & @(get$("TAYTEST.TST",STR):"tay=\n  f," ?)
+            & rmv$"TAYTEST.TST"
           | Out$614
           )
-          (   lst$(tay,taytesttest,NEW)
-            &   get$(taytesttest,VAP)
+          (   lst$(tay,"TAYTEST.TST",NEW)
+            &   get$("TAYTEST.TST",VAP)
               : t a y "=" \n " " " " f "," ?
-            & rmv$taytestest
+            & rmv$"TAYTEST.TST"
           | Out$615
           )
-          (   lst$(tay,taytesttest,NEW)
-            & @(get$(taytesttest,STR,VAP):"t a y = " ?)
-            & rmv$taytestest
+          (   lst$(tay,"TAYTEST.TST",NEW)
+            & @(get$("TAYTEST.TST",STR,VAP):"t a y = " ?)
+            & rmv$"TAYTEST.TST"
           | Out$616
           )
           (   put$("{comment line 1
 {comment line 2}
-}",taytesttest,NEW)
+}","TAYTEST.TST",NEW)
             & put$("\"sting line 1
 string line 2\"
-;",taytesttest,APP)
-            & lst$(tay,taytesttest,APP)
-            & get$(taytesttest,ECH):
+;","TAYTEST.TST",APP)
+            & lst$(tay,"TAYTEST.TST",APP)
+            & get$("TAYTEST.TST",ECH):
             & "New behaviour! 20181026"
-            & rmv$taytestest
           | Out$617
           )
           (   chu$200:?x
@@ -4746,7 +4755,7 @@ string line 2\"
           | Out$648
           )
           (   new$hash:?myhash
-            & put$(,"listHash.txt",NEW)
+            & put$(,"LISTHASH.TXT",NEW)
             & ( listHash
               =   LH N n
                 .   :?LH
@@ -4756,8 +4765,8 @@ string line 2\"
                     $ ( 
                       = .(1+!n:?n.!arg) !LH:?LH
                       )
-                  & put$(str$(\n\n !N ":\n"),"listHash.txt",APP)
-                  & lst$(LH,"listHash.txt",APP)
+                  & put$(str$(\n\n !N ":\n"),"LISTHASH.TXT",APP)
+                  & lst$(LH,"LISTHASH.TXT",APP)
               )
             & (myhash..ISO)$
             & 240:?I
@@ -4842,21 +4851,23 @@ string line 2\"
             & !cnt6:584
             & !cnt6+!cnt7:!cnt4
           |   Out
-            $ ( 649a
-                cnt1
-                !cnt1
-                cnt2
-                !cnt2
-                cnt3
-                !cnt3
-                cnt4
-                !cnt4
-                cnt5
-                !cnt5
-                cnt6
-                !cnt6
-                "cnt6+cnt7"
-                !cnt6+!cnt7
+            $ (   649a
+                  cnt1
+                  !cnt1
+                  cnt2
+                  !cnt2
+                  cnt3
+                  !cnt3
+                  cnt4
+                  !cnt4
+                  cnt5
+                  !cnt5
+                  cnt6
+                  !cnt6
+                  "cnt6+cnt7"
+                  !cnt6+!cnt7
+                  "see LISTHASH.TXT"
+              & 
               )
           )
           (   (myhash..casesensitive)$
@@ -4915,6 +4926,7 @@ string line 2\"
             & !cnt12:283
             & !cnt13:134
             & !cnt13+!cnt11:!cnt10
+            & rmv$"LISTHASH.TXT"
           |   Out
             $ ( 649f
                 cnt10
@@ -5169,60 +5181,60 @@ string line 2\"
           | Out$722
           )
           (lst$(out,sgn)|Out$723)
-          (   fil$(afil,w)
-            & fil$(bfil,w)
-            & fil$(cfil,w)
-            & rmv$cfil:?Rmv
+          (   fil$("A.FIL",w)
+            & fil$("B.FIL",w)
+            & fil$("C.FIL",w)
+            & rmv$"C.FIL":?Rmv
             & (   !Rmv:EACCES
                 & ( fil$(,SET,-1)&Out$725a
                   | 
                   )
-                & (rmv$cfil:0|Out$726a)
+                & (rmv$"C.FIL":0|Out$726a)
                 & 
               |   !Rmv:0
                 & ( fil$(,SET,-1)&Out$725b
                   | 
                   )
-                & (rmv$cfil:ENOENT|Out$726b)
+                & (rmv$"C.FIL":ENOENT|Out$726b)
               | Out$(str$("724: rmv returns [" !Rmv "]"))
               )
-            & ( fil$(bfil,SET,-1)&Out$727
+            & ( fil$("B.FIL",SET,-1)&Out$727
               | 
               )
-            & (rmv$bfil:0|Out$728)
+            & (rmv$"B.FIL":0|Out$728)
             & (fil$(,SET,-1)&Out$729|)
-            & (rmv$bfil:ENOENT|Out$730)
-            & ( fil$(afil,SET,-1)&Out$731
+            & (rmv$"B.FIL":ENOENT|Out$730)
+            & ( fil$("A.FIL",SET,-1)&Out$731
               | 
               )
-            & (rmv$afil:0|Out$732)
-            & (rmv$afil:ENOENT|Out$733)
+            & (rmv$"A.FIL":0|Out$732)
+            & (rmv$"A.FIL":ENOENT|Out$733)
           | Out$734
           )
-          (   (fil$(afil,w)|Out$735)
-            & (fil$(bfil,w)|Out$736)
-            & (fil$(cfil,w)|Out$737)
-            & ( fil$(bfil,SET,-1)&Out$738
+          (   (fil$("A.FIL",w)|Out$735)
+            & (fil$("B.FIL",w)|Out$736)
+            & (fil$("C.FIL",w)|Out$737)
+            & ( fil$("B.FIL",SET,-1)&Out$738
               | 
               )
-            & ( fil$(cfil,SET,-1)&Out$739
+            & ( fil$("C.FIL",SET,-1)&Out$739
               | 
               )
-            & ( fil$(afil,SET,-1)&Out$740
+            & ( fil$("A.FIL",SET,-1)&Out$740
               | 
               )
-            & (rmv$afil:0|Out$741)
-            & (rmv$bfil:0|Out$742)
-            & (rmv$cfil:0|Out$743)
+            & (rmv$"A.FIL":0|Out$741)
+            & (rmv$"B.FIL":0|Out$742)
+            & (rmv$"C.FIL":0|Out$743)
           | Out$744
           )
           out$745
-          (   (fil$(aaa,w)|Out$745)
-            & ( put$(test,aaa,APP)&Out$746
+          (   (fil$("AAA.FIL",w)|Out$745)
+            & ( put$(test,"AAA.FIL",APP)&Out$746
               | 
               )
-            & fil$(aaa,SET,-1)
-          | rmv$aaa
+            & fil$("AAA.FIL",SET,-1)
+          | rmv$"AAA.FIL"
           )
           out$747
           (get$klaa/bra&Out$747|)
@@ -5234,18 +5246,18 @@ string line 2\"
           (   0:?n
             &   whl
               ' ( 1+!n:~>1000:?n
-                & str$(manya !n):?NM
+                & str$(MANYA !n ".TST"):?NM
                 & fil$(!NM,w)
                 )
             &   whl
-              ' ( str$(manya !n):?NM
+              ' ( str$(MANYA !n ".TST"):?NM
                 & (fil$(!NM,SET,-1)|)
                 & rmv$!NM
                 & !n+-1:>0:?n
                 )
           | Out$753
           )
-          (   fil$("file98741lfn.txt",w)
+          (   fil$("FILE98741LFN.TXT",w)
             & fil$(,CHR)
             & fil$(,,,xyz)
             & fil$(,CHR,3)
@@ -5253,15 +5265,15 @@ string line 2\"
             & fil$(,CHR,3,2)
             & fil$(,,,1234567890)
             & ~(fil$(,SET,-1))
-            & get$"file98741lfn.txt":xabc123456
-            & rmv$"file98741lfn.txt"
+            & get$"FILE98741LFN.TXT":xabc123456
+            & rmv$"FILE98741LFN.TXT"
           | Out$754
           )
           (fil$(,,,,)&Out$755|)
           ( fil$(,4 5,)&Out$756
           | 
           )
-          ( fil$("file98741lfn.txt",w)
+          ( fil$("FILE98741LFN.TXT",w)
           & (fil$(,CHR,hk)&Out$757|)
           & (fil$(,CHR,45/7)&Out$758|)
           & ( fil$(,CHR,3,hk)&Out$759
@@ -5283,9 +5295,9 @@ string line 2\"
           & (fil$(,TEL):0|Out$768)
           & (fil$(,SET,3/2)&Out$769|)
           & ~(fil$(,SET,-1))
-          & rmv$"file98741lfn.txt"
+          & rmv$"FILE98741LFN.TXT"
           )
-          ( fil$("file98741lfn.txt",w)
+          ( fil$("FILE98741LFN.TXT",w)
           & (fil$(,DEC)|Out$770)
           & (fil$(,,1)&Out$771|)
           & (fil$(,,2)&Out$772|)
@@ -5324,16 +5336,16 @@ string line 2\"
           & (fil$(,,4,999999999)|Out$804)
           & (fil$(,,5,999999999)|Out$805)
           & ~(fil$(,SET,-1))
-          & rmv$"file98741lfn.txt"
+          & rmv$"FILE98741LFN.TXT"
           )
-          ( fil$("file98741lfn.txt",w)
+          ( fil$("FILE98741LFN.TXT",w)
           & (fil$(,STR)|Out$806)
           & (fil$(,,,koorddanser)|Out$807)
           & ~(fil$(,SET,-1))
-          & rmv$"file98741lfn.txt"
+          & rmv$"FILE98741LFN.TXT"
           )
-          ( rmv$"file98741lfn.txt"
-          & (fil$("file98741lfn.txt","w+b")|Out$808)
+          ( rmv$"FILE98741LFN.TXT"
+          & (fil$("FILE98741LFN.TXT","w+b")|Out$808)
           & (fil$(,CHR,1,2)|Out$809)
           & (fil$(,,,abcdefghij)|Out$810)
           & (fil$(,SET,0)|Out$811)
@@ -5371,10 +5383,10 @@ string line 2\"
           & (fil$(,SET,0)|Out$832)
           & (fil$:(123deXghij.)|Out$833)
           & ~(fil$(,SET,-1))
-          & (|rmv$"file98741lfn.txt")
+          & (|rmv$"FILE98741LFN.TXT")
           )
-          ( rmv$"file98741lfn.txt"
-          & (fil$("file98741lfn.txt","w+b")|Out$834)
+          ( rmv$"FILE98741LFN.TXT"
+          & (fil$("FILE98741LFN.TXT","w+b")|Out$834)
           & (fil$(,CHR,10,1000)|Out$835)
           & (fil$(,,,abcdefghij)|Out$836)
           & (fil$(,CHR,4,1)|Out$837)
@@ -5390,10 +5402,10 @@ string line 2\"
           & (fil$(,STR)|Out$842)
           & (fil$:(OP.)|Out$843)
           & ~(fil$(,SET,-1))
-          & (|rmv$"file98741lfn.txt")
+          & (|rmv$"FILE98741LFN.TXT")
           )
-          ( rmv$"file98741lfn.txt"
-          & (fil$("file98741lfn.txt","w+b")|Out$844)
+          ( rmv$"FILE98741LFN.TXT"
+          & (fil$("FILE98741LFN.TXT","w+b")|Out$844)
           & (fil$(,CHR,1,255)|Out$845)
           & (fil$(,,,abcdefghij)|Out$846)
           & "prepare for reading all bytes"
@@ -5405,7 +5417,7 @@ string line 2\"
           & (fil$(,DEC,4,1)|Out$850)
           & "read that"
           & (fil$(,SET,0)|Out$851)
-          & (fil$:1684209761|Out$852)
+          & (fil$:?NN:1684209761|Out$852)
           & (fil$(,DEC,2,2)|Out$853)
           & "read that"
           & (fil$(,SET,0)|Out$854)
@@ -5415,15 +5427,15 @@ string line 2\"
           & (fil$(,SET,0)|Out$857)
           & (fil$:1684234849|Out$843)
           & ~(fil$(,SET,-1))
-          & (|rmv$"file98741lfn.txt")
+          & (|rmv$"FILE98741LFN.TXT")
           )
-          (put$('$tay,LIN)|Out$844)
-          (/('(x.u))$7:u|Out$845)
+          (put$('$tay,LIN)|Out$844b)
+          (/('(x.u))$7:u|Out$845b)
           ( (k=ab (Lk=i))&new$k
-          | Out$846
+          | Out$846b
           )
           ( (k=ab Lk)&new$k
-          | Out$847
+          | Out$847b
           )
           (   get$("pr-xml-utf-8.xml",X,ML):?xml
             & @( toML$!xml
@@ -5438,37 +5450,38 @@ string line 2\"
                )
             & !y:!b
             & !x:!a
-          | Out$848
+          | Out$848b
           )
           (   11:?!(=)
             & !loss
             & !:?p
             & !p:11
-          | Out$849
+          | Out$849b
           )
-          out$850
-          (ø l:% %|Out$850)
-          ( (   fil$(taytesttest,r)
+          out$850b
+          (ø l:% %|Out$850b)
+          ( (   fil$("TAYTEST.TST",r)
               & fil$(,CHR)
-              & fil$("file98741lfn.txt",w)
-              & fil$taytesttest
-            | Out$852
+              & fil$("FILE98741LFN.TXT",w)
+              & fil$"TAYTEST.TST"
+            | Out$852b
             )
-          & (fil$(taytesttest,SET,-1)|)
-          & (fil$("file98741lfn.txt",SET,-1)|)
-          & rmv$"file98741lfn.txt"
+          & (fil$("TAYTEST.TST",SET,-1)|)
+          & (fil$("FILE98741LFN.TXT",SET,-1)|)
+          & rmv$"FILE98741LFN.TXT"
+          & rmv$"TAYTEST.TST"
           )
           ( glf$(=!.a.):(=?)
-          | Out$853
+          | Out$853b
           )
           ( glf$(=?.a.):(=?h)
-          | Out$854
+          | Out$854b
           )
           ( glf$(=!.a.):(=?h)
-          | Out$855
+          | Out$855b
           )
-          (@(548:@548 @)&Out$856|)
-          (@(548:@ @)&Out$857|)
+          (@(548:@548 @)&Out$856b|)
+          (@(548:@ @)&Out$857b|)
           ( @(548:@(548:548) @)&Out$858
           | 
           )
