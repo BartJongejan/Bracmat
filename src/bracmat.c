@@ -14100,8 +14100,11 @@ static function_return_type functions(psk Pnode)
                             strcpy(draft,"ENOENT");
                             break;
                         default:
-                            sprintf(draft,"%d",errno);
-                            break;
+                            wipe(Pnode);
+                            Pnode = scopy((const char*)strerror(errno));
+                            return functionOk(Pnode);
+                           /* sprintf(draft,"%d",errno);
+                            break;*/
                         }
 #endif
                     }
