@@ -1,3 +1,25 @@
+18 May 2019
+In Bracmat.c, in the implementation of the rmv function, if errno is non-zero
+and neither EACCES nor ENOENT, use strerror(errno) to explain what remove() is
+complaining about.
+In valid.bra, test 753 is improved. In the first loop counting from 1 to 1000,
+1000 files are opened for writing. If the OS does not have that many file
+handles, Bracmat closes some of the files, remembering the file mode and the
+position in the file. If fil$ fails for some reason, the loop is exited. The
+first test is to check that the loop was done 1000 times. Else error 753a is
+issued. In the second loop, the code iterates over all "open" files in reverse
+order, closes each file and deletes it. Files that already had been closed
+because there weren't enough file handles, are opened in the same file mode as
+before and the writing position is restored. After re-opening, those files are
+also closed and deleted. If the iteration stops before the first file is closed
+and deleted, error message 753b is issued. Finally the code iterates over all
+1000 file names and attempts to delete files with those names. The expected
+returned value from the rmv function is ENOENT, sinces all files should have
+been deleted already. In OpenVMS some return values may be 0, since opening
+a file twice for writing is expected to create a new version of the file. 
+If the returned value is neither 0 nor ENOENT, error 753c is issued.
+After running valid.bra, no files called MANYAnnn
+
 17 May 2019
 In valid.bra, changed all file names to upper case and added an extension.
 Also made sure that all generated files are also deleted again, with the
