@@ -5190,7 +5190,6 @@ string line 2\"
                   | 
                   )
                 & (rmv$"C.FIL":0|Out$726a)
-                & 
               |   !Rmv:0
                 & ( fil$(,SET,-1)&Out$725b
                   | 
@@ -5243,19 +5242,27 @@ string line 2\"
           (get$"k:laabra"&Out$750|)
           (get$"/klaa/bra"&Out$751|)
           (get$"\\klaa/bra"&Out$752|)
-          (   0:?n
-            &   whl
-              ' ( 1+!n:~>1000:?n
-                & str$(MANYA !n ".TST"):?NM
-                & fil$(!NM,w)
-                )
-            &   whl
-              ' ( str$(MANYA !n ".TST"):?NM
-                & (fil$(!NM,SET,-1)|)
-                & rmv$!NM
-                & !n+-1:>0:?n
-                )
-          | Out$753
+          ( 0:?n
+          &   whl
+            ' ( 1+!n:~>1000:?n
+              & str$(MANYA !n ".TST"):?NM
+              & fil$(!NM,w)
+              )
+          & (!n:1000|Out$(str$("753a n=" !n)))
+          &   whl
+            ' ( str$(MANYA !n ".TST"):?NM
+              & (fil$(!NM,SET,-1)|)
+              & rmv$!NM:0
+              & !n+-1:>0:?n
+              )
+          & (!n:1|Out$(str$("753b n=" !n)))
+          & 0:?n
+          &   whl
+            ' ( 1+!n:~>1000:?n
+              & str$(MANYA !n ".TST"):?NM
+              & rmv$!NM:(0|ENOENT)
+              )
+          & (!n:1000|Out$(str$("753c n=" !n)))
           )
           (   fil$("FILE98741LFN.TXT",w)
             & fil$(,CHR)
@@ -5438,19 +5445,21 @@ string line 2\"
           | Out$847b
           )
           (   get$("pr-xml-utf-8.xml",X,ML):?xml
-            & @( toML$!xml
-               :   ?x
-                   "<tr><td bgcolor=\"&cellback;\" rowspan=\"2\" colspan=\"1\"></td>"
-                   ?y
-               )
-            & @( toML$(nestML$!xml)
-               :   ?a
-                   "<tr><td bgcolor=\"&cellback;\" rowspan=\"2\" colspan=\"1\" />"
-                   ?b
-               )
-            & !y:!b
-            & !x:!a
-          | Out$848b
+            & (   @( toML$!xml
+                   :   ?x
+                       "<tr><td bgcolor=\"&cellback;\" rowspan=\"2\" colspan=\"1\"></td>"
+                       ?y
+                   )
+                & @( toML$(nestML$!xml)
+                   :   ?a
+                       "<tr><td bgcolor=\"&cellback;\" rowspan=\"2\" colspan=\"1\" />"
+                       ?b
+                   )
+                & (!y:!b|Out$848bA)
+                & (!x:!a|Out$848bB)
+              | Out$848bC
+              )
+          | Out$"848bD cannot open pr-xml-utf-8.xml"
           )
           (   11:?!(=)
             & !loss
