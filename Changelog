@@ -1,6 +1,7 @@
-22 May remove() returns a value that is not 0, EACCES or ENOENT, and
+22 May 2019 
+If remove() returns a value that is not 0, EACCES or ENOENT, and
 strerror(errno) evaluates to "file currently locked by another user",
-then rmv$ returns EACCES.
+then rmv$ returns EACCES. Added two typecasts for strcmp #ifdef __VMS.
 
 18 May 2019
 In Bracmat.c, in the implementation of the rmv function, if errno is non-zero

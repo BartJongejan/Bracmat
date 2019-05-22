@@ -21,7 +21,7 @@ email: bartj@hum.ku.dk
 */
 #define DATUM "22 May 2019"
 #define VERSION "6.7"
-#define BUILD "230"
+#define BUILD "231"
 /*
 COMPILATION
 -----------
@@ -8497,7 +8497,11 @@ static Hash * newhash(unsigned LONG size)
     temp->hash_size = size;
     temp->record_count = (unsigned int)0;
     temp->hash_table = (pskRecord **)bmalloc(__LINE__,sizeof(pskRecord *) * temp->hash_size);
+#ifdef __VMS
+    temp->cmpfunc = (int (*)())strcmp;
+#else
     temp->cmpfunc = strcmp;
+#endif
     temp->hashfunc = casesensitivehash;
     temp->elements = 0L;     /* elements >= record_count */
     temp->record_count = 0L; /* record_count >= size - unoccupied */
@@ -8690,7 +8694,11 @@ static Boolean hashcasesensitive(struct typedObjectnode * This,ppsk arg)
     {
     UNREFERENCED_PARAMETER(arg);
     (HASH(This))->hashfunc = casesensitivehash;
+#ifdef __VMS
+    (HASH(This))->cmpfunc = (int (*)())strcmp;
+#else
     (HASH(This))->cmpfunc = strcmp;
+#endif
     rehash(PHASH(This),100);
     return TRUE;
     }
