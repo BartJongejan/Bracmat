@@ -1,3 +1,7 @@
+22 May remove() returns a value that is not 0, EACCES or ENOENT, and
+strerror(errno) evaluates to "file currently locked by another user",
+then rmv$ returns EACCES.
+
 18 May 2019
 In Bracmat.c, in the implementation of the rmv function, if errno is non-zero
 and neither EACCES nor ENOENT, use strerror(errno) to explain what remove() is
