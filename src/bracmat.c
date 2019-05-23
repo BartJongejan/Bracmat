@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "22 May 2019"
+#define DATUM "23 May 2019"
 #define VERSION "6.7"
-#define BUILD "231"
+#define BUILD "232"
 /*
 COMPILATION
 -----------
@@ -14108,12 +14108,14 @@ static function_return_type functions(psk Pnode)
                             strcpy(draft,"ENOENT");
                             break;
                         default:
+#ifdef __VMS
                             if (!strcmp("file currently locked by another user", (const char*)strerror(errno)))
                                 {  /* OpenVMS */
                                 strcpy(draft, "EACCES");
                                 break;
                                 }
                             else
+#endif
                                 {
                                 wipe(Pnode);
                                 Pnode = scopy((const char*)strerror(errno));

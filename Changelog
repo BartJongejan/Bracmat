@@ -1,3 +1,6 @@
+23 May 2019
+Put #ifdef __VMS ... #endif around yesterday's change in wmv$ implementation.  
+
 22 May 2019 
 If remove() returns a value that is not 0, EACCES or ENOENT, and
 strerror(errno) evaluates to "file currently locked by another user",
