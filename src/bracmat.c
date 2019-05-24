@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "23 May 2019"
+#define DATUM "24 May 2019"
 #define VERSION "6.7"
-#define BUILD "232"
+#define BUILD "233"
 /*
 COMPILATION
 -----------
@@ -1342,7 +1342,7 @@ total bytes = 1166400
 
 static int hum = 1;
 static int listWithName = 1;
-static int nice = TRUE;
+static int beNice = TRUE;
 static int optab[256];
 static int dummy_op = WHITE;
 #if DEBUGBRACMAT
@@ -3614,7 +3614,7 @@ static void endnode(psk Root,int space)
     printflags(Root);
     if(Root->ops & MINUS)
         (*process)('-');
-    if(nice)
+    if(beNice)
         {
         for(pstring = POBJ(Root);*pstring;pstring++)
             do_something(*pstring);
@@ -4528,8 +4528,8 @@ void writeError(psk Pnode)
     {
     FILE *saveFpo;
     int saveNice;
-    saveNice = nice;
-    nice = FALSE;
+    saveNice = beNice;
+    beNice = FALSE;
     saveFpo = global_fpo;
     global_fpo = errorStream;
 #if !defined NO_FOPEN
@@ -4550,7 +4550,7 @@ void writeError(psk Pnode)
         }
 /*#endif*/
     global_fpo = saveFpo;
-    nice = saveNice;
+    beNice = saveNice;
     }
 
 /*#if !_BRACMATEMBEDDED*/
@@ -7228,10 +7228,10 @@ static int string_copy_insert(psk name,psk pnode,char * str,char * cutoff)
             psnode->str = str;
             psnode->length = cutoff - str;
             }
-        DBGSRC(int saveNice;int redhum;saveNice = nice;\
-            redhum = hum;nice = FALSE;hum = FALSE;\
+        DBGSRC(int saveNice;int redhum;saveNice = beNice;\
+            redhum = hum;beNice = FALSE;hum = FALSE;\
             Printf("str [%s] length " LONGU "\n",psnode->str,(unsigned LONG int)psnode->length);\
-            nice = saveNice;hum = redhum;)
+            beNice = saveNice;hum = redhum;)
         ret = insert(name,(psk)psnode);
         if(ret)
             dec_refcount((psk)psnode);
@@ -9795,7 +9795,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
         suggestedCutOff = NULL;
         }
 #endif
-    DBGSRC(int saveNice;int redhum;saveNice = nice;redhum = hum;nice = FALSE;\
+    DBGSRC(int saveNice;int redhum;saveNice = beNice;redhum = hum;beNice = FALSE;\
         hum = FALSE;Printf("%d  %.*s|%s",ind,cutoff-sub,sub,cutoff);\
         Printf(":");result(pat);\
         Printf  (",pos=%ld,sLen=%ld,sugCut=%s,mayMoveStart=%s)"\
@@ -9804,7 +9804,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                 ,suggestedCutOff ? *suggestedCutOff ? *suggestedCutOff : (char*)"(0)" : (char*)"0"\
                 ,mayMoveStartOfSubject ? *mayMoveStartOfSubject ? *mayMoveStartOfSubject : (char*)"(0)" : (char*)"0"\
                 );\
-        Printf("\n");nice = saveNice;hum = redhum;)
+        Printf("\n");beNice = saveNice;hum = redhum;)
     s.i = (PRISTINE << SHIFT_LMR) + (PRISTINE << SHIFT_RMR);
 
     Flgs = pat->v.fl;
@@ -10308,11 +10308,11 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
     if(stringOncePattern(pat) || /* @("abXk":(|? b|`) X ?id) must fail*/ (s.c.rmr & (TRUE|FENCE|ONCE)) == FENCE)
         {
         s.c.rmr |= ONCE;
-        DBGSRC(int saveNice;int redhum;saveNice = nice;redhum = hum;\
-            nice = FALSE;hum = FALSE;\
+        DBGSRC(int saveNice;int redhum;saveNice = beNice;redhum = hum;\
+            beNice = FALSE;hum = FALSE;\
             Printf("%d%*sstringmatch(%.*s",ind,ind,"",cutoff-sub,sub);\
             Printf(":");result(pat);\
-            nice = saveNice;hum = redhum;\
+            beNice = saveNice;hum = redhum;\
             Printf(") s.c.rmr %d (B)",s.c.rmr);\
             if(pat->v.fl & POSITION) Printf("POSITION ");\
             if(pat->v.fl & FRACTION)Printf("FRACTION ");\
@@ -11698,7 +11698,7 @@ static void lstsub(psk pnode)
 vars *nxtvar;
 unsigned char *name;
 int alphabet,n;
-nice = FALSE;
+beNice = FALSE;
 name = POBJ(pnode);
 for(alphabet = 0;alphabet<256;alphabet++)
     {
@@ -11742,7 +11742,7 @@ for(alphabet = 0;alphabet<256;alphabet++)
             }
         }
     }
-nice = TRUE;
+beNice = TRUE;
 }
 
 static void lst(psk pnode)
@@ -11751,7 +11751,7 @@ static void lst(psk pnode)
         {
         if(Op(pnode) == EQUALS)
             {
-            nice = FALSE;
+            beNice = FALSE;
             myprintf("(",NULL);
             if(hum)
                 myprintf("\n",NULL);
@@ -11766,7 +11766,7 @@ static void lst(psk pnode)
             if(hum)
                 myprintf("\n",NULL);
             myprintf(")\n",NULL);
-            nice = TRUE;
+            beNice = TRUE;
             return;
             }
         else
@@ -13329,7 +13329,7 @@ static function_return_type functions(psk Pnode)
         {
         FIRSTCASE(STR) /* str$(arg arg arg .. ..) */
             {
-            nice = FALSE;
+            beNice = FALSE;
             hum = 0;
             telling = 1;
             process = tstr;
@@ -13339,7 +13339,7 @@ static function_return_type functions(psk Pnode)
             source = POBJ(rlnode);
             result(rightnode);
             rlnode->v.fl = (READY | SUCCESS) | (numbercheck(SPOBJ(rlnode)) & ~DEFINITELYNONUMBER);
-            nice = TRUE;
+            beNice = TRUE;
             hum = 1;
             process = myputc;
             wipe(Pnode);
@@ -13715,13 +13715,13 @@ static function_return_type functions(psk Pnode)
         CASE(BEZ) /* bez $  */
             {
 #if MAXSTACK
-#if defined _WIN32
+#if defined _WIN32 || defined __VMS
             sprintf(draft,"%lu.%lu.%u.%d",(unsigned long)globalloc,(unsigned long)maxgloballoc,maxbez / ONEREF,maxstack);
 #else
             sprintf(draft,"%zu.%zu.%u.%d",globalloc,maxgloballoc,maxbez / ONEREF,maxstack);
 #endif
 #else
-#if defined _WIN32
+#if defined _WIN32 || defined __VMS
             sprintf(draft,"%lu.%lu.%u",(unsigned long)globalloc,(unsigned long)maxgloballoc,maxbez / ONEREF);
 #else
             sprintf(draft,"%zu.%zu.%u",globalloc,maxgloballoc,maxbez / ONEREF);
