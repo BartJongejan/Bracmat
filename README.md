@@ -178,6 +178,14 @@ http://rosettacode.org/wiki/Rosetta_Code
     
       Source code that implements support for reading XML-files
 
+    * CONFIGURE.COM
+
+      Script that configures DESCRIP.MMS
+
+    * DESCRIP.MMS
+     
+      OpenVMS makefile.
+
 * web
 
    All that is needed to create a version of Bracmat that runs in a browser.  
