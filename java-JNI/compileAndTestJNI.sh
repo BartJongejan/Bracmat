@@ -110,6 +110,9 @@ else
     if [ -d /usr/share/tomcat9/lib ]; then
         sudo cp -p ./bracmat.jar /usr/share/tomcat9/lib/
         sudo java -classpath /usr/share/tomcat9/lib/bracmat.jar:. bracmattest
+    elif  [ -d /opt/tomcat/latest/lib ]; then
+        sudo cp -p ./bracmat.jar /opt/tomcat/latest/lib
+        sudo java -classpath /opt/tomcat/latest/lib/bracmat.jar:. bracmattest
     fi
 fi
 
