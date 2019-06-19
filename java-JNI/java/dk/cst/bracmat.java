@@ -50,19 +50,6 @@ public class bracmat
         {
         return Reason;
         }
-    protected void finalize() throws Throwable
-        {
-        //logger.info("finalize() called !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        if(Loaded)
-            {
-            //logger.info("bracmat is loaded");
-            //end();/* end() should only be called if Bracmat is going to exit. However, a JNI-library does not exit! */
-            }
-        else
-            {
-            ;//logger.info(Reason);
-            }
-        }
     static 
         {
         try
@@ -78,28 +65,7 @@ public class bracmat
         //logger.setLevel(Level.ALL);
         // Log a simple INFO message.
         //logger.info("doing loadBracmatLibrary");
-        if(!loadBracmatLibrary())
-            ;//logger.info("Sorry: no bracmat this time!");
-
-        //logger.fine("loadBracmatLibrary done");
-        /*
-        Loaded = true;
-        Reason = "";
-        try 
-        {
-        System.loadLibrary("bracmat");
-        }
-        catch (UnsatisfiedLinkError e) 
-        {
-        Loaded = false;
-        Reason = "UnsatisfiedLinkError: Native code library failed to load.\n" + e + " java.library.path=" +  System.getProperty("java.library.path");
-        }
-        catch (SecurityException e)
-        {
-        Loaded = false;
-        Reason = "SecurityException: Native code library failed to load.\n" + e + " java.library.path=" +  System.getProperty("java.library.path");
-        }
-        */ 
+        loadBracmatLibrary();
         }
     public synchronized static boolean loadBracmatLibrary() 
         {
@@ -155,7 +121,7 @@ public class bracmat
         return true;
         }
 
-    private static void checkClass(Class c) throws Exception 
+    private static void checkClass(Class<?> c) throws Exception 
         {
         //logger.info("checking Class");
         if (c.getClassLoader() != bracmat.class.getClassLoader()) 
