@@ -6,6 +6,14 @@
 # at a time to the command line and check that the test at the end of a 
 # block went ok. (If there is a test.)
 
+rm -rf *.o
+rm -rf *.class
+rm java/*.jar
+rm libbracmat.*
+rm bracmattest
+rm bracmat
+rm dk_cst_bracmat.h
+
 # Create stand-alone bracmat.
 gcc -std=c99 -pedantic -Wall -O2 -DNDEBUG ../src/bracmat.c ../src/xml.c ../src/json.c
 mv a.out bracmat
@@ -13,12 +21,8 @@ mv a.out bracmat
 # Expect a line only saying 'bracmat alife and kicking'.
 ./bracmat 'put$"bracmat alife and kicking\n"'
 
-# Compile bracmat.c as relocatable code for shared object
-# Create bracmatso.o, xml.o and json.o
-gcc -std=c99 -pedantic -Wall -O2 -c -fPIC -DNDEBUG ../safe/bracmatso.c ../src/xml.c ../src/json.c
-
 cd java
-JDK_DIRS="/usr/lib/jvm/java /usr/lib/jvm/default-java ${OPENJDKS} /usr/lib/jvm/java-6-openjdk /usr/lib/jvm/java-6-sun /usr/lib/jvm/java-7-oracle"
+JDK_DIRS="/usr/lib/jvm/java /usr/lib/jvm/default-java ${OPENJDKS} /usr/lib/jvm/java-6-openjdk /usr/lib/jvm/java-6-sun /usr/lib/jvm/java-7-oracle /usr/lib/jvm/java-11-openjdk-amd64/"
 # Look for the right JVM to use
 for jdir in $JDK_DIRS; do
     if [ -r "$jdir/bin/java" -a -z "${JAVA_HOME}" ]; then
@@ -27,11 +31,18 @@ for jdir in $JDK_DIRS; do
 done
 export JAVA_HOME
 # Compile java class that loads shared object libbracmat.so.
-javac ./dk/cst/*.java
+javac ./dk/cst/*.java -h .. -Xlint
+cd ..
+
+# Compile bracmat.c as relocatable code for shared object
+# Create bracmatso.o, xml.o and json.o
+gcc -std=c99 -pedantic -Wall -O2 -c -fPIC -DNDEBUG ../safe/bracmatso.c ../src/xml.c ../src/json.c
+
+cd java
 
 # Make header file for C code that exposes methods to Java, 
 # store header file between C code one level up.
-javah -d ../ dk.cst.bracmat
+# javah -d ../ dk.cst.bracmat
 # Jar the java class that interfaces the native code.
 jar cfv bracmat.jar dk/cst/bracmat.class
 
@@ -84,22 +95,21 @@ javac -classpath bracmat.jar ./bracmattest.java
 #sudo, because bracmat may want to write /var/log/clarin/tools.log
 # Expect:
 # result = 1+x^2+-1/2*x^3+5/6*x^4+-3/4*x^5
-# result = Bracmat version 6, build 156 (6 May 2013)
+# result = Bracmat version 6.7, build 233 (24 May 2019)
 # Version should be in accordance with what is stated in /home/bart/bracmat/bracmat.c +/- line 47
-# #define DATUM "6 May 2013"
-# #define VERSION "6"
-# #define BUILD "156"
+# #define DATUM "24 May 2019"
+# #define VERSION "6.7"
+# #define BUILD "233"
 sudo java -classpath bracmat.jar:. bracmattest
 
 #copy bracmat.jar to final destination(s) (Platform-dependend!)
 if [ -d /usr/local/jboss ]; then
-    #devtools:
     sudo cp -p ./bracmat.jar /usr/local/jboss/server/all/lib/
     sudo cp -p ./bracmat.jar /usr/local/jboss/server/default/lib/
 else 
-    if [ -d /usr/share/tomcat7/lib ]; then
-        sudo cp -p ./bracmat.jar /usr/share/tomcat7/lib/
-#       sudo java -classpath /usr/share/tomcat7/lib/bracmat.jar:. bracmattest
+    if [ -d /usr/share/tomcat9/lib ]; then
+        sudo cp -p ./bracmat.jar /usr/share/tomcat9/lib/
+        sudo java -classpath /usr/share/tomcat9/lib/bracmat.jar:. bracmattest
     fi
 fi
 
