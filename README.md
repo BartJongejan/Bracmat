@@ -13,8 +13,8 @@ patterns that allow embedded expression evaluation is almost unique.
 
 Bracmat is a good choice for tasks that require dynamic programming.
 
-Almost three hundred examples of Bracmat code can be found at
-http://rosettacode.org/wiki/Rosetta_Code
+[Almost three hundred examples of Bracmat code](http://rosettacode.org/wiki/Category:Bracmat) can be found at
+[Rosetta Code](http://rosettacode.org/wiki/Rosetta_Code)
 
 **This distribution contains the following directories and files:**
 * Linux
