@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "24 May 2019"
-#define VERSION "6.7"
-#define BUILD "233"
+#define DATUM "3 November 2019"
+#define VERSION "6.7.1"
+#define BUILD "234"
 /*
 COMPILATION
 -----------
@@ -3968,12 +3968,15 @@ else
 
 static void result(psk Root)
 {
-if(HAS__UNOPS(Root))
-    {
-    parenthesised_result(Root,0,FALSE,0);
-    }
-else
-    reslt(Root,0,FALSE,0);
+    if (Root) 
+        {
+        if (HAS__UNOPS(Root))
+            {
+            parenthesised_result(Root, 0, FALSE, 0);
+            }
+        else
+            reslt(Root, 0, FALSE, 0);
+        }
 }
 
 #if 1
@@ -15090,7 +15093,6 @@ static psk mergeOrSortTerms(psk Pnode)
                 {
                 assert(RtermNNNI != NULL);
                 dif = equal(LtermNNNI,RtermNNNI);
-                assert(dif <= 0 || Op((*runner)->RIGHT) != PLUS);
                 }
             if(dif == 0)
                 {                        /*{?} i*x+-i*x => 0 */
@@ -15222,8 +15224,6 @@ static psk mergeOrSortTerms(psk Pnode)
                     }
                 return rightbranch(top);                        /*{?} i*x+-i*x => 0 */
                 }
-            assert(dif <= 0);
-            assert((*runner) == top);
             assert(Ltail == NULL);
             }
         else  /* LtermI != NULL && RtermI == NULL */

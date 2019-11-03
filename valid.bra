@@ -6194,6 +6194,56 @@ string line 2\"
           |   Out
             $ "Andrew Booker was wrong. (Sum of Three Cubes Problem for number 33.)"
           )
+          (   "https://codegolf.stackexchange.com/questions/161483/expand-sine-and-cosine/195251#195251"
+            & "This expression caused failing assertions. However, the code was correct and the assertions were unwarranted."
+            & ( P
+              =   F v a b
+                .     !arg:((sin|cos):?F.?v)
+                    & ( !v:@&(!F.!v)
+                      | !F$!v
+                      )
+                  | !arg:%?a_%?b&(P$!a)_(P$!b)
+                  | !arg
+              )
+            & ( f
+              =   i a b n u
+                .   1
+                  + (     !arg
+                        :   e
+                          ^ (?n*((i|-i):?i)*?u+?b)
+                      & (!i*(sin.!u)+(cos.!u))^!n*f$(e^!b)
+                    | !arg:%?a_%?b&(f$!a)_(f$!b)
+                    | !arg
+                    )
+                  + -1
+              )
+            & (Z=.f$(P$!arg))
+            &     (sin.2*x)
+                  (cos.2*x)
+                  (sin.-3*x)+(sin.x)^3
+                  (cos.2*x)+3*(sin.x)^2
+                  (sin.-4*x)
+                  (cos.a+2*b+-1*c+3*pi)
+                  (sin.x+674868986*pi)+(sin.x+883658433*pi)
+                  (sin.x+674868986*pi)+(sin.x+883658434*pi)
+              : ?cases
+            &   map$((=.Z$!arg).!cases)
+              :   2*(cos.x)*(sin.x)
+                  (cos.x)^2+-1*(sin.x)^2
+                  2*(sin.x)^3+-3*(cos.x)^2*(sin.x)
+                  (cos.x)^2+2*(sin.x)^2
+                    -4*(cos.x)^3*(sin.x)
+                  + 4*(cos.x)*(sin.x)^3
+                    -1*(cos.b)^2*(sin.a)*(sin.c)
+                  + -1*(cos.a)*(cos.b)^2*(cos.c)
+                  + -2*(cos.a)*(cos.b)*(sin.b)*(sin.c)
+                  + (cos.a)*(cos.c)*(sin.b)^2
+                  + 2*(cos.b)*(cos.c)*(sin.a)*(sin.b)
+                  + (sin.a)*(sin.b)^2*(sin.c)
+                  0
+                  2*(sin.x)
+          | Out$"20191103 expand-sine-and-cosine"
+          )
       &   out
         $ ( str
           $ ( "Done. "
