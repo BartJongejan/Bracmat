@@ -3,12 +3,13 @@
 Reads UnicodeData.txt from current working directory.
 http://unicode.org/Public/UNIDATA/UnicodeData.txt
 
-Writes arrays to the files u2l.cpp amd l2u.cpp.
-Put these arrays in the right place in Bracmat.c to support the latest lower to
-upper and upper to lower conventions.
+Writes arrays to the file u2l-l2u.cpp.
+Put these arrays in the right place in Bracmat.c to support 
+the latest lower to upper and upper to lower conventions.
 }
 
 X=
+  (UnicodeDataDate="01-Apr-2019 00:08")
   ( do
   =   
     .   0:?p
@@ -119,7 +120,7 @@ X=
             :   (?d:?D&-1+!D:?D.?)
                 ?
                 (   (!D&-1+!D:?D.?) ?
-                  & ~`
+                  & `~
                 | ?let
                 )
           & 1+!D:?D
@@ -143,18 +144,10 @@ struct cletter Cletters[]={"
 ","cletters.cpp",APP)
       & lst$(letters,letters,NEW)
       & ( comp
-        =   
-          .   !arg:(?arg.?name)
+        =   name file
+          .   !arg:(?arg.?name.?file)
             &   put
-              $ (   str
-                  $ ( "struct ccaseconv {int L:21;int range:11;int inc:2;int dif:20;};
-struct ccaseconv "
-                      !name
-                      "[]={\n"
-                    )
-                , str$(!name ".cpp"):?name
-                , NEW
-                )
+              $ (str$(\n "struct ccaseconv " !name "[]={\n"),!file,APP)
             & (pat1=!d1&-1+!d1:?d1)
             & (pat2=!d2&-2+!d2:?d2)
             & ( setpat
@@ -198,7 +191,7 @@ struct ccaseconv "
                             . ?
                             )
                             ?
-                        & ~`
+                        & `~
                       |   ?arg
                         &     (   !dd:
                                 & ( !d
@@ -237,14 +230,26 @@ struct ccaseconv "
                           : ?conv
                       )
                 )
-            & put$(str$!conv,!name,APP)
+            & put$(str$!conv,!file,APP)
             & put$("{0x1FFFFF,0,0,0}};
-",!name,APP)
+",!file,APP)
             & !LL
         )
-      & comp$(!u2l.u2l):?u2ls
+      &   put
+        $ (   str
+            $ ( "/* Based on http://unicode.org/Public/UNIDATA/UnicodeData.txt "
+                !(X.UnicodeDataDate)
+                " */
+/* Structures created with uni.bra */
+                  
+struct ccaseconv {unsigned int L:21;int range:11;unsigned int inc:2;int dif:20;};"
+              )
+          , "u2l-l2u.cpp"
+          , NEW
+          )
+      & comp$(!u2l.u2l."u2l-l2u.cpp"):?u2ls
       & lst$(u2ls,u2ls,NEW)
-      & comp$(!l2u.l2u):?l2us
+      & comp$(!l2u.l2u."u2l-l2u.cpp"):?l2us
       & lst$(l2us,l2us,NEW)
       & whl'(!K:%?k ?K&lst$(!k,!k,NEW))
       & ( 
@@ -270,9 +275,9 @@ r=
 Reads UnicodeData.txt from current working directory.
 http://unicode.org/Public/UNIDATA/UnicodeData.txt
 
-Writes arrays to the files u2l.cpp amd l2u.cpp.
-Put these arrays in the right place in Bracmat.c to support the latest lower to
-upper and upper to lower conventions.
+Writes arrays to the file u2l-l2u.cpp.
+Put these arrays in the right place in Bracmat.c to support 
+the latest lower to upper and upper to lower conventions.
 }
 
 "

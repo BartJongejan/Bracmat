@@ -1,3 +1,6 @@
+17 January 2020
+Updated with http://unicode.org/Public/UNIDATA/UnicodeData.txt 01-Apr-2019 00:08
+
 3 November 2019
 Discovered two unwarranted assertions while evaluating expressions with
 complex numbers. The code was correct. The assertions are removed. 
