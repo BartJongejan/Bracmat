@@ -1000,7 +1000,7 @@ are used as literals, such as mathematical symbols or text."
           "Atoms consist of any number of non-zero bytes, up to the limits set by the
 operating system and hardware. Atoms can be surrounded by quotation marks,
 but are in many cases optional. You do need them if you want parentheses,
-braces, semicolons, operators or prefixes to be part of an atom.  All UTF-8
+braces, semicolons, operators or prefixes to be part of an atom. All UTF-8
 encoded unicode characters can be used in strings. Some special characters
 have to be preceded by a back slash:
 
@@ -2236,7 +2236,7 @@ addition, |_0_| is also a trivial element in products. Lists and sums do not hav
     causes backtracking if the pattern did not successfully unify with a 
     non-trivial element of the subject-list. A list is an expression
     consisting of terms (|_+_| operator), factors (|_*_| operator) or words
-    (white-space operator). In non-sophisticated  patterns, |_`_| means
+    (white-space operator). In non-sophisticated patterns, |_`_| means
     simply : unify with at most one non-trivial element.
     Zero non-trivial elements are allowed, in which case unification takes
     place with an implicit trivial element: Bracmat sees 0's everywhere in a
@@ -4817,7 +4817,7 @@ Topic:")
                                     pre$!b
                               )
                           | ( blockquote
-                            . ,(pre.(class.exoutput),!arg)
+                            .,(pre.(class.exoutput),!arg)
                             )
                           )
                       | definitionList$!arg
@@ -4864,7 +4864,7 @@ Topic:")
                                   )
                                )
                            )
-                        & break2$!a (blockquote.,(pre.,!c \n !ee))
+                        & break2$!a (blockquote.,(pre.,!c \n !ee)) (!f:|\n !f) (!g|\n !g)
                       | inline1$!arg
                       | break2$!arg
                   )
@@ -5490,7 +5490,7 @@ Topic:")
                   ' (   !arg
                       :   ?A
                           ( blockquote
-                          .   
+                          .
                             ,     ?
                                   ( pre
                                   .   ( class

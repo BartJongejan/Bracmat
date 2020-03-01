@@ -1344,8 +1344,11 @@ object causes expansion of the atom or the member to its direct or
 indirect binding. This binding is matched with the subject.</dd><dt><code>`</code></dt><dd>causes backtracking if the pattern did not successfully unify with a
 non-trivial element of the subject-list. A list is an expression
 consisting of terms (<code>+</code> operator), factors (<code>*</code> operator) or words
-<blockquote><pre>(white-space operator). In non-sophisticated  patterns, |_`_| means
-simply : unify with at most one non-trivial element.</pre></blockquote></dd><dt><code>?</code></dt><dd>unifies with anything. If<code> ? </code>is followed by a non-nil atom denoting a
+(white-space operator). In non-sophisticated patterns, <code>`</code> means
+simply<code> : </code>unify with at most one non-trivial element.
+Zero non-trivial elements are allowed, in which case unification takes
+place with an implicit trivial element: Bracmat sees 0's everywhere in a
+sum, 1's in a product and zero length words in a sentence.</dd><dt><code>?</code></dt><dd>unifies with anything. If<code> ? </code>is followed by a non-nil atom denoting a
 variable or an expression denoting a member of an object, then the matched
 part of the subject is captured by this variable or member. In other
 words, pattern matching can have assignment as a side-effect.</dd><dt><code>@</code></dt><dd>unifies only with atoms. Also, if prefixed to the <code>:</code> operator, it
@@ -1450,9 +1453,10 @@ ways to convert atoms to trees and back.</p>
 are used as literals, such as mathematical symbols or text.</p>
 <p>Atoms consist of any number of non-zero bytes, up to the limits set by the
 operating system and hardware. Atoms can be surrounded by quotation marks,
-but are in many cases optional. You do need them if you want parentheses,</p>
-<blockquote><pre>braces, semicolons, operators or prefixes to be part of an atom.  All UTF-8
-encoded unicode characters can be used in strings. Some special characters</pre></blockquote>
+but are in many cases optional. You do need them if you want parentheses,
+braces, semicolons, operators or prefixes to be part of an atom. All UTF-8
+encoded unicode characters can be used in strings. Some special characters
+have to be preceded by a back slash:</p>
 <dl><dt><code>\a</code></dt><dd>attention (bell)</dd><dt><code>\b</code></dt><dd>backspace</dd><dt><code>\t</code></dt><dd>tab</dd><dt><code>\n</code></dt><dd>new line</dd><dt><code>\v</code></dt><dd>vertical tab</dd><dt><code>\f</code></dt><dd>form feed</dd><dt><code>\r</code></dt><dd>carriage return</dd><dt><code>\\</code></dt><dd>back slash</dd><dt><code>\"</code></dt><dd>
 <blockquote><pre>  double quote</pre></blockquote></dd></dl>
 <p>If you precede a string with the prefix<code> @, </code>then back slashes are treated as
