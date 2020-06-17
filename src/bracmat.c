@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "17 January 2020"
-#define VERSION "6.7.2"
-#define BUILD "235"
+#define DATUM "17 June 2020"
+#define VERSION "6.7.3"
+#define BUILD "236"
 /*
 COMPILATION
 -----------
@@ -10095,6 +10095,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                 name->v.fl |= SUCCESS;
                 if ((s.c.rmr = (char)evaluate(name)) != TRUE)
                     ok = FALSE;
+                name = isolated(name);
                 name->v.fl |= saveflgs;
                 pat = name;
                 }
@@ -15917,8 +15918,20 @@ static psk eval(psk Pnode)
                     {
                     privatized(Pnode,&lkn);
                     lkn.LEFT = eval(lkn.LEFT);
-                    if(isSUCCESSorFENCE(lkn.LEFT))
+                    if (isSUCCESSorFENCE(lkn.LEFT))
+                        {
                         Pnode = _rightbranch(&lkn);/* TRUE or FENCE */
+                        if (lkn.v.fl & INDIRECT)
+                            {
+                            lkn.RIGHT = eval(Pnode);
+                            if (isSUCCESS(lkn.RIGHT))
+                                {
+                                Pnode = evalvar(lkn.RIGHT);
+                                }
+                            else
+                                Pnode->v.fl ^= SUCCESS;
+                            }
+                        }
                     else
                         Pnode = _leftbranch(&lkn);/* FAIL */
                     break;
@@ -15927,10 +15940,30 @@ static psk eval(psk Pnode)
                     {
                     privatized(Pnode,&lkn);
                     lkn.LEFT = eval(lkn.LEFT);
-                    if(isSUCCESSorFENCE(lkn.LEFT))
+                    if (isSUCCESSorFENCE(lkn.LEFT))
+                        {
                         Pnode = _fenceleftbranch(&lkn);/* FENCE or TRUE */
+                        if ((lkn.v.fl & INDIRECT) && isSUCCESS(Pnode))
+                            {
+                            lkn.RIGHT = eval(Pnode);
+                            if (isSUCCESS(lkn.RIGHT))
+                                Pnode = evalvar(lkn.RIGHT);
+                            else
+                                Pnode->v.fl ^= SUCCESS;
+                            }
+                        }
                     else
+                        {
                         Pnode = _rightbranch(&lkn);/* FAIL */
+                        if ((lkn.v.fl & INDIRECT) && isSUCCESS(Pnode))
+                            {
+                            lkn.RIGHT = eval(Pnode);
+                            if (isSUCCESS(lkn.RIGHT))
+                                Pnode = evalvar(lkn.RIGHT);
+                            else
+                                Pnode->v.fl ^= SUCCESS;
+                            }
+                        }
                     break;
                     }
                     /* Operators that can occur in evaluated expressions: */

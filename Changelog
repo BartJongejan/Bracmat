@@ -1,3 +1,8 @@
+17 June 2020
+If f=g, then !(&!f) behaves like !!f both in eval and match context.
+Fixed bug that permanently attached a ? flag to g when evaluating 17:?(&!f),
+so that 17:!(&!f) did not work as expected.
+
 17 January 2020
 Updated with http://unicode.org/Public/UNIDATA/UnicodeData.txt 01-Apr-2019 00:08
 
