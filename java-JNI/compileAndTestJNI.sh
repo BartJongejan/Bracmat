@@ -25,7 +25,7 @@ cd java
 JDK_DIRS="/usr/lib/jvm/java /usr/lib/jvm/default-java ${OPENJDKS} /usr/lib/jvm/java-6-openjdk /usr/lib/jvm/java-6-sun /usr/lib/jvm/java-7-oracle /usr/lib/jvm/java-11-openjdk-amd64/"
 echo "JDK_DIRS $JDK_DIRS"
 # Look for the right JVM to use
-$JAVAHOM=""
+JAVAHOM=""
 for jdir in $JDK_DIRS; do
     if [ -r "$jdir/bin/java" -a -z "${JAVAHOM}" ]; then
 	JAVAHOM="$jdir"
