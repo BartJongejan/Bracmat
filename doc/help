@@ -713,8 +713,8 @@ returns the input if the pattern didn't match.
         | !arg
     )
 {!} ivanRule
-{?} ivanRule$(She bought a bycicle for Ivan)
-{!} She bought a bycicle for Wanja
+{?} ivanRule$(She bought a bicycle for Ivan)
+{!} She bought a bicycle for Wanja
 "
     )
   & ( nonlinpat
@@ -1313,7 +1313,7 @@ operations, as in:
     fixed data structure:|_(Palme.Olof.Sweden)_|
     object member referencing: (myhash..insert)$(xxx.998743)
 3 ,
-    list with autostretch:|_(ham,(bread,butter),jam):(ham,bread,butter,jam)_|
+    automatically flattens sublists:|_(ham,(bread,butter),jam):(ham,bread,butter,jam)_|
 4 |
     or else: |_get$myfile | out$\"Cannot read myfile\"_|
 5 &
@@ -1333,10 +1333,10 @@ operations, as in:
 12 \\D
     differentiate: x\\D(x^10)
 13 '
-    function evaluation (does not evaluate rhs):|_str'(b+a):\"b+a\"_|
+    function evaluation (does not evaluate RHS):|_str'(b+a):\"b+a\"_|
     macro:|_()'(my name is ()$name)_|
 14 $
-    function evaluation (evaluates rhs): str$(b+a):\"a+b\"
+    function evaluation (evaluates RHS): str$(b+a):\"a+b\"
     variable in macro:|_()'(my name is ()$name)_|
 15 _
     dummy:   |_!expr:?lhs_?rhs & (do$!lhs)_(do$!rhs)_|  "
@@ -1408,11 +1408,11 @@ instruction we have an expression with the <nil>=<expression> syntax.
       , Objects
       ,   "With the = and . operators you can construct and dereference conventional data
 structures and even objects with methods. In an expression, each subexpression
-with a = operator in the top node and an atom in the lhs of the top node
+with a = operator in the top node and an atom in the LHS of the top node
 indicates a field or object method that can be accessed and changed
 independently of other fields and methods, i.e. without the need to dissect and
 reassemble the whole expression. Such expressions are objects. An object member
-(a field or method) is addressed by using the lhs of the = operator as the
+(a field or method) is addressed by using the LHS of the = operator as the
 member's name, preceded by the objects name. The name of the object and the
 name of the member must be separated by a dot operator.
 
@@ -1445,7 +1445,7 @@ overwrite the variables |_length_|, |_age_| and |_name_|):
                                 , (name=(first=John) (family=Bull)));}
 
 Bracmat replaces the expression '$John by the value of John, protected
-against evaluation by a = operator. For that reason, the pattern on the rhs
+against evaluation by a = operator. For that reason, the pattern on the RHS
 of the match operator : contains a = operator as well. Now we can change John's
 age by operating on the variable |_alias_|:
 
@@ -1546,7 +1546,7 @@ A change made to |_y_| affects |_z_| but does not affect |_x_|."
 
 Now |_x_|, |_y_| and |_z_| are the same object.
 
-Explanation: in (A) the value of |_x_| is not evaluated, especially the lhs of
+Explanation: in (A) the value of |_x_| is not evaluated, especially the LHS of
 the = operator. Therefore, a new = node is created each time |_x_| is
 evaluated. In (B), the value of |_x_| IS evaluated, so no new copies of the
 = node are made."
@@ -1569,7 +1569,7 @@ outside a pattern is either giving or left unchanged. Try this :
 evaluator. The latter is useful if the _ has matched an operator that is
 very volatile, such as & and |_|_|.
 {?} (=!a:!b&!c):(=?left_?right) {match the &}
-{?} '_
+{?} '$_
 {!} =&              { It worked, the _ is replaced by a &. }
 {?} get$(str$('$_),MEM,VAP):\"=\" ?op & !op { freeze and slice }
 {!} &               { The operator is immobilised in a string. }"
@@ -1891,33 +1891,241 @@ the return value of a function is part of the pattern. A function may be
 called several times during one evaluation of a matching expression, due to
 backtracking and retrying."
     )
+  & ( funmactxt
+    =   T
+      , "function evaluation"
+      , "The binary operators $ and ' are similar in most respects. In general, the
+left operand evaluates to the name of a built-in or defined function, whereas
+the right operand is an expression that is passed as an argument to the
+function. The $ evaluates the right operand before it is passed over, the '
+doesn't. Parameter passing is by value, although the implementation postpones
+and limits copying of data as much as possible. In the code of the called
+function, the passed argument is bound to a local variable that is always
+called arg.
+
+Most often, the left operand of the $ and the ' operator evaluates to an
+alfanumeric name. There are a few special function names:
+* No name at all. Here, the $ and the ' operator have decidedly different and
+  complementary roles. (Forced evaluation of subexpressions in otherwise
+  unevaluated expressions, such as patterns)
+* An integral number. (Array indexing.)
+* Only prefixes. (Prefix pasting or influencing success and failure of non-
+  atomic expressions.)
+
+Function calls are even effective in patterns, as it is fair to assume
+that the $ and ' operators seldom occur in subjects and so need not to be
+matched (the same is, a fortiori, true for the & and | operators). In patterns,
+the return value of a function is part of the pattern. A function may be
+called several times during one evaluation of a matching expression, due to
+backtracking and retrying."
+    )
   & ( macrotxt
     =   T
       , "macro evaluation"
-      , "The ' operator with empty lhs is the macro evaluator. The macro evaluator
-returns the rhs unchanged, except where the $ operator (also with empty lhs)
-occurs. The expressions headed by such $ operators are replaced as follows:
+      , "The ' operator with empty LHS is the macro evaluator. The macro evaluator
+returns the RHS unchanged, except where $ operators with empty LHS occur.
 
-    '$$
+The expression to the RHS of such a $ operator must evaluate to the name of a
+variable or to a definition. The whole $ expression is then replaced by the
+value of the variable or the definition. (The following example illustrates
+three ways how you can make sure that the LHS of the $ operator is empty.)
 
-If the rhs is the $ operator with empty lhs, the macro evaluator replaces the
-expression with the rhs of the heading $, and macro-evaluates the rhs of the
-result.
-{?} '(one dollar ($($)))
-{!} =one dollar ()$
-{?} '(two dollars ($($($($)))))
-{!} =two dollars ()$($)
+{?} x=un
+{?} y=(member=deux)
+{?} '(one ($x), two \"\"$(y.member), three ()$(=trois))
+{!} =one un,two deux,three trois
 
-    '$_
+Here is an example that shows that the RHS of the $ operator can be an
+expression that first needs to be evaluated:
 
-If the rhs is headed by the _ operator, the expression is replaced by the rhs,
-where the dummy operator is evaluated to its current value.
-{?} (=a^b):(=?_?) & '(dummy (a_b) power ($(a_b)))
-{!} =dummy a_b power a^b
+{?} a=eins
+{?} b=zwei
+{?} dice=clk$
+{?} '(Eins oder zwei? ()$(!dice:<1&a|b))
+{!} =Eins oder zwei? eins
+    {...}
+{?} '(Eins oder zwei? ()$(!dice:<1&a|b))
+{!} =Eins oder zwei? zwei
 
-In all other cases the rhs is evaluated to a variable name, a member name or a
-definition. The expression is thereafter replaced by the value of the variable,
-the member of the definition.
+You can construct any Bracmat expression using macro evaluation. For example,
+the function |_F_|, below, transforms an expression with + and * operators to a
+pattern, replacing any non-empty atom that is not a number to a pattern
+variable that either is receiving or giving, depending on whether the atom
+occurs for the first time or not, when reading the expression from the
+beginning to the end.
+
+{?} (F=
+      seen f
+    .   :?seen
+      & ( f
+        =   a b
+          .   !arg:%?a+%?b&'($(f$!a)+$(f$!b))
+            | !arg:%?a*%?b&'($(f$!a)*$(f$!b))
+            |     !arg
+                : (
+                  | #
+                  | e
+                  | i
+                  | pi
+                  )
+              & '$arg
+            | !seen:? !arg ?&glf$('(!.$arg))
+            | !arg !seen:?seen&glf$('(%?.$arg))
+        )
+      & f$!arg
+    );
+{?} F$(a*b+3*a*c)
+{!} =%?a*%?b+3*!a*%?c
+
+Now we can use the pattern to match expressions with the same structure and
+with the same operators
+
+{?} x*y+3*x*z:!(F$(a*b+3*a*c))
+
+The function F can only handle expressions containing + and * operators.
+Now we will in a few steps amend F so that it can handle any operator. This is
+done by using the dummy _ operator.
+
+As a first step, we will have to protect the argument of F against evaluation,
+because otherwise we will never be able to analyse expressions that evolve to
+different expressions when evaluated. So, from now on we will use F with the
+' operator, like so.
+
+{?} F'(a*b+3*a*c)
+
+To simplify the first amendment, we will only handle expressions with the +
+operator. Later we will generalize to handling any operator.
+
+{?} (F=
+      seen f
+    .   :?seen
+      & ( f
+        =   a b g
+          .     !arg:(=%?a+%?b)
+              & '($(f$('$a))+$(f$('$b)))
+            |   !arg:(=?g)
+              & (     !g
+                    : (
+                      | #
+                      | e
+                      | i
+                      | pi
+                      )
+                  & !arg
+                | !seen:? !g ?&glf$('(!.$g))
+                | !g !seen:?seen&glf$('(%?.$g))
+                )
+        )
+      & f$('$arg)
+    );
+
+{?} F'(a+b+pi+a)
+{!} =%?a+%?b+pi+!a
+
+Now we replace the + operator by the dummy operator _. If we only do that,
+then we will only see _ operators in the result. That is because in a macro
+context, a _ operator is not evaluated to its current value. However, if the
+RHS expression of a $ operator with empty LHS is headed by the _ operator,
+then the _ operator is evaluated to its current value, analogous to what
+happens if the RHS were the name of a variable. So we add an extra $ operator.
+
+When the _ operator is evaluated to its current  value, the LHS and the RHS are
+also evaluated.
+
+{?} a^b:?_?
+{?} LHS:?left
+{?} '$(($left)_($(=RHS)))
+
+Without evaluation of _ operator:
+
+{?} '($left)_($(=RHS))
+{!} =LHS_RHS
+
+With evaluation of _ operator:
+
+{?} '$($left)_($(=RHS))
+{!} =LHS^RHS
+
+Now we use this in the function F:
+
+{?} (F=
+      seen f
+    .   :?seen
+      & ( f
+        =   a b g
+          .     !arg:(=%?a_%?b)
+              & '$($(f$('$a)))_($(f$('$b)))
+            |   !arg:(=?g)
+              & (     !g
+                    : (
+                      | #
+                      | e
+                      | i
+                      | pi
+                      )
+                  & !arg
+                | !seen:? !g ?&glf$('(!.$g))
+                | !g !seen:?seen&glf$('(%?.$g))
+                )
+        )
+      & f$('$arg)
+    );
+
+{?} F'(a+b_k&out$y&$$(=.arg))
+Finally, we ensure that atoms that already have a prefix are treated in the
+same way as empty strings and numbers.
+
+{?} (F=
+      seen f
+    .   :?seen
+      & ( f
+        =   a b g
+          .     !arg:(=%?a_%?b)
+              & '$($(f$('$a)))_($(f$('$b)))
+            |   !arg:(=?g)
+              & (   (   !g
+                      : (
+                        | #
+                        | e
+                        | i
+                        | pi
+                        )
+                    | ~(glf$('(`/#<>%@?!.$g)))
+                    )
+                  & !arg
+                | !seen:? !g ?&glf$('(!.$g))
+                | !g !seen:?seen&glf$('(%?.$g))
+                )
+        )
+      & f$('$arg)
+    );
+
+{?} F'('(the hare&$the tortoise))
+{!} ='(%?the %?hare&$!the %?tortoise)
+
+In the above example the argument of the F function is returned in an
+unevaluated state, though transformed to something else. The last input was a
+macro expression, and the result is still a macro expression.
+
+Now suppose that we want to produce the macro expression
+
+    '(There are 23 elements in list ()$L)
+
+by means of another macro expression that evaluated the number of elements to
+23. Somthing like this:
+
+{?} 23:?N
+{?} '('(There are ()$N elements in list ()$L))
+
+This generates the error \"macro evaluation fails because rhs of $ operator is not bound to a value: $L\".
+What is needed is to 'escape' the $ operator in the subexpression ()$L, since we do not want ()$L to be
+evaluated. This is done with and extra $ operator, similar to how a backslash is escaped in many
+programming languages:
+
+{?} 23:?N
+{?} '('(There are ()$N elements in list ()$($L)))
+{!} ='(There are 23 elements in list ()$L)
+
 More examples:
 {?} '(b+a c)
 {!} =b+a c
@@ -1926,7 +2134,16 @@ More examples:
 {?} (object=(member=value)) & '(a ($(object.member)) z)
 {!} =a value z
 {?} '(a ($(=value)) z)
-{!} =a value z"
+{!} =a value z
+
+{?} (=a^b):(=?_?) & '(dummy (a_b) power ($(a_b)))
+{!} =dummy a_b power a^b
+
+{?} '(one dollar ($($)))
+{!} =one dollar ()$
+{?} '(two dollars ($($($($)))))
+{!} =two dollars ()$($)
+"
     )
   & ( transformtxt
     =   T
@@ -2001,8 +2218,8 @@ variable by its value in an early stage.
 
 In Bracmat, a macro has the general form |_'<expression>_|. When |_'<expression>_| is
 evaluated, <expression> is searched for sub-expressions headed by the operator
-$, with empty lhs. Such sub-expressions are replaced, depending on what is
-found on the rhs of the $ operator.
+$, with empty LHS. Such sub-expressions are replaced, depending on what is
+found on the RHS of the $ operator.
 
 After macro substitution has taken place, what remains is an expression of
 the form =<expression>. The = operator is a safeguard against evaluation of
@@ -2099,7 +2316,7 @@ expression without the leading slash
 evaluates to
     =x.foo
 
-The rhs of the $ operator must be an atom.
+The RHS of the $ operator must be an atom.
 
 In an lambda abstraction
     /('(x.$x,$y))
@@ -2345,18 +2562,18 @@ subpattern.
 In the last resort, you can add a pattern like |_()_| or |_(&)_| or |_(|)_| or |_(:)_|, which
 match with an empty list only (assuming that the connecting nodes are spaces,
 otherwise use 0 in the case of a sum and 1 in the case of a product). Such
-patters don't fix the next position.
+patterns don't fix the next position.
 Example:
 
 {?} a a a c c:(? a|`) (|? b|`) (? c|`) (&) { {a}+ {b}* {c}+ }
 
 The following expression succeeds, because the subpattern doesn't confront the
 substring aaak.
-{?} @(aaakamcccc:(? a|`) m (|? b|`) (? c|`)) (&) 
+{?} @(aaakam:(? a|`) m) 
 
 An empty string before the m has the effect that Bracmat doesn't optimize
 the backtracking process away. 
-{?} @(aaakamcccc:(? a|`) () m (|? b|`) (? c|`)) (&)"
+{?} @(aaakam:(? a|`) () m)"
     )
   & ( escappattxt
     =   T
@@ -2365,15 +2582,15 @@ the backtracking process away.
 operators play an active role in pattern matching instead of being passive part
 of a pattern. These operators are = | & : ' $ _"
           "The normal role of these operators is ignored by the pattern matching
-evaluator if they are escaped with a $ node with an empty lhs.
+evaluator if they are escaped with a $ node with an empty LHS.
 {?} (=foo'bar):(=$(foo'bar))
 {!} =foo'bar
     
 {?} (=foo'bar):(=$(?f'?x)) & !f !x
 {!} foo bar
 
-The escape operator only affects the top node of the escape operator's rhs.
-The lhs and rhs of the affected node are matched against the subject in the
+The escape operator only affects the top node of the escape operator's RHS.
+The LHS and RHS of the affected node are matched against the subject in the
 normal way.
 {?} vowel=.!sjt:(a|e|i|o|u|y)      { Function to be used in a pattern to check
                                      that the subject is a single vowel. }
@@ -2386,7 +2603,7 @@ normal way.
 {!} =a$123
 
 {?} !n
-{!} 123                            { This proves that the rhs of the top $
+{!} 123                            { This proves that the RHS of the top $
                                      was evaluated. }
 
 {?} (=b$456):(=$((vowel')$(#:?m))) { This fails, proving that the pattern
@@ -2552,16 +2769,16 @@ No attempt is made to make the result look pretty using indentation."
     =   T
       , "Mapping between JSON and Bracmat expressions"
       , "
-A JSON object is represented as a sum of dotted pairs as the lhs (left hand
-side) of a comma operator, while the rhs must be empty. The original ordering
+A JSON object is represented as a sum of dotted pairs as the LHS (left hand
+side) of a comma operator, while the RHS must be empty. The original ordering
 of members may be lost, as the sum operator sorts its terms. In each dotted
-pair, the lhs represents the object member's key while the rhs represents the
+pair, the LHS represents the object member's key while the RHS represents the
 object member's value. An empty object is represented as (0,)
 
-A JSON array is a space separated list as the rhs of a comma operator with an
-empty string as lhs.
+A JSON array is a space separated list as the RHS of a comma operator with an
+empty string as LHS.
 
-A string is mapped to the atomic rhs of a dot operator, leaving the lhs empty.
+A string is mapped to the atomic RHS of a dot operator, leaving the LHS empty.
 
 Integer numbers map onto themselves. A non integral number is represented in
 fixed point notation if there is an exact representation. Otherwise, a floating
@@ -2639,7 +2856,7 @@ in an atom!"
 {!} a b
     S
     
-{?} @(a b:a ?)        {illegal, lhs of string match operator must be atomic}
+{?} @(a b:a ?)        {illegal, LHS of string match operator must be atomic}
     (Bracmat exits)
 
 {?} ~@(a:b)           {fails, pattern matching}
@@ -2962,7 +3179,13 @@ argument of the |_dbg_| function is evaluated with an internal debugging flag se
 With this flag set, suspicious code is warned against.
 
 It is important that the argument is not evaluated before being passed to the
-|_dbg_| function."
+|_dbg_| function.
+
+The |_dbg_| function is only available if the DEBUGBRACMAT macro is defined as
+
+    #define DEBUGBRACMAT 1
+
+in 'bracmat.c'."
     )
   & ( varmattxt
     =   T
