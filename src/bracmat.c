@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "17 June 2020"
-#define VERSION "6.7.3"
-#define BUILD "236"
+#define DATUM "22 June 2020"
+#define VERSION "6.7.4"
+#define BUILD "237"
 /*
 COMPILATION
 -----------
@@ -1347,10 +1347,6 @@ static int optab[256];
 static int dummy_op = WHITE;
 #if DEBUGBRACMAT
 static int debug = 0;
-#endif
-
-#if TELMAX
-static unsigned int maxbez = 0;
 #endif
 
 static FILE * global_fpi;
@@ -13376,13 +13372,13 @@ static function_return_type functions(psk Pnode)
             {
 #if MAXSTACK
 #if defined _WIN32 || defined __VMS
-            sprintf(draft,"%lu.%lu.%u.%d",(unsigned long)globalloc,(unsigned long)maxgloballoc,maxbez / ONEREF,maxstack);
+            sprintf(draft,"%lu.%lu.%d",(unsigned long)globalloc,(unsigned long)maxgloballoc,maxstack);
 #else
-            sprintf(draft,"%zu.%zu.%u.%d",globalloc,maxgloballoc,maxbez / ONEREF,maxstack);
+            sprintf(draft,"%zu.%zu.%d",globalloc,maxgloballoc,maxstack);
 #endif
 #else
 #if defined _WIN32 || defined __VMS
-            sprintf(draft,"%lu.%lu.%u",(unsigned long)globalloc,(unsigned long)maxgloballoc,maxbez / ONEREF);
+            sprintf(draft,"%lu.%lu",(unsigned long)globalloc,(unsigned long)maxgloballoc);
 #else
             sprintf(draft,"%zu.%zu.%u",globalloc,maxgloballoc,maxbez / ONEREF);
 #endif
