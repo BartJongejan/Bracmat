@@ -13380,7 +13380,7 @@ static function_return_type functions(psk Pnode)
 #if defined _WIN32 || defined __VMS
             sprintf(draft,"%lu.%lu",(unsigned long)globalloc,(unsigned long)maxgloballoc);
 #else
-            sprintf(draft,"%zu.%zu.%u",globalloc,maxgloballoc,maxbez / ONEREF);
+            sprintf(draft,"%zu.%zu",globalloc,maxgloballoc);
 #endif
 #endif
             Pnode = build_up(Pnode,draft,NULL);
