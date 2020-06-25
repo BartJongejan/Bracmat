@@ -537,8 +537,8 @@ in an atom!</p>
 <p><span class="arrow">&#8657;</span><a href="#patternm" style="line-height:12pt">Pattern matching</a></p>
 <p><span class="arrow">&#8657;</span><a href="#binovztxt" style="line-height:12pt"><code>=.,|&amp;: +*^\L\D'$_</code></a></p>
 <p><span class="arrow">&#8657;</span><a href="#binmenu" style="line-height:12pt">Binary operators</a></p>
+<p><span class="arrow">&#8658;</span><a href="#pattxt" style="line-height:12pt">Binary operators in pattern matching</a></p>
 <p><span class="arrow">&#8658;</span><a href="#pattxt2" style="line-height:12pt">Matching a number in a string</a></p>
-<p><span class="arrow">&#8656;</span><a href="#pattxt" style="line-height:12pt">Binary operators in pattern matching</a></p>
 <h3><a name="pattxt2">Matching a number in a string</a></h3>
 <p>In a string match, the<code> % </code>can be used to force characterwise matching if the
 subject is a number and the pattern otherwise would have been treated as a
@@ -571,8 +571,8 @@ characterwise. In<code> %-20/5, </code>the pattern matches <code>20/5</code> and
 <p><span class="arrow">&#8657;</span><a href="#patternm" style="line-height:12pt">Pattern matching</a></p>
 <p><span class="arrow">&#8657;</span><a href="#binovztxt" style="line-height:12pt"><code>=.,|&amp;: +*^\L\D'$_</code></a></p>
 <p><span class="arrow">&#8657;</span><a href="#binmenu" style="line-height:12pt">Binary operators</a></p>
-<p><span class="arrow">&#8656;</span><a href="#pattxttxt" style="line-height:12pt">Pattern matching in strings</a></p>
 <p><span class="arrow">&#8658;</span><a href="#escappattxt" style="line-height:12pt">Escaping operator in patterns</a></p>
+<p><span class="arrow">&#8656;</span><a href="#pattxttxt" style="line-height:12pt">Pattern matching in strings</a></p>
 <h3><a name="pattxt">Binary operators in pattern matching</a></h3>
 <p><i>subject</i><code> : </code><i>pattern</i></p>
 <p>Match <i>subject</i> with <i>pattern</i></p>
@@ -622,11 +622,11 @@ returns<code> !s.</code></dd><dt><code>(!s:!p)|!e </code>or<code> !s:!p|!e</code
 <p><span class="arrow">&#8657;</span><a href="#binovztxt" style="line-height:12pt"><code>=.,|&amp;: +*^\L\D'$_</code></a></p>
 <p><span class="arrow">&#8657;</span><a href="#binmenu" style="line-height:12pt">Binary operators</a></p>
 <p><span class="arrow">&#8657;</span><a href="#progsmenu" style="line-height:12pt">Programming advice</a></p>
+<p><span class="arrow">&#8658;</span><a href="#prostutxt1" style="line-height:12pt">Program flow</a></p>
+<p><span class="arrow">&#8658;</span><a href="#asstxt" style="line-height:12pt">Assignment to variables</a></p>
 <p><span class="arrow">&#8658;</span><a href="#escappattxt" style="line-height:12pt">Escaping operator in patterns</a></p>
-<p><span class="arrow">&#8658;</span><a href="#pattxttxt" style="line-height:12pt">Pattern matching in strings</a></p>
 <p><span class="arrow">&#8658;</span><a href="#unpattxt" style="line-height:12pt">Prefixes and pattern matching</a></p>
-<p><span class="arrow">&#8656;</span><a href="#prostutxt1" style="line-height:12pt">Program flow</a></p>
-<p><span class="arrow">&#8656;</span><a href="#asstxt" style="line-height:12pt">Assignment to variables</a></p>
+<p><span class="arrow">&#8656;</span><a href="#pattxttxt" style="line-height:12pt">Pattern matching in strings</a></p>
 <h3><a name="escappattxt">Escaping operator in patterns</a></h3>
 <p>Some operators can not be part of a pattern unless<code> 'escaped', </code>because these
 operators play an active role in pattern matching instead of being passive part
@@ -664,11 +664,11 @@ operators<code> . , </code>whitespace,<code> + * ^ \L </code>and<code> \D </code
 <p><span class="arrow">&#8657;</span><a href="#binmenu" style="line-height:12pt">Binary operators</a></p>
 <p><span class="arrow">&#8657;</span><a href="#progsmenu" style="line-height:12pt">Programming advice</a></p>
 <p><span class="arrow">&#8657;</span><a href="#funcmenu" style="line-height:12pt">functions</a></p>
+<p><span class="arrow">&#8658;</span><a href="#funmactxt" style="line-height:12pt">function evaluation</a></p>
+<p><span class="arrow">&#8658;</span><a href="#unpattxt" style="line-height:12pt">Prefixes and pattern matching</a></p>
+<p><span class="arrow">&#8658;</span><a href="#transformtxt" style="line-height:12pt">Program transformation</a></p>
 <p><span class="arrow">&#8656;</span><a href="#pattxt" style="line-height:12pt">Binary operators in pattern matching</a></p>
-<p><span class="arrow">&#8656;</span><a href="#funmactxt" style="line-height:12pt">function evaluation</a></p>
 <p><span class="arrow">&#8656;</span><a href="#pattxt2" style="line-height:12pt">Matching a number in a string</a></p>
-<p><span class="arrow">&#8656;</span><a href="#unpattxt" style="line-height:12pt">Prefixes and pattern matching</a></p>
-<p><span class="arrow">&#8656;</span><a href="#transformtxt" style="line-height:12pt">Program transformation</a></p>
 <h2><a name="syntax">The grammar of Bracmat</a></h2>
 <p>Note: in long lists the vertical bar<code> | </code>is left out.</p>
 <blockquote><pre>&lt;input&gt;           ::= [&lt;expression&gt;] [;&lt;input&gt;]
@@ -780,8 +780,8 @@ then using<code> : </code>to bind the function definition to the variable <code>
 {?} The first element is !first and the remainder is !rem.</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#binovztxt" style="line-height:12pt"><code>=.,|&amp;: +*^\L\D'$_</code></a></p>
 <p><span class="arrow">&#8657;</span><a href="#binmenu" style="line-height:12pt">Binary operators</a></p>
-<p><span class="arrow">&#8656;</span><a href="#objecttxt" style="line-height:12pt">Objects</a></p>
-<p><span class="arrow">&#8658;</span><a href="#pattxt" style="line-height:12pt">Binary operators in pattern matching</a></p>
+<p><span class="arrow">&#8658;</span><a href="#objecttxt" style="line-height:12pt">Objects</a></p>
+<p><span class="arrow">&#8656;</span><a href="#pattxt" style="line-height:12pt">Binary operators in pattern matching</a></p>
 <h3><a name="binprotxt">Binary operators in program flow</a></h3>
 <dl><dt><i>exprA</i><code> &amp; </code><i>exprB</i></dt><dd>(<i>exprA</i> and then <i>exprB</i>)
 <i>exprB</i> is only evaluated if <i>exprA</i> succeeds,</dd><dt><i>exprA</i><code> | </code><i>exprB</i></dt><dd>(<i>exprA</i> or else <i>exprB</i>)
@@ -864,8 +864,8 @@ backtracking and retrying.</p>
 <p><span class="arrow">&#8657;</span><a href="#binmenu" style="line-height:12pt">Binary operators</a></p>
 <p><span class="arrow">&#8657;</span><a href="#funcmenu" style="line-height:12pt">functions</a></p>
 <p><span class="arrow">&#8658;</span><a href="#macrotxt" style="line-height:12pt">macro evaluation</a></p>
-<p><span class="arrow">&#8658;</span><a href="#escappattxt" style="line-height:12pt">Escaping operator in patterns</a></p>
 <p><span class="arrow">&#8658;</span><a href="#naamloos" style="line-height:12pt">The nameless functions<code> $<i>expression</i> </code>and <code>'<i>expression</i></code></a></p>
+<p><span class="arrow">&#8656;</span><a href="#escappattxt" style="line-height:12pt">Escaping operator in patterns</a></p>
 <h3><a name="macrotxt">macro evaluation</a></h3>
 <p>The<code> ' </code>operator with empty LHS is the macro evaluator. The macro evaluator
 returns the RHS unchanged, except where<code> $ </code>operators with empty LHS occur.</p>
@@ -1039,9 +1039,9 @@ programming languages:</p>
 <p><span class="arrow">&#8657;</span><a href="#binovztxt" style="line-height:12pt"><code>=.,|&amp;: +*^\L\D'$_</code></a></p>
 <p><span class="arrow">&#8657;</span><a href="#binmenu" style="line-height:12pt">Binary operators</a></p>
 <p><span class="arrow">&#8657;</span><a href="#funcmenu" style="line-height:12pt">functions</a></p>
-<p><span class="arrow">&#8656;</span><a href="#funmactxt" style="line-height:12pt">function evaluation</a></p>
-<p><span class="arrow">&#8656;</span><a href="#naamloos" style="line-height:12pt">The nameless functions<code> $<i>expression</i> </code>and <code>'<i>expression</i></code></a></p>
+<p><span class="arrow">&#8658;</span><a href="#naamloos" style="line-height:12pt">The nameless functions<code> $<i>expression</i> </code>and <code>'<i>expression</i></code></a></p>
 <p><span class="arrow">&#8658;</span><a href="#transformtxt" style="line-height:12pt">Program transformation</a></p>
+<p><span class="arrow">&#8656;</span><a href="#funmactxt" style="line-height:12pt">function evaluation</a></p>
 <h3><a name="transformtxt">Program transformation</a></h3>
 <p>Bracmat code is data. Yet it is easier to transform the internal representation
 of JSON or XML data than to transform a Bracmat program. The reason is that for
@@ -1069,7 +1069,7 @@ special roles inside patterns, such as the <code>!</code> prefix and the <code> 
 <p><span class="arrow">&#8657;</span><a href="#binmenu" style="line-height:12pt">Binary operators</a></p>
 <p><span class="arrow">&#8657;</span><a href="#funcmenu" style="line-height:12pt">functions</a></p>
 <p><span class="arrow">&#8656;</span><a href="#macrotxt" style="line-height:12pt">macro evaluation</a></p>
-<p><span class="arrow">&#8658;</span><a href="#escappattxt" style="line-height:12pt">Escaping operator in patterns</a></p>
+<p><span class="arrow">&#8656;</span><a href="#escappattxt" style="line-height:12pt">Escaping operator in patterns</a></p>
 <h3><a name="dumtxt">The dummy operator<code> _</code></a></h3>
 <p>Bracmat has only one variable that binds to a binary operator, the<code> _</code>
 operator. Worse even, this variable is global. Nevertheless this variable is
@@ -1111,8 +1111,8 @@ matches are forgotten<code> : </code>the<code> _ </code>operator is a global var
 <p><span class="arrow">&#8657;</span><a href="#binovztxt" style="line-height:12pt"><code>=.,|&amp;: +*^\L\D'$_</code></a></p>
 <p><span class="arrow">&#8657;</span><a href="#binmenu" style="line-height:12pt">Binary operators</a></p>
 <p><span class="arrow">&#8657;</span><a href="#funcmenu" style="line-height:12pt">functions</a></p>
+<p><span class="arrow">&#8658;</span><a href="#funtxt1" style="line-height:12pt">Definition of a function</a></p>
 <p><span class="arrow">&#8656;</span><a href="#dumtxt" style="line-height:12pt">The dummy operator<code> _</code></a></p>
-<p><span class="arrow">&#8656;</span><a href="#funtxt1" style="line-height:12pt">Definition of a function</a></p>
 <h3><a name="prostutxt2">Some often used control structures</a></h3>
 <p>Here are the nearest equivalents of some traditional control structures.</p>
 <p>Sequence:</p>
@@ -1133,8 +1133,8 @@ matches are forgotten<code> : </code>the<code> _ </code>operator is a global var
 <blockquote><pre>  b$(x,y,z):?v;</pre></blockquote></dd></dl>
 <p><span class="arrow">&#8657;</span><a href="#binmenu" style="line-height:12pt">Binary operators</a></p>
 <p><span class="arrow">&#8657;</span><a href="#progsmenu" style="line-height:12pt">Programming advice</a></p>
+<p><span class="arrow">&#8658;</span><a href="#prostutxt1" style="line-height:12pt">Program flow</a></p>
 <p><span class="arrow">&#8656;</span><a href="#binprotxt" style="line-height:12pt">Binary operators in program flow</a></p>
-<p><span class="arrow">&#8656;</span><a href="#prostutxt1" style="line-height:12pt">Program flow</a></p>
 <h3><a name="naamloos">The nameless functions<code> $<i>expression</i> </code>and <code>'<i>expression</i></code></a></h3>
 <p>Sometimes a variable predictably will evaluate to the same value repeatedly,
 for example in an inner loop or a pattern that repeatedly backtracks. In
@@ -1210,7 +1210,7 @@ many times while parts of it remain constant, for example in nested loops:</p>
 <p><span class="arrow">&#8657;</span><a href="#binmenu" style="line-height:12pt">Binary operators</a></p>
 <p><span class="arrow">&#8657;</span><a href="#funcmenu" style="line-height:12pt">functions</a></p>
 <p><span class="arrow">&#8656;</span><a href="#funmactxt" style="line-height:12pt">function evaluation</a></p>
-<p><span class="arrow">&#8658;</span><a href="#macrotxt" style="line-height:12pt">macro evaluation</a></p>
+<p><span class="arrow">&#8656;</span><a href="#macrotxt" style="line-height:12pt">macro evaluation</a></p>
 <h2><a name="objecttxt">Objects</a></h2>
 <p>With the<code> = </code>and<code> . </code>operators you can construct and dereference conventional data
 structures and even objects with methods. In an expression, each subexpression
@@ -1314,10 +1314,10 @@ evaluated. In (B), the value of <code>x</code> IS evaluated, so no new copies of
 <p><span class="arrow">&#8657;</span><a href="#binovztxt" style="line-height:12pt"><code>=.,|&amp;: +*^\L\D'$_</code></a></p>
 <p><span class="arrow">&#8657;</span><a href="#progsmenu" style="line-height:12pt">Programming advice</a></p>
 <p><span class="arrow">&#8657;</span><a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a></p>
-<p><span class="arrow">&#8656;</span><a href="#savtxt" style="line-height:12pt">The<code> = </code>operator</a></p>
-<p><span class="arrow">&#8656;</span><a href="#contxt" style="line-height:12pt">Construction of data structures</a></p>
-<p><span class="arrow">&#8658;</span><a href="#asstxt" style="line-height:12pt">Assignment to variables</a></p>
+<p><span class="arrow">&#8658;</span><a href="#contxt" style="line-height:12pt">Construction of data structures</a></p>
 <p><span class="arrow">&#8658;</span><a href="#methodtxt" style="line-height:12pt">Methods</a></p>
+<p><span class="arrow">&#8656;</span><a href="#savtxt" style="line-height:12pt">The<code> = </code>operator</a></p>
+<p><span class="arrow">&#8656;</span><a href="#asstxt" style="line-height:12pt">Assignment to variables</a></p>
 <h2><a name="contxt">Construction of data structures</a></h2>
 <p>In Bracmat linear lists can be made by separating the elements with comma,
 plus sign, asterisk, space and dot. The first four operators create linear
@@ -1396,7 +1396,7 @@ of the matrix at hand, and may even be indifferent to the number of indices.</p>
 <p><span class="arrow">&#8657;</span><a href="#binmenu" style="line-height:12pt">Binary operators</a></p>
 <p><span class="arrow">&#8657;</span><a href="#progsmenu" style="line-height:12pt">Programming advice</a></p>
 <p><span class="arrow">&#8657;</span><a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a></p>
-<p><span class="arrow">&#8658;</span><a href="#objecttxt" style="line-height:12pt">Objects</a></p>
+<p><span class="arrow">&#8656;</span><a href="#objecttxt" style="line-height:12pt">Objects</a></p>
 <h3><a name="prostutxt1">Program flow</a></h3>
 <p>Most binary operators are used in expressions that flow on their own or
 flow not at all. In the first group are the arithmetic operators, in
@@ -1426,8 +1426,8 @@ The tilde<code> ~ </code>negates failure and success.</p>
 <p><span class="arrow">&#8657;</span><a href="#binovztxt" style="line-height:12pt"><code>=.,|&amp;: +*^\L\D'$_</code></a></p>
 <p><span class="arrow">&#8657;</span><a href="#progsmenu" style="line-height:12pt">Programming advice</a></p>
 <p><span class="arrow">&#8656;</span><a href="#binprotxt" style="line-height:12pt">Binary operators in program flow</a></p>
-<p><span class="arrow">&#8658;</span><a href="#pattxt" style="line-height:12pt">Binary operators in pattern matching</a></p>
-<p><span class="arrow">&#8658;</span><a href="#prostutxt2" style="line-height:12pt">Some often used control structures</a></p>
+<p><span class="arrow">&#8656;</span><a href="#pattxt" style="line-height:12pt">Binary operators in pattern matching</a></p>
+<p><span class="arrow">&#8656;</span><a href="#prostutxt2" style="line-height:12pt">Some often used control structures</a></p>
 <h2><a name="unopsmenu">Prefixes</a></h2>
 <dl><dt><a href="#unstuurtxt"> program flow</a></dt><dt><a href="#unpattxt"> pattern matching</a></dt><dt><a href="#unpattxt"> prefixes combined with expressions</a></dt><dt><a href="#unops"> unary operators</a></dt></dl>
 <p><span class="arrow">&#8657;</span><a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a></p>
@@ -1562,7 +1562,7 @@ the backtracking process away.</p>
 <p><span class="arrow">&#8657;</span><a href="#unopsmenu" style="line-height:12pt">Prefixes</a></p>
 <p><span class="arrow">&#8657;</span><a href="#progsmenu" style="line-height:12pt">Programming advice</a></p>
 <p><span class="arrow">&#8656;</span><a href="#pattxt" style="line-height:12pt">Binary operators in pattern matching</a></p>
-<p><span class="arrow">&#8658;</span><a href="#escappattxt" style="line-height:12pt">Escaping operator in patterns</a></p>
+<p><span class="arrow">&#8656;</span><a href="#escappattxt" style="line-height:12pt">Escaping operator in patterns</a></p>
 <h3><a name="unops">minus sign</a></h3>
 <p>The minus sign <code>-</code> has only its normal arithmetic meaning when used as an
 unary operator in front of a rational number or the imaginary number <code>i</code><code>.</code></p>
@@ -1746,9 +1746,9 @@ avoids multi-word assignments and forces immediate backtracking.</p>
  )</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#progsmenu" style="line-height:12pt">Programming advice</a></p>
 <p><span class="arrow">&#8657;</span><a href="#predefmenu" style="line-height:12pt">Predefined functions</a></p>
-<p><span class="arrow">&#8656;</span><a href="#debugtxt" style="line-height:12pt">Debugging</a></p>
-<p><span class="arrow">&#8656;</span><a href="#outtxt" style="line-height:12pt"><code>out$<i>expression</i></code></a></p>
+<p><span class="arrow">&#8658;</span><a href="#outtxt" style="line-height:12pt"><code>out$<i>expression</i></code></a></p>
 <p><span class="arrow">&#8658;</span><a href="#debugtxt3" style="line-height:12pt">using dbg' as debugging aid</a></p>
+<p><span class="arrow">&#8656;</span><a href="#debugtxt" style="line-height:12pt">Debugging</a></p>
 <h3><a name="debugtxt3">using dbg' as debugging aid</a></h3>
 <p>Some programming errors may be found with the built-in <code>dbg</code> function. The
 argument of the <code>dbg</code> function is evaluated with an internal debugging flag set.
@@ -1806,7 +1806,7 @@ code.</p>
 <p>It is possible to declare a function inside another function. Always declare
 the name of an embedded function as a local variable.</p>
 <p><span class="arrow">&#8657;</span><a href="#funcmenu" style="line-height:12pt">functions</a></p>
-<p><span class="arrow">&#8658;</span><a href="#funtxt3" style="line-height:12pt">Recursion and the<code> _ </code>operator</a></p>
+<p><span class="arrow">&#8656;</span><a href="#funtxt3" style="line-height:12pt">Recursion and the<code> _ </code>operator</a></p>
 <h3><a name="lambda">Lambda calculus, currying</a></h3>
 <p>The lambda abstraction</p>
 <blockquote><pre>     (&#955;x.x)y</pre></blockquote>
@@ -2166,8 +2166,8 @@ characters that can be misunderstood, such as dots, (back) slashes or dollars.</
 <p>As of July 2009 Codepage 850 is not supported, unless bracmat is compiled with
 <code>#define </code>CODEPAGE850 1.</p>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
-<p><span class="arrow">&#8656;</span><a href="#lowtxt" style="line-height:12pt"><code>low$(<i>atom-or-nil</i>)</code></a></p>
-<p><span class="arrow">&#8656;</span><a href="#upptxt" style="line-height:12pt"><code>upp$(<i>atom-or-nil</i>)</code></a></p>
+<p><span class="arrow">&#8658;</span><a href="#lowtxt" style="line-height:12pt"><code>low$(<i>atom-or-nil</i>)</code></a></p>
+<p><span class="arrow">&#8658;</span><a href="#upptxt" style="line-height:12pt"><code>upp$(<i>atom-or-nil</i>)</code></a></p>
 <h4><a name="lsttxt1"><code>lst$(<i>(=expression) or variable</i>*[,LIN][,RAW])</code></a></h4>
 <p><code>lst$</code> outputs all present bindings of one or more variables to standard
 output. If a variable is local to a function and a variable of the same name
@@ -2197,10 +2197,10 @@ The second parameter is optional.</p>
 <p>If <code>LIN</code> is not present, output is very much indented, sometimes making it more
 readable for humans. If <code>LIN</code> is present, output is as compact as possible.</p>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
-<p><span class="arrow">&#8656;</span><a href="#lsttxt1" style="line-height:12pt"><code>lst$(<i>(=expression) or variable</i>*[,LIN][,RAW])</code></a></p>
-<p><span class="arrow">&#8656;</span><a href="#puttxt1" style="line-height:12pt"><code>put$(<i>expression</i>[,LIN])</code></a></p>
+<p><span class="arrow">&#8658;</span><a href="#puttxt1" style="line-height:12pt"><code>put$(<i>expression</i>[,LIN])</code></a></p>
 <p><span class="arrow">&#8658;</span><a href="#lsttxt2" style="line-height:12pt"><code>lst$(<i>(=expression) or variable</i>*,MEM [,LIN][,RAW])</code></a></p>
 <p><span class="arrow">&#8658;</span><a href="#puttxt2" style="line-height:12pt"><code>put$(<i>expression</i>,MEM [,LIN])</code></a></p>
+<p><span class="arrow">&#8656;</span><a href="#lsttxt1" style="line-height:12pt"><code>lst$(<i>(=expression) or variable</i>*[,LIN][,RAW])</code></a></p>
 <h4><a name="lsttxt2"><code>lst$(<i>(=expression) or variable</i>*,MEM [,LIN][,RAW])</code></a></h4>
 <p>The difference with the preceding form is that output takes place to
 memory. What is normally visible on screen is put in one atom, which is
@@ -2216,8 +2216,8 @@ expressions.</p>
 {?} { .. celebrate space-saving, until fct$ is needed .. }
 {?} get$(!sleeping-fct,MEM)</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
-<p><span class="arrow">&#8656;</span><a href="#humtxt" style="line-height:12pt">option <code>LIN</code></a></p>
 <p><span class="arrow">&#8658;</span><a href="#lsttxt3" style="line-height:12pt"><code>lst$(<i>(=expression) or variable</i>*,<i>file name</i>,NEW | APP [,LIN][,TXT][,BIN])</code></a></p>
+<p><span class="arrow">&#8656;</span><a href="#humtxt" style="line-height:12pt">option <code>LIN</code></a></p>
 <h4><a name="lsttxt3"><code>lst$(<i>(=expression) or variable</i>*,<i>file name</i>,NEW | APP [,LIN][,TXT][,BIN])</code></a></h4>
 <p>This time, output is sent to the named file instead of standard output.
 The third argument is explained below.
@@ -2227,8 +2227,8 @@ Code that has been saved with<code> lst$ </code>can be reloaded with<code> get$.
 {?} lst$(tay,taylor,NEW)
     { save function tay$ to file "taylor" in indented format }</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
-<p><span class="arrow">&#8656;</span><a href="#lsttxt2" style="line-height:12pt"><code>lst$(<i>(=expression) or variable</i>*,MEM [,LIN][,RAW])</code></a></p>
 <p><span class="arrow">&#8658;</span><a href="#newtxt" style="line-height:12pt">options <code>NEW</code><code>, </code><code>APP</code><code>, </code><code>TXT</code> and <code>BIN</code></a></p>
+<p><span class="arrow">&#8656;</span><a href="#lsttxt2" style="line-height:12pt"><code>lst$(<i>(=expression) or variable</i>*,MEM [,LIN][,RAW])</code></a></p>
 <h4><a name="newtxt">options <code>NEW</code><code>, </code><code>APP</code><code>, </code><code>TXT</code> and <code>BIN</code></a></h4>
 <p>One of the options <code>NEW</code> and <code>APP</code> must be present:</p>
 <dl><dt><code>NEW</code></dt><dd>tells the computer to open a new file or overwrite an old one.</dd><dt><code>APP</code></dt><dd>directs output to an existing file. If the file does not exist, it is
@@ -2240,8 +2240,8 @@ for <code>put</code><code>. </code>In Windows, each line feed character will be 
 carriage return. In Unix and Linux, text mode and binary mode are the same.</dd><dt><code>BIN</code></dt><dd>tells Bracmat to write a file in binary mode. This is the default file mode
 for <code>lst</code><code>.</code></dd></dl>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
+<p><span class="arrow">&#8658;</span><a href="#puttxt3" style="line-height:12pt"><code>put$(<i>expression</i>,<i>file name</i>,NEW | APP [,LIN])</code></a></p>
 <p><span class="arrow">&#8656;</span><a href="#lsttxt3" style="line-height:12pt"><code>lst$(<i>(=expression) or variable</i>*,<i>file name</i>,NEW | APP [,LIN][,TXT][,BIN])</code></a></p>
-<p><span class="arrow">&#8656;</span><a href="#puttxt3" style="line-height:12pt"><code>put$(<i>expression</i>,<i>file name</i>,NEW | APP [,LIN])</code></a></p>
 <h4><a name="maptxt"><code>map$(<i>fnc</i>.<i>list</i>)</code></a></h4>
 <p><code>map$ </code>produces a list containing the results of applying <i>fnc</i> to each member
 in <i>list</i>. <i>fnc</i> can be the name of a function, a function definition
@@ -2339,7 +2339,7 @@ with the exception that it positions the cursor on the beginning of the next
 line.</p>
 <blockquote><pre class="exinput">{?} put$("b+a" is after evaluation b+a)</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
-<p><span class="arrow">&#8658;</span><a href="#humtxt" style="line-height:12pt">option <code>LIN</code></a></p>
+<p><span class="arrow">&#8656;</span><a href="#humtxt" style="line-height:12pt">option <code>LIN</code></a></p>
 <h4><a name="puttxt2"><code>put$(<i>expression</i>,MEM [,LIN])</code></a></h4>
 <p><i>expression</i> is stringized and placed into an atom, which is the return
 value of the call. This use of<code> put$ </code>is similar to the<code> str$ </code>function, but
@@ -2348,14 +2348,14 @@ including space operators, to the atom.</p>
 <blockquote><pre class="exinput">{?} put$(this is not Lotus 1 1+1 1+1+1,MEM):?proposition &amp;
 {?} put$!proposition</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
-<p><span class="arrow">&#8656;</span><a href="#humtxt" style="line-height:12pt">option <code>LIN</code></a></p>
 <p><span class="arrow">&#8658;</span><a href="#puttxt3" style="line-height:12pt"><code>put$(<i>expression</i>,<i>file name</i>,NEW | APP [,LIN])</code></a></p>
+<p><span class="arrow">&#8656;</span><a href="#humtxt" style="line-height:12pt">option <code>LIN</code></a></p>
 <h4><a name="puttxt3"><code>put$(<i>expression</i>,<i>file name</i>,NEW | APP [,LIN])</code></a></h4>
 <p>Write <i>expression</i> to the named file.</p>
 <blockquote><pre class="exinput">{?} put$(tay$(e^x,x,10),"e.out",APP)</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
 <p><span class="arrow">&#8656;</span><a href="#puttxt2" style="line-height:12pt"><code>put$(<i>expression</i>,MEM [,LIN])</code></a></p>
-<p><span class="arrow">&#8658;</span><a href="#newtxt" style="line-height:12pt">options <code>NEW</code><code>, </code><code>APP</code><code>, </code><code>TXT</code> and <code>BIN</code></a></p>
+<p><span class="arrow">&#8656;</span><a href="#newtxt" style="line-height:12pt">options <code>NEW</code><code>, </code><code>APP</code><code>, </code><code>TXT</code> and <code>BIN</code></a></p>
 <h4><a name="rentxt"><code>ren$(<i>oldname</i>.<i>newname</i>)</code></a></h4>
 <p>Renames a file or directory or moves a file.
 The<code> ren$ </code>function succeeds, unless a syntactic error was made. If there is an
@@ -2620,7 +2620,7 @@ handles failing arguments in the correct way, contrary to<code> out$.</code></p>
 <blockquote><pre class="exinput">{?} put$a &amp; put$b
 {?} out$a &amp; out$b</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#predefmenu" style="line-height:12pt">Predefined functions</a></p>
-<p><span class="arrow">&#8658;</span><a href="#debugtxt2" style="line-height:12pt">using<code> out$ </code>as debugging aid</a></p>
+<p><span class="arrow">&#8656;</span><a href="#debugtxt2" style="line-height:12pt">using<code> out$ </code>as debugging aid</a></p>
 <h4><a name="subtxt1"><code>sub$(<i>expression</i>.<i>pattern</i>.<i>replacement</i></code>)</a></h4>
 <p>substitution function
 argument 1<code> : </code>subject
@@ -2647,7 +2647,7 @@ are illegal.</p>
 <blockquote><pre class="exinput">{?} d2x$utf$chu$x2d$7fffffff</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
 <p><span class="arrow">&#8657;</span><a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a></p>
-<p><span class="arrow">&#8656;</span><a href="#utftxt" style="line-height:12pt"><code>utf$<i>UTF-8 character</i></code></a></p>
+<p><span class="arrow">&#8658;</span><a href="#utftxt" style="line-height:12pt"><code>utf$<i>UTF-8 character</i></code></a></p>
 <p><span class="arrow">&#8658;</span><a href="#lowtxt" style="line-height:12pt"><code>low$(<i>atom-or-nil</i>)</code></a></p>
 <h2><a name="lowtxt"><code>low$(<i>atom-or-nil</i>)</code></a></h2>
 <p><code>low$ </code>converts a string to all-lowercase.
@@ -2656,9 +2656,9 @@ as UTF-8 encoded Unicode characters, but default to ISO 8859 (Latin 1) if
 the argument is not valid UTF-8.</p>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
 <p><span class="arrow">&#8657;</span><a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a></p>
-<p><span class="arrow">&#8658;</span><a href="#DOSopttxt" style="line-height:12pt">Codepage 850 support</a></p>
 <p><span class="arrow">&#8658;</span><a href="#upptxt" style="line-height:12pt"><code>upp$(<i>atom-or-nil</i>)</code></a></p>
 <p><span class="arrow">&#8656;</span><a href="#chutxt" style="line-height:12pt"><code>chu$<i>value</i></code></a></p>
+<p><span class="arrow">&#8656;</span><a href="#DOSopttxt" style="line-height:12pt">Codepage 850 support</a></p>
 <h2><a name="upptxt"><code>upp$(<i>atom-or-nil</i>)</code></a></h2>
 <p><code>upp$ </code>converts a string to all-uppercase.
 The characters<code> 'a'-'z' </code>are converted to<code> 'A'-'Z'. </code>Other characters are handled
@@ -2666,8 +2666,8 @@ as UTF-8 encoded Unicode characters, but default to ISO 8859 (Latin 1) if
 the argument is not valid UTF-8.</p>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
 <p><span class="arrow">&#8657;</span><a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a></p>
-<p><span class="arrow">&#8658;</span><a href="#DOSopttxt" style="line-height:12pt">Codepage 850 support</a></p>
 <p><span class="arrow">&#8656;</span><a href="#lowtxt" style="line-height:12pt"><code>low$(<i>atom-or-nil</i>)</code></a></p>
+<p><span class="arrow">&#8656;</span><a href="#DOSopttxt" style="line-height:12pt">Codepage 850 support</a></p>
 <h2><a name="utftxt"><code>utf$<i>UTF-8 character</i></code></a></h2>
 <p><code>utf$ </code>returns the Unicode code point of the UTF-8 character.
 The function fails if the string is too short or too long, or if the sequence
@@ -2680,8 +2680,8 @@ If <code>txt</code> starts with a sequence that is not UTF-8, bracmat stops back
 when that fact has been established.</p>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
 <p><span class="arrow">&#8657;</span><a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a></p>
-<p><span class="arrow">&#8656;</span><a href="#charset" style="line-height:12pt">Character set</a></p>
-<p><span class="arrow">&#8658;</span><a href="#chutxt" style="line-height:12pt"><code>chu$<i>value</i></code></a></p>
+<p><span class="arrow">&#8658;</span><a href="#charset" style="line-height:12pt">Character set</a></p>
+<p><span class="arrow">&#8656;</span><a href="#chutxt" style="line-height:12pt"><code>chu$<i>value</i></code></a></p>
 <h2><a name="methodtxt">Methods</a></h2>
 <p>A method is function that is a member of an object. A method definition is not
 different from a function definition, but the ways in which methods and a
@@ -2819,7 +2819,7 @@ argument is UTF-8 encoded, but graciously falls back to regarding the argument
 as ISO 8859-1 encoded if parsing the argument as UTF-8 fails. UTF-16 and UTF-32
 is not supported, because those encodings make use of zero-bytes.</p>
 <p><span class="arrow">&#8657;</span><a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a></p>
-<p><span class="arrow">&#8658;</span><a href="#utftxt" style="line-height:12pt"><code>utf$<i>UTF-8 character</i></code></a></p>
+<p><span class="arrow">&#8656;</span><a href="#utftxt" style="line-height:12pt"><code>utf$<i>UTF-8 character</i></code></a></p>
 <h2><a name="predvartxt">Predefined variables</a></h2>
 <p>There are three variables that are predefined, but that in no way are preserved
 by Bracmat.</p>

@@ -2,12 +2,13 @@ help=
   ( streep,verwerk,lusmenu,whatIsBracmat,filosofie,colofon
   . syntax,atotxt,evaltxt,gettxt,contxt,binovztxt,patternm
   . savtxt,dumtxt,binprotxt,prostutxt1,prostutxt2,funmactxt
-  . unops,naamloos,algtxt,unpattxt,binmenu,pattxttxt, maptxt
-  . pattxt,asstxt,unopsmenu,unstuurtxt,varsmenu,funcmenu, vaptxt
+  . unops,naamloos,algtxt,unpattxt,binmenu,pattxttxt,maptxt
+  . pattxt,asstxt,unopsmenu,unstuurtxt,varsmenu,funcmenu,vaptxt
   . varmattxt,varprotxt,progsmenu,debugtxt,debugtxt2,debugtxt3
   . inbltmenu,alctxt,aligntxt,asctxt,utftxt,chrtxt,charset
   . chutxt,dbgtxt,dentxt,escappattxt,lambda,morexmlps,jsntxt
-  . divtxt,fretxt,funtxt1,funtxt3,lsttxt1,difftxt,pattxt2
+  . divtxt,fretxt,funtxt1,funtxt3,beztxt
+  . lsttxt1,difftxt,pattxt2,methodtxt,predvartxt
   . lsttxt2,lsttxt3,memtxt,modtxt,peetxt,poktxt,Bracmat-name
   . puttxt1,puttxt2,puttxt3,rentxt,revtxt,seltxt,simtxt,strtxt
   . switxt,systxt,tbltxt,filtxt,flgtxt,glftxt,predefmenu,flttxt
@@ -36,7 +37,8 @@ help=
 10 data structures
 11 objects
 12 hash tables
-13  character set
+13 character set
+14 predefined variables
 html transform this file to HTML
 htmltable transform this file to HTML, put excercises in tables, not blockquotes
 save reformat and save this file
@@ -52,9 +54,10 @@ lex lexical analysis of help file"
           (8,progsmenu)
           (9,funcmenu)
           (10,contxt)
-          (11,objecttxt)
+          (11,objecttxt methodtxt)
           (12,hashtxt)
           (13,charset utftxt chutxt lowtxt upptxt)
+          (14,predvartxt)
           (html,)
           (htmltable,)
           (lex,)
@@ -140,113 +143,116 @@ lex lexical analysis of help file"
     return program (command line) argument: (arg$0:?programName) ((arg$:?o1)&(arg$:?o2))
 4 |_asc_|
     convert character to internal representation: asc$y:121
-5 |_chr_|
+5 |_bez_|
+    show number of allocations and max. number of allocations 
+6 |_chr_|
     convert internal representation to character: chr$121:y
-6 |_chu_|
+7 |_chu_|
     convert Unicode codepoint to UTF-8 character: chu$2000
-7 |_clk_|
+8 |_clk_|
     CPU seconds since start of session: clk$:?t0
-8 |_d2x_|
+9 |_d2x_|
     convert decimal number to hexadecimal number: d2x$73083734:45B2B56
-9 |_dbg_|
+10 |_dbg_|
     debugging aid: |_dbg'(a b c:? b ?)_|
-10 |_den_|
+11 |_den_|
     denominator: den$22/7:7
-11 |_div_|
+12 |_div_|
     quotient: div$(22.7):1
-12 |_fil_|
+13 |_fil_|
     file I/O (low-level)
-13 |_flg_|
+14 |_flg_|
     splits expression in prefixes and expression without prefixes
-14 |_glf_|
+15 |_glf_|
     opposite of flg: combines prefixes and expression
-15 |_fre_|
+16 |_fre_|
     return allocated memory (low level)
-16 |_get_|
+17 |_get_|
     get input (from file,keyboard or memory)
-17 |_low_|
+18 |_low_|
     convert to lower case
-18 |_lst_|
+19 |_lst_|
     list un-evaluated expression(s) or value(s) of variable(s)
-19 |_map_|
+20 |_map_|
     apply function to each member of a list
-20 |_mem_|
+21 |_mem_|
     list existing variable names
-21 |_mod_|
+22 |_mod_|
     remainder
-22 |_new_|
+23 |_new_|
     create new object as a copy of another object
-23 |_pee_|
+24 |_pee_|
     get value from address (peek) (low level)
-24 |_pok_|
+25 |_pok_|
     put value at address (poke) (low level)
-25 |_put_|
+26 |_put_|
     write output
-26 |_ren_|
+27 |_ren_|
     rename file or directory or move file
-27 |_rev_|
+28 |_rev_|
     string reverse
-28 |_rmv_|
+29 |_rmv_|
     remove file
-29 |_sim_|
+30 |_sim_|
     similarity between two atoms
-30 |_str_|
+31 |_str_|
     stringize expression into atom
-31 |_swi_|
+32 |_swi_|
     software interrupt (low level)
-32 |_sys_|
+33 |_sys_|
     command line shell
-33 |_tbl_|
+34 |_tbl_|
     create array, remove array/variable
-34 |_upp_|
+35 |_upp_|
     convert to upper case
-35 |_utf_|
+36 |_utf_|
     convert UTF-8 character to Unicode codepoint
-36 |_vap_|
+37 |_vap_|
     deconstruct a string character-wise or according to specified separator
-37 |_whl_|
+38 |_whl_|
     while loop
-38 |_x2d_|
+39 |_x2d_|
     convert hexadecimal number to decimal number x2d$BABEFACE:3133078222
 "
       ,   (1,seltxt)
           (2,alctxt)
           (3,argtxt)
           (4,asctxt)
-          (5,chrtxt)
-          (6,chutxt)
-          (7,clktxt)
-          (8,d2xtxt)
-          (9,dbgtxt)
-          (10,dentxt)
-          (11,divtxt)
-          (12,filtxt)
-          (13,flgtxt)
-          (14,glftxt)
-          (15,fretxt)
-          (16,gettxt)
-          (17,lowtxt DOSopttxt)
-          (18,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt)
-          (19,maptxt)
-          (20,memtxt)
-          (21,modtxt)
-          (22,newobjecttxt)
-          (23,peetxt)
-          (24,poktxt)
-          (25,puttxt1 humtxt puttxt2 puttxt3 newtxt)
-          (26,rentxt)
-          (27,rmvtxt)
-          (28,revtxt)
-          (29,simtxt)
-          (30,strtxt)
-          (31,switxt)
-          (32,systxt)
-          (33,tbltxt)
-          (34,upptxt DOSopttxt)
-          (35,utftxt)
-          (36,vaptxt)
-          (37,whltxt)
-          (38,x2dtxt)
+          (5,beztxt)
+          (6,chrtxt)
+          (7,chutxt)
+          (8,clktxt)
+          (9,d2xtxt)
+          (10,dbgtxt)
+          (11,dentxt)
+          (12,divtxt)
+          (13,filtxt)
+          (14,flgtxt)
+          (15,glftxt)
+          (16,fretxt)
+          (17,gettxt)
+          (18,lowtxt DOSopttxt)
+          (19,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt)
+          (20,maptxt)
+          (21,memtxt)
+          (22,modtxt)
+          (23,newobjecttxt)
+          (24,peetxt)
+          (25,poktxt)
+          (26,puttxt1 humtxt puttxt2 puttxt3 newtxt)
+          (27,rentxt)
+          (28,rmvtxt)
+          (29,revtxt)
+          (30,simtxt)
+          (31,strtxt)
+          (32,switxt)
+          (33,systxt)
+          (34,tbltxt)
+          (35,upptxt DOSopttxt)
+          (36,utftxt)
+          (37,vaptxt)
+          (38,whltxt)
+          (39,x2dtxt)
     )
   & ( intro
     =   M
@@ -317,7 +323,7 @@ data are, the better are the chances that not all results, although defendable,
 have an appearance that suits you. It is here that programming comes in:
 Bracmat leaves certain kinds of data unchanged, but opens the possibility to
 dissect data, to perform calculations on the parts, and to assemble an answer
-from the resulting sub-answers.
+from the resulting subanswers.
 
 Bracmat makes no distinction between data and instructions. All there is are
 expressions. Some expressions stay the same upon evaluation, other expressions
@@ -1163,7 +1169,7 @@ Bracmat instructions, they hereafter exist in a sleeping state in memory."
 !intern is, in this example, expanded to an atom with a very long name, namely
 all of the text of file |_matrix_|. The sleeping expressions are evaluated one
 after the other, just as if |_get'matrix_| was evaluated."
-          "  get'(,VAP):?space-list
+          "  get'(,VAP):?space-STRing
 
 Read characters from standard input (normally keyboard) until next line feed
 character. Put each character into an atom. Put all atoms into a linear list
@@ -1417,7 +1423,7 @@ member's name, preceded by the objects name. The name of the object and the
 name of the member must be separated by a dot operator.
 
 In the example below an object named |_John_| is created with the members
-|_length_|, |_age_| and |_name_|. The |_name_| member has two sub-members
+|_length_|, |_age_| and |_name_|. The |_name_| member has two submembers
 |_first_| and |_family_|:
 
 {?} John = (length = 180),(age = 30),(name = (first=John) (family=Bull))
@@ -1425,6 +1431,7 @@ In the example below an object named |_John_| is created with the members
 There is no prescribed way in which the members should be glued together to
 form an object. Here, the comma operator and blank operator are used, but any
 operator but the = operator can be used to separate field names.
+
 John's length can be changed to 185 in the following ways:
 
 {?} John.length = 185
@@ -1457,7 +1464,7 @@ inspect |_John_|:
 {?} lst$John
  (John=
    (length=180)
- , (age=30)
+ , (age=31)
  , (name=(first=John) (family=Bull)));
 
 Alternatively, we can also just show the field |_age_| in |_John_|:
@@ -1465,7 +1472,7 @@ Alternatively, we can also just show the field |_age_| in |_John_|:
 {?} !(John.age)
 {!} 31
 "
-          "It is also possible to create an alias for a sub-object. Taking the previous
+          "It is also possible to create an alias for a subobject. Taking the previous
 example, we could create an alias for the name member:
 
 {?} '$(John.name):(=?nm)
@@ -1478,8 +1485,8 @@ Now assign a new family name:
  , (age=30)
  , (name=(first=John) (family=Flinter)));
 
-Using an alias for a sub-object can save some code and processing time if the
-sub-object is accessed many times. Without the alias for John's name, we can
+Using an alias for a subobject can save some code and processing time if the
+subobject is accessed many times. Without the alias for John's name, we can
 change his family name in this way:
 
 {?} Flinter:?(John.name.family)
@@ -1488,17 +1495,17 @@ change his family name in this way:
 
 {?} x=(header=blabla) (=(a=1) (b=2))
 
-Here, |_a_| and |_b_| are fields in a nameless sub-object of |_x_|. We can ask for the
+Here, |_a_| and |_b_| are fields in a nameless subobject of |_x_|. We can ask for the
 value of |_b_|:
 
 {?} !(x..b)
 {!} 2
 
-To retrieve the whole sub-object:
+To retrieve the whole subobject:
 
-{?} '$(x.):(=?sub-object)
-{?} lst$sub-object
- (sub-object=
+{?} '$(x.):(=?subobject)
+{?} lst$subobject
+ (subobject=
  (a=1) (b=2));
 "
           "An alias can also be created for part of an object:
@@ -1550,6 +1557,34 @@ Explanation: in (A) the value of |_x_| is not evaluated, especially the LHS of
 the = operator. Therefore, a new = node is created each time |_x_| is
 evaluated. In (B), the value of |_x_| IS evaluated, so no new copies of the
 = node are made."
+    )
+  & ( methodtxt
+    =   T
+      , Methods
+      , "A method is function that is a member of an object. A method definition is not
+different from a function definition, but the ways in which methods and a
+functions are called are. While a function call only requires the name of the
+function, a method call requires the name or definition of an object and the
+name of the method, separated by a dot operator. In the body of a method it is
+usually necessary to refer to other members of the same object - that is one of
+the primary objectives of using objects. Such self-references start with |_its_|,
+which is analogous to |_this_| in C++. Here is an example of an object that
+represents a rectangle with an x-size and a y-size for the lengths of two
+orthogonal sides. Apart from these two data members, the object also has a
+member function |_area$_| that returns the product of the x-size and the
+y-size, and another member function that computes the length of the diagonal.
+
+{?} (rect=
+      (x-size=5)
+      (y-size=12)
+      (area=.!(its.x-size)*!(its.y-size))
+      (diagonal=.(!(its.x-size)^2+!(its.y-size)^2)^1/2)
+    );
+{?} (rect.area)$
+{!} 60
+{?} (rect.diagonal)$
+{!} 13
+"
     )
   & ( dumtxt
     =   T
@@ -2090,7 +2125,7 @@ same way as empty strings and numbers.
                         | i
                         | pi
                         )
-                    | ~(glf$('(`/#<>%@?!.$g)))
+                    | ~(glf$('(~`/#<>%@?!.$g)))
                     )
                   & !arg
                 | !seen:? !g ?&glf$('(!.$g))
@@ -2112,7 +2147,7 @@ Now suppose that we want to produce the macro expression
     '(There are 23 elements in list ()$L)
 
 by means of another macro expression that evaluated the number of elements to
-23. Somthing like this:
+23. Something like this:
 
 {?} 23:?N
 {?} '('(There are ()$N elements in list ()$L))
@@ -2170,8 +2205,8 @@ special roles inside patterns, such as the |_!_| prefix and the |_ _ _| operator
               )
             )
     )
-{?} tr$(=foo\L\"STRing\" ~!(sin$4/56) !and_?<UNDERSCORE)
-{!} (=oof\Lgnirts ~!(nis$65/4) !dna_<?erocsrednu)"
+{?} tr$(=foo\\L\"STRing\" ~!(sin$4/56) !and_?<UNDERSCORE)
+{!} (=oof\\Lgnirts ~!(nis$65/4) !dna_<?erocsrednu)"
     )
   & ( unops
     =   T
@@ -2217,8 +2252,8 @@ such situations macro substitution can improve performance by replacing the
 variable by its value in an early stage.
 
 In Bracmat, a macro has the general form |_'<expression>_|. When |_'<expression>_| is
-evaluated, <expression> is searched for sub-expressions headed by the operator
-$, with empty LHS. Such sub-expressions are replaced, depending on what is
+evaluated, <expression> is searched for subexpressions headed by the operator
+$, with empty LHS. Such subexpressions are replaced, depending on what is
 found on the RHS of the $ operator.
 
 After macro substitution has taken place, what remains is an expression of
@@ -2553,10 +2588,10 @@ the prefixes."
 If you want to match pattern !pat one or more times (this is often written as
 {pat}+ ), use the complex pattern |_(? !pat|`)_|. Likewise, if you want to match
 !pat zero or more times ( {pat}* ), use |_(|? !pat|`)_|.
-These patterns should not be the last sub-pattern or precede a subpattern that
+These patterns should not be the last subpattern or precede a subpattern that
 is static and fixes the end point of the repeating sequence, because the
 correct working of the repeating patterns depends on repeated backtracking
-from following sub-patterns. Bracmat may be optimized to skip such
+from following subpatterns. Bracmat may be optimized to skip such
 backtracking and jump to the 'right' end position if that is fixed by the next
 subpattern. 
 In the last resort, you can add a pattern like |_()_| or |_(&)_| or |_(|)_| or |_(:)_|, which
@@ -2735,21 +2770,42 @@ differentiated and, sometimes, simplified."
     =   T
       , "jsn$<expression>"
       , "
-jsn$ serializes <expression> to JSON format.
+|_jsn$_| serializes <expression> to JSON format.
 
-Suppose mars.json contains
+Suppose |_mars.json_| contains
  
-{\"planet\":\"Mars\",
- \"moons\":[\"Deimos\",\"Phobos\"],
- \"Eccentricity\":0.0934}
+    {\"planet\":\"Mars\",
+     \"moons\":[\"Deimos\",\"Phobos\"],
+     \"Eccentricity\":0.0934}
 
-Read mars.json into variable mars:
+Read |_mars.json_| into variable |_mars_|:
+
 {?} get$(\"mars.json\",JSN):?mars
-{!} (Eccentricity.934/10000) + (moons.,(.Deimos) (.Phobos)) + (planet..Mars)
+{!}     (Eccentricity.934/10000)
+      + (moons.,(.Deimos) (.Phobos))
+      + (planet..Mars)
+    ,
+
+{?} !mars:(?name-value-pairs,)
+{!}     (Eccentricity.934/10000)
+      + (moons.,(.Deimos) (.Phobos))
+      + (planet..Mars)
+    ,
 
 Now add the fact that Mars' gravity, compared to the Earth's, is about 3711/9807
-{?} (ratio.3711/9807)+!mars:?mars
-{!} (Eccentricity.934/10000) + (moons.,(.Deimos) (.Phobos)) + (planet..Mars) + (ratio.3711/9807)
+
+{?} !name-value-pairs+(ratio.3711/9807):?name-value-pairs
+{!}   (Eccentricity.934/10000)
+    + (moons.,(.Deimos) (.Phobos))
+    + (planet..Mars)
+    + (ratio.3711/9807)
+
+{?} (!name-value-pairs,):?mars
+{!}     (Eccentricity.934/10000)
+      + (moons.,(.Deimos) (.Phobos))
+      + (planet..Mars)
+      + (ratio.3711/9807)
+    ,
 
 Finally, serialize the new data to JSON
 {?} jsn$!mars
@@ -2952,8 +3008,8 @@ Match <subject> with <pattern>
 A match succeeds if <subject> succeeds and <pattern> is successfully matched
 with <subject>. The returned value is the left operand, <subject>.
 
-Patterns may be built up from sub-patterns and may also include actions that
-are triggered if a sub-pattern successfully matches (part of) the subject.
+Patterns may be built up from subpatterns and may also include actions that
+are triggered if a subpattern successfully matches (part of) the subject.
 
 As with the evaluation of other binary operators, the left operand of the :
 operator is evaluated first. The other operand, <pattern>, is not evaluated,
@@ -2971,7 +3027,7 @@ matching."
 patterns with alternatives, conjunctions and side effects in the form of
 actions. In the following examples, !s stands for the subject expression,
 the expressions in parentheses are patterns and |_!p_|, |_!pa_|, |_!pb_|,
-etc. are sub-patterns therein. |_!a_|, |_!aa_|, etc. stands for an action
+etc. are subpatterns therein. |_!a_|, |_!aa_|, etc. stands for an action
 (a part of the pattern that is conditionally evaluated).
 
     !s:(!p&!a)
@@ -3151,7 +3207,7 @@ This expression succeeds, but finds nothing:
   (De kok snijdt recht en de meid snijdt scheef : (? ?a ? !a ?) & out$(!a is occurring twice))
 
 Check what is unified with |_? ?a_|. To do so, put a variable after the first
-|_?_| and insert an output action after each sub-pattern.
+|_?_| and insert an output action after each subpattern.
 
   (De kok snijdt recht en de meid snijdt scheef
       : ((?x & out$(x is !x))   {output x after unification}
@@ -3323,6 +3379,26 @@ If the value of |_txt_| starts with an valid UTF-8 sequence, bracmat backtracks
 until the value of |_c_| matches the UTF-8 sequence.
 If |_txt_| starts with a sequence that is not UTF-8, bracmat stops backtracking
 when that fact has been established."
+    )
+  & ( beztxt
+    =   T
+      , "bez$"
+      , "bez$ returns two numbers separated by a dot operator. The first number is the
+number of currently allocated binary nodes and leafs. The second number is the
+maximum number of allocated binary nodes and leafs in this session, until now.
+These numbers are not of much use, except for controlling that there are no
+memory leaks. The function bez$ can be turned off by setting |_TELMAX_| to zero
+in bracmat.c before compilation.
+
+In interactive mode, with TELMAX set to one, Bracmat shows
+(1) whether the evaluation was successful or not, (2) the amount of CPU time
+and (3) the result of calling bez$ after each non-empty evaluation result.
+
+{?} 2^10000+-1*3^100000*5^-10000
+{!} -13349714142304014694589143904897822922452485076062773553456279939841274146
+...2182755869676383936027544370832840538165786625768305384553968906402587890625
+    S   0,72 sec  (3990.13910)
+"
     )
   & ( chrtxt
     =   T
@@ -3521,13 +3597,16 @@ The second parameter is optional.
   & ( lsttxt2
     =   T
       , "lst$(<(=expression) or variable>*,MEM [,LIN][,RAW])"
-      , "The difference with the preceding form is, that output takes place to
+      , "The difference with the preceding form is that output takes place to
 memory. What is normally visible on screen is put in one atom, which is
 the return value of the call to lst. It has the opposite effect of
-get$(<atom>,MEM). Use : compression of an expression to save space. If the
-compressed expression is needed, it is decompressed with get$. Compression is
-typically by a factor of about 5, but may be as large as 16. Expressions with
-very large atoms (such as this help function) do less well. Example:
+get$(<atom>,MEM). In theory one can save some memory by writing an expression
+to a single leaf node, because each node in an expression has some memory
+overhead. In practice the saving can be quite small or non-existent, because
+Bracmat expressions often share part of their data structures with other
+expressions.
+
+Example:
 
 {?} lst$(fct,MEM):?sleeping-fct
 {?} tbl$(fct,0)   { remove function fct$ from memory }
@@ -3549,7 +3628,7 @@ Code that has been saved with lst$ can be reloaded with get$.
   & ( maptxt
     =   T
       , "map$(<fnc>.<list>)"
-      , "map$ produces a list containing the results of applying <fnc> to each member
+      ,   "map$ produces a list containing the results of applying <fnc> to each member
 in <list>. <fnc> can be the name of a function, a function definition
 ('anonymous function') or a lambda abstraction. <fnc> can also be the name of
 a built-in function. (See the first example.) The members in <list> must be
@@ -3562,7 +3641,7 @@ separated by the space operator.
 {!} 1 4 9 16
 {?} (square=.!arg^2)&map$(square.1 2 3 4)
 {!} 1 4 9 16"
-"{?} (  map
+          "{?} (  map
     $ ( (
         =   x
           .     !arg:?*?^%?x*?*?^!x*?
@@ -3592,7 +3671,8 @@ character of the input string is a separator, the last call to fnc$ is with
 a zero-length string. This will often happen if a newline character terminates
 every line in the input string and the newline character is specified as a
 separator.
-")
+"
+    )
   & ( memtxt
     =   T
       , "mem$[EXT]"
@@ -4128,6 +4208,25 @@ must be the empty string"
 
 An open file is closed by specifying an impossible file position."
     )
+  & ( predvartxt
+    =   T
+      , "Predefined variables"
+      , "There are three variables that are predefined, but that in no way are preserved
+by Bracmat.
+
+{?} !w
+
+This returns article 11 of the GNU General Public License, Version 2.
+
+{?} !c
+
+This returns article 12 of the GNU General Public License, Version 2.
+
+{?} !v
+
+This returns the current version number and build date of Bracmat.
+"
+    )
   & ( show
     =   fnc,df,ex
       .   !arg:(?fnc.?df.?ex)
@@ -4194,7 +4293,7 @@ An open file is closed by specifying an impossible file position."
                       ' ( @(!t:?s \n ?t)
                         & wr$(detag$!s)
                         )
-                    & wr$detag$!t
+                    & wr$(detag$!t)
                     & putout$!arg
                   | 
               )
@@ -4234,7 +4333,7 @@ An open file is closed by specifying an impossible file position."
               )
             & :?antw
             &   whl
-              ' ( !arg:(~:?ptxt) ?arg
+              ' ( !arg:%@?ptxt ?arg
                 &   !!ptxt
                   : (   (T,?titel,?txt)
                       & !tit
@@ -4287,7 +4386,7 @@ Topic:")
                 | !arg
             )
           & ( codes
-            =   e a cds sdc dc code codev A K L Z
+            =   e a cds code codev A K L Z
               .   ( code
                   =     a e z ZA AA
                       , az zz S seps P n A
@@ -4424,21 +4523,15 @@ Topic:")
                       : ?A (code.?,?K) (code.?,?L) ?Z
                     & !A (code.,str$(!K !L)) !Z:?cds
                     )
-                & :?sdc
-                &   whl
-                  ' ( !cds:%?dc ?cds
-                    & !dc !sdc:?sdc
+                &   map
+                  $ ( ( 
+                      =   
+                        .   !arg:@&angbrack$!arg
+                          |   !arg:(?e.?a,?arg)
+                            & (!e.!a,angbrack$!arg)
+                      )
+                    . !cds
                     )
-                &   whl
-                  ' ( !sdc:%?dc ?sdc
-                    &     ( !dc:@&angbrack$!dc
-                          |   !dc:(?e.?a,?dc)
-                            & (!e.!a,angbrack$!dc)
-                          )
-                          !cds
-                      : ?cds
-                    )
-                & !cds
             )
           & ( inline1
             =   a m
@@ -4515,7 +4608,7 @@ Topic:")
                 & ( entn
                   =   A
                     .     !arg:%?A ?arg
-                        & ent$!A entn$!arg
+                        & toML$!A entn$!arg
                       | !arg
                   )
                 & ( atts
@@ -4590,7 +4683,6 @@ Topic:")
                             )
                           )
                   )
-                & lst$(arg,"arg.lst",NEW)
                 & fil$(!file,w)
                 & fil$(,STR)
                 & write$!xml
@@ -4733,7 +4825,7 @@ Topic:")
                   =   n,s,t
                     .     @( str$!arg
                            :   #%?n
-                               %?`s
+                               `%?s
                                ?t
                                (   \n
                                    ((=.!n+1)$() !s ?:?arg)
@@ -4882,25 +4974,22 @@ Topic:")
                       & (dl.,!dl)
                   )
                 & ( trimn
-                  =   c p line R trm
+                  =   c p
                     .   !arg:(?arg.?p)
-                      & str$!arg:?arg
-                      & ( trm
-                        =   p
-                          .   !arg:(?arg.?p)
-                            &   whl
-                              ' ( !p+-1:~<0:?p
-                                & @(!arg:" " ?arg)
-                                )
-                            & !arg
-                        )
-                      & :?R
-                      &   whl
-                        ' ( @(!arg:?line \n ?arg)
-                          & !R trm$(!line.!p) \n:?R
+                      &   str
+                        $ ( vap
+                          $ ( ( 
+                              =   
+                                .     whl
+                                    ' ( !p+-1:~<0:?p
+                                      & @(!arg:" " ?arg)
+                                      )
+                                  & !arg
+                              )
+                            . str$!arg
+                            . \n
+                            )
                           )
-                      & !R trm$(!arg.!p):?R
-                      & str$!R
                   )
                 & ( trim1
                   =   
@@ -5001,7 +5090,7 @@ Topic:")
                   )
                 & ( blocklevel
                   =   a b c d ee f g s x y
-                    .     @(!arg:?a \n1 %?`s ?b \n2 !s ?c)
+                    .     @(!arg:?a \n1 `%?s ?b \n2 !s ?c)
                         &   break2$!a
                             (   @( !c
                                  :   ?d
@@ -5040,7 +5129,7 @@ Topic:")
                                     pre$!b
                               )
                           | ( blockquote
-                            .,(pre.(class.exoutput),!arg)
+                            . ,(pre.(class.exoutput),!arg)
                             )
                           )
                       | definitionList$!arg
@@ -5087,7 +5176,10 @@ Topic:")
                                   )
                                )
                            )
-                        & break2$!a (blockquote.,(pre.,!c \n !ee)) (!f:|\n !f) (!g|\n !g)
+                        &   break2$!a
+                            (blockquote.,(pre.,!c \n !ee))
+                            (!f:|\n !f)
+                            (!g|\n !g)
                       | inline1$!arg
                       | break2$!arg
                   )
@@ -5126,81 +5218,99 @@ Topic:")
                   )
                 & ( listmenu2
                   =     men sel tekst a b term definition
-                      , ddlines padded menu menutekst
+                      , ddlines padded menu/tekst
                     .   !arg:(?men.?sel)
-                      & :?menu:?menutekst
-                      &   whl
-                        ' ( !sel:(?antw,?keuze) ?sel
-                          & out$(listmenuitem !antw !keuze)
-                          & (   @( !men
-                                 :   ( !antw&:?a
-                                     | ?a \n !antw
-                                     )
-                                     " "
-                                     ( ?tekst
-                                     & ( !antw:#
-                                       |   str$(!antw " " !tekst)
-                                         : ?tekst
-                                       )
-                                     )
-                                     ( (\n (%@:~" ") ?|)
-                                     : ?b
-                                     )
-                                 )
-                              & str$(!a !b):?men
-                            |     out
-                                $ ( "error men="
-                                    str$!men
-                                    " sel="
-                                    str$!sel
-                                    " antw="
-                                    !antw
-                                    " arg="
-                                    !arg
-                                  )
-                              & get'
-                            )
-                          & ( padded
-                            =   
-                              .     @(!arg:%@)
-                                  & entCP$"&nbsp;" !arg entCP$"&nbsp;"
-                                |   @(!arg:%@ %@)
-                                  & entCP$"&nbsp;" !arg
-                                | !arg
-                            )
-                          & ( ddlines
-                            =   line
-                              .     @(!arg:?line \n ?arg)
-                                  &   inline1$!line
-                                      (br.,)
-                                      ddlines$!arg
-                                | inline1$!arg
-                            )
-                          &     !menu
-                                ( !keuze:
-                                |   @(!tekst:?term \n ?definition)
-                                  &   ( dt
-                                      .   
-                                        , ( a
-                                          .   (href."#" first$!keuze)
-                                            , inline1$!term
+                      & ( padded
+                        =   
+                          .     @(!arg:%@)
+                              & entCP$"&nbsp;" !arg entCP$"&nbsp;"
+                            |   @(!arg:%@ %@)
+                              & entCP$"&nbsp;" !arg
+                            | !arg
+                        )
+                      & ( ddlines
+                        =   line
+                          .     @(!arg:?line \n ?arg)
+                              &   inline1$!line
+                                  (br.,)
+                                  ddlines$!arg
+                            | inline1$!arg
+                        )
+                      &     map
+                          $ ( ( 
+                              =   
+                                .   !arg:(?antw,?keuze)
+                                  & out$(listmenuitem !antw !keuze)
+                                  & (   @( !men
+                                         :   (   !antw
+                                               & :?a
+                                             | ?a \n !antw
+                                             )
+                                             " "
+                                             ( ?tekst
+                                             & ( !antw:#
+                                               |   str$(!antw " " !tekst)
+                                                 : ?tekst
+                                               )
+                                             )
+                                             ( ( \n (%@:~" ") ?
+                                               | 
+                                               )
+                                             : ?b
+                                             )
+                                         )
+                                      & str$(!a !b):?men
+                                    |     out
+                                        $ ( "error men="
+                                            str$!men
+                                            " sel="
+                                            str$!sel
+                                            " antw="
+                                            !antw
+                                            " arg="
+                                            !arg
                                           )
-                                      )
-                                      (dd.,ddlines$!definition)
-                                      \n
-                                |   ( dt
-                                    .   
-                                      , ( a
-                                        .   (href."#" first$!keuze)
-                                          , inline1$!tekst
-                                        )
+                                      & get'
                                     )
-                                    \n
-                                )
-                            : ?menu
-                          & !menutekst !tekst:?menutekst
-                          )
-                      & (!men.!menu.!menutekst)
+                                  & (   !keuze:
+                                      |   @(!tekst:?term \n ?definition)
+                                        &   ( dt
+                                            .   
+                                              , ( a
+                                                .   (href."#" first$!keuze)
+                                                  , inline1$!term
+                                                )
+                                            )
+                                            (dd.,ddlines$!definition)
+                                            \n
+                                      |   ( dt
+                                          .   
+                                            , ( a
+                                              .   (href."#" first$!keuze)
+                                                , inline1$!tekst
+                                              )
+                                          )
+                                          \n
+                                    . !tekst
+                                    )
+                              )
+                            . !sel
+                            )
+                        : ?menu/tekst
+                      & ( !men
+                        .   map
+                          $ ( ( 
+                              = .!arg:(?arg.?)&!arg
+                              )
+                            . !menu/tekst
+                            )
+                        .   map
+                          $ ( ( 
+                              = .!arg:(?.?arg)&!arg
+                              )
+                            . !menu/tekst
+                            )
+                        )
                   )
                 & ( doMenuItems
                   =   sel menutekst antw keuze menutitel
@@ -5208,8 +5318,7 @@ Topic:")
                       &   whl
                         ' ( !sel:(?antw,?keuze) ?sel
                           & out$(doMenuItem !antw en !keuze)
-                          & ( !keuze:
-                              & out$NOKEUZE
+                          & ( !keuze:&out$NOKEUZE
                             |   !menutekst:%?menutitel ?menutekst
                               & out$(!titel !menutitel !keuze)
                               &   writeHTML
@@ -5221,8 +5330,11 @@ Topic:")
                   )
                 & (.):?backtotitref
                 & !arg:(?overviewtitref.?topictitel.?arg)
+                & out$(overviewtitref !overviewtitref)
+                & out$(topictitel !topictitel)
+                & out$(arg !arg)
                 &   whl
-                  ' ( !arg:(~:?ptxt) ?arg
+                  ' ( !arg:%@?ptxt ?arg
                     &   !!ptxt
                       : (   (T,?titel,?txt)
                           & Tit$(!ptxt.!titel)
@@ -5231,7 +5343,6 @@ Topic:")
                             $ (!ptxt.!overviewtitref.!backtotitref.!arg)
                         |   (M,?titel,?men,?sel)
                           & Tit$(!ptxt.!titel)
-                          & :?menu:?menutekst
                           &   listmenu2$(!men.!sel)
                             : (?txt.?menu.?menutekst)
                           &   addContent2paragraphs
@@ -5248,21 +5359,20 @@ Topic:")
                 & out$\"
             )
           & ( anchors
-            =   R z a m Z M L lastchar E A acc
+            =   R a m Z M L lastchar E A
               .   ( lastchar
                   =   "/"
                     | ~<a:~>z
                     | ~<A:~>Z
                     | ~<0:~>9
                   )
-                & :?acc
-                &   whl
-                  ' ( !arg:%?z ?arg
-                    &     !acc
-                          (   !z:@
+                &   map
+                  $ ( ( 
+                      =   
+                        .     !arg:@
                             & :?R
                             &   whl
-                              ' ( @( !z
+                              ' ( @( !arg
                                    :   ?a
                                        http
                                        ?m
@@ -5274,63 +5384,62 @@ Topic:")
                                              ?
                                          | 
                                          )
-                                       : ?z
+                                       : ?arg
                                        )
                                    )
                                 & @( rev$!m
                                    : ?Z (%@?L:!lastchar) ?M
                                    )
                                 & http rev$(str$(!L !M)):?m
-                                & str$(rev$!Z !z):?z
+                                & str$(rev$!Z !arg):?arg
                                 &   !R !a (a.(href.!m),!m)
                                   : ?R
                                 )
-                            & !R !z
-                          |   !z:(?E.?A,?z)
-                            & (!E.!A,anchors$!z)
-                          | !z
-                          )
-                      : ?acc
+                            & !R !arg
+                          |   !arg:(?E.?A,?arg)
+                            & (!E.!A,anchors$!arg)
+                          | !arg
+                      )
+                    . !arg
                     )
-                & !acc
             )
           & ( fputall
-            =   parcontent,content,a,paragraphs,helpbody
-              .   !arg:?paragraphs
-                & :?helpbody
-                &   whl
-                  ' ( !paragraphs:(?.?parcontent) ?paragraphs
-                    &   whl
-                      ' ( !parcontent:(?.%?content) ?parcontent
-                        &   whl
-                          ' ( !content:%?a ?content
-                            & !helpbody anchors$!a:?helpbody
+            =   
+              .   map
+                $ ( ( 
+                    =   parcontent
+                      .   !arg:(?.?parcontent)
+                        &   map
+                          $ ( ( 
+                              =   content
+                                .   !arg:(?.%?content)
+                                  &   map
+                                    $ ((=.anchors$!arg).!content)
+                              )
+                            . !parcontent
                             )
-                        )
                     )
-                & !helpbody
+                  . !arg
+                  )
             )
           & ( removeEmpty
-            =   A M Z z e a es
+            =   Z es
               .   !arg:(?Z.?es)
-                & :?z
-                & whl'(!Z:%?A ?Z&!A !z:?z)
-                &   whl
-                  ' ( !z:%?A ?z
-                    &     (   !A:(?e.?a,?M)
+                &   map
+                  $ ( ( 
+                      =   M e a
+                        .     !arg:(?e.?a,?M)
                             &   (!e.!a,removeEmpty$(!M.!es):?M)
-                              : ?A
+                              : ?arg
                             & (   !M:
                                 & !es:? !e ?
                                 & 
-                              | !A
+                              | !arg
                               )
-                          | !A
-                          )
-                          !Z
-                      : ?Z
+                          | !arg
+                      )
+                    . !Z
                     )
-                & !Z
             )
           & ( flatten
             =   A D
@@ -5339,27 +5448,32 @@ Topic:")
                 | !arg
             )
           & ( unspace
-            =   a z
-              .     whl
-                  ' @( !arg
-                     : (" "|\n|\t) ?arg
-                     )
-                & rev$!arg:?arg
-                &   whl
-                  ' @( !arg
-                     : (" "|\n|\t) ?arg
-                     )
-                & rev$!arg:?arg
-                &   whl
-                  ' ( @( !arg
-                       :   ?a
-                           (" "|\n|\t)
-                           (" "|\n|\t)
-                           ?z
-                       )
-                    & str$(!a " " !z):?arg
-                    )
-                & !arg
+            =   
+              .       vap
+                    $ ( ( 
+                        =   
+                          .   vap
+                            $ ( ( 
+                                =   
+                                  .   vap
+                                    $ ( ( 
+                                        =   
+                                          .   !arg:
+                                            | " " !arg
+                                        )
+                                      . !arg
+                                      . \t
+                                      )
+                                )
+                              . !arg
+                              . \n
+                              )
+                        )
+                      . !arg
+                      . " "
+                      )
+                  : " " ?arg
+                & str$!arg
             )
           & ( createIndex
             =     a Anchors L h dts body nam tit Tits
@@ -5399,7 +5513,6 @@ Topic:")
                         )
                         ?arg
                     )
-                & lst$(Anchors,Anchors,NEW)
                 &   
                   : ?dts
                   : ?lastdt
@@ -5478,21 +5591,17 @@ Topic:")
             )
           &   ( compactBlockquotes
               =   A B M Z z e a x y
-                .   !arg:?Z
-                  & :?z
-                  &   whl
-                    ' ( !Z:%?A ?Z
-                      & (!A:\n|!A !z:?z)
-                      )
-                  &   whl
-                    ' ( !z:%?A ?z
-                      &     (   !A:(~blockquote:?e.?a,?M)
-                              & (!e.!a,compactBlockquotes$!M)
-                            | !A
-                            )
-                            !Z
-                        : ?Z
-                      )
+                .       map
+                      $ ( ( 
+                          =   
+                            .   !arg:\n&
+                              |   !arg:(~blockquote:?e.?a,?M)
+                                & (!e.!a,compactBlockquotes$!M)
+                              | !arg
+                          )
+                        . !arg
+                        )
+                    : ?Z
                   &   whl
                     ' (   !Z
                         :   ?a
@@ -5569,13 +5678,11 @@ Topic:")
                         | 
                     )
                   & inner$(lusmenu.0.)
-                  & lst$(menus,"menus.bra",NEW)
                   & !menus
                   &   whl
                     ' ( !menus:?A (?M.%?B+%) ?C
                       & !A (!M.!B) !C:?menus
                       )
-                  & lst$(menus,"menus.bra",APP)
                   & !menus:?Menus
                   & :?MM
                   &   whl
@@ -5594,7 +5701,6 @@ Topic:")
                           & !Menutje !Menus:?Menus
                           )
                       )
-                  & lst$(MM,"menus.bra",APP)
                   & ( levmen
                     =   U T L A levs R M t
                       .     !arg:(?T.?L.?A) ?arg
@@ -5612,30 +5718,29 @@ Topic:")
                         | !arg
                     )
                   & levmen$!MM:?LL
-                  & lst$(LL,"menus.bra",APP)
                   & ( todl
-                    =   R T L t S
-                      .     :?R
-                          &   whl
-                            ' ( !arg:(?T.?L.?t.?S) ?arg
-                              &     !R
-                                    ( dt
-                                    .   
-                                      , ( a
-                                        .   (href.str$("#" !T))
-                                          , inline1$!t
-                                        )
-                                    )
-                                    ( !S:
-                                    | (dd.,todl$!S)
-                                    )
-                                : ?R
+                    =   T L t S
+                      . dl
+                      .   
+                        ,   map
+                          $ ( ( 
+                              =   
+                                .   !arg:(?T.?L.?t.?S)
+                                  &   ( dt
+                                      .   
+                                        , ( a
+                                          .   (href.str$("#" !T))
+                                            , inline1$!t
+                                          )
+                                      )
+                                      ( !S:
+                                      | (dd.,todl$!S)
+                                      )
                               )
-                          & (dl.,!R)
-                        | 
+                            . !arg
+                            )
                     )
                   & todl$!LL:?LLhtml
-                  & lst$(LLhtml,"menus.bra",APP)
                   & (!LL.!LLhtml)
               )
           & ( flatMenuList
@@ -5651,59 +5756,62 @@ Topic:")
                         ' (!subs:%?sub ?subs&trv$!sub)
                   )
                 & trv$!arg
-                & lst$(menlist,menlist,NEW)
                 & !menlist
             )
           & ( reorderParagraphs
             =     menlist paragraphs pars
                 , NN name lev A B C D
               .   !arg:(?menlist.?pars)
-                & :?paragraphs
-                &   whl
-                  ' ( !menlist:(?NN.?name.?lev) ?menlist
-                    & out$(!NN !name)
-                    &   !pars
-                      : ?A (!name.(titel.?.?B) ?C) ?D
-                    &     !paragraphs
-                          (!name.(titel.str$(h !lev+1).!B) !C)
-                      : ?paragraphs
-                    & !A !D:?pars
+                &   map
+                  $ ( ( 
+                      =   
+                        .   !arg:(?NN.?name.?lev)
+                          & out$(!NN !name)
+                          &   !pars
+                            :   ?A
+                                (!name.(titel.?.?B) ?C)
+                                ?D
+                          & !A !D:?pars
+                          & ( !name
+                            . (titel.str$(h !lev+1).!B) !C
+                            )
+                      )
+                    . !menlist
                     )
-                & lst$(paragraphs,paragraphs,APP)
-                & !paragraphs
             )
           & ( rtrim
-            =   R A Z RTR
-              .   str$!arg:?arg
-                & :?R
-                & ( RTR
-                  = .whl'@(!arg:?arg " ")&!arg
+            =   
+              .   str
+                $ (     vap
+                      $ ( ( 
+                          =   
+                            .   whl'@(!arg:?arg " ")
+                              & !arg \n
+                          )
+                        . str$!arg
+                        . \n
+                        )
+                    : ?arg \n
+                  & !arg
                   )
-                &   whl
-                  ' ( @(!arg:?A \n ?arg)
-                    & !R RTR$!A \n:?R
-                    )
-                & str$(!R RTR$!arg):?R
-                & whl'@(!R:?R " ")
-                & !R
             )
           & ( rightTrimPre
-            =   R A X E P
-              .   :?R
-                &   whl
-                  ' ( !arg:?X (?E.?Y) ?arg
-                    &     !R
-                          !X
-                          (   !Y:(?A,?P)
-                            & (   !E:pre
-                                & (pre.!A,rtrim$!P)
-                              | (!E.!A,rightTrimPre$!P)
-                              )
-                          | (!E.rightTrimPre$!Y)
-                          )
-                      : ?R
+            =   A X E P
+              .   map
+                $ ( ( 
+                    =   
+                      .     !arg:(?E.?Y)
+                          & (   !Y:(?A,?P)
+                              & (   !E:pre
+                                  & (pre.!A,rtrim$!P)
+                                | (!E.!A,rightTrimPre$!P)
+                                )
+                            | (!E.rightTrimPre$!Y)
+                            )
+                        | !arg
                     )
-                & !R !arg
+                  . !arg
+                  )
             )
           & ( convertBlockQuoteToTable
             =     A Z prows ret rows row
@@ -5713,7 +5821,7 @@ Topic:")
                   ' (   !arg
                       :   ?A
                           ( blockquote
-                          .
+                          .   
                             ,     ?
                                   ( pre
                                   .   ( class
@@ -5762,15 +5870,71 @@ Topic:")
                     )
                 & !ret !arg
             )
+          & ( fixArrows
+            =     A Z aa back backmore href inh
+                , more name nback nmore seen txt za
+              .   :?seen
+                &   map
+                  $ ( ( 
+                      =   
+                        .     !arg:(?name.?inh)
+                            & !name !seen:?seen
+                            & :?back:?more
+                            & (   !inh:?A (back.?back) ?Z
+                                & !A !Z:?inh
+                              | 
+                              )
+                            & (   !inh:?A (more.?more) ?Z
+                                & !A !Z:?inh
+                              | 
+                              )
+                            & !back !more:~:?backmore
+                            & :?nback:?nmore
+                            &   whl
+                              ' (   !backmore
+                                  :   (span.(class.arrow),?)
+                                      ( a
+                                      .   ?aa (href."#" ?href) ?za
+                                        , ?txt
+                                      )
+                                      (br.,)
+                                      ?backmore
+                                & (   !seen:? !href ?
+                                    &     !nback
+                                          (span.(class.arrow),⇐)
+                                          ( a
+                                          .     !aa
+                                                (href."#" !href)
+                                                !za
+                                            , !txt
+                                          )
+                                          (br.,)
+                                      : ?nback
+                                  |     !nmore
+                                        (span.(class.arrow),⇒)
+                                        ( a
+                                        .   !aa (href."#" !href) !za
+                                          , !txt
+                                        )
+                                        (br.,)
+                                    : ?nmore
+                                  )
+                                )
+                            & ( !name
+                              . !inh (more.!nmore) (back.!nback)
+                              )
+                          | !arg
+                      )
+                    . !arg
+                    )
+            )
           & !arg:(?fname.?tablestuff)
           & doMenu$:(?theMenu.?Contents)
-          & lst$(theMenu,theMenu,NEW)
           & flatMenuList$!theMenu:?menlist
           & :?paragraphs
           & writeHTML$((.).Bracmat.lusmenu)
-          & out$(lst paragraphs)
-          & lst$(paragraphs,paragraphs,NEW)
           & reorderParagraphs$(!menlist.!paragraphs):?paragraphs
+          & fixArrows$!paragraphs:?paragraphs
           & fputall$!paragraphs:?helpbody
           & removeEmpty$(!helpbody.code i):?helpbody
           & compactBlockquotes$!helpbody:?helpbody
@@ -5780,7 +5944,6 @@ Topic:")
           & ( !tablestuff:
             | !tablestuff$!helpbody:?helpbody
             )
-          & lst$(helpbody,helpbody,NEW)
           & createIndex$!helpbody:?Index
           &     ( "!DOCTYPE"
                 . " html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\""
