@@ -6,6 +6,7 @@
 \usepackage[x11names]{xcolor}
 \usepackage[a4paper,margin=2.54cm]{geometry}
 \usepackage{makeidx}
+\usepackage{booktabs}
 \usepackage[pdftex,colorlinks,linkcolor={blue!40!black},bookmarks]{hyperref}
 \usepackage{tocloft}
 
@@ -62,7 +63,7 @@ you.
 Bracmat is a computer programming language designed for analysis and
 manipulation of complex data, be it evaluation of algebraic
 expressions, parsing natural language, validation of HTML or automatic
-chaining multi-facetted webservices into a workflow. In several
+chaining multifacetted webservices into a workflow. In several
 projects, Bracmat has been combined with other programming languages
 to take care of high level activities that otherwise would be very
 time consuming to implement.
@@ -98,11 +99,11 @@ collections thereof. For example, \verb|a+b+a| becomes \verb|2*a+b|
 and not, say, \verb|x.a| or \verb|b+2*a|. Again, Bracmat takes
 decisions that you can't easily circumvent. However, the more complex
 the data are, the better are the chances that not all results,
-although defendable, have an appearance that suits you. It is here
+although defensible, have an appearance that suits you. It is here
 that programming comes in: Bracmat leaves certain kinds of data
 unchanged, but opens the possibility to dissect data, to perform
 calculations on the parts, and to assemble an answer from the
-resulting sub-answers.
+resulting subanswers.
 
 Bracmat makes no distinction between data and instructions. All there
 is are expressions. Some expressions stay the same upon evaluation,
@@ -150,7 +151,7 @@ Many problems can be solved by following steps similar to those taken when solvi
 \item Merge stuff
 \item Combine stuff
 \item Replace stuff
-\item Cope with labyrinthian problems with many culs-de-sac
+\item Cope with labyrinthine problems with many culs-de-sac
 \end{itemize}
 
 \subsection{User interaction with Bracmat}
@@ -194,7 +195,7 @@ the result of a calculation, you may write a semicolon after the last
 instruction. Instructions in a text file must be separated by
 semicolons.
 
-You may freely surround binary operators with white-space characters
+You may freely surround binary operators with whitespace characters
 (e.g. space, tab, line feed). Take care not to put spaces between the
 characters that make up a fraction or negative number,
 \verb|- 1234 / 5678| is not the same as \verb|-1234/5678|.
@@ -260,7 +261,7 @@ here are some recommendations about programming habits:
 \item Use meaningful names. There is no limit to their length and you
   may use the minus-sign as separator in multiple-word-names.
 \item Let Bracmat indent your code: regularly save your code, read it
-  in Bracmat, save it from bracmat using the lst function to the file
+  in Bracmat, save it from Bracmat using the lst function to the file
   you are editing and reread the file in your editor.
 \item Try to evade the ``not'' prefix \verb|~| and the use of arrays.
 \end{itemize}
@@ -496,6 +497,7 @@ word into the word \verb|cat|:
 {?} the dog runs:?Row     _com[initial creation]
 {?} !Row:%?one % %?three  _com[step 1: retrieval of 1st and 3rd word]
 {?} !one cat !three:?Row  _com[step 2: reconstruction]
+_oct{!} the cat runs
 \end{ex}
 
 This may seem complicated and cumbersome, but look at this:
@@ -518,31 +520,31 @@ make the origin of some details more explicit:
   \item conditional execution of right operands of ``and'' and ``or''
   \item parameter passing (only ``by value'')
   \end{itemize}
-
+  
 \item Pascal
-\begin{quote}
-  locally defined functions and routines
-\end{quote}
+  \begin{itemize}
+  \item locally defined functions and routines
+  \end{itemize}
 
 \item Lisp
-\begin{itemize}
-\item implementation of expressions in binary trees
-\item weak type checking
-\item late binding
-\end{itemize}
-
+  \begin{itemize}
+  \item implementation of expressions in binary trees
+  \item weak type checking
+  \item late binding
+  \end{itemize}
+  
 \item Logo
-\begin{quote}
-  different notations for the same variable, depending on whether it
-  produces or receives a value
-\end{quote}
-
+  \begin{itemize}
+  \item different notations for the same variable, depending on whether
+    it produces or receives a value
+  \end{itemize}
+  
 \item Snobol, Icon
-\begin{itemize}
-\item a well developed pattern matching apparatus including
-  backtracking
-\item dual results of evaluations: both value and success/failure
-\end{itemize}
+  \begin{itemize}
+  \item a well developed pattern matching apparatus including
+    backtracking
+  \item dual results of evaluations: both value and success/failure
+  \end{itemize}
 \end{description}
 
 Every similarity to other computer algebra systems is a matter of
@@ -576,7 +578,7 @@ programming language Bracmat: it is all about tree branches.
 \subsection{How to obtain Bracmat}
 
 There are a few download options. You can get the last revision from
-\texttt{https://github.com/ BartJongejan/Bracmat}.
+\texttt{https://github.com/\allowbreak{}BartJongejan/\allowbreak{}Bracmat}.
 
 At \texttt{http://cst.dk/download/bracmat/} you can follow the history
 of Bracmat from its inception somewhere in the eighties up to the last
@@ -654,7 +656,7 @@ match operator that this is not the normal match operation, but a
 string match operation.
 \begin{ex}
 {?} @(20abc:? b ?)  _com[is there a character _bc[b] in the string _bc[20abc]?]
-_oct{!} 20 a b c
+_oct{!} 20abc
 _oct    S   0,00 sec
 \end{ex}
 
@@ -713,8 +715,8 @@ match.
         | !arg
     )
 _oct{!} ivanRule
-{?} ivanRule$(She bought a bycicle for Ivan)
-_oct{!} She bought a bycicle for Wanja
+{?} ivanRule$(She bought a bicycle for Ivan)
+_oct{!} She bought a bicycle for Wanja
 \end{ex}
 % $
 
@@ -816,7 +818,7 @@ _oct{!} a b
 _oct    S
 \end{ex}
 \begin{ex}
-{?} @(a b:a ?)        _coma[illegal, lhs of string match operator]
+{?} @(a b:a ?)        _coma[illegal, LHS of string match operator]
                       _comc[must be atomic]
 _com[Bracmat exits]
 \end{ex}
@@ -918,8 +920,8 @@ A match succeeds if \emph{subject} succeeds and \emph{pattern} is
 successfully matched with \emph{subject}. The returned value is the
 left operand, \emph{subject}.
 
-Patterns may be built up from sub-patterns and may also include
-actions that are triggered if a sub-pattern successfully matches (part
+Patterns may be built up from subpatterns and may also include
+actions that are triggered if a subpattern successfully matches (part
 of) the subject.
 
 As with the evaluation of other binary operators, the left operand of
@@ -928,12 +930,13 @@ the \verb|:| operator is evaluated first. The other operand,
 matching (parts of) \emph{pattern} may be evaluated several
 times. This is the case with function calls, atoms with a \verb|!|
 prefix and all right hand sides of the \verb|&| operator. The use of
-the involved binary operators (\verb|$ ' &|) and prefixes
-(\verb|! !!|) as ``meta operators'' does not restrict the range of
+the involved binary operators
+(\verb|$|, \verb|'| and \verb|&|) and prefixes (\verb|!| and
+\verb|!!|) as ``meta operators'' does not restrict the range of
 matchable expressions in a serious way, as these operators and
 prefixes normally do not occur in evaluated subject expressions. The
-same is true for some other operators (\verb,: | _, and
-\verb|=|). These operators, too, have a special meaning within
+same is true for some other operators (\verb|:|, \verb,|,, \verb|_|,
+and \verb|=|). These operators, too, have a special meaning within
 patterns. All other binary operators occurring in a pattern are
 searched for in the subject expression as part of the pattern
 matching.
@@ -943,7 +946,7 @@ in formulating complex patterns with alternatives, conjunctions and
 side effects in the form of actions. In the following examples,
 \verb|!s| stands for the subject expression, the expressions in
 parentheses are patterns and \verb|!p|, \verb|!pa|, \verb|!pb|,
-etc. are sub-patterns therein. \verb|!a|, \verb|!aa|, etc. stands for
+etc. are subpatterns therein. \verb|!a|, \verb|!aa|, etc., stand for
 an action (a part of the pattern that is conditionally evaluated).
 
 \begin{v}
@@ -969,12 +972,13 @@ is also tried.
 The next example combines these operators in a grammar-like
 expression:
 \begin{v}
-!s:( !pa         & !A  _com[If either _bc[!pa], or _bc[!pb] or both of _bc[!pc1] and _bc[!pc2]]
+!s:( !pa         & !A  _com[if either _bc[!pa], or _bc[!pb] or both of _bc[!pc1] and _bc[!pc2]]
    | !pb         & !B  _com[fire, actions _bc[!A], _bc[!B] and _bc[!C], respectively,]
    | (!pc1:!pc2) & !C  _com[are triggered]
    )
 \end{v}
-Take care for the grouping of the \verb|: &| and \verb,|, operators:
+Notice the grouping of the \verb|:|, \verb|&| and \verb,|,
+operators:
 
 \verb|(!s:!pa):!pb| and \verb|!s:(!pa:!pb)| have, incidentally, the
 same effect, but the following expressions are very different:
@@ -1002,7 +1006,7 @@ instead of being passive part of a pattern. These operators are
 \verb.= | & : ' $ _.
 
 The normal role of these operators is ignored by the pattern matching
-evaluator if they are escaped with a \verb|$| node with an empty lhs.
+evaluator if they are escaped with a \verb|$| node with an empty LHS.
 
 \begin{ex}
 {?} (=foo'bar):(=$(foo'bar))
@@ -1012,7 +1016,7 @@ _oct{!} foo bar
 \end{ex}
 
 The escape operator only affects the top node of the escape operator's
-rhs. The lhs and rhs of the affected node are matched against the
+RHS. The LHS and RHS of the affected node are matched against the
 subject in the normal way.
 
 {\fontsize{11}{12}\selectfont
@@ -1026,7 +1030,7 @@ subject in the normal way.
                                    _comc[are evaluated as normal]
 _oct{!} =a$123
 {?} !n
-_oct{!} 123                            _coma[this proves that the rhs of the top _bc$]
+_oct{!} 123                            _coma[this proves that the RHS of the top _bc$]
 _oct                                   _comc[was evaluated]
 {?} (=b$456):(=$((vowel')$(#:?m))) _coma[this fails, proving that the pattern]
                                    _comb[expression _bc[vowel'] doesn't recognise]
@@ -1044,8 +1048,8 @@ _oct{!} 456
 }
 
 The escape operator functions with all Bracmat operators, but the
-operators \verb|.| , whitespace, \verb|+ * ^ \L| and \verb|\D| should
-not be escaped normally.
+operators \verb|.|, whitespace, \verb|+|, \verb|*|, \verb|^|,
+\verb|\L| and \verb|\D| should not be escaped normally.
 
 \section{The grammar of Bracmat}
 
@@ -1053,7 +1057,7 @@ Note: in long lists the vertical bar \verb,|, is left out.
 {\fontsize{10}{11}\selectfont
 \begin{v}[commandchars=\{\{\}]
 <input>           ::= [<expression>] [; <input>]
-<expression>      ::=   <white space> <expression> <white space>
+<expression>      ::=   <whitespace> <expression> <whitespace>
                       | [<prefixes>] ( <expression> )
                       | <leaf>
                       | <expression> <binop> <expression>
@@ -1064,17 +1068,17 @@ Note: in long lists the vertical bar \verb,|, is left out.
 <character>       ::= any printable character except \ and " | <spec>
 <spec>            ::= \a \b \t \n \v \f \r \" \\
 <nil>             ::= ""   (or nothing at all, such as in "()")
-<binop>           ::= = . , | & : <white space> + * ^ \L \D ' $ _
+<binop>           ::= = . , | & : <whitespace> + * ^ \L \D ' $ _
 <prefixes>        ::= <prefix> [<prefixes>]
 <prefix>          ::= [ ~ / # < > % @ ` ? ! !!
-<white space>     ::= spaces, tabs, new line and form feed characters
+<whitespace>      ::= spaces, tabs, new line and form feed characters
 \end{v}
 % $
 }
 
-White space (operator/cosmetic measure) almost never leads to
+Whitespace (operator/cosmetic measure) almost never leads to
 confusion. It does in (some) cases where a \emph{nil} leaf without prefixes
-is adjacent to the white space operator. For example:
+is adjacent to the whitespace operator. For example:
 \verb|get' out$now|. Bracmat interprets this as \verb|get'(out$now)|.
 \verb|""| or \verb|()| fixes the problem: \verb|get'() out$now|. Quotation
 marks are not part of the string they surround. They should be used if
@@ -1089,7 +1093,7 @@ quotation marks. Comments are enclosed in \verb|{}| and may be nested.
 
 \newcommand{\caret}{\char`\^}
 
-\bfun{\bc{= . , | \& :} white space \bc{+ * \caret{} \char`\\L \char`\\D ' \$ \char`\_}}
+\bfun{\bc{= . , | \& :} whitespace \bc{+ * \caret{} \char`\\L \char`\\D ' \$ \char`\_}}
 
 These are the 15 binary Bracmat operators. The higher in the list, the
 lower in the order of operations. Use parentheses to overrule the
@@ -1133,7 +1137,7 @@ _oct{!} a^-1+a^2+a*b+a*c+b*c
   match subject with pattern:\\
   \verb|  Meeting at 4 in room 24:? ?#hour ? ?#room ?|
 
-\item white space
+\item whitespace
 
   sentence, neutral element:\\
   \verb|  Oh well this can go on and on:?a Oh ?z & !a:|
@@ -1163,13 +1167,13 @@ _oct{!} a^-1+a^2+a*b+a*c+b*c
 
 \item \texttt{'}
 
-  function evaluation (does not evaluate rhs): \verb|str'(b+a):"b+a"|
+  function evaluation (does not evaluate RHS): \verb|str'(b+a):"b+a"|
 
   macro: \verb|()'(my name is ()$name)|
 
 \item \texttt{\$}
 
-  function evaluation (evaluates rhs): \verb|str$(b+a):"a+b"|
+  function evaluation (evaluates RHS): \verb|str$(b+a):"a+b"|
 
   variable in macro: \verb|()'(my name is ()$name)|
 
@@ -1180,7 +1184,7 @@ _oct{!} a^-1+a^2+a*b+a*c+b*c
 
 \subsubsection{The \texttt{=} operator}
 
-This operator assures that the right hand operator stays
+This operator ensures that the right hand operator stays
 unevaluated. It is mainly used in the definition of pieces of code
 (e.g. functions). The code on the right is bound to the name on the
 left.
@@ -1223,12 +1227,17 @@ almost the same as that of the macro instruction
 instruction we have an expression with the \emph{nil} \verb|=|
 \emph{expression} syntax.
 \begin{ex}
-{?} out_dollar(b+a)
-{?} out_dollar(=b+a)
-{?} out_dollar('(b+a))
+{?} out_d(b+a)
+_oct[]a+b
+{?} out_d(=b+a)
+_oct[]=b+a
+{?} out_d('(b+a))
+_oct=b+a
 {?} c=3
-{?} out_dollar(=b+a+_dollar[]c)
-{?} out_dollar('(b+a+_dollar[]c))
+{?} out_d(=b+a+_dollar[]c)
+_oct=b+a+$c
+{?} out_d('(b+a+_dollar[]c))
+_oct=b+a+3
 \end{ex}
 
 \subsubsection{Differentiation}
@@ -1357,6 +1366,10 @@ until it is subsumed in situations like the above ones.
 
 \item \emph{base} \verb|\L| \emph{expr}
 
+  logarithm
+
+\item \emph{variable} \verb|\D| \emph{expr}
+
   differentiation
 \end{description}
 
@@ -1375,8 +1388,8 @@ left hand side of the expression, then the right hand side is not
 evaluated. In this sense algebraic operators behave like the logical
 \verb|&| operator.
 
-Bracmat gives the user practically NO control over the format of
-evaluated algebraic expressions, such as the order of terms or
+Bracmat gives the user practically \emph{no} control over the format
+of evaluated algebraic expressions, such as the order of terms or
 factors. Bracmat tries to present algebraic objects in a unique
 (canonical) form. This is in many cases an unattainable goal: the
 forms
@@ -1430,7 +1443,7 @@ names:
   patterns.)
 \item An integral number. (Array indexing.)
 \item Only prefixes. (Prefix pasting or influencing success and
-  failure of non- atomic expressions.)
+  failure of non-atomic expressions.)
 \end{itemize}
 
 Function calls are even effective in patterns, as it is fair to assume
@@ -1442,39 +1455,235 @@ evaluation of a matching expression, due to backtracking and retrying.
 
 \subsection{Macro evaluation}
 
-The \verb|'| operator with empty lhs is the macro evaluator. The macro
-evaluator returns the rhs unchanged, except where the
-\verb|$| operator (also with empty lhs) occurs. The expressions headed
-by such \verb|$| operators are replaced as follows:
+The \verb|'| operator with empty LHS is the macro evaluator. The macro evaluator
+returns the RHS unchanged, except where \verb|$| operators with empty LHS occur.
 
-\subsubsection*{\texttt{'\$\$}}
-
-If the rhs is the \verb|$| operator with empty lhs, the macro
-evaluator replaces the expression with the rhs of the heading
-\verb|$|, and macro-evaluates the rhs of the result.
+The expression to the RHS of such a \verb|$| operator must evaluate to the name of a
+variable or to a definition. The whole \verb|$| expression is then replaced by the
+value of the variable or the definition. (The following example illustrates
+three ways how you can make sure that the LHS of the \verb|$| operator is empty.)
 \begin{ex}
-{?} '(one dollar ($($)))
-_oct{!} =one dollar ()$
-{?} '(two dollars ($($($($)))))
-_oct{!} =two dollars ()$($)
+{?} x=un
+{?} y=(member=deux)
+{?} '(one ($x), two ""$(y.member), three ()$(=trois))
+_oct{!} =one un,two deux,three trois
 \end{ex}
 % $
 
-\subsubsection*{\texttt{'\$\char`\_}}
-\index{dummy operator}
+Here is an example that shows that the RHS of the \verb|$| operator can be an
+expression that first needs to be evaluated:
+\begin{ex}
+{?} a=eins
+{?} b=zwei
+{?} dice=clk$
+{?} '(Eins oder zwei? ()$(!dice:<1&a|b))
+_oct{!} =Eins oder zwei? eins
+    {...}
+{?} '(Eins oder zwei? ()$(!dice:<1&a|b))
+_oct{!} =Eins oder zwei? zwei
+\end{ex}
+% $
 
-If the rhs is headed by the \verb|_| operator, the expression is
-replaced by the rhs, where the dummy operator is evaluated to its
-current value.
+You can construct any Bracmat expression using macro evaluation. For example,
+the function \verb|F|, below, transforms an expression with \verb|+| and \verb|*| operators to a
+pattern, replacing any non-empty atom that is not a number to a pattern
+variable that either is receiving or giving, depending on whether the atom
+occurs for the first time or not, when reading the expression from the
+beginning to the end.
+\begin{ex}
+{?} (F=
+      seen f
+    .   :?seen
+      & ( f
+        =   a b
+          .   !arg:%?a+%?b&'($(f$!a)+$(f$!b))
+            | !arg:%?a*%?b&'($(f$!a)*$(f$!b))
+            |     !arg
+                : (
+                  | #
+                  | e
+                  | i
+                  | pi
+                  )
+              & '$arg
+            | !seen:? !arg ?&glf$('(!.$arg))
+            | !arg !seen:?seen&glf$('(%?.$arg))
+        )
+      & f$!arg
+    );
+{?} F$(a*b+3*a*c)
+_oct{!} =%?a*%?b+3*!a*%?c
+\end{ex}
+% $
+
+Now we can use the pattern to match expressions with the same structure and
+with the same operators
+\begin{ex}
+{?} x*y+3*x*z:!(F$(a*b+3*a*c))
+\end{ex}
+% $
+
+The function F can only handle expressions containing \verb|+| and \verb|*| operators.
+Now we will in a few steps amend F so that it can handle any operator. This is
+done by using the dummy \verb|_| operator.
+
+As a first step, we will have to protect the argument of F against evaluation,
+because otherwise we will never be able to analyse expressions that evolve to
+different expressions when evaluated. So, from now on we will use F with the
+\verb|'| operator, like so.
+\begin{ex}
+{?} F'(a*b+3*a*c)
+\end{ex}
+% $
+
+To simplify the first amendment, we will only handle expressions with the \verb|+|
+operator. Later we will generalize to handling any operator.
+\begin{ex}
+{?} (F=
+      seen f
+    .   :?seen
+      & ( f
+        =   a b g
+          .     !arg:(=%?a+%?b)
+              & '($(f$('$a))+$(f$('$b)))
+            |   !arg:(=?g)
+              & (     !g
+                    : (
+                      | #
+                      | e
+                      | i
+                      | pi
+                      )
+                  & !arg
+                | !seen:? !g ?&glf$('(!.$g))
+                | !g !seen:?seen&glf$('(%?.$g))
+                )
+        )
+      & f$('$arg)
+    );
+{?} F'(a+b+pi+a)
+_oct{!} =%?a+%?b+pi+!a
+\end{ex}
+% $
+
+Now we replace the \verb|+| operator by the dummy operator \verb|_|. If we only do that,
+then we will only see \verb|_| operators in the result. That is because in a macro
+context, a \verb|_| operator is not evaluated to its current value. However, if the
+RHS expression of a \verb|$| operator with empty LHS is headed by the \verb|_| operator,
+then the \verb|_| operator is evaluated to its current value, analogous to what
+happens if the RHS were the name of a variable. So we add an extra \verb|$| operator.
+
+When the \verb|_| operator is evaluated to its current  value, the LHS and the RHS are
+also evaluated.
 \begin{ex}[commandchars=&\[\]]
-{?} (=a^b):(=?_?) && '(dummy (a_b) power ($(a_b)))
-&oct{!} =dummy a_b power a^b
+{?} a^b:?_?
+{?} LHS:?left
+{?} '$(($left)_($(=RHS)))
 \end{ex}
 % $
 
-In all other cases the rhs is evaluated to a variable name, a member
-name or a definition. The expression is thereafter replaced by the
-value of the variable, the member of the definition. More examples:
+Without evaluation of \verb|_| operator:
+\begin{ex}[commandchars=&\[\]]
+{?} '($left)_($(=RHS))
+&oct{!} =LHS_RHS
+\end{ex}
+% $
+
+With evaluation of \verb|_| operator:
+\begin{ex}[commandchars=&\[\]]
+{?} '$($left)_($(=RHS))
+&oct{!} =LHS^RHS
+\end{ex}
+% $
+
+Now we use this in the function \verb|F|:
+\begin{ex}[commandchars=&\[\]]
+{?} (F=
+      seen f
+    .   :?seen
+      && ( f
+        =   a b g
+          .     !arg:(=%?a_%?b)
+              && '$($(f$('$a)))_($(f$('$b)))
+            |   !arg:(=?g)
+              && (     !g
+                    : (
+                      | #
+                      | e
+                      | i
+                      | pi
+                      )
+                  && !arg
+                | !seen:? !g ?&&glf$('(!.$g))
+                | !g !seen:?seen&&glf$('(%?.$g))
+                )
+        )
+      && f$('$arg)
+    );
+{?} F'(a+b_k&&out$y&&$$(=.arg))
+\end{ex}
+% $
+
+Finally, we ensure that atoms that already have a prefix are treated in the
+same way as empty strings and numbers.
+\begin{ex}[commandchars=&\[\]]
+{?} (F=
+      seen f
+    .   :?seen
+      && ( f
+        =   a b g
+          .     !arg:(=%?a_%?b)
+              && '$($(f$('$a)))_($(f$('$b)))
+            |   !arg:(=?g)
+              && (   (   !g
+                      : (
+                        | #
+                        | e
+                        | i
+                        | pi
+                        )
+                    | ~(glf$('(~`/#<>%@?!.$g)))
+                    )
+                  && !arg
+                | !seen:? !g ?&&glf$('(!.$g))
+                | !g !seen:?seen&&glf$('(%?.$g))
+                )
+        )
+      && f$('$arg)
+    );
+{?} F'('(the hare&&$the tortoise))
+&oct{!} ='(%?the %?hare&&$!the %?tortoise)
+\end{ex}
+% $
+
+In the above example the argument of the \verb|F| function is returned in an
+unevaluated state, though transformed to something else. The last input was a
+macro expression, and the result is still a macro expression.
+
+Now suppose that we want to produce the macro expression
+\begin{v}
+'(There are 23 elements in list ()$L)
+\end{v}
+by means of another macro expression that evaluated the number of elements to
+23. Something like this:
+\begin{ex}
+{?} 23:?N
+{?} '('(There are ()$N elements in list ()$L))
+\end{ex}
+% $
+
+This generates the error "macro evaluation fails because rhs of \verb|$| operator is not bound to a value: \verb|$L|".
+What is needed is to `escape' the \verb|$| operator in the subexpression \verb|()$L|, since we do not want \verb|()$L| to be
+evaluated. This is done with and extra \verb|$| operator, similar to how a backslash is escaped in many
+programming languages:
+\begin{ex}
+{?} 23:?N
+{?} '('(There are ()$N elements in list ()$($L)))
+_oct{!} ='(There are 23 elements in list ()$L)
+\end{ex}
+% $
+
+More examples:
 \begin{ex}
 {?} '(b+a c)
 _oct{!} =b+a c
@@ -1539,7 +1748,7 @@ macro evaluator. The latter is useful if the \verb|_| has matched an
 operator that is very volatile, such as \verb|&| and \verb,|,.
 \begin{ex}[commandchars=*\[\]]
 {?} (=!a:!b&!c):(=?left_?right) *com[match the *bc&]
-{?} '_
+{?} '$_
 *oct{!} =&                          *com[it worked, the *bc_ is replaced by a *bc&]
 {?} get*d(str*d('*d_),MEM,VAP):"=" ?op & !op *com[freeze and slice]
 *oct{!} &           *com[the operator is immobilised in a string]
@@ -1554,9 +1763,9 @@ with the \verb|_|.
 \subsection{Recursion and the \texttt{\char`\_} operator}
 
 In Bracmat functions are allowed to call themselves. Often this
-happens if a the function's argument is split into a left subtree and
+happens if a function's argument is split into a left subtree and
 a right subtree and the function is called with each subtree in turn
-as its argument. If the operator in between the subtrees is unknown,
+as its argument. If the operator between the subtrees is unknown,
 it is time consuming to try all patterns \verb|?+?|, \verb|?*?|,
 \verb|?$?|, \verb|?'?| etc. The \verb|_| operator circumvents this
 problem. It is a dummy operator that matches any other operator and
@@ -1571,6 +1780,7 @@ variable.
         | !arg                        *com[let atoms as they are]
     )
 {?} reverse*d(Bill loves sweet Nancy. This is true)
+*oct{!} true is This.Nancy sweet loves Bill
 \end{ex}
 
 \subsection{Some often used control structures}
@@ -1611,7 +1821,7 @@ whl'(`!b&!a)
 \end{v}
 \verb|v := IF a THEN b ELSE c;|
 \begin{v}
-(!a&`!b|`!c):?v { works even if !c fails }
+(!a&`!b|`!c):?v _com[works even if _bc[!c] fails]
 \end{v}
 
 \subsubsection*{Branching}
@@ -1638,10 +1848,10 @@ performance by replacing the variable by its value in an early stage.
 
 In Bracmat, a macro has the general form
 \verb|'|\emph{expression}. When \verb|'|\emph{expression} is
-evaluated, \emph{expression} is searched for sub-expressions headed by
+evaluated, \emph{expression} is searched for subexpressions headed by
 the operator
-\verb|$|, with empty lhs. Such sub-expressions are replaced, depending
-on what is found on the rhs of the \verb|$| operator.
+\verb|$|, with empty LHS. Such subexpressions are replaced, depending
+on what is found on the RHS of the \verb|$| operator.
 
 After macro substitution has taken place, what remains is an
 expression of the form \verb|=|\emph{expression}. The \verb|=|
@@ -1680,7 +1890,7 @@ ever executed.
 \begin{ex}
 {?} power=three
 {?} ((!power : two & (=!arg^2)) | (=!arg^3)) : (=?abc)  _coma[if _bc[power] = _bc[two],]
-    _comc[_bc[abc] is bound to _bc[!arg^2] (unevaluated); otherwise, \bc[abc] is bound to _bc[!arg^3]]
+    _comc[_bc[abc] is bound to _bc[!arg^2] (unevaluated); otherwise, _bc[abc] is bound to _bc[!arg^3]]
 {?} '(.!arg + -1*$abc + 2) : (=?poly) _coma[_bc[poly] is the name of a new function]
     _comb[that will return a value that depends on the current value of _bc[arg]]
     _comc[and on the value of _bc[power] at the time when _bc[abc] got its binding]
@@ -1695,18 +1905,16 @@ example in nested loops:
 
 Without macro construct ($5\times 5$ multiplication table):
 \begin{ex}
-{?} 0:?m
-{?} (outer = 1+!m : <6 : ?m
-            & '( 1+!n : <6 : ?n
-               & put$($m X !n "=" ()$m*!n ",")
-                              _com[_bc[!m] is expanded only 2 times]
-               & !inner
-               ) : (=?inner)  _coma[at each pass through the outer loop]
-                              _comc[the inner loop _bc[inner] is defined anew]
-            & put$\n
-            & 0 : ?n
-            & `!inner
-            & !outer)
+{?} 0:?m                      _com[initialise counter of outer loop]
+{?} (outer = 1+!m : <6 : ?m   _com[code for outer loop]
+           & put$\n           _com[start output on new line]
+           & 0 : ?n           _com[initialise counter of inner loop]
+           & `!inner          _com[execute inner loop]
+           & !outer)
+{?} (inner = 1+!n : <6 : ?n   _com[code for inner loop]
+           & put$(!m X !n "=" !m*!n ", ")
+                              _com[the same _bc[!m] is expanded 10 times]
+           & !inner)          _com[loop]
 {?} !outer
 \end{ex}
 
@@ -1714,16 +1922,16 @@ With macro construct:
 \begin{ex}
 {?} 0:?m
 {?} (outer = 1+!m : <6 : ?m
-            & '( 1+!n : <6 : ?n
-               & put$($m X !n "=" ()$m*!n ",")
-                              _com[_bc[!m] is expanded only 2 times]
-               & !inner
-               ) : (=?inner)  _coma[at each pass through the outer loop]
-                              _comc[the inner loop _bc[inner] is defined anew]
-            & put$\n
-            & 0 : ?n
-            & `!inner
-            & !outer)
+           & '( 1+!n : <6 : ?n
+              & put$($m X !n "=" ()$m*!n ",")
+                             _com[_bc[!m] is expanded only 2 times]
+              & !inner
+              ) : (=?inner)  _coma[at each pass through the outer loop]
+                             _comc[the inner loop _bc[inner] is defined anew]
+           & put$\n
+           & 0 : ?n
+           & `!inner
+           & !outer)
 {?} !outer
 \end{ex}
 
@@ -1732,25 +1940,25 @@ With macro construct:
 With the \verb|=| and \verb|.| operators you can construct and
 dereference conventional data structures and even objects with
 methods. In an expression, each subexpression with a \verb|=| operator
-in the top node and an atom in the lhs of the top node indicates a
+in the top node and an atom in the LHS of the top node indicates a
 field or object method that can be accessed and changed independently
 of other fields and methods, i.e. without the need to dissect and
 reassemble the whole expression. Such expressions are objects. An
-object member (a field or method) is addressed by using the lhs of the
-\verb|=| operator as the member's name, preceded by the objects
+object member (a field or method) is addressed by using the LHS of the
+\verb|=| operator as the member's name, preceded by the object's
 name. The name of the object and the name of the member must be
 separated by a dot operator.
 
 In the example below an object named \verb|John| is created with the
 members \verb|length|, \verb|age| and \verb|name|. The \verb|name|
-member has two sub-members \verb|first| and \verb|family|:
+member has two submembers \verb|first| and \verb|family|:
 \begin{ex}
-{?} John = (length = 180),(age = 30),(name = (first=John) (family=Bull))
+{?} John = (length=180),(age=30),(name=(first=John) (family=Bull))
 \end{ex}
 
 There is no prescribed way in which the members should be glued
 together to form an object. Here, the comma operator and blank
-operator are used, but any operator but the \verb|=| operator can be
+operator are used, but any operator except the \verb|=| operator can be
 used to separate field names. John's length can be changed to 185 in
 the following ways:
 \begin{ex}
@@ -1766,19 +1974,17 @@ alias, but we have to take care not to evaluate \verb|John|, because
 that would create or overwrite the variables \verb|length|, \verb|age|
 and \verb|name|):
 \begin{ex}
-{?} !John:?alias {Wrong, (alias=length,age,name);}
+{?} !John:?alias
+    _com[wrong, _bc[alias]=_bc[length,age,name]]
 \end{ex}
 \begin{ex}
-{?} '$John : (=?alias) {Right, (alias=
-                                 (length=185)
-                               , (age=30)
-                               , (name=(first=John) (family=Bull)));}
+{?} '$John : (=?alias)
+   _com[right, _bc[alias]=_bc[(length=185),(age=30),(name=(first=John)(family=Bull))]]
 \end{ex}
-%$
 
 Bracmat replaces the expression \verb|'$John| by the value of John,
 protected against evaluation by a \verb|=| operator. For that reason,
-the pattern on the rhs of the match operator \verb|:| contains a
+the pattern on the RHS of the match operator \verb|:| contains a
 \verb|=| operator as well. Now we can change John's age by operating
 on the variable \verb|alias|:
 \begin{ex}
@@ -1792,7 +1998,8 @@ we can inspect \verb|John|:
 _oct(John=
 _oct  (length=180)
 _oct, (age=30)
-_oct, (name=(first=John) (family=Bull)));
+_oct, (name=(first=John) (family=Bull))
+_oct);
 \end{ex}
 
 Alternatively, we can also just show the field \verb|age| in John:
@@ -1801,7 +2008,7 @@ Alternatively, we can also just show the field \verb|age| in John:
 _oct{!} 31
 \end{ex}
 
-It is also possible to create an alias for a sub-object. Taking the
+It is also possible to create an alias for a subobject. Taking the
 previous example, we could create an alias for the \verb|name| member:
 \begin{ex}
 {?} '_dollar(John.name):(=?nm)
@@ -1817,8 +2024,8 @@ _oct, (age=30)
 _oct, (name=(first=John) (family=Flinter)));
 \end{ex}
 
-Using an alias for a sub-object can save some code and processing time
-if the sub-object is accessed many times. Without the alias for John's
+Using an alias for a subobject can save some code and processing time
+if the subobject is accessed many times. Without the alias for John's
 name, we can change his family name in this way:
 \begin{ex}
 {?} Flinter:?(John.name.family)
@@ -1829,18 +2036,18 @@ It is valid to have an empty name for a member:
 {?} x=(header=blabla) (=(a=1) (b=2))
 \end{ex}
 
-Here, \verb|a| and \verb|b| are fields in a nameless sub-object of
+Here, \verb|a| and \verb|b| are fields in a nameless subobject of
 \verb|x|. We can ask for the value of \verb|b|:
 \begin{ex}
 {?} !(x..b)
 _oct{!} 2
 \end{ex}
 
-To retrieve the whole sub-object:
+To retrieve the whole subobject:
 \begin{ex}
-{?} '_dollar(x.):(=?sub-object)
-{?} lst_dollar[]sub-object
-_oct(sub-object=
+{?} '_dollar(x.):(=?subobject)
+{?} lst_dollar[]subobject
+_oct(subobject=
 _oct(a=1) (b=2));
 \end{ex}
 
@@ -1897,13 +2104,13 @@ Suppose that \verb|x| \emph{is} evaluated (case B):
 Now \verb|x|, \verb|y| and \verb|z| are the same object.
 
 Explanation: in (A) the value of \verb|x| is not evaluated, especially
-the lhs of the \verb|=| operator. Therefore, a new \verb|=| node is
+the LHS of the \verb|=| operator. Therefore, a new \verb|=| node is
 created each time \verb|x| is evaluated. In (B), the value of \verb|x|
 \emph{is} evaluated, so no new copies of the \verb|=| node are made.
 
 \section{Construction of data structures}
 
-In Bracmat linear lists can be made by separating the elements with
+In Bracmat, linear lists can be made by separating the elements with
 comma, plus sign, asterisk, space and dot. The first four operators
 create linear structures (right descending lists), moving nodes as
 necessary, whereas the dot operator creates any tree structure. In
@@ -2000,7 +2207,7 @@ and finally fails when backtracking (induced by the \verb|~|) has
 found all answers to the query.
 
 Experimentation with the implementation of matrices in Bracmat has
-learned that lists (of lists (of lists\ldots)) lead to smaller and
+revealed that lists (of lists (of lists\ldots)) lead to smaller and
 faster programs than arrays, artificially made multidimensional by
 playing with the index. A drawback of the list approach is its
 unconventionality. Much time has to be spend in reformulating existing
@@ -2013,7 +2220,7 @@ and may even be indifferent to the number of indices.
 Most binary operators are used in expressions that flow on their own
 or flow not at all. In the first group are the arithmetic operators,
 in the second is the dot operator. In between are the two other
-structuring operators, comma and white space.
+structuring operators, comma and whitespace.
 
 Branching to a function is done with the \verb|$| and \verb|'|
 operators:
@@ -2032,7 +2239,7 @@ evaluated expression:
 \item \verb|!X|\par
   expand \verb|X|
 \item \verb|!!Y|\par
-  expand expansion of \verb|Y| (two \verb|!|'s is the maximum)
+  expand expansion of \verb|Y| (two \verb|!|s is the maximum)
 \end{description}
 
 Conditional evaluation is decided by the success or failure of
@@ -2081,9 +2288,9 @@ name.
   \emph{atom}
 \end{description}
 
-Likewise \verb|!(|\emph{object name}\verb|.|\emph{member name}\verb|)|
-is replaced by the binding of \emph{object name}\verb|.|\emph{member
-  name}.
+Likewise \verb|!(|\emph{object-name}\verb|.|\emph{member-name}\verb|)|
+is replaced by the binding of
+\emph{object-name}\verb|.|\emph{member-name}.
 
 Bindings can be evaluated or unevaluated. In the last case, the next
 step after expansion is the evaluation of the binding, unless
@@ -2135,8 +2342,8 @@ the \verb|'| operators.
          & TRUE
        | FALSE
     )
-{?} is-greater-than == !one:>!two                  _com[an extra _bc=]
-{?} is-divisor-of ='((div_dollar(!two,!one)*!one):!two)  _com[an extra _bc']
+{?} is-greater-than = =!one:>!two                  _com[an extra _bc=]
+{?} is-divisor-of = '((div_dollar(!two,!one)*!one):!two) _com[an extra _bc']
 {?} chack_dollar(3,!is-greater-than,15)                  _com[pass by value]
 {?} chack_dollar(3,!is-divisor-of,15)
 \end{ex}
@@ -2146,13 +2353,14 @@ the \verb|'| operators.
 In patterns, atoms and expressions within parentheses may be preceded
 by prefixes that control the matching process.
 
-Below, use the term `trivial elements' for elements that either are
+Below, use the term ``trivial elements'' for elements that are either
 neutral or zero. A list expression (an expression that links elements
 with the space operator) has the empty string as neutral element. In
-sums, 0 (zero) is the neutral element. In products, 1 is the neutral
-element. So the empty string, 0 and 1 are trivial elements in lists,
-sums and products, respectively. In addition, 0 is also a trivial
-element in products. Lists and sums do not have `zeros'.
+sums, \verb|0| (zero) is the neutral element. In products, \verb|1| is
+the neutral element. So the empty string, \verb|0| and \verb|1| are
+trivial elements in lists, sums and products, respectively. In
+addition, \verb|0| is also a trivial element in products. Lists and
+sums do not have ``zeros.''
 
 \begin{description}
 \item \verb|!| and \verb|!!|\par
@@ -2164,7 +2372,7 @@ element in products. Lists and sums do not have `zeros'.
   causes backtracking if the pattern did not successfully unify with a
   non-trivial element of the subject-list. A list is an expression
   consisting of terms (\verb|+| operator), factors (\verb|*| operator)
-  or words (white-space operator). In non-sophisticated patterns,
+  or words (whitespace operator). In non-sophisticated patterns,
   \verb|`| means simply: unify with at most one non-trivial
   element. Zero non-trivial elements are allowed, in which case
   unification takes place with an implicit trivial element: Bracmat
@@ -2193,7 +2401,7 @@ element in products. Lists and sums do not have `zeros'.
   \verb|<| prefix.
 
 \item \verb|>|\par
-  unifies only with atoms that are less than the atom following the
+  unifies only with atoms that are greater than the atom following the
   \verb|>| prefix.
 
 \item \verb|#|\par
@@ -2208,7 +2416,7 @@ element in products. Lists and sums do not have `zeros'.
 
 \item \verb|[|\par
   Position prefix. Must be followed by an expression that evaluates to
-  a number (For example \verb|[4| or \verb|[(!pos+3)|) or by a
+  a number (for example \verb|[4| or \verb|[(!pos+3)|) or by a
   variable having a question mark as in \verb|[?pos|. In the first
   case, the pattern cannot succeed unless the element following the
   \verb|[| element is at the indicated position. The \verb|[| element
@@ -2298,11 +2506,11 @@ If you want to match pattern \verb|!pat| one or more times (this is
 often written as \verb|{pat}+|), use the complex pattern
 \verb,(? !pat|`),. Likewise, if you want to match \verb|!pat| zero or
 more times (\verb|{pat}*|), use \verb,(|? !pat|`),. These patterns
-should not be the last sub-pattern or precede a subpattern that is
+should not be the last subpattern or precede a subpattern that is
 static and fixes the end point of the repeating sequence, because the
 correct working of the repeating patterns depends on repeated
-backtracking from following sub-patterns. Bracmat may be optimized to
-skip such backtracking and jump to the `right' end position if that is
+backtracking from following subpatterns. Bracmat may be optimized to
+skip such backtracking and jump to the ``right'' end position if that is
 fixed by the next subpattern. In the last resort, you can add a
 pattern like \verb|()| or \verb|(&)| or \verb,(|), or \verb|(:)|,
 which match with an empty list only (assuming that the connecting
@@ -2398,7 +2606,7 @@ the operating system and hardware. Atoms can be surrounded by
 quotation marks, but are in many cases optional. You do need them if
 you want parentheses, braces, semicolons, operators or prefixes to be
 part of an atom. All UTF-8 encoded Unicode characters can be used in
-strings. Some special characters have to be preceded by a back slash:
+strings. Some special characters have to be preceded by a backslash:
 \begin{description}
 \item  \verb|\a|\par
   attention (bell)
@@ -2415,12 +2623,12 @@ strings. Some special characters have to be preceded by a back slash:
 \item \verb|\r|\par
   carriage return
 \item \verb|\\|\par
-  back slash
+  backslash
 \item \verb|\"|\par
   double quote
 \end{description}
 
-If you precede a string with the prefix \verb|@|, then back slashes
+If you precede a string with the prefix \verb|@|, then backslashes
 are treated as normal
 characters, e.g. \verb|sys$@"C:\dos\edit"|. Instead of the tab and new
 line characters above, you may enter tabs and new lines by pressing
@@ -2467,9 +2675,12 @@ together.
 \begin{ex}
 {?} i=2       _com[variable _bc[i] is bound to the literal _bc[2]]
 {?} !i^2      _com[the associated value of _bc[i] is squared]
+_oct{!} 4
 {?} i^2       _com[the literal _bc[i] (a special one, like _bc[pi] and _bc[e]) is squared]
+_oct{!} -1
 {?} 7 = prime _com[the variable _bc[7] is bound to the literal _bc[prime]]
 {?} 7 is !7   _com[the symbol _bc[7] is used as both a literal and a variable]
+_oct{!} 7 is prime
 \end{ex}
 
 \subsection{Variables}
@@ -2496,11 +2707,11 @@ is relatively unimportant. The four evaluators are:
 \begin{enumerate}
 \item the expression evaluator, which takes care for the
   transformations of expressions,
-\item the match evaluator, which handles the unification of pattern
+\item the \emph{match evaluator}, which handles the unification of pattern
   expressions with subject expressions,
-\item the macro evaluator, which merely substitutes certain parts of
+\item the \emph{macro evaluator}, which merely substitutes certain parts of
   an expression,
-\item the archivist, which doesn't do anything but keeping expressions
+\item the \emph{archivist}, which doesn't do anything but keeping expressions
   alive.
 \end{enumerate}
 
@@ -2523,12 +2734,15 @@ operand of the cross link operator, the symbol ``l'' (``r'') is
 used. If the transition depends on the left operand being \emph{nil},
 the symbol ``n'' is used.
 \begin{center}
-\begin{tabular}{lllll}
-  & expression & match & macro & archivist \\
-  expression & & \verb|:| & n\verb|'|r & \verb|=|r \verb|'|r\\
-  match & \verb|&|r \verb|$| \verb|'|l \verb|?!| \verb|!!| & & n\verb|'|r & \verb|=|r \verb|'|r\\
+  \begin{tabular}{lllll}
+    \toprule
+    & expression & match & macro & archivist \\
+    \midrule
+  expression & & \verb|:| & n\verb|'|r & \verb|=|r, \verb|'|r\\
+  match & \verb|&|r, \verb|$|, \verb|'|l, \verb|?!|, \verb|!!| & & n\verb|'|r & \verb|=|r, \verb|'|r\\
   macro & \verb|$|r \\
-  archivist
+    archivist \\
+    \bottomrule
 \end{tabular}
 \end{center}
 
@@ -2604,7 +2818,7 @@ finds nothing:
 \end{v}
 
 Check what is unified with \verb|? ?a|. To do so, put a variable after
-the first \verb|?| and insert an output action after each sub-pattern.
+the first \verb|?| and insert an output action after each subpattern.
 \begin{v}
 (De kok snijdt recht en de meid snijdt scheef
     : ((?x & out_d(x is !x))   _com[output _bc[x] after unification]
@@ -2646,10 +2860,11 @@ to the \verb|dbg| function.
   [\texttt{,}\emph{var2}\texttt{,} \ldots]\texttt{.}\emph{function-body}}
 
 \emph{var1}, \emph{var2}, etc. are explicitly declared local
-variables. A function is called by \emph{function
-  name}\verb|$|\emph{argument expression} or \emph{function
-  name}\texttt'\emph{argument expression}, depending on whether
-argument expression must be evaluated (\verb|$|) or not (\verb|'|).
+variables. A function is called by
+\emph{function-name}\verb|$|\emph{argument-expression} or
+\emph{function-name}\texttt'\emph{argument-expression}, depending on
+whether argument expression must be evaluated (\verb|$|) or not
+(\verb|'|).
 
 All Bracmat functions have arity one or two, that is, they accept one
 or two arguments. The \emph{argument expression} to the right of the
@@ -2730,7 +2945,7 @@ evaluates to
 =x.foo
 \end{v}
 
-The rhs of the \verb|$| operator must be an atom.
+The RHS of the \verb|$| operator must be an atom.
 
 In an lambda abstraction
 \begin{v}
@@ -2764,24 +2979,24 @@ aap aap
 
 \subsection{Built-in functions}
 
-\bfun{\bi{index}\bc{\dollar}\bi{array name}}
+\bfun{\bi{index}\bc{\dollar}\bi{array-name}}
 
-Both array name and index should evaluate to atoms. \emph{array name}
+Both \bi{array-name} and \bi{index} should evaluate to atoms. \bi{array-name}
 may be preceded by prefixes, such as \bc{?} or \bc{!}. Indexing starts
 at 0 and is done modulo(size-of-array). Negative values count from the
 upper end of the array. The chosen index remains in force until a new
 indexing function is evaluated.
-\begin{v}[commandchars=_()]
-{?} tbl_d(array,4)              _com(declare _bc(array[0..3]))
-{?} a-value : 2 _d ?array     _com(_bc(array[2]) := _bc(a-value))
-{?} array = another-value    _com(_bc(array[2]) := _bc(another-value))
-{?} !array : -1 _d ?array     _com(_bc(array[3]) := _bc(another-value))
-{?} 45 : 1_d?array            _com(_bc(array[1]) := _bc(45))
-{?} 2'!array : 3'!array      _coma(are _bc(array[2]) and _bc(array[3]) equal?)
-                             _comc(notice use of _bc' instead of _bc_d)
+\begin{v}[commandchars=_/;]
+{?} tbl_d(array,4)              _com/declare _bc/array[0..3];;
+{?} a-value : 2_d?array         _com/_bc/array[2]; := _bc/a-value;;
+{?} array = another-value      _com/_bc/array[2]; := _bc/another-value;;
+{?} !array : -1_d?array         _com/_bc/array[3]; := _bc/another-value;;
+{?} 45 : 1_d?array              _com/_bc/array[1]; := _bc/45;;
+{?} 2'!array : 3'!array        _coma/are _bc/array[2]; and _bc/array[3]; equal?;
+                               _comc/notice use of _bc' instead of _bc_d;
 \end{v}
 
-\bfun{\bc{alc\d}\bi{number of bytes}}
+\bfun{\bc{alc\d}\bi{number-of-bytes}}
 \index{alc@\bc{alc}}
 
 This function allocates memory and returns the starting address of the
@@ -2880,8 +3095,28 @@ character according to the current table used by the operating system
 _oct{!} 43
 \end{ex}
 
+\bfun{\bc{bez\d}}
+\index{\bez@\bc{bez}}
+\verb|bez$| returns two numbers separated by a dot operator. The first number is the
+number of currently allocated binary nodes and leafs. The second number is the
+maximum number of allocated binary nodes and leafs in this session, until now.
+These numbers are not of much use, except for controlling that there are no
+memory leaks. The function \verb|bez$| can be turned off by setting \verb|TELMAX| to zero
+in bracmat.c before compilation.
+
+In interactive mode, with \verb|TELMAX| set to one, Bracmat shows
+(1) whether the evaluation was successful or not, (2) the amount of CPU time
+and (3) the result of calling \verb|bez$| after each non-empty evaluation result.
+
+\begin{ex}
+{?} 2^10000+-1*3^100000*5^-10000
+_oct{!} -13349714142304014694589143904897822922452485076062773553456279939841274146
+_oct...2182755869676383936027544370832840538165786625768305384553968906402587890625
+_oct   S   0,72 sec  (3990.13910)
+\end{ex}
+
 \bfun{\bc{chr\d}\bi{value}}
-\index{asc@\bc{asc}}
+\index{\chr@\bc{chr}}
 
 \verb|chr$| returns the character at location value in the current
 table of characters used by the operating system (e.g. an extended
@@ -2910,7 +3145,7 @@ second.
 _oct{!} 30375/1000
 \end{ex}
 
-\bfun{\bc{d2x\d}\bi{decimal value}}
+\bfun{\bc{d2x\d}\bi{decimal-value}}
 \index{d2x@\bc{d2x}}
 
 \verb|d2x$| converts a decimal number between 0 and 4294967295
@@ -2935,10 +3170,10 @@ can not be found.
 {?} dbg'((myclass.yourfunc)_d[]X)
 \end{ex}
 
-\bfun{\bc{den\d}\bi{rational number}}
+\bfun{\bc{den\d}\bi{rational-number}}
 \index{den@\bc{den}}
 
-The denominator of \emph{rational number} is returned. There is no
+The denominator of \emph{rational-number} is returned. There is no
 built-in numerator extractor function.
 \begin{ex}
 {?} den_d22/7
@@ -2950,7 +3185,7 @@ _oct{!} 22
 _oct{!} 6
 \end{ex}
 
-\bfun{\bc{div\d(}\bi{rational number}\bc{,}\bi{rational number}\bc{)}}
+\bfun{\bc{div\d(}\bi{rational-number}\bc{,}\bi{rational-number}\bc{)}}
 \index{div@\bc{div}}
 
 \verb|div$| returns the (integral) quotient of its arguments.
@@ -2959,32 +3194,32 @@ _oct{!} 6
 _oct{!} 36
 \end{ex}
 
-\bfun{\bc{fil\d(}[[\bi{file name}][\bc,\bi{option}[\bc,\bi{number}[\bc,value to output]]]]\bc{)}}
+\bfun{\bc{fil\d(}[[\bi{file-name}][\bc,\bi{option}[\bc,\bi{number}[\bc,\bi{value-to-output}]]]]\bc{)}}
 \index{fil@\bc{fil}}
 
 \verb|fil$| is a multi-purpose low level I/O function.
 \begin{quote}
 \begin{description}
-\item \bc{fil\d(}[\bi{file name}]\bc,\bi{mode}\bc)\par
+\item \bc{fil\d(}[\bi{file-name}]\bc,\bi{mode}\bc)\par
   set file mode, open a file in a file mode
-\item \bc{fil\d(}[\bi{file name}]\bc,\bi{type}\bc,\bi{size}[\bc,\bi{number}]\bc)\par
+\item \bc{fil\d(}[\bi{file-name}]\bc,\bi{type}\bc,\bi{size}[\bc,\bi{number}]\bc)\par
   prepare for reading or writing fixed sized records
-\item \bc{fil\d(}[\bi{file name}]\bc,\bc{STR}[\bc,\bi{stop}]\bc)\par
+\item \bc{fil\d(}[\bi{file-name}]\bc,\bc{STR}[\bc,\bi{stop}]\bc)\par
   prepare for reading or writing variable sized record
-\item \bc{fil\d(}\bi{file name}\bc,\bc{TEL}\bc)\par
+\item \bc{fil\d(}\bi{file-name}\bc,\bc{TEL}\bc)\par
   tell position inside file
-\item \bc{fil\d(}\bi{file name}\bc,\bi{whence}\bc,\bi{offset}\bc)\par
+\item \bc{fil\d(}\bi{file-name}\bc,\bi{whence}\bc,\bi{offset}\bc)\par
   go to file position
-\item \bc{fil\d(}[\bi{file name}][\bc{,,}\bi{number}]\bc)\par
+\item \bc{fil\d(}[\bi{file-name}][\bc{,,}\bi{number}]\bc)\par
   read from file 
-\item \bc{fil\d(}[\bi{file name}]\bc{,,}\bi{number}\bc,\bi{value}\bc)\par
+\item \bc{fil\d(}[\bi{file-name}]\bc{,,}\bi{number}\bc,\bi{value}\bc)\par
   write to file
-\item \bc{fil\d(}[\bi{file name}]\bc{,SET,-1}\bc)\par
+\item \bc{fil\d(}[\bi{file-name}]\bc{,SET,-1}\bc)\par
   close a file
 \end{description}
 \end{quote}
 
-\bfun{\bc{fil\d(}[\bi{file name}]\bc,\bi{mode}\bc)}
+\bfun{\bc{fil\d(}[\bi{file-name}]\bc,\bi{mode}\bc)}
 
 Set file mode, open file in file mode.
 
@@ -3018,7 +3253,7 @@ Option \emph{mode} is one of the following:
 \end{description}
 \end{quote}
 
-\bfun{\bc{fil\d(}[\bi{file name}]\bc,\bi{type}\bc,\bi{size}[\bc,\bi{number}]\bc)}
+\bfun{\bc{fil\d(}[\bi{file-name}]\bc,\bi{type}\bc,\bi{size}[\bc,\bi{number}]\bc)}
 
 Prepare for reading or writing fixed sized records.
 
@@ -3042,9 +3277,9 @@ between implementations with different byte order. The optional
 have to be performed. If type is \verb|DEC|, the product of \bi{size}
 and \bi{number} may not be greater than 4. If a number is read or
 written in 2 or more chunks, the least significant bytes or 16 bit
-words are read or written first (little endian.)
+words are read or written first (little-endian.)
 
-\bfun{\bc{fil\d(}[\bi{file name}]\bc,\bc{STR}[\bc,\bi{stop}]\bc)}
+\bfun{\bc{fil\d(}[\bi{file-name}]\bc,\bc{STR}[\bc,\bi{stop}]\bc)}
 
 Prepare for reading or writing variable sized record.
 
@@ -3054,13 +3289,13 @@ the character to be written is equal to one of the characters in the
 until the end of the file (reading) or the end of the string
 (writing.)
 
-\bfun{\bc{fil\d(}\bi{file name}\bc,\bc{TEL}\bc)}
+\bfun{\bc{fil\d(}\bi{file-name}\bc,\bc{TEL}\bc)}
 
 Tell the position inside the file.
 
 Returns the current value of the file position indicator.
 
-\bfun{\bc{fil\d(}\bi{file name}\bc,\bi{whence}\bc,\bi{offset}\bc)}
+\bfun{\bc{fil\d(}\bi{file-ame}\bc,\bi{whence}\bc,\bi{offset}\bc)}
 
 Go to file position.
 
@@ -3081,10 +3316,10 @@ Option \bi{whence} is one of the following:
 \end{quote}
 
 For a text file, offset must be 0, or the value returned from a call
-to \bc{fil\d(}\bi{file name}\bc{,TEL)}, in which case \bi{whence} must
+to \bc{fil\d(}\bi{file-name}\bc{,TEL)}, in which case \bi{whence} must
 be \bc{SET}.
 
-\bfun{\bc{fil\d(}[\bi{file name}][\bc{,,}\bi{number}]\bc)}
+\bfun{\bc{fil\d(}[\bi{file-name}][\bc{,,}\bi{number}]\bc)}
 
 Read from a file.
 
@@ -3100,7 +3335,7 @@ and the read string (which does not contain the stop character.)
 {?} fil$(,SET,-1)                _com[close the file]
 
 {?} fil$("mytext.txt","rb")      _com[open for reading in binary mode]
-{?} fil$(,STR,"\n \t\r")         _com[prepare for reading until the next white space]
+{?} fil$(,STR,"\n \t\r")         _com[prepare for reading until the next whitespace]
 {?} :?words                      _com[in a moment, accumulate all words in this variable]
 {?} whl'(fil$:(?word.?stop)&!word !words:?words)&  _com[read all words]
 {?} fil$(,SET,-1)                _com[close the file]
@@ -3108,7 +3343,7 @@ and the read string (which does not contain the stop character.)
 \end{ex}
 }
 
-\bfun{\bc{fil\d(}[\bi{file name}]\bc{,,}\bi{number}\bc,\bi{value}\bc)}
+\bfun{\bc{fil\d(}[\bi{file-name}]\bc{,,}\bi{number}\bc,\bi{value}\bc)}
 
 Write to a file.
 
@@ -3125,7 +3360,7 @@ only the product $\bi{number}\times\bi{size}$ matters. If \bi{type} is
 $\bi{number}\times\bi{size}$, \bi{value} is padded with spaces (to the
 right.) If type is \bc{STR}, \bi{number} must be the empty string.
 
-\bfun{\bc{fil\d(}[\bi{file name}]\bc{,SET,-1}\bc)}
+\bfun{\bc{fil\d(}[\bi{file-name}]\bc{,SET,-1}\bc)}
 
 Close a file.
 
@@ -3134,7 +3369,7 @@ An open file is closed by specifying an impossible file position.
 \bfun{\bc{flg\d(=}\bi{expression}\bc)}
 \index{flg@\bc{flg}}
 
-\bc{flg} returns a copy of the expression without prefixes (`flags')
+\bc{flg} returns a copy of the expression without prefixes (``flags'')
 and a new leaf with the prefixes of the original expression. These two
 results are coupled with a dot operator, the prefixes to the left and
 the expression without prefixes to the right. The result is protected
@@ -3180,7 +3415,7 @@ _oct{!} =?!.x
 _oct{!} =?!z
 \end{ex}
 
-\bfun{\bc{fre\d}\bi{memory address}}
+\bfun{\bc{fre\d}\bi{memory-address}}
 \index{fre@\bc{fre}}
 
 \verb|fre$| returns a chunk of memory to the memory pool (heap). The
@@ -3210,15 +3445,15 @@ Options:
     read. Not present: No echo.
   \item \bc{VAP}\par
     Present: The (8-bit) characters are read as is. Extra spaces are
-    inserted between the characters (VAPorised.) Not present No extra
+    inserted between the characters (VAPorised.) Not present: No extra
     spaces are added.
   \item \bc{STR}\par
     Present: The characters are read into one string. Not present: The
     characters are interpreted as parts of a Bracmat expression and
     evaluated after the whole expression has been read.
   \item \bc{TXT}\par
-    Present: File is read in `text' mode (file mode r.) Not present:
-    File is read in binary mode (file mode rb).
+    Present: File is read in ``text'' mode (file mode \verb|r|.) Not present:
+    File is read in binary mode (file mode \verb|rb|).
   \item \bc{BIN}\par
     Present: File is read in binary mode. Not present: File is still
     read in binary mode.
@@ -3240,8 +3475,8 @@ Options:
     \bc?\ldots\bc?. Not present: Processing instructions are assumed
     to have the syntax \bc?\ldots\ .
   \item \bc{TRM} (together with \bc{ML})\par
-    Present: Heading and trailing white space is cut down to a single
-    space in character data. Not present: All white space is
+    Present: Heading and trailing whitespace is cut down to a single
+    space in character data. Not present: All whitespace is
     kept. Input can be exactly reproduced when writing, except
     HTML entities.
   \end{description}
@@ -3295,7 +3530,7 @@ trick is useful in batch processing.
 If the first parameter is \bi{nil} or \verb|stdin| and the \bc{MEM}
 option is not used, input is coming from standard input. Take care for
 putting filenames in double quotes if they contain any characters that
-can be misunderstood, such as dots, (back) slashes or dollars.
+can be misunderstood, such as dots, (back)slashes or dollars.
 
 \bfun{\bc{lst\d(}(\bc=\bi{expression}) or \bi{variable}*[\bc{,LIN}][\bc{,RAW}]\bc)}
 \index{lst@\bc{lst}}
@@ -3313,11 +3548,11 @@ Expressions headed by the \bc= operator can be used instead of variable
 names. In that case no semicolon is appended. The listing starts with
 \bc{(=} and ends with \bc), followed by a newline.
 
-With the \bc{RAW} option only the expression right of the \bc=
+With the \bc{RAW} option, only the expression right of the \bc=
 operator is listed.
 
 The \bc{LIN} option suppresses most newlines and all other unneeded
-white space characters.
+whitespace characters.
 
 If the first parameter is the zero-length string, then all variables
 with names starting with a character below ASCII 128 are shown. If a
@@ -3334,16 +3569,16 @@ If \bc{LIN} is not present, output is very much indented, sometimes
 making it more readable for humans. If \bc{LIN} is present, output is
 as compact as possible.
 
-\bfun{\bc{lst\d(}(\bc=\bi{expression}) or \bi{variable}*[\bc{,MEM}][\bc{,LIN}][\bc{,RAW}]\bc)}
+\bfun{\bc{lst\d(}(\bc=\bi{expression}) or \bi{variable}*\bc{,MEM}[\bc{,LIN}][\bc{,RAW}]\bc)}
 
 The difference with the preceding form is that output takes place to
 memory. What is normally visible on screen is put in one atom, which
-is the return value of the call to lst. It has the opposite effect of
-\verb|get$(|\bi{atom}\verb|,MEM)|. Use \verb|:| compression of an
-expression to save space. If the compressed expression is needed, it
-is decompressed with \verb|get$|. Compression is typically by a factor
-of about 5, but may be as large as 16. Expressions with very large
-atoms (such as this help function) do less well.
+is the return value of the call to \bc{lst}. It has the opposite effect of
+\verb|get$(|\bi{atom}\verb|,MEM)|. In theory one can save some memory by writing an expression
+to a single leaf node, because each node in an expression has some memory
+overhead. In practice the saving can be quite small or non-existent, because
+Bracmat expressions often share part of their data structures with other
+expressions.
 
 Example:
 \begin{ex}
@@ -3353,7 +3588,7 @@ Example:
 {?} get_d(!sleeping-fct,MEM)
 \end{ex}
 
-\bfun{\bc{lst\d(}(\bc=\bi{expression}) or \bi{variable}*\bc,\bi{file name}\bc,\bc{NEW}$\vert$\bc{APP}[\bc{,LIN}][\bc{,TXT}][\bc{,BIN}]\bc)}
+\bfun{\bc{lst\d(}(\bc=\bi{expression}) or \bi{variable}*\bc,\bi{file-name}\bc,\bc{NEW}$\vert$\bc{APP}[\bc{,LIN}][\bc{,TXT}][\bc{,BIN}]\bc)}
 
 This time, output is sent to the named file instead of standard
 output. The third argument is explained below. Code that has been
@@ -3395,8 +3630,8 @@ the functions \verb|put| and \verb|lst|.
 \index{map@\bc{map}}
 
 \verb|map$| produces a list containing the results of applying
-\bi{fnc} to each member in list. \bi{fnc} can be the name of a
-function, a function definition (`anonymous function') or a lambda
+\bi{fnc} to each member in \bi{list}. \bi{fnc} can be the name of a
+function, a function definition (``anonymous function'') or a lambda
 abstraction. \bi{fnc} can also be the name of a built-in
 function. (See the first example.) The members in \bi{list} must be
 separated by the space operator.
@@ -3442,7 +3677,7 @@ array: 0 .. size-1). The predefined function \verb|cat$| makes use of
 \bfun{\bc{mod\d(}\bi{number}\bc,\bi{divisor}\bc)}
 \index{mod@\bc{mod}}
 
-\verb|mod$| divides \bi{number} by \bi{divisor}. The rest is returned.
+\verb|mod$| divides \bi{number} by \bi{divisor}. The remainder is returned.
 \begin{ex}
 {?} mod_d(22,7)
 _oct{!} 1
@@ -3458,9 +3693,9 @@ form, \bi{args} is passed to the method \verb|new|.
 Example:
 \begin{ex}
 {?} (patient=
-  (name=(first=John),(last=Bull)) _com[name is a copy, first and last are not]
+    (name=(first=John),(last=Bull)) _com[name is a copy, first and last are not]
   , (age=20)
-  , ( new
+  , (new
     =
       .   out$"hello world"
         & new$(its.name):(=?(its.name)) _com[create fresh copies of first and last]
@@ -3491,8 +3726,8 @@ Depending on \bi{size}, a 1, 2 or 4 byte sized integer allocated at
 
 2 and 4 byte integers may only start at addresses that are multiples
 of 2 and 4, respectively. \bi{address} is lowered to the nearest allowable
-value, if needed. Notice that multi byte integers are stored
-differently in Little Endian (iAPx86, VAX, ARM) and Big Endian
+value, if needed. Notice that multi-byte integers are stored
+differently in little-endian (iAPx86, VAX, ARM) and big-endian
 (MC680x0) machines. Many operating systems abort programs that try to
 access non-existent or protected memory areas.
 
@@ -3510,8 +3745,8 @@ address.
 
 2 and 4 byte integers may only start at addresses that are multiples
 of 2 and 4, respectively. \bi{address} is lowered to the nearest
-allowable value, if needed. Notice that multi byte integers are stored
-differently in Little Endian (iAPx86, VAX, ARM) and Big Endian
+allowable value, if needed. Notice that multi-byte integers are stored
+differently in little-endian (iAPx86, VAX, ARM) and big-endian
 (MC680x0) machines. Many operating systems abort programs that try to
 access non-existent or protected memory areas.
 
@@ -3536,13 +3771,13 @@ positions the cursor on the beginning of the next line.
 
 \bfun{\bc{put\d(}\bi{expression}\bc{,MEM}[\bc{,LIN}]\bc)}
 
-\bi{expression} is stringized and placed into an atom, which is the
+\bi{expression} is stringified and placed into an atom, which is the
 return value of the call. This use of
 \verb|put$| is similar to the \verb|str$| function, but whereas
 \verb|str$| suppresses the space operator, \verb|put$| transfers every
 character, including space operators, to the atom.
 
-\bfun{\bc{put\d(}\bi{expression}\bc,\bi{file name}\bc{,NEW}$\vert$\bc{APP}[\bc{,LIN}]\bc)}
+\bfun{\bc{put\d(}\bi{expression}\bc,\bi{file-name}\bc{,NEW}$\vert$\bc{APP}[\bc{,LIN}]\bc)}
 
 Write \bi{expression} to the named file.
 
@@ -3554,7 +3789,7 @@ Write \bi{expression} to the named file.
 \index{ren@\bc{ren}}
 
 Renames a file or directory or moves a file. The \verb|ren$| function
-succeeds, unless a syntactic error was made. If there is an error at
+succeeds unless a syntactic error was made. If there is an error at
 the operating system level, one of the following codes is returned:
 \begin{quote}
   \begin{description}
@@ -3572,7 +3807,7 @@ the operating system level, one of the following codes is returned:
 If the command succeeds at the operating system level, the value 0 is
 returned.
 
-\bfun{\bc{rmv\d}\bi{file name}}
+\bfun{\bc{rmv\d}\bi{file-name}}
 \index{rmv@\bc{rmv}}
 
 Removes a file. The \verb|rmv$| function succeeds, unless a syntactic
@@ -3632,7 +3867,7 @@ _oct{!} 30
 prefixes and operators, with the exception of the space operator, are
 copied to the output string. Main use: pasting of two or more atoms.
 
-\bfun{\bc{swi\d(}\bi{interrupt number}\bc.\bi{input value}\bc,[\bi{input value}\bc,\ldots]\bc)}
+\bfun{\bc{swi\d(}\bi{interrupt-number}\bc.\bi{input-value}\bc,[\bi{input-value}\bc,\ldots]\bc)}
 \index{swi@\bc{swi}}
 
 This function is the most operating-system-dependent function in
@@ -3643,7 +3878,7 @@ be complete. Missing values are assumed to be zero. Blocks of memory
 should be passed by allocating memory with \verb|alc$| and passing the
 returned value. The returned value has the form
 
-\bc(\bi{error code}\bc.\bi{output value}\bc,\bi{output value}\bc,\ldots\bc)
+\bc(\bi{error-code}\bc.\bi{output-value}\bc,\bi{output-value}\bc,\ldots\bc)
 
 An error code of 0 means that no error is reported. In the MS-DOS
 version, the input registers are AX, BX, CX, DX, BP, SI, DI, DS, ES
@@ -3674,7 +3909,7 @@ and FLAGS, respectively.
 {?} gotoxy$(0,0) & put_d(top left corner)
 \end{ex}
 
-\bfun{\bc{sys\d}\bi{command line commando}}
+\bfun{\bc{sys\d}\bi{command-line-command}}
 \index{sys@\bc{sys}}
 
 In most environments,
@@ -3708,7 +3943,7 @@ following codes is returned:
   \item \bc{ENOENT}\par
     Command interpreter cannot be found.
   \item \bc{ENOEXEC}\par
-    Command-interpreter file has invalid format and is not executable.
+    Command interpreter file has invalid format and is not executable.
   \item \bc{ENOMEM}\par
     Not enough memory is available to execute command; or available
     memory has been corrupted; or invalid block exists, indicating
@@ -3719,7 +3954,7 @@ following codes is returned:
 If the command succeeds at the operating system level, the value 0 is
 returned.
 
-\bfun{\bc{tbl\d(}\bi{variable}\bc,\bi{array size}\bc)}
+\bfun{\bc{tbl\d(}\bi{variable}\bc,\bi{array-size}\bc)}
 \index{tbl@\bc{tbl}}
 
 The named variable is (re-)sized to an array with \bi{array size}
@@ -3727,7 +3962,7 @@ elements. Resizing always affects the elements with the highest
 indexes first: shrinking means that the last elements are lost,
 expanding creates new zero-valued elements at the end.
 
-If \bi{array size} equals zero, the named \bi{variable} ceases to
+If \bi{array-size} equals zero, the named \bi{variable} ceases to
 exist in memory. This is the only way in Bracmat to get rid of global
 variables.
 
@@ -3736,7 +3971,7 @@ is not possible to declare arrays locally.
 
 Bracmat never accesses arrays as a whole; there is always just one
 element that is in focus. By issuing an instruction of the form
-\bi{index}{\bc\d}\bi{array name} or \bi{index}{\bc\d}\bi{array name}
+\bi{index}{\bc\d}\bi{array-name} or \bi{index}{\bc\d}\bi{array-name}
 you can explicitly tell Bracmat to put focus on some element. Bracmat
 does this automatically in the case of pushing and popping local
 variables onto and from a stack.
@@ -3814,7 +4049,7 @@ expression. If the sign is \verb|-|, then \verb|sgn| returns
 {?} abs$(-7*a)
 \end{ex}
 
-\bfun{\bc{cat\d(}[\bi{include list}][\bc,[\bi{exclude list}][\bc{,EXT}]]\bc)}
+\bfun{\bc{cat\d(}[\bi{include-list}][\bc,[\bi{exclude-list}][\bc{,EXT}]]\bc)}
 \index{cat@\bc{cat}}
 
 \verb|cat$| is like the built-in function \verb|mem$|, but offers the
@@ -3823,7 +4058,7 @@ and/or to exclude names that are in the second parameter. The optional
 third parameter adds information about array size and current index
 value, e.g. (arg,5,5). If the first parameter is missing, this is
 taken to mean that \emph{no} names are excluded (unless by virtue of the
-second parameter). You can use \verb|cat$| to save the state of the
+second parameter.) You can use \verb|cat$| to save the state of the
 variable space for later use, e.g. removing all variables that have
 been created since.
 \begin{ex}
@@ -3847,18 +4082,14 @@ sometimes, simplified.
 
 \verb|fct$| uses some heuristics in trying to factorise
 \bi{expression}.
-\begin{v}
+\begin{ex}
 {?} 1+(2*a^3+6/7*t)*(3*x+4*y+z^-1)+-1:?sum
 {?} fct\d!sum
 _oct{!} 6/7*z^-1*(1+3*x*z+4*y*z)*(t+7/3*a^3)
-\end{v}
+\end{ex}
 
-\bfun{\bc{flt\d(}\bi{rational number}\bc,\bi{number of decimals}\bc)}
+\bfun{\bc{flt\d(}\bi{rational-number}\bc,\bi{number-of-decimals}\bc)}
 \index{flt@\bc{flt}}
-
-\verb|flt$| converts a rational number to a floating point
-presentation. The result is stored in an atom. This function is meant
-for output, Bracmat does not use floating point numbers itself.
 
 \verb|flt$| converts a rational number to a floating point
 presentation. The result is stored in an atom. This function is meant
@@ -3883,19 +4114,44 @@ Suppose \verb|mars.json| contains
 Read \verb|mars.json| into variable \verb|mars|:
 \begin{ex}
 {?} get_d("mars.json",JSN):?mars
-_oct{!} (Eccentricity.934/10000) + (moons.,(.Deimos) (.Phobos))
-_oct    + (planet..Mars)
+_oct{!}     (Eccentricity.934/10000)
+_oct      + (moons.,(.Deimos) (.Phobos))
+_oct      + (planet..Mars)
+_oct    ,
 \end{ex}
+\begin{ex}
+{?} !mars:(?name-value-pairs,)
+_oct{!}     (Eccentricity.934/10000)
+_oct      + (moons.,(.Deimos) (.Phobos))
+_oct      + (planet..Mars)
+_oct    ,
+\end{ex}
+
+
 Now add the fact that Mars' gravity, compared to the Earth's, is about
 $3711/9807$:
+
+
 \begin{ex}
-{?} (ratio.3711/9807)+!mars:?mars
-_oct{!} (Eccentricity.934/10000) + (moons.,(.Deimos) (.Phobos))
-_oct    + (planet..Mars) + (ratio.3711/9807)
+{?} !name-value-pairs+(ratio.3711/9807):?name-value-pairs
+_oct{!}   (Eccentricity.934/10000)
+_oct    + (moons.,(.Deimos) (.Phobos))
+_oct    + (planet..Mars)
+_oct    + (ratio.3711/9807)
 \end{ex}
+\begin{ex}
+{?} (!name-value-pairs,):?mars
+_oct{!}     (Eccentricity.934/10000)
+_oct      + (moons.,(.Deimos) (.Phobos))
+_oct      + (planet..Mars)
+_oct      + (ratio.3711/9807)
+_oct    ,
+\end{ex}
+
+
 Finally, serialize the new data to JSON
 \begin{ex}[commandchars=\\()]
-{?} jsn_d!mars
+{?} jsn\d!mars
 \oct{!} {"Eccentricity":0.0934,"moons":["Deimos","Phobos"],
 \oct     "planet":"Mars","ratio":3.78403181401040073417E-1}
 \end{ex}
@@ -3910,30 +4166,30 @@ Objects have their elements sorted.
 
 No attempt is made to make the result look pretty using indentation.
 
-\subsubsection*{Mapping between JSON and Brachmat expressions}
+\subsubsection*{Mapping between JSON and Bracmat expressions}
 
-A JSON object is represented as a sum of dotted pairs as the lhs (left
-hand side) of a comma operator, while the rhs must be empty. The
+A JSON object is represented as a sum of dotted pairs as the LHS (left
+hand side) of a comma operator, while the RHS must be empty. The
 original ordering of members may be lost, as the sum operator sorts
-its terms. In each dotted pair, the lhs represents the object member's
-key while the rhs represents the object member's value. An empty
+its terms. In each dotted pair, the LHS represents the object member's
+key while the RHS represents the object member's value. An empty
 object is represented as \verb|(0,)|.
 
-A JSON array is a space separated list as the rhs of a comma operator
-with an empty string as lhs.
+A JSON array is a space separated list as the RHS of a comma operator
+with an empty string as LHS.
 
-A string is mapped to the atomic rhs of a dot operator, leaving the
-lhs empty.
+A string is mapped to the atomic RHS of a dot operator, leaving the
+LHS empty.
 
 \bc{true}, \bc{false} and \bc{null} map onto themselves.
 
-\bfun{\bc{MLencoding\d}\bi{internal expression of XML or HTML data}}
+\bfun{\bc{MLencoding\d}\bi{internal-expression-of-XML-or-HTML-data}}
 \index{MLencoding@\bc{MLencoding}}
 
 This function parses the data for indicators of the used character
 encoding.
 
-\bfun{\bc{nestML\d}\bi{internal expression of XML or HTML data}}
+\bfun{\bc{nestML\d}\bi{internal-expression-of-XML-or-HTML-data}}
 \index{nestML@\bc{nestML}}
 
 After reading XML or HTML data, all text and tags are in a flat
@@ -3945,7 +4201,7 @@ tags and creates a tree structure. This works best for XML data.
 
 Uses the built-in function
 \verb|put$| to output expression to the output stream (usually the
-screen). Output is ended with a new line. Normally, \verb|out$|
+screen.) Output is ended with a new line. Normally, \verb|out$|
 returns its argument.
 \verb|out$| is a good debugging tool, but \verb|put$| is slightly
 safer, as it handles failing arguments in the correct way, contrary to
@@ -3962,10 +4218,11 @@ _oct{!} b
 \bfun{\bc{sub\d(}\bi{expression}\bc.\bi{pattern}\bc.\bi{replacement}\bc)}
 \index{sub@\bc{sub}}
 
-Substitution function argument 1 : subject argument 2 : pattern
-argument 3 : replacement for subexpressions matched by pattern.
+Substitution function. Argument 1: subject. Argument 2: pattern.
+Argument 3: replacement for subexpressions in subject matched by
+pattern.
 
-\bfun{\bc{tay\d(}\bi{expression}\bc,\bi{variable}\bc,\bi{number of terms}\bc)}
+\bfun{\bc{tay\d(}\bi{expression}\bc,\bi{variable}\bc,\bi{number-of-terms}\bc)}
 \index{tay@\bc{tay}}
 
 A Taylor expansion is applied to \bi{expression}. The second argument is
@@ -3975,7 +4232,7 @@ terms, including vanishing terms.
 {?} tay$((cos$x)^-1,x,20)
 \end{ex}
 
-\bfun{\bc{toML\d}\bi{internal expression of XML or HTML data}}
+\bfun{\bc{toML\d}\bi{internal-expression-of-XML-or-HTML-data}}
 \index{toML@\bc{toML}}
 
 This function creates a string containing XML or HTML formatted data
@@ -4007,7 +4264,7 @@ default to ISO 8859-1 (Latin 1) if the argument is not valid UTF-8.
 characters are handled as UTF-8 encoded Unicode characters, but
 default to ISO 8859-1 (Latin 1) if the argument is not valid UTF-8.
 
-\bfun{\bc{utf\d}\bi{UTF-8 character}}
+\bfun{\bc{utf\d}\bi{UTF-8-character}}
 \index{utf@\bc{utf}}
 
 \verb|utf$| returns the Unicode code point of the UTF-8 character. The
@@ -4021,9 +4278,36 @@ matches the UTF-8 sequence. If \bc{txt} starts with a sequence that is
 not UTF-8, Bracmat stops backtracking when that fact has been
 established.
 
+\section{Methods}
+\index{method}
+A method is function that is a member of an object. A method definition is not
+different from a function definition, but the ways in which methods and a
+functions are called are. While a function call only requires the name of the
+function, a method call requires the name or definition of an object and the
+name of the method, separated by a dot operator. In the body of a method it is
+usually necessary to refer to other members of the same object - that is one of
+the primary objectives of using objects. Such self-references start with \verb|its|,
+which is analogous to \verb|this| in C++. Here is an example of an object that
+represents a rectangle with an \verb|x-size| and a \verb|y-size| for the lengths of two
+orthogonal sides. Apart from these two data members, the object also has a
+member function \verb|area$| that returns the product of the \verb|x-size| and the
+\verb|y-size|, and another member function that computes the length of the diagonal.
+\begin{ex}
+{?} (rect=
+    (x-size=5)
+    (y-size=12)
+    (area=.!(its.x-size)*!(its.y-size))
+    (diagonal=.(!(its.x-size)^2+!(its.y-size)^2)^1/2)
+    );
+{?} (rect.area)$
+_oct{!} 60
+{?} (rect.diagonal)$
+_oct{!} 13
+\end{ex}
+
 \section{Hash tables}
 
-If you need to manage a large data set it, may be a good idea to use a
+If you need to manage a large data set it may be a good idea to use a
 hash table instead of a list. Storing, retrieving and deleting are
 costly processes in lists, but cheap in hash tables. Handling hash
 tables in Bracmat is very simple. You create a hash table as follows
@@ -4149,18 +4433,18 @@ Make all key access case sensitive. This the default.
 \bfun{\bc{(myhash..forall)\d{}Function}}
 
 Apply the function to all key-value pairs. The function can be
-specified by its name or by its function body. The forall method
+specified by its name or by its function body. The \bc{forall} method
 finishes when all elements are traversed or before that if the
-function fails. The behaviour of forall is undefined if the hash table
+function fails. The behaviour of \bc{forall} is undefined if the hash table
 is changed or deleted during the traversal, although this can be done
-safely. For example may some members be missed and others be processed
+safely. For example, some members may be missed and others may be processed
 more than once.
 
 Example:
 \begin{ex}
 {?} new_d[]hash:?myhash;          _com[create a hash table _bc[myhash]]
 {?} (myhash..insert)_d(X.12);   _com[insert the value 12 for key _bc[X]]
-{?} (myhash..insert)_d(Z.1);    _com[use the built-in insert method]
+{?} (myhash..insert)_d(Z.1);    _com[use the built-in _bc[insert] method]
 {?} ( (myhash..forall)         _com[output all key-value pairs]
     _d (
       =   Key,Value,loop
@@ -4185,6 +4469,23 @@ text, Bracmat assumes that the argument is UTF-8 encoded, but
 graciously falls back to regarding the argument as ISO 8859-1 encoded
 if parsing the argument as UTF-8 fails. UTF-16 and UTF-32 is not
 supported, because those encodings make use of zero-bytes.
+
+\section{Predefined variables}
+\index{predefined variables}
+There are three variables that are predefined, but that in no way are preserved
+by Bracmat.
+\begin{ex}
+{?} !w
+\end{ex}
+This returns article 11 of the GNU General Public License, Version 2.
+\begin{ex}
+{?} !c
+\end{ex}
+This returns article 12 of the GNU General Public License, Version 2.</p>
+\begin{ex}
+{?} !v
+\end{ex}
+This returns the current version number and build date of Bracmat.
 
 \printindex
 
