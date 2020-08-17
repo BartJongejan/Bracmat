@@ -115,12 +115,18 @@ if [ -d /usr/local/jboss ]; then
     sudo cp -p ./bracmat.jar /usr/local/jboss/server/all/lib/
     sudo cp -p ./bracmat.jar /usr/local/jboss/server/default/lib/
 else 
-    if [ -d /usr/share/tomcat9/lib ]; then
-        sudo cp -p ./bracmat.jar /usr/share/tomcat9/lib/
-        sudo java -classpath /usr/share/tomcat9/lib/bracmat.jar:. bracmattest
-    elif  [ -d /opt/tomcat/latest/lib ]; then
+    if  [ -d /opt/tomcat/latest/lib ]; then
         sudo cp -p ./bracmat.jar /opt/tomcat/latest/lib
+	echo "Assuming Tomcat lib is /opt/tomcat/latest/lib. Testing..."
         sudo java -classpath /opt/tomcat/latest/lib/bracmat.jar:. bracmattest
+	echo "Test done. Did you see sensible output?"
+    elif [ -d /usr/share/tomcat9/lib ]; then
+        sudo cp -p ./bracmat.jar /usr/share/tomcat9/lib/
+	echo "Assuming Tomcat lib is /usr/share/tomcat9/lib. Testing..."
+        sudo java -classpath /usr/share/tomcat9/lib/bracmat.jar:. bracmattest
+	echo "test done. Did you see sensible output?"
+    else
+	echo "did not copy bracmat.jar to tomcat lib folder. Where is it?" 
     fi
 fi
 
