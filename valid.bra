@@ -6255,6 +6255,12 @@ string line 2\"
             & !typoer:17
           | Out$"Alternative to !! and ?!."
           )
+          (     -80538738812075974^3
+              + 80435758145817515^3
+              + 12602123297335631^3
+            : 42
+          | Out$"forty-two is not the answer"
+          )
       &   out
         $ ( str
           $ ( "Done. "
