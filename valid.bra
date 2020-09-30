@@ -6261,6 +6261,10 @@ string line 2\"
             : 42
           | Out$"forty-two is not the answer"
           )
+          (   get$("<?xml akajh ?><?app >aap",ML MEM):?ml
+            & toML$!ml:"<?xml akajh ?><?app ?>aap"
+          | "toML 20200930"
+          )
       &   out
         $ ( str
           $ ( "Done. "

@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "22 June 2020"
-#define VERSION "6.7.4"
-#define BUILD "237"
+#define DATUM "30 September 2020"
+#define VERSION "6.7.5"
+#define BUILD "238"
 /*
 COMPILATION
 -----------
@@ -16461,7 +16461,7 @@ int startProc(
         "?s&whl'(!arg:%?a ?arg&(!a:(.?e.)&(!L.) !B:?B&:?L&!e !s:?s|(!a:(?e.?,?"
         ")&!a|!a:(?e.?x)&(!s:!e ?s&(!e.!x,!L) (!B:(%?L.) ?B&)|!a)|!a) !L:?L))&"
         "!L),",
-        "(toML=O d t g l \246 w \242 \247 H G S D E F I U.:?O&chr$\261\262\267"
+        "(toML=O d t g l \246 w \242 \247 H G S D E F I U x.:?O&0:?x&chr$\261\262\267"
         ":?D&(d=a.whl'(!arg:%?a ?arg&!a !O:?O))&'(a c n.@(!arg:?a (>%@($D) ?:"
         "?arg))&(@(!arg:(%?c&utf$!c:?n) ?arg)|@(!arg:(%?c&asc$!c:?n) ?arg))&!a"
         " \246\243 !n \273 S$!arg|!arg):(=?S)&'(a c n.@(!arg:?a (>%@($D) ?:"
@@ -16484,7 +16484,8 @@ int startProc(
         "\276)&(!A:(~<>script|~<>style)&d$!C|w$!C)&d$(\274\257 !A \276))|!A:(&"
         "!B:(?B.)&d$(\274\257 g$!B \276)|\241&d$(\274\241 !F$!B \276)|"
         "\241\255\255&d$(\274\241\255\255 !F$!B \255\255\276)|\277&d$(\274\277"
-        " !F$!B \277\276)|\241\333CDATA\333&d$(\274\241\333CDATA\333 !F$!B "
+        " (=.@(!arg:(?arg \277|xml ?:?arg))&1:?x&!arg \277|!arg (!x:1&\277|))$"
+        "(!F$!B) \276)|\241\333CDATA\333&d$(\274\241\333CDATA\333 !F$!B "
         "\335\335\276)|\241DOCTYPE&d$(\274\241DOCTYPE !F$!B \276)|?&d$(\274 !A"
         " t$!B \276)))|d$(g$!r)))):(=?w)&w$!arg&str$((=a L.:?L&whl'(!arg:%?a "
         "?arg&!a !L:?L)&!L)$!O)),",

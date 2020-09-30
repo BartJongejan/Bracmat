@@ -1,3 +1,8 @@
+30 September 2020
+toML: if xml declaration encountered, make sure that there is exactly one "?"
+before the ">" of the xml declaration and before all ">" in all Processing
+Instructions.
+
 20 June 2020
 Removed the third (and last) number from the data structure that is returned by
 the bez$ function, since this number is always 0.
