@@ -58,7 +58,7 @@ extern void putLeafChar(int c);
 extern char * putCodePoint(unsigned LONG val,char * s);
 
 typedef enum {notag,tag,endoftag,endoftag_startoftag} estate;
-static estate (*tagState)(const char * pkar);
+static estate (*tagState)(const unsigned char * pkar);
 
 static int Put(char * c);
 static int (*xput)(char * c) = Put;
@@ -2506,49 +2506,49 @@ static void cbEndAttribute(void)
     putOperatorChar(' ');
     }
 
-static estate def_pcdata(const char * pkar);
-static estate (*def)(const char * pkar) = def_pcdata;
-static estate def_cdata(const char * pkar);
-static estate lt(const char * pkar);
-static estate lt_cdata(const char * pkar);
-static estate lts_cdata(const char * pkar);
-static estate element(const char * pkar);
-static estate elementonly(const char * pkar);
-static estate gt(const char * pkar);
-static estate emptytag(const char * pkar);
-static estate atts(const char * pkar);
-static estate name(const char * pkar);
-static estate value(const char * pkar);
-static estate atts_or_value(const char * pkar);
-static estate invalue(const char * pkar);
-static estate singlequotes(const char * pkar);
-static estate doublequotes(const char * pkar);
-static estate insinglequotedvalue(const char * pkar);
-static estate indoublequotedvalue(const char * pkar);
-static estate endvalue(const char * pkar);
-static estate markup(const char * pkar); /* <! */
-static estate perhapsScriptOrStyle(const char * pkar); /* <s or <S */
-static estate scriptOrStyleElement(const char * pkar); /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
-static estate scriptOrStyleEndElement(const char * pkar); /* </s or </S */
-static estate scriptOrStyleEndElementL(const char * pkar); /* </script or </SCRIPT or </style or </STYLE */
-static estate unknownmarkup(const char * pkar);
-static estate PI(const char * pkar);       /* processing instruction <?...?> (XML) or <?...> (non-XML) */
-static estate endPI(const char * pkar);
-static estate DOCTYPE1(const char * pkar); /* <!D */
-static estate DOCTYPE7(const char * pkar); /* <!DOCTYPE */
-static estate DOCTYPE8(const char * pkar); /* <!DOCTYPE S */
-static estate DOCTYPE9(const char * pkar); /* <!DOCTYPE S [ */
-static estate DOCTYPE10(const char * pkar); /* <!DOCTYPE S [ ] */
-static estate CDATA1(const char * pkar); /* <![ */
-static estate CDATA7(const char * pkar); /* <![CDATA[ */
-static estate CDATA8(const char * pkar); /* <![CDATA[ ] */
-static estate CDATA9(const char * pkar); /* <![CDATA[ ]] */
-static estate h1(const char * pkar); /* <!- */
-static estate h2(const char * pkar); /* <!-- */
-static estate h3(const char * pkar); /* <!--  - */
-static estate endtag(const char * pkar);
+static estate def_pcdata(const unsigned char * pkar);
+static estate (*def)(const unsigned char * pkar) = def_pcdata;
+static estate def_cdata(const unsigned char * pkar);
+static estate lt(const unsigned char * pkar);
+static estate lt_cdata(const unsigned char * pkar);
+static estate lts_cdata(const unsigned char * pkar);
+static estate element(const unsigned char * pkar);
+static estate elementonly(const unsigned char * pkar);
+static estate gt(const unsigned char * pkar);
+static estate emptytag(const unsigned char * pkar);
+static estate atts(const unsigned char * pkar);
+static estate name(const unsigned char * pkar);
+static estate value(const unsigned char * pkar);
+static estate atts_or_value(const unsigned char * pkar);
+static estate invalue(const unsigned char * pkar);
+static estate singlequotes(const unsigned char * pkar);
+static estate doublequotes(const unsigned char * pkar);
+static estate insinglequotedvalue(const unsigned char * pkar);
+static estate indoublequotedvalue(const unsigned char * pkar);
+static estate endvalue(const unsigned char * pkar);
+static estate markup(const unsigned char * pkar); /* <! */
+static estate perhapsScriptOrStyle(const unsigned char * pkar); /* <s or <S */
+static estate scriptOrStyleElement(const unsigned char * pkar); /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
+static estate scriptOrStyleEndElement(const unsigned char * pkar); /* </s or </S */
+static estate scriptOrStyleEndElementL(const unsigned char * pkar); /* </script or </SCRIPT or </style or </STYLE */
+static estate unknownmarkup(const unsigned char * pkar);
+static estate PI(const unsigned char * pkar);       /* processing instruction <?...?> (XML) or <?...> (non-XML) */
+static estate endPI(const unsigned char * pkar);
+static estate DOCTYPE1(const unsigned char * pkar); /* <!D */
+static estate DOCTYPE7(const unsigned char * pkar); /* <!DOCTYPE */
+static estate DOCTYPE8(const unsigned char * pkar); /* <!DOCTYPE S */
+static estate DOCTYPE9(const unsigned char * pkar); /* <!DOCTYPE S [ */
+static estate DOCTYPE10(const unsigned char * pkar); /* <!DOCTYPE S [ ] */
+static estate CDATA1(const unsigned char * pkar); /* <![ */
+static estate CDATA7(const unsigned char * pkar); /* <![CDATA[ */
+static estate CDATA8(const unsigned char * pkar); /* <![CDATA[ ] */
+static estate CDATA9(const unsigned char * pkar); /* <![CDATA[ ]] */
+static estate h1(const unsigned char * pkar); /* <!- */
+static estate h2(const unsigned char * pkar); /* <!-- */
+static estate h3(const unsigned char * pkar); /* <!--  - */
+static estate endtag(const unsigned char * pkar);
 
-static estate def_pcdata(const char * pkar)
+static estate def_pcdata(const unsigned char * pkar)
     {
     switch(*pkar)
         {
@@ -2561,7 +2561,7 @@ static estate def_pcdata(const char * pkar)
         }
     }
     
-static estate def_cdata(const char * pkar)
+static estate def_cdata(const unsigned char * pkar)
     {
     switch(*pkar)
         {
@@ -2573,7 +2573,7 @@ static estate def_cdata(const char * pkar)
         }
     }
     
-static estate lt(const char * pkar)
+static estate lt(const unsigned char * pkar)
     {
     const int kar = *pkar;
     endElementName = NULL;
@@ -2617,7 +2617,7 @@ static estate lt(const char * pkar)
         }
     }
 
-static estate lt_cdata(const char * pkar)
+static estate lt_cdata(const unsigned char * pkar)
     {
     switch(*pkar)
         {
@@ -2636,7 +2636,7 @@ static int scriptstylei2 = 0;
 static int scriptstyleimax = 0;
 static char * elementEndNameLower;
 static char * elementEndNameUpper;
-static estate scriptOrStyleEndElement(const char * pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
+static estate scriptOrStyleEndElement(const unsigned char * pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
     {
     const int kar = *pkar;
     if(kar == elementEndNameLower[scriptstylei2] || kar == elementEndNameUpper[scriptstylei2])
@@ -2661,7 +2661,7 @@ static estate scriptOrStyleEndElement(const char * pkar) /* <sc or <SC or <Sc or
         }
     }
 
-static estate scriptOrStyleEndElementL(const char * pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
+static estate scriptOrStyleEndElementL(const unsigned char * pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
     {
     switch(*pkar)
         {
@@ -2693,7 +2693,7 @@ static estate scriptOrStyleEndElementL(const char * pkar) /* <sc or <SC or <Sc o
         }
     }
 
-static estate lts_cdata(const char * pkar)
+static estate lts_cdata(const unsigned char * pkar)
     {
     const int kar = *pkar;
     scriptstyleimax = ScriptStyleiMax;
@@ -2721,7 +2721,7 @@ static void stillCdata(void)
         }
     }
 
-static estate element(const char * pkar)
+static estate element(const unsigned char * pkar)
     {
     const int kar = *pkar;
     switch(kar)
@@ -2773,7 +2773,7 @@ static estate element(const char * pkar)
         }
     }
 
-static estate elementonly(const char * pkar)
+static estate elementonly(const unsigned char * pkar)
     {
     const int kar = *pkar;
     switch(kar)
@@ -2817,7 +2817,7 @@ static estate elementonly(const char * pkar)
         }
     }
 
-static estate gt(const char * pkar)
+static estate gt(const unsigned char * pkar)
     {
     switch(*pkar)
         {
@@ -2847,7 +2847,7 @@ static estate gt(const char * pkar)
         }
     }
 
-static estate emptytag(const char * pkar)
+static estate emptytag(const unsigned char * pkar)
     {
     switch(*pkar)
         {
@@ -2864,7 +2864,7 @@ static estate emptytag(const char * pkar)
         }
     }
 
-static estate atts(const char * pkar)
+static estate atts(const unsigned char * pkar)
     {
     const int kar = *pkar;
     switch(kar)
@@ -2906,7 +2906,7 @@ static estate atts(const char * pkar)
         }
     }
 
-static estate name(const char * pkar)
+static estate name(const unsigned char * pkar)
     {
     const int kar = *pkar;
     switch(kar)
@@ -2960,7 +2960,7 @@ static estate name(const char * pkar)
         }
     }
 
-static estate value(const char * pkar)
+static estate value(const unsigned char * pkar)
     {
     switch(*pkar)
         {
@@ -2989,7 +2989,7 @@ static estate value(const char * pkar)
         }
     }
 
-static estate atts_or_value(const char * pkar)
+static estate atts_or_value(const unsigned char * pkar)
     {
     const int kar = *pkar;
     switch(kar)
@@ -3047,7 +3047,7 @@ static estate atts_or_value(const char * pkar)
 /* This is far from conforming to and more forgiving than 
 https://html.spec.whatwg.org/multipage/syntax.html#unquoted
 */
-static estate invalue(const char * pkar)
+static estate invalue(const unsigned char * pkar)
     {
     switch(*pkar)
         {
@@ -3093,7 +3093,7 @@ static estate invalue(const char * pkar)
         }
     }
 
-static estate singlequotes(const char * pkar)
+static estate singlequotes(const unsigned char * pkar)
     {
     StaRt = ch;
     switch(*pkar)
@@ -3109,7 +3109,7 @@ static estate singlequotes(const char * pkar)
         }
     }
 
-static estate doublequotes(const char * pkar)
+static estate doublequotes(const unsigned char * pkar)
     {
     StaRt = ch;
     switch(*pkar)
@@ -3125,7 +3125,7 @@ static estate doublequotes(const char * pkar)
         }
     }
 
-static estate insinglequotedvalue(const char * pkar)
+static estate insinglequotedvalue(const unsigned char * pkar)
     {
     switch(*pkar)
         {
@@ -3139,7 +3139,7 @@ static estate insinglequotedvalue(const char * pkar)
         }
     }
 
-static estate indoublequotedvalue(const char * pkar)
+static estate indoublequotedvalue(const unsigned char * pkar)
     {
     switch(*pkar)
         {
@@ -3154,7 +3154,7 @@ static estate indoublequotedvalue(const char * pkar)
     }
 
 
-static estate endvalue(const char * pkar)
+static estate endvalue(const unsigned char * pkar)
     {
     switch(*pkar)
         {
@@ -3189,7 +3189,7 @@ static estate endvalue(const char * pkar)
 
 static char * elementNameLower;
 static char * elementNameUpper;
-static estate scriptOrStyleElement(const char * pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
+static estate scriptOrStyleElement(const unsigned char * pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
     {
     const int kar = *pkar;
     if(kar == elementNameLower[scriptstylei] || kar == elementNameUpper[scriptstylei])
@@ -3218,7 +3218,7 @@ static char script[] = "script";
 static char SCRIPT[] = "SCRIPT";
 static char style[] = "style";
 static char STYLE[] = "STYLE";
-static estate perhapsScriptOrStyle(const char * pkar) /* <s or <S */
+static estate perhapsScriptOrStyle(const unsigned char * pkar) /* <s or <S */
     {
     estate ret;
     switch(*pkar)
@@ -3252,7 +3252,7 @@ static estate perhapsScriptOrStyle(const char * pkar) /* <s or <S */
     }
 
 
-static estate markup(const char * pkar) /* <! */
+static estate markup(const unsigned char * pkar) /* <! */
     {
     switch(*pkar)
         {
@@ -3280,7 +3280,7 @@ static estate markup(const char * pkar) /* <! */
         }
     }
 
-static estate unknownmarkup(const char * pkar) /* <! */
+static estate unknownmarkup(const unsigned char * pkar) /* <! */
     {
     switch(*pkar)
         {
@@ -3298,7 +3298,7 @@ static estate unknownmarkup(const char * pkar) /* <! */
         }
     }
 
-static estate PI(const char * pkar)
+static estate PI(const unsigned char * pkar)
     {
     if(X)
         switch(*pkar)
@@ -3321,7 +3321,7 @@ static estate PI(const char * pkar)
             }
     }
 
-static estate endPI(const char * pkar)
+static estate endPI(const unsigned char * pkar)
     {
     switch(*pkar)
         {
@@ -3338,7 +3338,7 @@ static estate endPI(const char * pkar)
     }
 
 static int doctypei = 0;
-static estate DOCTYPE1(const char * pkar) /* <!D */
+static estate DOCTYPE1(const unsigned char * pkar) /* <!D */
     {
     const int kar = *pkar;
     static char octype[] = "OCTYPE";
@@ -3374,7 +3374,7 @@ static estate DOCTYPE1(const char * pkar) /* <!D */
     }
 
 
-static estate DOCTYPE7(const char * pkar) /* <!DOCTYPE */
+static estate DOCTYPE7(const unsigned char * pkar) /* <!DOCTYPE */
     {
     switch(*pkar)
         {
@@ -3400,7 +3400,7 @@ static estate DOCTYPE7(const char * pkar) /* <!DOCTYPE */
         }
     }
 
-static estate DOCTYPE8(const char * pkar) /* <!DOCTYPE S */
+static estate DOCTYPE8(const unsigned char * pkar) /* <!DOCTYPE S */
     {
     switch(*pkar)
         {
@@ -3420,7 +3420,7 @@ static estate DOCTYPE8(const char * pkar) /* <!DOCTYPE S */
         }
     }
 
-static estate DOCTYPE9(const char * pkar)  /* <!DOCTYPE S [ */
+static estate DOCTYPE9(const unsigned char * pkar)  /* <!DOCTYPE S [ */
     {
     switch(*pkar)
         {
@@ -3433,7 +3433,7 @@ static estate DOCTYPE9(const char * pkar)  /* <!DOCTYPE S [ */
         }
     }
 
-static estate DOCTYPE10(const char * pkar)  /* <!DOCTYPE S [ ] */
+static estate DOCTYPE10(const unsigned char * pkar)  /* <!DOCTYPE S [ ] */
     {
     switch(*pkar)
         {
@@ -3460,7 +3460,7 @@ static estate DOCTYPE10(const char * pkar)  /* <!DOCTYPE S [ ] */
 
 
 static int cdatai = 0;
-static estate CDATA1(const char * pkar) /* <![ */
+static estate CDATA1(const unsigned char * pkar) /* <![ */
     {
     const int kar = *pkar;
     static char cdata[] = "CDATA[";
@@ -3497,7 +3497,7 @@ static estate CDATA1(const char * pkar) /* <![ */
         }
     }
 
-static estate CDATA7(const char * pkar) /* <![CDATA[ */
+static estate CDATA7(const unsigned char * pkar) /* <![CDATA[ */
     {
     switch(*pkar)
         {
@@ -3509,7 +3509,7 @@ static estate CDATA7(const char * pkar) /* <![CDATA[ */
         }
     }
 
-static estate CDATA8(const char * pkar) /* <![CDATA[ ] */
+static estate CDATA8(const unsigned char * pkar) /* <![CDATA[ ] */
     {
     switch(*pkar)
         {
@@ -3522,7 +3522,7 @@ static estate CDATA8(const char * pkar) /* <![CDATA[ ] */
         }
     }
 
-static estate CDATA9(const char * pkar) /* <![CDATA[ ]] */
+static estate CDATA9(const unsigned char * pkar) /* <![CDATA[ ]] */
     {
     switch(*pkar)
         {
@@ -3538,7 +3538,7 @@ static estate CDATA9(const char * pkar) /* <![CDATA[ ]] */
     }
 
 
-static estate h1(const char * pkar) /* <!- */
+static estate h1(const unsigned char * pkar) /* <!- */
     {
     switch(*pkar)
         {
@@ -3559,7 +3559,7 @@ static estate h1(const char * pkar) /* <!- */
         }
     }
 
-static estate h2(const char * pkar) /* <!-- */
+static estate h2(const unsigned char * pkar) /* <!-- */
     {
     switch(*pkar)
         {
@@ -3571,7 +3571,7 @@ static estate h2(const char * pkar) /* <!-- */
         }
     }
 
-static estate h3(const char * pkar) /* <!--  - */
+static estate h3(const unsigned char * pkar) /* <!--  - */
     {
     switch(*pkar)
         {
@@ -3586,7 +3586,7 @@ static estate h3(const char * pkar) /* <!--  - */
         }
     }
 
-static estate endtag(const char * pkar)
+static estate endtag(const unsigned char * pkar)
     {
     const int kar = *pkar;
     if(':' == kar || ('A' <= kar && kar <= 'Z') || '_' == kar || ('a' <= kar && kar <= 'z') || (kar & 0x80))
@@ -3631,22 +3631,22 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
     def = def_pcdata;
     if(filesize > 0)
         {
-        char * alltext;
+        unsigned char * alltext;
         doctypei = 0;
         cdatai = 0;
         buf = (char*)malloc(BUFSIZE);
         glob_p = buf;
-        alltext = (fpi || trim) ? (char*)malloc(filesize+1) : bron;
+        alltext = (fpi || trim) ? (unsigned char*)malloc(filesize+1) : bron;
         HT = html;
         X = xml;
         if(buf && alltext)
             {
-            char * curr_pos;
-            char * endpos;
+            unsigned char * curr_pos;
+            unsigned char * endpos;
             estate Seq = notag;
             if(trim)
                 {
-                char * p = alltext;
+                unsigned char * p = alltext;
                 int whitespace = FALSE;
                 if(fpi)
                     {
@@ -3677,7 +3677,7 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
                             {
                             size_t dif = p - alltext; 
                             ++incs;                            
-                            alltext = (char*)realloc(alltext,incs * inc);
+                            alltext = (unsigned char*)realloc(alltext,incs * inc);
                             p = alltext + dif;
                             }
                         }
@@ -3704,7 +3704,7 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
                             default:
                                 {
                                 whitespace = FALSE;
-                                *p++ = (char)kar;
+                                *p++ = (unsigned char)kar;
                                 }
                             }
                         }
@@ -3715,16 +3715,16 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
                 {
                 if(fpi == stdin)
                     {
-                    char * endp = alltext + incs * inc;
-                    char * p = alltext;
+                    unsigned char * endp = alltext + incs * inc;
+                    unsigned char * p = alltext;
                     while((kar = getc(fpi)) != EOF)
                         {
-                        *p++ = (char)kar;
+                        *p++ = (unsigned char)kar;
                         if(p >= endp)
                             {
                             size_t dif = p - alltext; 
                             ++incs;                            
-                            alltext = (char*)realloc(alltext,incs * inc);
+                            alltext = (unsigned char*)realloc(alltext,incs * inc);
                             p = alltext + dif;
                             endp = alltext + incs * inc;
                             }

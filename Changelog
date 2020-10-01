@@ -1,6 +1,7 @@
 1 October 2020
-/ in unquoted (x/html) attribute does not indicate empty tag. /> does.
+xml.c:/ in unquoted (x/html) attribute does not indicate empty tag. /> does.
 e.g. <a href=http://www.aaa.bb/cde/index.html>
+MLencoding:Check meta tag if xml declaration inconclusive 
 
 30 September 2020
 toML: if xml declaration encountered, make sure that there is exactly one "?"
