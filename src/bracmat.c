@@ -20,8 +20,8 @@
 email: bartj@hum.ku.dk
 */
 #define DATUM "1 October 2020"
-#define VERSION "6.7.6"
-#define BUILD "239"
+#define VERSION "6.7.7"
+#define BUILD "240"
 /*
 COMPILATION
 -----------
@@ -16451,12 +16451,12 @@ int startProc(
         "?\177e.?\177x.?\177v)|out$(str$((=sub$(expr.var.rep)) !arg))&get'&~`)"
         "&\177F$!\177e),",
 
-        "(MLencoding=N M J h m R.:?N&(R=? (charset.?N) ?|? (content.@(?:? "
+        "(MLencoding=D N M J h m R.:?N:?D&(R=? (charset.?N) ?|? (content.@(?:? "
         "charset ? \275 ?N)) ?)&(M=? (~<>meta.(!R,?)|!R) ?)&(J=? (~<>head.(?,"
         "!M)|?&~`) ?|? (~<>head:?h.?) ?m (.!h.) ?&!m:!M)&(!arg:(@ (\277.@(?:"
         "~<>XML (? encoding ? \275 ? (\242 ?N \242|\247 ?N \247) ?|?&"
-        "utf\255\270:?N))) ?|? (~<>html.(?,!J)|?&~`) ?|? (~<>html.?) !J)|)&(!N"
-        ":~|!arg:? (\241DOCTYPE.@(?:? html ?)) ?&utf\255\270|)),",
+        "utf\255\270:?D))) ?&!D:|? (~<>html.(?,!J)|?&~`) ?|? (~<>html.?) !J)|)&(!N"
+        ":~|!arg:? (\241DOCTYPE.@(?:? html ?)) ?&utf\255\270|!D)),",
         "(nestML=a L B s e x.:?L&whl'(!arg:%?a ?arg&!a !L:?L)&!L:?arg&:?L:?B:"
         "?s&whl'(!arg:%?a ?arg&(!a:(.?e.)&(!L.) !B:?B&:?L&!e !s:?s|(!a:(?e.?,?"
         ")&!a|!a:(?e.?x)&(!s:!e ?s&(!e.!x,!L) (!B:(%?L.) ?B&)|!a)|!a) !L:?L))&"
