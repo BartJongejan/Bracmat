@@ -58,7 +58,7 @@ extern void putLeafChar(int c);
 extern char * putCodePoint(unsigned LONG val,char * s);
 
 typedef enum {notag,tag,endoftag,endoftag_startoftag} estate;
-static estate (*tagState)(int kar);
+static estate (*tagState)(const char * pkar);
 
 static int Put(char * c);
 static int (*xput)(char * c) = Put;
@@ -2506,51 +2506,51 @@ static void cbEndAttribute(void)
     putOperatorChar(' ');
     }
 
-static estate def_pcdata(int kar);
-static estate (*def)(int kar) = def_pcdata;
-static estate def_cdata(int kar);
-static estate lt(int kar);
-static estate lt_cdata(int kar);
-static estate lts_cdata(int kar);
-static estate element(int kar);
-static estate elementonly(int kar);
-static estate gt(int kar);
-static estate emptytag(int kar);
-static estate atts(int kar);
-static estate name(int kar);
-static estate value(int kar);
-static estate atts_or_value(int kar);
-static estate invalue(int kar);
-static estate singlequotes(int kar);
-static estate doublequotes(int kar);
-static estate insinglequotedvalue(int kar);
-static estate indoublequotedvalue(int kar);
-static estate endvalue(int kar);
-static estate markup(int kar); /* <! */
-static estate perhapsScriptOrStyle(int kar); /* <s or <S */
-static estate scriptOrStyleElement(int kar); /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
-static estate scriptOrStyleEndElement(int kar); /* </s or </S */
-static estate scriptOrStyleEndElementL(int kar); /* </script or </SCRIPT or </style or </STYLE */
-static estate unknownmarkup(int kar);
-static estate PI(int kar);       /* processing instruction <?...?> (XML) or <?...> (non-XML) */
-static estate endPI(int kar);
-static estate DOCTYPE1(int kar); /* <!D */
-static estate DOCTYPE7(int kar); /* <!DOCTYPE */
-static estate DOCTYPE8(int kar); /* <!DOCTYPE S */
-static estate DOCTYPE9(int kar); /* <!DOCTYPE S [ */
-static estate DOCTYPE10(int kar); /* <!DOCTYPE S [ ] */
-static estate CDATA1(int kar); /* <![ */
-static estate CDATA7(int kar); /* <![CDATA[ */
-static estate CDATA8(int kar); /* <![CDATA[ ] */
-static estate CDATA9(int kar); /* <![CDATA[ ]] */
-static estate h1(int kar); /* <!- */
-static estate h2(int kar); /* <!-- */
-static estate h3(int kar); /* <!--  - */
-static estate endtag(int kar);
+static estate def_pcdata(const char * pkar);
+static estate (*def)(const char * pkar) = def_pcdata;
+static estate def_cdata(const char * pkar);
+static estate lt(const char * pkar);
+static estate lt_cdata(const char * pkar);
+static estate lts_cdata(const char * pkar);
+static estate element(const char * pkar);
+static estate elementonly(const char * pkar);
+static estate gt(const char * pkar);
+static estate emptytag(const char * pkar);
+static estate atts(const char * pkar);
+static estate name(const char * pkar);
+static estate value(const char * pkar);
+static estate atts_or_value(const char * pkar);
+static estate invalue(const char * pkar);
+static estate singlequotes(const char * pkar);
+static estate doublequotes(const char * pkar);
+static estate insinglequotedvalue(const char * pkar);
+static estate indoublequotedvalue(const char * pkar);
+static estate endvalue(const char * pkar);
+static estate markup(const char * pkar); /* <! */
+static estate perhapsScriptOrStyle(const char * pkar); /* <s or <S */
+static estate scriptOrStyleElement(const char * pkar); /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
+static estate scriptOrStyleEndElement(const char * pkar); /* </s or </S */
+static estate scriptOrStyleEndElementL(const char * pkar); /* </script or </SCRIPT or </style or </STYLE */
+static estate unknownmarkup(const char * pkar);
+static estate PI(const char * pkar);       /* processing instruction <?...?> (XML) or <?...> (non-XML) */
+static estate endPI(const char * pkar);
+static estate DOCTYPE1(const char * pkar); /* <!D */
+static estate DOCTYPE7(const char * pkar); /* <!DOCTYPE */
+static estate DOCTYPE8(const char * pkar); /* <!DOCTYPE S */
+static estate DOCTYPE9(const char * pkar); /* <!DOCTYPE S [ */
+static estate DOCTYPE10(const char * pkar); /* <!DOCTYPE S [ ] */
+static estate CDATA1(const char * pkar); /* <![ */
+static estate CDATA7(const char * pkar); /* <![CDATA[ */
+static estate CDATA8(const char * pkar); /* <![CDATA[ ] */
+static estate CDATA9(const char * pkar); /* <![CDATA[ ]] */
+static estate h1(const char * pkar); /* <!- */
+static estate h2(const char * pkar); /* <!-- */
+static estate h3(const char * pkar); /* <!--  - */
+static estate endtag(const char * pkar);
 
-static estate def_pcdata(int kar)
+static estate def_pcdata(const char * pkar)
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '<':
             tagState = lt;
@@ -2561,9 +2561,9 @@ static estate def_pcdata(int kar)
         }
     }
     
-static estate def_cdata(int kar)
+static estate def_cdata(const char * pkar)
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '<':
             tagState = lt_cdata;
@@ -2573,8 +2573,9 @@ static estate def_cdata(int kar)
         }
     }
     
-static estate lt(int kar)
+static estate lt(const char * pkar)
     {
+    const int kar = *pkar;
     endElementName = NULL;
     switch(kar)
         {
@@ -2616,9 +2617,9 @@ static estate lt(int kar)
         }
     }
 
-static estate lt_cdata(int kar)
+static estate lt_cdata(const char * pkar)
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '/':
             tagState = lts_cdata;
@@ -2635,8 +2636,9 @@ static int scriptstylei2 = 0;
 static int scriptstyleimax = 0;
 static char * elementEndNameLower;
 static char * elementEndNameUpper;
-static estate scriptOrStyleEndElement(int kar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
+static estate scriptOrStyleEndElement(const char * pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
     {
+    const int kar = *pkar;
     if(kar == elementEndNameLower[scriptstylei2] || kar == elementEndNameUpper[scriptstylei2])
         {
         estate ret;
@@ -2648,7 +2650,7 @@ static estate scriptOrStyleEndElement(int kar) /* <sc or <SC or <Sc or <sC or <s
             }
         else
             ++scriptstylei2;
-        ret = element(kar);
+        ret = element(pkar);
         return ret;
         }
     else
@@ -2659,9 +2661,9 @@ static estate scriptOrStyleEndElement(int kar) /* <sc or <SC or <Sc or <sC or <s
         }
     }
 
-static estate scriptOrStyleEndElementL(int kar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
+static estate scriptOrStyleEndElementL(const char * pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '>':
             flush();
@@ -2691,8 +2693,9 @@ static estate scriptOrStyleEndElementL(int kar) /* <sc or <SC or <Sc or <sC or <
         }
     }
 
-static estate lts_cdata(int kar)
+static estate lts_cdata(const char * pkar)
     {
+    const int kar = *pkar;
     scriptstyleimax = ScriptStyleiMax;
     scriptstylei2 = 0;
     if(  kar == elementEndNameLower[scriptstylei2]
@@ -2718,8 +2721,9 @@ static void stillCdata(void)
         }
     }
 
-static estate element(int kar)
+static estate element(const char * pkar)
     {
+    const int kar = *pkar;
     switch(kar)
         {
         case '<':
@@ -2769,8 +2773,9 @@ static estate element(int kar)
         }
     }
 
-static estate elementonly(int kar)
+static estate elementonly(const char * pkar)
     {
+    const int kar = *pkar;
     switch(kar)
         {
         case '<':
@@ -2812,9 +2817,9 @@ static estate elementonly(int kar)
         }
     }
 
-static estate gt(int kar)
+static estate gt(const char * pkar)
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '<':
             tagState = lt;
@@ -2842,9 +2847,9 @@ static estate gt(int kar)
         }
     }
 
-static estate emptytag(int kar)
+static estate emptytag(const char * pkar)
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '<':
             tagState = lt;
@@ -2859,8 +2864,9 @@ static estate emptytag(int kar)
         }
     }
 
-static estate atts(int kar)
+static estate atts(const char * pkar)
     {
+    const int kar = *pkar;
     switch(kar)
         {
         case '<':
@@ -2900,8 +2906,9 @@ static estate atts(int kar)
         }
     }
 
-static estate name(int kar)
+static estate name(const char * pkar)
     {
+    const int kar = *pkar;
     switch(kar)
         {
         case '<':
@@ -2953,9 +2960,9 @@ static estate name(int kar)
         }
     }
 
-static estate value(int kar)
+static estate value(const char * pkar)
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '>':
         case '/':
@@ -2982,8 +2989,9 @@ static estate value(int kar)
         }
     }
 
-static estate atts_or_value(int kar)
+static estate atts_or_value(const char * pkar)
     {
+    const int kar = *pkar;
     switch(kar)
         {
         case '<':
@@ -3039,9 +3047,9 @@ static estate atts_or_value(int kar)
 /* This is far from conforming to and more forgiving than 
 https://html.spec.whatwg.org/multipage/syntax.html#unquoted
 */
-static estate invalue(int kar)
+static estate invalue(const char * pkar)
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '<':
             tagState = lt;
@@ -3066,22 +3074,29 @@ static estate invalue(int kar)
             cbEndAttribute();
             tagState = atts;
             return tag;
+        /* Unsafe to end value at first /
+           See fx get$("<a href=http://www.cst.dk/esslli2010/resources.html>",HT ML MEM)
+           */
         case '/':
-            nxput(StaRt,ch);
-            cbEndAttribute();
-            putOperatorChar(',');
-            putOperatorChar(')');
-            tagState = emptytag;
-            return tag;
+            if (*(pkar + 1) == '>')
+                {
+                nxput(StaRt, ch);
+                cbEndAttribute();
+                putOperatorChar(',');
+                putOperatorChar(')');
+                tagState = emptytag;
+                return tag;
+                }
+            /* fall through */
         default:
             return tag;
         }
     }
 
-static estate singlequotes(int kar)
+static estate singlequotes(const char * pkar)
     {
     StaRt = ch;
-    switch(kar)
+    switch(*pkar)
         {
         case '\'':
             nxput(StaRt,ch);
@@ -3094,10 +3109,10 @@ static estate singlequotes(int kar)
         }
     }
 
-static estate doublequotes(int kar)
+static estate doublequotes(const char * pkar)
     {
     StaRt = ch;
-    switch(kar)
+    switch(*pkar)
         {
         case '\"':
             nxput(StaRt,ch);
@@ -3110,9 +3125,9 @@ static estate doublequotes(int kar)
         }
     }
 
-static estate insinglequotedvalue(int kar)
+static estate insinglequotedvalue(const char * pkar)
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '\'':
             nxput(StaRt,ch);
@@ -3124,9 +3139,9 @@ static estate insinglequotedvalue(int kar)
         }
     }
 
-static estate indoublequotedvalue(int kar)
+static estate indoublequotedvalue(const char * pkar)
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '\"':
             nxput(StaRt,ch);
@@ -3139,9 +3154,9 @@ static estate indoublequotedvalue(int kar)
     }
 
 
-static estate endvalue(int kar)
+static estate endvalue(const char * pkar)
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '<':
             tagState = lt;
@@ -3174,8 +3189,9 @@ static estate endvalue(int kar)
 
 static char * elementNameLower;
 static char * elementNameUpper;
-static estate scriptOrStyleElement(int kar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
+static estate scriptOrStyleElement(const char * pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
     {
+    const int kar = *pkar;
     if(kar == elementNameLower[scriptstylei] || kar == elementNameUpper[scriptstylei])
         {
         estate ret;
@@ -3187,7 +3203,7 @@ static estate scriptOrStyleElement(int kar) /* <sc or <SC or <Sc or <sC or <st o
             }
         else
             ++scriptstylei;
-        ret = element(kar);
+        ret = element(pkar);
         /*tagState = scriptOrStyleElement;*/
         return ret;
         }
@@ -3195,17 +3211,17 @@ static estate scriptOrStyleElement(int kar) /* <sc or <SC or <Sc or <sC or <st o
         {
         scriptstylei = 0;
         }
-    return element(kar);
+    return element(pkar);
     }
 
 static char script[] = "script";
 static char SCRIPT[] = "SCRIPT";
 static char style[] = "style";
 static char STYLE[] = "STYLE";
-static estate perhapsScriptOrStyle(int kar) /* <s or <S */
+static estate perhapsScriptOrStyle(const char * pkar) /* <s or <S */
     {
     estate ret;
-    switch(kar)
+    switch(*pkar)
         {
         case 'C':
         case 'c':
@@ -3215,7 +3231,7 @@ static estate perhapsScriptOrStyle(int kar) /* <s or <S */
             elementEndNameUpper = SCRIPT;
             scriptstyleimax = sizeof(script) - 4;
             ScriptStyleiMax = sizeof(script) - 2;
-            ret = element(kar);
+            ret = element(pkar);
             tagState = scriptOrStyleElement;
             return ret;
         case 'T':
@@ -3226,19 +3242,19 @@ static estate perhapsScriptOrStyle(int kar) /* <s or <S */
             elementEndNameUpper = STYLE;
             scriptstyleimax = sizeof(style) - 4;
             ScriptStyleiMax = sizeof(style) - 2;
-            ret = element(kar);
+            ret = element(pkar);
             tagState = scriptOrStyleElement;
             return ret;
         default:
             tagState = element;
         }
-    return element(kar);
+    return element(pkar);
     }
 
 
-static estate markup(int kar) /* <! */
+static estate markup(const char * pkar) /* <! */
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '<':
             tagState = lt;
@@ -3264,9 +3280,9 @@ static estate markup(int kar) /* <! */
         }
     }
 
-static estate unknownmarkup(int kar) /* <! */
+static estate unknownmarkup(const char * pkar) /* <! */
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '<':
             tagState = lt;
@@ -3282,10 +3298,10 @@ static estate unknownmarkup(int kar) /* <! */
         }
     }
 
-static estate PI(int kar)
+static estate PI(const char * pkar)
     {
     if(X)
-        switch(kar)
+        switch(*pkar)
             {
             case '?':
                 tagState = endPI;
@@ -3294,7 +3310,7 @@ static estate PI(int kar)
                 return tag;
             }
     else
-        switch(kar)
+        switch(*pkar)
             {
             case '>':
                 tagState = def;
@@ -3305,9 +3321,9 @@ static estate PI(int kar)
             }
     }
 
-static estate endPI(int kar)
+static estate endPI(const char * pkar)
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '>':
             tagState = def;
@@ -3322,10 +3338,11 @@ static estate endPI(int kar)
     }
 
 static int doctypei = 0;
-static estate DOCTYPE1(int kar) /* <!D */
+static estate DOCTYPE1(const char * pkar) /* <!D */
     {
+    const int kar = *pkar;
     static char octype[] = "OCTYPE";
-    switch(kar)
+    switch(*pkar)
         {
         case '<':
             tagState = lt;
@@ -3357,9 +3374,9 @@ static estate DOCTYPE1(int kar) /* <!D */
     }
 
 
-static estate DOCTYPE7(int kar) /* <!DOCTYPE */
+static estate DOCTYPE7(const char * pkar) /* <!DOCTYPE */
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '<':
             tagState = lt;
@@ -3383,9 +3400,9 @@ static estate DOCTYPE7(int kar) /* <!DOCTYPE */
         }
     }
 
-static estate DOCTYPE8(int kar) /* <!DOCTYPE S */
+static estate DOCTYPE8(const char * pkar) /* <!DOCTYPE S */
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '<':
             tagState = lt;
@@ -3403,9 +3420,9 @@ static estate DOCTYPE8(int kar) /* <!DOCTYPE S */
         }
     }
 
-static estate DOCTYPE9(int kar)  /* <!DOCTYPE S [ */
+static estate DOCTYPE9(const char * pkar)  /* <!DOCTYPE S [ */
     {
-    switch(kar)
+    switch(*pkar)
         {
         case ']':
             tagState = DOCTYPE10;
@@ -3416,9 +3433,9 @@ static estate DOCTYPE9(int kar)  /* <!DOCTYPE S [ */
         }
     }
 
-static estate DOCTYPE10(int kar)  /* <!DOCTYPE S [ ] */
+static estate DOCTYPE10(const char * pkar)  /* <!DOCTYPE S [ ] */
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '<':
             tagState = lt;
@@ -3443,8 +3460,9 @@ static estate DOCTYPE10(int kar)  /* <!DOCTYPE S [ ] */
 
 
 static int cdatai = 0;
-static estate CDATA1(int kar) /* <![ */
+static estate CDATA1(const char * pkar) /* <![ */
     {
+    const int kar = *pkar;
     static char cdata[] = "CDATA[";
     switch(kar)
         {
@@ -3479,9 +3497,9 @@ static estate CDATA1(int kar) /* <![ */
         }
     }
 
-static estate CDATA7(int kar) /* <![CDATA[ */
+static estate CDATA7(const char * pkar) /* <![CDATA[ */
     {
-    switch(kar)
+    switch(*pkar)
         {
         case ']':
             tagState = CDATA8;
@@ -3491,9 +3509,9 @@ static estate CDATA7(int kar) /* <![CDATA[ */
         }
     }
 
-static estate CDATA8(int kar) /* <![CDATA[ ] */
+static estate CDATA8(const char * pkar) /* <![CDATA[ ] */
     {
-    switch(kar)
+    switch(*pkar)
         {
         case ']':
             tagState = CDATA9;
@@ -3504,9 +3522,9 @@ static estate CDATA8(int kar) /* <![CDATA[ ] */
         }
     }
 
-static estate CDATA9(int kar) /* <![CDATA[ ]] */
+static estate CDATA9(const char * pkar) /* <![CDATA[ ]] */
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '>':  /* <![CDATA[ ]]> */
             tagState = def;
@@ -3520,9 +3538,9 @@ static estate CDATA9(int kar) /* <![CDATA[ ]] */
     }
 
 
-static estate h1(int kar) /* <!- */
+static estate h1(const char * pkar) /* <!- */
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '<':
             tagState = lt;
@@ -3541,9 +3559,9 @@ static estate h1(int kar) /* <!- */
         }
     }
 
-static estate h2(int kar) /* <!-- */
+static estate h2(const char * pkar) /* <!-- */
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '-':
             tagState = h3;
@@ -3553,9 +3571,9 @@ static estate h2(int kar) /* <!-- */
         }
     }
 
-static estate h3(int kar) /* <!--  - */
+static estate h3(const char * pkar) /* <!--  - */
     {
-    switch(kar)
+    switch(*pkar)
         {
         case '-': /* <!-- -- */
             tagState = markup;
@@ -3568,8 +3586,9 @@ static estate h3(int kar) /* <!--  - */
         }
     }
 
-static estate endtag(int kar)
+static estate endtag(const char * pkar)
     {
+    const int kar = *pkar;
     if(':' == kar || ('A' <= kar && kar <= 'Z') || '_' == kar || ('a' <= kar && kar <= 'z') || (kar & 0x80))
         {
         endElementName = NULL;
@@ -3731,7 +3750,7 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
             while(*ch)
                 {
                 while(  *ch 
-                     && (( Seq = (*tagState)(*ch)) == tag 
+                     && (( Seq = (*tagState)(ch)) == tag 
                         || Seq == endoftag_startoftag
                         )
                      )
@@ -3756,7 +3775,7 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
                 if(*ch)
                     {
                     while(  *ch 
-                         && (Seq = (*tagState)(*ch)) == notag
+                         && (Seq = (*tagState)(ch)) == notag
                          )
                         {
                         xput(ch);
@@ -3770,7 +3789,7 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
                 }
             if(Seq == tag)
                 {
-                Seq = (*tagState)(' ');
+                Seq = (*tagState)(" ");
                 if(Seq == tag)
                     putOperatorChar(')');
                 }

@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "30 September 2020"
-#define VERSION "6.7.5"
-#define BUILD "238"
+#define DATUM "1 October 2020"
+#define VERSION "6.7.6"
+#define BUILD "239"
 /*
 COMPILATION
 -----------

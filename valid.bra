@@ -6265,6 +6265,13 @@ string line 2\"
             & toML$!ml:"<?xml akajh ?><?app ?>aap"
           | "toML 20200930"
           )
+          (     toML
+              $ ( get
+                $ ("<a href=http://www.aaa.dk/ess/index.html>",HT ML MEM)
+                )
+            : "<a href=\"http://www.aaa.dk/ess/index.html\">"
+          | out$"xml.c:invalue(const char * kar) 20201001"
+          )
       &   out
         $ ( str
           $ ( "Done. "
