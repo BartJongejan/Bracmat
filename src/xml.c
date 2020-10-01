@@ -55,13 +55,13 @@ attributes can be empty (no =[value])
 
 extern void putOperatorChar(int c);
 extern void putLeafChar(int c);
-extern char * putCodePoint(unsigned LONG val,char * s);
+extern unsigned char * putCodePoint(unsigned LONG val,unsigned char * s);
 
 typedef enum {notag,tag,endoftag,endoftag_startoftag} estate;
 static estate (*tagState)(const unsigned char * pkar);
 
-static int Put(char * c);
-static int (*xput)(char * c) = Put;
+static int Put(const unsigned char * c);
+static int (*xput)(const unsigned char * c) = Put;
 
 static int rawput(int c)
     {
@@ -69,7 +69,7 @@ static int rawput(int c)
     return TRUE;
     }
 
-static int nrawput(char * c)
+static int nrawput(const unsigned char * c)
     {
     while(*c)
         if(!rawput(*c++))
@@ -112,8 +112,8 @@ struct lowup lu[] =
 
 #define BUFSIZE 35000
 
-static char * buf;
-static char * glob_p;
+static unsigned char * buf;
+static unsigned char * glob_p;
 static int anychar = FALSE;
 
 static int (*namechar)(int c);
@@ -2317,31 +2317,31 @@ int compareEntities(const void * a, const void * b)
 
 static int HT = 0;
 static int X = 0;
-static int charref(char * c)
+static int charref(const unsigned char * c)
     {
     if(*c == ';')
         {
         *glob_p = '\0';
-        if(  !strcmp(buf,"amp")
-          || !strcmp(buf,"#38")
-          || !strcmp(buf,"#x26")
+        if(  !strcmp((const char *)buf,"amp")
+          || !strcmp((const char*)buf,"#38")
+          || !strcmp((const char*)buf,"#x26")
           )
             rawput('&');
-        else if(!strcmp(buf,"apos"))
+        else if(!strcmp((const char*)buf,"apos"))
             rawput('\'');
-        else if(!strcmp(buf,"quot"))
+        else if(!strcmp((const char*)buf,"quot"))
             {
             rawput('\"');
             }
-        else if(!strcmp(buf,"lt"))
+        else if(!strcmp((const char*)buf,"lt"))
             rawput('<');
-        else if(!strcmp(buf,"gt"))
+        else if(!strcmp((const char*)buf,"gt"))
             rawput('>');
         else if(buf[0] == '#')
             {
             unsigned long N;
-            char tmp[22];
-            N = (buf[1] == 'x') ? strtoul(buf+2,NULL,16) : strtoul(buf+1,NULL,10);
+            unsigned char tmp[22];
+            N = (buf[1] == 'x') ? strtoul((const char*)(buf+2),NULL,16) : strtoul((const char*)(buf+1),NULL,10);
             glob_p = buf;
             xput = Put;
             if(putCodePoint(N,tmp))
@@ -2357,7 +2357,7 @@ static int charref(char * c)
                 {
                 Entity * pItem;
                 Entity key;
-                key.ent = buf;
+                key.ent = (const char*)buf;
                 pItem = (Entity*)bsearch( &key
                                         , entities
                                         , sizeof(entities)/sizeof(entities[0])
@@ -2366,8 +2366,8 @@ static int charref(char * c)
                                         );
                 if (pItem!=NULL)
                     {
-                    char tmp[100];
-                    char * endp;
+                    unsigned char tmp[100];
+                    unsigned char * endp;
                     glob_p = buf;
                     xput = Put;
                     endp = putCodePoint(pItem->code, tmp);
@@ -2413,7 +2413,7 @@ static int charref(char * c)
     return TRUE;
     }
 
-static int Put(char * c)
+static int Put(const unsigned char * c)
     {
     if(*c == '&')
         {
@@ -2429,40 +2429,40 @@ static int Put(char * c)
 static void flush(void)
     {
     if(xput != Put)
-        xput("");
+        xput((const unsigned char*)"");
     }
 
-static void nxput(char * start,char *end)
+static void nxput(unsigned char * start,unsigned char *end)
     {
     for(;start < end;++start)
         xput(start);
     flush();
     }
 
-static void nxputWithoutEntityUnfolding(char * start,char *end)
+static void nxputWithoutEntityUnfolding(unsigned char * start,unsigned char *end)
     {
     for(;start < end;++start)
         rawput(*start);
     }
 
-static void nonTagWithoutEntityUnfolding(char * kind,char * start,char * end)
+static void nonTagWithoutEntityUnfolding(const char * kind,unsigned char * start,unsigned char * end)
     {
-    nrawput(kind);
+    nrawput((const unsigned char*)kind);
     putOperatorChar('.');
     nxputWithoutEntityUnfolding(start,end);
     putOperatorChar(')');
     }
 
-static void nonTag(char * kind,char * start,char * end)
+static void nonTag(const char * kind,unsigned char * start,unsigned char * end)
     {
-    nrawput(kind);
+    nrawput((const unsigned char*)kind);
     putOperatorChar('.');
     nxput(start,end);
     putOperatorChar(')');
     }
 
-static char * ch;
-static char * StaRt = 0;
+static unsigned char * ch;
+static unsigned char * StaRt = 0;
 static int isMarkup = 0;
 
 static void cbStartMarkUp(void)
@@ -2486,7 +2486,7 @@ static void cbEndDOCTYPE(void)/* called when > has been read */
     nonTagWithoutEntityUnfolding("!DOCTYPE",StaRt,ch);
     }
 
-static char * endElementName;
+static unsigned char * endElementName;
 static void cbEndElementName(void)
     {
     nxput(StaRt,endElementName ? endElementName : ch);
@@ -2634,8 +2634,8 @@ static int ScriptStyleiMax = 0;
 static int scriptstylei = 0;
 static int scriptstylei2 = 0;
 static int scriptstyleimax = 0;
-static char * elementEndNameLower;
-static char * elementEndNameUpper;
+static unsigned char * elementEndNameLower;
+static unsigned char * elementEndNameUpper;
 static estate scriptOrStyleEndElement(const unsigned char * pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
     {
     const int kar = *pkar;
@@ -3187,8 +3187,8 @@ static estate endvalue(const unsigned char * pkar)
     }
 
 
-static char * elementNameLower;
-static char * elementNameUpper;
+static unsigned char * elementNameLower;
+static unsigned char * elementNameUpper;
 static estate scriptOrStyleElement(const unsigned char * pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
     {
     const int kar = *pkar;
@@ -3214,10 +3214,10 @@ static estate scriptOrStyleElement(const unsigned char * pkar) /* <sc or <SC or 
     return element(pkar);
     }
 
-static char script[] = "script";
-static char SCRIPT[] = "SCRIPT";
-static char style[] = "style";
-static char STYLE[] = "STYLE";
+static unsigned char script[] = "script";
+static unsigned char SCRIPT[] = "SCRIPT";
+static unsigned char style[] = "style";
+static unsigned char STYLE[] = "STYLE";
 static estate perhapsScriptOrStyle(const unsigned char * pkar) /* <s or <S */
     {
     estate ret;
@@ -3341,7 +3341,7 @@ static int doctypei = 0;
 static estate DOCTYPE1(const unsigned char * pkar) /* <!D */
     {
     const int kar = *pkar;
-    static char octype[] = "OCTYPE";
+    static unsigned char octype[] = "OCTYPE";
     switch(*pkar)
         {
         case '<':
@@ -3463,7 +3463,7 @@ static int cdatai = 0;
 static estate CDATA1(const unsigned char * pkar) /* <![ */
     {
     const int kar = *pkar;
-    static char cdata[] = "CDATA[";
+    static unsigned char cdata[] = "CDATA[";
     switch(kar)
         {
         case '<':
@@ -3603,7 +3603,7 @@ static estate endtag(const unsigned char * pkar)
         }
     }
 
-void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
+void XMLtext(FILE * fpi,unsigned char * bron,int trim,int html,int xml)
     {
     int kar;
     int inc = 0x10000;
@@ -3624,7 +3624,7 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
         }
     else if(bron)
         {
-        filesize = strlen(bron);
+        filesize = strlen((const char *)bron);
         }
     else
         return;
@@ -3634,9 +3634,9 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
         unsigned char * alltext;
         doctypei = 0;
         cdatai = 0;
-        buf = (char*)malloc(BUFSIZE);
+        buf = (unsigned char*)malloc(BUFSIZE);
         glob_p = buf;
-        alltext = (fpi || trim) ? (unsigned char*)malloc(filesize+1) : bron;
+        alltext = (fpi || trim) ? (unsigned char*)malloc(filesize+1) : (unsigned char *)bron;
         HT = html;
         X = xml;
         if(buf && alltext)
@@ -3670,7 +3670,7 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
                             default:
                                 {
                                 whitespace = FALSE;
-                                *p++ = (char)kar;
+                                *p++ = (unsigned char)kar;
                                 }
                             }
                         if(p >= alltext + incs * inc)
@@ -3789,7 +3789,7 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
                 }
             if(Seq == tag)
                 {
-                Seq = (*tagState)(" ");
+                Seq = (*tagState)((const unsigned char *)" ");
                 if(Seq == tag)
                     putOperatorChar(')');
                 }
@@ -3807,7 +3807,7 @@ void XMLtext(FILE * fpi,char * bron,int trim,int html,int xml)
             }
         if(buf)
             free(buf);
-        if(alltext && alltext != bron)
+        if(alltext && alltext != (unsigned char *)bron)
             free(alltext);
         }
     }
