@@ -31,6 +31,7 @@ JNIEXPORT jstring JNICALL Java_dk_cst_bracmat_eval(JNIEnv * env, jobject obj, js
 #if defined WIN32
     mutexUnlockOut();
 #else
+    (*env)->ReleaseStringUTFChars(env, expr, str);
     pthread_mutex_unlock(&mutexout);
 #endif
     return ret;
