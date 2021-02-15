@@ -1,11 +1,11 @@
-{lex.bra
-
-analyse bracmat code for lexicality
-
-Usage:
- lex$<symbol>
-}
-
+{lex.bra
+
+analyse bracmat code for lexicality
+
+Usage:
+ lex$<symbol>
+}
+
 "sOme wEiRdN→ame"=
   new
 =   
@@ -70,6 +70,7 @@ Usage:
             + tbl
             + upp
             + utf
+            + vap
             + whl
             + x2d
             + "?"
@@ -125,9 +126,10 @@ Usage:
                   & (     !arg
                         : (=$(?$?)|$(?'?))
                       & "******** FUNCTION CALL (function$parameters or function'parameters) ********"
-                      & (!lhs:~|^):?lhs
-                      & ( !builtins+!predefs:?+!lhs+?
+                      & ( !lhs:
+                        | !builtins+!predefs:?+!lhs+?
                         | !lhs:(=?.?)
+                        | !('(flg'$lhs)):(=$!.?)
                         |   (     testDeclaration
                                 $ (!context.!lhs.!vars.!unrefs)
                               : ?unrefs
@@ -164,27 +166,29 @@ Usage:
                       & (   '$rhs:(=?V.?c)
                           & "******** FUNCTION DEFINITION (function=local vars.definition) ********"
                           & pickVars$!V:?V
-                          & (     testDeclaration
-                                $ (!context.!lhs.!vars.!unrefs)
-                              : ?unrefs
-                            |   !context:
-                              & !globalfuncs+!lhs:?globalfuncs
-                            |   (     !notdeclfuncs
-                                    : ?A+(!context.?M)+?Z
-                                  & !A+(!context.!lhs+!M)+!Z
-                                | !notdeclfuncs+(!context.!lhs)
+                          & ( !lhs:^
+                            |   (     testDeclaration
+                                    $ (!context.!lhs.!vars.!unrefs)
+                                  : ?unrefs
+                                |   !context:
+                                  & !globalfuncs+!lhs:?globalfuncs
+                                |   (     !notdeclfuncs
+                                        : ?A+(!context.?M)+?Z
+                                      & !A+(!context.!lhs+!M)+!Z
+                                    | !notdeclfuncs+(!context.!lhs)
+                                    )
+                                  : ?notdeclfuncs
                                 )
-                              : ?notdeclfuncs
-                            )
-                          &   (     !definedfuncs
-                                  : ?A (!context.?M) ?Z
-                                & (   !M:?+#*(!lhs.?)+?
-                                    & !definedfuncs
-                                  | !A (!context.(!lhs.0)+!M) !Z
+                              &   (     !definedfuncs
+                                      : ?A (!context.?M) ?Z
+                                    & (   !M:?+#*(!lhs.?)+?
+                                        & !definedfuncs
+                                      | !A (!context.(!lhs.0)+!M) !Z
+                                      )
+                                  | (!context.!lhs.0) !definedfuncs
                                   )
-                              | (!context.!lhs.0) !definedfuncs
-                              )
-                            : ?definedfuncs
+                                : ?definedfuncs
+                            )
                           &     Y
                               $ ( !context !lhs
                                 . (!context !lhs.!V) !vars
@@ -254,23 +258,23 @@ Usage:
           | Y$(...'($arg=$!arg)):?unrefs
           )
         &   put
-          $ ( "==========================================================\r
-Lexical analysis. See program code further down this file.\r
-==========================================================\r
-\r
- ----------------------\r
-{ Undeclared functions }\r
- ----------------------\r
+          $ ( "==========================================================
+Lexical analysis. See program code further down this file.
+==========================================================
+
+ ----------------------
+{ Undeclared functions }
+ ----------------------
 "
             , "lex.txt"
             , NEW
             )
         & lst$(notdeclfuncs,"lex.txt",APP)
         &   put
-          $ ( "\r
- ----------------------\r
-{ Undeclared variables }\r
- ----------------------\r
+          $ ( "
+ ----------------------
+{ Undeclared variables }
+ ----------------------
 "
             , "lex.txt"
             , APP
@@ -284,96 +288,95 @@ Lexical analysis. See program code further down this file.\r
             & !A (!M.!AA+!ZZ) !Z:?reffunc
             )
         &   put
-          $ ( "\r
- ------------------------\r
-{ Unused local variables }\r
- ------------------------\r
+          $ ( "
+ ------------------------
+{ Unused local variables }
+ ------------------------
 "
             , "lex.txt"
             , APP
             )
         & lst$(unusedLocals,"lex.txt",APP)
         &   put
-          $ ( "\r
- ----------------\r
-{ Not referenced }\r
- ----------------\r
+          $ ( "
+ ----------------
+{ Not referenced }
+ ----------------
 "
             , "lex.txt"
             , APP
             )
         & lst$(unrefs,"lex.txt",APP)
         &   put
-          $ ( "\r
- -------------------\r
-{ Defined functions }\r
- -------------------\r
+          $ ( "
+ -------------------
+{ Defined functions }
+ -------------------
 "
             , "lex.txt"
             , APP
             )
         & lst$(definedfuncs,"lex.txt",APP)
         &   put
-          $ ( "\r
- ---------------------\r
-{ Undefined functions }\r
- ---------------------\r
+          $ ( "
+ ---------------------
+{ Undefined functions }
+ ---------------------
 "
             , "lex.txt"
             , APP
             )
         & lst$(undefinedfuncs,"lex.txt",APP)
         &   put
-          $ ( "\r
- ------------------------\r
-{ Unreferenced functions }\r
- ------------------------\r
+          $ ( "
+ ------------------------
+{ Unreferenced functions }
+ ------------------------
 "
             , "lex.txt"
             , APP
             )
         & lst$(notreffunc,"lex.txt",APP)
         &   put
-          $ ( "\r
- ----------------------\r
-{ Referenced functions }\r
- ----------------------\r
+          $ ( "
+ ----------------------
+{ Referenced functions }
+ ----------------------
 "
             , "lex.txt"
             , APP
             )
         & lst$(reffunc,"lex.txt",APP)
         &   put
-          $ ( "\r
- ------------------\r
-{ Global variables }\r
- ------------------\r
+          $ ( "
+ ------------------
+{ Global variables }
+ ------------------
 "
             , "lex.txt"
             , APP
             )
         & lst$(globalvars,"lex.txt",APP)
         &   put
-          $ ( "\r
- ------------------\r
-{ Global functions }\r
- ------------------\r
+          $ ( "
+ ------------------
+{ Global functions }
+ ------------------
 "
             , "lex.txt"
             , APP
             )
         & lst$(globalfuncs,"lex.txt",APP)
-        &   put
-          $ ("\r
-\r
-============\r
-Program code\r
-============\r
+        & put$("
+
+============
+Program code
+============
 ","lex.txt",APP)
         & lst$(!arg,"lex.txt",APP)
-        & "\r
-===========\r
-See lex.txt\r
+        & "
+===========
+See lex.txt
 ==========="
     );
 
@@ -382,14 +385,14 @@ rr=
 & rmv$(str$(lex ".bak"))
 & ren$("lex.bra".str$(lex ".bak"))
 &   put
-  $ ( "{lex.bra\r
-\r
-analyse bracmat code for lexicality\r
-\r
-Usage:\r
- lex$<symbol>\r
-}\r
-\r
+  $ ( "{lex.bra
+
+analyse bracmat code for lexicality
+
+Usage:
+ lex$<symbol>
+}
+
 "
     , "lex.bra"
     , NEW
@@ -397,8 +400,8 @@ Usage:\r
 & lst'("sOme wEiRdN→ame","lex.bra",APP)
 & put'(\n,"lex.bra",APP)
 & lst'(rr,"lex.bra",APP)
-& put$("\r
-new'\"sOme wEiRdN→ame\";\r
+& put$("
+new'\"sOme wEiRdN→ame\";
 ","lex.bra",APP);
-
-new'"sOme wEiRdN→ame";
+
+new'"sOme wEiRdN→ame";
