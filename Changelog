@@ -1,3 +1,6 @@
+20 July 2021
+Typo corrected: 'ANY Child' -> 'ANY KIND'
+
 25 January 2021
 java-JNI/dk_cst_bracmat.c : Added (*env)->ReleaseStringUTFChars(expr, str);
 
