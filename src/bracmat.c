@@ -8945,12 +8945,12 @@ static int stringOncePattern(psk pat)
 static int oncePattern(psk pat)
     {
     /*
-    This function has a side effect: it sets a flag in all pattern nodes that
-    can be matched by at most one non-trivial list element (a nonzero term in
-    a sum, a factor in a product that is not 1, or a nonempty word in a
-    sentence. Because the function depends on ATOMFILTERS, the algorithm
-    should be slightly different for normal matches and for string matches.
-    Ideally, two flags should be reserved.
+    This function has a side effect: it sets a flag IMPLIEDFENCE in all
+    pattern nodes that can be matched by at most one non-trivial list element
+    (a nonzero term in a sum, a factor in a product that is not 1, or a
+    nonempty word in a sentence. Because the function depends on ATOMFILTERS,
+    the algorithm should be slightly different for normal matches and for
+    string matches. Ideally, two flags should be reserved.
     */
     if(pat->v.fl & IMPLIEDFENCE)
         {
