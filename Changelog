@@ -1,5 +1,6 @@
 31 July 2021
 For 64-bit versions, the size of the reference counter is enlarged by 32 bits.
+Fixed: endless loop when dummy operator evaluates to itself.
 
 20 July 2021
 Typo corrected: 'ANY Child' -> 'ANY KIND'

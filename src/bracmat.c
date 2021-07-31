@@ -16107,6 +16107,8 @@ static psk eval(psk Pnode)
                     Pnode->v.fl &= (~OPERATOR & ~READY);
                     Pnode->flgs |= dummy_op;
                     Pnode->v.fl |= SUCCESS;
+                    if(dummy_op == UNDERSCORE)
+                        Pnode->v.fl |= READY; /* stop iterating */
                     if(lkn.v.fl & INDIRECT)
                         {/* (a=b=127)&(.):(_)&!(a_b) */
                         Pnode = evalvar(Pnode);

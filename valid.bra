@@ -6281,6 +6281,12 @@ string line 2\"
             : iso-8859-1
           | out$"MLencoding:Check meta tag if xml declaration inconclusive"
           )
+          (   (p==B_A)
+            & !p:!p
+            & w_k:w_k
+          |   out
+            $ "Evaluation must stop if the dummy operator evaluates to itself."
+          )
       &   out
         $ ( str
           $ ( "Done. "
