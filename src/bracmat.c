@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "20 July 2021"
-#define VERSION "6.7.9"
-#define BUILD "243"
+#define DATUM "30 July 2021"
+#define VERSION "6.8.0"
+#define BUILD "244"
 /*
 COMPILATION
 -----------
@@ -136,7 +136,7 @@ TODO list:
 /* 
 About reference counting.
 Most nodes can be shared by no more than 1024 referers. Copies must be made as needed.
-Objects (nodes with = ('EQUALS') are objects and cane be shared by almost 2^40 referers.
+Objects (nodes with = ('EQUALS') are objects and can be shared by almost 2^40 referers.
 
 small refcounter       large refcounter              comment
 (10 bits, all nodes)   (30 bits, only objects)
@@ -324,6 +324,7 @@ typedef   signed __int32  INT32_T; /* pre VS2010 has no int32_t */
 #define _4      1
 #define _5_6    1
 #define LONG long long
+#define ULONG unsigned long long
 #define LONGU "%llu"
 #define LONGD "%lld"
 #define LONG0D "%0lld"
@@ -337,9 +338,14 @@ typedef   signed __int32  INT32_T; /* pre VS2010 has no int32_t */
 #if !defined NO_C_INTERFACE && !defined _WIN32
 #if UINT_MAX == 4294967295ul
 typedef unsigned int UINT32_T;
-typedef   signed int  INT32_T;
 #elif ULONG_MAX == 4294967295ul
 typedef unsigned long UINT32_T;
+#endif
+#endif
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
+#if UINT_MAX == 4294967295ul
+typedef   signed int  INT32_T;
+#elif ULONG_MAX == 4294967295ul
 typedef   signed long  INT32_T;
 #endif
 #endif
@@ -353,6 +359,7 @@ typedef   signed long  INT32_T;
 #define _5_6    1
 #endif
 #define LONG long
+#define ULONG unsigned long
 #define LONGU "%lu"
 #define LONGD "%ld"
 #define LONG0D "%0ld"
@@ -414,11 +421,11 @@ typedef   signed long  INT32_T;
 #define VISIBLE_FLAGS_POS       (INDIRECT|DOUBLY_INDIRECT|NONIDENT|QFRACTION|UNIFY|QNUMBER|NOT|GREATER_THAN|SMALLER_THAN)
 #define VISIBLE_FLAGS           (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|FRACTION|UNIFY|NOT|GREATER_THAN|SMALLER_THAN|FENCE|POSITION)
 
-#define HAS_VISIBLE_FLAGS_OR_MINUS(psk) ((psk)->ops & (VISIBLE_FLAGS|MINUS))
-#define RATIONAL(psk)      (((psk)->ops & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS)) == QNUMBER)
-#define RATIONAL_COMP(psk) (((psk)->ops & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
-#define RATIONAL_COMP_NOT_NUL(psk) (((psk)->ops & (QNUMBER|QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
-#define RATIONAL_WEAK(psk) (((psk)->ops & (QNUMBER|IS_OPERATOR|INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)) == QNUMBER)/* allows < > ~< and ~> as flags on numbers */
+#define HAS_VISIBLE_FLAGS_OR_MINUS(psk) ((psk)->flgs & (VISIBLE_FLAGS|MINUS))
+#define RATIONAL(psk)      (((psk)->flgs & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS)) == QNUMBER)
+#define RATIONAL_COMP(psk) (((psk)->flgs & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
+#define RATIONAL_COMP_NOT_NUL(psk) (((psk)->flgs & (QNUMBER|QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
+#define RATIONAL_WEAK(psk) (((psk)->flgs & (QNUMBER|IS_OPERATOR|INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)) == QNUMBER)/* allows < > ~< and ~> as flags on numbers */
 #define       LESS(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN))
 #define LESS_EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|GREATER_THAN))
 #define MORE_EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN))
@@ -428,32 +435,32 @@ typedef   signed long  INT32_T;
 #define      EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == QNUMBER)
 #define NOTLESSORMORE(psk) (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN|GREATER_THAN))
 
-#define INTEGER(pn)               (((pn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                      == QNUMBER)
-#define INTEGER_COMP(pn)          (((pn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))             == QNUMBER)
+#define INTEGER(pn)               (((pn)->flgs & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                      == QNUMBER)
+#define INTEGER_COMP(pn)          (((pn)->flgs & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))             == QNUMBER)
 
-#define INTEGER_NOT_NEG(pn)       (((pn)->ops & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                == QNUMBER)
-#define INTEGER_NOT_NEG_COMP(pn)  (((pn)->ops & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))       == QNUMBER)
+#define INTEGER_NOT_NEG(pn)       (((pn)->flgs & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                == QNUMBER)
+#define INTEGER_NOT_NEG_COMP(pn)  (((pn)->flgs & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))       == QNUMBER)
 
-#define INTEGER_POS(pn)           (((pn)->ops & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))           == QNUMBER)
-#define INTEGER_POS_COMP(pn)      (((pn)->ops & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))  == QNUMBER)
+#define INTEGER_POS(pn)           (((pn)->flgs & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))           == QNUMBER)
+#define INTEGER_POS_COMP(pn)      (((pn)->flgs & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))  == QNUMBER)
 
-#define INTEGER_NOT_NUL_COMP(pn) (((pn)->ops & (QNUMBER|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))        == QNUMBER)
-#define HAS_MINUS_SIGN(pn)         (((pn)->ops & (MINUS|IS_OPERATOR)) == MINUS)
+#define INTEGER_NOT_NUL_COMP(pn) (((pn)->flgs & (QNUMBER|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))        == QNUMBER)
+#define HAS_MINUS_SIGN(pn)         (((pn)->flgs & (MINUS|IS_OPERATOR)) == MINUS)
 
 #define RAT_NUL(pn) (((pn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS)) == QNUL)
 #define RAT_NUL_COMP(pn) (((pn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUL)
-#define RAT_NEG(pn) (((pn)->ops & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS)) \
+#define RAT_NEG(pn) (((pn)->flgs & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS)) \
                                 == (QNUMBER|MINUS))
-#define RAT_NEG_COMP(pn) (((pn)->ops & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) \
+#define RAT_NEG_COMP(pn) (((pn)->flgs & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) \
                                 == (QNUMBER|MINUS))
 
-#define RAT_RAT(pn) (((pn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))\
+#define RAT_RAT(pn) (((pn)->flgs & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))\
                                 == (QNUMBER|QFRACTION))
 
-#define RAT_RAT_COMP(pn) (((pn)->ops & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))\
+#define RAT_RAT_COMP(pn) (((pn)->flgs & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))\
                                 == (QNUMBER|QFRACTION))
-#define IS_ONE(pn) ((pn)->u.lobj == ONE && !((pn)->ops & (MINUS | VISIBLE_FLAGS)))
-#define IS_NIL(pn) ((pn)->u.lobj == 0   && !((pn)->ops & (MINUS | VISIBLE_FLAGS)))
+#define IS_ONE(pn) ((pn)->u.lobj == ONE && !((pn)->flgs & (MINUS | VISIBLE_FLAGS)))
+#define IS_NIL(pn) ((pn)->u.lobj == 0   && !((pn)->flgs & (MINUS | VISIBLE_FLAGS)))
 
 
 #include <string.h>
@@ -488,7 +495,6 @@ extern int _stksize = -1;
 
 #define SHL 16
 
-#define ops v.fl
 #define flgs v.fl
 
 #ifdef __TURBOC__
@@ -504,7 +510,7 @@ typedef struct
 #define LEFT  u.p.left
 #define TRUE 1
 #define FALSE 0
-#define PRISTINE (1<<2)
+#define PRISTINE (1<<2) /* Used to initialise matchstate variables. */
 #define ONCE (1<<3)
 #define POSITION_ONCE (1<<4)
 #define POSITION_MAX_REACHED (1<<5)
@@ -768,7 +774,7 @@ typedef union
             unsigned int refcount        :10;
             } leaf;
 #endif
-        unsigned int fl;
+        ULONG fl;
         } tFlags;
 
 
@@ -964,7 +970,6 @@ typedef struct objectnode /* createdWithNew == 0 */
     {
     tFlags v;
     psk left,right;
-#ifdef BUILTIN
     union
         {
         struct
@@ -975,11 +980,6 @@ typedef struct objectnode /* createdWithNew == 0 */
             } s;
         int Int:32;
         } u;
-#else
-    unsigned int refcount : 30;
-    unsigned int built_in:1;
-    unsigned int createdWithNew:1;
-#endif
     } objectnode;
 
 typedef struct stringrefnode
@@ -1011,7 +1011,6 @@ typedef struct typedObjectnode /* createdWithNew == 1 */
     tFlags v;
     psk left,right; /* left == nil, right == data (if vtab == NULL)
             or name of object type, e.g. [set], [hash], [file], [float] (if vtab != NULL)*/
-#ifdef BUILTIN
     union
         {
         struct
@@ -1022,11 +1021,6 @@ typedef struct typedObjectnode /* createdWithNew == 1 */
             } s;
         int Int:32;
         } u;
-#else
-    unsigned int refcount : 30; /* Always 0L */
-    unsigned int built_in:1;
-    unsigned int createdWithNew:1;
-#endif
     struct Hash * voiddata;
     #define HASH(x) (Hash*)x->voiddata
     #define VOID(x) x->voiddata
@@ -1034,24 +1028,12 @@ typedef struct typedObjectnode /* createdWithNew == 1 */
     method * vtab; /* The last element n of the array must have vtab[n].name == NULL */
     } typedObjectnode;
 
-#ifdef BUILTIN
-#define INCREFCOUNT(a) { ((objectnode*)a)->u.s.refcount++;(a)->ops &= ((~ALL_REFCOUNT_BITS_SET)|ONEREF); }
-#define DECREFCOUNT(a) { ((objectnode*)a)->u.s.refcount--;(a)->ops |= ALL_REFCOUNT_BITS_SET; }
+#define INCREFCOUNT(a) { ((objectnode*)a)->u.s.refcount++;(a)->flgs &= ((~ALL_REFCOUNT_BITS_SET)|ONEREF); }
+#define DECREFCOUNT(a) { ((objectnode*)a)->u.s.refcount--;(a)->flgs |= ALL_REFCOUNT_BITS_SET; }
 #define REFCOUNTNONZERO(a) ((a)->u.s.refcount)
 #define ISBUILTIN(a) ((a)->u.s.built_in)
 #define ISCREATEDWITHNEW(a) ((a)->u.s.createdWithNew)
 #define SETCREATEDWITHNEW(a) (a)->u.s.createdWithNew = 1
-#else
-#define INCREFCOUNT(a) { (a)->refcount++;(a)->ops &= ((~ALL_REFCOUNT_BITS_SET)|ONEREF); }
-#define DECREFCOUNT(a) { (a)->refcount--;(a)->ops |= ALL_REFCOUNT_BITS_SET; }
-#define REFCOUNTNONZERO(a) ((a)->refcount)
-#define ISBUILTIN(a) ((a)->built_in)
-#define SETBUILTIN(a) (a)->built_in = 1
-#define UNSETBUILTIN(a) (a)->built_in = 0
-#define ISCREATEDWITHNEW(a) ((a)->createdWithNew)
-#define SETCREATEDWITHNEW(a) (a)->createdWithNew = 1
-#define UNSETCREATEDWITHNEW(a) (a)->createdWithNew = 0
-#endif
 
 /*#if !_BRACMATEMBEDDED*/
 #if !defined NO_FOPEN
@@ -1134,7 +1116,7 @@ Flgs 0                   NOT
     13                  UNIFY
     14                  IDENT
     15               IMPLIEDFENCE
-ops 16  0             IS_OPERATOR
+    16  0             IS_OPERATOR
     17  1   (operators 0-14)      QNUMBER
     18  2       "                 MINUS
     19  3       "                 QNUL
@@ -1181,10 +1163,10 @@ static const char opchar[16] =
 
 #define OPERATOR ((0xF<<OPSH) + IS_OPERATOR)
 
-#define Op(pn) ((pn)->ops & OPERATOR)
-#define kopo(pn) ((pn).ops & OPERATOR)
-#define is_op(pn) ((pn)->ops & IS_OPERATOR)
-#define is_object(pn) (((pn)->ops & OPERATOR) == EQUALS)
+#define Op(pn) ((pn)->flgs & OPERATOR)
+#define kopo(pn) ((pn).flgs & OPERATOR)
+#define is_op(pn) ((pn)->flgs & IS_OPERATOR)
+#define is_object(pn) (((pn)->flgs & OPERATOR) == EQUALS)
 #define klopcode(pn) (Op(pn) >> OPSH)
 
 #define nil(p) knil[klopcode(p)]
@@ -1197,14 +1179,12 @@ static const char opchar[16] =
 #define QFRACTION           (1 << (SHL+4))
 #define LATEBIND            (1 << (SHL+5))
 #define DEFINITELYNONUMBER  (1 << (SHL+6)) /* this is not stored in a node! */
-#define ONEREF   (unsigned int)(1 << (SHL+NON_REF_COUNT_BITS))
+#define ONEREF   (ULONG)(1 << (SHL+NON_REF_COUNT_BITS))
 
 #define ALL_REFCOUNT_BITS_SET \
-       ((((unsigned int)(~0)) >> (SHL+NON_REF_COUNT_BITS)) << (SHL+NON_REF_COUNT_BITS))
+       ((((ULONG)(~0)) >> (SHL+NON_REF_COUNT_BITS)) << (SHL+NON_REF_COUNT_BITS))
 
-#define shared(pn) ((pn)->ops & ALL_REFCOUNT_BITS_SET)
-#define sharedo(pn) ((pn).ops & ALL_REFCOUNT_BITS_SET)
-
+#define shared(pn) ((pn)->flgs & ALL_REFCOUNT_BITS_SET)
 
 static int all_refcount_bits_set(psk pnode)
     {
@@ -1213,9 +1193,9 @@ static int all_refcount_bits_set(psk pnode)
 
 static void dec_refcount(psk pnode)
     {
-    assert(pnode->ops & ALL_REFCOUNT_BITS_SET);
-    pnode->ops -= ONEREF;
-    if((pnode->ops & (OPERATOR|ALL_REFCOUNT_BITS_SET)) == EQUALS)
+    assert(pnode->flgs & ALL_REFCOUNT_BITS_SET);
+    pnode->flgs -= ONEREF;
+    if((pnode->flgs & (OPERATOR|ALL_REFCOUNT_BITS_SET)) == EQUALS)
         {
         if(REFCOUNTNONZERO((objectnode*)pnode))
             {
@@ -2853,13 +2833,7 @@ static psk new_operator_like(psk pnode)
         DBGSRC(printf("new_operator_like:");result(pnode);printf("\n");)
         assert(!ISBUILTIN((objectnode*)pnode));
         goal = (objectnode *)bmalloc(__LINE__,sizeof(objectnode));
-#ifdef BUILTIN
         goal->u.Int = 0;
-#else
-        goal->refcount = 0;
-        UNSETCREATEDWITHNEW(goal);
-        UNSETBUILTIN(goal);
-#endif
         return (psk)goal;
         }
     else
@@ -3180,7 +3154,7 @@ static int quote(unsigned char *strng)
 static int printflags(psk Root)
     {
     int count = 0;
-    int Flgs = Root->v.fl;
+    ULONG Flgs = Root->v.fl;
     if(Flgs & FENCE)
         {
         (*process)('`');
@@ -3253,7 +3227,7 @@ static void endnode(psk Root,int space)
     int q,ikar;
 #if CHECKALLOCBOUNDS
     if(POINT)
-        printf("\n[%p %d]",Root,(Root->ops & ALL_REFCOUNT_BITS_SET)/ ONEREF);
+        printf("\n[%p %d]",Root,(Root->flgs & ALL_REFCOUNT_BITS_SET)/ ONEREF);
 #endif
     if(!Root->u.obj
         && !HAS_UNOPS(Root)
@@ -3264,7 +3238,7 @@ static void endnode(psk Root,int space)
         return;
         }
     printflags(Root);
-    if(Root->ops & MINUS)
+    if(Root->flgs & MINUS)
         (*process)('-');
     if(beNice)
         {
@@ -3344,7 +3318,7 @@ static psk same_as_w(psk pnode)
     {
     if(shared(pnode) != ALL_REFCOUNT_BITS_SET)
         {
-        (pnode)->ops += ONEREF;
+        (pnode)->flgs += ONEREF;
         return pnode;
         }
     else if(is_object(pnode))
@@ -3363,7 +3337,7 @@ static psk same_as_w_2(ppsk PPnode)
     psk pnode = *PPnode;
     if(shared(pnode) != ALL_REFCOUNT_BITS_SET)
         {
-        pnode->ops += ONEREF;
+        pnode->flgs += ONEREF;
         return pnode;
         }
     else if(is_object(pnode))
@@ -3404,7 +3378,7 @@ static psk iCopyOf(psk pnode)
 #else
     MEMCPY(ret,pnode,((len / sizeof(LONG)) + 1) * sizeof(LONG));
 #endif
-    ret->ops &= ~ALL_REFCOUNT_BITS_SET;
+    ret->flgs &= ~ALL_REFCOUNT_BITS_SET;
     return ret;
     }
 
@@ -3424,7 +3398,7 @@ static void copyToCutoff(psk * ppnode,psk pnode,psk cutoff)
             else
                 {
                 psk p = new_operator_like(pnode);
-                p->ops = pnode->ops & ~ALL_REFCOUNT_BITS_SET;
+                p->flgs = pnode->flgs & ~ALL_REFCOUNT_BITS_SET;
                 p->LEFT = same_as_w(pnode->LEFT);
                 *ppnode = p;
                 ppnode = &(p->RIGHT);
@@ -3441,7 +3415,7 @@ static void copyToCutoff(psk * ppnode,psk pnode,psk cutoff)
 
 static psk Head(psk pnode)
 {
-if(pnode->ops & LATEBIND)
+if(pnode->flgs & LATEBIND)
     {
     assert(!shared(pnode));
     if(is_op(pnode))
@@ -3454,7 +3428,7 @@ if(pnode->ops & LATEBIND)
         {
         stringrefnode * ps = (stringrefnode *)pnode;
         pnode = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + ps->length);
-        pnode->ops = (ps->ops & ~ALL_REFCOUNT_BITS_SET & ~LATEBIND);
+        pnode->flgs = (ps->flgs & ~ALL_REFCOUNT_BITS_SET & ~LATEBIND);
         strncpy((char *)(pnode)+sizeof(unsigned LONG),(char *)ps->str,ps->length);
         wipe(ps->pnode);
         bfree(ps);
@@ -3487,7 +3461,7 @@ while(is_op(Root))
         extraSpc = 1;
 #if CHECKALLOCBOUNDS
     if(POINT)
-        printf("\n[%p %d]",Root,(Root->ops & ALL_REFCOUNT_BITS_SET)/ ONEREF);
+        printf("\n[%p %d]",Root,(Root->flgs & ALL_REFCOUNT_BITS_SET)/ ONEREF);
 #endif
     do_something(opchar[klopcode(Root)]);
     Parent = Op(Root);
@@ -3595,7 +3569,7 @@ if(is_op(Root))
         extraSpc = 1;
 #if CHECKALLOCBOUNDS
     if(POINT)
-        printf("\n[%p %d]",Root,(Root->ops & ALL_REFCOUNT_BITS_SET)/ ONEREF);
+        printf("\n[%p %d]",Root,(Root->flgs & ALL_REFCOUNT_BITS_SET)/ ONEREF);
 #endif
     do_something(opchar[klopcode(Root)]);
     Parent = Op(Root);
@@ -3725,7 +3699,7 @@ static LONG toLong(psk pnode)
     {
     LONG res;
     res = (LONG)STRTOUL((char *)POBJ(pnode),(char **)NULL,10);
-    if(pnode->ops & MINUS)
+    if(pnode->flgs & MINUS)
         res = -res;
     return res;
     }
@@ -4730,7 +4704,7 @@ static psk _copyop(psk Pnode)
     {
     psk apnode;
     apnode = new_operator_like(Pnode);
-    apnode->ops = Pnode->ops & ~ALL_REFCOUNT_BITS_SET;
+    apnode->flgs = Pnode->flgs & ~ALL_REFCOUNT_BITS_SET;
     apnode->LEFT = same_as_w_2(&Pnode->LEFT);
     apnode->RIGHT = same_as_w(Pnode->RIGHT);
     return apnode;
@@ -4815,7 +4789,7 @@ static psk isolated(psk Pnode)
     return Pnode;
     }
 
-static psk setflgs(psk pokn,int Flgs)
+static psk setflgs(psk pokn,ULONG Flgs)
     {
     if((Flgs & BEQUEST) || !(Flgs & SUCCESS))
         {
@@ -4942,7 +4916,7 @@ static void wipe(psk top)
             }
         else
             {
-            if(top->ops & LATEBIND)
+            if(top->flgs & LATEBIND)
                 {
                 wipe(((stringrefnode*)top)->pnode);
                 }
@@ -5059,8 +5033,8 @@ static Qnumber qTimesMinusOne(Qnumber _qx)
     len = offsetof(sk,u.obj) + 1 + strlen((char *)POBJ(_qx));
     res = (Qnumber)bmalloc(__LINE__,len);
     memcpy(res,_qx,len);
-    res->ops ^= MINUS;
-    res->ops &= ~ALL_REFCOUNT_BITS_SET;
+    res->flgs ^= MINUS;
+    res->flgs &= ~ALL_REFCOUNT_BITS_SET;
     return res;
     }
 
@@ -5133,7 +5107,7 @@ static psk inumberNode(nnumber * g)
         }
 
     res->v.fl = READY | SUCCESS | QNUMBER;
-    res->ops |= g->sign;
+    res->flgs |= g->sign;
     return res;
     }
 
@@ -5176,7 +5150,7 @@ static psk numberNode2(nnumber * g)
         bfree(g->alloc);
         }
     res->v.fl = READY | SUCCESS | QNUMBER;
-    res->ops |= g->sign;
+    res->flgs |= g->sign;
     return res;
     }
 
@@ -5216,7 +5190,7 @@ static void convert2binary(nnumber * x)
 
 static char * isplit(Qnumber _qget,nnumber * ptel,nnumber * pnoem)
     {
-    ptel->sign = _qget->ops & (MINUS|QNUL);
+    ptel->sign = _qget->flgs & (MINUS|QNUL);
     pnoem->sign = 0;
     pnoem->alloc = ptel->alloc = NULL;
     ptel->number = (char *)POBJ(_qget);
@@ -5245,7 +5219,7 @@ static char * isplit(Qnumber _qget,nnumber * ptel,nnumber * pnoem)
 
 static char * split(Qnumber _qget,nnumber * ptel,nnumber * pnoem)
     {
-    ptel->sign = _qget->ops & (MINUS|QNUL);
+    ptel->sign = _qget->flgs & (MINUS|QNUL);
     pnoem->sign = 0;
     pnoem->alloc = ptel->alloc = NULL;
     ptel->number = (char *)POBJ(_qget);
@@ -5378,7 +5352,7 @@ static void pbint(LONG * high,LONG * low)
         }
     for(;++high <= low;)
         {
-        printf("%0*ld ",(int)TEN_LOG_RADIX,*high);
+        printf(LONG0nD " ",(int)TEN_LOG_RADIX,*high);
         }
     }
 
@@ -5401,7 +5375,7 @@ static void fpbint(FILE * fp,LONG * high,LONG * low)
         }
     for(;++high <= low;)
         {
-        fprintf(fp,"%0*ld ",(int)TEN_LOG_RADIX,*high);
+        fprintf(fp, LONG0nD " ",(int)TEN_LOG_RADIX,*high);
         }
     }
 
@@ -5875,7 +5849,7 @@ static Qnumber nn2q(nnumber * num,nnumber * den)
         endp = iconvert2decimal(den,endp);
         assert((size_t)(endp - (char *)res) <= len);
         res->v.fl = READY | SUCCESS | QNUMBER | QFRACTION;
-        res->ops |= num->sign;
+        res->flgs |= num->sign;
         }
     return res;
     }
@@ -6344,9 +6318,9 @@ static Qnumber qIntegerDivision(Qnumber _qx,Qnumber _qy)
     bfree(p2.ialloc);
     res = qPlus
         (      (remainder.sign & QNUL)
-            || !(_qx->ops & MINUS)
+            || !(_qx->flgs & MINUS)
           ? &zeroNode
-          :   (_qy->ops & MINUS)
+          :   (_qy->flgs & MINUS)
             ? &oneNode
             : &minusOneNode
             , (aqnumber = inumberNode(&quotient))
@@ -6386,7 +6360,7 @@ static psk qDenominator(psk Pnode)
     assert(!(xn.sign & QNUL)); /*Because RATIONAL_COMP(_qx)*/
     memcpy((void*)POBJ(res),xn.number,xn.length);
     res->v.fl = READY | SUCCESS | QNUMBER;
-    res->ops |= xn.sign;
+    res->flgs |= xn.sign;
     wipe(Pnode);
     return res;
     }
@@ -6396,7 +6370,7 @@ static int qCompare(Qnumber _qx,Qnumber _qy)
     Qnumber som;
     int res;
     som = qPlus(_qx,_qy,MINUS);
-    res = som->ops & (MINUS|QNUL);
+    res = som->flgs & (MINUS|QNUL);
     pskfree(som);
     return res;
     }
@@ -6752,8 +6726,8 @@ static int copy_insert(psk name, psk pnode, psk cutoff)
 				 or object */
 				DBGSRC(printf("name:["); result(name); printf("] pnode:["); result(pnode); printf("] cutoff(%d):[", cutoff->v.fl / ONEREF); result(cutoff); printf("]\n");)
 					PNODE = new_operator_like(pnode);
-				PNODE->ops = (pnode->ops & ~ALL_REFCOUNT_BITS_SET) | LATEBIND;
-				pnode->ops += ONEREF;
+				PNODE->flgs = (pnode->flgs & ~ALL_REFCOUNT_BITS_SET) | LATEBIND;
+				pnode->flgs += ONEREF;
 				if (shared(cutoff) == ALL_REFCOUNT_BITS_SET)
 					{
 					/*
@@ -6780,7 +6754,7 @@ static int copy_insert(psk name, psk pnode, psk cutoff)
 					INCREFCOUNT(cutoff);
 					}
 				else
-					cutoff->ops += ONEREF;
+					cutoff->flgs += ONEREF;
 
 				PNODE->LEFT = pnode;
 				PNODE->RIGHT = cutoff;
@@ -6869,9 +6843,9 @@ static int string_copy_insert(psk name,psk pnode,char * str,char * cutoff)
         if((nr & MINUS) && !(name->v.fl & NUMBER))
             nr = 0; /* "-1" is only converted to -1 if the # flag is present on the pattern */
         psnode = (stringrefnode *)bmalloc(__LINE__,sizeof(stringrefnode));
-        psnode->ops = /*(pnode->ops & ~(ALL_REFCOUNT_BITS_SET|VISIBLE_FLAGS)) substring doesn't inherit flags like */
+        psnode->flgs = /*(pnode->flgs & ~(ALL_REFCOUNT_BITS_SET|VISIBLE_FLAGS)) substring doesn't inherit flags like */
             READY | SUCCESS | LATEBIND | nr;
-        /*psnode->ops |= SUCCESS;*/ /*{?} @(~`ab:%?x %?y)&!x => a */ /*{!} a */
+        /*psnode->flgs |= SUCCESS;*/ /*{?} @(~`ab:%?x %?y)&!x => a */ /*{!} a */
 		psnode->pnode = same_as_w(pnode);
         if(nr & MINUS)
             {
@@ -7211,7 +7185,7 @@ static int scompare(char * wh,unsigned char * s,unsigned char * cutoff,psk p)
     int smallerIfMoreDigitsAdded; /* -1/22 smaller than -1/2 */ /* 1/22 smaller than 1/2 */
     int samesign;
     int less;
-    int Flgs = p->v.fl;
+    ULONG Flgs = p->v.fl;
     enum {NoIndication,AnInteger,NotAFraction,NotANumber,AFraction,ANumber};
     int status = NoIndication;
 
@@ -8073,7 +8047,7 @@ static psk inserthash(Hash * temp,psk Arg)
         {
         psk goal = (psk)bmalloc(__LINE__,sizeof(knode));
         goal->v.fl = WHITE | SUCCESS;
-        goal->ops &= ~ALL_REFCOUNT_BITS_SET;
+        goal->flgs &= ~ALL_REFCOUNT_BITS_SET;
         goal->LEFT = same_as_w(Arg);
         goal->RIGHT = r->entry;
         r->entry = goal;
@@ -8818,7 +8792,7 @@ first finds (=B), which is an object that should not obtain the flags !! as in
     DBGSRC(printf("SymbolBinding_w(");result(variabele);printf(")\n");)
     if((pbinding = SymbolBinding(variabele,&newval,twolevelsofindirection)) != NULL)
         {
-        unsigned int nameflags,valueflags;
+        ULONG nameflags,valueflags;
         nameflags = (variabele->v.fl & (BEQUEST|SUCCESS));
         if(ANYNEGATION(variabele->v.fl))
             nameflags |= NOT;
@@ -9120,7 +9094,7 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
                       ,unsigned int op
                        )
     {
-    unsigned int Flgs;
+    ULONG Flgs;
     psk name;
     LONG pos;
     Flgs = pat->v.fl;
@@ -9432,7 +9406,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
 */
     psk loc;
     char * sloc;
-    unsigned int Flgs;
+    ULONG Flgs;
     matchstate s;
     int ci;
     psk name = NULL;
@@ -9524,7 +9498,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
             int ok = TRUE;
             if(is_op(pat))
                 {
-                unsigned int saveflgs = Flgs & VISIBLE_FLAGS;
+                ULONG saveflgs = Flgs & VISIBLE_FLAGS;
                 name = subtreecopy(pat);
                 name->v.fl &= ~VISIBLE_FLAGS;
                 name->v.fl |= SUCCESS;
@@ -10044,7 +10018,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
 		   */
     matchstate s;
     psk loc;
-    unsigned int Flgs;
+    ULONG Flgs;
     psk name = NULL;
     DBGSRC(Printf("%d%*smatch(",ind,ind,"");results(sub,cutoff);Printf(":");\
         result(pat);Printf(")");Printf("\n");)
@@ -10084,7 +10058,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
             int ok = TRUE;
             if(is_op(pat))
                 {
-                unsigned int saveflgs = Flgs & VISIBLE_FLAGS;
+                ULONG saveflgs = Flgs & VISIBLE_FLAGS;
                 DBGSRC(printf("pat:");result(pat);printf("\n");)
                 name = subtreecopy(pat);
                 name->v.fl &= ~VISIBLE_FLAGS;
@@ -10921,7 +10895,7 @@ static psk * backbone(psk arg,psk Pnode,psk * pfirst)
 static psk rightoperand(psk Pnode)
 {
 psk temp;
-unsigned int Sign;
+ULONG Sign;
 temp = (Pnode->RIGHT);
 return((Sign = Op(Pnode)) == Op(temp) &&
         (Sign == PLUS || Sign == TIMES || Sign == WHITE) ?
@@ -10990,13 +10964,7 @@ static psk evalmacro(psk Pnode)
                     if(dummy_op == EQUALS)
                         {
                         psk becomes = (psk)bmalloc(__LINE__,sizeof(objectnode));
-#ifdef BUILTIN
                         ((typedObjectnode*)becomes)->u.Int = 0;
-#else
-                        ((typedObjectnode*)*R)->refcount = 0;
-                        UNSETCREATEDWITHNEW((typedObjectnode*)*R);
-                        UNSETBUILTIN((typedObjectnode*)*R);
-#endif
                         becomes->LEFT = same_as_w(h->LEFT);
                         becomes->RIGHT = same_as_w(h->RIGHT);
                         wipe(h);
@@ -11176,13 +11144,7 @@ static psk lambda(psk Pnode,psk name,psk Arg)
                     if(dummy_op == EQUALS)
                         {
                         psk becomes = (psk)bmalloc(__LINE__,sizeof(objectnode));
-#ifdef BUILTIN
                         ((typedObjectnode*)becomes)->u.Int = 0;
-#else
-                        ((typedObjectnode*)*R)->refcount = 0;
-                        UNSETCREATEDWITHNEW((typedObjectnode*)*R);
-                        UNSETBUILTIN((typedObjectnode*)*R);
-#endif
                         becomes->LEFT = same_as_w(h->LEFT);
                         becomes->RIGHT = same_as_w(h->RIGHT);
                         wipe(h);
@@ -12634,7 +12596,7 @@ static psk objectcopysub2(psk src) /* src is NOT an object */
     if(is_op(src) && hasSubObject(src))
         {
         goal = (psk)bmalloc(__LINE__,sizeof(knode));
-        goal->ops = src->ops & ~ALL_REFCOUNT_BITS_SET;
+        goal->flgs = src->flgs & ~ALL_REFCOUNT_BITS_SET;
         goal->LEFT = objectcopysub(src->LEFT);
         goal->RIGHT = objectcopysub(src->RIGHT);
         return goal;
@@ -12655,17 +12617,9 @@ static psk objectcopysub(psk src)
         else
             {
             goal = (psk)bmalloc(__LINE__,sizeof(objectnode));
-#ifdef BUILTIN
             ((typedObjectnode*)goal)->u.Int = 0;
-#else
-            ((typedObjectnode*)goal)->refcount = 0;
-            UNSETBUILTIN((typedObjectnode*)goal);
-#endif
             }
-#ifndef BUILTIN
-        UNSETCREATEDWITHNEW((typedObjectnode*)goal);
-#endif
-        goal->ops = src->ops & ~ALL_REFCOUNT_BITS_SET;
+        goal->flgs = src->flgs & ~ALL_REFCOUNT_BITS_SET;
         goal->LEFT = same_as_w(src->LEFT);
         goal->RIGHT = same_as_w(src->RIGHT);
         return goal;
@@ -12682,30 +12636,16 @@ static psk objectcopy(psk src)
         if(ISBUILTIN((objectnode*)src))
             {
             goal = (psk)bmalloc(__LINE__,sizeof(typedObjectnode));
-#ifdef BUILTIN
             ((typedObjectnode*)goal)->u.Int = BUILTIN;
-#else
-            ((typedObjectnode*)goal)->refcount = 0;
-            UNSETCREATEDWITHNEW((typedObjectnode*)goal);/*TODO: This line seems to be superfluous*/
-            SETBUILTIN((typedObjectnode*)goal);
-#endif
             ((typedObjectnode*)goal)->vtab = ((typedObjectnode*)src)->vtab;
             ((typedObjectnode*)goal)->voiddata = NULL;
             }
         else
             {
             goal = (psk)bmalloc(__LINE__,sizeof(objectnode));
-#ifdef BUILTIN
             ((typedObjectnode*)goal)->u.Int = 0;
-#else
-            ((typedObjectnode*)goal)->refcount = 0;
-            UNSETBUILTIN((typedObjectnode*)goal);
-#endif
             }
-#ifndef BUILTIN
-        UNSETCREATEDWITHNEW((typedObjectnode*)goal);
-#endif
-        goal->ops = src->ops & ~ALL_REFCOUNT_BITS_SET;
+        goal->flgs = src->flgs & ~ALL_REFCOUNT_BITS_SET;
         goal->LEFT = same_as_w(src->LEFT);
         /*?? This adds an extra level of copying, but ONLY for objects that have a '=' node as the lhs of the main '=' node*/
         /* What is it good for? Bart 20010220 */
@@ -12731,12 +12671,7 @@ static psk getObjectDef(psk src)
             dest->v.fl = EQUALS | SUCCESS;
             dest->left = same_as_w(&nilNode);
             dest->right = same_as_w(src);
-#ifdef BUILTIN
             dest->u.Int = BUILTIN;
-#else
-            dest->refcount = 0;
-            SETBUILTIN(dest);
-#endif
             VOID(dest) = NULL;
             dest->vtab = df->vtab;
             return (psk)dest;
@@ -12757,12 +12692,7 @@ static psk getObjectDef(psk src)
         dest->left = same_as_w(&nilNode);
         dest->right = objectcopy(def); /* TODO Head(&def) ? */
         wipe(def);
-#ifdef BUILTIN
         dest->u.Int = 0;
-#else
-        dest->refcount = 0;
-        UNSETBUILTIN(dest);
-#endif
         VOID(dest) = NULL;
         dest->vtab = NULL;
         return (psk)dest;
@@ -12976,7 +12906,10 @@ static function_return_type functions(psk Pnode)
     {
     static char draft[22];
     psk lnode,rightnode,rrightnode,rlnode;
-    int intVal;
+    union {
+        int i; 
+        ULONG ul;
+        } intVal;
     if(is_op(lnode = Pnode->LEFT))
         return find_func(Pnode);
     rightnode = Pnode->RIGHT;
@@ -13076,7 +13009,7 @@ static function_return_type functions(psk Pnode)
         CASE(PEE) /* pee $ (<pointer>[,<number of bytes>]) (1,2,4,8)*/
             {
             void *p;
-            intVal = 1;
+            intVal.i = 1;
             if(is_op(rightnode))
                 {
                 rlnode = rightnode->LEFT;
@@ -13085,10 +13018,10 @@ static function_return_type functions(psk Pnode)
                     switch(rrightnode->u.obj)
                         {
                         case '2':
-                            intVal = 2;
+                            intVal.i = 2;
                             break;
                         case '4':
-                            intVal = 4;
+                            intVal.i = 4;
                             break;
                         }
                 }
@@ -13097,8 +13030,8 @@ static function_return_type functions(psk Pnode)
             if(is_op(rlnode) || !INTEGER_POS(rlnode))
                 return functionFail(Pnode);
             p = strToPointer((char *)POBJ(rlnode));
-            p = (void*)((char *)p - (ptrdiff_t)((size_t)p % intVal));
-            switch(intVal)
+            p = (void*)((char *)p - (ptrdiff_t)((size_t)p % intVal.i));
+            switch(intVal.i)
                 {
                 case 2:
                     sprintf(draft,"%hu",*(short unsigned int*)p);
@@ -13127,7 +13060,7 @@ static function_return_type functions(psk Pnode)
             psk rrlnode;
             void *p;
             LONG val;
-            intVal = 1;
+            intVal.i = 1;
             if(!is_op(rightnode))
                 return functionFail(Pnode);
             rlnode = rightnode->LEFT;
@@ -13141,13 +13074,13 @@ static function_return_type functions(psk Pnode)
                     switch(rrrightnode->u.obj)
                         {
                         case '2':
-                            intVal = 2;
+                            intVal.i = 2;
                             break;
                         case '4':
-                            intVal = 4;
+                            intVal.i = 4;
                             break;
                         case '8':
-                            intVal = 8;
+                            intVal.i = 8;
                             break;
                         default:
                             ;
@@ -13159,9 +13092,9 @@ static function_return_type functions(psk Pnode)
             || is_op(rrlnode) || !INTEGER(rrlnode))
                 return functionFail(Pnode);
             p = strToPointer((char *)POBJ(rlnode));
-            p = (void*)((char *)p - (ptrdiff_t)((size_t)p % intVal));
+            p = (void*)((char *)p - (ptrdiff_t)((size_t)p % intVal.i));
             val = toLong(rrlnode);
-            switch(intVal)
+            switch(intVal.i)
                 {
                 case 2:
                     *(unsigned short int*)p = (unsigned short int)val;
@@ -13245,10 +13178,10 @@ static function_return_type functions(psk Pnode)
             {
             if(is_op(rightnode) || !INTEGER_POS(rightnode))
                 return functionFail(Pnode);
-            intVal = strtoul((char *)POBJ(rightnode),(char **)NULL,10);
-            if(intVal > 255)
+            intVal.ul = strtoul((char *)POBJ(rightnode),(char **)NULL,10);
+            if(intVal.ul > 255)
                 return functionFail(Pnode);
-            draft[0] = (char)intVal;
+            draft[0] = (char)intVal.ul;
             draft[1] = 0;
             wipe(Pnode);
             Pnode = scopy((const char *)draft);
@@ -13289,16 +13222,16 @@ static function_return_type functions(psk Pnode)
             else
                 {
                 const char * s = (const char *)POBJ(rightnode);
-                intVal = getCodePoint(&s);
-                if(intVal < 0 || *s)
+                intVal.i = getCodePoint(&s);
+                if(intVal.i < 0 || *s)
                     {
-                    if(intVal != -2)
+                    if(intVal.i != -2)
                         {
                         Pnode->v.fl |= IMPLIEDFENCE;
                         }
                     return functionFail(Pnode);
                     }
-                sprintf(draft,"%d",intVal);
+                sprintf(draft,"%d",intVal.i);
                 wipe(Pnode);
                 Pnode = scopy((const char *)draft);
                 return functionOk(Pnode);
@@ -13316,20 +13249,20 @@ static function_return_type functions(psk Pnode)
             {
             if(is_object(rightnode) && !(rightnode->LEFT->v.fl & VISIBLE_FLAGS))
                 rightnode = rightnode->RIGHT;
-            intVal = rightnode->v.fl;
+            intVal.ul = rightnode->v.fl;
             addr[3] = same_as_w(rightnode);
             addr[3] = isolated(addr[3]);
             addr[3]->v.fl = addr[3]->v.fl & ~VISIBLE_FLAGS;
             addr[2] = same_as_w(&nilNode);
             addr[2] = isolated(addr[2]);
             addr[2]->v.fl &= ~VISIBLE_FLAGS;
-            addr[2]->v.fl |= VISIBLE_FLAGS & intVal;
+            addr[2]->v.fl |= VISIBLE_FLAGS & intVal.ul;
             if(addr[2]->v.fl & INDIRECT)
                 {
                 addr[2]->v.fl &= ~READY; /* {?} flg$(=!a):(=?X.?)&lst$X */
                 addr[3]->v.fl |= READY;  /* {?} flg$(=!a):(=?.?Y)&!Y */
                 }
-            if(NOTHINGF(intVal))
+            if(NOTHINGF(intVal.ul))
                 {
                 addr[2]->v.fl ^= SUCCESS;
                 addr[3]->v.fl ^= SUCCESS;
@@ -13346,17 +13279,17 @@ static function_return_type functions(psk Pnode)
               && Op(rightnode->RIGHT) == DOT
               )
                 {
-                intVal = rightnode->RIGHT->LEFT->v.fl & VISIBLE_FLAGS;
-                if(intVal && (rightnode->RIGHT->RIGHT->v.fl & intVal))
+                intVal.ul = rightnode->RIGHT->LEFT->v.fl & VISIBLE_FLAGS;
+                if(intVal.ul && (rightnode->RIGHT->RIGHT->v.fl & intVal.ul))
                     return functionFail(Pnode);
                 addr[3] = same_as_w(rightnode->RIGHT->RIGHT);
                 addr[3] = isolated(addr[3]);
-                addr[3]->v.fl |= intVal;
-                if(NOTHINGF(intVal))
+                addr[3]->v.fl |= intVal.ul;
+                if(NOTHINGF(intVal.ul))
                     {
                     addr[3]->v.fl ^= SUCCESS;
                     }
-                if(intVal & INDIRECT)
+                if(intVal.ul & INDIRECT)
                     {
                     addr[3]->v.fl &= ~READY;/* ^= --> &= ~ */
                     }
@@ -13508,7 +13441,7 @@ static function_return_type functions(psk Pnode)
                     {
                     nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
-                    nnode->ops &= ~ALL_REFCOUNT_BITS_SET;
+                    nnode->flgs &= ~ALL_REFCOUNT_BITS_SET;
                     nnode->LEFT = same_as_w(rightnode->LEFT);
                     nnode->RIGHT = same_as_w(pnode->LEFT);
                     nnode = functions(nnode);
@@ -13519,7 +13452,7 @@ static function_return_type functions(psk Pnode)
                     else
                         {
                         psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                        wnode->ops = WHITE | SUCCESS;
+                        wnode->flgs = WHITE | SUCCESS;
                         *ppnode = wnode;
                         ppnode = &(wnode->RIGHT);
                         wnode->LEFT = nnode;
@@ -13530,7 +13463,7 @@ static function_return_type functions(psk Pnode)
                     {
                     nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
-                    nnode->ops &= ~ALL_REFCOUNT_BITS_SET;
+                    nnode->flgs &= ~ALL_REFCOUNT_BITS_SET;
                     nnode->LEFT = same_as_w(rightnode->LEFT);
                     nnode->RIGHT = same_as_w(pnode);
                     nnode = functions(nnode);
@@ -13580,7 +13513,7 @@ static function_return_type functions(psk Pnode)
                                 psk nnode;
                                 nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                                 nnode->v.fl = Pnode->v.fl;
-                                nnode->ops &= ~ALL_REFCOUNT_BITS_SET;
+                                nnode->flgs &= ~ALL_REFCOUNT_BITS_SET;
                                 nnode->LEFT = same_as_w(rightnode->LEFT);
                                 subject = strstr(oldsubject, separator);
                                 if (subject)
@@ -13598,7 +13531,7 @@ static function_return_type functions(psk Pnode)
                                 if (subject)
                                     {
                                     psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                                    wnode->ops = WHITE | SUCCESS;
+                                    wnode->flgs = WHITE | SUCCESS;
                                     *ppnode = wnode;
                                     ppnode = &(wnode->RIGHT);
                                     wnode->LEFT = nnode;
@@ -13629,14 +13562,14 @@ static function_return_type functions(psk Pnode)
                             psk nnode;
                             nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                             nnode->v.fl = Pnode->v.fl;
-                            nnode->ops &= ~ALL_REFCOUNT_BITS_SET;
+                            nnode->flgs &= ~ALL_REFCOUNT_BITS_SET;
                             nnode->LEFT = same_as_w(rightnode->LEFT);
                             nnode->RIGHT = charcopy(oldsubject, subject);
                             nnode = functions(nnode);
                             if (*subject)
                                 {
                                 psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                                wnode->ops = WHITE | SUCCESS;
+                                wnode->flgs = WHITE | SUCCESS;
                                 *ppnode = wnode;
                                 ppnode = &(wnode->RIGHT);
                                 wnode->LEFT = nnode;
@@ -13654,14 +13587,14 @@ static function_return_type functions(psk Pnode)
                             psk nnode;
                             nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                             nnode->v.fl = Pnode->v.fl;
-                            nnode->ops &= ~ALL_REFCOUNT_BITS_SET;
+                            nnode->flgs &= ~ALL_REFCOUNT_BITS_SET;
                             nnode->LEFT = same_as_w(rightnode->LEFT);
                             nnode->RIGHT = charcopy(oldsubject, subject);
                             nnode = functions(nnode);
                             if (*subject)
                                 {
                                 psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                                wnode->ops = WHITE | SUCCESS;
+                                wnode->flgs = WHITE | SUCCESS;
                                 *ppnode = wnode;
                                 ppnode = &(wnode->RIGHT);
                                 wnode->LEFT = nnode;
@@ -13688,11 +13621,11 @@ static function_return_type functions(psk Pnode)
               && !is_op(rrightnode = rightnode->RIGHT)
               )
                 {
-                intVal = rename((const char *)POBJ(rlnode),(const char *)POBJ(rrightnode));
-                if(intVal)
+                intVal.i = rename((const char *)POBJ(rlnode),(const char *)POBJ(rrightnode));
+                if(intVal.i)
                     {
 #ifndef EACCES
-                    sprintf(draft,"%d",intVal);
+                    sprintf(draft,"%d",intVal.i);
 #else
                     switch(errno)
                         {
@@ -13738,14 +13671,14 @@ static function_return_type functions(psk Pnode)
             if(!is_op(rightnode))
                 {
 #if defined __SYMBIAN32__
-                intVal = unlink((const char *)POBJ(rightnode));
+                intVal.i = unlink((const char *)POBJ(rightnode));
 #else
-                intVal = remove((const char *)POBJ(rightnode));
+                intVal.i = remove((const char *)POBJ(rightnode));
 #endif
-                if(intVal)
+                if(intVal.i)
                     {
 #ifndef EACCES
-                    sprintf(draft,"%d",intVal);
+                    sprintf(draft,"%d",intVal.i);
 #else
                     switch(errno)
                         {
@@ -13829,7 +13762,7 @@ static function_return_type functions(psk Pnode)
                 if(is_op(rlnode = rightnode->LEFT))
                     return functionFail(Pnode);
                 rrightnode = rightnode->RIGHT;
-                intVal = (search_opt(rrightnode,ECH) << SHIFT_ECH)
+                intVal.i = (search_opt(rrightnode,ECH) << SHIFT_ECH)
                        + (search_opt(rrightnode,MEM) << SHIFT_MEM)
                        + (search_opt(rrightnode,VAP) << SHIFT_VAP)
                        + (search_opt(rrightnode,STG) << SHIFT_STR)
@@ -13843,16 +13776,16 @@ static function_return_type functions(psk Pnode)
                 }
             else
                 {
-                intVal = 0;
+                intVal.i = 0;
                 rlnode = rightnode;
                 }
-            if(intVal & OPT_MEM)
+            if(intVal.i & OPT_MEM)
                 {
                 addr[1] = same_as_w(rlnode);
                 source = POBJ(addr[1]);
                 for(;;)
                     {
-                    Pnode = input(NULL,Pnode,intVal,&err,&GoOn);
+                    Pnode = input(NULL,Pnode,intVal.i,&err,&GoOn);
                     if(!GoOn || err)
                         break;
                     Pnode = eval(Pnode);
@@ -13867,7 +13800,7 @@ static function_return_type functions(psk Pnode)
                     FILE *saveFp;
                     fileStatus * fs;
                     saveFp = global_fpi;
-                    fs = myfopen((char *)POBJ(rlnode),(intVal & OPT_TXT) ? READTXT : READBIN
+                    fs = myfopen((char *)POBJ(rlnode),(intVal.i & OPT_TXT) ? READTXT : READBIN
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
                         ,TRUE
 #endif
@@ -13881,7 +13814,7 @@ static function_return_type functions(psk Pnode)
                         global_fpi = fs->fp;
                     for(;;)
                         {
-                        Pnode = input(global_fpi,Pnode,intVal,&err,&GoOn);
+                        Pnode = input(global_fpi,Pnode,intVal.i,&err,&GoOn);
                         if(!GoOn || err)
                             break;
                         Pnode = eval(Pnode);
@@ -13894,13 +13827,13 @@ static function_return_type functions(psk Pnode)
                     }
                 else
                     {
-                    intVal |= OPT_ECH;
+                    intVal.i |= OPT_ECH;
 #ifdef DELAY_DUE_TO_INPUT
                     for(;;)
                         {
                         clock_t time0;
                         time0 = clock();
-                        Pnode = input(stdin,Pnode,intVal,&err,&GoOn);
+                        Pnode = input(stdin,Pnode,intVal.i,&err,&GoOn);
                         delayDueToInput += clock() - time0;
                         if(!GoOn || err)
                             break;
@@ -13909,7 +13842,7 @@ static function_return_type functions(psk Pnode)
 #else
                     for(;;)
                         {
-                        Pnode = input(stdin,Pnode,intVal,&err,&GoOn);
+                        Pnode = input(stdin,Pnode,intVal.i,&err,&GoOn);
                         if(!GoOn || err)
                             break;
                         Pnode = eval(Pnode);
@@ -13931,10 +13864,10 @@ static function_return_type functions(psk Pnode)
                 return functionFail(Pnode);
             else
                 {
-                intVal = system((const char *)POBJ(rightnode));
-                if(intVal)
+                intVal.i = system((const char *)POBJ(rightnode));
+                if(intVal.i)
 #ifndef E2BIG
-                    sprintf(draft,"%d",intVal);
+                    sprintf(draft,"%d",intVal.i);
 #else
                     switch(errno)
                         {
@@ -14088,8 +14021,8 @@ The same effect is obtained by <expr>:?!(=)
                 {
                 if(!HAS_UNOPS(Pnode->LEFT))
                     {
-                    intVal = Pnode->v.fl & UNOPS;
-                    if(  intVal == FRACTION 
+                    intVal.ul = Pnode->v.fl & UNOPS;
+                    if(  intVal.ul == FRACTION 
                       && is_op(Pnode->RIGHT)
                       && Op(Pnode->RIGHT) == DOT
                       && !is_op(Pnode->RIGHT->LEFT)
@@ -14101,13 +14034,7 @@ The same effect is obtained by <expr>:?!(=)
                         {
                         rightnode = evalmacro(Pnode->RIGHT);
                         rrightnode = (psk)bmalloc(__LINE__,sizeof(objectnode));
-#ifdef BUILTIN
                         ((typedObjectnode*)rrightnode)->u.Int = 0;
-#else
-                        ((typedObjectnode*)rrightnode)->refcount = 0;
-                        UNSETCREATEDWITHNEW((typedObjectnode*)rrightnode);
-                        UNSETBUILTIN((typedObjectnode*)rrightnode);
-#endif
                         rrightnode->v.fl = EQUALS | SUCCESS;
                         rrightnode->LEFT = same_as_w(&nilNode);
                         if(rightnode)
@@ -14120,7 +14047,7 @@ The same effect is obtained by <expr>:?!(=)
                             }
                         wipe(Pnode);
                         Pnode = rrightnode;
-                        Pnode->v.fl |= intVal; /* (a=b)&!('$a)*/
+                        Pnode->v.fl |= intVal.ul; /* (a=b)&!('$a)*/
                         }
                     }
                 else
@@ -14176,7 +14103,7 @@ static psk handleExponents(psk Pnode)
         done = TRUE;
         Pnode->LEFT = lnode = isolated(lnode);
         lnode->v.fl &= ~READY & ~OPERATOR;/* turn off READY flag */
-        lnode->ops |= TIMES;
+        lnode->flgs |= TIMES;
         addr[1] = lnode->LEFT;
         addr[2] = lnode->RIGHT;
         addr[3] = Pnode->RIGHT;
@@ -14253,7 +14180,7 @@ static psk handleExponents(psk Pnode)
                     else if(qCompare(&twoNode,rightnode) & (QNUL|MINUS))
                         {
                         iexponent = qModulo(rightnode,&fourNode);
-                        if(iexponent->ops & QNUL)
+                        if(iexponent->flgs & QNUL)
                             {
                             wipe(Pnode); /*{?} i^4 => 1 */
                             Pnode = copyof(&oneNode);
@@ -16171,20 +16098,14 @@ static psk eval(psk Pnode)
                         {
                         psk old = Pnode;
                         Pnode = (psk)bmalloc(__LINE__,sizeof(objectnode));
-#ifdef BUILTIN
                         ((typedObjectnode*)(Pnode))->u.Int = 0;
-#else
-                        ((typedObjectnode*)(Pnode))->refcount = 0;
-                        UNSETCREATEDWITHNEW((typedObjectnode*)Pnode);
-                        UNSETBUILTIN((typedObjectnode*)Pnode);
-#endif
                         Pnode->LEFT = subtreecopy(old->LEFT);
                         old->RIGHT = Head(old->RIGHT);
                         Pnode->RIGHT = subtreecopy(old->RIGHT);
                         wipe(old);
                         }
                     Pnode->v.fl &= (~OPERATOR & ~READY);
-                    Pnode->ops |= dummy_op;
+                    Pnode->flgs |= dummy_op;
                     Pnode->v.fl |= SUCCESS;
                     if(lkn.v.fl & INDIRECT)
                         {/* (a=b=127)&(.):(_)&!(a_b) */
@@ -16631,9 +16552,11 @@ int main(int argc,char *argv[])
 #else /* 32 bit and gcc 64 bit */
     printf("!_WIN64\n");
 #endif
-    printf("sizeof(char *) " LONGU "\n",(unsigned long)sizeof(char *));
-    printf("sizeof(LONG) " LONGU "\n",(unsigned long)sizeof(LONG));
-    printf("sizeof(size_t) " LONGU "\n",(unsigned long)sizeof(size_t));
+    printf("sizeof(char *) " LONGU "\n",(ULONG)sizeof(char *));
+    printf("sizeof(LONG) " LONGU "\n",(ULONG)sizeof(LONG));
+    printf("sizeof(size_t) " LONGU "\n",(ULONG)sizeof(size_t));
+    printf("sizeof(sk) " LONGU "\n", (ULONG)sizeof(sk));
+    printf("sizeof(tFlags) " LONGU "\n", (ULONG)sizeof(tFlags));
     printf("WORD32 %d\n",WORD32);
     printf("RADIX " LONGD "\n",(LONG)RADIX);
     printf("RADIX2 " LONGD "\n",(LONG)RADIX2);
@@ -16655,7 +16578,7 @@ int main(int argc,char *argv[])
         assert(RADIX == radix);
         }
 #endif
-    assert(sizeof(tFlags) == sizeof(unsigned int));
+    assert(sizeof(tFlags) == sizeof(ULONG));
 #if !defined __EMSCRIPTEN__
     while(--p >= argv[0])
         if(*p == '\\' || *p == '/')
