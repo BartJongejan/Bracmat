@@ -19,8 +19,8 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "30 July 2021"
-#define VERSION "6.8.0"
+#define DATUM "1 August 2021"
+#define VERSION "6.9.0"
 #define BUILD "244"
 /*
 COMPILATION
@@ -410,10 +410,11 @@ typedef   signed long  INT32_T;
 #define GREATER_THAN    (1<< 9) /* > */
 #define SMALLER_THAN    (1<<10) /* < */
 #define NUMBER          (1<<11) /* # */
-#define FRACTION           (1<<12) /* / */
+#define FRACTION        (1<<12) /* / */
 #define UNIFY           (1<<13) /* ? */
 #define IDENT           (1<<14)
 #define IMPLIEDFENCE    (1<<15) /* 20070222 */
+#define SELFMATCHING    (1<<16) /* 20210801 */
 
 #define VISIBLE_FLAGS_WEAK      (INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)
 #define VISIBLE_FLAGS_NON_COMP  (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|FRACTION|UNIFY) /* allows < > ~< and ~> as flags on numbers */
@@ -493,7 +494,6 @@ extern int _stksize = -1;
 #endif
 #endif
 
-#define SHL 16
 
 #define flgs v.fl
 
@@ -675,13 +675,19 @@ extern int JSONtext(FILE * fpi,char * source);
 #endif
 
 
+#define NON_REF_COUNT_BITS 23 /* prefixes, hidden flags, operator bits */
+
 #if REFCOUNTSTRESSTEST
 #define REF_COUNT_BITS 1
-#else
-#define REF_COUNT_BITS 10 /* 1 - 10, 5 - 8 is very nice */
 #endif
-/*#define REF_COUNT_BITS 1 */ /* stress test!*/
-#define NON_REF_COUNT_BITS (16-REF_COUNT_BITS)
+
+#if !defined REF_COUNT_BITS
+#if WORD32
+#define REF_COUNT_BITS (32 - NON_REF_COUNT_BITS)
+#else
+#define REF_COUNT_BITS (64 - NON_REF_COUNT_BITS)
+#endif
+#endif
 
 #define FILTERS     (FRACTION | NUMBER | SMALLER_THAN | GREATER_THAN | ATOM | NONIDENT)
 #define ATOMFILTERS (FRACTION | NUMBER | SMALLER_THAN | GREATER_THAN | ATOM | FENCE | IDENT)
@@ -740,7 +746,8 @@ typedef union
             unsigned int binop           :4;
             /* EQUALS DOT COMMA OR AND MATCH WHITE PLUS TIMES EXP LOG DIF FUU FUN UNDERSCORE */
             unsigned int latebind        :1;
-            unsigned int refcount        :10;
+            unsigned int selfmatching    :1;
+            ULONG        refcount        :REF_COUNT_BITS;
             } node;
         struct
             {
@@ -771,7 +778,8 @@ typedef union
             unsigned int qbreuk          :1;
 
             unsigned int latebind        :1;
-            unsigned int refcount        :10;
+            unsigned int selfmatching    :1;
+            ULONG        refcount        : REF_COUNT_BITS;
             } leaf;
 #endif
         ULONG fl;
@@ -1116,26 +1124,28 @@ Flgs 0                   NOT
     13                  UNIFY
     14                  IDENT
     15               IMPLIEDFENCE
-    16  0             IS_OPERATOR
-    17  1   (operators 0-14)      QNUMBER
-    18  2       "                 MINUS
-    19  3       "                 QNUL
-    20  4       "                 QFRACTION
-    21  5             LATEBIND                        NOOP
-    22  6          (reference count)
-    23  7                 "
-    24  8                 "
-    25  9                 "
-    26 10                 "
-    27 11                 "
-    28 12                 "
-    29 13                 "
-    30 14                 "
-    31 15                 "
+SHL 16               IS_OPERATOR
+    17      (operators 0-14)      QNUMBER
+    18          "                 MINUS
+    19          "                 QNUL
+    20          "                 QFRACTION
+    21                LATEBIND                        NOOP
+    22               SELFMATCHING
+REF 23             (reference count)
+    24                    "
+    25                    "
+    26                    "
+    27                    "
+    28                    "
+    29                    "
+    30                    "
+    31                    "
 
 Reference count starts with 0, not 1
 */
 
+#define SHL 16
+#define REF 23
 #define OPSH (SHL+1)
 #define IS_OPERATOR (1 << SHL)
 #define EQUALS     (( 0<<OPSH) + IS_OPERATOR)
@@ -1179,10 +1189,10 @@ static const char opchar[16] =
 #define QFRACTION           (1 << (SHL+4))
 #define LATEBIND            (1 << (SHL+5))
 #define DEFINITELYNONUMBER  (1 << (SHL+6)) /* this is not stored in a node! */
-#define ONEREF   (ULONG)(1 << (SHL+NON_REF_COUNT_BITS))
+#define ONEREF   (ULONG)(1 << NON_REF_COUNT_BITS)
 
 #define ALL_REFCOUNT_BITS_SET \
-       ((((ULONG)(~0)) >> (SHL+NON_REF_COUNT_BITS)) << (SHL+NON_REF_COUNT_BITS))
+       ((((ULONG)(~0)) >> NON_REF_COUNT_BITS) << NON_REF_COUNT_BITS)
 
 #define shared(pn) ((pn)->flgs & ALL_REFCOUNT_BITS_SET)
 
