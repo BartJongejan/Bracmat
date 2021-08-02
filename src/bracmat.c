@@ -122,7 +122,7 @@ TODO list:
    20010821 a () () was evaluated to a (). Removed last ().
    20010903 (a.) () was evaluated to a
 */
-#define DEBUGBRACMAT 0 /* implement dbg'(expression), see DBGSRC macro */
+#define DEBUGBRACMAT 1 /* implement dbg'(expression), see DBGSRC macro */
 #define REFCOUNTSTRESSTEST 0
 #define DOSUMCHECK 0
 #define CHECKALLOCBOUNDS 0 /* only if NDEBUG is false */
@@ -139,7 +139,7 @@ Most nodes can be shared by no more than 1024 referers. Copies must be made as n
 Objects (nodes with = ('EQUALS') are objects and can be shared by almost 2^40 referers.
 
 small refcounter       large refcounter              comment
-(10 bits, all nodes)   (30 bits, only objects)
+(9 bits, all nodes)   (30 bits, only objects)
 0                      0                             not shared, no test of large refcounter needed.
 1                      0                             shared with one, so totalling two
 2                      0                             shared with two
@@ -319,56 +319,56 @@ typedef   signed __int32  INT32_T; /* pre VS2010 has no int32_t */
 #endif
 
 #if defined _WIN64
-/*Microsoft*/
-#define WORD32  0
-#define _4      1
-#define _5_6    1
-#define LONG long long
-#define ULONG unsigned long long
-#define LONGU "%llu"
-#define LONGD "%lld"
-#define LONG0D "%0lld"
-#define LONG0nD "%0*lld"
-#define LONGX "%llX"
-#define STRTOUL _strtoui64
-#define STRTOL _strtoi64
-#define FSEEK _fseeki64
-#define FTELL _ftelli64
+    /*Microsoft*/
+    #define WORD32  0
+    #define _4      1
+    #define _5_6    1
+    #define LONG long long
+    #define ULONG unsigned long long
+    #define LONGU "%llu"
+    #define LONGD "%lld"
+    #define LONG0D "%0lld"
+    #define LONG0nD "%0*lld"
+    #define LONGX "%llX"
+    #define STRTOUL _strtoui64
+    #define STRTOL _strtoi64
+    #define FSEEK _fseeki64
+    #define FTELL _ftelli64
 #else
-#if !defined NO_C_INTERFACE && !defined _WIN32
-#if UINT_MAX == 4294967295ul
-typedef unsigned int UINT32_T;
-#elif ULONG_MAX == 4294967295ul
-typedef unsigned long UINT32_T;
-#endif
-#endif
-#if !defined NO_LOW_LEVEL_FILE_HANDLING
-#if UINT_MAX == 4294967295ul
-typedef   signed int  INT32_T;
-#elif ULONG_MAX == 4294967295ul
-typedef   signed long  INT32_T;
-#endif
-#endif
-#if LONG_MAX <= 2147483647L
-#define WORD32  1
-#define _4      1
-#define _5_6    1
-#else
-#define WORD32  0
-#define _4      1
-#define _5_6    1
-#endif
-#define LONG long
-#define ULONG unsigned long
-#define LONGU "%lu"
-#define LONGD "%ld"
-#define LONG0D "%0ld"
-#define LONG0nD "%0*ld"
-#define LONGX "%lX"
-#define STRTOUL strtoul
-#define STRTOL strtol
-#define FSEEK fseek
-#define FTELL ftell
+    #if !defined NO_C_INTERFACE && !defined _WIN32
+        #if UINT_MAX == 4294967295ul
+            typedef unsigned int UINT32_T;
+        #elif ULONG_MAX == 4294967295ul
+            typedef unsigned long UINT32_T;
+        #endif
+    #endif
+    #if !defined NO_LOW_LEVEL_FILE_HANDLING
+        #if UINT_MAX == 4294967295ul
+            typedef   signed int  INT32_T;
+        #elif ULONG_MAX == 4294967295ul
+            typedef   signed long  INT32_T;
+        #endif
+    #endif
+    #if LONG_MAX <= 2147483647L
+        #define WORD32  1
+        #define _4      1
+        #define _5_6    1
+    #else
+        #define WORD32  0
+        #define _4      1
+        #define _5_6    1
+    #endif
+    #define LONG long
+    #define ULONG unsigned long
+    #define LONGU "%lu"
+    #define LONGD "%ld"
+    #define LONG0D "%0ld"
+    #define LONG0nD "%0*ld"
+    #define LONGX "%lX"
+    #define STRTOUL strtoul
+    #define STRTOL strtol
+    #define FSEEK fseek
+    #define FTELL ftell
 #endif
 
 
@@ -414,7 +414,19 @@ typedef   signed long  INT32_T;
 #define UNIFY           (1<<13) /* ? */
 #define IDENT           (1<<14)
 #define IMPLIEDFENCE    (1<<15) /* 20070222 */
-#define SELFMATCHING    (1<<16) /* 20210801 */
+        /* 1<<16 test whether operator
+           1<<17 operator
+           1<<18 operator
+           1<<19 operator
+           1<<20 operator
+           1<<21 latebind
+        */
+#define SELFMATCHING    (1<<22) /* 20210801 */
+#if WORD32
+#else
+#define BUILT_IN        (1<<23) /* 20210801 only used for objects (operator =) */
+#define CREATEDWITHNEW  (1<<24) /* 20210801 only used for objects (operator =) */
+#endif
 
 #define VISIBLE_FLAGS_WEAK      (INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)
 #define VISIBLE_FLAGS_NON_COMP  (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|FRACTION|UNIFY) /* allows < > ~< and ~> as flags on numbers */
@@ -674,8 +686,11 @@ extern void XMLtext(FILE * fpi,char * source,int trim,int html,int xml);
 extern int JSONtext(FILE * fpi,char * source);
 #endif
 
-
+#if WORD32
 #define NON_REF_COUNT_BITS 23 /* prefixes, hidden flags, operator bits */
+#else
+#define NON_REF_COUNT_BITS 25 /* prefixes, hidden flags, operator bits */
+#endif
 
 #if REFCOUNTSTRESSTEST
 #define REF_COUNT_BITS 1
@@ -722,64 +737,74 @@ typedef union
 #ifndef NDEBUG
         struct
             {
-            unsigned int Not             :1; /* ~ */
-            unsigned int success         :1;
-            unsigned int ready           :1;
-            unsigned int position        :1; /* [ */
+            ULONG Not             :1; /* ~ */
+            ULONG success         :1;
+            ULONG ready           :1;
+            ULONG position        :1; /* [ */
 
-            unsigned int indirect        :1; /* ! */
-            unsigned int doubly_indirect :1; /* !! */
-            unsigned int fence           :1; /* `   (within same byte as ATOM and NOT) */
-            unsigned int atom            :1; /* @ */
+            ULONG indirect        :1; /* ! */
+            ULONG doubly_indirect :1; /* !! */
+            ULONG fence           :1; /* `   (within same byte as ATOM and NOT) */
+            ULONG atom            :1; /* @ */
 
-            unsigned int nonident        :1; /* % */
-            unsigned int greater_than    :1; /* > */
-            unsigned int smaller_than    :1; /* < */
-            unsigned int number          :1; /* # */
+            ULONG nonident        :1; /* % */
+            ULONG greater_than    :1; /* > */
+            ULONG smaller_than    :1; /* < */
+            ULONG number          :1; /* # */
 
-            unsigned int breuk           :1; /* / */
-            unsigned int unify           :1; /* ? */
-            unsigned int ident           :1;
-            unsigned int impliedfence    :1;
+            ULONG breuk           :1; /* / */
+            ULONG unify           :1; /* ? */
+            ULONG ident           :1;
+            ULONG impliedfence    :1;
 
-            unsigned int IS_OPERATOR     :1;
-            unsigned int binop           :4;
+            ULONG IS_OPERATOR     :1;
+            ULONG binop           :4; /* only if operator node*/
             /* EQUALS DOT COMMA OR AND MATCH WHITE PLUS TIMES EXP LOG DIF FUU FUN UNDERSCORE */
-            unsigned int latebind        :1;
-            unsigned int selfmatching    :1;
+            ULONG latebind        :1;
+            ULONG selfmatching    :1;
+#if WORD32
+#else
+            ULONG built_in : 1; /* only used for objects (operator =) */
+            ULONG createdWithNew : 1; /* only used for objects (operator =) */
+#endif
             ULONG        refcount        :REF_COUNT_BITS;
             } node;
         struct
             {
-            unsigned int Not             :1; /* ~ */
-            unsigned int success         :1;
-            unsigned int ready           :1;
-            unsigned int position        :1; /* [ */
+            ULONG Not             :1; /* ~ */
+            ULONG success         :1;
+            ULONG ready           :1;
+            ULONG position        :1; /* [ */
 
-            unsigned int indirect        :1; /* ! */
-            unsigned int doubly_indirect :1; /* !! */
-            unsigned int fence           :1; /* `   (within same byte as ATOM and NOT) */
-            unsigned int atom            :1; /* @ */
+            ULONG indirect        :1; /* ! */
+            ULONG doubly_indirect :1; /* !! */
+            ULONG fence           :1; /* `   (within same byte as ATOM and NOT) */
+            ULONG atom            :1; /* @ */
 
-            unsigned int nonident        :1; /* % */
-            unsigned int greater_than    :1; /* > */
-            unsigned int smaller_than    :1; /* < */
-            unsigned int number          :1; /* # */
+            ULONG nonident        :1; /* % */
+            ULONG greater_than    :1; /* > */
+            ULONG smaller_than    :1; /* < */
+            ULONG number          :1; /* # */
 
-            unsigned int breuk           :1; /* / */
-            unsigned int unify           :1; /* ? */
-            unsigned int ident           :1;
-            unsigned int impliedfence    :1;
+            ULONG breuk           :1; /* / */
+            ULONG unify           :1; /* ? */
+            ULONG ident           :1;
+            ULONG impliedfence    :1;
 
-            unsigned int is_operator     :1;
-            unsigned int qgetal          :1;
-            unsigned int minus           :1;
-            unsigned int qnul            :1;
-            unsigned int qbreuk          :1;
+            ULONG is_operator     :1;
+            ULONG qgetal          :1; /* only if leaf */
+            ULONG minus           :1; /* only if leaf */
+            ULONG qnul            :1; /* only if leaf */
+            ULONG qbreuk          :1; /* only if leaf */
 
-            unsigned int latebind        :1;
-            unsigned int selfmatching    :1;
-            ULONG        refcount        : REF_COUNT_BITS;
+            ULONG latebind        :1;
+            ULONG selfmatching    :1;  
+#if WORD32
+#else
+            ULONG built_in : 1; /* only used for objects (operator =) */
+            ULONG createdWithNew : 1; /* only used for objects (operator =) */
+#endif
+            ULONG        refcount        :REF_COUNT_BITS;
             } leaf;
 #endif
         ULONG fl;
@@ -972,8 +997,8 @@ typedef struct knode
     psk left,right;
     } knode;
 
+#if WORD32
 #define BUILTIN (1 << 30)
-
 typedef struct objectnode /* createdWithNew == 0 */
     {
     tFlags v;
@@ -989,6 +1014,13 @@ typedef struct objectnode /* createdWithNew == 0 */
         int Int:32;
         } u;
     } objectnode;
+#else
+typedef struct objectnode /* createdWithNew == 0 */
+    {
+    tFlags v;
+    psk left, right;
+    } objectnode;
+#endif
 
 typedef struct stringrefnode
     {
@@ -1014,6 +1046,7 @@ typedef struct method
 
 struct Hash;
 
+#if WORD32
 typedef struct typedObjectnode /* createdWithNew == 1 */
     {
     tFlags v;
@@ -1035,13 +1068,32 @@ typedef struct typedObjectnode /* createdWithNew == 1 */
     #define PHASH(x) (Hash**)&(x->voiddata)
     method * vtab; /* The last element n of the array must have vtab[n].name == NULL */
     } typedObjectnode;
+#else
+typedef struct typedObjectnode /* createdWithNew == 1 */
+    {
+    tFlags v;
+    psk left, right; /* left == nil, right == data (if vtab == NULL)
+            or name of object type, e.g. [set], [hash], [file], [float] (if vtab != NULL)*/
+    struct Hash * voiddata;
+#define HASH(x) (Hash*)x->voiddata
+#define VOID(x) x->voiddata
+#define PHASH(x) (Hash**)&(x->voiddata)
+    method * vtab; /* The last element n of the array must have vtab[n].name == NULL */
+    } typedObjectnode;
+#endif
 
+#if WORD32
 #define INCREFCOUNT(a) { ((objectnode*)a)->u.s.refcount++;(a)->flgs &= ((~ALL_REFCOUNT_BITS_SET)|ONEREF); }
 #define DECREFCOUNT(a) { ((objectnode*)a)->u.s.refcount--;(a)->flgs |= ALL_REFCOUNT_BITS_SET; }
 #define REFCOUNTNONZERO(a) ((a)->u.s.refcount)
 #define ISBUILTIN(a) ((a)->u.s.built_in)
 #define ISCREATEDWITHNEW(a) ((a)->u.s.createdWithNew)
 #define SETCREATEDWITHNEW(a) (a)->u.s.createdWithNew = 1
+#else
+#define ISBUILTIN(a) ((a)->flgs & BUILT_IN)
+#define ISCREATEDWITHNEW(a) ((a)->flgs & CREATEDWITHNEW)
+#define SETCREATEDWITHNEW(a) (a)->flgs |= CREATEDWITHNEW
+#endif
 
 /*#if !_BRACMATEMBEDDED*/
 #if !defined NO_FOPEN
@@ -1107,7 +1159,7 @@ typedef struct freeStoreType
     LONG size;
     } freeStoreType;
 
-/*          operator              leaf                optab
+/*          operator              leaf                optab       comment
 Flgs 0                   NOT
      1                  SUCCESS
      2                  READY
@@ -1124,16 +1176,16 @@ Flgs 0                   NOT
     13                  UNIFY
     14                  IDENT
     15               IMPLIEDFENCE
-SHL 16               IS_OPERATOR
+    16               IS_OPERATOR                                  SHL
     17      (operators 0-14)      QNUMBER
     18          "                 MINUS
     19          "                 QNUL
     20          "                 QFRACTION
     21                LATEBIND                        NOOP
     22               SELFMATCHING
-REF 23             (reference count)
-    24                    "
-    25                    "
+    23                 BUILT_IN                                  ONLY for 64 bit platform
+    24              CREATEDWITHNEW                               ONLY for 64 bit platform
+    25             (reference count)                             NON_REF_COUNT_BITS 25 or 23
     26                    "
     27                    "
     28                    "
@@ -1193,8 +1245,14 @@ static const char opchar[16] =
 
 #define ALL_REFCOUNT_BITS_SET \
        ((((ULONG)(~0)) >> NON_REF_COUNT_BITS) << NON_REF_COUNT_BITS)
+#if WORD32
+#define COPYFILTER ~ALL_REFCOUNT_BITS_SET
+#else
+#define COPYFILTER ~(ALL_REFCOUNT_BITS_SET | BUILT_IN | CREATEDWITHNEW)
+#endif
 
 #define shared(pn) ((pn)->flgs & ALL_REFCOUNT_BITS_SET)
+#define currRefCount(pn) (((pn)->flgs & ALL_REFCOUNT_BITS_SET) >> NON_REF_COUNT_BITS)
 
 static int all_refcount_bits_set(psk pnode)
     {
@@ -1205,6 +1263,7 @@ static void dec_refcount(psk pnode)
     {
     assert(pnode->flgs & ALL_REFCOUNT_BITS_SET);
     pnode->flgs -= ONEREF;
+#if WORD32
     if((pnode->flgs & (OPERATOR|ALL_REFCOUNT_BITS_SET)) == EQUALS)
         {
         if(REFCOUNTNONZERO((objectnode*)pnode))
@@ -1212,6 +1271,7 @@ static void dec_refcount(psk pnode)
             DECREFCOUNT(pnode);
             }
         }
+#endif
     }
 
 #define STRING    1
@@ -2843,7 +2903,11 @@ static psk new_operator_like(psk pnode)
         DBGSRC(printf("new_operator_like:");result(pnode);printf("\n");)
         assert(!ISBUILTIN((objectnode*)pnode));
         goal = (objectnode *)bmalloc(__LINE__,sizeof(objectnode));
+#if WORD32
         goal->u.Int = 0;
+#else
+        goal->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
+#endif
         return (psk)goal;
         }
     else
@@ -3331,11 +3395,13 @@ static psk same_as_w(psk pnode)
         (pnode)->flgs += ONEREF;
         return pnode;
         }
+#if WORD32
     else if(is_object(pnode))
         {
         INCREFCOUNT(pnode);
         return pnode;
         }
+#endif
     else
         {
         return subtreecopy(pnode);
@@ -3350,11 +3416,13 @@ static psk same_as_w_2(ppsk PPnode)
         pnode->flgs += ONEREF;
         return pnode;
         }
+#if WORD32
     else if(is_object(pnode))
         {
         INCREFCOUNT(pnode);
         return pnode;
         }
+#endif
     else
         {
         /*
@@ -3388,7 +3456,7 @@ static psk iCopyOf(psk pnode)
 #else
     MEMCPY(ret,pnode,((len / sizeof(LONG)) + 1) * sizeof(LONG));
 #endif
-    ret->flgs &= ~ALL_REFCOUNT_BITS_SET;
+    ret->flgs &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
     return ret;
     }
 
@@ -3408,7 +3476,7 @@ static void copyToCutoff(psk * ppnode,psk pnode,psk cutoff)
             else
                 {
                 psk p = new_operator_like(pnode);
-                p->flgs = pnode->flgs & ~ALL_REFCOUNT_BITS_SET;
+                p->flgs = pnode->flgs & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                 p->LEFT = same_as_w(pnode->LEFT);
                 *ppnode = p;
                 ppnode = &(p->RIGHT);
@@ -3438,7 +3506,7 @@ if(pnode->flgs & LATEBIND)
         {
         stringrefnode * ps = (stringrefnode *)pnode;
         pnode = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + ps->length);
-        pnode->flgs = (ps->flgs & ~ALL_REFCOUNT_BITS_SET & ~LATEBIND);
+        pnode->flgs = (ps->flgs & COPYFILTER /*~ALL_REFCOUNT_BITS_SET*/ & ~LATEBIND);
         strncpy((char *)(pnode)+sizeof(unsigned LONG),(char *)ps->str,ps->length);
         wipe(ps->pnode);
         bfree(ps);
@@ -4714,7 +4782,7 @@ static psk _copyop(psk Pnode)
     {
     psk apnode;
     apnode = new_operator_like(Pnode);
-    apnode->flgs = Pnode->flgs & ~ALL_REFCOUNT_BITS_SET;
+    apnode->flgs = Pnode->flgs & COPYFILTER;/* (ALL_REFCOUNT_BITS_SET | CREATEDWITHNEW);*/
     apnode->LEFT = same_as_w_2(&Pnode->LEFT);
     apnode->RIGHT = same_as_w(Pnode->RIGHT);
     return apnode;
@@ -6736,8 +6804,9 @@ static int copy_insert(psk name, psk pnode, psk cutoff)
 				 or object */
 				DBGSRC(printf("name:["); result(name); printf("] pnode:["); result(pnode); printf("] cutoff(%d):[", cutoff->v.fl / ONEREF); result(cutoff); printf("]\n");)
 					PNODE = new_operator_like(pnode);
-				PNODE->flgs = (pnode->flgs & ~ALL_REFCOUNT_BITS_SET) | LATEBIND;
+				PNODE->flgs = (pnode->flgs & COPYFILTER/*~ALL_REFCOUNT_BITS_SET*/) | LATEBIND;
 				pnode->flgs += ONEREF;
+#if WORD32
 				if (shared(cutoff) == ALL_REFCOUNT_BITS_SET)
 					{
 					/*
@@ -6764,6 +6833,7 @@ static int copy_insert(psk name, psk pnode, psk cutoff)
 					INCREFCOUNT(cutoff);
 					}
 				else
+#endif
 					cutoff->flgs += ONEREF;
 
 				PNODE->LEFT = pnode;
@@ -8842,7 +8912,7 @@ first finds (=B), which is an object that should not obtain the flags !! as in
                 DBGSRC(printf("subtreecopy\n");)
                 pbinding = subtreecopy(pbinding);
                 }
-            (pbinding)->v.fl = valueflags & ~ALL_REFCOUNT_BITS_SET;
+            (pbinding)->v.fl = valueflags & COPYFILTER; /* ~ALL_REFCOUNT_BITS_SET;*/
             }
         }
     return pbinding;
@@ -10974,7 +11044,11 @@ static psk evalmacro(psk Pnode)
                     if(dummy_op == EQUALS)
                         {
                         psk becomes = (psk)bmalloc(__LINE__,sizeof(objectnode));
+#if WORD32
                         ((typedObjectnode*)becomes)->u.Int = 0;
+#else
+                        ((typedObjectnode*)becomes)->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
+#endif
                         becomes->LEFT = same_as_w(h->LEFT);
                         becomes->RIGHT = same_as_w(h->RIGHT);
                         wipe(h);
@@ -11154,7 +11228,11 @@ static psk lambda(psk Pnode,psk name,psk Arg)
                     if(dummy_op == EQUALS)
                         {
                         psk becomes = (psk)bmalloc(__LINE__,sizeof(objectnode));
+#if WORD32
                         ((typedObjectnode*)becomes)->u.Int = 0;
+#else
+                        ((typedObjectnode*)becomes)->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
+#endif
                         becomes->LEFT = same_as_w(h->LEFT);
                         becomes->RIGHT = same_as_w(h->RIGHT);
                         wipe(h);
@@ -12606,7 +12684,7 @@ static psk objectcopysub2(psk src) /* src is NOT an object */
     if(is_op(src) && hasSubObject(src))
         {
         goal = (psk)bmalloc(__LINE__,sizeof(knode));
-        goal->flgs = src->flgs & ~ALL_REFCOUNT_BITS_SET;
+        goal->flgs = src->flgs & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
         goal->LEFT = objectcopysub(src->LEFT);
         goal->RIGHT = objectcopysub(src->RIGHT);
         return goal;
@@ -12627,9 +12705,13 @@ static psk objectcopysub(psk src)
         else
             {
             goal = (psk)bmalloc(__LINE__,sizeof(objectnode));
+#if WORD32
             ((typedObjectnode*)goal)->u.Int = 0;
+#else
+            ((typedObjectnode*)goal)->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
+#endif
             }
-        goal->flgs = src->flgs & ~ALL_REFCOUNT_BITS_SET;
+        goal->flgs = src->flgs & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
         goal->LEFT = same_as_w(src->LEFT);
         goal->RIGHT = same_as_w(src->RIGHT);
         return goal;
@@ -12646,16 +12728,24 @@ static psk objectcopy(psk src)
         if(ISBUILTIN((objectnode*)src))
             {
             goal = (psk)bmalloc(__LINE__,sizeof(typedObjectnode));
+#if WORD32
             ((typedObjectnode*)goal)->u.Int = BUILTIN;
+#else
+            ((typedObjectnode*)goal)->v.fl |= BUILT_IN;
+#endif
             ((typedObjectnode*)goal)->vtab = ((typedObjectnode*)src)->vtab;
             ((typedObjectnode*)goal)->voiddata = NULL;
             }
         else
             {
             goal = (psk)bmalloc(__LINE__,sizeof(objectnode));
+#if WORD32
             ((typedObjectnode*)goal)->u.Int = 0;
+#else
+            ((typedObjectnode*)goal)->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
+#endif
             }
-        goal->flgs = src->flgs & ~ALL_REFCOUNT_BITS_SET;
+        goal->flgs = src->flgs & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
         goal->LEFT = same_as_w(src->LEFT);
         /*?? This adds an extra level of copying, but ONLY for objects that have a '=' node as the lhs of the main '=' node*/
         /* What is it good for? Bart 20010220 */
@@ -12681,7 +12771,12 @@ static psk getObjectDef(psk src)
             dest->v.fl = EQUALS | SUCCESS;
             dest->left = same_as_w(&nilNode);
             dest->right = same_as_w(src);
+#if WORD32
             dest->u.Int = BUILTIN;
+#else
+            dest->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
+            dest->v.fl |= BUILT_IN;
+#endif
             VOID(dest) = NULL;
             dest->vtab = df->vtab;
             return (psk)dest;
@@ -12702,7 +12797,11 @@ static psk getObjectDef(psk src)
         dest->left = same_as_w(&nilNode);
         dest->right = objectcopy(def); /* TODO Head(&def) ? */
         wipe(def);
+#if WORD32
         dest->u.Int = 0;
+#else
+        dest->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
+#endif
         VOID(dest) = NULL;
         dest->vtab = NULL;
         return (psk)dest;
@@ -13451,7 +13550,7 @@ static function_return_type functions(psk Pnode)
                     {
                     nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
-                    nnode->flgs &= ~ALL_REFCOUNT_BITS_SET;
+                    nnode->flgs &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                     nnode->LEFT = same_as_w(rightnode->LEFT);
                     nnode->RIGHT = same_as_w(pnode->LEFT);
                     nnode = functions(nnode);
@@ -13473,7 +13572,7 @@ static function_return_type functions(psk Pnode)
                     {
                     nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
-                    nnode->flgs &= ~ALL_REFCOUNT_BITS_SET;
+                    nnode->flgs &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                     nnode->LEFT = same_as_w(rightnode->LEFT);
                     nnode->RIGHT = same_as_w(pnode);
                     nnode = functions(nnode);
@@ -13523,7 +13622,7 @@ static function_return_type functions(psk Pnode)
                                 psk nnode;
                                 nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                                 nnode->v.fl = Pnode->v.fl;
-                                nnode->flgs &= ~ALL_REFCOUNT_BITS_SET;
+                                nnode->flgs &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                                 nnode->LEFT = same_as_w(rightnode->LEFT);
                                 subject = strstr(oldsubject, separator);
                                 if (subject)
@@ -13572,7 +13671,7 @@ static function_return_type functions(psk Pnode)
                             psk nnode;
                             nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                             nnode->v.fl = Pnode->v.fl;
-                            nnode->flgs &= ~ALL_REFCOUNT_BITS_SET;
+                            nnode->flgs &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                             nnode->LEFT = same_as_w(rightnode->LEFT);
                             nnode->RIGHT = charcopy(oldsubject, subject);
                             nnode = functions(nnode);
@@ -13597,7 +13696,7 @@ static function_return_type functions(psk Pnode)
                             psk nnode;
                             nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                             nnode->v.fl = Pnode->v.fl;
-                            nnode->flgs &= ~ALL_REFCOUNT_BITS_SET;
+                            nnode->flgs &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                             nnode->LEFT = same_as_w(rightnode->LEFT);
                             nnode->RIGHT = charcopy(oldsubject, subject);
                             nnode = functions(nnode);
@@ -14044,7 +14143,11 @@ The same effect is obtained by <expr>:?!(=)
                         {
                         rightnode = evalmacro(Pnode->RIGHT);
                         rrightnode = (psk)bmalloc(__LINE__,sizeof(objectnode));
+#if WORD32
                         ((typedObjectnode*)rrightnode)->u.Int = 0;
+#else
+                        ((typedObjectnode*)rrightnode)->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
+#endif
                         rrightnode->v.fl = EQUALS | SUCCESS;
                         rrightnode->LEFT = same_as_w(&nilNode);
                         if(rightnode)
@@ -16108,7 +16211,11 @@ static psk eval(psk Pnode)
                         {
                         psk old = Pnode;
                         Pnode = (psk)bmalloc(__LINE__,sizeof(objectnode));
+#if WORD32
                         ((typedObjectnode*)(Pnode))->u.Int = 0;
+#else
+                        ((typedObjectnode*)(Pnode))->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
+#endif
                         Pnode->LEFT = subtreecopy(old->LEFT);
                         old->RIGHT = Head(old->RIGHT);
                         Pnode->RIGHT = subtreecopy(old->RIGHT);
@@ -16566,6 +16673,7 @@ int main(int argc,char *argv[])
 #endif
     printf("sizeof(char *) " LONGU "\n",(ULONG)sizeof(char *));
     printf("sizeof(LONG) " LONGU "\n",(ULONG)sizeof(LONG));
+    printf("sizeof(ULONG) " LONGU "\n", (ULONG)sizeof(ULONG));
     printf("sizeof(size_t) " LONGU "\n",(ULONG)sizeof(size_t));
     printf("sizeof(sk) " LONGU "\n", (ULONG)sizeof(sk));
     printf("sizeof(tFlags) " LONGU "\n", (ULONG)sizeof(tFlags));
