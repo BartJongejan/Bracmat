@@ -19,9 +19,10 @@
 /*
 email: bartj@hum.ku.dk
 */
+
 #define DATUM "3 August 2021"
 #define VERSION "6.9.1"
-#define BUILD "245"
+#define BUILD "246"
 /*
 COMPILATION
 -----------
@@ -434,11 +435,11 @@ typedef   signed __int32  INT32_T; /* pre VS2010 has no int32_t */
 #define VISIBLE_FLAGS_POS       (INDIRECT|DOUBLY_INDIRECT|NONIDENT|QFRACTION|UNIFY|QNUMBER|NOT|GREATER_THAN|SMALLER_THAN)
 #define VISIBLE_FLAGS           (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|FRACTION|UNIFY|NOT|GREATER_THAN|SMALLER_THAN|FENCE|POSITION)
 
-#define HAS_VISIBLE_FLAGS_OR_MINUS(psk) ((psk)->flgs & (VISIBLE_FLAGS|MINUS))
-#define RATIONAL(psk)      (((psk)->flgs & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS)) == QNUMBER)
-#define RATIONAL_COMP(psk) (((psk)->flgs & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
-#define RATIONAL_COMP_NOT_NUL(psk) (((psk)->flgs & (QNUMBER|QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
-#define RATIONAL_WEAK(psk) (((psk)->flgs & (QNUMBER|IS_OPERATOR|INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)) == QNUMBER)/* allows < > ~< and ~> as flags on numbers */
+#define HAS_VISIBLE_FLAGS_OR_MINUS(psk) ((psk)->v.fl & (VISIBLE_FLAGS|MINUS))
+#define RATIONAL(psk)      (((psk)->v.fl & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS)) == QNUMBER)
+#define RATIONAL_COMP(psk) (((psk)->v.fl & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
+#define RATIONAL_COMP_NOT_NUL(psk) (((psk)->v.fl & (QNUMBER|QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
+#define RATIONAL_WEAK(psk) (((psk)->v.fl & (QNUMBER|IS_OPERATOR|INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)) == QNUMBER)/* allows < > ~< and ~> as flags on numbers */
 #define       LESS(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN))
 #define LESS_EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|GREATER_THAN))
 #define MORE_EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN))
@@ -448,32 +449,32 @@ typedef   signed __int32  INT32_T; /* pre VS2010 has no int32_t */
 #define      EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == QNUMBER)
 #define NOTLESSORMORE(psk) (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN|GREATER_THAN))
 
-#define INTEGER(pn)               (((pn)->flgs & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                      == QNUMBER)
-#define INTEGER_COMP(pn)          (((pn)->flgs & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))             == QNUMBER)
+#define INTEGER(pn)               (((pn)->v.fl & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                      == QNUMBER)
+#define INTEGER_COMP(pn)          (((pn)->v.fl & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))             == QNUMBER)
 
-#define INTEGER_NOT_NEG(pn)       (((pn)->flgs & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                == QNUMBER)
-#define INTEGER_NOT_NEG_COMP(pn)  (((pn)->flgs & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))       == QNUMBER)
+#define INTEGER_NOT_NEG(pn)       (((pn)->v.fl & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                == QNUMBER)
+#define INTEGER_NOT_NEG_COMP(pn)  (((pn)->v.fl & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))       == QNUMBER)
 
-#define INTEGER_POS(pn)           (((pn)->flgs & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))           == QNUMBER)
-#define INTEGER_POS_COMP(pn)      (((pn)->flgs & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))  == QNUMBER)
+#define INTEGER_POS(pn)           (((pn)->v.fl & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))           == QNUMBER)
+#define INTEGER_POS_COMP(pn)      (((pn)->v.fl & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))  == QNUMBER)
 
-#define INTEGER_NOT_NUL_COMP(pn) (((pn)->flgs & (QNUMBER|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))        == QNUMBER)
-#define HAS_MINUS_SIGN(pn)         (((pn)->flgs & (MINUS|IS_OPERATOR)) == MINUS)
+#define INTEGER_NOT_NUL_COMP(pn) (((pn)->v.fl & (QNUMBER|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))        == QNUMBER)
+#define HAS_MINUS_SIGN(pn)         (((pn)->v.fl & (MINUS|IS_OPERATOR)) == MINUS)
 
 #define RAT_NUL(pn) (((pn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS)) == QNUL)
 #define RAT_NUL_COMP(pn) (((pn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUL)
-#define RAT_NEG(pn) (((pn)->flgs & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS)) \
+#define RAT_NEG(pn) (((pn)->v.fl & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS)) \
                                 == (QNUMBER|MINUS))
-#define RAT_NEG_COMP(pn) (((pn)->flgs & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) \
+#define RAT_NEG_COMP(pn) (((pn)->v.fl & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) \
                                 == (QNUMBER|MINUS))
 
-#define RAT_RAT(pn) (((pn)->flgs & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))\
+#define RAT_RAT(pn) (((pn)->v.fl & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))\
                                 == (QNUMBER|QFRACTION))
 
-#define RAT_RAT_COMP(pn) (((pn)->flgs & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))\
+#define RAT_RAT_COMP(pn) (((pn)->v.fl & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))\
                                 == (QNUMBER|QFRACTION))
-#define IS_ONE(pn) ((pn)->u.lobj == ONE && !((pn)->flgs & (MINUS | VISIBLE_FLAGS)))
-#define IS_NIL(pn) ((pn)->u.lobj == 0   && !((pn)->flgs & (MINUS | VISIBLE_FLAGS)))
+#define IS_ONE(pn) ((pn)->u.lobj == ONE && !((pn)->v.fl & (MINUS | VISIBLE_FLAGS)))
+#define IS_NIL(pn) ((pn)->u.lobj == 0   && !((pn)->v.fl & (MINUS | VISIBLE_FLAGS)))
 
 
 #include <string.h>
@@ -505,9 +506,6 @@ extern int _stksize = -1;
 #endif
 #endif
 #endif
-
-
-#define flgs v.fl
 
 #ifdef __TURBOC__
 #if O_S
@@ -1083,16 +1081,16 @@ typedef struct typedObjectnode /* createdWithNew == 1 */
 #endif
 
 #if WORD32
-#define INCREFCOUNT(a) { ((objectnode*)a)->u.s.refcount++;(a)->flgs &= ((~ALL_REFCOUNT_BITS_SET)|ONEREF); }
-#define DECREFCOUNT(a) { ((objectnode*)a)->u.s.refcount--;(a)->flgs |= ALL_REFCOUNT_BITS_SET; }
+#define INCREFCOUNT(a) { ((objectnode*)a)->u.s.refcount++;(a)->v.fl &= ((~ALL_REFCOUNT_BITS_SET)|ONEREF); }
+#define DECREFCOUNT(a) { ((objectnode*)a)->u.s.refcount--;(a)->v.fl |= ALL_REFCOUNT_BITS_SET; }
 #define REFCOUNTNONZERO(a) ((a)->u.s.refcount)
 #define ISBUILTIN(a) ((a)->u.s.built_in)
 #define ISCREATEDWITHNEW(a) ((a)->u.s.createdWithNew)
 #define SETCREATEDWITHNEW(a) (a)->u.s.createdWithNew = 1
 #else
-#define ISBUILTIN(a) ((a)->flgs & BUILT_IN)
-#define ISCREATEDWITHNEW(a) ((a)->flgs & CREATEDWITHNEW)
-#define SETCREATEDWITHNEW(a) (a)->flgs |= CREATEDWITHNEW
+#define ISBUILTIN(a) ((a)->v.fl & BUILT_IN)
+#define ISCREATEDWITHNEW(a) ((a)->v.fl & CREATEDWITHNEW)
+#define SETCREATEDWITHNEW(a) (a)->v.fl |= CREATEDWITHNEW
 #endif
 
 /*#if !_BRACMATEMBEDDED*/
@@ -1225,10 +1223,10 @@ static const char opchar[16] =
 
 #define OPERATOR ((0xF<<OPSH) + IS_OPERATOR)
 
-#define Op(pn) ((pn)->flgs & OPERATOR)
-#define kopo(pn) ((pn).flgs & OPERATOR)
-#define is_op(pn) ((pn)->flgs & IS_OPERATOR)
-#define is_object(pn) (((pn)->flgs & OPERATOR) == EQUALS)
+#define Op(pn) ((pn)->v.fl & OPERATOR)
+#define kopo(pn) ((pn).v.fl & OPERATOR)
+#define is_op(pn) ((pn)->v.fl & IS_OPERATOR)
+#define is_object(pn) (((pn)->v.fl & OPERATOR) == EQUALS)
 #define klopcode(pn) (Op(pn) >> OPSH)
 
 #define nil(p) knil[klopcode(p)]
@@ -1251,8 +1249,8 @@ static const char opchar[16] =
 #define COPYFILTER ~(ALL_REFCOUNT_BITS_SET | BUILT_IN | CREATEDWITHNEW)
 #endif
 
-#define shared(pn) ((pn)->flgs & ALL_REFCOUNT_BITS_SET)
-#define currRefCount(pn) (((pn)->flgs & ALL_REFCOUNT_BITS_SET) >> NON_REF_COUNT_BITS)
+#define shared(pn) ((pn)->v.fl & ALL_REFCOUNT_BITS_SET)
+#define currRefCount(pn) (((pn)->v.fl & ALL_REFCOUNT_BITS_SET) >> NON_REF_COUNT_BITS)
 
 static int all_refcount_bits_set(psk pnode)
     {
@@ -1261,10 +1259,10 @@ static int all_refcount_bits_set(psk pnode)
 
 static void dec_refcount(psk pnode)
     {
-    assert(pnode->flgs & ALL_REFCOUNT_BITS_SET);
-    pnode->flgs -= ONEREF;
+    assert(pnode->v.fl & ALL_REFCOUNT_BITS_SET);
+    pnode->v.fl -= ONEREF;
 #if WORD32
-    if((pnode->flgs & (OPERATOR|ALL_REFCOUNT_BITS_SET)) == EQUALS)
+    if((pnode->v.fl & (OPERATOR|ALL_REFCOUNT_BITS_SET)) == EQUALS)
         {
         if(REFCOUNTNONZERO((objectnode*)pnode))
             {
@@ -2900,7 +2898,6 @@ static psk new_operator_like(psk pnode)
     if(Op(pnode) == EQUALS)
         {
         objectnode * goal;
-        DBGSRC(printf("new_operator_like:");result(pnode);printf("\n");)
         assert(!ISBUILTIN((objectnode*)pnode));
         goal = (objectnode *)bmalloc(__LINE__,sizeof(objectnode));
 #if WORD32
@@ -3301,7 +3298,7 @@ static void endnode(psk Root,int space)
     int q,ikar;
 #if CHECKALLOCBOUNDS
     if(POINT)
-        printf("\n[%p %d]",Root,(Root->flgs & ALL_REFCOUNT_BITS_SET)/ ONEREF);
+        printf("\n[%p %d]",Root,(Root->v.fl & ALL_REFCOUNT_BITS_SET)/ ONEREF);
 #endif
     if(!Root->u.obj
         && !HAS_UNOPS(Root)
@@ -3312,7 +3309,7 @@ static void endnode(psk Root,int space)
         return;
         }
     printflags(Root);
-    if(Root->flgs & MINUS)
+    if(Root->v.fl & MINUS)
         (*process)('-');
     if(beNice)
         {
@@ -3392,7 +3389,7 @@ static psk same_as_w(psk pnode)
     {
     if(shared(pnode) != ALL_REFCOUNT_BITS_SET)
         {
-        (pnode)->flgs += ONEREF;
+        (pnode)->v.fl += ONEREF;
         return pnode;
         }
 #if WORD32
@@ -3413,7 +3410,7 @@ static psk same_as_w_2(ppsk PPnode)
     psk pnode = *PPnode;
     if(shared(pnode) != ALL_REFCOUNT_BITS_SET)
         {
-        pnode->flgs += ONEREF;
+        pnode->v.fl += ONEREF;
         return pnode;
         }
 #if WORD32
@@ -3456,7 +3453,7 @@ static psk iCopyOf(psk pnode)
 #else
     MEMCPY(ret,pnode,((len / sizeof(LONG)) + 1) * sizeof(LONG));
 #endif
-    ret->flgs &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+    ret->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
     return ret;
     }
 
@@ -3476,7 +3473,7 @@ static void copyToCutoff(psk * ppnode,psk pnode,psk cutoff)
             else
                 {
                 psk p = new_operator_like(pnode);
-                p->flgs = pnode->flgs & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+                p->v.fl = pnode->v.fl & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                 p->LEFT = same_as_w(pnode->LEFT);
                 *ppnode = p;
                 ppnode = &(p->RIGHT);
@@ -3493,7 +3490,7 @@ static void copyToCutoff(psk * ppnode,psk pnode,psk cutoff)
 
 static psk Head(psk pnode)
 {
-if(pnode->flgs & LATEBIND)
+if(pnode->v.fl & LATEBIND)
     {
     assert(!shared(pnode));
     if(is_op(pnode))
@@ -3506,7 +3503,7 @@ if(pnode->flgs & LATEBIND)
         {
         stringrefnode * ps = (stringrefnode *)pnode;
         pnode = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + ps->length);
-        pnode->flgs = (ps->flgs & COPYFILTER /*~ALL_REFCOUNT_BITS_SET*/ & ~LATEBIND);
+        pnode->v.fl = (ps->v.fl & COPYFILTER /*~ALL_REFCOUNT_BITS_SET*/ & ~LATEBIND);
         strncpy((char *)(pnode)+sizeof(unsigned LONG),(char *)ps->str,ps->length);
         wipe(ps->pnode);
         bfree(ps);
@@ -3539,7 +3536,7 @@ while(is_op(Root))
         extraSpc = 1;
 #if CHECKALLOCBOUNDS
     if(POINT)
-        printf("\n[%p %d]",Root,(Root->flgs & ALL_REFCOUNT_BITS_SET)/ ONEREF);
+        printf("\n[%p %d]",Root,(Root->v.fl & ALL_REFCOUNT_BITS_SET)/ ONEREF);
 #endif
     do_something(opchar[klopcode(Root)]);
     Parent = Op(Root);
@@ -3647,7 +3644,7 @@ if(is_op(Root))
         extraSpc = 1;
 #if CHECKALLOCBOUNDS
     if(POINT)
-        printf("\n[%p %d]",Root,(Root->flgs & ALL_REFCOUNT_BITS_SET)/ ONEREF);
+        printf("\n[%p %d]",Root,(Root->v.fl & ALL_REFCOUNT_BITS_SET)/ ONEREF);
 #endif
     do_something(opchar[klopcode(Root)]);
     Parent = Op(Root);
@@ -3777,27 +3774,27 @@ static LONG toLong(psk pnode)
     {
     LONG res;
     res = (LONG)STRTOUL((char *)POBJ(pnode),(char **)NULL,10);
-    if(pnode->flgs & MINUS)
+    if(pnode->v.fl & MINUS)
         res = -res;
     return res;
     }
 
 static int numbercheck(const char *begin)
     {
-    int op_of_0,check;
+    int op_or_0,check;
     int needNonZeroDigit = FALSE;
     if(!*begin)
         return 0;
     check = QNUMBER;
-    op_of_0 = *begin;
+    op_or_0 = *begin;
 
-    if(op_of_0 >= '0' && op_of_0 <= '9')
+    if(op_or_0 >= '0' && op_or_0 <= '9')
         {
-        if(op_of_0 == '0')
+        if(op_or_0 == '0')
             check |= QNUL;
-        while(optab[op_of_0 = *++begin] != -1)
+        while(optab[op_or_0 = *++begin] != -1)
             {
-            if(op_of_0 == '/')
+            if(op_or_0 == '/')
                 {
                 /* check &= ~QNUL;*/
                 if(check & QFRACTION)
@@ -3811,7 +3808,7 @@ static int numbercheck(const char *begin)
                     check |= QFRACTION;
                     }
                 }
-            else if(op_of_0 < '0' || op_of_0 > '9')
+            else if(op_or_0 < '0' || op_or_0 > '9')
                 {
                 check = DEFINITELYNONUMBER;
                 break;
@@ -3825,7 +3822,7 @@ static int numbercheck(const char *begin)
                     check = DEFINITELYNONUMBER;
                     break;
                     }
-                else if(op_of_0 != '0')
+                else if(op_or_0 != '0')
                     {
                     needNonZeroDigit = FALSE;
                     /*check &= ~QNUL;*/
@@ -3838,7 +3835,7 @@ static int numbercheck(const char *begin)
                 }
             }
         /* Trailing closing parentheses were accepted on equal footing with '\0' bytes. */
-        if(op_of_0 == ')') /* "2)"+3       @("-23/4)))))":-23/4)  */
+        if(op_or_0 == ')') /* "2)"+3       @("-23/4)))))":-23/4)  */
             {
             check = DEFINITELYNONUMBER;
             }
@@ -3994,7 +3991,7 @@ static psk lex(int * nxt,int priority,int Flags,int opsflgs,va_list * pargptr)
 #endif
 /* *nxt (if nxt != 0) is set to the character following the expression. */
     {
-    int op_of_0;
+    int op_or_0;
     psk Pnode;
     if(*start > 0 && *start <= '\6')
         Pnode = same_as_w(addr[*start++]);
@@ -4027,7 +4024,7 @@ static psk lex(int * nxt,int priority,int Flags,int opsflgs,va_list * pargptr)
             return /*0*/Pnode;
         }
 
-    op_of_0 = *start;
+    op_or_0 = *start;
 
     if(*++start == 0)
 #if GLOBALARGPTR
@@ -4036,17 +4033,17 @@ static psk lex(int * nxt,int priority,int Flags,int opsflgs,va_list * pargptr)
         (*shift)(pargptr);
 #endif
 
-    if(optab[op_of_0] == NOOP) /* 20080910 Otherwise problem with the k in ()k */
+    if(optab[op_or_0] == NOOP) /* 20080910 Otherwise problem with the k in ()k */
         errorprintf("malformed input\n");
     else
         {
         Flags &= ~MINUS;/* 20110831 Bitwise, operators cannot have the - flag. */
         do
             {
-            /* op_of_0 == an operator */
+            /* op_or_0 == an operator */
             psk operatorNode;
-            int child_op_of_0;
-            if(optab[op_of_0] < priority) /* 'op_of_0' has too low priority */
+            int child_op_or_0;
+            if(optab[op_or_0] < priority) /* 'op_or_0' has too low priority */
                 {
 #if STRINGMATCH_CAN_BE_NEGATED
                 if(  (Flags & (NOT|FILTERS)) == (NOT|ATOM)
@@ -4054,7 +4051,7 @@ static psk lex(int * nxt,int priority,int Flags,int opsflgs,va_list * pargptr)
                   ) /* 20071229 Undo setting of
                         success == FALSE
                        if ~@ flags are attached to : operator
-                       Notice that op_of_0 is ')'
+                       Notice that op_or_0 is ')'
                        This is a special case. In ~@(a:b) the ~ operator must
                        not negate the @ but the result of the string match.
                     */
@@ -4064,46 +4061,46 @@ static psk lex(int * nxt,int priority,int Flags,int opsflgs,va_list * pargptr)
 #endif
                 (Pnode)->v.fl ^= Flags; /*19970821*/
                 if(nxt)
-                    *nxt = op_of_0;
+                    *nxt = op_or_0;
                 return Pnode;
                 }
-            if(optab[op_of_0] == EQUALS)
+            if(optab[op_or_0] == EQUALS)
                 {
                 operatorNode = (psk)bmalloc(__LINE__,sizeof(objectnode));
         /*        ((objectnode*)psk)->refcount = 0; done by bmalloc */
                 }
             else
                 operatorNode = (psk)bmalloc(__LINE__,sizeof(knode));
-            assert(optab[op_of_0] != NOOP);
-            assert(optab[op_of_0] >= 0);
-            operatorNode->v.fl = optab[op_of_0] | SUCCESS;
+            assert(optab[op_or_0] != NOOP);
+            assert(optab[op_or_0] >= 0);
+            operatorNode->v.fl = optab[op_or_0] | SUCCESS;
             /*operatorNode->v.fl ^= Flags;*/
             operatorNode->LEFT = Pnode;
-            Pnode = operatorNode;/* 'op_of_0' has sufficient priority */
-            if(optab[op_of_0] == priority) /* 'op_of_0' has same priority */
+            Pnode = operatorNode;/* 'op_or_0' has sufficient priority */
+            if(optab[op_or_0] == priority) /* 'op_or_0' has same priority */
                 {
                 (Pnode)->v.fl ^= Flags; /*19970821*/
                 operatorNode->RIGHT = NULL;
                 if(nxt)
-                    *nxt = op_of_0;
+                    *nxt = op_or_0;
                 return Pnode;
                 }
             for(;;)
                 {
-                child_op_of_0 = 0;
-                assert(optab[op_of_0] >= 0);
+                child_op_or_0 = 0;
+                assert(optab[op_or_0] >= 0);
 #if GLOBALARGPTR
-                operatorNode->RIGHT = lex(&child_op_of_0,optab[op_of_0],0,0);
+                operatorNode->RIGHT = lex(&child_op_or_0,optab[op_or_0],0,0);
 #else
-                operatorNode->RIGHT = lex(&child_op_of_0,optab[op_of_0],0,0,pargptr);
+                operatorNode->RIGHT = lex(&child_op_or_0,optab[op_or_0],0,0,pargptr);
 #endif
-                if(child_op_of_0 != op_of_0)
+                if(child_op_or_0 != op_or_0)
                     break;
                 operatorNode = operatorNode->RIGHT;
                 }
-            op_of_0 = child_op_of_0;
+            op_or_0 = child_op_or_0;
             }
-        while(op_of_0 != 0);
+        while(op_or_0 != 0);
         }
     (Pnode)->v.fl ^= Flags; /*19970821*/
     return /*0*/Pnode;
@@ -4782,7 +4779,7 @@ static psk _copyop(psk Pnode)
     {
     psk apnode;
     apnode = new_operator_like(Pnode);
-    apnode->flgs = Pnode->flgs & COPYFILTER;/* (ALL_REFCOUNT_BITS_SET | CREATEDWITHNEW);*/
+    apnode->v.fl = Pnode->v.fl & COPYFILTER;/* (ALL_REFCOUNT_BITS_SET | CREATEDWITHNEW);*/
     apnode->LEFT = same_as_w_2(&Pnode->LEFT);
     apnode->RIGHT = same_as_w(Pnode->RIGHT);
     return apnode;
@@ -4994,7 +4991,7 @@ static void wipe(psk top)
             }
         else
             {
-            if(top->flgs & LATEBIND)
+            if(top->v.fl & LATEBIND)
                 {
                 wipe(((stringrefnode*)top)->pnode);
                 }
@@ -5111,8 +5108,8 @@ static Qnumber qTimesMinusOne(Qnumber _qx)
     len = offsetof(sk,u.obj) + 1 + strlen((char *)POBJ(_qx));
     res = (Qnumber)bmalloc(__LINE__,len);
     memcpy(res,_qx,len);
-    res->flgs ^= MINUS;
-    res->flgs &= ~ALL_REFCOUNT_BITS_SET;
+    res->v.fl ^= MINUS;
+    res->v.fl &= ~ALL_REFCOUNT_BITS_SET;
     return res;
     }
 
@@ -5185,7 +5182,7 @@ static psk inumberNode(nnumber * g)
         }
 
     res->v.fl = READY | SUCCESS | QNUMBER;
-    res->flgs |= g->sign;
+    res->v.fl |= g->sign;
     return res;
     }
 
@@ -5228,7 +5225,7 @@ static psk numberNode2(nnumber * g)
         bfree(g->alloc);
         }
     res->v.fl = READY | SUCCESS | QNUMBER;
-    res->flgs |= g->sign;
+    res->v.fl |= g->sign;
     return res;
     }
 
@@ -5268,7 +5265,7 @@ static void convert2binary(nnumber * x)
 
 static char * isplit(Qnumber _qget,nnumber * ptel,nnumber * pnoem)
     {
-    ptel->sign = _qget->flgs & (MINUS|QNUL);
+    ptel->sign = _qget->v.fl & (MINUS|QNUL);
     pnoem->sign = 0;
     pnoem->alloc = ptel->alloc = NULL;
     ptel->number = (char *)POBJ(_qget);
@@ -5297,7 +5294,7 @@ static char * isplit(Qnumber _qget,nnumber * ptel,nnumber * pnoem)
 
 static char * split(Qnumber _qget,nnumber * ptel,nnumber * pnoem)
     {
-    ptel->sign = _qget->flgs & (MINUS|QNUL);
+    ptel->sign = _qget->v.fl & (MINUS|QNUL);
     pnoem->sign = 0;
     pnoem->alloc = ptel->alloc = NULL;
     ptel->number = (char *)POBJ(_qget);
@@ -5927,7 +5924,7 @@ static Qnumber nn2q(nnumber * num,nnumber * den)
         endp = iconvert2decimal(den,endp);
         assert((size_t)(endp - (char *)res) <= len);
         res->v.fl = READY | SUCCESS | QNUMBER | QFRACTION;
-        res->flgs |= num->sign;
+        res->v.fl |= num->sign;
         }
     return res;
     }
@@ -6396,9 +6393,9 @@ static Qnumber qIntegerDivision(Qnumber _qx,Qnumber _qy)
     bfree(p2.ialloc);
     res = qPlus
         (      (remainder.sign & QNUL)
-            || !(_qx->flgs & MINUS)
+            || !(_qx->v.fl & MINUS)
           ? &zeroNode
-          :   (_qy->flgs & MINUS)
+          :   (_qy->v.fl & MINUS)
             ? &oneNode
             : &minusOneNode
             , (aqnumber = inumberNode(&quotient))
@@ -6438,7 +6435,7 @@ static psk qDenominator(psk Pnode)
     assert(!(xn.sign & QNUL)); /*Because RATIONAL_COMP(_qx)*/
     memcpy((void*)POBJ(res),xn.number,xn.length);
     res->v.fl = READY | SUCCESS | QNUMBER;
-    res->flgs |= xn.sign;
+    res->v.fl |= xn.sign;
     wipe(Pnode);
     return res;
     }
@@ -6448,7 +6445,7 @@ static int qCompare(Qnumber _qx,Qnumber _qy)
     Qnumber som;
     int res;
     som = qPlus(_qx,_qy,MINUS);
-    res = som->flgs & (MINUS|QNUL);
+    res = som->v.fl & (MINUS|QNUL);
     pskfree(som);
     return res;
     }
@@ -6524,7 +6521,6 @@ static int cmpsub(psk kn1,psk kn2)
 
 static int cmp(psk kn1,psk kn2)
     {
-    DBGSRC(Printf("cmp      (");result(kn1);Printf(",");result(kn2);Printf(")\n");)
     while(kn1 != kn2)
         {
         int r;
@@ -6768,87 +6764,85 @@ static int copy_insert(psk name, psk pnode, psk cutoff)
 	psk PNODE;
 	int ret;
 	assert((pnode->RIGHT == 0 && cutoff == 0) || pnode->RIGHT != cutoff);
-	DBGSRC(printf("copy_insert:"); result(pnode); printf("\n");)
-		if ((pnode->v.fl & INDIRECT)
-			&& (pnode->v.fl & READY)
-			/*
-			{?} !dagj a:?dagj a
-			{!} !dagj
-			The test (pnode->v.fl & READY) does not solve stackoverflow
-			in the following examples:
+	if ((pnode->v.fl & INDIRECT)
+		&& (pnode->v.fl & READY)
+		/*
+		{?} !dagj a:?dagj a
+		{!} !dagj
+		The test (pnode->v.fl & READY) does not solve stackoverflow
+		in the following examples:
 
-			{?} (=!y):(=?y)
-			{?} !y
+		{?} (=!y):(=?y)
+		{?} !y
 
-			{?} (=!y):(=?x)
-			{?} (=!x):(=?y)
-			{?} !x
-			*/
-			)
-			{
-			return FALSE;
-			}
-		else if (pnode->v.fl & IDENT)
-			{
-			PNODE = copyof(pnode);
-			}
-		else if (cutoff == NULL)
-			{
-			return insert(name, pnode);
+		{?} (=!y):(=?x)
+		{?} (=!x):(=?y)
+		{?} !x
+		*/
+		)
+		{
+		return FALSE;
+		}
+	else if (pnode->v.fl & IDENT)
+		{
+		PNODE = copyof(pnode);
+		}
+	else if (cutoff == NULL)
+		{
+		return insert(name, pnode);
+		}
+	else
+		{
+		assert(!is_object(pnode));
+		if ((shared(pnode) != ALL_REFCOUNT_BITS_SET) && !all_refcount_bits_set(cutoff))
+			{/* cutoff: either node with headroom in the small refcounter
+				or object */
+			PNODE = new_operator_like(pnode);
+			PNODE->v.fl = (pnode->v.fl & COPYFILTER/*~ALL_REFCOUNT_BITS_SET*/) | LATEBIND;
+			pnode->v.fl += ONEREF;
+#if WORD32
+			if (shared(cutoff) == ALL_REFCOUNT_BITS_SET)
+				{
+				/*
+				(T=
+				1100:?I
+				& tbl$(AA,!I)
+				& (OBJ==(=a) (=b) (=c))
+				&   !OBJ
+				: (
+				=   %
+				%
+				(?m:?n:?o:?p:?q:?r:?s) { increase refcount of (=c) to 7}
+				)
+				&   whl
+				' ( !I+-1:~<0:?I
+				& !OBJ:(=(% %:?(!I$?AA)) ?)
+				)
+				& !I);
+				{due to late binding, the refcount of (=c) has just come above 1023, and then
+				late binding stops for the last 80 or so iterations. The left hand side of the
+				late bound node is not an object, and therefore can only count to 1024.
+				Thereafter copies must be made.}
+				*/
+				INCREFCOUNT(cutoff);
+				}
+			else
+#endif
+				cutoff->v.fl += ONEREF;
+
+			PNODE->LEFT = pnode;
+			PNODE->RIGHT = cutoff;
 			}
 		else
 			{
-			assert(!is_object(pnode));
-			if ((shared(pnode) != ALL_REFCOUNT_BITS_SET) && !all_refcount_bits_set(cutoff))
-				{/* cutoff: either node with headroom in the small refcounter
-				 or object */
-				DBGSRC(printf("name:["); result(name); printf("] pnode:["); result(pnode); printf("] cutoff(" LONGU "):[", cutoff->v.fl / ONEREF); result(cutoff); printf("]\n");)
-					PNODE = new_operator_like(pnode);
-				PNODE->flgs = (pnode->flgs & COPYFILTER/*~ALL_REFCOUNT_BITS_SET*/) | LATEBIND;
-				pnode->flgs += ONEREF;
-#if WORD32
-				if (shared(cutoff) == ALL_REFCOUNT_BITS_SET)
-					{
-					/*
-					(T=
-					1100:?I
-					& tbl$(AA,!I)
-					& (OBJ==(=a) (=b) (=c))
-					&   !OBJ
-					: (
-					=   %
-					%
-					(?m:?n:?o:?p:?q:?r:?s) { increase refcount of (=c) to 7}
-					)
-					&   whl
-					' ( !I+-1:~<0:?I
-					& !OBJ:(=(% %:?(!I$?AA)) ?)
-					)
-					& !I);
-					{due to late binding, the refcount of (=c) has just come above 1023, and then
-					late binding stops for the last 80 or so iterations. The left hand side of the
-					late bound node is not an object, and therefore can only count to 1024.
-					Thereafter copies must be made.}
-					*/
-					INCREFCOUNT(cutoff);
-					}
-				else
-#endif
-					cutoff->flgs += ONEREF;
-
-				PNODE->LEFT = pnode;
-				PNODE->RIGHT = cutoff;
-				}
-			else
-				{
-				copyToCutoff(&PNODE, pnode, cutoff); /*{?} a b c:(?z:?x:?y:?a:?b) c => a b c */
-				/*{?} 0:?n&a b c:?abc&whl'(!n+1:?n:<2000&str$(v !n):?v&!abc:?!v c) =>   whl
-				' ( !n+1:?n:<2000
-				& str$(v !n):?v
-				& !abc:?!v c
-				) */
-				}
+			copyToCutoff(&PNODE, pnode, cutoff); /*{?} a b c:(?z:?x:?y:?a:?b) c => a b c */
+			/*{?} 0:?n&a b c:?abc&whl'(!n+1:?n:<2000&str$(v !n):?v&!abc:?!v c) =>   whl
+			' ( !n+1:?n:<2000
+			& str$(v !n):?v
+			& !abc:?!v c
+			) */
 			}
+		}
 
 		ret = insert(name, PNODE);
 		wipe(PNODE);
@@ -6923,9 +6917,9 @@ static int string_copy_insert(psk name,psk pnode,char * str,char * cutoff)
         if((nr & MINUS) && !(name->v.fl & NUMBER))
             nr = 0; /* "-1" is only converted to -1 if the # flag is present on the pattern */
         psnode = (stringrefnode *)bmalloc(__LINE__,sizeof(stringrefnode));
-        psnode->flgs = /*(pnode->flgs & ~(ALL_REFCOUNT_BITS_SET|VISIBLE_FLAGS)) substring doesn't inherit flags like */
+        psnode->v.fl = /*(pnode->v.fl & ~(ALL_REFCOUNT_BITS_SET|VISIBLE_FLAGS)) substring doesn't inherit flags like */
             READY | SUCCESS | LATEBIND | nr;
-        /*psnode->flgs |= SUCCESS;*/ /*{?} @(~`ab:%?x %?y)&!x => a */ /*{!} a */
+        /*psnode->v.fl |= SUCCESS;*/ /*{?} @(~`ab:%?x %?y)&!x => a */ /*{!} a */
 		psnode->pnode = same_as_w(pnode);
         if(nr & MINUS)
             {
@@ -8127,7 +8121,7 @@ static psk inserthash(Hash * temp,psk Arg)
         {
         psk goal = (psk)bmalloc(__LINE__,sizeof(knode));
         goal->v.fl = WHITE | SUCCESS;
-        goal->flgs &= ~ALL_REFCOUNT_BITS_SET;
+        goal->v.fl &= ~ALL_REFCOUNT_BITS_SET;
         goal->LEFT = same_as_w(Arg);
         goal->RIGHT = r->entry;
         r->entry = goal;
@@ -8521,7 +8515,6 @@ typedef struct
 
 static psk getmember(psk name,psk tree,objectStuff * Object)
     {
-    DBGSRC(Printf("getmember(");result(name);Printf(",");result(tree);Printf(")\n");)
     while(is_op(tree))
         {
         if(Op(tree) == EQUALS)
@@ -8607,7 +8600,6 @@ must be equivalent
 */
     {
     vars *nxtvar;
-    DBGSRC(Printf("find(");result(namenode);Printf(")\n");)
     if(is_op(namenode))
         {
         switch(Op(namenode))
@@ -8869,7 +8861,6 @@ first finds (=B), which is an object that should not obtain the flags !! as in
     psk pbinding;
     int newval;
     newval = FALSE;
-    DBGSRC(printf("SymbolBinding_w(");result(variabele);printf(")\n");)
     if((pbinding = SymbolBinding(variabele,&newval,twolevelsofindirection)) != NULL)
         {
         ULONG nameflags,valueflags;
@@ -8882,8 +8873,7 @@ first finds (=B), which is an object that should not obtain the flags !! as in
         valueflags ^= ((nameflags & SUCCESS) ^ SUCCESS);
 
         assert(pbinding != NULL);
-        DBGSRC(printf("pbinding:");result(pbinding);printf("\n");)
-
+        
         if(Op(pbinding) == EQUALS)
             {
             if(!newval)
@@ -8904,12 +8894,10 @@ first finds (=B), which is an object that should not obtain the flags !! as in
             assert(Op(pbinding) != EQUALS);
             if(newval)
                 {
-                DBGSRC(printf("isolated\n");)
                 pbinding = isolated(pbinding);
                 }
             else
                 {
-                DBGSRC(printf("subtreecopy\n");)
                 pbinding = subtreecopy(pbinding);
                 }
             (pbinding)->v.fl = valueflags & COPYFILTER; /* ~ALL_REFCOUNT_BITS_SET;*/
@@ -8948,7 +8936,6 @@ static int stringOncePattern(psk pat)
     should be slightly different for normal matches and for string matches.
     Ideally, two flags should be reserved.
     */
-    DBGSRC(printf("stringOncePattern:");result(pat);printf("\n");)
     if(pat->v.fl & IMPLIEDFENCE)
         {
         return TRUE;
@@ -9210,7 +9197,6 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
 #endif
     Flgs = pat->v.fl & (UNIFY|INDIRECT|DOUBLY_INDIRECT);
 
-    DBGSRC(printf("patA:");result(pat);printf("\n");)
     name = subtreecopy(pat);
     name->v.fl |= SUCCESS;
     if((Flgs & UNIFY) && (is_op(pat) || (Flgs & INDIRECT)))
@@ -9228,7 +9214,6 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
         }
     else
         {
-        DBGSRC(printf("patA:");result(pat);printf("\n");)
         s.c.rmr = (char)evaluate(name) & TRUE;
 
         if (!(s.c.rmr))
@@ -9241,7 +9226,6 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
         Flgs |= name->v.fl;
         }
     pat = name;
-    DBGSRC(printf("patB:");result(pat);printf("\n");)
     if(Flgs & UNIFY)
         {
         if (  is_op(pat)
@@ -9301,7 +9285,6 @@ static char doPosition(matchstate s,psk pat,LONG pposition,size_t stringLength,p
     if( ((pat->v.fl & (SUCCESS|VISIBLE_FLAGS_POS0|IS_OPERATOR)) == (SUCCESS|QNUMBER)))
         {
         pos = toLong(pat); /* [20 */
-        DBGSRC(Printf("pat:");result(pat);Printf("\n");)
         if(pos < 0)
             pos += (expr == NULL ? (LONG)stringLength : expressionLength(expr,op)) + 1; /* [(20+-1*(!len+1)) -> `-7 */
         if(LESS(pat))
@@ -9494,7 +9477,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
     if(!cutoff)
         cutoff = sub+stringLength;
 #if CUTOFFSUGGEST
-    if(  (pat->flgs & ATOM)
+    if(  (pat->v.fl & ATOM)
       ||    (NOTHING(pat) 
          && (  is_op(pat) 
             || !pat->u.obj)
@@ -10139,7 +10122,6 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
             if(is_op(pat))
                 {
                 ULONG saveflgs = Flgs & VISIBLE_FLAGS;
-                DBGSRC(printf("pat:");result(pat);printf("\n");)
                 name = subtreecopy(pat);
                 name->v.fl &= ~VISIBLE_FLAGS;
                 name->v.fl |= SUCCESS;
@@ -10418,7 +10400,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
                         if ((s.c.lmr = match(ind+1,sub->LEFT, pat->LEFT, NULL,0,sub->LEFT,12345)) & TRUE)
                             s.c.rmr = match(ind+1,sub->RIGHT, pat->RIGHT, NULL,0,sub->RIGHT,12345);
 #ifndef NDEBUG
-                            DBGSRC(printMatchState("EXP:EXIT-MID",s,pposition,0);)
+                        DBGSRC(printMatchState("EXP:EXIT-MID",s,pposition,0);)
 #endif
                         s.c.rmr |= (char)(s.c.lmr & (FENCE | ONCE)); /* a*b^2*c:?x*?y^(~1:?t)*?z */
                         }
@@ -10463,7 +10445,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
 #ifndef NDEBUG
                         DBGSRC(printMatchState("UNDERSCORE:EXIT-MID",s,pposition,0);)
 #endif
-                            switch( Op(sub))
+                        switch( Op(sub))
                             {
                             case WHITE:
                             case PLUS:
@@ -12539,7 +12521,6 @@ static function_return_type find_func(psk Pnode)
     objectStuff Object = {0,0,0};
     int isNewRef = FALSE;
     addr[1] = NULL;
-    DBGSRC(Printf("find_func(");result(Pnode);Printf(")\n");)
     addr[1] = find(lnode,&isNewRef,&Object);
     if(addr[1])
         {
@@ -12622,10 +12603,8 @@ static function_return_type find_func(psk Pnode)
         }
     else if(Object.theMethod)
         {
-        DBGSRC(printf("Object.theMethod\n");)
         if(Object.theMethod((struct typedObjectnode *)Object.object,&Pnode))
             {
-            DBGSRC(printf("functionOk");result(Pnode);printf("\n");)
             return functionOk(Pnode);
             }
         }
@@ -12684,7 +12663,7 @@ static psk objectcopysub2(psk src) /* src is NOT an object */
     if(is_op(src) && hasSubObject(src))
         {
         goal = (psk)bmalloc(__LINE__,sizeof(knode));
-        goal->flgs = src->flgs & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+        goal->v.fl = src->v.fl & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
         goal->LEFT = objectcopysub(src->LEFT);
         goal->RIGHT = objectcopysub(src->RIGHT);
         return goal;
@@ -12711,7 +12690,7 @@ static psk objectcopysub(psk src)
             ((typedObjectnode*)goal)->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
 #endif
             }
-        goal->flgs = src->flgs & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+        goal->v.fl = src->v.fl & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
         goal->LEFT = same_as_w(src->LEFT);
         goal->RIGHT = same_as_w(src->RIGHT);
         return goal;
@@ -12745,7 +12724,7 @@ static psk objectcopy(psk src)
             ((typedObjectnode*)goal)->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
 #endif
             }
-        goal->flgs = src->flgs & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+        goal->v.fl = src->v.fl & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
         goal->LEFT = same_as_w(src->LEFT);
         /*?? This adds an extra level of copying, but ONLY for objects that have a '=' node as the lhs of the main '=' node*/
         /* What is it good for? Bart 20010220 */
@@ -13550,7 +13529,7 @@ static function_return_type functions(psk Pnode)
                     {
                     nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
-                    nnode->flgs &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+                    nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                     nnode->LEFT = same_as_w(rightnode->LEFT);
                     nnode->RIGHT = same_as_w(pnode->LEFT);
                     nnode = functions(nnode);
@@ -13561,7 +13540,7 @@ static function_return_type functions(psk Pnode)
                     else
                         {
                         psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                        wnode->flgs = WHITE | SUCCESS;
+                        wnode->v.fl = WHITE | SUCCESS;
                         *ppnode = wnode;
                         ppnode = &(wnode->RIGHT);
                         wnode->LEFT = nnode;
@@ -13572,7 +13551,7 @@ static function_return_type functions(psk Pnode)
                     {
                     nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
-                    nnode->flgs &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+                    nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                     nnode->LEFT = same_as_w(rightnode->LEFT);
                     nnode->RIGHT = same_as_w(pnode);
                     nnode = functions(nnode);
@@ -13622,7 +13601,7 @@ static function_return_type functions(psk Pnode)
                                 psk nnode;
                                 nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                                 nnode->v.fl = Pnode->v.fl;
-                                nnode->flgs &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+                                nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                                 nnode->LEFT = same_as_w(rightnode->LEFT);
                                 subject = strstr(oldsubject, separator);
                                 if (subject)
@@ -13640,7 +13619,7 @@ static function_return_type functions(psk Pnode)
                                 if (subject)
                                     {
                                     psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                                    wnode->flgs = WHITE | SUCCESS;
+                                    wnode->v.fl = WHITE | SUCCESS;
                                     *ppnode = wnode;
                                     ppnode = &(wnode->RIGHT);
                                     wnode->LEFT = nnode;
@@ -13671,14 +13650,14 @@ static function_return_type functions(psk Pnode)
                             psk nnode;
                             nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                             nnode->v.fl = Pnode->v.fl;
-                            nnode->flgs &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+                            nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                             nnode->LEFT = same_as_w(rightnode->LEFT);
                             nnode->RIGHT = charcopy(oldsubject, subject);
                             nnode = functions(nnode);
                             if (*subject)
                                 {
                                 psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                                wnode->flgs = WHITE | SUCCESS;
+                                wnode->v.fl = WHITE | SUCCESS;
                                 *ppnode = wnode;
                                 ppnode = &(wnode->RIGHT);
                                 wnode->LEFT = nnode;
@@ -13696,14 +13675,14 @@ static function_return_type functions(psk Pnode)
                             psk nnode;
                             nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                             nnode->v.fl = Pnode->v.fl;
-                            nnode->flgs &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+                            nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                             nnode->LEFT = same_as_w(rightnode->LEFT);
                             nnode->RIGHT = charcopy(oldsubject, subject);
                             nnode = functions(nnode);
                             if (*subject)
                                 {
                                 psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                                wnode->flgs = WHITE | SUCCESS;
+                                wnode->v.fl = WHITE | SUCCESS;
                                 *ppnode = wnode;
                                 ppnode = &(wnode->RIGHT);
                                 wnode->LEFT = nnode;
@@ -14110,7 +14089,6 @@ The same effect is obtained by <expr>:?!(=)
             else
                 {
                 addr[2] = getObjectDef(rightnode);
-                DBGSRC(printf("addr[2]:");result(addr[2]);printf("\n");)
                 if(!addr[2])
                     return functionFail(Pnode);
                 if(ISBUILTIN((objectnode*)addr[2]))
@@ -14216,7 +14194,7 @@ static psk handleExponents(psk Pnode)
         done = TRUE;
         Pnode->LEFT = lnode = isolated(lnode);
         lnode->v.fl &= ~READY & ~OPERATOR;/* turn off READY flag */
-        lnode->flgs |= TIMES;
+        lnode->v.fl |= TIMES;
         addr[1] = lnode->LEFT;
         addr[2] = lnode->RIGHT;
         addr[3] = Pnode->RIGHT;
@@ -14293,7 +14271,7 @@ static psk handleExponents(psk Pnode)
                     else if(qCompare(&twoNode,rightnode) & (QNUL|MINUS))
                         {
                         iexponent = qModulo(rightnode,&fourNode);
-                        if(iexponent->flgs & QNUL)
+                        if(iexponent->v.fl & QNUL)
                             {
                             wipe(Pnode); /*{?} i^4 => 1 */
                             Pnode = copyof(&oneNode);
@@ -15824,7 +15802,6 @@ static psk evalvar(psk Pnode)
         }
     else
         {
-        DBGSRC(printf("evalvar  (");result(Pnode);printf("\n");)
         if(shared(Pnode))
             {
             /*You can get here if a !variable is unitialized*/
@@ -15905,13 +15882,11 @@ static psk eval(psk Pnode)
                         `~a:?b will assign `~a to b
                         */
                         {
-                        DBGSRC(Printf("before match:");result(&lkn);\
-                            Printf("\n");)
 #if STRINGMATCH_CAN_BE_NEGATED
-                        if(lkn.flgs & ATOM) /* should other flags be
+                        if(lkn.v.fl & ATOM) /* should other flags be
                                             excluded, including ~ ?*/
 #else
-                        if((lkn.flgs & ATOM) && !NEGATION(lkn.flgs,ATOM))
+                        if((lkn.v.fl & ATOM) && !NEGATION(lkn.v.fl,ATOM))
 #endif
                             {
 #if CUTOFFSUGGEST
@@ -16222,7 +16197,7 @@ static psk eval(psk Pnode)
                         wipe(old);
                         }
                     Pnode->v.fl &= (~OPERATOR & ~READY);
-                    Pnode->flgs |= dummy_op;
+                    Pnode->v.fl |= dummy_op;
                     Pnode->v.fl |= SUCCESS;
                     if(dummy_op == UNDERSCORE)
                         Pnode->v.fl |= READY; /* stop iterating */
@@ -16302,65 +16277,65 @@ int startProc(
     global_fpi = stdin;
     global_fpo = stdout;
 
-    argNode.flgs = READY | SUCCESS;
+    argNode.v.fl = READY | SUCCESS;
     argNode.u.lobj = O('a','r','g');
 
-    sjtNode.flgs = READY | SUCCESS;
+    sjtNode.v.fl = READY | SUCCESS;
     sjtNode.u.lobj = O('s','j','t');
 
-    selfNode.flgs = READY | SUCCESS;
+    selfNode.v.fl = READY | SUCCESS;
     selfNode.u.lobj = O('i','t','s');
 
-    SelfNode.flgs = READY | SUCCESS;
+    SelfNode.v.fl = READY | SUCCESS;
     SelfNode.u.lobj = O('I','t','s');
 
-    nilNode.flgs = READY | SUCCESS | IDENT;
+    nilNode.v.fl = READY | SUCCESS | IDENT;
     nilNode.u.lobj = 0L;
 
-    nilNodeNotNeutral.flgs = READY | SUCCESS;
+    nilNodeNotNeutral.v.fl = READY | SUCCESS;
     nilNodeNotNeutral.u.lobj = 0L;
 
-    zeroNode.flgs = READY | SUCCESS | IDENT | QNUMBER | QNUL;
+    zeroNode.v.fl = READY | SUCCESS | IDENT | QNUMBER | QNUL;
     zeroNode.u.lobj = 0L;
     zeroNode.u.obj = '0';
 
-    zeroNodeNotNeutral .flgs = READY | SUCCESS | QNUMBER | QNUL;
+    zeroNodeNotNeutral .v.fl = READY | SUCCESS | QNUMBER | QNUL;
     zeroNodeNotNeutral.u.lobj = 0L;
     zeroNodeNotNeutral.u.obj = '0';
 
     oneNode.u.lobj = 0L;
     oneNode.u.obj = '1';
-    oneNode.flgs = READY | SUCCESS | IDENT | QNUMBER;
+    oneNode.v.fl = READY | SUCCESS | IDENT | QNUMBER;
     *(&(oneNode.u.obj)+1) = 0;
 
     oneNodeNotNeutral.u.lobj = 0L;
     oneNodeNotNeutral.u.obj = '1';
-    oneNodeNotNeutral.flgs = READY | SUCCESS | QNUMBER;
+    oneNodeNotNeutral.v.fl = READY | SUCCESS | QNUMBER;
     *(&(oneNode.u.obj) + 1) = 0;
 
     minusTwoNode.u.lobj = 0L;
     minusTwoNode.u.obj = '2';
-    minusTwoNode.flgs = READY | SUCCESS | QNUMBER | MINUS;
+    minusTwoNode.v.fl = READY | SUCCESS | QNUMBER | MINUS;
     *(&(minusTwoNode.u.obj)+1) = 0;
 
     minusOneNode.u.lobj = 0L;
     minusOneNode.u.obj = '1';
-    minusOneNode.flgs = READY | SUCCESS | QNUMBER | MINUS;
+    minusOneNode.v.fl = READY | SUCCESS | QNUMBER | MINUS;
     *(&(minusOneNode.u.obj)+1) = 0;
 
     twoNode.u.lobj = 0L;
     twoNode.u.obj = '2';
-    twoNode.flgs = READY | SUCCESS | QNUMBER;
+    twoNode.v.fl = READY | SUCCESS | QNUMBER;
     *(&(twoNode.u.obj)+1) = 0;
 
     fourNode.u.lobj = 0L;
     fourNode.u.obj = '4';
-    fourNode.flgs = READY | SUCCESS | QNUMBER;
+    fourNode.v.fl = READY | SUCCESS | QNUMBER;
     *(&(fourNode.u.obj)+1) = 0;
 
     minusFourNode.u.lobj = 0L;
     minusFourNode.u.obj = '4';
-    minusFourNode.flgs = READY | SUCCESS | QNUMBER | MINUS;
+    minusFourNode.v.fl = READY | SUCCESS | QNUMBER | MINUS;
     *(&(minusFourNode.u.obj)+1) = 0;
 
     m0 = build_up(m0,"?*(%+%)^~/#>1*?" , NULL);
