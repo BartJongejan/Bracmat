@@ -3446,7 +3446,7 @@ static psk iCopyOf(psk pnode)
     Argument must start on a word boundary. */
     psk ret;
     size_t len;
-    len = sizeof(unsigned LONG)+strlen((char *)POBJ(pnode));
+    len = sizeof(ULONG)+strlen((char *)POBJ(pnode));
     ret = (psk)bmalloc(__LINE__,len+1);
 #if ICPY
     MEMCPY(ret,pnode,(len >> LOGWORDLENGTH) + 1);
@@ -3502,9 +3502,9 @@ if(pnode->v.fl & LATEBIND)
     else
         {
         stringrefnode * ps = (stringrefnode *)pnode;
-        pnode = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + ps->length);
+        pnode = (psk)bmalloc(__LINE__,sizeof(ULONG) + 1 + ps->length);
         pnode->v.fl = (ps->v.fl & COPYFILTER /*~ALL_REFCOUNT_BITS_SET*/ & ~LATEBIND);
-        strncpy((char *)(pnode)+sizeof(unsigned LONG),(char *)ps->str,ps->length);
+        strncpy((char *)(pnode)+sizeof(ULONG),(char *)ps->str,ps->length);
         wipe(ps->pnode);
         bfree(ps);
         }
@@ -3945,7 +3945,7 @@ static psk Atom(int Flgs)
             af++;
 
     eind = start;
-    Pnode = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + (size_t)(eind - begin) - af);
+    Pnode = (psk)bmalloc(__LINE__,sizeof(ULONG) + 1 + (size_t)(eind - begin) - af);
     start = begin;
     begin = POBJ(Pnode);
     while(start < eind)
@@ -3971,7 +3971,9 @@ static psk Atom(int Flgs)
         else
             (Pnode)->v.fl = (Flgs ^ (READY|SUCCESS)) | (numbercheck(SPOBJ(Pnode)) & ~DEFINITELYNONUMBER);
         }
-#undef opsflgs
+    
+    if (!(Pnode->v.fl & VISIBLE_FLAGS))
+        Pnode->v.fl |= SELFMATCHING;
     return Pnode;
     }
 
@@ -4055,17 +4057,16 @@ static psk lex(int * nxt,int priority,int Flags,va_list * pargptr)
                     *nxt = op_or_0;
                 return Pnode;
                 }
+#if WORD32
             if(optab[op_or_0] == EQUALS)
-                {
                 operatorNode = (psk)bmalloc(__LINE__,sizeof(objectnode));
-        /*        ((objectnode*)psk)->refcount = 0; done by bmalloc */
-                }
             else
+#endif
+                /* on 64 bit platform, sizeof(objectnode) == sizeof(knode) 20210803*/
                 operatorNode = (psk)bmalloc(__LINE__,sizeof(knode));
             assert(optab[op_or_0] != NOOP);
             assert(optab[op_or_0] >= 0);
             operatorNode->v.fl = optab[op_or_0] | SUCCESS;
-            /*operatorNode->v.fl ^= Flags;*/
             operatorNode->LEFT = Pnode;
             Pnode = operatorNode;/* 'op_or_0' has sufficient priority */
             if(optab[op_or_0] == priority) /* 'op_or_0' has same priority */
@@ -6846,13 +6847,13 @@ static psk scopy(const char * str)
     psk pnode;
     if(nr & MINUS)
         { /* bracmat out$arg$() -123 */
-        pnode = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + strlen((const char *)str));
-        strcpy((char *)(pnode)+sizeof(unsigned LONG),str + 1);
+        pnode = (psk)bmalloc(__LINE__,sizeof(ULONG) + strlen((const char *)str));
+        strcpy((char *)(pnode)+sizeof(ULONG),str + 1);
         }
     else
         {
-        pnode = (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + strlen((const char *)str));
-        strcpy((char *)(pnode)+sizeof(unsigned LONG),str);
+        pnode = (psk)bmalloc(__LINE__,sizeof(ULONG) + 1 + strlen((const char *)str));
+        strcpy((char *)(pnode)+sizeof(ULONG),str);
         }
     pnode->v.fl = READY | SUCCESS | nr;
     return pnode;
@@ -6868,8 +6869,8 @@ static psk charcopy(const char * strt, const char * until)
         if (*strt == '0')
             nr |= QNUL;
         }
-    pnode = (psk)bmalloc(__LINE__, sizeof(unsigned LONG) + 1 + (until - strt));
-    strncpy((char *)(pnode)+sizeof(unsigned LONG), strt, until - strt);
+    pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + (until - strt));
+    strncpy((char *)(pnode)+sizeof(ULONG), strt, until - strt);
     pnode->v.fl = READY | SUCCESS | nr;
     return pnode;
     }
@@ -6924,7 +6925,7 @@ static int string_copy_insert(psk name,psk pnode,char * str,char * cutoff)
             }
         DBGSRC(int saveNice;int redhum;saveNice = beNice;\
             redhum = hum;beNice = FALSE;hum = FALSE;\
-            Printf("str [%s] length " LONGU "\n",psnode->str,(unsigned LONG int)psnode->length);\
+            Printf("str [%s] length " LONGU "\n",psnode->str,(ULONG int)psnode->length);\
             beNice = saveNice;hum = redhum;)
         ret = insert(name,(psk)psnode);
         if(ret)
@@ -7018,7 +7019,7 @@ static int getCodePoint2(const char ** ps,int * isutf)
     return ks;
     }
 
-static int utf8bytes(unsigned LONG val)
+static int utf8bytes(ULONG val)
     {
     if(val < 0x80)
         {
@@ -7047,7 +7048,7 @@ static int utf8bytes(unsigned LONG val)
     }
 
 /* extern, is called from xml.c json.c */
-char * putCodePoint(unsigned LONG val,char * s)
+char * putCodePoint(ULONG val,char * s)
     {
     /* Converts Unicode character w to 1,2,3 or 4 bytes of UTF8 in s. */
     if(val < 0x80)
@@ -7978,10 +7979,10 @@ typedef LONG (*hashfuncTp)(const char *s);
 typedef struct Hash
     {
     pskRecord **hash_table;
-    unsigned LONG hash_size;
-    unsigned LONG elements;     /* elements >= record_count */
-    unsigned LONG record_count; /* record_count >= size - unoccupied */
-    unsigned LONG unoccupied;
+    ULONG hash_size;
+    ULONG elements;     /* elements >= record_count */
+    ULONG record_count; /* record_count >= size - unoccupied */
+    ULONG unoccupied;
     cmpfuncTp cmpfunc;
     hashfuncTp hashfunc;
     } Hash;
@@ -8164,7 +8165,7 @@ static void freehash(Hash * temp)
         {
         if(temp->hash_table)
             {
-            unsigned LONG i;
+            ULONG i;
             for(i = temp->hash_size;i > 0;)
                 {
                 pskRecord * r = temp->hash_table[--i];
@@ -8183,9 +8184,9 @@ static void freehash(Hash * temp)
         }
     }
 
-static Hash * newhash(unsigned LONG size)
+static Hash * newhash(ULONG size)
     {
-    unsigned LONG i;
+    ULONG i;
     Hash * temp = (Hash *)bmalloc(__LINE__,sizeof(Hash));
     assert(size > 0);
     temp->hash_size = size;
@@ -8205,7 +8206,7 @@ static Hash * newhash(unsigned LONG size)
     return temp;
     }
 
-static unsigned LONG nextprime(unsigned LONG g)
+static ULONG nextprime(ULONG g)
     {
     /* For primality test, only try divisors that are 2, 3 or 5 or greater
     numbers that are not multiples of 2, 3 or 5. Candidates below 100 are:
@@ -8214,11 +8215,11 @@ static unsigned LONG nextprime(unsigned LONG g)
     Of these 28 candidates, three are not prime:
     49 (7*7), 77 (7*11) and 91 (7*13) */
     int i;
-    unsigned LONG smalldivisor;
+    ULONG smalldivisor;
     static int bijt[12]=
       {1,  2,  2,  4,    2,    4,    2,    4,    6,    2,  6};
     /*2-3,3-5,5-7,7-11,11-13,13-17,17-19,19-23,23-29,29-1,1-7*/
-    unsigned LONG bigdivisor;
+    ULONG bigdivisor;
     if(!(g & 1))
         {
         if(g <= 2)
@@ -8250,7 +8251,7 @@ static void rehash(Hash ** ptemp,int loadFactor/*1-100*/)
     Hash * temp = *ptemp;
     if(temp)
         {
-        unsigned LONG newsize;
+        ULONG newsize;
         Hash * newtable;
         newsize = nextprime((100 * temp->record_count)/loadFactor);
         if(!newsize)
@@ -8260,7 +8261,7 @@ static void rehash(Hash ** ptemp,int loadFactor/*1-100*/)
         newtable->hashfunc = temp->hashfunc;
         if(temp->hash_table)
             {
-            unsigned LONG i;
+            ULONG i;
             for(i = temp->hash_size;i > 0;)
                 {
                 pskRecord * r = temp->hash_table[--i];
@@ -8400,7 +8401,7 @@ static Boolean hashcasesensitive(struct typedObjectnode * This,ppsk arg)
 
 static Boolean hashforall(struct typedObjectnode * This,ppsk arg)
     {
-    unsigned LONG i;
+    ULONG i;
     int ret = TRUE;
     This = (typedObjectnode *)same_as_w((psk)This);
     for( i = 0
@@ -10720,12 +10721,12 @@ b b h h h a b c d:?X (|b c|x) d)
 static int subroot(nnumber * ag,char *conc[],int *pind)
     {
     int macht,i;
-    unsigned LONG g,smalldivisor;
-    unsigned LONG ores;
+    ULONG g,smalldivisor;
+    ULONG ores;
     static int bijt[12]=
         {1,  2,  2,  4,    2,    4,    2,    4,    6,    2,  6};
     /* 2-3,3-5,5-7,7-11,11-13,13-17,17-19,19-23,23-29,29-1,1-7*/
-    unsigned LONG bigdivisor;
+    ULONG bigdivisor;
 
 #ifdef ERANGE   /* ANSI C : strtoul() out of range */
     errno = 0;
@@ -11363,9 +11364,9 @@ for(alphabet = 0;alphabet < 256/*0x80*/;alphabet++)
             goal->RIGHT = build_up(goal->RIGHT,dim,NULL);
             }
         goal = goal->LEFT =
-            (psk)bmalloc(__LINE__,sizeof(unsigned LONG) + 1 + strlen((char *)VARNAME(nxtvar)));
+            (psk)bmalloc(__LINE__,sizeof(ULONG) + 1 + strlen((char *)VARNAME(nxtvar)));
         goal->v.fl = (READY|SUCCESS);
-        strcpy((char *)(goal)+sizeof(unsigned LONG),(char *)VARNAME(nxtvar));
+        strcpy((char *)(goal)+sizeof(ULONG),(char *)VARNAME(nxtvar));
         pgoal = &(*pgoal)->RIGHT;
         }
     }
@@ -12333,7 +12334,7 @@ if(Op(rightnode = (*PPnode)->RIGHT) == COMMA)
             process = tel;
             global_fpo = NULL;
             (*how)(rlnode);
-            ret = (psk)bmalloc(__LINE__,sizeof(unsigned LONG)+telling);
+            ret = (psk)bmalloc(__LINE__,sizeof(ULONG)+telling);
             ret->v.fl = READY | SUCCESS;
             process = glue;
             source = POBJ(ret);
@@ -12960,7 +12961,7 @@ static void print_clock(char * pjotter,clock_t time)
         sprintf(pjotter,"-1");
     else
 #if defined __TURBOC__ && !defined __BORLANDC__
-        sprintf(pjotter,"%0lu/%lu",(unsigned LONG)time,(unsigned LONG)(10.0*CLOCKS_PER_SEC));/* CLOCKS_PER_SEC == 18.2 */
+        sprintf(pjotter,"%0lu/%lu",(ULONG)time,(ULONG)(10.0*CLOCKS_PER_SEC));/* CLOCKS_PER_SEC == 18.2 */
 #else
         sprintf(pjotter,LONG0D "/" LONGD,(LONG )time,(LONG)CLOCKS_PER_SEC);
 #endif
@@ -13002,7 +13003,7 @@ static function_return_type functions(psk Pnode)
             telling = 1;
             process = tstr;
             result(rightnode);
-            rlnode = (psk)bmalloc(__LINE__, sizeof(unsigned LONG) + telling);
+            rlnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + telling);
             process = pstr;
             source = POBJ(rlnode);
             result(rightnode);
@@ -13183,7 +13184,7 @@ static function_return_type functions(psk Pnode)
                     break;
 #ifndef __BORLANDC__
                 case 8:
-                    *(unsigned LONG*)p = (unsigned LONG)val;
+                    *(ULONG*)p = (ULONG)val;
                     break;
 #endif
                 case 1:
@@ -13215,7 +13216,7 @@ static function_return_type functions(psk Pnode)
         CASE(X2D) /* x2d $ hexnumber */
             {
             char * endptr;
-            unsigned LONG val;
+            ULONG val;
             if(  is_op(rightnode)
               || HAS_VISIBLE_FLAGS_OR_MINUS(rightnode)
               )
@@ -13232,7 +13233,7 @@ static function_return_type functions(psk Pnode)
         CASE(D2X) /* d2x $ decimalnumber */
             {
             char * endptr;
-            unsigned LONG val;
+            ULONG val;
             if(is_op(rightnode) || !INTEGER_NOT_NEG(rightnode))
                 return functionFail(Pnode);
 #ifdef __BORLANDC__
@@ -13268,7 +13269,7 @@ static function_return_type functions(psk Pnode)
             }
         CASE(Chu) /* chu $ number */
             {
-            unsigned LONG val;
+            ULONG val;
             if(is_op(rightnode) || !INTEGER_POS(rightnode))
                 return functionFail(Pnode);
             val = STRTOUL((char *)POBJ(rightnode),(char **)NULL,10);
