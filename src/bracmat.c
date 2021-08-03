@@ -3962,14 +3962,14 @@ static psk Atom(int Flgs)
         }
     if(Flgs & INDIRECT)
         {
-        (Pnode)->v.fl = Flgs ^ SUCCESS;
+        Pnode->v.fl = Flgs ^ SUCCESS;
         }
     else
         {
         if(NEGATION(Flgs,NUMBER))
-            (Pnode)->v.fl = (Flgs ^ (READY|SUCCESS));
+            Pnode->v.fl = (Flgs ^ (READY|SUCCESS));
         else
-            (Pnode)->v.fl = (Flgs ^ (READY|SUCCESS)) | (numbercheck(SPOBJ(Pnode)) & ~DEFINITELYNONUMBER);
+            Pnode->v.fl = (Flgs ^ (READY|SUCCESS)) | (numbercheck(SPOBJ(Pnode)) & ~DEFINITELYNONUMBER);
         }
     
     if (!(Pnode->v.fl & VISIBLE_FLAGS))
@@ -4052,7 +4052,7 @@ static psk lex(int * nxt,int priority,int Flags,va_list * pargptr)
                     Flags ^= SUCCESS;
                     }
 #endif
-                (Pnode)->v.fl ^= Flags; /*19970821*/
+                Pnode->v.fl ^= Flags; /*19970821*/
                 if(nxt)
                     *nxt = op_or_0;
                 return Pnode;
@@ -4068,15 +4068,31 @@ static psk lex(int * nxt,int priority,int Flags,va_list * pargptr)
             assert(optab[op_or_0] >= 0);
             operatorNode->v.fl = optab[op_or_0] | SUCCESS;
             operatorNode->LEFT = Pnode;
-            Pnode = operatorNode;/* 'op_or_0' has sufficient priority */
+            /*
+            if(Pnode->v.fl & SELFMATCHING)
+                switch (op_or_0)
+                    {
+                        case DOT:
+                        case COMMA:
+                        case WHITE:
+                        case PLUS:
+                        case TIMES:
+                        case EXP:
+                        case LOG:
+                        case DIF:
+                            operatorNode->v.fl |= SELFMATCHING;
+                        default:
+                    }
+                    */
             if(optab[op_or_0] == priority) /* 'op_or_0' has same priority */
                 {
-                (Pnode)->v.fl ^= Flags; /*19970821*/
+                operatorNode->v.fl ^= Flags; /*19970821*/
                 operatorNode->RIGHT = NULL;
                 if(nxt)
                     *nxt = op_or_0;
-                return Pnode;
+                return operatorNode;
                 }
+            Pnode = operatorNode;/* 'op_or_0' has sufficient priority */
             for(;;)
                 {
                 child_op_or_0 = 0;
@@ -4094,7 +4110,7 @@ static psk lex(int * nxt,int priority,int Flags,va_list * pargptr)
             }
         while(op_or_0 != 0);
         }
-    (Pnode)->v.fl ^= Flags; /*19970821*/
+    Pnode->v.fl ^= Flags; /*19970821*/
     return /*0*/Pnode;
     }
 
@@ -4937,7 +4953,7 @@ static psk dopb(psk Pnode,psk src)
     {
     psk okn;
     okn = same_as_w(src);
-    okn = setflgs(okn,(Pnode)->v.fl);
+    okn = setflgs(okn,Pnode->v.fl);
     wipe(Pnode);
     return okn;
     }
@@ -14651,7 +14667,7 @@ static psk mergeOrSortTerms(psk Pnode)
         }
     if(res)
         {
-        (Pnode)->v.fl &= ~READY;
+        Pnode->v.fl &= ~READY;
         return Pnode;
         }
     rightoperand_and_tail(top,&Rterm,&Rtail);
@@ -15801,8 +15817,8 @@ static psk evalvar(psk Pnode)
             Pnode = iCopyOf(Pnode);
             }
         assert(!shared(Pnode));
-        (Pnode)->v.fl |= READY;
-        (Pnode)->v.fl ^= SUCCESS;
+        Pnode->v.fl |= READY;
+        Pnode->v.fl ^= SUCCESS;
         }
     return Pnode;
     }
@@ -15912,7 +15928,7 @@ static psk eval(psk Pnode)
                         Pnode = _leftbranch(&lkn);
                         }
                     DBGSRC(Printf("after match:");result(Pnode);Printf("\n");\
-                        if((Pnode)->v.fl & SUCCESS) Printf(" SUCCESS\n");\
+                        if(Pnode->v.fl & SUCCESS) Printf(" SUCCESS\n");\
                         else Printf(" FENCE\n");)
                     break;
                     }
