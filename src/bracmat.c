@@ -22,7 +22,7 @@ email: bartj@hum.ku.dk
 
 #define DATUM "3 August 2021"
 #define VERSION "6.9.1"
-#define BUILD "246"
+#define BUILD "247"
 /*
 COMPILATION
 -----------
@@ -3979,15 +3979,9 @@ static psk Atom(int Flgs,int opsflgs)
     }
 
 #if GLOBALARGPTR
-#define lex(NXT,GRENS,FLGS,OPSFLGS) lex(NXT,GRENS,FLGS)
+static psk lex(int * nxt,int priority,int Flags)
 #else
-#define lex(NXT,GRENS,FLGS,OPSFLGS,PVA_LIST) lex(NXT,GRENS,FLGS,PVA_LIST)
-#endif
-
-#if GLOBALARGPTR
-static psk lex(int * nxt,int priority,int Flags,int opsflgs)
-#else
-static psk lex(int * nxt,int priority,int Flags,int opsflgs,va_list * pargptr)
+static psk lex(int * nxt,int priority,int Flags,va_list * pargptr)
 #endif
 /* *nxt (if nxt != 0) is set to the character following the expression. */
     {
@@ -4004,10 +3998,10 @@ static psk lex(int * nxt,int priority,int Flags,int opsflgs,va_list * pargptr)
             if(*++start == 0)
 #if GLOBALARGPTR
                 (*shift)();
-            Pnode = lex(NULL,0,Flgs,locopsflgs);
+            Pnode = lex(NULL,0,Flgs);
 #else
                 (*shift)(pargptr);
-            Pnode = lex(NULL,0,Flgs,locopsflgs,pargptr);
+            Pnode = lex(NULL,0,Flgs,pargptr);
 #endif
             }
         else
@@ -4090,9 +4084,9 @@ static psk lex(int * nxt,int priority,int Flags,int opsflgs,va_list * pargptr)
                 child_op_or_0 = 0;
                 assert(optab[op_or_0] >= 0);
 #if GLOBALARGPTR
-                operatorNode->RIGHT = lex(&child_op_or_0,optab[op_or_0],0,0);
+                operatorNode->RIGHT = lex(&child_op_or_0,optab[op_or_0],0);
 #else
-                operatorNode->RIGHT = lex(&child_op_or_0,optab[op_or_0],0,0,pargptr);
+                operatorNode->RIGHT = lex(&child_op_or_0,optab[op_or_0],0,pargptr);
 #endif
                 if(child_op_or_0 != op_or_0)
                     break;
@@ -4118,9 +4112,9 @@ static psk buildtree_w(psk Pnode)
     start = InputElement->buffer;
     shift = vshift_w;
 #if GLOBALARGPTR
-    Pnode = lex(NULL,0,0,0);
+    Pnode = lex(NULL,0,0);
 #else
-    Pnode = lex(NULL,0,0,0,0);
+    Pnode = lex(NULL,0,0,0);
 #endif
     shift = shift_nw;
     if((--InputElement)->mallocallocated)
@@ -4887,9 +4881,9 @@ static psk starttree_w(psk Pnode,...)
     va_start(argptr,Pnode);
     start = startPos = va_arg(argptr,unsigned char *);
 #if GLOBALARGPTR
-    Pnode = lex(NULL,0,0,0);
+    Pnode = lex(NULL,0,0);
 #else
-    Pnode = lex(NULL,0,0,0,&argptr);
+    Pnode = lex(NULL,0,0,&argptr);
 #endif
     va_end(argptr);
     return Pnode;
@@ -4903,9 +4897,9 @@ static psk vbuildupnowipe(psk Pnode,const char *conc[])
     start = (unsigned char *)conc[0];
     shift = vshift_nw;
 #if GLOBALARGPTR
-    okn = lex(NULL,0,0,0);
+    okn = lex(NULL,0,0);
 #else
-    okn = lex(NULL,0,0,0,0);
+    okn = lex(NULL,0,0,0);
 #endif
     shift = shift_nw;
     okn = setflgs(okn,Pnode->v.fl);
@@ -4928,9 +4922,9 @@ static psk build_up(psk Pnode,...)
     va_start(argptr,Pnode);
     start = startPos = va_arg(argptr,unsigned char *);
 #if GLOBALARGPTR
-    okn = lex(NULL,0,0,0);
+    okn = lex(NULL,0,0);
 #else
-    okn = lex(NULL,0,0,0,&argptr);
+    okn = lex(NULL,0,0,&argptr);
 #endif
     va_end(argptr);
     if(Pnode)
