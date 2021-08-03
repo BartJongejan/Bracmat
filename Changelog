@@ -1,3 +1,12 @@
+3 August 2021
+Objects (trees headed by = operator and built in object types, i.e. hash
+tables) are space optimized in 64 bit versions. Otherwise unused bits in the
+first 64 bit word of the object node are now used to store the bit fields and
+reference counter, which previously were in an other 64 bit word. All nodes
+(objects, non-object operator nodes and leafs) have the same amount of bits for
+reference counting, currently 39. 32 bit versions have 32 bits for objects and
+9 bits for all other nodes. (When all 9 bits are used, a new copy is created.)
+
 31 July 2021
 For 64-bit versions, the size of the reference counter is enlarged by 32 bits.
 Fixed: endless loop when dummy operator evaluates to itself.
