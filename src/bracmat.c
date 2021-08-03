@@ -3933,10 +3933,7 @@ return Flgs;
 
 #define flags(OPSFLGS) flags()
 
-
-#define Atom(FLGS,OPSFLGS) Atom(FLGS)
-
-static psk Atom(int Flgs,int opsflgs)
+static psk Atom(int Flgs)
     {
     unsigned char *begin,*eind;
     size_t af = 0;
@@ -4005,7 +4002,7 @@ static psk lex(int * nxt,int priority,int Flags,va_list * pargptr)
 #endif
             }
         else
-            Pnode = Atom(Flgs,locopsflgs);
+            Pnode = Atom(Flgs);
         }
 
     if(*start == 0)
