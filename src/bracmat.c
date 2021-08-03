@@ -19,9 +19,9 @@
 /*
 email: bartj@hum.ku.dk
 */
-#define DATUM "1 August 2021"
-#define VERSION "6.9.0"
-#define BUILD "244"
+#define DATUM "3 August 2021"
+#define VERSION "6.9.1"
+#define BUILD "245"
 /*
 COMPILATION
 -----------
@@ -122,7 +122,7 @@ TODO list:
    20010821 a () () was evaluated to a (). Removed last ().
    20010903 (a.) () was evaluated to a
 */
-#define DEBUGBRACMAT 1 /* implement dbg'(expression), see DBGSRC macro */
+#define DEBUGBRACMAT 0 /* implement dbg'(expression), see DBGSRC macro */
 #define REFCOUNTSTRESSTEST 0
 #define DOSUMCHECK 0
 #define CHECKALLOCBOUNDS 0 /* only if NDEBUG is false */
@@ -6802,7 +6802,7 @@ static int copy_insert(psk name, psk pnode, psk cutoff)
 			if ((shared(pnode) != ALL_REFCOUNT_BITS_SET) && !all_refcount_bits_set(cutoff))
 				{/* cutoff: either node with headroom in the small refcounter
 				 or object */
-				DBGSRC(printf("name:["); result(name); printf("] pnode:["); result(pnode); printf("] cutoff(%d):[", cutoff->v.fl / ONEREF); result(cutoff); printf("]\n");)
+				DBGSRC(printf("name:["); result(name); printf("] pnode:["); result(pnode); printf("] cutoff(" LONGU "):[", cutoff->v.fl / ONEREF); result(cutoff); printf("]\n");)
 					PNODE = new_operator_like(pnode);
 				PNODE->flgs = (pnode->flgs & COPYFILTER/*~ALL_REFCOUNT_BITS_SET*/) | LATEBIND;
 				pnode->flgs += ONEREF;
@@ -9505,9 +9505,9 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
         }
 #endif
     DBGSRC(int saveNice;int redhum;saveNice = beNice;redhum = hum;beNice = FALSE;\
-        hum = FALSE;Printf("%d  %.*s|%s",ind,cutoff-sub,sub,cutoff);\
+        hum = FALSE;Printf("%d  %.*s|%s",ind,(int)(cutoff-sub),sub,cutoff);\
         Printf(":");result(pat);\
-        Printf  (",pos=%ld,sLen=%ld,sugCut=%s,mayMoveStart=%s)"\
+        Printf  (",pos=" LONGD ",sLen=%ld,sugCut=%s,mayMoveStart=%s)"\
                 ,pposition\
                 ,(long int)stringLength\
                 ,suggestedCutOff ? *suggestedCutOff ? *suggestedCutOff : (char*)"(0)" : (char*)"0"\
@@ -10001,7 +10001,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
 #else
                             s.c.rmr = (char)(scompare("b",(unsigned char *)sub,cutoff, pat));
 #endif
-                            DBGSRC(Printf("%s %d%*sscompare(%.*s,",wh,ind,ind,"",cutoff-sub,sub);result(pat);Printf(") ");\
+                            DBGSRC(Printf("%s %d%*sscompare(%.*s,",wh,ind,ind,"",(int)(cutoff-sub),sub);result(pat);Printf(") ");\
                                 if(s.c.rmr & ONCE) Printf("ONCE|");\
                                 if(s.c.rmr & TRUE) Printf("TRUE"); else Printf("FALSE");\
                                 Printf("\n");)
@@ -10019,7 +10019,7 @@ FENCE      Unwillingness of the subject to be matched by alternative patterns.
         s.c.rmr |= ONCE;
         DBGSRC(int saveNice;int redhum;saveNice = beNice;redhum = hum;\
             beNice = FALSE;hum = FALSE;\
-            Printf("%d%*sstringmatch(%.*s",ind,ind,"",cutoff-sub,sub);\
+            Printf("%d%*sstringmatch(%.*s",ind,ind,"",(int)(cutoff-sub),sub);\
             Printf(":");result(pat);\
             beNice = saveNice;hum = redhum;\
             Printf(") s.c.rmr %d (B)",s.c.rmr);\
