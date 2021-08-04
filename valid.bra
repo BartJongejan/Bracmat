@@ -976,7 +976,6 @@ towards operators that are closer to the root of the tree"
             & !rr:aaaaaaa
           | Out$"66lbis first alternation fails because of embedding"
           )
-          out$66m
           ( @( aaab
              :   ( (|a)
                    (|a)
@@ -986,7 +985,6 @@ towards operators that are closer to the root of the tree"
              )
           | Out$"66m first alternation fails because of embedding"
           )
-          out$66n
           ( ( N
             = @( aaab
                :   ( ((|a):?X)
@@ -1003,11 +1001,9 @@ towards operators that are closer to the root of the tree"
             | Out$"66n first alternation fails because of embedding"
             )
           )
-          out$66o
           ( @(aaab:((|a) aa) b)
           | Out$"66o first alternation fails because of embedding"
           )
-          out$66p
           ( @( aaaaaaaaaaaaaa
              :   ((aa|aaa) (aaaaa|aa))
                  (aaa|aaaa|aaaaaaa)
@@ -1015,7 +1011,6 @@ towards operators that are closer to the root of the tree"
              )
           | Out$"66p first alternation fails because of embedding"
           )
-          out$66q
           ( @( aaaaaaaaaaaaaa
              :   ( ((aa|aaa) (aaaaa|aa))
                    (aaa|aaaa|aaaaaaa)
@@ -1024,7 +1019,6 @@ towards operators that are closer to the root of the tree"
              )
           | Out$"66q first alternation fails because of embedding"
           )
-          out$66r
           ( @( aaaaaaaaaaaaaaa
              :   ( ((aa|aaa) (aaaaa|aa))
                    (aaa|aaaa|aaaaaaa)
@@ -1038,7 +1032,6 @@ towards operators that are closer to the root of the tree"
              )
           | Out$66rbis
           )
-          out$67
           ( @(abXk:(|? b|`) X ?id)
           &   Out
             $ "67 (Acceptable) (string match optimization) Pattern should only match subjects having only b's before the X"
@@ -1058,13 +1051,11 @@ towards operators that are closer to the root of the tree"
           &   Out
             $ "67c Pattern should only match subjects having only b's before the X"
           )
-          out$68
           (   a b X k
             : (|? b|`) X ?id
           &   Out
             $ "68 Pattern should only match subjects having only b's before the X"
           )
-          out$69
           (   @( bbbbXk
                :   (|? b|`)
                    ((%@:~b) ?:?id)
@@ -2022,18 +2013,44 @@ towards operators that are closer to the root of the tree"
             & (myhash..ISO)$
             &   (str$(chr$(x2d$C4) chr$(x2d$C7)).isokey)
               : ?keyval1
+            & "Latin-1 ÄÇ"
             &   (str$(chu$(x2d$C4) chu$(x2d$C7)),unicodekey1)
               : ?keyval2
+            & "UTF-8 ÄÇ"
             &   (str$(chu$(x2d$C5) chu$(x2d$C7)),unicodekey2)
               : ?keyval3
+            & "UTF-8 ÅÇ"
+            & str$(chr$(x2d$E4) chu$(x2d$C7)):?key4
+            & "ISO ä UTF-8 Ç"
             & (myhash..insert)$!keyval1
             & (myhash..insert)$!keyval2
             & (myhash..insert)$!keyval3
-            &     (myhash..find)
-                $ (str$(chr$(x2d$E4) chu$(x2d$C7)))
-              : ?a
+            & (myhash..find)$!key4:?a
             & !a:!keyval2 !keyval1
-          | Out194
+            &   Out
+              $ "194a Latin-1 followed by UTF-8: UTF-8 should not be recognized."
+          | 
+          )
+          (   new$hash:?myhash
+            & (myhash..ISO)$
+            &   (str$(chr$(x2d$C7) chr$(x2d$C4)).isokey)
+              : ?keyval1
+            & "Latin-1 ÇÄ"
+            &   (str$(chu$(x2d$C7) chu$(x2d$C4)),unicodekey1)
+              : ?keyval2
+            & "UTF-8 ÇÄ"
+            &   (str$(chu$(x2d$C7) chu$(x2d$C5)),unicodekey2)
+              : ?keyval3
+            & "UTF-8 ÇÅ"
+            & str$(chu$(x2d$C7) chr$(x2d$E4)):?key4
+            & "UTF-8 Ç ISO ä"
+            & (myhash..insert)$!keyval1
+            & (myhash..insert)$!keyval2
+            & (myhash..insert)$!keyval3
+            & (myhash..find)$!key4:?a
+            & !a:!keyval2 !keyval1
+          |   Out
+            $ "194b UTF-8 followed by Latin-1: OK to fall back to Latin-1 after UTF-8"
           )
           (sim$(backyard,backaryd):14/16|Out$195)
           (     sim
@@ -2208,23 +2225,23 @@ towards operators that are closer to the root of the tree"
           | Out$226
           )
           (b+a:a+b|Out$227)
-          (b+a+c:a+b+c|Out228)
+          (b+a+c:a+b+c|Out$228)
           ( (a+c+f)+b+d+g:a+b+c+d+f+g
-          | Out229
+          | Out$229
           )
-          (i+-i*x:i+-i*x|Out230)
-          (i+-i:0|Out231)
-          (i*x+-i:-i+i*x|Out232)
+          (i+-i*x:i+-i*x|Out$230)
+          (i+-i:0|Out$231)
+          (i*x+-i:-i+i*x|Out$232)
           ( (i*x+i*z)+i*y:i*x+i*y+i*z
-          | Out233
+          | Out$233
           )
           ( i*y+i*x+i*z:i*x+i*y+i*z
-          | Out234
+          | Out$234
           )
-          (i*x+3*i*x:4*i*x|Out235)
-          (3*i*x+i*x:4*i*x|Out236)
-          (-i*x+3*i*x:2*i*x|Out237)
-          (-i*x+3*-i*x:4*-i*x|Out238)
+          (i*x+3*i*x:4*i*x|Out$235)
+          (3*i*x+i*x:4*i*x|Out$236)
+          (-i*x+3*i*x:2*i*x|Out$237)
+          (-i*x+3*-i*x:4*-i*x|Out$238)
           (3*-i*x+-3*i*x:6*-i*x|Out$239)
           (3*-i*x+-3*-i*x:0|Out$240)
           (i*x+3*-i*x:2*-i*x|Out$241)
@@ -4073,7 +4090,7 @@ towards operators that are closer to the root of the tree"
                : ?x (f|ef|def) ?
                )
             & abc:!x
-          | Out504
+          | Out$504
           )
           out$505
           (   @(abcd:~>%a ?x)
