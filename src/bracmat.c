@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "3 August 2021"
-#define VERSION "6.9.1"
-#define BUILD "247"
+#define DATUM "5 August 2021"
+#define VERSION "6.9.2"
+#define BUILD "249"
 /*
 COMPILATION
 -----------
@@ -123,17 +123,42 @@ TODO list:
    20010821 a () () was evaluated to a (). Removed last ().
    20010903 (a.) () was evaluated to a
 */
-#define DEBUGBRACMAT 1 /* implement dbg'(expression), see DBGSRC macro */
+#define DEBUGBRACMAT 1 /* Implement dbg'(expression), see DBGSRC macro */
 #define REFCOUNTSTRESSTEST 0
 #define DOSUMCHECK 0
 #define CHECKALLOCBOUNDS 0 /* only if NDEBUG is false */
-#define PVNAME 0 /* allocate strings of variable names separately from variable structure. */
+#define PVNAME 0 /* Allocate strings of variable names separately from variable
+                    structure. Does not give better results. */
 #define STRINGMATCH_CAN_BE_NEGATED 0 /* ~@(a:a) */
 #define CODEPAGE850 0
-#define MAXSTACK 0 /* 1: show max stack depth (eval function only)*/
+#define MAXSTACK 0 /* 1: Show max stack depth (eval function only)*/
 #define CUTOFFSUGGEST 1
-#define READMARKUPFAMILY 1 /* read SGML, HTML and XML files. (include xml.c in your project!) */
-#define READJSON 1 /* read JSON files. (include json.c in your project!) */
+#define READMARKUPFAMILY 1 /* Read SGML, HTML and XML files. 
+                             (include xml.c in your project!) */
+#define READJSON 1 /* Read JSON files. (Include json.c in your project!) */
+#define DATAMATCHESITSELF 0 /* An experiment from August 2021.
+The idea is to make matching a data structure with itself faster by just
+checking whether they have the same address. Only structures with no prefixes
+anywhere and only using the operators DOT COMMA WHITE PLUS TIMES EXP LOG can be
+compared safely this way. For example,
+
+  (a=x+y+x) & ('$a:'$a)
+
+and
+
+  (a=(x.y),z) & !a:!a
+
+succeed, whereas
+
+  (b=x ~%) & ('$b:'$b)
+
+fails.
+
+To make this work, an extra bit had to be reserved in each node. The overhead
+of setting the bit turned out to outweigh the advantage: programs became
+a little bit slower, not faster.
+*/
+
 /*
 About reference counting.
 Most nodes can be shared by no more than 1024 referers. Copies must be made as needed.
@@ -422,11 +447,22 @@ typedef   signed long  INT32_T;
            1<<20 operator
            1<<21 latebind
         */
+#if DATAMATCHESITSELF
 #define SELFMATCHING    (1<<22) /* 20210801 */
+#define BITWISE_OR_SELFMATCHING |SELFMATCHING
+#else
+#define BITWISE_OR_SELFMATCHING 
+#endif
+
 #if WORD32
 #else
+#if DATAMATCHESITSELF
 #define BUILT_IN        (1<<23) /* 20210801 only used for objects (operator =) */
 #define CREATEDWITHNEW  (1<<24) /* 20210801 only used for objects (operator =) */
+#else
+#define BUILT_IN        (1<<22) /* 20210801 only used for objects (operator =) */
+#define CREATEDWITHNEW  (1<<23) /* 20210801 only used for objects (operator =) */
+#endif
 #endif
 
 #define VISIBLE_FLAGS_WEAK      (INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)
@@ -684,10 +720,18 @@ extern void XMLtext(FILE * fpi, char * source, int trim, int html, int xml);
 extern int JSONtext(FILE * fpi, char * source);
 #endif
 
+#if DATAMATCHESITSELF
 #if WORD32
 #define NON_REF_COUNT_BITS 23 /* prefixes, hidden flags, operator bits */
 #else
 #define NON_REF_COUNT_BITS 25 /* prefixes, hidden flags, operator bits */
+#endif
+#else
+#if WORD32
+#define NON_REF_COUNT_BITS 22 /* prefixes, hidden flags, operator bits */
+#else
+#define NON_REF_COUNT_BITS 24 /* prefixes, hidden flags, operator bits */
+#endif
 #endif
 
 #if REFCOUNTSTRESSTEST
@@ -1180,7 +1224,7 @@ Flgs 0                   NOT
     19          "                 QNUL
     20          "                 QFRACTION
     21                LATEBIND                        NOOP
-    22               SELFMATCHING
+    22               SELFMATCHING                                Toggles with DATAMATCHESITSELF
     23                 BUILT_IN                                  ONLY for 64 bit platform
     24              CREATEDWITHNEW                               ONLY for 64 bit platform
     25             (reference count)                             NON_REF_COUNT_BITS 25 or 23
@@ -3291,8 +3335,13 @@ static int printflags(psk Root)
 
 #define LHS 1
 #define RHS 2
+
+#if DATAMATCHESITSELF
 //#define SM(Root) {if((Root)->v.fl & SELFMATCHING) (*process)(';');}
 #define SM(Root)
+#else
+#define SM(Root)
+#endif
 
 static void endnode(psk Root, int space)
     {
@@ -3976,14 +4025,16 @@ static psk Atom(int Flgs)
         else
             Pnode->v.fl = (Flgs ^ (READY | SUCCESS)) | (numbercheck(SPOBJ(Pnode)) & ~DEFINITELYNONUMBER);
         }
-
+#if DATAMATCHESITSELF
     if (!(Pnode->v.fl & VISIBLE_FLAGS))
         {
         Pnode->v.fl |= SELFMATCHING;
         }
+#endif
     return Pnode;
     }
 
+#if DATAMATCHESITSELF
 static psk leftDescend_rightDescend(psk top)
     {
     /* (a.b).((c.d).(e.f)) -> (((a.b).(c.d)).e).f*/
@@ -4026,6 +4077,7 @@ static psk leftDescend_rightDescend(psk top)
         }
     return top;
     }
+#endif
 
 #if GLOBALARGPTR
 static psk lex(int * nxt, int priority, int Flags)
@@ -4151,6 +4203,7 @@ static psk lex(int * nxt, int priority, int Flags, va_list * pargptr)
                         }
                     else
                         {
+#if DATAMATCHESITSELF
                         switch (optab[op_or_0])
                             {
                                 case DOT:
@@ -4183,6 +4236,7 @@ static psk lex(int * nxt, int priority, int Flags, va_list * pargptr)
                                     }
                                 default:
                                     {
+#endif
                                     Pnode = operatorNode;/* 'op_or_0' has sufficient priority */
                                     for (;;)
                                         {
@@ -4197,15 +4251,19 @@ static psk lex(int * nxt, int priority, int Flags, va_list * pargptr)
                                             break;
                                         operatorNode = operatorNode->RIGHT;
                                         }
+#if DATAMATCHESITSELF
                                     }
                             }
+#endif
                         op_or_0 = child_op_or_0;
                         }
                     }
                 } while (op_or_0 != 0);
             }
         Pnode->v.fl ^= Flags; /*19970821*/
+#if DATAMATCHESITSELF
         Pnode = leftDescend_rightDescend(Pnode);
+#endif
         return Pnode;
         }
     }
@@ -5286,7 +5344,7 @@ static psk inumberNode(nnumber * g)
         iconvert2decimal(g, (char *)POBJ(res));
         }
 
-    res->v.fl = READY | SUCCESS | QNUMBER | SELFMATCHING;
+    res->v.fl = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
     res->v.fl |= g->sign;
     return res;
     }
@@ -5329,7 +5387,7 @@ static psk numberNode2(nnumber * g)
             }
         bfree(g->alloc);
         }
-    res->v.fl = READY | SUCCESS | QNUMBER | SELFMATCHING;
+    res->v.fl = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
     res->v.fl |= g->sign;
     return res;
     }
@@ -6021,7 +6079,7 @@ static Qnumber nn2q(nnumber * num, nnumber * den)
         *endp++ = '/';
         endp = iconvert2decimal(den, endp);
         assert((size_t)(endp - (char *)res) <= len);
-        res->v.fl = READY | SUCCESS | QNUMBER | QFRACTION | SELFMATCHING;
+        res->v.fl = READY | SUCCESS | QNUMBER | QFRACTION BITWISE_OR_SELFMATCHING;
         res->v.fl |= num->sign;
         }
     return res;
@@ -6529,7 +6587,7 @@ static psk qDenominator(psk Pnode)
     res = (psk)bmalloc(__LINE__, len);
     assert(!(xn.sign & QNUL)); /*Because RATIONAL_COMP(_qx)*/
     memcpy((void*)POBJ(res), xn.number, xn.length);
-    res->v.fl = READY | SUCCESS | QNUMBER | SELFMATCHING;
+    res->v.fl = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
     res->v.fl |= xn.sign;
     wipe(Pnode);
     return res;
@@ -6968,7 +7026,7 @@ static psk charcopy(const char * strt, const char * until)
     psk pnode;
     if ('0' <= *strt && *strt <= '9')
         {
-        nr = QNUMBER | SELFMATCHING;
+        nr = QNUMBER BITWISE_OR_SELFMATCHING;
         if (*strt == '0')
             nr |= QNUL;
         }
@@ -10283,10 +10341,12 @@ static char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk exp
             }
         else
             {
+#if DATAMATCHESITSELF
             if (pat == sub && (pat->v.fl & SELFMATCHING))
                 {
                 return TRUE | ONCE;
                 }
+#endif
             switch (Op(pat))
                 {
                     case WHITE:
@@ -15616,7 +15676,7 @@ static psk merge
                 assert(!shared(Pnode));
                 Pnode = eval(Pnode);
                 }
-            
+#if DATAMATCHESITSELF
             if (is_op(Pnode))
                 {
                 if ((Pnode->LEFT->v.fl & SELFMATCHING) && (Pnode->RIGHT->v.fl & SELFMATCHING))
@@ -15624,6 +15684,7 @@ static psk merge
                 else
                     Pnode->v.fl &= ~SELFMATCHING;
                 }
+#endif
             if (rennur != &nilNode)
                 {
                 psk n = rennur->RIGHT;
@@ -15643,6 +15704,7 @@ static psk merge
         Pnode = Rennur;
         assert(!shared(Pnode));
         Pnode->v.fl |= READY;
+#if DATAMATCHESITSELF
         if (is_op(Pnode))
             {
             if ((Pnode->LEFT->v.fl & SELFMATCHING) && (Pnode->RIGHT->v.fl & SELFMATCHING))
@@ -15650,6 +15712,7 @@ static psk merge
             else
                 Pnode->v.fl &= ~SELFMATCHING;
             }
+#endif
         Rennur = tmp;
         }
     return Pnode;
@@ -16409,47 +16472,47 @@ int startProc(
     nilNodeNotNeutral.v.fl = READY | SUCCESS;
     nilNodeNotNeutral.u.lobj = 0L;
 
-    zeroNode.v.fl = READY | SUCCESS | IDENT | QNUMBER | QNUL | SELFMATCHING;
+    zeroNode.v.fl = READY | SUCCESS | IDENT | QNUMBER | QNUL BITWISE_OR_SELFMATCHING;
     zeroNode.u.lobj = 0L;
     zeroNode.u.obj = '0';
 
-    zeroNodeNotNeutral.v.fl = READY | SUCCESS | QNUMBER | QNUL | SELFMATCHING;
+    zeroNodeNotNeutral.v.fl = READY | SUCCESS | QNUMBER | QNUL BITWISE_OR_SELFMATCHING;
     zeroNodeNotNeutral.u.lobj = 0L;
     zeroNodeNotNeutral.u.obj = '0';
 
     oneNode.u.lobj = 0L;
     oneNode.u.obj = '1';
-    oneNode.v.fl = READY | SUCCESS | IDENT | QNUMBER | SELFMATCHING;
+    oneNode.v.fl = READY | SUCCESS | IDENT | QNUMBER BITWISE_OR_SELFMATCHING;
     *(&(oneNode.u.obj) + 1) = 0;
 
     oneNodeNotNeutral.u.lobj = 0L;
     oneNodeNotNeutral.u.obj = '1';
-    oneNodeNotNeutral.v.fl = READY | SUCCESS | QNUMBER | SELFMATCHING;
+    oneNodeNotNeutral.v.fl = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
     *(&(oneNode.u.obj) + 1) = 0;
 
     minusTwoNode.u.lobj = 0L;
     minusTwoNode.u.obj = '2';
-    minusTwoNode.v.fl = READY | SUCCESS | QNUMBER | MINUS | SELFMATCHING;
+    minusTwoNode.v.fl = READY | SUCCESS | QNUMBER | MINUS BITWISE_OR_SELFMATCHING;
     *(&(minusTwoNode.u.obj) + 1) = 0;
 
     minusOneNode.u.lobj = 0L;
     minusOneNode.u.obj = '1';
-    minusOneNode.v.fl = READY | SUCCESS | QNUMBER | MINUS | SELFMATCHING;
+    minusOneNode.v.fl = READY | SUCCESS | QNUMBER | MINUS BITWISE_OR_SELFMATCHING;
     *(&(minusOneNode.u.obj) + 1) = 0;
 
     twoNode.u.lobj = 0L;
     twoNode.u.obj = '2';
-    twoNode.v.fl = READY | SUCCESS | QNUMBER | SELFMATCHING;
+    twoNode.v.fl = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
     *(&(twoNode.u.obj) + 1) = 0;
 
     fourNode.u.lobj = 0L;
     fourNode.u.obj = '4';
-    fourNode.v.fl = READY | SUCCESS | QNUMBER | SELFMATCHING;
+    fourNode.v.fl = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
     *(&(fourNode.u.obj) + 1) = 0;
 
     minusFourNode.u.lobj = 0L;
     minusFourNode.u.obj = '4';
-    minusFourNode.v.fl = READY | SUCCESS | QNUMBER | MINUS | SELFMATCHING;
+    minusFourNode.v.fl = READY | SUCCESS | QNUMBER | MINUS BITWISE_OR_SELFMATCHING;
     *(&(minusFourNode.u.obj) + 1) = 0;
 
     m0 = build_up(m0, "?*(%+%)^~/#>1*?", NULL);
