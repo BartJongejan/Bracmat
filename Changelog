@@ -1,3 +1,10 @@
+5 August 2021
+Experiment: theoretically, match can be speeded up by first checking whether
+subject and pattern are the same thing. If they are, the match succeeds,
+PROVIDED that the thing doesn't contain any flags and only a subset of
+operators. The experiment was not a success: programs became slower, because of
+the overhead.
+
 3 August 2021
 Objects (trees headed by = operator and built in object types, i.e. hash
 tables) are space optimized in 64 bit versions. Otherwise unused bits in the
