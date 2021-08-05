@@ -154,9 +154,9 @@ succeed, whereas
 
 fails.
 
-To make this work, an extra bit had to be reserved in each node. The overhead
-of setting the bit turned out to outweigh the advantage: programs became
-a little bit slower, not faster.
+To make this work, an extra bit has to be reserved in each node. The overhead
+of setting the bit turns out to outweigh the advantage: programs become a
+little bit slower, not faster.
 */
 
 /*
