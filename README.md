@@ -272,6 +272,14 @@ Bracmat is a good choice for tasks that require dynamic programming.
     bracmat parm1 parm2 ...
   
   * Bracmat evaluates each parameter, from left to right. When the last parameter is evaluated, bracmat exits.
+  * Parameters must be enclosed in apostrophes (Linux, Mac) or quotes (Windows). These characters must be escaped with a backslash if they are part of a parameter
+
+    bracmat $'out\'"here I am"'    (Linux)
+    
+    bracmat "out'\"here I am\""    (Windows)
+    
+    Notice the $ in front of the parameter. This is a bash extension that makes it possible to escape apostrophes.
+   
   * At least the first parameter must be a valid bracmat expression, appropriately quoted and 'escaped' to pass unscathed through the shell's own parameter evaluation mechanism.
 
 **Download**
