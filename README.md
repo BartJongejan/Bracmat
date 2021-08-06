@@ -96,7 +96,7 @@ Bracmat is a good choice for tasks that require dynamic programming.
   Java and C source code for creating a JNI (Java Native Interface) so the
   Bracmat evaluator can be called from the Java programming language.
   
-  * java
+    * java
 
     Java code
 
@@ -107,8 +107,8 @@ Bracmat is a good choice for tasks that require dynamic programming.
           
     * dk
 
-      * cst
-
+        * cst
+        
         * bracmat.java
                 
           Java code that loads the Bracmat dynamic library.
@@ -272,9 +272,9 @@ Bracmat is a good choice for tasks that require dynamic programming.
         bracmat parm1 parm2 ...
   
   * Bracmat evaluates each parameter, from left to right. When the last parameter is evaluated, bracmat exits.
-  * Parameters must be enclosed in apostrophes (Linux, Mac) or quotes (Windows). These characters must be escaped with a backslash if they are part of a parameter
+  * Parameters can be enclosed in apostrophes (Linux, Mac) or quotes (Windows). These characters must be escaped with a backslash if they are part of a parameter
 
-        bracmat $'out$Hello\\nWorld!&out\'"Here I am!\\nWhat about you?"'    (Linux)
+        bracmat $'out$Hello\\nWorld!&out\'"Here I am!\\nWhat about you?"'    (bash)
     
         bracmat "out$Hello\nWorld!&out'\"Here I am!\nWhat about you?\""    (Windows)
     
@@ -284,6 +284,12 @@ Bracmat is a good choice for tasks that require dynamic programming.
         World!
         Here I am!
         What about you?
+        
+    In Linux, enclosing parameters in apostrophes or quotes is not necessary if you are willing to escape more characters. For example, this works:
+    
+        bracmat out\'Hello\&out\$world    (bash)
+
+    On Windows, escaping is not possible in every case.
    
   * At least the first parameter must be a valid bracmat expression, appropriately quoted and 'escaped' to pass unscathed through the shell's own parameter evaluation mechanism.
 
