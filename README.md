@@ -278,7 +278,12 @@ Bracmat is a good choice for tasks that require dynamic programming.
     
         bracmat "out$Hello\nWorld!&out'\"Here I am!\nWhat about you?\""    (Windows)
     
-    Notice the $ in front of the Linux parameter. This is a bash extension that makes it possible to escape apostrophes.
+    Notice the $ in front of the Linux parameter. This is a bash extension that makes it possible to escape apostrophes. You should see this output:
+    
+        Hello
+        World!
+        Here I am!
+        What about you?
    
   * At least the first parameter must be a valid bracmat expression, appropriately quoted and 'escaped' to pass unscathed through the shell's own parameter evaluation mechanism.
 
