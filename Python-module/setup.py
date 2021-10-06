@@ -1,8 +1,8 @@
 # setup.py
 # 
-from distutils.core import setup
+from setuptools import setup
 from Cython.Build import cythonize
-from distutils.extension import Extension
+from setuptools.extension import Extension
 
 sourcefiles = ['../safe/bracmatso.c', '../src/xml.c', '../src/json.c', 'prythat.pyx']
 

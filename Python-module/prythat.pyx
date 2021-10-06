@@ -24,7 +24,7 @@ cdef void WinFlushFunc():
 cdef void NiFunc(const char * strng):
     cdef bytes py_string = strng
     py = py_string.decode('UTF-8')
-    exec py in globals(),locals()
+    exec(py, globals(),locals())
 
 # Call back function Ni!$"<expr>" for evaluating a Python expression
 cdef const char * NiiFunc(const char * strng):
