@@ -22,7 +22,7 @@ email: bartj@hum.ku.dk
 
 #define DATUM "5 August 2021"
 #define VERSION "6.9.2"
-#define BUILD "249"
+#define BUILD "250"
 /*
 COMPILATION
 -----------
@@ -1585,7 +1585,7 @@ static int isLetter(int a)
 
 struct ccaseconv
     {
-    unsigned int L : 21; int range : 11; unsigned int inc : 2; int dif : 20;
+    unsigned int L : 21; unsigned int range : 11; unsigned int inc : 2; int dif : 20;
     };
 struct ccaseconv u2l[] = {
 {0x41,25,1,32},

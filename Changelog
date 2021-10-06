@@ -1,3 +1,6 @@
+6 October 2021
+Field 'range' in struct ccaseconv changed from 'int' to 'unsigned int'.
+
 5 August 2021
 Experiment: theoretically, match can be speeded up by first checking whether
 subject and pattern are the same thing. If they are, the match succeeds,
