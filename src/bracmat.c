@@ -22,7 +22,7 @@ email: bartj@hum.ku.dk
 
 #define DATUM "5 August 2021"
 #define VERSION "6.9.2"
-#define BUILD "251"
+#define BUILD "250"
 /*
 COMPILATION
 -----------
@@ -13125,7 +13125,7 @@ static void stringreverse(char * a, size_t len)
 
 static void print_clock(char * pjotter, clock_t time)
     {
-    if (time == -1L)
+    if (time == (clock_t)-1)
         sprintf(pjotter, "-1");
     else
 #if defined __TURBOC__ && !defined __BORLANDC__
