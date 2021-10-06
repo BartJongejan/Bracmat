@@ -1973,11 +1973,11 @@ static int convertLetter(int a, struct ccaseconv * T)
             if (i == 0)
                 return a;
             --i;
-            if ((unsigned int)a <= T[i].L + T[i].range
-                && (T[i].inc < 2
-                    || !((a - T[i].L) & 1)
-                    )
-                )
+            if (  (unsigned int)a <= (unsigned int)(T[i].L + T[i].range)
+               && (  T[i].inc < 2
+                  || !((a - T[i].L) & 1)
+                  )
+               )
                 {
                 return a + T[i].dif;
                 }

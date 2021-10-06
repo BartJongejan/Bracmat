@@ -1,5 +1,6 @@
 6 October 2021
 Field 'range' in struct ccaseconv changed from 'int' to 'unsigned int'.
+Cast (T[i].L + T[i].range) to 'unsigned int'
 
 5 August 2021
 Experiment: theoretically, match can be speeded up by first checking whether
