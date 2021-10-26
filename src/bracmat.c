@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "5 August 2021"
-#define VERSION "6.9.2"
-#define BUILD "250"
+#define DATUM "26 October 2021"
+#define VERSION "6.9.3"
+#define BUILD "251"
 /*
 COMPILATION
 -----------
@@ -123,7 +123,7 @@ TODO list:
    20010821 a () () was evaluated to a (). Removed last ().
    20010903 (a.) () was evaluated to a
 */
-#define DEBUGBRACMAT 1 /* Implement dbg'(expression), see DBGSRC macro */
+#define DEBUGBRACMAT 0 /* Implement dbg'(expression), see DBGSRC macro */
 #define REFCOUNTSTRESSTEST 0
 #define DOSUMCHECK 0
 #define CHECKALLOCBOUNDS 0 /* only if NDEBUG is false */
@@ -136,6 +136,7 @@ TODO list:
 #define READMARKUPFAMILY 1 /* Read SGML, HTML and XML files. 
                              (include xml.c in your project!) */
 #define READJSON 1 /* Read JSON files. (Include json.c in your project!) */
+#define SHOWMEMBLOCKS 0
 #define DATAMATCHESITSELF 0 /* An experiment from August 2021.
 The idea is to make matching a data structure with itself faster by just
 checking whether they have the same address. Only structures with no prefixes
@@ -257,7 +258,7 @@ Atari : define -DATARI because of BIGENDIAN and extern int _stksize = -1;
 /* Optional #defines for debugging and adaptation to machine */
 
 #define TELMAX  1 /* Show the maximum number of allocated nodes. */
-#define TELLING 0 /* Same, plus current number of allocated nodes, in groups of
+#define TELLING 1 /* Same, plus current number of allocated nodes, in groups of
                        4,8,12 and >12 bytes */
 #if TELLING
 #if TELMAX == 0
@@ -803,7 +804,6 @@ typedef union
         ULONG binop : 4; /* only if operator node*/
         /* EQUALS DOT COMMA OR AND MATCH WHITE PLUS TIMES EXP LOG DIF FUU FUN UNDERSCORE */
         ULONG latebind : 1;
-        ULONG selfmatching : 1;
 #if WORD32
 #else
         ULONG built_in : 1; /* only used for objects (operator =) */
@@ -840,7 +840,6 @@ typedef union
         ULONG qbreuk : 1; /* only if leaf */
 
         ULONG latebind : 1;
-        ULONG selfmatching : 1;
 #if WORD32
 #else
         ULONG built_in : 1; /* only used for objects (operator =) */
@@ -2324,9 +2323,9 @@ static int errorprintf(const char *fmt, ...)
 
 struct memblock
     {
-    void * lowestAddress;
-    void * highestAddress;
-    void * firstFreeElementBetweenAddresses; /* if NULL : no more free elements */
+    struct memoryElement * lowestAddress;
+    struct memoryElement * highestAddress;
+    struct memoryElement * firstFreeElementBetweenAddresses; /* if NULL : no more free elements */
     struct memblock * previousOfSameLength; /* address of older ands smaller block with same sized elements */
     size_t sizeOfElement;
 #if TELMAX
@@ -2349,14 +2348,14 @@ static int global_nallocations = 0;
 
 struct memoryElement
     {
-    void * next;
+    struct memoryElement * next;
     };
-
+/*
 struct pointerStruct
     {
     struct pointerStruct * lp;
     } *global_p, *global_ep;
-
+*/
 struct memblock ** pMemBlocks = 0; /* list of memblock, sorted
                                       according to memory address */
 static int NumberOfMemBlocks = 0;
@@ -2367,7 +2366,7 @@ static int malloced = 0;
 #if DOSUMCHECK
 
 static int LineNo;
-static int N;
+static int globN;
 
 static int getchecksum(void)
     {
@@ -2394,7 +2393,7 @@ static void setChecksum(int lineno, int n)
     if (lineno)
         {
         LineNo = lineno;
-        N = n;
+        globN = n;
         }
     Checksum = getchecksum();
     }
@@ -2405,7 +2404,7 @@ static void checksum(int line)
     nChecksum = getchecksum();
     if (Checksum && Checksum != nChecksum)
         {
-        Printf("Line %d: Illegal write after bmalloc(%d) on line %d", line, N, LineNo);
+        Printf("Line %d: Illegal write after bmalloc(%d) on line %d", line, globN, LineNo);
         getchar();
         exit(1);
         }
@@ -2516,8 +2515,8 @@ static void checkBounds(void * p)
     assert(lp[lp[1]] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d'));
     for (q = pMemBlocks + NumberOfMemBlocks; --q >= pMemBlocks;)
         {
-        size_t stepSize = (*q)->sizeOfElement / sizeof(struct pointerStruct);
-        if ((*q)->lowestAddress <= p && p < (*q)->highestAddress)
+        size_t stepSize = (*q)->sizeOfElement / sizeof(struct memoryElement);
+        if ((*q)->lowestAddress <= (struct memoryElement *)p && (struct memoryElement *)p < (*q)->highestAddress)
             {
             assert(lp[stepSize - 1] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d'));
             return;
@@ -2530,15 +2529,15 @@ static void checkAllBounds()
     struct memblock ** q;
     for (q = pMemBlocks + NumberOfMemBlocks; --q >= pMemBlocks;)
         {
-        size_t stepSize = (*q)->sizeOfElement / sizeof(struct pointerStruct);
+        size_t stepSize = (*q)->sizeOfElement / sizeof(struct memoryElement);
 
-        struct pointerStruct * p = (struct pointerStruct *)(*q)->lowestAddress;
-        struct pointerStruct * e = (struct pointerStruct *)(*q)->highestAddress;
+        struct memoryElement* p = (struct memoryElement*)(*q)->lowestAddress;
+        struct memoryElement* e = (struct memoryElement*)(*q)->highestAddress;
         size_t L = (*q)->sizeOfElement - 1;
-        struct pointerStruct * x;
+        struct memoryElement* x;
         for (x = p; x < e; x += stepSize)
             {
-            struct pointerStruct * a = ((struct memoryElement *)x)->next;
+            struct memoryElement* a = ((struct memoryElement *)x)->next;
             if (a == 0 || (p <= a && a < e))
                 ;
             else
@@ -2556,7 +2555,7 @@ static void checkAllBounds()
                         else if (*s == 0)
                             printf("NIL");
                         else
-                            printf("-", *s);
+                            printf("-%c", *s);
                     printf("] %p\n", x);
                     }
                 assert(((LONG *)x)[0] == ('s' << 24) + ('t' << 16) + ('a' << 8) + ('r'));
@@ -2585,14 +2584,14 @@ static void bfree(void *p)
 #endif
     for (q = pMemBlocks + NumberOfMemBlocks; --q >= pMemBlocks;)
         {
-        if ((*q)->lowestAddress <= p && p < (*q)->highestAddress)
+        if ((*q)->lowestAddress <= (struct memoryElement *)p && (struct memoryElement *)p < (*q)->highestAddress)
             {
 #if TELMAX
             ++((*q)->numberOfFreeElementsBetweenAddresses);
 #endif
             ((struct memoryElement *)p)->next = (*q)->firstFreeElementBetweenAddresses;
-            (*q)->firstFreeElementBetweenAddresses = p;
-            setChecksum(LineNo, N);
+            (*q)->firstFreeElementBetweenAddresses = (struct memoryElement*)p;
+            setChecksum(LineNo, globN);
             return;
             }
         }
@@ -2600,7 +2599,7 @@ static void bfree(void *p)
 #if TELMAX
     --malloced;
 #endif
-    setChecksum(LineNo, N);
+    setChecksum(LineNo, globN);
     }
 
 #if TELLING
@@ -2613,22 +2612,34 @@ static void bezetting(void)
     for (i = 0; i < NumberOfMemBlocks; ++i)
         {
         mb = pMemBlocks[i];
-        Printf("%d word : %lu\n", mb->sizeOfElement / sizeof(struct pointerStruct), 1000UL - (1000UL * mb->numberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
+#if WORD32 || defined __VMS
+        Printf("%zd word : %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->numberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
+#else
+        Printf("%zd word : %zu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->numberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
+#endif
         }
     Printf("\nmax occupied (promilles)\n");
     for (i = 0; i < NumberOfMemBlocks; ++i)
         {
         mb = pMemBlocks[i];
-        Printf("%d word : %lu\n", mb->sizeOfElement / sizeof(struct pointerStruct), 1000UL - (1000UL * mb->minimumNumberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
+#if WORD32 || defined __VMS
+        Printf("%zd word : %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->minimumNumberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
+#else
+        Printf("%zd word : %zu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->minimumNumberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
+#endif
         }
     Printf("\noccupied (absolute)\n");
     for (i = 0; i < NumberOfMemBlocks; ++i)
         {
         mb = pMemBlocks[i];
-        words = mb->sizeOfElement / sizeof(struct pointerStruct);
-        Printf("%d word : %lu\n", words, (mb->numberOfElementsBetweenAddresses - mb->numberOfFreeElementsBetweenAddresses));
+        words = mb->sizeOfElement / sizeof(struct memoryElement);
+        Printf("%zd word : %zu\n", words, (mb->numberOfElementsBetweenAddresses - mb->numberOfFreeElementsBetweenAddresses));
         }
-    Printf("more than %d words : %lu\n", words, malloced);
+#if WORD32 || defined __VMS
+    Printf("more than %zd words : %u\n", words, malloced);
+#else
+    Printf("more than %zd words : %lu\n", words, malloced);
+#endif
     }
 #endif
 
@@ -2636,49 +2647,68 @@ static struct memblock * initializeMemBlock(size_t elementSize, size_t numberOfE
     {
     size_t nlongpointers;
     size_t stepSize;
-    struct memblock * mb;
-    mb = (struct memblock *)malloc(sizeof(struct memblock));
-    mb->sizeOfElement = elementSize;
-    mb->previousOfSameLength = 0;
-    stepSize = elementSize / sizeof(struct pointerStruct);
-    nlongpointers = elementSize * numberOfElements / sizeof(struct pointerStruct);
-    mb->firstFreeElementBetweenAddresses = mb->lowestAddress = malloc(sizeof(struct pointerStruct) * nlongpointers);
-#if TELMAX
-    mb->numberOfElementsBetweenAddresses = numberOfElements;
-#endif
-    if (mb->lowestAddress == 0)
+    struct memblock* mb;
+    struct memoryElement* mEa, * mEz;
+    mb = (struct memblock*)malloc(sizeof(struct memblock));
+    if (mb)
         {
+        mb->sizeOfElement = elementSize;
+        mb->previousOfSameLength = 0;
+        stepSize = elementSize / sizeof(struct memoryElement);
+        nlongpointers = stepSize * numberOfElements;
+        mb->firstFreeElementBetweenAddresses = mb->lowestAddress = malloc(elementSize * numberOfElements);
+        if (mb->lowestAddress == 0)
+            {
+#if _BRACMATEMBEDDED
+            return 0;
+#else
+            exit(-1);
+#endif
+            }
+        else
+            {
+#if TELMAX
+            mb->numberOfElementsBetweenAddresses = numberOfElements;
+#endif
+            mEa = mb->lowestAddress;
+            mb->highestAddress = mEa + nlongpointers;
+#if TELMAX
+            mb->numberOfFreeElementsBetweenAddresses = numberOfElements;
+#endif
+            mEz = mb->highestAddress - stepSize;
+            for (; mEa < mEz; )
+                {
+                mEa->next = mEa + stepSize;
+                assert(((LONG)(mEa->next) & 1) == 0);
+                mEa = mEa->next;
+                }
+            assert(mEa == mEz);
+            mEa->next = 0;
+            return mb;
+            }
+        }
+    else
 #if _BRACMATEMBEDDED
         return 0;
 #else
         exit(-1);
 #endif
-        }
-    global_p = (struct pointerStruct *)mb->lowestAddress;
-    global_ep = global_p + nlongpointers;
-    mb->highestAddress = (void*)global_ep;
-#if TELMAX
-    mb->numberOfFreeElementsBetweenAddresses = numberOfElements;
-#endif
-    global_ep -= stepSize;
-    for (
-        ; global_p < global_ep
-        ; global_p = global_p->lp
-        )
-        global_p->lp = global_p + stepSize;
-    global_p->lp = 0;
-    return mb;
     }
-/*
+
+#if SHOWMEMBLOCKS
 static void showMemBlocks()
     {
     int totalbytes;
     int i;
     for(i = 0;i < NumberOfMemBlocks;++i)
         {
+#if defined __VMS
         printf  ("%p %d %p <= %p <= %p [%p] %lu\n"
+#else
+        printf("%p %d %p <= %p <= %p [%p] %zu\n"
+#endif
             ,pMemBlocks[i]
-        ,i
+            ,i
             ,pMemBlocks[i]->lowestAddress
             ,pMemBlocks[i]->firstFreeElementBetweenAddresses
             ,pMemBlocks[i]->highestAddress
@@ -2687,18 +2717,22 @@ static void showMemBlocks()
             );
         }
     totalbytes = 0;
-    for(i = 0;i < nallocations;++i)
+    for(i = 0;i < global_nallocations;++i)
         {
+#if defined __VMS
         printf  ("%d %d %lu\n"
+#else
+        printf("%d %d %zu\n"
+#endif
             ,i+1
-            ,allocations[i].numberOfElements
-            ,allocations[i].numberOfElements * (i+1) * sizeof(struct pointerStruct)
+            , global_allocations[i].numberOfElements
+            , global_allocations[i].numberOfElements * (i+1) * sizeof(struct memoryElement)
             );
-        totalbytes += allocations[i].numberOfElements * (i+1) * sizeof(struct pointerStruct);
+        totalbytes += global_allocations[i].numberOfElements * (i+1) * sizeof(struct memoryElement);
         }
     printf("total bytes = %d\n",totalbytes);
     }
-*/
+#endif
 
 /* The newMemBlocks function is introduced because the same code,
 if in-line in bmalloc, and if compiled with -O3, doesn't run. */
@@ -2716,31 +2750,43 @@ static struct memblock * newMemBlocks(size_t n)
 
     ++NumberOfMemBlocks;
     npMemBlocks = (struct memblock **)malloc((NumberOfMemBlocks) * sizeof(struct memblock *));
-    for (i = 0; i < NumberOfMemBlocks - 1; ++i)
+    if (npMemBlocks)
         {
-        if (mb < pMemBlocks[i])
+        for (i = 0; i < NumberOfMemBlocks - 1; ++i)
             {
-            npMemBlocks[j++] = mb;
-            for (; i < NumberOfMemBlocks - 1; ++i)
+            if (mb < pMemBlocks[i])
                 {
-                npMemBlocks[j++] = pMemBlocks[i];
+                npMemBlocks[j++] = mb;
+                for (; i < NumberOfMemBlocks - 1; ++i)
+                    {
+                    npMemBlocks[j++] = pMemBlocks[i];
+                    }
+                free(pMemBlocks);
+                pMemBlocks = npMemBlocks;
+#if SHOWMEMBLOCKS
+                showMemBlocks();
+#endif
+                return mb;
                 }
-            free(pMemBlocks);
-            pMemBlocks = npMemBlocks;
-            /** /
-            showMemBlocks();
-            / **/
-            return mb;
+            npMemBlocks[j++] = pMemBlocks[i];
             }
-        npMemBlocks[j++] = pMemBlocks[i];
+        npMemBlocks[j] = mb;
+        free(pMemBlocks);
+        pMemBlocks = npMemBlocks;
+#if SHOWMEMBLOCKS
+        showMemBlocks();
+#endif
+        return mb;
         }
-    npMemBlocks[j] = mb;
-    free(pMemBlocks);
-    pMemBlocks = npMemBlocks;
-    /** /
-    showMemBlocks();
-    / **/
-    return mb;
+    else
+        {
+#if _BRACMATEMBEDDED
+        return 0;
+#else
+        exit(-1);
+#endif
+        }
+
     }
 
 
@@ -2766,7 +2812,7 @@ static void * bmalloc(int lineno, size_t n)
     n += 3 * sizeof(LONG);
 #endif
     checksum(__LINE__);
-    n = (n - 1) / sizeof(struct pointerStruct);
+    n = (n - 1) / sizeof(struct memoryElement);
     if (n <
 #if _5_6
         6
@@ -2814,7 +2860,8 @@ static void * bmalloc(int lineno, size_t n)
 #endif
             }
         }
-    ret = malloc((n + 1) * sizeof(struct pointerStruct));
+    ret = malloc((n + 1) * sizeof(struct memoryElement));
+
     if (!ret)
         {
 #if TELLING
@@ -2893,39 +2940,44 @@ static int init_memoryspace(void)
                                                      3
 #endif
     );
-    global_nallocations = addAllocation(1 * sizeof(struct pointerStruct), MEM1SIZE, 0, global_allocations);
-    global_nallocations = addAllocation(2 * sizeof(struct pointerStruct), MEM2SIZE, global_nallocations, global_allocations);
-    global_nallocations = addAllocation(3 * sizeof(struct pointerStruct), MEM3SIZE, global_nallocations, global_allocations);
+    global_nallocations = addAllocation(1 * sizeof(struct memoryElement), MEM1SIZE, 0, global_allocations);
+    global_nallocations = addAllocation(2 * sizeof(struct memoryElement), MEM2SIZE, global_nallocations, global_allocations);
+    global_nallocations = addAllocation(3 * sizeof(struct memoryElement), MEM3SIZE, global_nallocations, global_allocations);
 #if _4
-    global_nallocations = addAllocation(4 * sizeof(struct pointerStruct), MEM4SIZE, global_nallocations, global_allocations);
+    global_nallocations = addAllocation(4 * sizeof(struct memoryElement), MEM4SIZE, global_nallocations, global_allocations);
 #endif
 #if _5_6
-    global_nallocations = addAllocation(5 * sizeof(struct pointerStruct), MEM5SIZE, global_nallocations, global_allocations);
-    global_nallocations = addAllocation(6 * sizeof(struct pointerStruct), MEM6SIZE, global_nallocations, global_allocations);
+    global_nallocations = addAllocation(5 * sizeof(struct memoryElement), MEM5SIZE, global_nallocations, global_allocations);
+    global_nallocations = addAllocation(6 * sizeof(struct memoryElement), MEM6SIZE, global_nallocations, global_allocations);
 #endif
     NumberOfMemBlocks = global_nallocations;
     pMemBlocks = (struct memblock **)malloc(NumberOfMemBlocks * sizeof(struct memblock *));
 
-    for (i = 0; i < NumberOfMemBlocks; ++i)
+    if (pMemBlocks)
         {
-        pMemBlocks[i] = global_allocations[i].memoryBlock = initializeMemBlock(global_allocations[i].elementSize, global_allocations[i].numberOfElements);
+        for (i = 0; i < NumberOfMemBlocks; ++i)
+            {
+            pMemBlocks[i] = global_allocations[i].memoryBlock = initializeMemBlock(global_allocations[i].elementSize, global_allocations[i].numberOfElements);
+            }
+        qsort(pMemBlocks, NumberOfMemBlocks, sizeof(struct memblock*), memblocksort);
+        /*
+        for(i = 0;i < NumberOfMemBlocks;++i)
+            {
+            printf  ("%p %d %p %p %p %p %lu\n"
+                    ,pMemBlocks[i]
+                    ,i
+                    ,pMemBlocks[i]->lowestAddress
+                    ,pMemBlocks[i]->firstFreeElementBetweenAddresses
+                    ,pMemBlocks[i]->highestAddress
+                    ,pMemBlocks[i]->previousOfSameLength
+                    ,pMemBlocks[i]->sizeOfElement
+                    );
+            }
+        */
+        return 1;
         }
-    qsort(pMemBlocks, NumberOfMemBlocks, sizeof(struct memblock *), memblocksort);
-    /*
-    for(i = 0;i < NumberOfMemBlocks;++i)
-        {
-        printf  ("%p %d %p %p %p %p %lu\n"
-                ,pMemBlocks[i]
-                ,i
-                ,pMemBlocks[i]->lowestAddress
-                ,pMemBlocks[i]->firstFreeElementBetweenAddresses
-                ,pMemBlocks[i]->highestAddress
-                ,pMemBlocks[i]->previousOfSameLength
-                ,pMemBlocks[i]->sizeOfElement
-                );
-        }
-    */
-    return 1;
+    else
+        return 0;
     }
 
 static void pskfree(psk p)
@@ -4448,8 +4500,13 @@ static int redirectError(char * name)
             fclose(errorStream);
             errorStream = NULL;
             errorFileName = (char *)malloc(strlen(name) + 1);
-            strcpy(errorFileName, name);
-            return TRUE;
+            if (errorFileName)
+                {
+                strcpy(errorFileName, name);
+                return TRUE;
+                }
+            else
+                return FALSE;
             }
 #endif
         errorStream = stderr;
@@ -8508,14 +8565,14 @@ static Boolean hashremove(struct typedObjectnode * This, ppsk arg)
 static Boolean hashnew(struct typedObjectnode * This, ppsk arg)
     {
     /*    UNREFERENCED_PARAMETER(arg);*/
-    unsigned long N = 97;
+    unsigned long Nprime = 97;
     if (INTEGER_POS_COMP((*arg)->RIGHT))
         {
-        N = strtoul((char *)POBJ((*arg)->RIGHT), NULL, 10);
-        if (N == 0 || N == ULONG_MAX)
-            N = 97;
+        Nprime = strtoul((char *)POBJ((*arg)->RIGHT), NULL, 10);
+        if (Nprime == 0 || Nprime == ULONG_MAX)
+            Nprime = 97;
         }
-    VOID(This) = (void *)newhash(N);
+    VOID(This) = (void *)newhash(Nprime);
     return TRUE;
     }
 
@@ -14590,57 +14647,57 @@ is found iteratively, not recursively. This also causes some operations to
 be tremendously faster. e.g. (1+a+b+c)^30+1&ready evaluates in about
 4,5 seconds now, previously in 330 seconds! (AST Bravo MS 5233M 233 MHz MMX Pentium)
 */
-static void splitProduct_number_im_rest(psk pnode, ppsk N, ppsk I, ppsk NNNI)
+static void splitProduct_number_im_rest(psk pnode, ppsk Nm, ppsk I, ppsk NNNI)
     {
     psk temp;
     if (Op(pnode) == TIMES)
         {
         if (RATIONAL_COMP(pnode->LEFT))
             {/* 17*x */
-            *N = pnode->LEFT;
+            *Nm = pnode->LEFT;
             temp = pnode->RIGHT;
-            }/* N*temp */
+            }/* Nm*temp */
         else
             {
-            *N = NULL;
+            *Nm = NULL;
             temp = pnode;
             }/* temp */
         if (Op(temp) == TIMES)
             {
             if (!is_op(temp->LEFT) && PLOBJ(temp->LEFT) == IM)
-                {/* N*i*x */
+                {/* Nm*i*x */
                 *I = temp->LEFT;
                 *NNNI = temp->RIGHT;
-                }/* N*I*NNNI */
+                }/* Nm*I*NNNI */
             else
                 {
                 *I = NULL;
                 *NNNI = temp;
-                }/* N*NNNI */
+                }/* Nm*NNNI */
             }
         else
             {
             if (!is_op(temp) && PLOBJ(temp) == IM)
-                {/* N*i */
+                {/* Nm*i */
                 *I = temp;
                 *NNNI = NULL;
-                }/* N*I */
+                }/* Nm*I */
             else
                 {
                 *I = NULL;
                 *NNNI = temp;
-                }/* N*NNNI */
+                }/* Nm*NNNI */
             }
         }
     else if (!is_op(pnode) && PLOBJ(pnode) == IM)
         {/* i */
-        *N = NULL;
+        *Nm = NULL;
         *I = pnode;
         *NNNI = NULL;
         }/* I */
     else
         {/* x */
-        *N = NULL;
+        *Nm = NULL;
         *I = NULL;
         *NNNI = pnode;
         }/* NNNI */
