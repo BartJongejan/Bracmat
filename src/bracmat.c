@@ -257,8 +257,8 @@ Atari : define -DATARI because of BIGENDIAN and extern int _stksize = -1;
 
 /* Optional #defines for debugging and adaptation to machine */
 
-#define TELMAX  1 /* Show the maximum number of allocated nodes. */
-#define TELLING 1 /* Same, plus current number of allocated nodes, in groups of
+#define TELMAX  0 /* Show the maximum number of allocated nodes. */
+#define TELLING 0 /* Same, plus current number of allocated nodes, in groups of
                        4,8,12 and >12 bytes */
 #if TELLING
 #if TELMAX == 0
@@ -2635,11 +2635,7 @@ static void bezetting(void)
         words = mb->sizeOfElement / sizeof(struct memoryElement);
         Printf("%zd word : %zu\n", words, (mb->numberOfElementsBetweenAddresses - mb->numberOfFreeElementsBetweenAddresses));
         }
-#if WORD32 || defined __VMS
     Printf("more than %zd words : %u\n", words, malloced);
-#else
-    Printf("more than %zd words : %lu\n", words, malloced);
-#endif
     }
 #endif
 
