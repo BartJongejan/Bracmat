@@ -800,7 +800,7 @@ typedef union
         ULONG ident : 1;
         ULONG impliedfence : 1;
 
-        ULONG IS_OPERATOR : 1;
+        ULONG is_operator : 1;
         ULONG binop : 4; /* only if operator node*/
         /* EQUALS DOT COMMA OR AND MATCH WHITE PLUS TIMES EXP LOG DIF FUU FUN UNDERSCORE */
         ULONG latebind : 1;
