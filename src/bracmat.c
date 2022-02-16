@@ -5662,11 +5662,6 @@ static void fpbint(FILE * fp, LONG * high, LONG * low)
         }
     }
 
-static void fpbin(FILE * fp, nnumber * res)
-    {
-    fpbint(fp, res->inumber, res->inumber + res->ilength - 1);
-    }
-
 static void validt(LONG * high, LONG * low)
     {
     for (; high <= low; ++high)
