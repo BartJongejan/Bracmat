@@ -5644,11 +5644,6 @@ static void pbint(LONG * high, LONG * low)
         }
     }
 
-static void pbin(nnumber * res)
-    {
-    pbint(res->inumber, res->inumber + res->ilength - 1);
-    }
-
 static void fpbint(FILE * fp, LONG * high, LONG * low)
     {
     for (; high <= low; ++high)
