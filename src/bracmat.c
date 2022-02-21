@@ -773,7 +773,6 @@ extern int JSONtext(FILE * fpi, char * source);
 
 
 typedef int Boolean;
-typedef struct Vars vars;
 
 typedef union
     {
@@ -1007,13 +1006,13 @@ typedef struct varia
     psk variableValue[1];       /* variableValue[0], arraysize is adjusted by psh */
     } varia;
 
-struct Vars /* sizeof(vars) = n * 4 bytes */
+typedef struct vars /* sizeof(vars) = n * 4 bytes */
     {
 #if PVNAME
     unsigned char *vname;
 #define VARNAME(x) x->vname
 #endif
-    vars *next;
+    struct vars *next;
     int n;
     int selector;
     varia *pvaria; /* Can also contain entry[0]   (if n == 0) */
@@ -1025,7 +1024,7 @@ struct Vars /* sizeof(vars) = n * 4 bytes */
         } u;
 #define VARNAME(x) &x->u.Obj
 #endif
-    };
+    } vars;
 
 static vars * variables[256];
 
