@@ -146,6 +146,32 @@ Bracmat is a good choice for tasks that require dynamic programming.
     * bracmat
 
       executable for Apple computers
+
+* potu
+    * many .c and .h files
+    * Makefile
+
+      There are two ways to compile and link the program, and both ways should
+      be kept working in future development
+
+      * All .c files (except potu.c) #included in potu.c, while making all .h
+        files that contain function or global variable declarations
+        ineffective.
+        This way of compilation forces a (partial) order on the inclusion of
+        the .c files. In general, the lower level functions are toward the top
+        of the list, while the higher level functions are closer to the bottom
+        of the list. This order mimics the order in the original bracmat.c
+        file.
+
+      * All .c files compiled separately and then linked. In this way, we
+        ensure that each .c file includes all needed header files.
+
+      The name 'potu', like 'bracmat', stems from the 1741 novel
+      Nicolai Klimii Iter Subterraneum by Ludvig Holberg. Both are places on
+      the planet Nazar that is inside the Earth. Nazar is inhabited by
+      intelligent trees.
+
+      The initial version of potu is functionally not different from bracmat.
       
 * safe
 
