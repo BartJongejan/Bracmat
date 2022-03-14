@@ -532,7 +532,8 @@ static jstate value(int arg)
         case '"':
             popj(); action = push(string); startString(); return json;
         case '[':
-            popj(); action = push(valueOrCloseSquareBracket); startArray(); return json;
+            popj
+            (); action = push(valueOrCloseSquareBracket); startArray(); return json;
         case '{':
             popj(); action = push(startNamestringOrCloseBrace); startObject(); firstValue(); return json;
         case 't':
