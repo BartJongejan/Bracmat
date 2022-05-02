@@ -14,14 +14,16 @@
 #include "globals.h"
 #include "memory.h"
 #include "wipecopy.h"
+#include "platformdependentdefs.h"
+#include "result.h"
 #include <string.h>
 
 /*MOVETO evaluate.c*/
 #if MAXSTACK
 static int maxstack = 0;
-static int stack = 0;
-#define ASTACK {++stack;if(stack > maxstack) maxstack = stack;}{
-#define ZSTACK }{--stack;}
+static int theStack = 0;
+#define ASTACK {++theStack;if(theStack > maxstack) maxstack = theStack;}{
+#define ZSTACK }{--theStack;}
 #else
 #define ASTACK
 #define ZSTACK
