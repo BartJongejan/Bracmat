@@ -14,6 +14,7 @@
 #include "objectnode.h"
 #include "filewrite.h"
 #include "stringmatch.h"
+#include "result.h"
 #include <assert.h>
 #include <string.h>
 
