@@ -397,7 +397,7 @@ static int isFree(void * p)
     return 0;
     }
 
-static void result(psk Root);
+void result(psk Root);
 static int rfree(psk p)
     {
     int r = 0;
@@ -415,8 +415,6 @@ static int rfree(psk p)
         }
     return r;
     }
-
-static int POINT = 0;
 
 static int areFree(char * t, psk p)
     {
@@ -448,7 +446,7 @@ static void checkMem(void * p)
         printf("s:[");
         for (; s < (char *)(q + q[1] + 1); ++s)
             {
-            if ((((int)s) % 4) == 0)
+            if ((((LONG)s) % 4) == 0)
                 printf("|");
             if (' ' <= *s && *s <= 127)
                 printf(" %c", *s);
@@ -474,7 +472,9 @@ static void checkBounds(void * p)
     assert(lp[lp[1]] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d'));
     for (q = pMemBlocks + NumberOfMemBlocks; --q >= pMemBlocks;)
         {
+#ifndef NDEBUG
         size_t stepSize = (*q)->sizeOfElement / sizeof(struct memoryElement);
+#endif // !NDEBUG
         if ((*q)->lowestAddress <= (struct memoryElement *)p && (struct memoryElement *)p < (*q)->highestAddress)
             {
             assert(lp[stepSize - 1] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d'));
@@ -483,7 +483,7 @@ static void checkBounds(void * p)
         }
     }
 
-static void checkAllBounds()
+static void checkAllBounds(void)
     {
     struct memblock ** q;
     for (q = pMemBlocks + NumberOfMemBlocks; --q >= pMemBlocks;)
