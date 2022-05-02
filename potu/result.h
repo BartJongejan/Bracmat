@@ -4,5 +4,6 @@
 #include "nodestruct.h"
 
 void result(psk Root);
+void results(psk Root, psk cutoff);
 
 #endif
