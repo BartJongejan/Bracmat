@@ -11,6 +11,8 @@
 #include "binding.h"
 #include "nodeutil.h"
 #include "equal.h"
+#include "result.h"
+#include "filewrite.h"
 #include <assert.h>
 
 static int stringOncePattern(psk pat)
