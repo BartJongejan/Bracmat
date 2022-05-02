@@ -1,3 +1,10 @@
+2 May 2022
+map$ can now handle a non-list expression as though it were a list. For that,
+there is an extra argument telling on what type of operator to split the
+expression. 
+E.g.            map$((=.!arg) 2*a+i*b+e\Lc (=+)) 
+evaluates to                  2*a e\Lc i*b
+
 26 October 2021
 Removed superfluous bitfield in tFlags. This bitfield caused sizeof(tFlags) to
 be too large. Also changed the type of several structure members from void *
