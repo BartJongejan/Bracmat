@@ -7,15 +7,27 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#if DEBUGBRACMAT
+extern int debug;
+#endif
+#if CHECKALLOCBOUNDS
+extern int POINT;
+#endif
+#if CODEPAGE850
+extern const unsigned char lowerEquivalent[256];
+extern const unsigned char upperEquivalent[256];
+#endif
+
 extern int dummy_op;
 extern psk addr[7];
 extern sk zeroNode, oneNode, minusOneNode,
     nilNode, nilNodeNotNeutral,
     zeroNodeNotNeutral,
     oneNodeNotNeutral,
-    argNode, selfNode, SelfNode, minusTwoNode, twoNode, minusFourNode, fourNode, sjtNode;
+    argNode, selfNode, SelfNode, twoNode, fourNode, sjtNode;
 
 extern psk global_anchor;
+
 
 extern FILE * global_fpi;
 extern FILE * global_fpo;
