@@ -195,7 +195,7 @@ static void endnode(psk Root, int space)
     int q, ikar;
 #if CHECKALLOCBOUNDS
     if (POINT)
-        printf("\n[%p %d]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
+        printf("\n[%p %lld]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
 #endif
     SM(Root)
 
@@ -310,7 +310,7 @@ static void reslt(psk Root, int level, int ind, int space)
             extraSpc = 1;
 #if CHECKALLOCBOUNDS
         if (POINT)
-            printf("\n[%p %d]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
+            printf("\n[%p %lld]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
 #endif
         SM(Root)
             do_something(opchar[klopcode(Root)]);
@@ -419,7 +419,7 @@ static void parenthesised_result(psk Root, int level, int ind, int space)
             extraSpc = 1;
 #if CHECKALLOCBOUNDS
         if (POINT)
-            printf("\n[%p %d]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
+            printf("\n[%p %lld]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
 #endif
         SM(Root)
             do_something(opchar[klopcode(Root)]);
@@ -494,7 +494,7 @@ static void hreslts(psk Root, int level, int ind, int space, psk cutoff)
         }
     }
 
-static void results(psk Root, psk cutoff)
+void results(psk Root, psk cutoff)
     {
     if (HAS__UNOPS(Root))
         {
