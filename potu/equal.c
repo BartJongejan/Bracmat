@@ -228,7 +228,12 @@ int compare(psk s, psk p)
 With the % flag on an otherwise numeric pattern, the pattern is treated
     as a string, not a number.
 */
-int scompare(char* s, char* cutoff, psk p, char** suggestedCutOff, char** mayMoveStartOfSubject)
+int scompare(char* s, char* cutoff, psk p
+#if CUTOFFSUGGEST
+    , char** suggestedCutOff
+    , char** mayMoveStartOfSubject
+#endif
+)
     {
     int Sign = 0;
     char* P;
