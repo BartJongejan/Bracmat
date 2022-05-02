@@ -4,6 +4,13 @@
 #include "u2l-l2u.h"
 #include "nodedefs.h"
 
+#if CODEPAGE850
+unsigned char ISO8859toCodePage850(unsigned char kar);
+unsigned char CodePage850toISO8859(unsigned char kar);
+int strcasecmpDOS(const char* s, const char* p);
+#endif
+
+
 int convertLetter(int a, struct ccaseconv * T);
 psk changeCase(psk Pnode
 #if CODEPAGE850
