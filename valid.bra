@@ -6304,6 +6304,24 @@ string line 2\"
           |   out
             $ "Evaluation must stop if the dummy operator evaluates to itself."
           )
+          (   (x=a+b+c)
+            & map$((=.!arg) !x ()'$x):a b c
+          |   out
+            $ "Convert non-atomic expression to space operator separated list."
+          )
+          (   (x=c)
+            & map$((=.!arg) !x ()'$x):a b c
+            & out$"Expression must be non-atomic."
+          | 
+          )
+          ( map$((=.!arg) () (=+)):
+          | out$"Corner case: expression is empty atom. Should succeed."
+          )
+          (     map
+              ' ((=.!arg) (a b c) (=x y))
+            : a b c
+          | out$"Expression can be a list if call is map' and not map$."
+          )
       &   out
         $ ( str
           $ ( "Done. "
