@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "21 February 2022"
-#define VERSION "6.9.3"
-#define BUILD "252"
+#define DATUM "2 May 2022"
+#define VERSION "6.10.0"
+#define BUILD "255"
 /*
 COMPILATION
 -----------
@@ -13731,49 +13731,117 @@ static function_return_type functions(psk Pnode)
             {
             return output(&Pnode, lst) ? functionOk(Pnode) : functionFail(Pnode);
             }
-        CASE(MAP) /* map $ (<function>.<list>) */
+        CASE(MAP) /* map $ (<function>.<list>)
+                     map $ (<function> <tree1> (=<tree2>))
+                     map $ (<function> (=<tree2>))
+                     The second form splits regards tree1 as a right descending
+                     'list' with a backbone operator that is the same as the
+                     heading operator of tree 2.
+                     For example,
+                          map$((=.!arg).2*a+e\Lb+c^2.(=+))
+                     generates the list
+                          2*a e\Lb c^2
+                     Notice that in the second form, the three arguments must
+                     be separated by spaces!
+                     The third form returns a nil node (empty node). */
             {
             if (is_op(rightnode))
                 {/*XXX*/
-                psk pnode = rightnode->RIGHT;
                 psk nnode;
                 psk nPnode;
                 ppsk ppnode = &nPnode;
-                while (is_op(pnode) && Op(pnode) == WHITE)
+                rrightnode = rightnode->RIGHT;
+                if (Op(rightnode) == WHITE)
                     {
-                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                    nnode->v.fl = Pnode->v.fl;
-                    nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
-                    nnode->LEFT = same_as_w(rightnode->LEFT);
-                    nnode->RIGHT = same_as_w(pnode->LEFT);
-                    nnode = functions(nnode);
-                    if (!is_op(nnode) && IS_NIL(nnode))
+                    if (Op(rrightnode) == WHITE)
                         {
-                        wipe(nnode);
+                        lnode = rrightnode->RIGHT;
+                        rrightnode = rrightnode->LEFT;
+                        if (Op(lnode) == EQUALS)
+                            {
+                            intVal.ul = Op(lnode->RIGHT);
+                            if (intVal.ul)
+                                {
+                                while (is_op(rrightnode) && Op(rrightnode) == intVal.ul)
+                                    {
+                                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                    nnode->v.fl = Pnode->v.fl;
+                                    nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+                                    nnode->LEFT = same_as_w(rightnode->LEFT);
+                                    nnode->RIGHT = same_as_w(rrightnode->LEFT);
+                                    nnode = functions(nnode);
+                                    if (!is_op(nnode) && IS_NIL(nnode))
+                                        {
+                                        wipe(nnode);
+                                        }
+                                    else
+                                        {
+                                        psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                        wnode->v.fl = WHITE | SUCCESS;
+                                        *ppnode = wnode;
+                                        ppnode = &(wnode->RIGHT);
+                                        wnode->LEFT = nnode;
+                                        }
+                                    rrightnode = rrightnode->RIGHT;
+                                    }
+                                }
+                            else
+                                {
+                                /* No operator specified */
+                                return functionFail(Pnode);
+                                }
+                            }
+                        else
+                            {
+                            /* The last argument must have heading = operator */
+                            return functionFail(Pnode);
+                            }
                         }
                     else
                         {
-                        psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                        wnode->v.fl = WHITE | SUCCESS;
-                        *ppnode = wnode;
-                        ppnode = &(wnode->RIGHT);
-                        wnode->LEFT = nnode;
+                        wipe(Pnode);
+                        Pnode = same_as_w(&nilNode);
+                        return functionOk(Pnode);
                         }
-                    pnode = pnode->RIGHT;
                     }
-                if (is_op(pnode) || !IS_NIL(pnode))
+                else
+                    {
+                    while (is_op(rrightnode) && Op(rrightnode) == WHITE)
+                        {
+                        nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                        nnode->v.fl = Pnode->v.fl;
+                        nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+                        nnode->LEFT = same_as_w(rightnode->LEFT);
+                        nnode->RIGHT = same_as_w(rrightnode->LEFT);
+                        nnode = functions(nnode);
+                        if (!is_op(nnode) && IS_NIL(nnode))
+                            {
+                            wipe(nnode);
+                            }
+                        else
+                            {
+                            psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                            wnode->v.fl = WHITE | SUCCESS;
+                            *ppnode = wnode;
+                            ppnode = &(wnode->RIGHT);
+                            wnode->LEFT = nnode;
+                            }
+                        rrightnode = rrightnode->RIGHT;
+                        }
+                    }
+                if (is_op(rrightnode) || !IS_NIL(rrightnode))
                     {
                     nnode = (psk)bmalloc(__LINE__, sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
                     nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                     nnode->LEFT = same_as_w(rightnode->LEFT);
-                    nnode->RIGHT = same_as_w(pnode);
+                    nnode->RIGHT = same_as_w(rrightnode);
                     nnode = functions(nnode);
                     *ppnode = nnode;
                     }
                 else
                     {
-                    *ppnode = same_as_w(pnode);
+                    *ppnode = same_as_w(rrightnode);
                     }
                 wipe(Pnode);
                 Pnode = nPnode;
@@ -13788,28 +13856,28 @@ static function_return_type functions(psk Pnode)
             {
             if (is_op(rightnode))
                 {/*XXX*/
-                psk pnode = rightnode->RIGHT;
-                if (is_op(pnode))
+                rrightnode = rightnode->RIGHT;
+                if (is_op(rrightnode))
                     { /* first form */
-                    psk sepnode = pnode->RIGHT;
-                    pnode = pnode->LEFT;
-                    if (is_op(sepnode) || is_op(pnode))
+                    psk sepnode = rrightnode->RIGHT;
+                    rrightnode = rrightnode->LEFT;
+                    if (is_op(sepnode) || is_op(rrightnode))
                         {
                         return functionFail(Pnode);
                         }
                     else
                         {
-                        const char * separator = &sepnode->u.sobj;
+                        const char* separator = &sepnode->u.sobj;
                         if (!*separator)
                             {
                             return functionFail(Pnode);
                             }
                         else
                             {
-                            char * subject = &pnode->u.sobj;
+                            char* subject = &rrightnode->u.sobj;
                             psk nPnode;
                             ppsk ppnode = &nPnode;
-                            char * oldsubject = subject;
+                            char* oldsubject = subject;
                             while (subject)
                                 {
                                 psk nnode;
@@ -13852,10 +13920,10 @@ static function_return_type functions(psk Pnode)
                 else
                     {
                     /* second form */
-                    const char * subject = &pnode->u.sobj;
+                    const char* subject = &rrightnode->u.sobj;
                     psk nPnode = 0;
                     ppsk ppnode = &nPnode;
-                    const char * oldsubject = subject;
+                    const char* oldsubject = subject;
                     int k;
                     if (hasUTF8MultiByteCharacters(subject))
                         {
