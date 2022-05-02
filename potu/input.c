@@ -1175,23 +1175,26 @@ void stringEval(const char *s, const char ** out, int * err)
     sprintf(buf, "put$(%s,MEM)", s);
 #else
     char * buf = (char *)malloc(strlen(s) + 7);
-    sprintf(buf, "str$(%s)", s);
-#endif
-    source = (unsigned char *)buf;
-    global_anchor = input(NULL, global_anchor, OPT_MEM, err, NULL); /* 4 -> OPT_MEM*/
-    if (err && *err)
-        return;
-#if JMP
-    if (setjmp(jumper) != 0)
+    if (buf)
         {
-        free(buf);
-        return -1;
-        }
+        sprintf(buf, "str$(%s)", s);
 #endif
-    global_anchor = eval(global_anchor);
-    if (out != NULL)
-        *out = is_op(global_anchor) ? (const char *)"" : (const char *)POBJ(global_anchor);
-    free(buf);
+        source = (unsigned char*)buf;
+        global_anchor = input(NULL, global_anchor, OPT_MEM, err, NULL); /* 4 -> OPT_MEM*/
+        if (err && *err)
+            return;
+#if JMP
+        if (setjmp(jumper) != 0)
+            {
+            free(buf);
+            return -1;
+            }
+#endif
+        global_anchor = eval(global_anchor);
+        if (out != NULL)
+            *out = is_op(global_anchor) ? (const char*)"" : (const char*)POBJ(global_anchor);
+        free(buf);
+        }
     return;
     }
 
