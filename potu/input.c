@@ -6,7 +6,7 @@
 #include "memory.h"
 #include "numbercheck.h"
 #include "copy.h"
-#include "output.h"
+#include "filewrite.h"
 #include "wipecopy.h"
 #include "result.h"
 #include "eval.h"

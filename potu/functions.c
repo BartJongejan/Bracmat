@@ -7,7 +7,7 @@
 #include "input.h"
 #include "wipecopy.h"
 #include "eval.h"
-#include "output.h"
+#include "filewrite.h"
 #include "input.h"
 #include "writeerr.h"
 #include "lambda.h"
