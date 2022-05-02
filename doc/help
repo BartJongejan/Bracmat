@@ -7,7 +7,7 @@ help=
   . varmattxt,varprotxt,progsmenu,debugtxt,debugtxt2,debugtxt3
   . inbltmenu,alctxt,aligntxt,asctxt,utftxt,chrtxt,charset
   . chutxt,dbgtxt,dentxt,escappattxt,lambda,morexmlps,jsntxt
-  . divtxt,fretxt,funtxt1,funtxt3,beztxt
+  . divtxt,fretxt,funtxt1,funtxt3,beztxt,moptxt
   . lsttxt1,difftxt,pattxt2,methodtxt,predvartxt
   . lsttxt2,lsttxt3,memtxt,modtxt,peetxt,poktxt,Bracmat-name
   . puttxt1,puttxt2,puttxt3,rentxt,revtxt,seltxt,simtxt,strtxt
@@ -179,39 +179,41 @@ lex lexical analysis of help file"
     list existing variable names
 22 |_mod_|
     remainder
-23 |_new_|
+23 |_mop_|
+    map expression to space separated list
+24 |_new_|
     create new object as a copy of another object
-24 |_pee_|
+25 |_pee_|
     get value from address (peek) (low level)
-25 |_pok_|
+26 |_pok_|
     put value at address (poke) (low level)
-26 |_put_|
+27 |_put_|
     write output
-27 |_ren_|
+28 |_ren_|
     rename file or directory or move file
-28 |_rev_|
+29 |_rev_|
     string reverse
-29 |_rmv_|
+30 |_rmv_|
     remove file
-30 |_sim_|
+31 |_sim_|
     similarity between two atoms
-31 |_str_|
+32 |_str_|
     stringize expression into atom
-32 |_swi_|
+33 |_swi_|
     software interrupt (low level)
-33 |_sys_|
+34 |_sys_|
     command line shell
-34 |_tbl_|
+35 |_tbl_|
     create array, remove array/variable
-35 |_upp_|
+36 |_upp_|
     convert to upper case
-36 |_utf_|
+37 |_utf_|
     convert UTF-8 character to Unicode codepoint
-37 |_vap_|
+38 |_vap_|
     deconstruct a string character-wise or according to specified separator
-38 |_whl_|
+39 |_whl_|
     while loop
-39 |_x2d_|
+40 |_x2d_|
     convert hexadecimal number to decimal number x2d$BABEFACE:3133078222
 "
       ,   (1,seltxt)
@@ -236,23 +238,24 @@ lex lexical analysis of help file"
           (20,maptxt)
           (21,memtxt)
           (22,modtxt)
-          (23,newobjecttxt)
-          (24,peetxt)
-          (25,poktxt)
-          (26,puttxt1 humtxt puttxt2 puttxt3 newtxt)
-          (27,rentxt)
-          (28,rmvtxt)
-          (29,revtxt)
-          (30,simtxt)
-          (31,strtxt)
-          (32,switxt)
-          (33,systxt)
-          (34,tbltxt)
-          (35,upptxt DOSopttxt)
-          (36,utftxt)
-          (37,vaptxt)
-          (38,whltxt)
-          (39,x2dtxt)
+          (23,moptxt)
+          (24,newobjecttxt)
+          (25,peetxt)
+          (26,poktxt)
+          (27,puttxt1 humtxt puttxt2 puttxt3 newtxt)
+          (28,rentxt)
+          (29,rmvtxt)
+          (30,revtxt)
+          (31,simtxt)
+          (32,strtxt)
+          (33,switxt)
+          (34,systxt)
+          (35,tbltxt)
+          (36,upptxt DOSopttxt)
+          (37,utftxt)
+          (38,vaptxt)
+          (39,whltxt)
+          (40,x2dtxt)
     )
   & ( intro
     =   M
@@ -3664,6 +3667,32 @@ separated by the space operator.
 {!} (a*b^3*c^2.)
     (d*f^3*g^2*h*j^3.same exponent 3)
     (o*p.)"
+    )
+  & ( moptxt
+    =   T
+      , "mop$(<fnc>.<expression>.(=<non-leaf expression>))"
+      ,   "mop$ traverses a list-like expression element by element and outputs a space
+operator separated list. For that to work, mop$ needs an extra argument that
+tells which operator to use. That argument is always headed by |_=_|, the
+right hand side of which is a non-leaf expression. The top operator of that
+expression is used as the separating operator.
+{?} mop$((=.!arg).aap+noot+mies.(=+))
+{!} aap mies noot
+{?} (x=2*a+i*b+e\Lc) & mop$((=.!arg).!x.()'($x))
+{!} 2*a e\Lc i*b
+{?} mop$((=.!arg)..(=*))
+{!}
+
+It is possible to have a list with space operators as separating operator:
+
+{?} mop'((=.!arg).a b c.(=x y))
+{!} a b c
+
+Another way to do this is to use the map$ function
+
+{?} map'((=.!arg).a b c)
+{!} a b c
+"
     )
   & ( vaptxt
     =   T

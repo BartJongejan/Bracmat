@@ -685,6 +685,7 @@ typedef struct
 #define X2D O('x','2','d') /* hex -> dec */
 #define D2X O('d','2','x') /* dec -> hex */
 #define MAP O('m','a','p')
+#define MOP O('m','o','p')
 #define Vap O('v','a','p') /* map for string instead of list */
 #define XX  O('e', 0 , 0 )
 
@@ -13731,19 +13732,7 @@ static function_return_type functions(psk Pnode)
             {
             return output(&Pnode, lst) ? functionOk(Pnode) : functionFail(Pnode);
             }
-        CASE(MAP) /* map $ (<function>.<list>)
-                     map $ (<function> <tree1> (=<tree2>))
-                     map $ (<function> (=<tree2>))
-                     The second form splits regards tree1 as a right descending
-                     'list' with a backbone operator that is the same as the
-                     heading operator of tree 2.
-                     For example,
-                          map$((=.!arg).2*a+e\Lb+c^2.(=+))
-                     generates the list
-                          2*a e\Lb c^2
-                     Notice that in the second form, the three arguments must
-                     be separated by spaces!
-                     The third form returns a nil node (empty node). */
+        CASE(MAP) /* map $ (<function>.<list>) */
             {
             if (is_op(rightnode))
                 {/*XXX*/
@@ -13751,9 +13740,67 @@ static function_return_type functions(psk Pnode)
                 psk nPnode;
                 ppsk ppnode = &nPnode;
                 rrightnode = rightnode->RIGHT;
-                if (Op(rightnode) == WHITE)
+                while (is_op(rrightnode) && Op(rrightnode) == WHITE)
                     {
-                    if (Op(rrightnode) == WHITE)
+                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                    nnode->v.fl = Pnode->v.fl;
+                    nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+                    nnode->LEFT = same_as_w(rightnode->LEFT);
+                    nnode->RIGHT = same_as_w(rrightnode->LEFT);
+                    nnode = functions(nnode);
+                    if (!is_op(nnode) && IS_NIL(nnode))
+                        {
+                        wipe(nnode);
+                        }
+                    else
+                        {
+                        psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                        wnode->v.fl = WHITE | SUCCESS;
+                        *ppnode = wnode;
+                        ppnode = &(wnode->RIGHT);
+                        wnode->LEFT = nnode;
+                        }
+                    rrightnode = rrightnode->RIGHT;
+                    }
+                if (is_op(rrightnode) || !IS_NIL(rrightnode))
+                    {
+                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                    nnode->v.fl = Pnode->v.fl;
+                    nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+                    nnode->LEFT = same_as_w(rightnode->LEFT);
+                    nnode->RIGHT = same_as_w(rrightnode);
+                    nnode = functions(nnode);
+                    *ppnode = nnode;
+                    }
+                else
+                    {
+                    *ppnode = same_as_w(rrightnode);
+                    }
+                wipe(Pnode);
+                Pnode = nPnode;
+                return functionOk(Pnode);
+                }
+            else
+                return functionFail(Pnode);
+            }
+        CASE(MOP) /*     mop $ (<function>.<tree1>.(=<tree2>))
+                mop regards tree1 as a right descending 'list' with a backbone
+                operator that is the same as the heading operator of tree 2.
+                For example,
+                                      mop$((=.!arg).2*a+e\Lb+c^2.(=+))
+                generates the list
+                                                    2*a e\Lb c^2
+                  */
+            {
+            if (is_op(rightnode))
+                {/*XXX*/
+                psk nnode;
+                psk nPnode;
+                ppsk ppnode = &nPnode;
+                rrightnode = rightnode->RIGHT;
+                if (Op(rightnode) == DOT)
+                    {
+                    if (Op(rrightnode) == DOT)
                         {
                         lnode = rrightnode->RIGHT;
                         rrightnode = rrightnode->LEFT;
@@ -13799,35 +13846,14 @@ static function_return_type functions(psk Pnode)
                         }
                     else
                         {
-                        wipe(Pnode);
-                        Pnode = same_as_w(&nilNode);
-                        return functionOk(Pnode);
+                        /* Expecting a dot */
+                        return functionFail(Pnode);
                         }
                     }
                 else
                     {
-                    while (is_op(rrightnode) && Op(rrightnode) == WHITE)
-                        {
-                        nnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                        nnode->v.fl = Pnode->v.fl;
-                        nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
-                        nnode->LEFT = same_as_w(rightnode->LEFT);
-                        nnode->RIGHT = same_as_w(rrightnode->LEFT);
-                        nnode = functions(nnode);
-                        if (!is_op(nnode) && IS_NIL(nnode))
-                            {
-                            wipe(nnode);
-                            }
-                        else
-                            {
-                            psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                            wnode->v.fl = WHITE | SUCCESS;
-                            *ppnode = wnode;
-                            ppnode = &(wnode->RIGHT);
-                            wnode->LEFT = nnode;
-                            }
-                        rrightnode = rrightnode->RIGHT;
-                        }
+                    /* Expecting a dot */
+                    return functionFail(Pnode);
                     }
                 if (is_op(rrightnode) || !IS_NIL(rrightnode))
                     {

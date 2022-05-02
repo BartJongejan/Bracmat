@@ -411,11 +411,11 @@ function_return_type functions(psk Pnode)
                     switch (rrightnode->u.obj)
                         {
                             case '2':
-                                intVal.i = 2;
-                                break;
+	intVal.i = 2;
+	break;
                             case '4':
-                                intVal.i = 4;
-                                break;
+	intVal.i = 4;
+	break;
                         }
                 }
             else
@@ -467,16 +467,16 @@ function_return_type functions(psk Pnode)
                     switch (rrrightnode->u.obj)
                         {
                             case '2':
-                                intVal.i = 2;
-                                break;
+	intVal.i = 2;
+	break;
                             case '4':
-                                intVal.i = 4;
-                                break;
+	intVal.i = 4;
+	break;
                             case '8':
-                                intVal.i = 8;
-                                break;
+	intVal.i = 8;
+	break;
                             default:
-                                ;
+	;
                         }
                 }
             else
@@ -822,19 +822,7 @@ function_return_type functions(psk Pnode)
             {
             return output(&Pnode, lst) ? functionOk(Pnode) : functionFail(Pnode);
             }
-        CASE(MAP) /* map $ (<function>.<list>) 
-                     map $ (<function> <tree1> (=<tree2>))
-                     map $ (<function> (=<tree2>))
-                     The second form splits regards tree1 as a right descending
-                     'list' with a backbone operator that is the same as the
-                     heading operator of tree 2.
-                     For example, 
-                          map$((=.!arg).2*a+e\Lb+c^2.(=+))
-                     generates the list 
-                          2*a e\Lb c^2
-                     Notice that in the second form, the three arguments must
-                     be separated by spaces!
-                     The third form returns a nil node (empty node). */
+        CASE(MAP) /* map $ (<function>.<list>) */
             {
             if (is_op(rightnode))
                 {/*XXX*/
@@ -842,9 +830,67 @@ function_return_type functions(psk Pnode)
                 psk nPnode;
                 ppsk ppnode = &nPnode;
                 rrightnode = rightnode->RIGHT;
-                if (Op(rightnode) == WHITE)
+                while (is_op(rrightnode) && Op(rrightnode) == WHITE)
                     {
-                    if (Op(rrightnode) == WHITE)
+                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                    nnode->v.fl = Pnode->v.fl;
+                    nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+                    nnode->LEFT = same_as_w(rightnode->LEFT);
+                    nnode->RIGHT = same_as_w(rrightnode->LEFT);
+                    nnode = functions(nnode);
+                    if (!is_op(nnode) && IS_NIL(nnode))
+                        {
+                        wipe(nnode);
+                        }
+                    else
+                        {
+                        psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                        wnode->v.fl = WHITE | SUCCESS;
+                        *ppnode = wnode;
+                        ppnode = &(wnode->RIGHT);
+                        wnode->LEFT = nnode;
+                        }
+                    rrightnode = rrightnode->RIGHT;
+                    }
+                if (is_op(rrightnode) || !IS_NIL(rrightnode))
+                    {
+                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                    nnode->v.fl = Pnode->v.fl;
+                    nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+                    nnode->LEFT = same_as_w(rightnode->LEFT);
+                    nnode->RIGHT = same_as_w(rrightnode);
+                    nnode = functions(nnode);
+                    *ppnode = nnode;
+                    }
+                else
+                    {
+                    *ppnode = same_as_w(rrightnode);
+                    }
+                wipe(Pnode);
+                Pnode = nPnode;
+                return functionOk(Pnode);
+                }
+            else
+                return functionFail(Pnode);
+            }
+        CASE(MOP) /*     mop $ (<function>.<tree1>.(=<tree2>))
+                mop regards tree1 as a right descending 'list' with a backbone
+                operator that is the same as the heading operator of tree 2.
+                For example,
+	      mop$((=.!arg).2*a+e\Lb+c^2.(=+))
+                generates the list
+	                    2*a e\Lb c^2
+                  */
+            {
+            if (is_op(rightnode))
+                {/*XXX*/
+                psk nnode;
+                psk nPnode;
+                ppsk ppnode = &nPnode;
+                rrightnode = rightnode->RIGHT;
+                if (Op(rightnode) == DOT)
+                    {
+                    if (Op(rrightnode) == DOT)
                         {
                         lnode = rrightnode->RIGHT;
                         rrightnode = rrightnode->LEFT;
@@ -852,35 +898,35 @@ function_return_type functions(psk Pnode)
                             {
                             intVal.ul = Op(lnode->RIGHT);
                             if (intVal.ul)
-                                {
-                                while (is_op(rrightnode) && Op(rrightnode) == intVal.ul)
-                                    {
-                                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                                    nnode->v.fl = Pnode->v.fl;
-                                    nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
-                                    nnode->LEFT = same_as_w(rightnode->LEFT);
-                                    nnode->RIGHT = same_as_w(rrightnode->LEFT);
-                                    nnode = functions(nnode);
-                                    if (!is_op(nnode) && IS_NIL(nnode))
-                                        {
-                                        wipe(nnode);
-                                        }
-                                    else
-                                        {
-                                        psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                                        wnode->v.fl = WHITE | SUCCESS;
-                                        *ppnode = wnode;
-                                        ppnode = &(wnode->RIGHT);
-                                        wnode->LEFT = nnode;
-                                        }
-                                    rrightnode = rrightnode->RIGHT;
-                                    }
-                                }
+	{
+	while (is_op(rrightnode) && Op(rrightnode) == intVal.ul)
+	    {
+	    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+	    nnode->v.fl = Pnode->v.fl;
+	    nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+	    nnode->LEFT = same_as_w(rightnode->LEFT);
+	    nnode->RIGHT = same_as_w(rrightnode->LEFT);
+	    nnode = functions(nnode);
+	    if (!is_op(nnode) && IS_NIL(nnode))
+	        {
+	        wipe(nnode);
+	        }
+	    else
+	        {
+	        psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
+	        wnode->v.fl = WHITE | SUCCESS;
+	        *ppnode = wnode;
+	        ppnode = &(wnode->RIGHT);
+	        wnode->LEFT = nnode;
+	        }
+	    rrightnode = rrightnode->RIGHT;
+	    }
+	}
                             else
-                                {
-                                /* No operator specified */
-                                return functionFail(Pnode);
-                                }
+	{
+	/* No operator specified */
+	return functionFail(Pnode);
+	}
                             }
                         else
                             {
@@ -890,35 +936,14 @@ function_return_type functions(psk Pnode)
                         }
                     else
                         {
-                        wipe(Pnode);
-                        Pnode = same_as_w(&nilNode);
-                        return functionOk(Pnode);
+                        /* Expecting a dot */
+                        return functionFail(Pnode);
                         }
                     }
                 else
                     {
-                    while (is_op(rrightnode) && Op(rrightnode) == WHITE)
-                        {
-                        nnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                        nnode->v.fl = Pnode->v.fl;
-                        nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
-                        nnode->LEFT = same_as_w(rightnode->LEFT);
-                        nnode->RIGHT = same_as_w(rrightnode->LEFT);
-                        nnode = functions(nnode);
-                        if (!is_op(nnode) && IS_NIL(nnode))
-                            {
-                            wipe(nnode);
-                            }
-                        else
-                            {
-                            psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                            wnode->v.fl = WHITE | SUCCESS;
-                            *ppnode = wnode;
-                            ppnode = &(wnode->RIGHT);
-                            wnode->LEFT = nnode;
-                            }
-                        rrightnode = rrightnode->RIGHT;
-                        }
+                    /* Expecting a dot */
+                    return functionFail(Pnode);
                     }
                 if (is_op(rrightnode) || !IS_NIL(rrightnode))
                     {
@@ -942,8 +967,8 @@ function_return_type functions(psk Pnode)
                 return functionFail(Pnode);
             }
         CASE(Vap) /*    vap $ (<function>.<string>.<char>)
-                     or vap $ (<function>.<string>)
-                     Second form splits in characters. */
+                 or vap $ (<function>.<string>)
+                 Second form splits in characters. */
             {
             if (is_op(rightnode))
                 {/*XXX*/
@@ -970,38 +995,38 @@ function_return_type functions(psk Pnode)
                             ppsk ppnode = &nPnode;
                             char* oldsubject = subject;
                             while (subject)
-                                {
-                                psk nnode;
-                                nnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                                nnode->v.fl = Pnode->v.fl;
-                                nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
-                                nnode->LEFT = same_as_w(rightnode->LEFT);
-                                subject = strstr(oldsubject, separator);
-                                if (subject)
-                                    {
-                                    *subject = '\0';
-                                    nnode->RIGHT = scopy(oldsubject);
-                                    *subject = separator[0];
-                                    oldsubject = subject + strlen(separator);
-                                    }
-                                else
-                                    {
-                                    nnode->RIGHT = scopy(oldsubject);
-                                    }
-                                nnode = functions(nnode);
-                                if (subject)
-                                    {
-                                    psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                                    wnode->v.fl = WHITE | SUCCESS;
-                                    *ppnode = wnode;
-                                    ppnode = &(wnode->RIGHT);
-                                    wnode->LEFT = nnode;
-                                    }
-                                else
-                                    {
-                                    *ppnode = nnode;
-                                    }
-                                }
+	{
+	psk nnode;
+	nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+	nnode->v.fl = Pnode->v.fl;
+	nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+	nnode->LEFT = same_as_w(rightnode->LEFT);
+	subject = strstr(oldsubject, separator);
+	if (subject)
+	    {
+	    *subject = '\0';
+	    nnode->RIGHT = scopy(oldsubject);
+	    *subject = separator[0];
+	    oldsubject = subject + strlen(separator);
+	    }
+	else
+	    {
+	    nnode->RIGHT = scopy(oldsubject);
+	    }
+	nnode = functions(nnode);
+	if (subject)
+	    {
+	    psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
+	    wnode->v.fl = WHITE | SUCCESS;
+	    *ppnode = wnode;
+	    ppnode = &(wnode->RIGHT);
+	    wnode->LEFT = nnode;
+	    }
+	else
+	    {
+	    *ppnode = nnode;
+	    }
+	}
                             wipe(Pnode);
                             Pnode = nPnode;
                             return functionOk(Pnode);
@@ -1028,17 +1053,17 @@ function_return_type functions(psk Pnode)
                             nnode->RIGHT = charcopy(oldsubject, subject);
                             nnode = functions(nnode);
                             if (*subject)
-                                {
-                                psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                                wnode->v.fl = WHITE | SUCCESS;
-                                *ppnode = wnode;
-                                ppnode = &(wnode->RIGHT);
-                                wnode->LEFT = nnode;
-                                }
+	{
+	psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
+	wnode->v.fl = WHITE | SUCCESS;
+	*ppnode = wnode;
+	ppnode = &(wnode->RIGHT);
+	wnode->LEFT = nnode;
+	}
                             else
-                                {
-                                *ppnode = nnode;
-                                }
+	{
+	*ppnode = nnode;
+	}
                             }
                         }
                     else
@@ -1053,17 +1078,17 @@ function_return_type functions(psk Pnode)
                             nnode->RIGHT = charcopy(oldsubject, subject);
                             nnode = functions(nnode);
                             if (*subject)
-                                {
-                                psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                                wnode->v.fl = WHITE | SUCCESS;
-                                *ppnode = wnode;
-                                ppnode = &(wnode->RIGHT);
-                                wnode->LEFT = nnode;
-                                }
+	{
+	psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
+	wnode->v.fl = WHITE | SUCCESS;
+	*ppnode = wnode;
+	ppnode = &(wnode->RIGHT);
+	wnode->LEFT = nnode;
+	}
                             else
-                                {
-                                *ppnode = nnode;
-                                }
+	{
+	*ppnode = nnode;
+	}
                             }
                         }
                     wipe(Pnode);
@@ -1091,28 +1116,28 @@ function_return_type functions(psk Pnode)
                     switch (errno)
                         {
                             case EACCES:
-                                /*
-                                File or directory specified by newname already exists or
-                                could not be created (invalid path); or oldname is a directory
-                                and newname specifies a different path.
-                                */
-                                strcpy(draft, "EACCES");
-                                break;
+	/*
+	File or directory specified by newname already exists or
+	could not be created (invalid path); or oldname is a directory
+	and newname specifies a different path.
+	*/
+	strcpy(draft, "EACCES");
+	break;
                             case ENOENT:
-                                /*
-                                File or path specified by oldname not found.
-                                */
-                                strcpy(draft, "ENOENT");
-                                break;
+	/*
+	File or path specified by oldname not found.
+	*/
+	strcpy(draft, "ENOENT");
+	break;
                             case EINVAL:
-                                /*
-                                Name contains invalid characters.
-                                */
-                                strcpy(draft, "EINVAL");
-                                break;
+	/*
+	Name contains invalid characters.
+	*/
+	strcpy(draft, "EINVAL");
+	break;
                             default:
-                                sprintf(draft, "%d", errno);
-                                break;
+	sprintf(draft, "%d", errno);
+	break;
                         }
 #endif
                     }
@@ -1144,35 +1169,35 @@ function_return_type functions(psk Pnode)
                     switch (errno)
                         {
                             case EACCES:
-                                /*
-                                File or directory specified by newname already exists or
-                                could not be created (invalid path); or oldname is a directory
-                                and newname specifies a different path.
-                                */
-                                strcpy(draft, "EACCES");
-                                break;
+	/*
+	File or directory specified by newname already exists or
+	could not be created (invalid path); or oldname is a directory
+	and newname specifies a different path.
+	*/
+	strcpy(draft, "EACCES");
+	break;
                             case ENOENT:
-                                /*
-                                File or path specified by oldname not found.
-                                */
-                                strcpy(draft, "ENOENT");
-                                break;
+	/*
+	File or path specified by oldname not found.
+	*/
+	strcpy(draft, "ENOENT");
+	break;
                             default:
 #ifdef __VMS
-                                if (!strcmp("file currently locked by another user", (const char*)strerror(errno)))
-                                    {  /* OpenVMS */
-                                    strcpy(draft, "EACCES");
-                                    break;
-                                    }
-                                else
+	if (!strcmp("file currently locked by another user", (const char*)strerror(errno)))
+	    {  /* OpenVMS */
+	    strcpy(draft, "EACCES");
+	    break;
+	    }
+	else
 #endif
-                                    {
-                                    wipe(Pnode);
-                                    Pnode = scopy((const char*)strerror(errno));
-                                    return functionOk(Pnode);
-                                    }
-                                /* sprintf(draft,"%d",errno);
-                                 break;*/
+	    {
+	    wipe(Pnode);
+	    Pnode = scopy((const char*)strerror(errno));
+	    return functionOk(Pnode);
+	    }
+	/* sprintf(draft,"%d",errno);
+	 break;*/
                         }
 #endif
                     }
@@ -1288,12 +1313,12 @@ function_return_type functions(psk Pnode)
                         if (!GoOn || err)
                             break;
                         Pnode = eval(Pnode);
-                        }
-#endif
                     }
+#endif
                 }
-            return err ? functionFail(Pnode) : functionOk(Pnode);
             }
+            return err ? functionFail(Pnode) : functionOk(Pnode);
+        }
         CASE(PUT) /* put$(file,mode,node) of put$node */
             {
             return output(&Pnode, result) ? functionOk(Pnode) : functionFail(Pnode);
@@ -1314,43 +1339,43 @@ function_return_type functions(psk Pnode)
                     switch (errno)
                         {
                             case E2BIG:
-                                /*
-                                Argument list (which is system-dependent) is too big.
-                                */
-                                strcpy(draft, "E2BIG");
-                                break;
+	/*
+	Argument list (which is system-dependent) is too big.
+	*/
+	strcpy(draft, "E2BIG");
+	break;
                             case ENOENT:
-                                /*
-                                Command interpreter cannot be found.
-                                */
-                                strcpy(draft, "ENOENT");
-                                break;
+	/*
+	Command interpreter cannot be found.
+	*/
+	strcpy(draft, "ENOENT");
+	break;
                             case ENOEXEC:
-                                /*
-                                Command-interpreter file has invalid format and is not executable.
-                                */
-                                strcpy(draft, "ENOEXEC");
-                                break;
+	/*
+	Command-interpreter file has invalid format and is not executable.
+	*/
+	strcpy(draft, "ENOEXEC");
+	break;
                             case ENOMEM:
-                                /*
-                                Not enough memory is available to execute command; or available
-                                memory has been corrupted; or invalid block exists, indicating
-                                that process making call was not allocated properly.
-                                */
-                                strcpy(draft, "ENOMEM");
-                                break;
+	/*
+	Not enough memory is available to execute command; or available
+	memory has been corrupted; or invalid block exists, indicating
+	that process making call was not allocated properly.
+	*/
+	strcpy(draft, "ENOMEM");
+	break;
                             default:
-                                sprintf(draft, "%d", errno);
-                                break;
-                        }
+	sprintf(draft, "%d", errno);
+	break;
+                }
 #endif
                 else
                     strcpy(draft, "0");
                 wipe(Pnode);
                 Pnode = scopy((const char*)draft);
                 return functionOk(Pnode);
-                }
             }
+    }
 #endif
 #endif
         CASE(TBL) /* tbl$(varname,length) */
@@ -1435,7 +1460,7 @@ function_return_type functions(psk Pnode)
                 */
                 else
                     Pnode = build_up(Pnode, "(((\2.new)'\3)|)&\2", NULL);
-                }
+            }
             else
                 {
                 addr[2] = getObjectDef(rightnode);
@@ -1451,7 +1476,7 @@ function_return_type functions(psk Pnode)
             SETCREATEDWITHNEW((objectnode*)addr[2]);
             wipe(addr[2]);
             return functionOk(Pnode);
-            }
+    }
         CASE(0) /* $<expr>  '<expr> */
             {
             if (Op(Pnode) == FUU)
@@ -1502,7 +1527,7 @@ function_return_type functions(psk Pnode)
                 {
                 return functionFail(Pnode);
                 }
-            }
+                }
         DEFAULT
             {
             if (INTEGER(lnode))
@@ -1523,7 +1548,7 @@ function_return_type functions(psk Pnode)
             addr[1] = NULL;
             return find_func(Pnode);
             }
-        }
+            }
     }
     /*return functionOk(Pnode); 20 Dec 1995, unreachable code in Borland C */
     }

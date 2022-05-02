@@ -343,6 +343,7 @@ typedef struct
 #define X2D O('x','2','d') /* hex -> dec */
 #define D2X O('d','2','x') /* dec -> hex */
 #define MAP O('m','a','p')
+#define MOP O('m','o','p')
 #define Vap O('v','a','p') /* map for string instead of list */
 #define XX  O('e', 0 , 0 )
 

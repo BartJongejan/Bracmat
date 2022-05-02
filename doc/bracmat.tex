@@ -3295,7 +3295,7 @@ Tell the position inside the file.
 
 Returns the current value of the file position indicator.
 
-\bfun{\bc{fil\d(}\bi{file-ame}\bc,\bi{whence}\bc,\bi{offset}\bc)}
+\bfun{\bc{fil\d(}\bi{file-name}\bc,\bi{whence}\bc,\bi{offset}\bc)}
 
 Go to file position.
 
@@ -3646,20 +3646,51 @@ _oct{!} 1 4 9 16
 _oct{!} 1 4 9 16
 {?} (  map
     _d[] ( (
-         =   x
-           .     !arg:?*?^%?x*?*?^!x*?
-               & (!arg."same exponent" !x)
-             | (!arg.)
-            )
-          . a*b^3*c^2 d*f^3*g^2*h*j^3 o*p
-          )
+        =   x
+          .     !arg:?*?^%?x*?*?^!x*?
+              & (!arg."same exponent" !x)
+            | (!arg.)
         )
+      . a*b^3*c^2 d*f^3*g^2*h*j^3 o*p
+      )
+    )
 _oct{!} (a*b^3*c^2.)
 _oct    (d*f^3*g^2*h*j^3.same exponent 3)
 _oct    (o*p.)
 \end{ex}
 
+\bfun{\bc{mop\d(}\bi{fnc}.\bi{expression}.(=\bi{non-leaf expression}\bc))}
+\index{mop@\bc{mop}}
+
+\verb|mop$| traverses a list-like expression element by element and outputs a space
+operator separated list. For that to work, \verb|mop$| needs an extra argument that
+tells which operator to use. That argument is always headed by \verb|=|, the
+right hand side of which is a non-leaf expression. The top operator of that
+expression is used as the separating operator.
+\begin{ex}
+{?} mop_d((=.!arg).aap+noot+mies.(=+))
+_oct{!} aap mies noot
+{?} (x=2*a+i*b+e\Lc) & mop_d((=.!arg).!x.()'($x))
+_oct{!} 2*a e\Lc c i*b
+_oct{!}
+\end{ex}
+
+It is possible to have a list with space operators as separating operator:
+
+\begin{ex}
+{?} mop'((=.!arg).a b c.(=x y))
+_oct{!} a b c
+\end{ex}
+
+Another way to do this is to use the \verb|map$| function
+
+\begin{ex}
+{?} map'((=.!arg).a b c)
+{!} a b c
+\end{ex}
+
 \bfun{\bc{mem\d}[\bc{EXT}]}
+
 \index{mem@\bc{mem}}
 
 \verb|mem$| produces a list of all currently existing variables,

@@ -6280,14 +6280,14 @@ string line 2\"
           )
           (   get$("<?xml akajh ?><?app >aap",ML MEM):?ml
             & toML$!ml:"<?xml akajh ?><?app ?>aap"
-          | "toML 20200930"
+          | Out$"toML 20200930"
           )
           (     toML
               $ ( get
                 $ ("<a href=http://www.aaa.dk/ess/index.html>",HT ML MEM)
                 )
             : "<a href=\"http://www.aaa.dk/ess/index.html\">"
-          | out$"xml.c:invalue(const char * kar) 20201001"
+          | Out$"xml.c:invalue(const char * kar) 20201001"
           )
           (     MLencoding
               $ ( get
@@ -6296,31 +6296,31 @@ string line 2\"
                   )
                 )
             : iso-8859-1
-          | out$"MLencoding:Check meta tag if xml declaration inconclusive"
+          | Out$"MLencoding:Check meta tag if xml declaration inconclusive"
           )
           (   (p==B_A)
             & !p:!p
             & w_k:w_k
-          |   out
+          |   Out
             $ "Evaluation must stop if the dummy operator evaluates to itself."
           )
           (   (x=a+b+c)
-            & map$((=.!arg) !x ()'$x):a b c
-          |   out
+            & mop$((=.!arg).!x.'$x):a b c
+          |   Out
             $ "Convert non-atomic expression to space operator separated list."
           )
           (   (x=c)
-            & map$((=.!arg) !x ()'$x):a b c
-            & out$"Expression must be non-atomic."
+            & mop$((=.!arg).!x.'$x):a b c
+            & Out$"Expression must be non-atomic."
           | 
           )
-          ( map$((=.!arg) () (=+)):
-          | out$"Corner case: expression is empty atom. Should succeed."
+          ( mop$((=.!arg)..(=+)):
+          | Out$"Corner case: expression is empty atom. Should succeed."
           )
-          (     map
-              ' ((=.!arg) (a b c) (=x y))
+          (     mop
+              ' ((=.!arg).a b c.(=x y))
             : a b c
-          | out$"Expression can be a list if call is map' and not map$."
+          | Out$"Expression can be a list if call is map' and not map$."
           )
       &   out
         $ ( str
