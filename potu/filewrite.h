@@ -1,5 +1,6 @@
 #ifndef FILEWRITE_H
 #define FILEWRITE_H
+#include "platformdependentdefs.h"
 #include <stdio.h>
 
 #if _BRACMATEMBEDDED
