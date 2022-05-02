@@ -24,15 +24,6 @@
 #define BIGENDIAN     0
 #endif
 
-#if BIGENDIAN
-#define iobj lobj
-#define O(a,b,c) (a*0x1000000L+b*0x10000L+c*0x100)
-#else
-#if !WORD32
-#define iobj lobj
-#endif
-#define O(a,b,c) (a+b*0x100+c*0x10000L)
-#endif
 
 #if defined BRACMATEMBEDDED
 #define _BRACMATEMBEDDED 1
@@ -135,6 +126,16 @@ typedef   signed long  INT32_T;
 #define STRTOL strtol
 #define FSEEK fseek
 #define FTELL ftell
+#endif
+
+#if BIGENDIAN
+#define iobj lobj
+#define O(a,b,c) (a*0x1000000L+b*0x10000L+c*0x100)
+#else
+#if !WORD32
+#define iobj lobj
+#endif
+#define O(a,b,c) (a+b*0x100+c*0x10000L)
 #endif
 
 
