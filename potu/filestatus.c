@@ -18,6 +18,7 @@
 #include <assert.h>
 
 #if !defined NO_FOPEN
+
 enum { NoPending, Writing, Reading };
 typedef struct fileStatus
     {
