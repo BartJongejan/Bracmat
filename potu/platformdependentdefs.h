@@ -204,7 +204,9 @@ typedef struct
 #define MEMCPY(a,b,n) memcpy((char *)(a),(char *)(b),n)
 #endif
 #if defined EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 #define __EMSCRIPTEN__
+#endif
 #endif
 #if defined __EMSCRIPTEN__ /* This is set if compiling with __EMSCRIPTEN__. */
 #define EMSCRIPTEN_HTML 1 /* set to 1 if using __EMSCRIPTEN__ to convert this file to HTML*/
