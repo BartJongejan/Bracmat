@@ -1,4 +1,3 @@
-/*MOVETO CANONIZATION*/
 #include "canonization.h"
 #include "globals.h"
 #include "variables.h"
