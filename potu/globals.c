@@ -88,6 +88,7 @@ const psk knil[16] =
 
 #if !defined NO_FOPEN
 char* targetPath = NULL; /* Path that can be prepended to filenames. */
+#endif
 
 int ARGC = 0;
 char** ARGV = NULL;
@@ -95,4 +96,3 @@ char** ARGV = NULL;
 psk m0 = NULL, m1 = NULL, f0 = NULL, f1 = NULL, f4 = NULL, f5 = NULL;
 
 
-#endif
