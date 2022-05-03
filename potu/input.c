@@ -6,6 +6,7 @@
 #include "memory.h"
 #include "numbercheck.h"
 #include "copy.h"
+#include "objectnode.h"
 #include "filewrite.h"
 #include "wipecopy.h"
 #include "result.h"

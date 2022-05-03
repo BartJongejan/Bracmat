@@ -2,6 +2,7 @@
 
 #include "parse.h"
 #include "globals.h"
+#include "objectnode.h"
 #include "filewrite.h"
 #include "typedobjectnode.h"
 #include "nodedefs.h"
