@@ -22,7 +22,7 @@ email: bartj@hum.ku.dk
 
 #define DATUM "2 May 2022"
 #define VERSION "6.10.0"
-#define BUILD "255"
+#define BUILD "256"
 /*
 COMPILATION
 -----------
