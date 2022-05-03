@@ -19,7 +19,7 @@ void myputc(int c);
 int mygetc(FILE * fpi);
 #endif
 
-void(*process)(int c);
+extern void(*process)(int c);
 
 void myprintf(char *strng, ...);
 

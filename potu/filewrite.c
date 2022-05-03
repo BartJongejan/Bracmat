@@ -6,6 +6,8 @@
 #include <stdarg.h>
 #include <string.h>
 
+void(*process)(int c);
+
 #if _BRACMATEMBEDDED
 
 static int(*WinIn)(void) = NULL;
