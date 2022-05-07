@@ -20,7 +20,7 @@ Bracmat is a good choice for tasks that require dynamic programming.
 * Linux
     * bracmat
 
-      64 bit statically linked executable for Linux (tested with Ubuntu 16.04)
+      64 bit statically linked executable for Linux (tested with Ubuntu 16.04, 18.04 and 20.04)
 
 * Python-module
 
