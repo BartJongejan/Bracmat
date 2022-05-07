@@ -15,9 +15,12 @@ X=
       & out$(removed !stl)
       & str$(!a !z)
   )
-  ( replaceStyle =.
-  @(!arg:?A "<style>" ? "</style>" ?Z)
-  & str$(!A "<style>
+  ( replaceStyle
+  =   
+    .   @(!arg:?A "<style>" ? "</style>" ?Z)
+      &   str
+        $ ( !A
+            "<style>
 body {
 font-family: arial;
 margin: 0;
@@ -40,7 +43,9 @@ font-family: 'Lucida Console', Monaco, monospace;
 outline: ridge;
 }
 </style>
-" !Z)
+"
+            !Z
+          )
   )
   ( removeElement
   =   html elstart elend a z
@@ -108,7 +113,7 @@ outline: ridge;
     .   out$insertPrint
       & !arg:?XYZ
       & lst$(XYZ,XYZ,NEW)
-      &  @(!arg:?A "Module['printErr'] = typeof printErr" ?Z)
+      & @(!arg:?A "Module['printErr'] = typeof printErr" ?Z)
       & out$Found
       &   str
         $ ( !A
