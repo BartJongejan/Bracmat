@@ -146,7 +146,7 @@ outline: ridge;
            the confines of your browser, with all the limitations that follow, 
            such as the inability to read and write files.
            <br />
-           Full, more than 100 times faster versions of Bracmat compiled and
+           Full, ten times faster versions of Bracmat compiled and
            linked for Windows, macOS and Linux, together with the C source
            code, can be found on 
            <a href=\"https://github.com/BartJongejan/Bracmat\">GitHub</a>.<br>
