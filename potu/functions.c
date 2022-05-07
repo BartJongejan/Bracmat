@@ -441,7 +441,7 @@ function_return_type functions(psk Pnode)
 #endif                    
                     case 1:
                     default:
-                        sprintf(draft, "%u", (int)*(unsigned char*)p);
+                        sprintf(draft, "%u", (unsigned int)*(unsigned char*)p);
                         break;
                 }
             wipe(Pnode);

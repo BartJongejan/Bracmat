@@ -269,7 +269,8 @@ static void setStop(fileStatus* fs, char* stopstring)
         free(fs->stop);
     fs->stop = (char*)malloc(strlen(stopstring) + 1);
 #endif
-    strcpy(fs->stop, stopstring);
+    if(fs->stop)
+        strcpy(fs->stop, stopstring);
     }
 
 int fil(ppsk PPnode)

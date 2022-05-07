@@ -219,38 +219,34 @@ char stringmatch
             , 12345
             );
         }
-    if (!(((Flgs & NONIDENT)
-        && (NEGATION(Flgs, NONIDENT)
-        ? ((s.c.once = ONCE)
-        , cutoff > sub
-        )
-        : cutoff == sub
-        )
-        )
-        || ((Flgs & ATOM)
-        && (NEGATION(Flgs, ATOM)
-        ? (cutoff < sub + 2) /*!(sub[0] && sub[1])*/
-        : cutoff > sub
-        && ((s.c.once = ONCE)
-        , cutoff > sub + 1 /*sub[1]*/
-        )
-        )
-        )
-        || ((Flgs & (FRACTION | NUMBER))
-        && ((ci = sfullnumbercheck(sub, cutoff))
-        , (((Flgs & FRACTION)
-        && ((ci != (QFRACTION | QNUMBER)) ^ NEGATION(Flgs, FRACTION))
-        )
-        || ((Flgs & NUMBER)
-        && (((ci & QNUMBER) == 0) ^ NEGATION(Flgs, NUMBER))
-        )
-        )
-        )
-        && (s.c.rmr = (ci == DEFINITELYNONUMBER) ? ONCE : FALSE
-        , (s.c.lmr = PRISTINE)
-        )
-        )
-        )
+    if  (  !(   (   (Flgs & NONIDENT)
+                &&  ( NEGATION(Flgs, NONIDENT)
+                    ? ((s.c.once = ONCE), cutoff > sub)
+                    : cutoff == sub
+                    )
+                )
+            ||  (   (Flgs & ATOM)
+                &&  (      NEGATION(Flgs, ATOM)
+                        ?  (cutoff < sub + 2) /*!(sub[0] && sub[1])*/
+                        :  cutoff > sub
+                    &&  ((s.c.once = ONCE), cutoff > sub + 1 /*sub[1]*/ )
+                    )
+                )
+            ||  (   (Flgs & (FRACTION | NUMBER))
+                &&  (   (ci = sfullnumbercheck(sub, cutoff))
+                    ,   (   (   (Flgs & FRACTION)
+                            &&  ((ci != (QFRACTION | QNUMBER)) ^ NEGATION(Flgs, FRACTION))
+                            )
+                        ||  (   (Flgs & NUMBER)
+                            &&  (((ci & QNUMBER) == 0) ^ NEGATION(Flgs, NUMBER))
+                            )
+                        )
+                    )
+                &&  (   s.c.rmr = (ci == DEFINITELYNONUMBER) ? ONCE : FALSE
+                    ,   (s.c.lmr = PRISTINE) /* Single = is correct! */
+                    )
+                )
+            )
         )
         {
         if (IS_VARIABLE(pat))

@@ -40,7 +40,11 @@ void myputc(int c)
 #else
 void myputc(int c)
     {
+#ifdef __EMSCRIPTEN__
+    fputc(c, stdout);
+#else
     fputc(c, global_fpo);
+#endif
     }
 
 int mygetc(FILE * fpi)
