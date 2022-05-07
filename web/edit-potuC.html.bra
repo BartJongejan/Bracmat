@@ -75,11 +75,6 @@ outline: ridge;
       & @(!html:?a "<textarea" ?z)
       & str$(!a !toInsert "<textarea" !z)
   )
-  ( removeNewLineInPrintFunction
-  =   a b z
-    .   @(!arg:?a print ?b "element.value += text + \"\\n\";" ?z)
-      & str$(!a print !b "element.value += text;" !z)
-  )
   ( doit
   =   
     .     ( "The text in the file 'safereadme', as constructed by the next
@@ -200,9 +195,6 @@ final result. }
         &   (its.insertBeforeTextArea)$(!html.!inputField !submitButton)
           : ?html
         & out$"inserted input field and submit button"
-        & (its.removeNewLineInPrintFunction)$!html:?html
-        & out$"Removed newine in print function"
-        & lst$(html,"htmlXXX.html",NEW,RAW)
         & put$(!js,"potuC.js",TXT,NEW)
         & @(!html:?a "</body>" ?z)
         & out$"found body close tag"

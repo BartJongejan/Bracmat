@@ -3,9 +3,9 @@ Module['print'] = (function () {
     if (element) element.value = ''; // clear browser cache
     return function (text) {
         if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
-        console.log(text);
+        //console.log(text);
         if (element) {
-            element.value += text;
+            element.value += text + '\n';
             element.scrollTop = element.scrollHeight; // focus on bottom
         }
     };
