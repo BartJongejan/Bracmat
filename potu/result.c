@@ -17,7 +17,7 @@ static void hreslts(psk Root, int level, int ind, int space, psk cutoff);
 
 
 #define COMPLEX_MAX 80
-#define LINELENGTH 80
+int LINELENGTH = NARROWLINELENGTH;
 
 static size_t complexity(psk Root, size_t max)
     {

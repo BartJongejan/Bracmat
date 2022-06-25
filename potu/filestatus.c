@@ -903,12 +903,16 @@ int fil(ppsk PPnode)
         FILE* saveFpo;
         psk rightnode, rlnode, rrightnode, rrrightnode;
         static LONG opts[] =
-            { APP,BIN,CON,EXT,MEM,LIN,NEW,RAW,TXT,VAP,0L };
+            { APP,BIN,CON,EXT,MEM,LIN,NEW,RAW,TXT,VAP,WID,0L };
         if (Op(rightnode = (*PPnode)->RIGHT) == COMMA)
             {
+            int wide;
             saveFpo = global_fpo;
             rlnode = rightnode->LEFT;
             rrightnode = rightnode->RIGHT;
+            wide = search_opt(rrightnode, WID);
+            if (wide)
+                LINELENGTH = WIDELINELENGTH;
             hum = !search_opt(rrightnode, LIN);
             listWithName = !search_opt(rrightnode, RAW);
             if (allopts(rrightnode, opts))
@@ -987,6 +991,8 @@ int fil(ppsk PPnode)
                 addr[2] = rightnode;
                 }
             *PPnode = dopb(*PPnode, addr[2]);
+            if (wide)
+                LINELENGTH = NARROWLINELENGTH;
             }
         else
             {

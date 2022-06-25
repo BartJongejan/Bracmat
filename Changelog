@@ -1,3 +1,7 @@
+25 June 2022
+potu (6.11.0): New option 'WID' for 'lst' function, creating wider lines (~120 instead
+of ~80 characters).
+
 2 May 2022
 New built-in function mop$ iterates over terms/factors/elements and outputs a
 space operator separated list. 

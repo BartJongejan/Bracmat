@@ -349,6 +349,7 @@ typedef struct
 #define MAP O('m','a','p')
 #define MOP O('m','o','p')
 #define Vap O('v','a','p') /* map for string instead of list */
+#define WID O('W','I','D') /* lst option for wider lines */
 #define XX  O('e', 0 , 0 )
 
 
