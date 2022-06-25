@@ -155,7 +155,7 @@ int errorprintf(const char *fmt, ...)
 int lineTooLong(unsigned char *strng)
     {
     if (hum
-        && strlen((const char *)strng) > 10 /*LINELENGTH*/
+        && strlen((const char *)strng) > 10 /*LineLength*/
         /* very short strings are allowed to keep \n and \t */
         )
         return TRUE;

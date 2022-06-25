@@ -61,8 +61,6 @@ extern char** ARGV;
 
 extern psk m0, m1, f0, f1, f4, f5;
 
-#define NARROWLINELENGTH 80
-#define WIDELINELENGTH 120
-static int LINELENGTH;
+extern int LineLength;
 
 #endif

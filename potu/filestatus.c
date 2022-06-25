@@ -912,7 +912,7 @@ int fil(ppsk PPnode)
             rrightnode = rightnode->RIGHT;
             wide = search_opt(rrightnode, WID);
             if (wide)
-                LINELENGTH = WIDELINELENGTH;
+                LineLength = WIDELINELENGTH;
             hum = !search_opt(rrightnode, LIN);
             listWithName = !search_opt(rrightnode, RAW);
             if (allopts(rrightnode, opts))
@@ -992,10 +992,10 @@ int fil(ppsk PPnode)
                 }
             *PPnode = dopb(*PPnode, addr[2]);
             if (wide)
-                LINELENGTH = NARROWLINELENGTH;
+                LineLength = NARROWLINELENGTH;
             }
         else
-            {
+            {   
             (*how)(rightnode);
             flush();
             *PPnode = rightbranch(*PPnode);

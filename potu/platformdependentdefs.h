@@ -368,4 +368,7 @@ typedef struct
 #endif
 #endif
 
+#define NARROWLINELENGTH 80
+#define WIDELINELENGTH 120
+
 #endif

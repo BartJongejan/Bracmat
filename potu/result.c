@@ -17,7 +17,7 @@ static void hreslts(psk Root, int level, int ind, int space, psk cutoff);
 
 
 #define COMPLEX_MAX 80
-int LINELENGTH = NARROWLINELENGTH;
+int LineLength = NARROWLINELENGTH;
 
 static size_t complexity(psk Root, size_t max)
     {
@@ -45,20 +45,20 @@ static size_t complexity(psk Root, size_t max)
                                 max += COMPLEX_MAX / 10;
                                 break;
                             default:
-                                max += COMPLEX_MAX / LINELENGTH;
+                                max += COMPLEX_MAX / LineLength;
                         }
                     break;
                 default:
-                    max += COMPLEX_MAX / LINELENGTH;
+                    max += COMPLEX_MAX / LineLength;
             }
         Parent = Op(Root);
         Child = Op(Root->LEFT);
         if (HAS__UNOPS(Root->LEFT) || Parent >= Child)
-            max += (2 * COMPLEX_MAX) / LINELENGTH; /* 2 parentheses */
+            max += (2 * COMPLEX_MAX) / LineLength; /* 2 parentheses */
 
         Child = Op(Root->RIGHT);
         if (HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
-            max += (2 * COMPLEX_MAX) / LINELENGTH; /* 2 parentheses */
+            max += (2 * COMPLEX_MAX) / LineLength; /* 2 parentheses */
 
         if (max > COMPLEX_MAX)
             return max;
@@ -66,7 +66,7 @@ static size_t complexity(psk Root, size_t max)
         Root = Root->RIGHT;
         }
     if (!is_op(Root))
-        max += (COMPLEX_MAX*strlen((char *)POBJ(Root))) / LINELENGTH;
+        max += (COMPLEX_MAX*strlen((char *)POBJ(Root))) / LineLength;
     return max;
     }
 
