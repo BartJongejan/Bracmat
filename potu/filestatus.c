@@ -903,14 +903,14 @@ int fil(ppsk PPnode)
         FILE* saveFpo;
         psk rightnode, rlnode, rrightnode, rrrightnode;
         static LONG opts[] =
-            { APP,BIN,CON,EXT,MEM,LIN,NEW,RAW,TXT,VAP,WID,0L };
+            { APP,BIN,CON,EXT,MEM,LIN,NEW,RAW,TXT,VAP,WYD,0L };
         if (Op(rightnode = (*PPnode)->RIGHT) == COMMA)
             {
             int wide;
             saveFpo = global_fpo;
             rlnode = rightnode->LEFT;
             rrightnode = rightnode->RIGHT;
-            wide = search_opt(rrightnode, WID);
+            wide = search_opt(rrightnode, WYD);
             if (wide)
                 LineLength = WIDELINELENGTH;
             hum = !search_opt(rrightnode, LIN);

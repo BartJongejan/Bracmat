@@ -1,4 +1,9 @@
 25 June 2022
+bracmat (6.11.1): New option 'WYD' for 'lst' and 'put', creating wider lines
+(~120 instead of ~80 characters).
+potu (6.11.1): Renamed 'WID' to 'WYD'.
+
+25 June 2022
 potu (6.11.0): New option 'WID' for 'lst' function, creating wider lines (~120 instead
 of ~80 characters).
 

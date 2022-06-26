@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "2 May 2022"
-#define VERSION "6.10.0"
-#define BUILD "255"
+#define DATUM "26 June 2022"
+#define VERSION "6.11.1"
+#define BUILD "258"
 /*
 COMPILATION
 -----------
@@ -687,6 +687,7 @@ typedef struct
 #define MAP O('m','a','p')
 #define MOP O('m','o','p')
 #define Vap O('v','a','p') /* map for string instead of list */
+#define WYD O('W','Y','D') /* lst option for wider lines */
 #define XX  O('e', 0 , 0 )
 
 
@@ -3206,8 +3207,11 @@ static void glue(int c)
     *source++ = (char)c;
     }
 
+#define NARROWLINELENGTH 80
+#define WIDELINELENGTH 120
+
 #define COMPLEX_MAX 80
-#define LINELENGTH 80
+int LineLength = NARROWLINELENGTH;
 
 static size_t complexity(psk Root, size_t max)
     {
@@ -3235,20 +3239,20 @@ static size_t complexity(psk Root, size_t max)
                                 max += COMPLEX_MAX / 10;
                                 break;
                             default:
-                                max += COMPLEX_MAX / LINELENGTH;
+                                max += COMPLEX_MAX / LineLength;
                         }
                     break;
                 default:
-                    max += COMPLEX_MAX / LINELENGTH;
+                    max += COMPLEX_MAX / LineLength;
             }
         Parent = Op(Root);
         Child = Op(Root->LEFT);
         if (HAS__UNOPS(Root->LEFT) || Parent >= Child)
-            max += (2 * COMPLEX_MAX) / LINELENGTH; /* 2 parentheses */
+            max += (2 * COMPLEX_MAX) / LineLength; /* 2 parentheses */
 
         Child = Op(Root->RIGHT);
         if (HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
-            max += (2 * COMPLEX_MAX) / LINELENGTH; /* 2 parentheses */
+            max += (2 * COMPLEX_MAX) / LineLength; /* 2 parentheses */
 
         if (max > COMPLEX_MAX)
             return max;
@@ -3256,7 +3260,7 @@ static size_t complexity(psk Root, size_t max)
         Root = Root->RIGHT;
         }
     if (!is_op(Root))
-        max += (COMPLEX_MAX*strlen((char *)POBJ(Root))) / LINELENGTH;
+        max += (COMPLEX_MAX*strlen((char *)POBJ(Root))) / LineLength;
     return max;
     }
 
@@ -3304,7 +3308,7 @@ static void do_something(int c)
 static int lineToLong(unsigned char *strng)
     {
     if (hum
-        && strlen((const char *)strng) > 10 /*LINELENGTH*/
+        && strlen((const char *)strng) > 10 /*LineLength*/
         /* very short strings are allowed to keep \n and \t */
         )
         return TRUE;
@@ -12541,12 +12545,16 @@ static int output(ppsk PPnode, void(*how)(psk k))
     FILE *saveFpo;
     psk rightnode, rlnode, rrightnode, rrrightnode;
     static LONG opts[] =
-        { APP,BIN,CON,EXT,MEM,LIN,NEW,RAW,TXT,VAP,0L };
+        { APP,BIN,CON,EXT,MEM,LIN,NEW,RAW,TXT,VAP,WYD,0L };
     if (Op(rightnode = (*PPnode)->RIGHT) == COMMA)
         {
+        int wide;
         saveFpo = global_fpo;
         rlnode = rightnode->LEFT;
         rrightnode = rightnode->RIGHT;
+        wide = search_opt(rrightnode, WYD);
+        if (wide)
+            LineLength = WIDELINELENGTH;
         hum = !search_opt(rrightnode, LIN);
         listWithName = !search_opt(rrightnode, RAW);
         if (allopts(rrightnode, opts))
@@ -12625,6 +12633,8 @@ static int output(ppsk PPnode, void(*how)(psk k))
             addr[2] = rightnode;
             }
         *PPnode = dopb(*PPnode, addr[2]);
+        if (wide)
+            LineLength = NARROWLINELENGTH;
         }
     else
         {

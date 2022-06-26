@@ -1188,7 +1188,7 @@ ask |_end Bracmat session ? (y/n)_| after which the user has to choose. This
 trick is useful in batch processing."
           "If the first parameter is <nil> or |_stdin_| and the |_MEM_| option is not used,
 input is coming from standard input.
-Take care for putting filenames in double quotes if they contain any
+Take care that you put filenames in double quotes if they contain any
 characters that can be misunderstood, such as dots, (back)slashes or dollars."
     )
   & ( lowtxt
@@ -3577,7 +3577,7 @@ matches are forgotten : the |___| operator is a global variable.
     )
   & ( lsttxt1
     =   T
-      , "lst$(<(=expression) or variable>*[,LIN][,RAW])"
+      , "lst$(<(=expression) or variable>*[,LIN][,RAW][,WYD])"
       , "|_lst$_| outputs all present bindings of one or more variables to standard
 output. If a variable is local to a function and a variable of the same name
 already exists in the context of another function invocation or globally, all
@@ -3597,6 +3597,10 @@ listed.
 The LIN option suppresses most newlines and all other unneeded white
 space characters.
 
+The WYD option makes lines wider. That is especially useful if your code is
+deeply nested. This option has no effect if the LIN option is provided as well.
+
+
 If the first parameter is the zero-length string, then all variables with
 names starting with a character below ASCII 128 are shown. If a variable
 has more than one binding (arrays/stacks) then the current value is preceded
@@ -3609,7 +3613,7 @@ The second parameter is optional.
     )
   & ( lsttxt2
     =   T
-      , "lst$(<(=expression) or variable>*,MEM [,LIN][,RAW])"
+      , "lst$(<(=expression) or variable>*,MEM [,LIN][,RAW][,WYD])"
       , "The difference with the preceding form is that output takes place to
 memory. What is normally visible on screen is put in one atom, which is
 the return value of the call to lst. It has the opposite effect of
@@ -3628,7 +3632,7 @@ Example:
     )
   & ( lsttxt3
     =   T
-      , "|_lst$(<(=expression) or variable>*,<file-name>,NEW | APP [,LIN][,TXT][,BIN])_|"
+      , "|_lst$(<(=expression) or variable>*,<file-name>,NEW | APP [,LIN][,TXT][,BIN][,WYD])_|"
       , "This time, output is sent to the named file instead of standard output.
 The third argument is explained below.
 Code that has been saved with lst$ can be reloaded with get$.
@@ -3820,7 +3824,7 @@ returned."
     )
   & ( puttxt1
     =   T
-      , "put$(<expression>[,LIN])"
+      , "put$(<expression>[,LIN][,WYD])"
       , "Sends <expression> to standard output. The cursor is positioned after the
 last output character. The predefined function out$ does the same as put$,
 with the exception that it positions the cursor on the beginning of the next
@@ -3830,7 +3834,7 @@ line.
     )
   & ( puttxt2
     =   T
-      , "put$(<expression>,MEM [,LIN])"
+      , "put$(<expression>,MEM [,LIN][,WYD])"
       , "<expression> is stringified and placed into an atom, which is the return
 value of the call. This use of put$ is similar to the str$ function, but
 whereas str$ suppresses the space operator, put$ transfers every character,
@@ -3842,7 +3846,7 @@ including space operators, to the atom.
     )
   & ( puttxt3
     =   T
-      , "|_put$(<expression>,<file-name>,NEW | APP [,LIN])_|"
+      , "|_put$(<expression>,<file-name>,NEW | APP [,LIN][,WYD])_|"
       , "Write <expression> to the named file.
 
 {?} put$(tay$(e^x,x,10),\"e.out\",APP)"

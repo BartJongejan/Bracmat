@@ -3528,11 +3528,11 @@ assumption and the program will come to an end immediately. If the
 trick is useful in batch processing.
 
 If the first parameter is \bi{nil} or \verb|stdin| and the \bc{MEM}
-option is not used, input is coming from standard input. Take care for
-putting filenames in double quotes if they contain any characters that
+option is not used, input is coming from standard input. Take care that
+you put filenames in double quotes if they contain any characters that
 can be misunderstood, such as dots, (back)slashes or dollars.
 
-\bfun{\bc{lst\d(}(\bc=\bi{expression}) or \bi{variable}*[\bc{,LIN}][\bc{,RAW}]\bc)}
+\bfun{\bc{lst\d(}(\bc=\bi{expression}) or \bi{variable}*[\bc{,LIN}][\bc{,RAW}][\bc{,WYD}]\bc)}
 \index{lst@\bc{lst}}
 
 \verb|lst$| outputs all present bindings of one or more variables to
@@ -3554,6 +3554,9 @@ operator is listed.
 The \bc{LIN} option suppresses most newlines and all other unneeded
 whitespace characters.
 
+The \bc{WYD} option makes lines wider. That is especially useful if your code is
+deeply nested. This option has no effect if the \bc{LIN} option is provided as well.
+
 If the first parameter is the zero-length string, then all variables
 with names starting with a character below ASCII 128 are shown. If a
 variable has more than one binding (arrays/stacks) then the current
@@ -3569,7 +3572,7 @@ If \bc{LIN} is not present, output is very much indented, sometimes
 making it more readable for humans. If \bc{LIN} is present, output is
 as compact as possible.
 
-\bfun{\bc{lst\d(}(\bc=\bi{expression}) or \bi{variable}*\bc{,MEM}[\bc{,LIN}][\bc{,RAW}]\bc)}
+\bfun{\bc{lst\d(}(\bc=\bi{expression}) or \bi{variable}*\bc{,MEM}[\bc{,LIN}][\bc{,RAW}][\bc{,WYD}]\bc)}
 
 The difference with the preceding form is that output takes place to
 memory. What is normally visible on screen is put in one atom, which
@@ -3588,7 +3591,7 @@ Example:
 {?} get_d(!sleeping-fct,MEM)
 \end{ex}
 
-\bfun{\bc{lst\d(}(\bc=\bi{expression}) or \bi{variable}*\bc,\bi{file-name}\bc,\bc{NEW}$\vert$\bc{APP}[\bc{,LIN}][\bc{,TXT}][\bc{,BIN}]\bc)}
+\bfun{\bc{lst\d(}(\bc=\bi{expression}) or \bi{variable}*\bc,\bi{file-name}\bc,\bc{NEW}$\vert$\bc{APP}[\bc{,LIN}][\bc{,TXT}][\bc{,BIN}][\bc{,WYD}]\bc)}
 
 This time, output is sent to the named file instead of standard
 output. The third argument is explained below. Code that has been
@@ -3788,7 +3791,7 @@ access non-existent or protected memory areas.
                       _comc[assuming 1-complement arithmetic]
 \end{ex}
 
-\bfun{\bc{put\d(}\bi{expression}[\bc{,LIN}]\bc)}
+\bfun{\bc{put\d(}\bi{expression}[\bc{,LIN}][\bc{,WYD}]\bc)}
 \index{put@\bc{put}}
 
 Sends \bi{expression} to standard output. The cursor is positioned
@@ -3800,7 +3803,7 @@ positions the cursor on the beginning of the next line.
 {?} put_d("b+a" is after evaluation b+a)
 \end{ex}
 
-\bfun{\bc{put\d(}\bi{expression}\bc{,MEM}[\bc{,LIN}]\bc)}
+\bfun{\bc{put\d(}\bi{expression}\bc{,MEM}[\bc{,LIN}][\bc{,WYD}]\bc)}
 
 \bi{expression} is stringified and placed into an atom, which is the
 return value of the call. This use of
@@ -3808,7 +3811,7 @@ return value of the call. This use of
 \verb|str$| suppresses the space operator, \verb|put$| transfers every
 character, including space operators, to the atom.
 
-\bfun{\bc{put\d(}\bi{expression}\bc,\bi{file-name}\bc{,NEW}$\vert$\bc{APP}[\bc{,LIN}]\bc)}
+\bfun{\bc{put\d(}\bi{expression}\bc,\bi{file-name}\bc{,NEW}$\vert$\bc{APP}[\bc{,LIN}][\bc{,WYD}]\bc)}
 
 Write \bi{expression} to the named file.
 
