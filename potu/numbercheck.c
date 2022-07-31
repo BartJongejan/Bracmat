@@ -2,58 +2,168 @@
 #include "globals.h"
 #include "nonnodetypes.h"
 
+static int onlydigits(const char* begin)
+    {
+    int op_or_0;
+    while (optab[op_or_0 = *begin++] != -1)
+        {
+        if (op_or_0 < '0' || op_or_0 > '9')
+            {
+            return 0;
+            }
+        }
+    return 1;
+    }
+
+static int seeexponent(const char* begin)
+    {
+    int op_or_0;
+    if (optab[op_or_0 = *begin++] != -1)
+        {
+        if (op_or_0 == '+' || op_or_0 == '-')
+            {
+            if (optab[op_or_0 = *begin++] != -1)
+                {
+                if ((op_or_0 >= '0' && op_or_0 <= '9'))
+                    {
+                    if (!onlydigits(begin))
+                        {
+                        return 0;
+                        }
+                    }
+                else
+                    {
+                    return 0;
+                    }
+                }
+            else
+                {
+                return 0;
+                }
+            }
+        else if (op_or_0 >= '0' && op_or_0 <= '9')
+            {
+            if (!onlydigits(begin))
+                {
+                return 0;
+                }
+            }
+        else
+            {
+            return 0;
+            }
+        }
+    else
+        {
+        return 0;
+        }
+    return 1;
+    }
+
 int numbercheck(const char *begin)
     {
     int op_or_0, check;
     int needNonZeroDigit = FALSE;
     if (!*begin)
         return 0;
-    check = QNUMBER;
+    check = QNUMBER | QDOUBLE;
     op_or_0 = *begin;
 
     if (op_or_0 >= '0' && op_or_0 <= '9')
         {
         if (op_or_0 == '0')
-            check |= QNUL;
-        while (optab[op_or_0 = *++begin] != -1)
             {
-            if (op_or_0 == '/')
+            check |= QNUL;
+            }
+        if (optab[op_or_0 = *++begin] != -1)
+            {
+            if (op_or_0 == '.' || op_or_0 == ',')
                 {
-                /* check &= ~QNUL;*/
-                if (check & QFRACTION)
+                check &= ~QFRACTION;
+                if (optab[op_or_0 = *++begin] != -1)
                     {
-                    check = DEFINITELYNONUMBER;
-                    break;
-                    }
-                else
-                    {
-                    needNonZeroDigit = TRUE;
-                    check |= QFRACTION;
+                    if (op_or_0 < '0' || op_or_0 > '9')
+                        {
+                        check = DEFINITELYNONUMBER;
+                        }
+                    else
+                        {
+                        while ((check != DEFINITELYNONUMBER) && (optab[op_or_0 = *begin++] != -1))
+                            {
+                            if (op_or_0 == 'e' || op_or_0 == 'E')
+                                {
+                                if(!seeexponent(++begin))
+                                    {
+                                    check = DEFINITELYNONUMBER;
+                                    break;
+                                    }
+                                }
+                            else if ((check & QNUL) && (op_or_0 != '0'))
+                                {
+                                check = DEFINITELYNONUMBER;
+                                break;
+                                }
+                            else if (op_or_0 < '0' || op_or_0 > '9')
+                                {
+                                check = DEFINITELYNONUMBER;
+                                break;
+                                }
+                            }
+                        }
                     }
                 }
-            else if (op_or_0 < '0' || op_or_0 > '9')
+            else if (op_or_0 == 'E' || op_or_0 == 'e')
                 {
-                check = DEFINITELYNONUMBER;
-                break;
+                check &= ~QFRACTION;
+                if (!seeexponent(++begin))
+                    {
+                    check = DEFINITELYNONUMBER;
+                    }
                 }
             else
                 {
-                /* initial zero followed by
-                                 0 <= k <= 9 makes no number */
-                if ((check & (QNUL | QFRACTION)) == QNUL)
+                check &= ~QDOUBLE;
+                while ((check != DEFINITELYNONUMBER) && (optab[op_or_0 = *begin++] != -1))
                     {
-                    check = DEFINITELYNONUMBER;
-                    break;
-                    }
-                else if (op_or_0 != '0')
-                    {
-                    needNonZeroDigit = FALSE;
-                    /*check &= ~QNUL;*/
-                    }
-                else if (needNonZeroDigit) /* '/' followed by '0' */
-                    {
-                    check = DEFINITELYNONUMBER;
-                    break;
+                    if (op_or_0 == '/')
+                        {
+                        /* check &= ~QNUL;*/
+                        if (check & QFRACTION)
+                            {
+                            check = DEFINITELYNONUMBER;
+                            break;
+                            }
+                        else
+                            {
+                            needNonZeroDigit = TRUE;
+                            check |= QFRACTION;
+                            }
+                        }
+                    else if (op_or_0 < '0' || op_or_0 > '9')
+                        {
+                        check = DEFINITELYNONUMBER;
+                        break;
+                        }
+                    else
+                        {
+                        /* initial zero followed by
+                                         0 <= k <= 9 makes no number */
+                        if ((check & (QNUL | QFRACTION)) == QNUL)
+                            {
+                            check = DEFINITELYNONUMBER;
+                            break;
+                            }
+                        else if (op_or_0 != '0')
+                            {
+                            needNonZeroDigit = FALSE;
+                            /*check &= ~QNUL;*/
+                            }
+                        else if (needNonZeroDigit) /* '/' followed by '0' */
+                            {
+                            check = DEFINITELYNONUMBER;
+                            break;
+                            }
+                        }
                     }
                 }
             }
@@ -71,6 +181,16 @@ int numbercheck(const char *begin)
         {
         check = 0;
         }
+/*  printf("check %s\n",
+           (check& QDOUBLE 
+            ? "double" 
+            : (check & QFRACTION) 
+            ? "fraction" 
+            : (check & QNUMBER) 
+            ? "number" 
+            : (check & QNUL) 
+            ? "nul" 
+            : "NaN"));*/
     return check;
     }
 

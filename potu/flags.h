@@ -31,7 +31,7 @@
            1<<21 latebind
         */
 #if DATAMATCHESITSELF
-#define SELFMATCHING    (1<<22) /* 20210801 */
+#define SELFMATCHING    (1<<23) /* 20210801 */
 #define BITWISE_OR_SELFMATCHING |SELFMATCHING
 #else
 #define BITWISE_OR_SELFMATCHING 
@@ -40,11 +40,11 @@
 #if WORD32
 #else
 #if DATAMATCHESITSELF
+#define BUILT_IN        (1<<24) /* 20210801 only used for objects (operator =) */
+#define CREATEDWITHNEW  (1<<25) /* 20210801 only used for objects (operator =) */
+#else
 #define BUILT_IN        (1<<23) /* 20210801 only used for objects (operator =) */
 #define CREATEDWITHNEW  (1<<24) /* 20210801 only used for objects (operator =) */
-#else
-#define BUILT_IN        (1<<22) /* 20210801 only used for objects (operator =) */
-#define CREATEDWITHNEW  (1<<23) /* 20210801 only used for objects (operator =) */
 #endif
 #endif
 
@@ -87,15 +87,15 @@
 
 #if DATAMATCHESITSELF
 #if WORD32
-#define NON_REF_COUNT_BITS 23 /* prefixes, hidden flags, operator bits */
+#define NON_REF_COUNT_BITS 24 /* prefixes, hidden flags, operator bits */
 #else
-#define NON_REF_COUNT_BITS 25 /* prefixes, hidden flags, operator bits */
+#define NON_REF_COUNT_BITS 26 /* prefixes, hidden flags, operator bits */
 #endif
 #else
 #if WORD32
-#define NON_REF_COUNT_BITS 22 /* prefixes, hidden flags, operator bits */
+#define NON_REF_COUNT_BITS 23 /* prefixes, hidden flags, operator bits */
 #else
-#define NON_REF_COUNT_BITS 24 /* prefixes, hidden flags, operator bits */
+#define NON_REF_COUNT_BITS 25 /* prefixes, hidden flags, operator bits */
 #endif
 #endif
 
@@ -136,8 +136,9 @@
 #define MINUS               (1 << (SHL+2))
 #define QNUL                (1 << (SHL+3))
 #define QFRACTION           (1 << (SHL+4))
-#define LATEBIND            (1 << (SHL+5))
-#define DEFINITELYNONUMBER  (1 << (SHL+6)) /* this is not stored in a node! */
+#define QDOUBLE             (1 << (SHL+5))
+#define LATEBIND            (1 << (SHL+6))
+#define DEFINITELYNONUMBER  (1 << (SHL+7)) /* this is not stored in a node! */
 #define ONEREF   (ULONG)(1 << NON_REF_COUNT_BITS)
 
 #define ALL_REFCOUNT_BITS_SET \
