@@ -271,17 +271,17 @@ int scompare(char* s, char* cutoff, psk p
         status = ANumber;
 
 
-    if (!(Flgs & NONIDENT) /* % as flag on number forces comparison as string, not as number */
-        && RATIONAL_WEAK(p)
-        && (status != NotANumber)
-        && ((((Flgs & (QFRACTION | IS_OPERATOR)) == QFRACTION)
-        && (status != NotAFraction)
-        )
-        || (((Flgs & (QFRACTION | QNUMBER | IS_OPERATOR)) == QNUMBER)
-        && (status != AFraction)
-        )
-        )
-        )
+    if (   !(Flgs & NONIDENT) /* % as flag on number forces comparison as string, not as number */
+       &&  RATIONAL_WEAK(p)
+       &&  (status != NotANumber)
+       &&  (   (  ((Flgs & (QFRACTION | IS_OPERATOR)) == QFRACTION)
+               && (status != NotAFraction)
+               )
+           ||  (   ((Flgs & (QFRACTION | QNUMBER | IS_OPERATOR)) == QNUMBER)
+               &&  (status != AFraction)
+               )
+           )
+       )
         {
         int check = sfullnumbercheck(s, cutoff);
         if (check & QNUMBER)

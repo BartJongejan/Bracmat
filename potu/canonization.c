@@ -1174,7 +1174,7 @@ int cmptimes(psk kn1, psk kn2)
         kn2 = kn2->LEFT;
 
     diff = number_degree(kn2);
-    if (diff != 4)
+    if (diff != 5)
         diff -= number_degree(kn1);
     else
         {
