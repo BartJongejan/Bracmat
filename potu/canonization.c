@@ -8,6 +8,7 @@
 #include "input.h"
 #include "branch.h"
 #include "rational.h"
+#include "real.h"
 #include "memory.h"
 #include "treematch.h"
 #include "nodeutil.h"
@@ -841,6 +842,7 @@ psk mergeOrSortTerms(psk Pnode)
     return Pnode;
     }
 
+
 psk substtimes(psk Pnode)
     {
     static const char* conc[] = { NULL,NULL,NULL,NULL };
@@ -919,6 +921,48 @@ psk substtimes(psk Pnode)
                     return Pnode;
                     }
                 }
+            }
+        else if(REAL_COMP(lkn) && rvar)
+            {
+            if(REAL_COMP(rkn))
+                {
+                if(rkn == lkn)
+                    lvar = (Pnode->LEFT = isolated(lkn)); /*{?} 1/10*1/10 => 1/100 */
+                conc[0] = hash6;
+                addr[6] = fTimes(rvar, lvar);
+                if(rkn == Pnode->RIGHT)
+                    conc[1] = NULL; /*{?} -1*140/1000 => -7/50 */
+                else
+                    {
+                    addr[1] = Pnode->RIGHT->RIGHT; /*{?} -1*1/4*e^(2*i*x) => -1/4*e^(2*i*x) */
+                    conc[1] = "*\1";
+                    }
+                Pnode = vbuildup(Pnode, conc);
+                wipe(addr[6]);
+                return Pnode;
+                }
+#if 0
+            else
+                {
+                if(PLOBJ(rkn) == IM && RAT_NEG_COMP(lkn))
+                    {
+                    conc[0] = "(\2*\3)";
+                    addr[2] = qTimesMinusOne(lkn);
+                    addr[3] = qTimesMinusOne(rkn);
+                    if(rkn == Pnode->RIGHT)
+                        conc[1] = NULL; /*{?} -1*i => -i */
+                    else
+                        {
+                        addr[1] = Pnode->RIGHT->RIGHT; /*{?} -3*i*x => 3*-i*x */
+                        conc[1] = "*\1";
+                        }
+                    Pnode = vbuildup(Pnode, conc);
+                    wipe(addr[2]);
+                    wipe(addr[3]);
+                    return Pnode;
+                    }
+                }
+#endif
             }
         }
 

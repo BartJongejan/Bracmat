@@ -21,15 +21,18 @@ LONG toLong(psk pnode)
     return res;
     }
 
+/* "1.2E300" * i * pi * e * pa * 1/7 -> 1/7*i*"1.2E300"*pi*e*pa */
+/*                                      5   4  3        2  1 0  */
+
 int number_degree(psk pnode)
     {
     if (REAL_COMP(pnode))
-        return 4;
+        return 3;
     if (RATIONAL_COMP(pnode))
         return 5;
     switch (PLOBJ(pnode))
         {
-            case IM: return 3;
+            case IM: return 4;
             case PI: return 2;
             case XX: return 1;
             default: return 0;

@@ -152,6 +152,7 @@ TODO list:
 #define INPUT_H
 #define WIPECOPY_H
 #define RATIONAL_H
+#define REAL_H
 #define ENCODING_H
 #define EQUAL_H
 #define OBJECT_H
@@ -226,6 +227,7 @@ TODO list:
 #include "input.h"
 #include "wipecopy.h"
 #include "rational.h"
+#include "real.h"
 #include "encoding.h"
 #include "equal.h"
 #include "object.h"
