@@ -64,12 +64,17 @@ int numbercheck(const char* begin)
     {
     int op_or_0, check;
     int needNonZeroDigit = FALSE;
-    const char* save = begin;
+    int signseen = FALSE;
     if(!*begin)
         return 0;
     check = QNUMBER | QDOUBLE;
     op_or_0 = *begin;
 
+    if(op_or_0 == '-' || op_or_0 == '+')
+        {
+        op_or_0 = *++begin;
+        signseen = TRUE;
+        }
     if(op_or_0 >= '0' && op_or_0 <= '9')
         {
         if(op_or_0 == '0')
@@ -123,6 +128,8 @@ int numbercheck(const char* begin)
                     check = DEFINITELYNONUMBER;
                     }
                 }
+            else if(signseen)
+                check = DEFINITELYNONUMBER;
             else
                 {
                 check &= ~QDOUBLE;

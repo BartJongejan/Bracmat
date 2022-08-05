@@ -32,7 +32,7 @@ static psk tryq(psk Pnode, psk fun, Boolean* ok)
     psh(fun->LEFT, &zeroNode, NULL);
     anchor = eval(anchor);
     pop(fun->LEFT);
-    if (anchor->v.fl & SUCCESS)
+    if(anchor->v.fl & SUCCESS)
         {
         *ok = TRUE;
         wipe(Pnode);
@@ -58,7 +58,7 @@ psk handleExponents(psk Pnode)
     {
     psk lnode;
     Boolean done = FALSE;
-    for (; ((lnode = Pnode->LEFT)->v.fl & READY) && Op(lnode) == EXP;)
+    for(; ((lnode = Pnode->LEFT)->v.fl & READY) && Op(lnode) == EXP;)
         {
         done = TRUE;
         Pnode->LEFT = lnode = isolated(lnode);
@@ -69,7 +69,7 @@ psk handleExponents(psk Pnode)
         addr[3] = Pnode->RIGHT;
         Pnode = build_up(Pnode, "(\1^(\2*\3))", NULL);
         }
-    if (done)
+    if(done)
         {
         return Pnode;
         }
@@ -80,31 +80,31 @@ psk handleExponents(psk Pnode)
         Qnumber iexponent, hiexponent;
 
         psk rightnode;
-        if (!is_op(rightnode = Pnode->RIGHT))
+        if(!is_op(rightnode = Pnode->RIGHT))
             {
-            if (RAT_NUL(rightnode))
+            if(RAT_NUL(rightnode))
                 {
                 wipe(Pnode);
                 return copyof(&oneNode);
                 }
-            if (IS_ONE(rightnode))
+            if(IS_ONE(rightnode))
                 {
                 return leftbranch(Pnode);
                 }
             }
         lnode = Pnode->LEFT;
-        if (!is_op(lnode))
+        if(!is_op(lnode))
             {
-            if ((RAT_NUL(lnode) && !RAT_NEG_COMP(rightnode)) || IS_ONE(lnode))
+            if((RAT_NUL(lnode) && !RAT_NEG_COMP(rightnode)) || IS_ONE(lnode))
                 {
                 return leftbranch(Pnode);
                 }
 
-            if (!is_op(rightnode) && RATIONAL_COMP(rightnode))
+            if(!is_op(rightnode) && RATIONAL_COMP(rightnode))
                 {
-                if (RATIONAL_COMP(lnode))
+                if(RATIONAL_COMP(lnode))
                     {
-                    if (RAT_NEG_COMP(rightnode) && absone(rightnode))
+                    if(RAT_NEG_COMP(rightnode) && absone(rightnode))
                         {
                         conc_arr[1] = NULL;
                         conc_arr[2] = hash6;
@@ -115,16 +115,16 @@ psk handleExponents(psk Pnode)
                         wipe(addr[6]);
                         return Pnode;
                         }
-                    else if (RAT_NEG_COMP(lnode) && RAT_RAT_COMP(rightnode))
+                    else if(RAT_NEG_COMP(lnode) && RAT_RAT_COMP(rightnode))
                         {
                         return Pnode; /*{?} -3^2/3 => -3^2/3 */
                         }
                     /* Missing here is n^m, with m > 2.
                        That case is handled in casemacht. */
                     }
-                else if (PLOBJ(lnode) == IM)
+                else if(PLOBJ(lnode) == IM)
                     {
-                    if (qCompare(rightnode, &zeroNode) & MINUS)
+                    if(qCompare(rightnode, &zeroNode) & MINUS)
                         { /* i^-n -> -i^n */ /*{?} i^-7 => i */
                           /* -i^-n -> i^n */ /*{?} -i^-7 => -i */
                         conc_arr[0] = "(\2^\3)";
@@ -136,10 +136,10 @@ psk handleExponents(psk Pnode)
                         wipe(addr[3]);
                         return Pnode;
                         }
-                    else if (qCompare(&twoNode, rightnode) & (QNUL | MINUS))
+                    else if(qCompare(&twoNode, rightnode) & (QNUL | MINUS))
                         {
                         iexponent = qModulo(rightnode, &fourNode);
-                        if (iexponent->v.fl & QNUL)
+                        if(iexponent->v.fl & QNUL)
                             {
                             wipe(Pnode); /*{?} i^4 => 1 */
                             Pnode = copyof(&oneNode);
@@ -148,14 +148,14 @@ psk handleExponents(psk Pnode)
                             {
                             int Sign;
                             Sign = qCompare(iexponent, &twoNode);
-                            if (Sign & QNUL)
+                            if(Sign & QNUL)
                                 {
                                 wipe(Pnode);
                                 Pnode = copyof(&minusOneNode);
                                 }
                             else
                                 {
-                                if (!(Sign & MINUS))
+                                if(!(Sign & MINUS))
                                     {
                                     hiexponent = iexponent;
                                     iexponent = qPlus(&fourNode, hiexponent, MINUS);
@@ -176,7 +176,7 @@ psk handleExponents(psk Pnode)
                 }
             }
 
-        if (Op(lnode) == TIMES)
+        if(Op(lnode) == TIMES)
             {
             addr[1] = lnode->LEFT;
             addr[2] = lnode->RIGHT;
@@ -184,15 +184,15 @@ psk handleExponents(psk Pnode)
             return build_up(Pnode, "\1^\3*\2^\3", NULL);
             }
 
-        if (RATIONAL_COMP(lnode))
+        if(RATIONAL_COMP(lnode))
             {
             static const char parenonepow[] = "(\1^";
-            if (INTEGER_NOT_NUL_COMP(rightnode) && !absone(rightnode))
+            if(INTEGER_NOT_NUL_COMP(rightnode) && !absone(rightnode))
                 {
                 addr[1] = lnode;
-                if (INTEGER_POS_COMP(rightnode))
+                if(INTEGER_POS_COMP(rightnode))
                     {
-                    if (qCompare(&twoNode, rightnode) & MINUS)
+                    if(qCompare(&twoNode, rightnode) & MINUS)
                         {
                         /* m^n = (m^(n\2))^2*m^(n mod 2) */ /*{?} 9^7 => 4782969 */
                         conc_arr[0] = parenonepow;
@@ -225,20 +225,20 @@ psk handleExponents(psk Pnode)
                     }
                 return Pnode;
                 }
-            else if (RAT_RAT(rightnode))
+            else if(RAT_RAT(rightnode))
                 {
                 char** conc, slash = 0;
                 int wipe[20], ind;
                 nnumber numerator = { 0 }, denominator = { 0 };
-                for (ind = 0; ind < 20; wipe[ind++] = TRUE);
+                for(ind = 0; ind < 20; wipe[ind++] = TRUE);
                 ind = 0;
                 conc = (char**)bmalloc(__LINE__, 20 * sizeof(char**));
                 /* 20 is safe value for ULONGs */
                 addr[1] = Pnode->RIGHT;
-                if (RAT_RAT_COMP(Pnode->LEFT))
+                if(RAT_RAT_COMP(Pnode->LEFT))
                     {
                     split(Pnode->LEFT, &numerator, &denominator);
-                    if (!subroot(&numerator, conc, &ind))
+                    if(!subroot(&numerator, conc, &ind))
                         {
                         wipe[ind] = FALSE;
                         conc[ind++] = numerator.number;
@@ -250,7 +250,7 @@ psk handleExponents(psk Pnode)
                         }
                     wipe[ind] = FALSE;
                     conc[ind++] = "*(";
-                    if (!subroot(&denominator, conc, &ind))
+                    if(!subroot(&denominator, conc, &ind))
                         {
                         wipe[ind] = FALSE;
                         conc[ind++] = denominator.number;
@@ -265,7 +265,7 @@ psk handleExponents(psk Pnode)
                     numerator.number = (char*)POBJ(Pnode->LEFT);
                     numerator.alloc = NULL;
                     numerator.length = strlen(numerator.number);
-                    if (!subroot(&numerator, conc, &ind))
+                    if(!subroot(&numerator, conc, &ind))
                         {
                         bfree(conc);
                         return Pnode;
@@ -273,17 +273,17 @@ psk handleExponents(psk Pnode)
                     }
                 conc[ind--] = NULL;
                 Pnode = vbuildup(Pnode, (const char**)conc);
-                if (slash)
+                if(slash)
                     numerator.number[numerator.length] = slash;
-                for (; ind >= 0; ind--)
-                    if (wipe[ind])
+                for(; ind >= 0; ind--)
+                    if(wipe[ind])
                         bfree(conc[ind]);
                 bfree(conc);
                 return Pnode;
                 }
             }
         }
-    if (is_op(Pnode->RIGHT))
+    if(is_op(Pnode->RIGHT))
         {
         int ok;
         Pnode = tryq(Pnode, f4, &ok);
@@ -301,9 +301,9 @@ be tremendously faster. e.g. (1+a+b+c)^30+1&ready evaluates in about
 static void splitProduct_number_im_rest(psk pnode, ppsk Nm, ppsk I, ppsk NNNI)
     {
     psk temp;
-    if (Op(pnode) == TIMES)
+    if(Op(pnode) == TIMES)
         {
-        if (RATIONAL_COMP(pnode->LEFT))
+        if(RATIONAL_COMP(pnode->LEFT))
             {/* 17*x */
             *Nm = pnode->LEFT;
             temp = pnode->RIGHT;
@@ -313,9 +313,9 @@ static void splitProduct_number_im_rest(psk pnode, ppsk Nm, ppsk I, ppsk NNNI)
             *Nm = NULL;
             temp = pnode;
             }/* temp */
-        if (Op(temp) == TIMES)
+        if(Op(temp) == TIMES)
             {
-            if (!is_op(temp->LEFT) && PLOBJ(temp->LEFT) == IM)
+            if(!is_op(temp->LEFT) && PLOBJ(temp->LEFT) == IM)
                 {/* Nm*i*x */
                 *I = temp->LEFT;
                 *NNNI = temp->RIGHT;
@@ -328,7 +328,7 @@ static void splitProduct_number_im_rest(psk pnode, ppsk Nm, ppsk I, ppsk NNNI)
             }
         else
             {
-            if (!is_op(temp) && PLOBJ(temp) == IM)
+            if(!is_op(temp) && PLOBJ(temp) == IM)
                 {/* Nm*i */
                 *I = temp;
                 *NNNI = NULL;
@@ -340,7 +340,7 @@ static void splitProduct_number_im_rest(psk pnode, ppsk Nm, ppsk I, ppsk NNNI)
                 }/* Nm*NNNI */
             }
         }
-    else if (!is_op(pnode) && PLOBJ(pnode) == IM)
+    else if(!is_op(pnode) && PLOBJ(pnode) == IM)
         {/* i */
         *Nm = NULL;
         *I = pnode;
@@ -364,25 +364,25 @@ static psk expandDummy(psk Pnode, int* ok)
 
 static psk expandProduct(psk Pnode, int* ok)
     {
-    switch (Op(Pnode))
+    switch(Op(Pnode))
         {
-            case TIMES:
-            case EXP:
+        case TIMES:
+        case EXP:
+            {
+            if(((match(0, Pnode, m0, NULL, 0, Pnode, 3333) & TRUE)
+                && ((Pnode = tryq(Pnode, f0, ok)), *ok)
+                )
+               || ((match(0, Pnode, m1, NULL, 0, Pnode, 4444) & TRUE)
+                   && ((Pnode = tryq(Pnode, f1, ok)), *ok)
+                   )
+               )
                 {
-                if (((match(0, Pnode, m0, NULL, 0, Pnode, 3333) & TRUE)
-                    && ((Pnode = tryq(Pnode, f0, ok)), *ok)
-                    )
-                    || ((match(0, Pnode, m1, NULL, 0, Pnode, 4444) & TRUE)
-                    && ((Pnode = tryq(Pnode, f1, ok)), *ok)
-                    )
-                    )
-                    {
-                    if (is_op(Pnode)) /*{?} (1+i)*(1+-i)+Z => 2+Z */
-                        Pnode->v.fl &= ~READY;
-                    return Pnode;
-                    }
-                break;
+                if(is_op(Pnode)) /*{?} (1+i)*(1+-i)+Z => 2+Z */
+                    Pnode->v.fl &= ~READY;
+                return Pnode;
                 }
+            break;
+            }
         }
     *ok = FALSE;
     return Pnode;
@@ -461,34 +461,34 @@ psk mergeOrSortTerms(psk Pnode)
     psk RtermN, RtermI, RtermNNNI;
 
     int ok;
-    if (!is_op(L) && RAT_NUL_COMP(L))
+    if(!is_op(L) && RAT_NUL_COMP(L))
         {
         /* 0+x -> x */
         return rightbranch(top);
         }
 
     R = top->RIGHT;
-    if (!is_op(R) && RAT_NUL_COMP(R))
+    if(!is_op(R) && RAT_NUL_COMP(R))
         {
         /*{?} x+0 => x */
         return leftbranch(top);
         }
 
-    if (is_op(L)
-        && ((top->LEFT = expandProduct(top->LEFT, &ok)), ok)
-        )
+    if(is_op(L)
+       && ((top->LEFT = expandProduct(top->LEFT, &ok)), ok)
+       )
         {
         res = TRUE;
         }
-    if (is_op(R)
-        && ((top->RIGHT = expandProduct(top->RIGHT, &ok)), ok)
-        )
+    if(is_op(R)
+       && ((top->RIGHT = expandProduct(top->RIGHT, &ok)), ok)
+       )
         { /*
           {?} a*b+u*(x+y) => a*b+u*x+u*y
           */
         res = TRUE;
         }
-    if (res)
+    if(res)
         {
         Pnode->v.fl &= ~READY;
         return Pnode;
@@ -496,12 +496,51 @@ psk mergeOrSortTerms(psk Pnode)
     rightoperand_and_tail(top, &Rterm, &Rtail);
     leftoperand_and_tail(top, &Lterm, &Ltail);
     assert(Ltail == NULL);
-    if (RATIONAL_COMP(Lterm))
+
+    if(REAL_COMP(Lterm))
         {
-        if (RATIONAL_COMP(Rterm))
+        switch(PLOBJ(Rterm))
+            {
+            case PI:
+            case XX:
+                conc[0] = hash6;
+                /* "4.0E0"+"7.0E0" -> "1.1E1" */
+                addr[6] = dfPlus(Lterm, PLOBJ(Rterm) == PI ? MPI : ME);
+                conc[1] = NULL;
+                conc[2] = NULL;
+                if(Rtail != NULL)
+                    {
+                    addr[4] = Rtail;
+                    conc[1] = "+\4";
+                    }
+                Pnode = vbuildup(top, conc);
+                wipe(addr[6]);
+                return Pnode;
+            default:
+                if(REAL_COMP(Rterm))
+                    {
+                    conc[0] = hash6;
+                    /* "4.0E0"+"7.0E0" -> "1.1E1" */
+                    addr[6] = fPlus(Lterm, Rterm);
+                    conc[1] = NULL;
+                    conc[2] = NULL;
+                    if(Rtail != NULL)
+                        {
+                        addr[4] = Rtail;
+                        conc[1] = "+\4";
+                        }
+                    Pnode = vbuildup(top, conc);
+                    wipe(addr[6]);
+                    }
+                return Pnode;
+            }
+        }
+    else if(RATIONAL_COMP(Lterm))
+        {
+        if(RATIONAL_COMP(Rterm))
             {
             conc[0] = hash6;
-            if (Lterm == Rterm)
+            if(Lterm == Rterm)
                 {
                 /* 7+7 -> 2*7 */ /*{?} 7+7 => 14 */
                 addr[6] = qTimes(&twoNode, Rterm);
@@ -513,7 +552,7 @@ psk mergeOrSortTerms(psk Pnode)
                 }
             conc[1] = NULL;
             conc[2] = NULL;
-            if (Rtail != NULL)
+            if(Rtail != NULL)
                 {
                 addr[4] = Rtail;
                 conc[1] = "+\4";
@@ -523,11 +562,11 @@ psk mergeOrSortTerms(psk Pnode)
             }
         return Pnode;
         }
-    else if (RATIONAL_COMP(Rterm))
+    else if(RATIONAL_COMP(Rterm))
         {
         addr[1] = Rterm;
         addr[2] = L;
-        if (Rtail)
+        if(Rtail)
             {
             /* How to get here?
                    (1+a)*(1+b)+c+(1+d)*(1+f)
@@ -550,15 +589,15 @@ psk mergeOrSortTerms(psk Pnode)
             }
         }
 
-    if (Op(Lterm) == LOG
-        && Op(Rterm) == LOG
-        && !equal(Lterm->LEFT, Rterm->LEFT)
-        )
+    if(Op(Lterm) == LOG
+       && Op(Rterm) == LOG
+       && !equal(Lterm->LEFT, Rterm->LEFT)
+       )
         {
         addr[1] = Lterm->LEFT;
         addr[2] = Lterm->RIGHT;
         addr[3] = Rterm->RIGHT;
-        if (Rtail == NULL)
+        if(Rtail == NULL)
             return build_up(top, "\1\016(\2*\3)", NULL); /*{?} 2\L3+2\L9 => 4+2\L27/16 */
         else
             {
@@ -569,24 +608,24 @@ psk mergeOrSortTerms(psk Pnode)
 
     splitProduct_number_im_rest(Lterm, &LtermN, &LtermI, &LtermNNNI);
 
-    if (LtermI)
+    if(LtermI)
         {
         ppsk runner = &Pnode;
         splitProduct_number_im_rest(Rterm, &RtermN, &RtermI, &RtermNNNI);
-        while (RtermI == NULL
-            && Op((*runner)->RIGHT) == PLUS
-            )
+        while(RtermI == NULL
+              && Op((*runner)->RIGHT) == PLUS
+              )
             {
             runner = &(*runner)->RIGHT;
             *runner = isolated(*runner);
             rightoperand_and_tail((*runner), &Rterm, &Rtail);
             splitProduct_number_im_rest(Rterm, &RtermN, &RtermI, &RtermNNNI);/*{?} i*x+-i*x+a => a */
             }
-        if (RtermI != NULL)
+        if(RtermI != NULL)
             {                        /*{?} i*x+-i*x => 0 */
             int indx;
             int dif;
-            if (LtermNNNI == NULL)
+            if(LtermNNNI == NULL)
                 {
                 dif = RtermNNNI == NULL ? 0 : -1;/*{?} i+-i*x => i+-i*x */
                                                  /*{?} i+-i => 0 */
@@ -596,17 +635,17 @@ psk mergeOrSortTerms(psk Pnode)
                 assert(RtermNNNI != NULL);
                 dif = equal(LtermNNNI, RtermNNNI);
                 }
-            if (dif == 0)
+            if(dif == 0)
                 {                        /*{?} i*x+-i*x => 0 */
-                if (RtermN)
+                if(RtermN)
                     {
                     addr[2] = RtermN; /*{?} i*x+3*i*x => 4*i*x */
-                    if (LtermN == NULL)
+                    if(LtermN == NULL)
                         {
                         /* a+n*a */ /*{?} i*x+3*i*x => 4*i*x */
-                        if (HAS_MINUS_SIGN(LtermI))
+                        if(HAS_MINUS_SIGN(LtermI))
                             {  /*{?} -i*x+3*i*x => 2*i*x */
-                            if (HAS_MINUS_SIGN(RtermI))
+                            if(HAS_MINUS_SIGN(RtermI))
                                 {
                                 conc[0] = "(1+\2)*-i";/*{?} -i*x+3*-i*x => 4*-i*x */
                                 }
@@ -615,7 +654,7 @@ psk mergeOrSortTerms(psk Pnode)
                                 conc[0] = "(-1+\2)*i";/*{?} -i*x+3*i*x => 2*i*x */
                                 }
                             }
-                        else if (HAS_MINUS_SIGN(RtermI))
+                        else if(HAS_MINUS_SIGN(RtermI))
                             {
                             conc[0] = "(-1+\2)*-i"; /*{?} i*x+3*-i*x => 2*-i*x */
                             }
@@ -629,9 +668,9 @@ psk mergeOrSortTerms(psk Pnode)
                         {
                         /* n*a+m*a */ /*{?} 3*-i*x+-3*i*x => 6*-i*x */
                         addr[3] = LtermN;
-                        if (HAS_MINUS_SIGN(LtermI))
+                        if(HAS_MINUS_SIGN(LtermI))
                             {
-                            if (HAS_MINUS_SIGN(RtermI))
+                            if(HAS_MINUS_SIGN(RtermI))
                                 {
                                 conc[0] = "(\3+\2)*-i";/*{?} 3*-i*x+-3*i*x => 6*-i*x */
                                 }
@@ -640,7 +679,7 @@ psk mergeOrSortTerms(psk Pnode)
                                 conc[0] = "(-1*\3+\2)*i";/*{?} 3*-i*x+-3*-i*x => 0 */
                                 }
                             }
-                        else if (HAS_MINUS_SIGN(RtermI))
+                        else if(HAS_MINUS_SIGN(RtermI))
                             {
                             conc[0] = "(\3+-1*\2)*i"; /*{?} 3*i*x+-3*i*x => 0 */
                             }
@@ -654,13 +693,13 @@ psk mergeOrSortTerms(psk Pnode)
                 else
                     {                        /*{?} i*x+-i*x => 0 */
                     addr[1] = LtermNNNI;
-                    if (LtermN != NULL)
+                    if(LtermN != NULL)
                         {
                         /* m*a+a */
                         addr[2] = LtermN; /*{?} 3*i*x+i*x => 4*i*x */
-                        if (HAS_MINUS_SIGN(LtermI))
+                        if(HAS_MINUS_SIGN(LtermI))
 
-                            if (HAS_MINUS_SIGN(RtermI))
+                            if(HAS_MINUS_SIGN(RtermI))
                                 {
                                 conc[0] = "(1+\2)*-i";/*{?} 3*-i*x+-i*x => 4*-i*x */
                                 }
@@ -669,7 +708,7 @@ psk mergeOrSortTerms(psk Pnode)
                                 conc[0] = "(-1+\2)*-i";/*{?} 3*-i*x+i*x => 2*-i*x */
                                 }
 
-                        else if (HAS_MINUS_SIGN(RtermI))
+                        else if(HAS_MINUS_SIGN(RtermI))
                             {
                             conc[0] = "(-1+\2)*i"; /*{?} 3*i*x+-i*x => 2*i*x */
                             }
@@ -682,9 +721,9 @@ psk mergeOrSortTerms(psk Pnode)
                     else
                         {
                         /* a+a */                        /*{?} i*x+-i*x => 0 */
-                        if (HAS_MINUS_SIGN(LtermI))
+                        if(HAS_MINUS_SIGN(LtermI))
 
-                            if (HAS_MINUS_SIGN(RtermI))
+                            if(HAS_MINUS_SIGN(RtermI))
                                 {
                                 conc[0] = "2*-i"; /*{?} -i+-i => 2*-i */
                                 }
@@ -693,7 +732,7 @@ psk mergeOrSortTerms(psk Pnode)
                                 conc[0] = "0"; /*{?} -i+i => 0 */
                                 }
 
-                        else if (HAS_MINUS_SIGN(RtermI))
+                        else if(HAS_MINUS_SIGN(RtermI))
                             {
                             conc[0] = "0";                        /*{?} i*x+-i*x => 0 */
                             }
@@ -704,7 +743,7 @@ psk mergeOrSortTerms(psk Pnode)
                         }
                     /* 2*a */
                     }
-                if (LtermNNNI != NULL)
+                if(LtermNNNI != NULL)
                     {                        /*{?} i*x+-i*x => 0 */
                     addr[1] = RtermNNNI;
                     conc[1] = "*\1";
@@ -712,14 +751,14 @@ psk mergeOrSortTerms(psk Pnode)
                     }
                 else
                     indx = 1; /*{?} i+-i => 0 */
-                if (Rtail != NULL)
+                if(Rtail != NULL)
                     {
                     addr[4] = Rtail; /*{?} -i+-i+i*y => 2*-i+i*y */
                     conc[indx++] = "+\4";
                     }
                 conc[indx] = NULL;                        /*{?} i*x+-i*x => 0 */
                 (*runner)->RIGHT = vbuildup((*runner)->RIGHT, conc);
-                if (runner != &Pnode)
+                if(runner != &Pnode)
                     {
                     (*runner)->v.fl &= ~READY;/*{?} i*x+-i*x+a => a */
                     *runner = eval(*runner);
@@ -743,11 +782,11 @@ psk mergeOrSortTerms(psk Pnode)
         int dif = 1;
         assert(LtermNNNI != NULL);
         splitProduct_number_im_rest(Rterm, &RtermN, &RtermI, &RtermNNNI);
-        while (RtermNNNI != NULL
-            && RtermI == NULL
-            && (dif = cmp(LtermNNNI, RtermNNNI)) > 0
-            && Op((*runner)->RIGHT) == PLUS
-            )
+        while(RtermNNNI != NULL
+              && RtermI == NULL
+              && (dif = cmp(LtermNNNI, RtermNNNI)) > 0
+              && Op((*runner)->RIGHT) == PLUS
+              )
             {
             /*
             x^(y*(a+b))+z^(y*(a+b))+-1*x^(a*y+b*y) => z^(y*(a+b))
@@ -765,15 +804,15 @@ psk mergeOrSortTerms(psk Pnode)
             rightoperand_and_tail((*runner), &Rterm, &Rtail);
             splitProduct_number_im_rest(Rterm, &RtermN, &RtermI, &RtermNNNI);
             }
-        if (RtermI != NULL)
+        if(RtermI != NULL)
             dif = -1; /*{?} (-i+a)+-i => a+2*-i */
-        if (dif == 0)
+        if(dif == 0)
             {
-            if (RtermN)
+            if(RtermN)
                 {
                 addr[1] = RtermNNNI;
                 addr[2] = RtermN;
-                if (LtermN == NULL)
+                if(LtermN == NULL)
                     /*{?} a+n*a => a+a*n */
                     conc[0] = "(1+\2)*\1";
                 /* (1+n)*a */
@@ -788,7 +827,7 @@ psk mergeOrSortTerms(psk Pnode)
             else
                 {
                 addr[1] = LtermNNNI;
-                if (LtermN != NULL)
+                if(LtermN != NULL)
                     {
                     /* m*a+a */
                     addr[2] = LtermN;
@@ -805,13 +844,13 @@ psk mergeOrSortTerms(psk Pnode)
             assert(Ltail == NULL);
             conc[1] = NULL;
             conc[2] = NULL;
-            if (Rtail != NULL)
+            if(Rtail != NULL)
                 {
                 addr[4] = Rtail;
                 conc[1] = "+\4";
                 }
             (*runner)->RIGHT = vbuildup((*runner)->RIGHT, conc);
-            if (runner != &Pnode)
+            if(runner != &Pnode)
                 {
                 (*runner)->v.fl &= ~READY;
                 /*{?} (b^3+c^3)+b^3+c+b^3 => c+3*b^3+c^3 */
@@ -821,7 +860,7 @@ psk mergeOrSortTerms(psk Pnode)
                 }
             return rightbranch(top);
             }
-        else if (dif > 0)  /*{?} b+a => a+b */
+        else if(dif > 0)  /*{?} b+a => a+b */
             {
             addr[1] = Rterm;
             addr[2] = L;
@@ -829,7 +868,7 @@ psk mergeOrSortTerms(psk Pnode)
             (*runner)->RIGHT->v.fl |= READY;
             return rightbranch(top);
             }
-        else if ((*runner) != top) /* b + a + c */
+        else if((*runner) != top) /* b + a + c */
             {
             addr[1] = L;
             addr[2] = (*runner)->RIGHT;
@@ -852,15 +891,15 @@ psk substtimes(psk Pnode)
     int nodedifference;
     rkn = rightoperand(Pnode);
 
-    if (is_op(rkn))
+    if(is_op(rkn))
         rvar = NULL; /* (f.e)*(y.s) */
     else
         {
-        if (IS_ONE(rkn))
+        if(IS_ONE(rkn))
             {
             return leftbranch(Pnode); /*{?} (a=7)&!(a*1) => 7 */
             }
-        else if (RAT_NUL(rkn))/*{?} -1*140/1000 => -7/50 */
+        else if(RAT_NUL(rkn))/*{?} -1*140/1000 => -7/50 */
             {
             wipe(Pnode); /*{?} x*0 => 0 */
             return copyof(&zeroNode);
@@ -869,67 +908,27 @@ psk substtimes(psk Pnode)
         }
 
     lkn = Pnode->LEFT;
-    if (!is_op(lkn))
+    if(!is_op(lkn))
         {
-        if (RAT_NUL(lkn)) /*{?} -1*140/1000 => -7/50 */
+        if(RAT_NUL(lkn)) /*{?} -1*140/1000 => -7/50 */
             {
             wipe(Pnode); /*{?} 0*x => 0 */
             return copyof(&zeroNode);
             }
         lvar = lkn;
 
-        if (IS_ONE(lkn))
+        if(IS_ONE(lkn))
             {
             return rightbranch(Pnode); /*{?} 1*-1 => -1 */
             }
-        else if (RATIONAL_COMP(lkn) && rvar)
+        else if(RATIONAL_COMP(lkn) && rvar)
             {
-            if (RATIONAL_COMP(rkn))
-                {
-                if (rkn == lkn)
-                    lvar = (Pnode->LEFT = isolated(lkn)); /*{?} 1/10*1/10 => 1/100 */
-                conc[0] = hash6;
-                addr[6] = qTimes(rvar, lvar);
-                if (rkn == Pnode->RIGHT)
-                    conc[1] = NULL; /*{?} -1*140/1000 => -7/50 */
-                else
-                    {
-                    addr[1] = Pnode->RIGHT->RIGHT; /*{?} -1*1/4*e^(2*i*x) => -1/4*e^(2*i*x) */
-                    conc[1] = "*\1";
-                    }
-                Pnode = vbuildup(Pnode, conc);
-                wipe(addr[6]);
-                return Pnode;
-                }
-            else
-                {
-                if (PLOBJ(rkn) == IM && RAT_NEG_COMP(lkn))
-                    {
-                    conc[0] = "(\2*\3)";
-                    addr[2] = qTimesMinusOne(lkn);
-                    addr[3] = qTimesMinusOne(rkn);
-                    if (rkn == Pnode->RIGHT)
-                        conc[1] = NULL; /*{?} -1*i => -i */
-                    else
-                        {
-                        addr[1] = Pnode->RIGHT->RIGHT; /*{?} -3*i*x => 3*-i*x */
-                        conc[1] = "*\1";
-                        }
-                    Pnode = vbuildup(Pnode, conc);
-                    wipe(addr[2]);
-                    wipe(addr[3]);
-                    return Pnode;
-                    }
-                }
-            }
-        else if(REAL_COMP(lkn) && rvar)
-            {
-            if(REAL_COMP(rkn))
+            if(RATIONAL_COMP(rkn))
                 {
                 if(rkn == lkn)
                     lvar = (Pnode->LEFT = isolated(lkn)); /*{?} 1/10*1/10 => 1/100 */
                 conc[0] = hash6;
-                addr[6] = fTimes(rvar, lvar);
+                addr[6] = qTimes(rvar, lvar);
                 if(rkn == Pnode->RIGHT)
                     conc[1] = NULL; /*{?} -1*140/1000 => -7/50 */
                 else
@@ -941,7 +940,6 @@ psk substtimes(psk Pnode)
                 wipe(addr[6]);
                 return Pnode;
                 }
-#if 0
             else
                 {
                 if(PLOBJ(rkn) == IM && RAT_NEG_COMP(lkn))
@@ -962,21 +960,57 @@ psk substtimes(psk Pnode)
                     return Pnode;
                     }
                 }
-#endif
+            }
+        else if(REAL_COMP(lkn) && rvar)
+            {
+            switch(PLOBJ(rkn))
+                {
+                case PI:
+                case XX:
+                    conc[0] = hash6;
+                    addr[6] = dfTimes(PLOBJ(rkn) == PI ? MPI : ME, lvar);
+                    if(rkn == Pnode->RIGHT)
+                        conc[1] = NULL; /*{?} -1*140/1000 => -7/50 */
+                    else
+                        {
+                        addr[1] = Pnode->RIGHT->RIGHT; /*{?} -1*1/4*e^(2*i*x) => -1/4*e^(2*i*x) */
+                        conc[1] = "*\1";
+                        }
+                    Pnode = vbuildup(Pnode, conc);
+                    wipe(addr[6]);
+                    return Pnode;
+                default:
+                    if(REAL_COMP(rkn))
+                        {
+                        if(rkn == lkn)
+                            lvar = (Pnode->LEFT = isolated(lkn)); /*{?} 1/10*1/10 => 1/100 */
+                        conc[0] = hash6;
+                        addr[6] = fTimes(rvar, lvar);
+                        if(rkn == Pnode->RIGHT)
+                            conc[1] = NULL; /*{?} -1*140/1000 => -7/50 */
+                        else
+                            {
+                            addr[1] = Pnode->RIGHT->RIGHT; /*{?} -1*1/4*e^(2*i*x) => -1/4*e^(2*i*x) */
+                            conc[1] = "*\1";
+                            }
+                        Pnode = vbuildup(Pnode, conc);
+                        wipe(addr[6]);
+                        return Pnode;
+                        }
+                }
             }
         }
 
-
     rlnode = Op(rkn) == EXP ? rkn->LEFT : rkn; /*{?} (f.e)*(y.s) => (f.e)*(y.s) */
     llnode = Op(lkn) == EXP ? lkn->LEFT : lkn;
-    if ((nodedifference = equal(llnode, rlnode)) == 0)
+    if((nodedifference = equal(llnode, rlnode)) == 0)
         {
         /* a^n*a^m */
-        if (rlnode != rkn)
+        if(rlnode != rkn)
             {
             addr[1] = rlnode; /*{?} e^(i*x)*e^(-i*x) => 1 */
             addr[2] = rkn->RIGHT;
-            if (llnode == lkn)
+            if(llnode == lkn)
                 {
                 conc[0] = "\1^(1+\2)"; /*{?} a*a^n => a^(1+n) */
                 }/* a^(1+n) */
@@ -990,7 +1024,7 @@ psk substtimes(psk Pnode)
             }
         else
             {
-            if (llnode != lkn)
+            if(llnode != lkn)
                 {
                 addr[1] = llnode;     /*{?} a^m*a => a^(1+m) */
                 addr[2] = lkn->RIGHT;
@@ -1005,7 +1039,7 @@ psk substtimes(psk Pnode)
                 /* a^2 */
                 }
             }
-        if (rkn != (temp = Pnode->RIGHT))
+        if(rkn != (temp = Pnode->RIGHT))
             {
             addr[4] = temp->RIGHT; /*{?} i*i*(-1/2*e^(i*a)+1/2*e^(-i*a))*(-1/2*e^(i*b)+1/2*e^(-i*b)) => -1*(-1/2*e^(i*a)+1/2*e^(-i*a))*(-1/2*e^(i*b)+1/2*e^(-i*b)) */
             conc[1] = "*\4";
@@ -1018,12 +1052,12 @@ psk substtimes(psk Pnode)
         {
         int degree;
         degree = number_degree(rlnode) - number_degree(llnode); /*{?} (f.e)*(y.s) => (f.e)*(y.s) */
-        if (degree > 0
-            || (degree == 0 && (nodedifference > 0)))
+        if(degree > 0
+           || (degree == 0 && (nodedifference > 0)))
             {
             /* b^n*a^m */
             /* l^n*a^m */
-            if ((temp = Pnode->RIGHT) == rkn)
+            if((temp = Pnode->RIGHT) == rkn)
                 {
                 Pnode->RIGHT = lkn; /*{?} x*2 => 2*x */
                 Pnode->LEFT = rkn;
@@ -1040,16 +1074,16 @@ psk substtimes(psk Pnode)
             /* a^m*b^n */
             /* a^m*l^n */
             }
-        else if (PLOBJ(rlnode) == IM)
+        else if(PLOBJ(rlnode) == IM)
             {
-            if (PLOBJ(llnode) == IM) /*{?} -1*i^1/3 => -i^5/3 */
+            if(PLOBJ(llnode) == IM) /*{?} -1*i^1/3 => -i^5/3 */
                 {
                 /*{?} i^n*-i^m => i^(-1*m+n) */
-                if (rlnode != rkn)
+                if(rlnode != rkn)
                     {
                     addr[1] = llnode;
                     addr[2] = rkn->RIGHT;
-                    if (llnode == lkn)
+                    if(llnode == lkn)
                         /*{?} i*-i^n => i^(1+-1*n) */
                         conc[0] = "\1^(1+-1*\2)";
                     /* i^(1-n) */
@@ -1062,7 +1096,7 @@ psk substtimes(psk Pnode)
                     }
                 else
                     {
-                    if (llnode != lkn)
+                    if(llnode != lkn)
                         {
                         /*{?} i^m*-i => i^(-1+m) */
                         addr[1] = llnode;
@@ -1078,14 +1112,14 @@ psk substtimes(psk Pnode)
                         }
                     }
                 }
-            else if (RAT_NEG_COMP(llnode)
-                /* -n*i^m -> n*-i^(2+m) */
-                /*{?} -7*i^9 => 7*i */ /*{!} 7*-i^11 */
-                /* -n*-i^m -> n*i^(2+m) */
-                /*{?} -7*-i^9 => 7*-i */ /*{!}-> 7*i^11 */
-                && rlnode != rkn
-                && llnode == lkn
-                )
+            else if(RAT_NEG_COMP(llnode)
+                    /* -n*i^m -> n*-i^(2+m) */
+                    /*{?} -7*i^9 => 7*i */ /*{!} 7*-i^11 */
+                    /* -n*-i^m -> n*i^(2+m) */
+                    /*{?} -7*-i^9 => 7*-i */ /*{!}-> 7*i^11 */
+                    && rlnode != rkn
+                    && llnode == lkn
+                    )
                 { /*{?} -1*i^1/3 => -i^5/3 */
                 addr[1] = llnode;
                 addr[2] = rkn->LEFT;
@@ -1095,7 +1129,7 @@ psk substtimes(psk Pnode)
                 }
             else
                 return Pnode; /*{?} 2*i*x => 2*i*x */
-            if (rkn != (temp = Pnode->RIGHT))
+            if(rkn != (temp = Pnode->RIGHT))
                 {
                 addr[4] = temp->RIGHT; /*{?} i^n*-i^m*z => i^(-1*m+n)*z */
                 conc[1] = "*\4";
@@ -1115,7 +1149,7 @@ static int bringright(psk pnode)
     psk lnode;
     int done;
     done = FALSE;
-    for (; Op(lnode = pnode->LEFT) == Op(pnode);)
+    for(; Op(lnode = pnode->LEFT) == Op(pnode);)
         {
         lnode = isolated(lnode);
         lnode->v.fl &= ~READY;
@@ -1161,13 +1195,13 @@ lloper = a * x
 */
 int cmpplus(psk kn1, psk kn2)
     {
-    if (RATIONAL_COMP(kn2))
+    if(RATIONAL_COMP(kn2))
         {
-        if (RATIONAL_COMP(kn1))
+        if(RATIONAL_COMP(kn1))
             return 0;
         return 1; /* switch places */
         }
-    else if (RATIONAL_COMP(kn1))
+    else if(RATIONAL_COMP(kn1))
         return -1;
     else
         {
@@ -1179,25 +1213,25 @@ int cmpplus(psk kn1, psk kn2)
         psk NNNI2;
         splitProduct_number_im_rest(kn1, &N1, &I1, &NNNI1);
         splitProduct_number_im_rest(kn2, &N2, &I2, &NNNI2);
-        if (I1 != NULL && I2 == NULL)
+        if(I1 != NULL && I2 == NULL)
             return 1; /* switch places: imaginary terms after real terms */
-        if (NNNI2 == NULL)
+        if(NNNI2 == NULL)
             {
-            if (NNNI1 != NULL)
+            if(NNNI1 != NULL)
                 return 1;
             return 0;
             }
-        else if (NNNI1 == NULL)
+        else if(NNNI1 == NULL)
             return -1;
         else
             {
             int diff;
             diff = equal(NNNI1, NNNI2);
-            if (diff > 0)
+            if(diff > 0)
                 {
                 return 1; /* switch places */
                 }
-            else if (diff < 0)
+            else if(diff < 0)
                 {
                 return -1;
                 }
@@ -1212,30 +1246,30 @@ int cmpplus(psk kn1, psk kn2)
 int cmptimes(psk kn1, psk kn2)
     {
     int diff;
-    if (Op(kn1) == EXP)
+    if(Op(kn1) == EXP)
         kn1 = kn1->LEFT;
-    if (Op(kn2) == EXP)
+    if(Op(kn2) == EXP)
         kn2 = kn2->LEFT;
 
     diff = number_degree(kn2);
-    if (diff != 5)
+    if(diff != 5)
         diff -= number_degree(kn1);
     else
         {
         diff = -number_degree(kn1);
-        if (!diff)
+        if(!diff)
             return 0; /* two numbers */
         }
-    if (diff > 0)
+    if(diff > 0)
         return 1; /* switch places */
-    else if (diff == 0)
+    else if(diff == 0)
         {
         diff = equal(kn1, kn2);
-        if (diff > 0)
+        if(diff > 0)
             {
             return 1; /* switch places */
             }
-        else if (diff < 0)
+        else if(diff < 0)
             {
             return -1;
             }
@@ -1252,17 +1286,17 @@ int cmptimes(psk kn1, psk kn2)
 
 psk merge
 (psk Pnode
-    , int(*comp)(psk, psk)
-    , psk(*combine)(psk)
+ , int(*comp)(psk, psk)
+ , psk(*combine)(psk)
 #if EXPAND
-    , psk(*expand)(psk, int*)
+ , psk(*expand)(psk, int*)
 #endif
 )
     {
     psk lhead, ltail, rhead, rtail;
     psk Rennur = &nilNode; /* Will contain all evaluated nodes in inverse order.*/
     psk tmp;
-    for (;;)
+    for(;;)
         {/* traverse from left to right to evaluate left side branches */
 #if EXPAND
         Boolean ok;
@@ -1275,25 +1309,25 @@ psk merge
             {
             Pnode->LEFT = eval(Pnode->LEFT);
             Pnode->LEFT = expand(Pnode->LEFT, &ok);
-            } while (ok);
+            } while(ok);
 #else
         Pnode->LEFT = eval(Pnode->LEFT);
 #endif
         tmp = Pnode->RIGHT;
-        if (tmp->v.fl & READY)
+        if(tmp->v.fl & READY)
             {
             break;
             }
-        if (!is_op(tmp)
-            || Op(Pnode) != Op(tmp)
-            )
+        if(!is_op(tmp)
+           || Op(Pnode) != Op(tmp)
+           )
             {
 #if EXPAND
             do
                 {
                 tmp = eval(tmp);
                 tmp = expand(tmp, &ok);
-                } while (ok);
+                } while(ok);
                 Pnode->RIGHT = tmp;
 #else
             Pnode->RIGHT = eval(tmp);
@@ -1304,12 +1338,12 @@ psk merge
         Rennur = Pnode;
         Pnode = tmp;
         }
-    for (;;)
+    for(;;)
         { /* From right to left, prepend sorted elements to result */
         psk rennur = &nilNode; /*Will contain branches in inverse sorted order*/
         psk L = leftoperand_and_tail(Pnode, &lhead, &ltail);
         psk R = rightoperand_and_tail(Pnode, &rhead, &rtail);
-        for (;;)
+        for(;;)
             { /* From right to left, prepend smallest of lhs and rhs
                  to rennur
               */
@@ -1322,9 +1356,9 @@ psk merge
             assert(Pnode->RIGHT == R);
             assert(L->v.fl & READY);
             assert(Pnode->RIGHT->v.fl & READY);
-            if (comp(lhead, rhead) <= 0) /* a * b */
+            if(comp(lhead, rhead) <= 0) /* a * b */
                 {
-                if (ltail == NULL)   /* a * (b*c) */
+                if(ltail == NULL)   /* a * (b*c) */
                     {
                     assert(Pnode->RIGHT->v.fl & READY);
                     break;
@@ -1333,7 +1367,7 @@ psk merge
                     {
                     L = isolated(L);
                     assert(!shared(L));
-                    if (ltail != L->RIGHT)
+                    if(ltail != L->RIGHT)
                         {
                         wipe(L->RIGHT); /* rare, set REFCOUNTSTRESSTEST 1 */
                         ltail = same_as_w(ltail);
@@ -1353,7 +1387,7 @@ psk merge
                 Pnode = isolated(Pnode);
                 assert(!shared(Pnode));
                 assert(L->v.fl & READY);
-                if (rtail == NULL) /* (b*c) * a */
+                if(rtail == NULL) /* (b*c) * a */
                     {
                     Pnode->LEFT = R;
                     assert(L->v.fl & READY);
@@ -1364,7 +1398,7 @@ psk merge
                     {
                     R = isolated(R);
                     assert(!shared(R));
-                    if (R->RIGHT != rtail)
+                    if(R->RIGHT != rtail)
                         {
                         wipe(R->RIGHT); /* rare, set REFCOUNTSTRESSTEST 1 */
                         rtail = same_as_w(rtail);
@@ -1378,12 +1412,12 @@ psk merge
                 /* (b*c) * d */
                 }
             }
-        for (;;)
+        for(;;)
             { /*Combine combinable elements and prepend to result*/
             Pnode->v.fl |= READY;
 
             Pnode = combine(Pnode);
-            if (!(Pnode->v.fl & READY))
+            if(!(Pnode->v.fl & READY))
                 { /*This may results in recursive call to merge
                     if the result of the evaluation is not in same
                     sorting position as unevaluated expression. */
@@ -1391,15 +1425,15 @@ psk merge
                 Pnode = eval(Pnode);
                 }
 #if DATAMATCHESITSELF
-            if (is_op(Pnode))
+            if(is_op(Pnode))
                 {
-                if ((Pnode->LEFT->v.fl & SELFMATCHING) && (Pnode->RIGHT->v.fl & SELFMATCHING))
+                if((Pnode->LEFT->v.fl & SELFMATCHING) && (Pnode->RIGHT->v.fl & SELFMATCHING))
                     Pnode->v.fl |= SELFMATCHING;
                 else
                     Pnode->v.fl &= ~SELFMATCHING;
                 }
 #endif
-            if (rennur != &nilNode)
+            if(rennur != &nilNode)
                 {
                 psk n = rennur->RIGHT;
                 assert(!shared(rennur));
@@ -1410,7 +1444,7 @@ psk merge
             else
                 break;
             }
-        if (Rennur == &nilNode)
+        if(Rennur == &nilNode)
             break;
         tmp = Rennur->RIGHT;
         assert(!shared(Rennur));
@@ -1419,9 +1453,9 @@ psk merge
         assert(!shared(Pnode));
         Pnode->v.fl |= READY;
 #if DATAMATCHESITSELF
-        if (is_op(Pnode))
+        if(is_op(Pnode))
             {
-            if ((Pnode->LEFT->v.fl & SELFMATCHING) && (Pnode->RIGHT->v.fl & SELFMATCHING))
+            if((Pnode->LEFT->v.fl & SELFMATCHING) && (Pnode->RIGHT->v.fl & SELFMATCHING))
                 Pnode->v.fl |= SELFMATCHING;
             else
                 Pnode->v.fl &= ~SELFMATCHING;
@@ -1436,43 +1470,43 @@ psk substlog(psk Pnode)
     {
     static const char* conc[] = { NULL,NULL,NULL,NULL };
     psk lnode = Pnode->LEFT, rightnode = Pnode->RIGHT;
-    if (!equal(lnode, rightnode))
+    if(!equal(lnode, rightnode))
         {
         wipe(Pnode);
         return copyof(&oneNode);
         }
-    else if (is_op(rightnode))  /*{?} x\L(2+y) => x\L(2+y) */
+    else if(is_op(rightnode))  /*{?} x\L(2+y) => x\L(2+y) */
         {
         int ok;
         return tryq(Pnode, f5, &ok); /*{?} x\L(a*x^n*z) => n+x\L(a*z) */
         }
-    else if (IS_ONE(rightnode))  /*{?} x\L1 => 0 */ /*{!} 0 */
+    else if(IS_ONE(rightnode))  /*{?} x\L1 => 0 */ /*{!} 0 */
         {
         wipe(Pnode);
         return copyof(&zeroNode);
         }
-    else if (RAT_NUL(rightnode)) /*{?} z\L0 => z\L0 */
+    else if(RAT_NUL(rightnode)) /*{?} z\L0 => z\L0 */
         return Pnode;
-    else if (is_op(lnode)) /*{?} (x+y)\Lz => (x+y)\Lz */
+    else if(is_op(lnode)) /*{?} (x+y)\Lz => (x+y)\Lz */
         return Pnode;
-    else if (RAT_NUL(lnode))   /*{?} 0\Lx => 0\Lx */
+    else if(RAT_NUL(lnode))   /*{?} 0\Lx => 0\Lx */
         return Pnode;
-    else if (IS_ONE(lnode))   /*{?} 1\Lx => 1\Lx */
+    else if(IS_ONE(lnode))   /*{?} 1\Lx => 1\Lx */
         return Pnode;
-    else if (RAT_NEG(lnode))  /*{?} -7\Lx => -7\Lx */
+    else if(RAT_NEG(lnode))  /*{?} -7\Lx => -7\Lx */
         return Pnode;
-    else if (RATIONAL_COMP(rightnode))  /*{?} x\L7 => x\L7 */
+    else if(RATIONAL_COMP(rightnode))  /*{?} x\L7 => x\L7 */
         {
-        if (qCompare(rightnode, &zeroNode) & MINUS)
+        if(qCompare(rightnode, &zeroNode) & MINUS)
             {
             /* (nL-m = i*pi/eLn+nLm)  */ /*{?} 7\L-9 => 1+7\L9/7+i*pi*e\L7^-1 */ /*{!} i*pi/e\L7+7\L9)  */
             addr[1] = lnode;
             addr[2] = rightnode;
             return build_up(Pnode, "(i*pi*e\016\1^-1+\1\016(-1*\2))", NULL);
             }
-        else if (RATIONAL_COMP(lnode)) /* m\Ln */ /*{?} 7\L9 => 1+7\L9/7 */
+        else if(RATIONAL_COMP(lnode)) /* m\Ln */ /*{?} 7\L9 => 1+7\L9/7 */
             {
-            if (qCompare(lnode, &oneNode) & MINUS)
+            if(qCompare(lnode, &oneNode) & MINUS)
                 {
                 /* (1/n)Lm = -1*nLm */ /*{?} 1/7\L9 => -1*(1+7\L9/7) */ /*{!} -1*nLm */
                 addr[1] = rightnode;
@@ -1484,7 +1518,7 @@ psk substlog(psk Pnode)
                 wipe(addr[6]);
                 return Pnode;
                 }
-            else if (qCompare(lnode, rightnode) & MINUS)
+            else if(qCompare(lnode, rightnode) & MINUS)
                 {
                 /* nL(n+m) = 1+nL((n+m)/n) */ /*{?} 7\L(7+9) => 1+7\L16/7 */ /*{!} 1+nL((n+m)/n) */
                 conc[0] = "(1+\1\016";
@@ -1497,7 +1531,7 @@ psk substlog(psk Pnode)
                 wipe(addr[6]);
                 return Pnode;
                 }
-            else if (qCompare(rightnode, &oneNode) & MINUS)
+            else if(qCompare(rightnode, &oneNode) & MINUS)
                 {
                 /* nL(1/m) = -1+nL(n/m) */ /*{?} 7\L1/9 => -2+7\L49/9 */ /*{!} -1+nL(n/m) */
                 conc[0] = "(-1+\1\016";
@@ -1535,52 +1569,52 @@ psk substdiff(psk Pnode)
     psk lnode, rightnode;
     lnode = Pnode->LEFT;
     rightnode = Pnode->RIGHT;
-    if (is_constant(lnode) || is_constant(rightnode))
+    if(is_constant(lnode) || is_constant(rightnode))
         {
         wipe(Pnode);
         Pnode = copyof(&zeroNode);
         }
-    else if (!equal(lnode, rightnode))
+    else if(!equal(lnode, rightnode))
         {
         wipe(Pnode);
         Pnode = copyof(&oneNode);
         }
-    else if (!is_op(rightnode)
-        && is_dependent_of(lnode, rightnode)
-        )
+    else if(!is_op(rightnode)
+            && is_dependent_of(lnode, rightnode)
+            )
         {
         ;
         }
-    else if (!is_op(rightnode))
+    else if(!is_op(rightnode))
         {
         wipe(Pnode);
         Pnode = copyof(&zeroNode);
         }
-    else if (Op(rightnode) == PLUS)
+    else if(Op(rightnode) == PLUS)
         {
         addr[1] = lnode;
         addr[2] = rightnode->LEFT;
         addr[3] = rightnode->RIGHT;
         Pnode = build_up(Pnode, "((\1\017\2)+(\1\017\3))", NULL);
         }
-    else if (is_op(rightnode))
+    else if(is_op(rightnode))
         {
         addr[2] = rightnode->LEFT;
         addr[1] = lnode;
         addr[3] = rightnode->RIGHT;
-        switch (Op(rightnode))
+        switch(Op(rightnode))
             {
-                case TIMES:
-                    Pnode = build_up(Pnode, "(\001\017\2*\3+\2*\001\017\3)", NULL);
-                    break;
-                case EXP:
-                    Pnode = build_up(Pnode,
-                        "(\2^(-1+\3)*\3*\001\017\2+\2^\3*e\016\2*\001\017\3)", NULL);
-                    break;
-                case LOG:
-                    Pnode = build_up(Pnode,
-                        "(\2^-1*e\016\2^-2*e\016\3*\001\017\2+\3^-1*e\016\2^-1*\001\017\3)", NULL);
-                    break;
+            case TIMES:
+                Pnode = build_up(Pnode, "(\001\017\2*\3+\2*\001\017\3)", NULL);
+                break;
+            case EXP:
+                Pnode = build_up(Pnode,
+                                 "(\2^(-1+\3)*\3*\001\017\2+\2^\3*e\016\2*\001\017\3)", NULL);
+                break;
+            case LOG:
+                Pnode = build_up(Pnode,
+                                 "(\2^-1*e\016\2^-2*e\016\3*\001\017\2+\3^-1*e\016\2^-1*\001\017\3)", NULL);
+                break;
             }
         }
     return Pnode;
@@ -1593,9 +1627,9 @@ psk substdiff(psk Pnode)
 static void PeekMsg(void)
     {
     static MSG msg;
-    while (PeekMessage(&msg, NULL, WM_PAINT, WM_DDE_LAST, PM_REMOVE))
+    while(PeekMessage(&msg, NULL, WM_PAINT, WM_DDE_LAST, PM_REMOVE))
         {
-        if (msg.message == WM_QUIT)
+        if(msg.message == WM_QUIT)
             {
             PostThreadMessage(GetCurrentThreadId(), WM_QUIT, 0, 0L);
             longjmp(jumper, 1);
@@ -1618,14 +1652,14 @@ psk handleWhitespace(psk Pnode)
     psk next;
     ppsk pwhitespacenode = &Pnode;
     ppsk prevpwhitespacenode = NULL;
-    for (;;)
+    for(;;)
         {
         whitespacenode = *pwhitespacenode;
         whitespacenode->LEFT = eval(whitespacenode->LEFT);
-        if (!is_op(apnode = whitespacenode->LEFT)
-            && !(apnode->u.obj)
-            && !HAS_UNOPS(apnode)
-            )
+        if(!is_op(apnode = whitespacenode->LEFT)
+           && !(apnode->u.obj)
+           && !HAS_UNOPS(apnode)
+           )
             {
             *pwhitespacenode = rightbranch(whitespacenode);
             }
@@ -1634,30 +1668,30 @@ psk handleWhitespace(psk Pnode)
             prevpwhitespacenode = pwhitespacenode;
             pwhitespacenode = &(whitespacenode->RIGHT);
             }
-        if (Op(whitespacenode = *pwhitespacenode) == WHITE && !(whitespacenode->v.fl & READY))
+        if(Op(whitespacenode = *pwhitespacenode) == WHITE && !(whitespacenode->v.fl & READY))
             {
-            if (shared(*pwhitespacenode))
+            if(shared(*pwhitespacenode))
                 *pwhitespacenode = copyop(*pwhitespacenode);
             }
         else
             {
             *pwhitespacenode = eval(*pwhitespacenode);
-            if (prevpwhitespacenode
-                && !is_op(whitespacenode = *pwhitespacenode)
-                && !((whitespacenode)->u.obj)
-                && !HAS_UNOPS(whitespacenode)
-                )
+            if(prevpwhitespacenode
+               && !is_op(whitespacenode = *pwhitespacenode)
+               && !((whitespacenode)->u.obj)
+               && !HAS_UNOPS(whitespacenode)
+               )
                 *prevpwhitespacenode = leftbranch(*prevpwhitespacenode);
             break;
             }
         }
 
     whitespacenode = Pnode;
-    while (Op(whitespacenode) == WHITE)
+    while(Op(whitespacenode) == WHITE)
         {
         next = whitespacenode->RIGHT;
         bringright(whitespacenode);
-        if (next->v.fl & READY)
+        if(next->v.fl & READY)
             break;
         whitespacenode = next;
         whitespacenode->v.fl |= READY;
@@ -1673,12 +1707,12 @@ psk handleComma(psk Pnode)
     psk commanode = Pnode;
     psk next;
     ppsk pcommanode;
-    while (Op(commanode->RIGHT) == COMMA && !(commanode->RIGHT->v.fl & READY))
+    while(Op(commanode->RIGHT) == COMMA && !(commanode->RIGHT->v.fl & READY))
         {
         commanode->LEFT = eval(commanode->LEFT);
         pcommanode = &(commanode->RIGHT);
         commanode = commanode->RIGHT;
-        if (shared(commanode))
+        if(shared(commanode))
             {
             *pcommanode = commanode = copyop(commanode);
             }
@@ -1686,11 +1720,11 @@ psk handleComma(psk Pnode)
     commanode->LEFT = eval(commanode->LEFT);
     commanode->RIGHT = eval(commanode->RIGHT);
     commanode = Pnode;
-    while (Op(commanode) == COMMA)
+    while(Op(commanode) == COMMA)
         {
         next = commanode->RIGHT;
         bringright(commanode);
-        if (next->v.fl & READY)
+        if(next->v.fl & READY)
             break;
         commanode = next;
         commanode->v.fl |= READY;
@@ -1701,14 +1735,14 @@ psk handleComma(psk Pnode)
 psk evalvar(psk Pnode)
     {
     psk loc_adr = SymbolBinding_w(Pnode, Pnode->v.fl & DOUBLY_INDIRECT);
-    if (loc_adr != NULL)
+    if(loc_adr != NULL)
         {
         wipe(Pnode);
         Pnode = loc_adr;
         }
     else
         {
-        if (shared(Pnode))
+        if(shared(Pnode))
             {
             /*You can get here if a !variable is unitialized*/
             dec_refcount(Pnode);
