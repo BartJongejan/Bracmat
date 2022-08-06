@@ -83,7 +83,7 @@ int numbercheck(const char* begin)
             }
         if(optab[op_or_0 = *++begin] != -1)
             {
-            if(op_or_0 == '.' || op_or_0 == ',')
+            if(op_or_0 == '.' /* || op_or_0 == ','*/)
                 {
                 check &= ~QFRACTION;
                 if(optab[op_or_0 = *++begin] != -1)

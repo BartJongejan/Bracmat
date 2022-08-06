@@ -100,77 +100,92 @@ psk handleExponents(psk Pnode)
                 return leftbranch(Pnode);
                 }
 
-            if(!is_op(rightnode) && RATIONAL_COMP(rightnode))
+            if(!is_op(rightnode)) 
                 {
-                if(RATIONAL_COMP(lnode))
+                if(REAL_COMP(rightnode) && REAL_COMP(lnode))
                     {
-                    if(RAT_NEG_COMP(rightnode) && absone(rightnode))
-                        {
-                        conc_arr[1] = NULL;
-                        conc_arr[2] = hash6;
-                        conc_arr[3] = NULL;
-                        addr[6] = qqDivide(&oneNode, lnode);
-                        assert(lnode == Pnode->LEFT);
-                        Pnode = vbuildup(Pnode, conc_arr + 2);
-                        wipe(addr[6]);
-                        return Pnode;
-                        }
-                    else if(RAT_NEG_COMP(lnode) && RAT_RAT_COMP(rightnode))
-                        {
-                        return Pnode; /*{?} -3^2/3 => -3^2/3 */
-                        }
-                    /* Missing here is n^m, with m > 2.
-                       That case is handled in casemacht. */
+                    /*"2.0E0" ^ "5.0E-1"*/
+                    conc_arr[1] = NULL;
+                    conc_arr[2] = hash6;
+                    conc_arr[3] = NULL;
+                    addr[6] = fExp(lnode, rightnode);
+                    assert(lnode == Pnode->LEFT);
+                    Pnode = vbuildup(Pnode, conc_arr + 2);
+                    wipe(addr[6]);
+                    return Pnode;
                     }
-                else if(PLOBJ(lnode) == IM)
+                else if(RATIONAL_COMP(rightnode))
                     {
-                    if(qCompare(rightnode, &zeroNode) & MINUS)
-                        { /* i^-n -> -i^n */ /*{?} i^-7 => i */
-                          /* -i^-n -> i^n */ /*{?} -i^-7 => -i */
-                        conc_arr[0] = "(\2^\3)";
-                        addr[2] = qTimesMinusOne(lnode);
-                        addr[3] = qTimesMinusOne(rightnode);
-                        conc_arr[1] = NULL;
-                        Pnode = vbuildup(Pnode, conc_arr);
-                        wipe(addr[2]);
-                        wipe(addr[3]);
-                        return Pnode;
-                        }
-                    else if(qCompare(&twoNode, rightnode) & (QNUL | MINUS))
+                    if(RATIONAL_COMP(lnode))
                         {
-                        iexponent = qModulo(rightnode, &fourNode);
-                        if(iexponent->v.fl & QNUL)
+                        if(RAT_NEG_COMP(rightnode) && absone(rightnode))
                             {
-                            wipe(Pnode); /*{?} i^4 => 1 */
-                            Pnode = copyof(&oneNode);
+                            conc_arr[1] = NULL;
+                            conc_arr[2] = hash6;
+                            conc_arr[3] = NULL;
+                            addr[6] = qqDivide(&oneNode, lnode);
+                            assert(lnode == Pnode->LEFT);
+                            Pnode = vbuildup(Pnode, conc_arr + 2);
+                            wipe(addr[6]);
+                            return Pnode;
                             }
-                        else
+                        else if(RAT_NEG_COMP(lnode) && RAT_RAT_COMP(rightnode))
                             {
-                            int Sign;
-                            Sign = qCompare(iexponent, &twoNode);
-                            if(Sign & QNUL)
+                            return Pnode; /*{?} -3^2/3 => -3^2/3 */
+                            }
+                        /* Missing here is n^m, with m > 2.
+                           That case is handled in casemacht. */
+                        }
+                    else if(PLOBJ(lnode) == IM)
+                        {
+                        if(qCompare(rightnode, &zeroNode) & MINUS)
+                            { /* i^-n -> -i^n */ /*{?} i^-7 => i */
+                              /* -i^-n -> i^n */ /*{?} -i^-7 => -i */
+                            conc_arr[0] = "(\2^\3)";
+                            addr[2] = qTimesMinusOne(lnode);
+                            addr[3] = qTimesMinusOne(rightnode);
+                            conc_arr[1] = NULL;
+                            Pnode = vbuildup(Pnode, conc_arr);
+                            wipe(addr[2]);
+                            wipe(addr[3]);
+                            return Pnode;
+                            }
+                        else if(qCompare(&twoNode, rightnode) & (QNUL | MINUS))
+                            {
+                            iexponent = qModulo(rightnode, &fourNode);
+                            if(iexponent->v.fl & QNUL)
                                 {
-                                wipe(Pnode);
-                                Pnode = copyof(&minusOneNode);
+                                wipe(Pnode); /*{?} i^4 => 1 */
+                                Pnode = copyof(&oneNode);
                                 }
                             else
                                 {
-                                if(!(Sign & MINUS))
+                                int Sign;
+                                Sign = qCompare(iexponent, &twoNode);
+                                if(Sign & QNUL)
                                     {
-                                    hiexponent = iexponent;
-                                    iexponent = qPlus(&fourNode, hiexponent, MINUS);
-                                    wipe(hiexponent);
+                                    wipe(Pnode);
+                                    Pnode = copyof(&minusOneNode);
                                     }
-                                addr[2] = lnode;
-                                addr[6] = iexponent;
-                                conc_arr[0] = "(-1*\2)^";
-                                conc_arr[1] = "(\6)";
-                                conc_arr[2] = NULL;
-                                Pnode = vbuildup(Pnode, conc_arr);
+                                else
+                                    {
+                                    if(!(Sign & MINUS))
+                                        {
+                                        hiexponent = iexponent;
+                                        iexponent = qPlus(&fourNode, hiexponent, MINUS);
+                                        wipe(hiexponent);
+                                        }
+                                    addr[2] = lnode;
+                                    addr[6] = iexponent;
+                                    conc_arr[0] = "(-1*\2)^";
+                                    conc_arr[1] = "(\6)";
+                                    conc_arr[2] = NULL;
+                                    Pnode = vbuildup(Pnode, conc_arr);
+                                    }
                                 }
+                            wipe(iexponent);
+                            return Pnode;
                             }
-                        wipe(iexponent);
-                        return Pnode;
                         }
                     }
                 }
