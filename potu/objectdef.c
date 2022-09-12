@@ -1,6 +1,7 @@
 #include "objectdef.h"
 #include "hashtypes.h"
 #include "hash.h"
+#include "calculation.h"
 #include "nodedefs.h"
 #include "memory.h"
 #include "copy.h"
@@ -11,7 +12,7 @@
 #include "wipecopy.h"
 #include <string.h>
 
-static classdef classes[] = { {"hash",hash},{NULL,NULL} };
+static classdef classes[] = { {"hash",hash},{"calculation",calculation}, {NULL,NULL}};
 
 static int hasSubObject(psk src)
     {
@@ -131,7 +132,7 @@ psk getObjectDef(psk src)
             dest->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
             dest->v.fl |= BUILT_IN;
 #endif
-            VOID(dest) = NULL;
+            dest->voiddata = NULL;
             dest->vtab = df->vtab;
             return (psk)dest;
             }
@@ -156,7 +157,7 @@ psk getObjectDef(psk src)
 #else
         dest->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
 #endif
-        VOID(dest) = NULL;
+        dest->voiddata = NULL;
         dest->vtab = NULL;
         return (psk)dest;
         }

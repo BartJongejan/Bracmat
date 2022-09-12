@@ -17,6 +17,9 @@
 #include <assert.h>
 #include <string.h>
 
+#define MPI 3.14159265358979323846 
+#define ME  2.718281828459045090795598298427648842334747314453125
+
 static const char
 hash5[] = "\5",
 hash6[] = "\6";

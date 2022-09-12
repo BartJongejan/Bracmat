@@ -10,6 +10,9 @@
 #include <string.h>
 #include <assert.h>
 
+#define HASH(x) (Hash*)x->voiddata
+#define PHASH(x) (Hash**)&(x->voiddata)
+
 static LONG casesensitivehash(const char* cp)
     {
     LONG hash_temp = 0;
@@ -377,7 +380,7 @@ static Boolean hashnew(struct typedObjectnode* This, ppsk arg)
         if (Nprime == 0 || Nprime == ULONG_MAX)
             Nprime = 97;
         }
-    VOID(This) = (void*)newhash(Nprime);
+    This->voiddata = (void*)newhash(Nprime);
     return TRUE;
     }
 

@@ -13,8 +13,6 @@ typedef struct method
     method_pnt func;
     } method;
 
-struct Hash;
-
 #if WORD32
 typedef struct typedObjectnode /* createdWithNew == 1 */
     {
@@ -31,10 +29,7 @@ typedef struct typedObjectnode /* createdWithNew == 1 */
             } s;
         int Int : 32;
         } u;
-    struct Hash * voiddata;
-#define HASH(x) (Hash*)x->voiddata
-#define VOID(x) x->voiddata
-#define PHASH(x) (Hash**)&(x->voiddata)
+    void * voiddata;
     method * vtab; /* The last element n of the array must have vtab[n].name == NULL */
     } typedObjectnode;
 #else
@@ -43,10 +38,7 @@ typedef struct typedObjectnode /* createdWithNew == 1 */
     tFlags v;
     psk left, right; /* left == nil, right == data (if vtab == NULL)
             or name of object type, e.g. [set], [hash], [file], [float] (if vtab != NULL)*/
-    struct Hash * voiddata;
-#define HASH(x) (Hash*)x->voiddata
-#define VOID(x) x->voiddata
-#define PHASH(x) (Hash**)&(x->voiddata)
+    void * voiddata;
     method * vtab; /* The last element n of the array must have vtab[n].name == NULL */
     } typedObjectnode;
 #endif
@@ -57,6 +49,5 @@ typedef struct
     psk object;
     method_pnt theMethod;
     } objectStuff;
-
 
 #endif

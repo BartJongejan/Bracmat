@@ -146,7 +146,7 @@ TODO list:
 #define BUILTINMETHOD_H
 #define QUOTE_H
 #define RESULT_H
-#define  JSON_H
+#define JSON_H
 #define XML_H
 #define WRITEERR_H
 #define INPUT_H
@@ -162,6 +162,7 @@ TODO list:
 #define VARIABLES_H
 #define MACRO_H
 #define HASH_H
+#define CALCULATION_H
 #define BINDING_H
 #define POSITION_H
 #define STRINGMATCH_H
@@ -190,6 +191,7 @@ TODO list:
 #include "input.c"
 #include "wipecopy.c"
 #include "rational.c"
+#include "real.c"
 #include "encoding.c"
 #include "equal.c"
 #include "object.c"
@@ -199,6 +201,7 @@ TODO list:
 #include "variables.c"
 #include "macro.c"
 #include "hash.c"
+#include "calculation.c"
 #include "binding.c"
 #include "position.c"
 #include "stringmatch.c"
@@ -237,6 +240,7 @@ TODO list:
 #include "variables.h"
 #include "macro.h"
 #include "hash.h"
+#include "calculation.h"
 #include "binding.h"
 #include "position.h"
 #include "stringmatch.h"
