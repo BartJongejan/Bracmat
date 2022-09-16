@@ -20,8 +20,8 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "26 June 2022"
-#define VERSION "6.11.1"
+#define DATUM "13 September 2022"
+#define VERSION "6.11.2"
 #define BUILD "258"
 /*
 COMPILATION
@@ -123,7 +123,7 @@ TODO list:
    20010821 a () () was evaluated to a (). Removed last ().
    20010903 (a.) () was evaluated to a
 */
-#define DEBUGBRACMAT 0 /* Implement dbg'(expression), see DBGSRC macro */
+#define DEBUGBRACMAT 1 /* Implement dbg'(expression), see DBGSRC macro */
 #define REFCOUNTSTRESSTEST 0
 #define DOSUMCHECK 0
 #define CHECKALLOCBOUNDS 0 /* only if NDEBUG is false */
@@ -8679,31 +8679,66 @@ method hash[] = {
 Standard methods are 'New' and 'Die'.
 A user defined 'die' can be added after creation of the object and will be invoked just before 'Die'.
 
-Example:
+Examples:
 
-new$hash:?h;
+( new$(=):?h
+&   (
+    =   ( List
+        =
+          .   out$List
+            & lst$its
+            & lst$Its
+        )
+        (die=.out$"Oh dear")
+    )
+  : (=?(h.))
+& (h..List)$
+& :?h
+);
 
-     (=(Insert=.out$Insert & lst$its & lst$Its & (Its..insert)$!arg)
-      (die = .out$"Oh dear")
-    ):(=?(h.));
+(   (
+    =   ( List
+        =
+          .   out$List
+            & lst$its
+            & lst$Its
+        )
+        (die=.out$"The end.")
+    )
+  : (=?(new$(=):?k))
+& (k..List)$
+& :?k
+);
 
-    (h..Insert)$(X.x);
+( new$hash:?h
+&   (
+    =   ( List
+        =
+          .   out$List
+            & lst$its
+            & lst$Its
+        )
+        (die=.out$"Oh dear")
+    )
+  : (=?(h.))
+& (h..List)$
+& :?h
+);
 
-    :?h;
-
-
-
-    (=(Insert=.out$Insert & lst$its & lst$Its & (Its..insert)$!arg)
-      (die = .out$"The end.")
-    ):(=?(new$hash:?k));
-
-    (k..Insert)$(Y.y);
-
-    :?k;
-
-A little problem is that in the last example, the '?' ends up as a flag on the '=' node.
-
-Bart 20010222
+(   (
+    =   ( List
+        =
+          .   out$List
+            & lst$its
+            & lst$Its
+        )
+        (die=.out$"The end.")
+    )
+  : (=?(new$hash:?k))
+& (k..List)$
+& lst$k
+& :?k
+);
 
 */
 
@@ -9779,7 +9814,10 @@ static char stringmatch
                 name->v.fl |= SUCCESS;
                 if ((s.c.rmr = (char)evaluate(name)) != TRUE)
                     ok = FALSE;
-                name->v.fl |= saveflgs;
+                if (Op(name) != EQUALS)
+                    {
+                    name->v.fl |= saveflgs;
+                    }
                 pat = name;
                 }
             if (ok)
@@ -10339,9 +10377,13 @@ static char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk exp
                 name->v.fl |= SUCCESS;
                 if ((s.c.rmr = (char)evaluate(name)) != TRUE)
                     ok = FALSE;
-                name = isolated(name);
-                name->v.fl |= saveflgs;
+                if (Op(name) != EQUALS)
+                    {
+                    /*name = isolated(name);*//*Is this needed? 20220913*/
+                    name->v.fl |= saveflgs;
+                    }
                 pat = name;
+                /* name is wiped later in this function! */
                 }
             if (ok)
                 {

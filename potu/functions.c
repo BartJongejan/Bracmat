@@ -28,7 +28,6 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
-#include <math.h>
 
 /*MOVETO FUNCTIONS*/
 #define LONGCASE
@@ -309,17 +308,45 @@ function_return_type functions(psk Pnode)
         {
         if(!is_op(rlnode = lnode->LEFT) && !strcmp((char*)POBJ(rlnode), "math"))
             {
-            if(REAL_COMP(Pnode->RIGHT))
+            if(is_op(Pnode->RIGHT))
                 {
-                psk restl = Cmath(lnode->RIGHT, Pnode->RIGHT);
-                if(restl)
+                if(REAL_COMP(Pnode->RIGHT->LEFT))
                     {
-                    wipe(Pnode);
-                    Pnode = restl;
-                    return functionOk(Pnode);
+                    if(is_op(Pnode->RIGHT->RIGHT))
+                        {
+                        ;
+                        }
+                    else
+                        {
+                        if(REAL_COMP(Pnode->RIGHT->RIGHT))
+                            {
+                            psk restl = Cmath2(lnode->RIGHT, Pnode->RIGHT->LEFT, Pnode->RIGHT->RIGHT);
+                            if(restl)
+                                {
+                                wipe(Pnode);
+                                Pnode = restl;
+                                return functionOk(Pnode);
+                                }
+                            else
+                                return functionFail(Pnode);
+                            }
+                        }
                     }
-                else
-                    return functionFail(Pnode);
+                }
+            else
+                {
+                if(REAL_COMP(Pnode->RIGHT))
+                    {
+                    psk restl = Cmath(lnode->RIGHT, Pnode->RIGHT);
+                    if(restl)
+                        {
+                        wipe(Pnode);
+                        Pnode = restl;
+                        return functionOk(Pnode);
+                        }
+                    else
+                        return functionFail(Pnode);
+                    }
                 }
             }
 

@@ -260,7 +260,10 @@ char stringmatch
                 name->v.fl |= SUCCESS;
                 if ((s.c.rmr = (char)evaluate(name)) != TRUE)
                     ok = FALSE;
-                name->v.fl |= saveflgs;
+                if (Op(name) != EQUALS)
+                    {
+                    name->v.fl |= saveflgs;
+                    }
                 pat = name;
                 }
             if (ok)

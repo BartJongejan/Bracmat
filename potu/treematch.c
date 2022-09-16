@@ -221,8 +221,11 @@ char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk expr, unsi
                 name->v.fl |= SUCCESS;
                 if ((s.c.rmr = (char)evaluate(name)) != TRUE)
                     ok = FALSE;
-                name = isolated(name);
-                name->v.fl |= saveflgs;
+                if (Op(name) != EQUALS)
+                    {
+                    /*name = isolated(name);*//*Is this needed? 20220913*/
+                    name->v.fl |= saveflgs;
+                    }
                 pat = name;
                 }
             if (ok)
