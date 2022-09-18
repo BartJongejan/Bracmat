@@ -1,3 +1,6 @@
+18 September 2022
+Fixed bugs, so we can compute points in te Mandelbrot set.
+
 16 September 2022
 Built in object type "calculation", meant to do floating point calculations with
 C doubles, evading conversions to other types during the computations. Uses threaded
