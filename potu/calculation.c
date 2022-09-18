@@ -421,7 +421,7 @@ char* getFuncName(funct funcp)
     {
     Cpair* cpair;
     char* naam = "UNK function";
-    char buffer[64];
+    static char buffer[64];
     for (cpair = pairs; cpair->name; ++cpair)
         {
         if (cpair->Cfun == funcp)
@@ -444,8 +444,6 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
              mem->wordp->action != TheEnd;
              )
             {
-            forthvariable* v;
-            stackvalue* svp;
             switch (mem->wordp->action)
                 {
                 case ResolveAndPush:
