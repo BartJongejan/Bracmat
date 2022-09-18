@@ -1,7 +1,7 @@
 16 September 2022
 Built in object type "calculation", meant to do floating point calculations with
-C-doubles, evading conversions to other types during the computations. Inspired
-by Forth.
+C doubles, evading conversions to other types during the computations. Uses threaded
+code, inspired by Forth.
 
 25 June 2022
 bracmat (6.11.1): New option 'WYD' for 'lst' and 'put', creating wider lines

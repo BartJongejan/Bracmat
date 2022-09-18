@@ -1,0 +1,133 @@
+{mandelbrot.bra
+
+for each pixel (Px, Py) on the screen do
+    x0 := scaled x coordinate of pixel (scaled to lie in the Mandelbrot X scale (-2.00, 0.47))
+    y0 := scaled y coordinate of pixel (scaled to lie in the Mandelbrot Y scale (-1.12, 1.12))
+    x := 0.0
+    y := 0.0
+    iteration := 0
+    max_iteration := 1000
+    while (x*x + y*y ≤ 2*2 AND iteration < max_iteration) do
+        xtemp := x*x - y*y + x0
+        y := 2*x*y + y0
+        x := xtemp
+        iteration := iteration + 1
+    
+    color := palette[iteration]
+    plot(Px, Py, color)
+
+}
+
+X=
+  ( doit
+  =   
+    .       new
+          $ ( calculation
+            , ( 
+              =   "0.0E0":?x:?y
+                & "1.0E0":?J
+                &   whl
+                  ' ( hypot$(!x,!y):~>"2.0E0"
+                    & !J:<"1.0E3"
+                    & !x*!x+"-1.0E0"*!y*!y+!a0:?xtemp
+                    & "2.0E0"*!x*!y+!a1:?y
+                    & !xtemp:?x
+                    & "1.0E0"+!J:?J
+                    )
+                & !J
+              )
+            )
+        : ?iter
+      & out$"ITER DEFINED"
+      & (iter..print)$
+      & out$"ITER PRINTED"
+      & get'
+      & ( flt
+        =   e,d,m,s,f
+          .     !arg:(?arg,~<0:?d)
+              & !arg:0
+            |     ( -1*!arg:>0:?arg&-1
+                  | 1
+                  )
+                : ?s
+              &   10\L!arg
+                : ?e+(10\L?m|0&1:?m)
+              & (   !m+1/2*1/10^!d:~<10
+                  & 1+!e:?e
+                  & !m*1/10:?m
+                | 
+                )
+              & @(div$(!m+1/2*(1/10^!d:?d),!d):`%?f ?m)
+              &   str
+                $ ( !s*!f
+                    (!d:~1&"."|)
+                    !m
+                    E
+                    !e
+                  )
+        )
+      & -200:?x0
+      & :?alliters
+      &   whl
+        ' ( !x0:~>47
+          & -112:?y0
+          & :?iters
+          &   whl
+            ' ( !y0:~>112
+              & (     (iter..calculate)
+                    $ (flt$(!x0*1/100,2),flt$(!y0*1/100,2))
+                  : ?Niter
+                | "weet niet":?Niter
+                )
+              & get$(str$("[" !Niter "]"),JSN,MEM):(,?Niter)
+              &     ( !Niter:1000&"  "
+                    | ■■
+                    )
+                    !iters
+                : ?iters
+              & 1+!y0:?y0
+              )
+          & str$(!iters \n) !alliters:?alliters
+          & 1+!x0:?x0
+          )
+      & put$(str$!alliters,"MandelbrotSet.txt",NEW WYD)
+  )
+  (new=.~|(its.doit)$);
+
+r=
+  get'("mandelbrot.bra",TXT)
+& rmv$(str$(mandelbrot ".bak"))
+& ren$("mandelbrot.bra".str$(mandelbrot ".bak"))
+&   put
+  $ ( "{mandelbrot.bra
+
+for each pixel (Px, Py) on the screen do
+    x0 := scaled x coordinate of pixel (scaled to lie in the Mandelbrot X scale (-2.00, 0.47))
+    y0 := scaled y coordinate of pixel (scaled to lie in the Mandelbrot Y scale (-1.12, 1.12))
+    x := 0.0
+    y := 0.0
+    iteration := 0
+    max_iteration := 1000
+    while (x*x + y*y ≤ 2*2 AND iteration < max_iteration) do
+        xtemp := x*x - y*y + x0
+        y := 2*x*y + y0
+        x := xtemp
+        iteration := iteration + 1
+    
+    color := palette[iteration]
+    plot(Px, Py, color)
+
+}
+
+"
+    , "mandelbrot.bra"
+    , NEW
+    , BIN
+    )
+& lst'(X,"mandelbrot.bra",APP)
+& put'(\n,"mandelbrot.bra",APP,BIN)
+& lst'(r,"mandelbrot.bra",APP)
+& put$(str$("\nnew'" X ";\n"),"mandelbrot.bra",APP,BIN)
+& ;
+
+new'X;

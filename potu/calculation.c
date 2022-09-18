@@ -22,14 +22,15 @@
 (      new$(calculation,(=hypot$(!a0.!a1))):?calc
     & (calc..calculate)$("1.0E-01"."2.0E0")
 )
-    
+
 (    new$(calculation,(=!a0*!a1:?p&!p:>"1.0E1"&"1.0E0"|"0.0E0")):?calc&(calc..print)$
    & (calc..calculate)$("3.4E0","4.0E0")
-)    
-    
+)
+
     */
 
 
+static double Nan;
 
 typedef enum {
     TheEnd
@@ -37,8 +38,17 @@ typedef enum {
     , ResolveAndGet
     , Push
     , Afunction
-    , Jump
+    , Abranch
     } actionType;
+
+static char* ActionAsWord[] =
+    { "TheEnd  "
+    , "Rslv&Psh"
+    , "Rslv&Get"
+    , "Push    "
+    , "Func    "
+    , "Branch  "
+    };
 
 struct forthMemory;
 
@@ -84,14 +94,20 @@ typedef struct forthMemory
     forthvariable* var;
     } forthMemory;
 
-static char* getVarName(forthvariable* varp, forthvalue *u)
+typedef struct
     {
-    for (;varp;++varp)
+    char* name;
+    void(*Cfun)(forthMemory*);
+    }Cpair;
+
+static char* getVarName(forthvariable* varp, forthvalue* u)
+    {
+    for (; varp; varp = varp->next)
         {
         if (&(varp->u.floating) == &(u->floating))
             return varp->name;
         }
-    return "UNKN";
+    return "UNK variable";
     }
 
 static forthvalue* getVariablePointer(forthvariable** varp, char* name)
@@ -140,6 +156,7 @@ static int setArgs(forthvariable** varp, psk args, int nr)
             return 1 + nr;
             }
         }
+    printf("setArgs fails\n");
     return -1;
     }
 
@@ -150,13 +167,11 @@ static void justpush(forthMemory* This, forthvalue val)
     ++(This->sp);
     }
 
+#if 0
 static Boolean calculate(struct typedObjectnode* This, ppsk arg)
     {
     psk Arg = (*arg)->RIGHT;
     forthMemory* mem = (forthMemory*)(This->voiddata);
-    printf("\n[");
-    result(Arg);
-    printf("]\n");
     if (setArgs(&(mem->var), Arg, 0) > 0)
         {
         for (mem->wordp = mem->word;
@@ -164,16 +179,17 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
              ++(mem->wordp)
              )
             {
+            printf("%d[%d] ", (int)(mem->wordp - mem->word), mem->wordp->action);
             switch (mem->wordp->action)
                 {
                 case ResolveAndPush:
-                    {
+                    { /* !variable */
                     forthvalue val = *(mem->wordp->u.valp);
                     justpush(mem, val);
                     break;
                     }
                 case ResolveAndGet:
-                    {
+                    { /* ?variable */
                     forthvalue* valp = mem->wordp->u.valp;
                     stackvalue* sv = mem->sp;
                     assert(sv > mem->stack);
@@ -181,21 +197,20 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                     break;
                     }
                 case Push:
-                    {
+                    { /* "9.8765432E0 */
                     forthvalue val = mem->wordp->u.val;
                     justpush(mem, val);
                     break;
                     }
                 case Afunction:
+                    /* function$(...) */
                     mem->wordp->u.funcp(mem);
-                    break;
-                case Jump:
-                    mem->wordp = mem->word + mem->wordp->offset;
                     break;
                 default:
                     ;
                 }
             }
+        printf("\n");
         for (; mem->sp > mem->stack;)
             {
             psk res;
@@ -221,7 +236,408 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
         }
     return FALSE;
     }
+#endif
 
+static forthvalue cpop(forthMemory* This)
+    {
+    assert(This->sp > This->stack);
+    --(This->sp);
+    return (This->sp)->val;
+    }
+
+static void fpush(forthMemory* This, double val)
+    {
+    assert(This->sp < &(This->stack[0]) + sizeof(This->stack) / sizeof(This->stack[0]));
+    (This->sp)->val.floating = val;
+    ++(This->sp);
+    }
+
+static void Cacos(forthMemory* This) { double a = cpop(This).floating; fpush(This, acos(a)); }
+static void Cacosh(forthMemory* This) { double a = cpop(This).floating; fpush(This, acosh(a)); }
+static void Casin(forthMemory* This) { double a = cpop(This).floating; fpush(This, asin(a)); }
+static void Casinh(forthMemory* This) { double a = cpop(This).floating; fpush(This, asinh(a)); }
+static void Catan(forthMemory* This) { double a = cpop(This).floating; fpush(This, atan(a)); }
+static void Catanh(forthMemory* This) { double a = cpop(This).floating; fpush(This, atanh(a)); }
+static void Ccbrt(forthMemory* This) { double a = cpop(This).floating; fpush(This, cbrt(a)); }
+static void Cceil(forthMemory* This) { double a = cpop(This).floating; fpush(This, ceil(a)); }
+static void Ccos(forthMemory* This) { double a = cpop(This).floating; fpush(This, cos(a)); }
+static void Ccosh(forthMemory* This) { double a = cpop(This).floating; fpush(This, cosh(a)); }
+static void Cexp(forthMemory* This) { double a = cpop(This).floating; fpush(This, exp(a)); }
+static void Cfabs(forthMemory* This) { double a = cpop(This).floating; fpush(This, fabs(a)); }
+static void Cfloor(forthMemory* This) { double a = cpop(This).floating; fpush(This, floor(a)); }
+static void Clog(forthMemory* This) { double a = cpop(This).floating; fpush(This, log(a)); }
+static void Clog10(forthMemory* This) { double a = cpop(This).floating; fpush(This, log10(a)); }
+static void Csin(forthMemory* This) { double a = cpop(This).floating; fpush(This, sin(a)); }
+static void Csinh(forthMemory* This) { double a = cpop(This).floating; fpush(This, sinh(a)); }
+static void Csqrt(forthMemory* This) { double a = cpop(This).floating; fpush(This, sqrt(a)); }
+static void Ctan(forthMemory* This) { double a = cpop(This).floating; fpush(This, tan(a)); }
+static void Ctanh(forthMemory* This) { double a = cpop(This).floating; fpush(This, tanh(a)); }
+
+static void Catan2(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, atan2(a, b)); }
+static void Cfdim(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, fdim(a, b)); }
+static void Cfmax(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, fmax(a, b)); }
+static void Cfmin(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, fmin(a, b)); }
+static void Cfmod(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, fmod(a, b)); }
+static void Chypot(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, hypot(a, b)); }
+static void Cpow(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, pow(a, b)); }
+
+
+static void fless(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, (a < b) ? 1.0 : Nan); }
+static void fless_equal(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, (a <= b) ? 1.0 : Nan); }
+static void fmore_equal(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, (a >= b) ? 1.0 : Nan); }
+static void fmore(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, (a > b) ? 1.0 : Nan); }
+static void funequal(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, (a != b) ? 1.0 : Nan); }
+static void flessormore(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, (a != b) ? 1.0 : Nan); }
+static void fequal(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, (a == b) ? 1.0 : Nan); }
+static void fnotlessormore(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, (a == b) ? 1.0 : Nan); }
+
+static void fplus(forthMemory* This)
+    {
+    double a = cpop(This).floating;
+    double b = cpop(This).floating;
+    fpush(This, a + b);
+    }
+static void ftimes(forthMemory* This)
+    {
+    double a = cpop(This).floating;
+    double b = cpop(This).floating;
+    fpush(This, a * b);
+    }
+static void fexp(forthMemory* This)
+    {
+    double a = cpop(This).floating;
+    double b = cpop(This).floating;
+    fpush(This, pow(a, b));
+    }
+static void flog(forthMemory* This)
+    {
+    double a = cpop(This).floating;
+    double b = cpop(This).floating;
+    fpush(This, log(a) / log(b));
+    }
+
+static void fand(forthMemory* This) /* Consumes top of stack if no problem found. */
+    {
+    forthvalue v = cpop(This);
+    if (isnan(v.floating) || isinf(v.floating)/* || v.integer == 0*/)
+        {
+        ++This->sp; /* Keep 0 on the stack, in case an OR wants to test. */
+        This->wordp = This->word + This->wordp->offset; /* skip RIGHT side */
+        }
+    else
+        {
+        ++(This->wordp);
+        }
+    }
+
+static void fOr(forthMemory* This) /* Consumes top of stack ! */
+    {
+    forthvalue v = cpop(This);
+    if (!isnan(v.floating) && !isinf(v.floating) /* && v.integer != 0 */)
+        { /* No problem found. Continue after 'if false' branch. */
+        ++This->sp; /* Keep value on the stack, in case this is the result wanted */
+        This->wordp = This->word + This->wordp->offset;
+        }
+    else
+        {
+        ++(This->wordp);
+        }
+    }
+
+static void cpush(forthMemory* This, forthvalue val)
+    {
+    assert(This->sp < &(This->stack[0]) + sizeof(This->stack) / sizeof(This->stack[0]));
+    (This->sp)->val = val;
+    ++(This->sp);
+    }
+
+static void fwhl(forthMemory* This) /* Consumes top of stack ! */
+    {
+    forthvalue v = cpop(This);
+    if (!isnan(v.floating) && !isinf(v.floating) /* && v.integer != 0 */)
+        { /* No problem found. Continue after 'if false' branch. */
+        This->wordp = This->word + This->wordp->offset;
+        }
+    else
+        {
+        forthvalue w;
+        w.floating = 1.23456789;
+        cpush(This, w);
+        ++(This->wordp);
+        }
+    }
+
+
+static Cpair pairs[] =
+    {
+        {"acos",  Cacos},
+        {"acosh", Cacosh},
+        {"asin",  Casin},
+        {"asinh", Casinh},
+        {"atan",  Catan},
+        {"atanh", Catanh},
+        {"cbrt",  Ccbrt},
+        {"ceil",  Cceil},
+        {"cos",   Ccos},
+        {"cosh",  Ccosh},
+        {"exp",   Cexp},
+        {"fabs",  Cfabs},
+        {"floor", Cfloor},
+        {"log",   Clog},
+        {"log10", Clog10},
+        {"sin",   Csin},
+        {"sinh",  Csinh},
+        {"sqrt",  Csqrt},
+        {"tan",   Ctan},
+        {"tanh",  Ctanh},
+        {"atan2", Catan2},
+        {"fdim",  Cfdim},
+        {"fmax",  Cfmax},
+        {"fmin",  Cfmin},
+        {"fmod",  Cfmod},
+        {"hypot", Chypot},
+        {"pow",   Cpow},
+
+        {"_plus"         ,fplus         },
+        {"_times"        ,ftimes        },
+        {"_exp"          ,fexp          },
+        {"_log"          ,flog          },
+        {"_and"          ,fand          },
+        {"_Or"           ,fOr           },
+        {"_less"         ,fless         },
+        {"_less_equal"   ,fless_equal   },
+        {"_more_equal"   ,fmore_equal   },
+        {"_more"         ,fmore         },
+        {"_unequal"      ,funequal      },
+        {"_lessormore"   ,flessormore   },
+        {"_equal"        ,fequal        },
+        {"_notlessormore",fnotlessormore},
+        {"_Or"           ,fOr           },
+        {"_whl"          ,fwhl          },
+        {0,0}
+    };
+
+char* getFuncName(funct funcp)
+    {
+    Cpair* cpair;
+    char* naam = "UNK function";
+    char buffer[64];
+    for (cpair = pairs; cpair->name; ++cpair)
+        {
+        if (cpair->Cfun == funcp)
+            {
+            naam = cpair->name;
+            return naam;
+            }
+        }
+    sprintf(buffer, "UNKNOWN[%p]", funcp);
+    return buffer;
+    }
+
+static Boolean calculate(struct typedObjectnode* This, ppsk arg)
+    {
+    psk Arg = (*arg)->RIGHT;
+    forthMemory* mem = (forthMemory*)(This->voiddata);
+    if (setArgs(&(mem->var), Arg, 0) > 0)
+        {
+        for (mem->wordp = mem->word;
+             mem->wordp->action != TheEnd;
+             )
+            {
+            forthvariable* v;
+            stackvalue* svp;
+            switch (mem->wordp->action)
+                {
+                case ResolveAndPush:
+                    {
+                    forthvalue val = *(mem->wordp->u.valp);
+                    justpush(mem, val);
+                    ++(mem->wordp);
+                    break;
+                    }
+                case ResolveAndGet:
+                    {
+                    forthvalue* valp = mem->wordp->u.valp;
+                    stackvalue* sv = mem->sp;
+                    assert(sv > mem->stack);
+                    *valp = ((sv - 1)->val);
+                    ++(mem->wordp);
+                    break;
+                    }
+                case Push:
+                    {
+                    forthvalue val = mem->wordp->u.val;
+                    justpush(mem, val);
+                    ++(mem->wordp);
+                    break;
+                    }
+                case Afunction:
+                    {
+                    mem->wordp->u.funcp(mem);
+                    ++(mem->wordp);
+                    break;
+                    }
+                case Abranch:
+                    {
+                    mem->wordp->u.funcp(mem);
+                    break;
+                    }
+                default:
+                    ;
+                }
+            }
+        for (; mem->sp > mem->stack;)
+            {
+            psk res;
+            size_t len;
+            char buf[64]; /* 64 bytes is even enough for quad https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF*/
+            double sv = (--(mem->sp))->val.floating;
+            int flags;
+            if (isnan(sv))
+                {
+                strcpy(buf, "NAN");
+                flags = READY BITWISE_OR_SELFMATCHING;
+                }
+            else if (isinf(sv))
+                {
+                if (isinf(sv < 0))
+                    strcpy(buf, "-INF");
+                else
+                    strcpy(buf, "INF");
+                flags = READY BITWISE_OR_SELFMATCHING;
+                }
+            else
+                {
+                sprintf(buf, "%.16E", sv);
+                flags = READY | SUCCESS | QNUMBER | QDOUBLE BITWISE_OR_SELFMATCHING;
+                }
+            len = offsetof(sk, u.obj) + strlen(buf);
+            res = (psk)bmalloc(__LINE__, len + 1);
+            strcpy((char*)POBJ(res), buf);
+            if (res)
+                {
+                wipe(*arg);
+                *arg = same_as_w(res);
+                res->v.fl = flags;
+                return TRUE;
+                }
+            }
+        }
+    return FALSE;
+    }
+
+static Boolean trc(struct typedObjectnode* This, ppsk arg)
+    {
+    psk Arg = (*arg)->RIGHT;
+    forthMemory* mem = (forthMemory*)(This->voiddata);
+    if (setArgs(&(mem->var), Arg, 0) > 0)
+        {
+        for (mem->wordp = mem->word;
+             mem->wordp->action != TheEnd;
+             /*++(mem->wordp)*/
+             )
+            {
+            forthvariable* v;
+            stackvalue* svp;
+            printf("%s %d,%d ", ActionAsWord[mem->wordp->action], (int)(mem->wordp - mem->word), (int)(mem->sp - mem->stack));
+            for (v = mem->var; v; v = v->next) { printf("%s=%f ", v->name, v->u.floating); };
+            for (svp = mem->sp - 1; svp >= mem->stack; --svp) { if (svp->valp == (forthvalue*)0xCDCDCDCDCDCDCDCD)printf("<undef>"); else printf("<%f>", svp->val.floating/*, svp->valp*/); }
+            printf("\t");
+            switch (mem->wordp->action)
+                {
+                case ResolveAndPush:
+                    {
+                    forthvalue val = *(mem->wordp->u.valp);
+                    printf("%s %f --> stack", getVarName(mem->var, (mem->wordp->u.valp)), val.floating);
+                    justpush(mem, val);
+                    ++(mem->wordp);
+                    break;
+                    }
+                case ResolveAndGet:
+                    {
+                    forthvalue* valp = mem->wordp->u.valp;
+                    stackvalue* sv = mem->sp;
+                    assert(sv > mem->stack);
+                    printf("%s %f <-- stack", getVarName(mem->var, valp), ((sv - 1)->val).floating);
+                    *valp = ((sv - 1)->val);
+                    ++(mem->wordp);
+                    break;
+                    }
+                case Push:
+                    {
+                    forthvalue val = mem->wordp->u.val;
+                    printf("%f", val.floating);
+                    justpush(mem, val);
+                    ++(mem->wordp);
+                    break;
+                    }
+                case Afunction:
+                    {
+                    char* naam = getFuncName(mem->wordp->u.funcp);
+                    printf(" %s", naam);
+                    mem->wordp->u.funcp(mem);
+                    ++(mem->wordp);
+                    break;
+                    }
+                case Abranch:
+                    {
+                    char* naam = getFuncName(mem->wordp->u.funcp);
+                    printf(" %s", naam);
+                    printf(" conditional jump to %d", mem->wordp->offset);
+                    mem->wordp->u.funcp(mem);
+                    break;
+                    }
+                default:
+                    ;
+                }
+#if 0
+            if (getchar() == 'q')
+                break;
+#else
+            printf("\n");
+#endif
+            }
+        printf("calculation DONE. On Stack %d\n", (int)(mem->sp - mem->stack));
+        for (; mem->sp > mem->stack;)
+            {
+            psk res;
+            size_t len;
+            char buf[64]; /* 64 bytes is even enough for quad https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF*/
+            double sv = (--(mem->sp))->val.floating;
+            int flags;
+            if (isnan(sv))
+                {
+                strcpy(buf, "NAN");
+                flags = READY BITWISE_OR_SELFMATCHING;
+                }
+            else if (isinf(sv))
+                {
+                if (isinf(sv < 0))
+                    strcpy(buf, "-INF");
+                else
+                    strcpy(buf, "INF");
+                flags = READY BITWISE_OR_SELFMATCHING;
+                }
+            else
+                {
+                sprintf(buf, "%.16E", sv);
+                flags = READY | SUCCESS | QNUMBER | QDOUBLE BITWISE_OR_SELFMATCHING;
+                }
+            len = offsetof(sk, u.obj) + strlen(buf);
+            res = (psk)bmalloc(__LINE__, len + 1);
+            strcpy((char*)POBJ(res), buf);
+            printf("value on stack %s\n", buf);
+            if (res)
+                {
+                wipe(*arg);
+                *arg = same_as_w(res);
+                res->v.fl = flags;
+                return TRUE;
+                }
+            }
+        }
+    return FALSE;
+    }
 
 static int polish1(psk code)
     {
@@ -271,12 +687,18 @@ static int polish1(psk code)
             C = polish1(code->RIGHT);
             if (C == -1)
                 return -1;
-            return R + C;
+            if (Op(code->RIGHT) == MATCH || code->RIGHT->v.fl & UNIFY)
+                return R + C;
+            else
+                return 1 + R + C;
             }
         case FUN:
         case FUU:
             if (is_op(code->LEFT))
+                {
+                printf("lhs of $ or ' is operator\n");
                 return -1;
+                }
             C = polish1(code->RIGHT);
             if (C == -1)
                 return -1;
@@ -299,22 +721,12 @@ static int polish1(psk code)
                 else if (code->v.fl & (UNIFY | INDIRECT))
                     return 1; /* variable */
                 else
+                    {
+                    printf("Not parsed: %s\n", &(code->u.sobj));
                     return -1;
+                    }
                 }
         }
-    }
-static forthvalue cpop(forthMemory* This)
-    {
-    assert(This->sp > This->stack);
-    --(This->sp);
-    return (This->sp)->val;
-    }
-
-static void fpush(forthMemory* This, double val)
-    {
-    assert(This->sp < &(This->stack[0]) + sizeof(This->stack) / sizeof(This->stack[0]));
-    (This->sp)->val.floating = val;
-    ++(This->sp);
     }
 
 static void ipush(forthMemory* This, LONG val)
@@ -324,63 +736,11 @@ static void ipush(forthMemory* This, LONG val)
     ++(This->sp);
     }
 
-static void fplus(forthMemory* This)
-    {
-    double a = cpop(This).floating;
-    double b = cpop(This).floating;
-    fpush(This, a + b);
-    }
-static void ftimes(forthMemory* This)
-    {
-    double a = cpop(This).floating;
-    double b = cpop(This).floating;
-    fpush(This, a * b);
-    }
-static void fexp(forthMemory* This)
-    {
-    double a = cpop(This).floating;
-    double b = cpop(This).floating;
-    fpush(This, pow(a, b));
-    }
-static void flog(forthMemory* This)
-    {
-    double a = cpop(This).floating;
-    double b = cpop(This).floating;
-    fpush(This, log(a) / log(b));
-    }
-
-static void fand(forthMemory* This) /* Consumes top of stack if no problem found. */
-    {
-    forthvalue v = cpop(This);
-    if (isnan(v.floating) || isinf(v.floating) || v.integer == 0)
-        {
-        ++This->sp; /* Keep 0 on the stack, in case an OR wants to test. */
-        This->wordp = This->word + This->wordp->offset; /* skip RIGHT side */
-        }
-    }
-
-static void fOr(forthMemory* This) /* Consumes top of stack ! */
-    {
-    forthvalue v = cpop(This);
-    if (!isnan(v.floating) && !isinf(v.floating) && v.integer != 0)
-        { /* No problem found. Continue after 'if false' branch. */
-        ++This->sp; /* Keep value on the stack, in case this is the result wanted */
-        This->wordp = This->word + This->wordp->offset;
-        }
-    }
-
 static forthvalue* pcpop(forthMemory* This)
     {
     assert(This->sp > This->stack);
     --(This->sp);
     return (This->sp)->valp;
-    }
-
-static void cpush(forthMemory* This, forthvalue val)
-    {
-    assert(This->sp < &(This->stack[0]) + sizeof(This->stack) / sizeof(This->stack[0]));
-    (This->sp)->val = val;
-    ++(This->sp);
     }
 
 static void pcpush(forthMemory* This, forthvalue* valp)
@@ -389,101 +749,6 @@ static void pcpush(forthMemory* This, forthvalue* valp)
     (This->sp)->valp = valp;
     ++(This->sp);
     }
-
-static void Cacos(forthMemory* This) { double a = cpop(This).floating; fpush(This, acos(a)); }
-static void Cacosh(forthMemory* This) { double a = cpop(This).floating; fpush(This, acosh(a)); }
-static void Casin(forthMemory* This) { double a = cpop(This).floating; fpush(This, asin(a)); }
-static void Casinh(forthMemory* This) { double a = cpop(This).floating; fpush(This, asinh(a)); }
-static void Catan(forthMemory* This) { double a = cpop(This).floating; fpush(This, atan(a)); }
-static void Catanh(forthMemory* This) { double a = cpop(This).floating; fpush(This, atanh(a)); }
-static void Ccbrt(forthMemory* This) { double a = cpop(This).floating; fpush(This, cbrt(a)); }
-static void Cceil(forthMemory* This) { double a = cpop(This).floating; fpush(This, ceil(a)); }
-static void Ccos(forthMemory* This) { double a = cpop(This).floating; fpush(This, cos(a)); }
-static void Ccosh(forthMemory* This) { double a = cpop(This).floating; fpush(This, cosh(a)); }
-static void Cexp(forthMemory* This) { double a = cpop(This).floating; fpush(This, exp(a)); }
-static void Cfabs(forthMemory* This) { double a = cpop(This).floating; fpush(This, fabs(a)); }
-static void Cfloor(forthMemory* This) { double a = cpop(This).floating; fpush(This, floor(a)); }
-static void Clog(forthMemory* This) { double a = cpop(This).floating; fpush(This, log(a)); }
-static void Clog10(forthMemory* This) { double a = cpop(This).floating; fpush(This, log10(a)); }
-static void Csin(forthMemory* This) { double a = cpop(This).floating; fpush(This, sin(a)); }
-static void Csinh(forthMemory* This) { double a = cpop(This).floating; fpush(This, sinh(a)); }
-static void Csqrt(forthMemory* This) { double a = cpop(This).floating; fpush(This, sqrt(a)); }
-static void Ctan(forthMemory* This) { double a = cpop(This).floating; fpush(This, tan(a)); }
-static void Ctanh(forthMemory* This) { double a = cpop(This).floating; fpush(This, tanh(a)); }
-
-static void Catan2(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, atan2(a, b)); }
-static void Cfdim(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, fdim(a, b)); }
-static void Cfmax(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, fmax(a, b)); }
-static void Cfmin(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, fmin(a, b)); }
-static void Cfmod(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, fmod(a, b)); }
-static void Chypot(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, hypot(a, b)); }
-static void Cpow(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, pow(a, b)); }
-
-
-static void fless(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; ipush(This, (a < b)); }
-static void fless_equal(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; ipush(This, (a <= b)); }
-static void fmore_equal(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; ipush(This, (a >= b)); }
-static void fmore(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; ipush(This, (a > b)); }
-static void funequal(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; ipush(This, (a != b)); }
-static void flessormore(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; ipush(This, (a != b)); }
-static void fequal(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; ipush(This, (a == b)); }
-static void fnotlessormore(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; ipush(This, (a == b)); }
-
-typedef struct
-    {
-    char* name;
-    void(*Cfun)(forthMemory*);
-    }Cpair;
-
-static Cpair pairs[] =
-    {
-        {"acos",  Cacos},
-        {"acosh", Cacosh},
-        {"asin",  Casin},
-        {"asinh", Casinh},
-        {"atan",  Catan},
-        {"atanh", Catanh},
-        {"cbrt",  Ccbrt},
-        {"ceil",  Cceil},
-        {"cos",   Ccos},
-        {"cosh",  Ccosh},
-        {"exp",   Cexp},
-        {"fabs",  Cfabs},
-        {"floor", Cfloor},
-        {"log",   Clog},
-        {"log10", Clog10},
-        {"sin",   Csin},
-        {"sinh",  Csinh},
-        {"sqrt",  Csqrt},
-        {"tan",   Ctan},
-        {"tanh",  Ctanh},
-        {"atan2", Catan2},
-        {"fdim",  Cfdim},
-        {"fmax",  Cfmax},
-        {"fmin",  Cfmin},
-        {"fmod",  Cfmod},
-        {"hypot", Chypot},
-        {"pow",   Cpow},
-
-        {"fplus"         ,fplus         },
-        {"ftimes"        ,ftimes        },
-        {"fexp"          ,fexp          },
-        {"flog"          ,flog          },
-        {"fand"          ,fand          },
-        {"fOr"           ,fOr           },
-        {"fless"         ,fless         },
-        {"fless_equal"   ,fless_equal   },
-        {"fmore_equal"   ,fmore_equal   },
-        {"fmore"         ,fmore         },
-        {"funequal"      ,funequal      },
-        {"flessormore"   ,flessormore   },
-        {"fequal"        ,fequal        },
-        {"fnotlessormore",fnotlessormore},
-        {"fOr"           ,fOr           },
-
-        {0,0}
-    };
-
 
 static Boolean print(struct typedObjectnode* This, ppsk arg)
     {
@@ -498,7 +763,7 @@ static Boolean print(struct typedObjectnode* This, ppsk arg)
             case ResolveAndPush:
                 {
                 forthvalue val = *(mem->wordp->u.valp);
-                printf(LONGD " ResolveAndPush %s %f\n", mem->wordp - mem->word, getVarName(mem->var, (mem->wordp->u.valp)),val.floating);
+                printf(LONGD " ResolveAndPush %s %f\n", mem->wordp - mem->word, getVarName(mem->var, (mem->wordp->u.valp)), val.floating);
                 break;
                 }
             case ResolveAndGet:
@@ -515,22 +780,16 @@ static Boolean print(struct typedObjectnode* This, ppsk arg)
                 }
             case Afunction:
                 {
-                Cpair* cpair;
-                char* naam = "UNK";
-                for (cpair = pairs; cpair->name; ++cpair)
-                    {
-                    if (cpair->Cfun == mem->wordp->u.funcp)
-                        {
-                        naam = cpair->name;
-                        break;
-                        }
-                    }
-                printf(LONGD " Afunction     %s %d\n", mem->wordp - mem->word, naam, mem->wordp->offset);
+                char* naam = getFuncName(mem->wordp->u.funcp);
+                printf(LONGD " Afunction     %s\n", mem->wordp - mem->word, naam);
                 break;
                 }
-            case Jump:
-                printf(LONGD " Jump          \n", mem->wordp - mem->word);
+            case Abranch:
+                {
+                char* naam = getFuncName(mem->wordp->u.funcp);
+                printf(LONGD " Abranch       %s %d\n", mem->wordp - mem->word, naam, mem->wordp->offset);
                 break;
+                }
             default:
                 printf(LONGD " default       %d\n", mem->wordp - mem->word, mem->wordp->action);
                 ;
@@ -539,6 +798,7 @@ static Boolean print(struct typedObjectnode* This, ppsk arg)
     printf(LONGD " TheEnd          \n", mem->wordp - mem->word);
     return TRUE;
     }
+
 
 
 static forthword* polish2(forthvariable** varp, psk code, forthword* wordp, forthword* word)
@@ -588,7 +848,7 @@ static forthword* polish2(forthvariable** varp, psk code, forthword* wordp, fort
             forthword* saveword;
             wordp = polish2(varp, code->LEFT, wordp, word);
             saveword = wordp;
-            saveword->action = Afunction;
+            saveword->action = Abranch;
             saveword->u.funcp = fand;
             wordp = polish2(varp, code->RIGHT, ++wordp, word);
             saveword->offset = (unsigned int)(wordp - word);
@@ -609,7 +869,7 @@ static forthword* polish2(forthvariable** varp, psk code, forthword* wordp, fort
             forthword* saveword;
             wordp = polish2(varp, code->LEFT, wordp, word);
             saveword = wordp;
-            saveword->action = Afunction;
+            saveword->action = Abranch;
             saveword->u.funcp = fOr;
             wordp = polish2(varp, code->RIGHT, ++wordp, word);
             saveword->offset = (unsigned int)(ULONG)(wordp - word); /* the address of the word after the 'if false' branch.*/
@@ -687,8 +947,8 @@ static forthword* polish2(forthvariable** varp, psk code, forthword* wordp, fort
             if (strcmp(name, "whl"))
                 return 0;
             wordp = polish2(varp, code->RIGHT, wordp, word);
-            wordp->action = Afunction;
-            wordp->u.funcp = fOr;
+            wordp->action = Abranch;
+            wordp->u.funcp = fwhl;
             wordp->offset = here; /* If all good, jump back to start of loop */
             return ++wordp;;
             }
@@ -757,6 +1017,7 @@ static Boolean calculationnew(struct typedObjectnode* This, ppsk arg)
     forthword* lastword;
     forthMemory* forthstuff;
     int length;
+    Nan = log(0.0);
     printf("\ncalculationnew{"); result(code); printf("}\n");
     if (is_object(code))
         code = code->RIGHT;
@@ -771,6 +1032,7 @@ static Boolean calculationnew(struct typedObjectnode* This, ppsk arg)
     forthstuff->sp = forthstuff->stack;
     lastword = polish2(&(forthstuff->var), code, forthstuff->wordp, forthstuff->word);
     lastword->action = TheEnd;
+    printf("allocated for %d words\nActual number of words %d\n", length + 1, (int)(lastword - forthstuff->word) + 1);
     return TRUE;
     }
 
@@ -791,6 +1053,7 @@ static Boolean calculationdie(struct typedObjectnode* This, ppsk arg)
 
 method calculation[] = {
     {"calculate",calculate},
+    {"trc",trc},
     {"print",print},
     {"New",calculationnew},
     {"Die",calculationdie},
