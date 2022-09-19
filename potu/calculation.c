@@ -167,77 +167,6 @@ static void justpush(forthMemory* This, forthvalue val)
     ++(This->sp);
     }
 
-#if 0
-static Boolean calculate(struct typedObjectnode* This, ppsk arg)
-    {
-    psk Arg = (*arg)->RIGHT;
-    forthMemory* mem = (forthMemory*)(This->voiddata);
-    if (setArgs(&(mem->var), Arg, 0) > 0)
-        {
-        for (mem->wordp = mem->word;
-             mem->wordp->action != TheEnd;
-             ++(mem->wordp)
-             )
-            {
-            printf("%d[%d] ", (int)(mem->wordp - mem->word), mem->wordp->action);
-            switch (mem->wordp->action)
-                {
-                case ResolveAndPush:
-                    { /* !variable */
-                    forthvalue val = *(mem->wordp->u.valp);
-                    justpush(mem, val);
-                    break;
-                    }
-                case ResolveAndGet:
-                    { /* ?variable */
-                    forthvalue* valp = mem->wordp->u.valp;
-                    stackvalue* sv = mem->sp;
-                    assert(sv > mem->stack);
-                    *valp = ((sv - 1)->val);
-                    break;
-                    }
-                case Push:
-                    { /* "9.8765432E0 */
-                    forthvalue val = mem->wordp->u.val;
-                    justpush(mem, val);
-                    break;
-                    }
-                case Afunction:
-                    /* function$(...) */
-                    mem->wordp->u.funcp(mem);
-                    break;
-                default:
-                    ;
-                }
-            }
-        printf("\n");
-        for (; mem->sp > mem->stack;)
-            {
-            psk res;
-            size_t len;
-            char buf[64]; /* 64 bytes is even enough for quad https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF*/
-            stackvalue* sv = --(mem->sp);
-            sprintf(buf, "%.16E", sv->val.floating);
-            len = offsetof(sk, u.obj) + strlen(buf);
-            res = (psk)bmalloc(__LINE__, len + 1);
-            strcpy((char*)POBJ(res), buf);
-            if (strcmp(buf, "INF") && strcmp(buf, "NAN"))
-                res->v.fl = READY | SUCCESS | QNUMBER | QDOUBLE BITWISE_OR_SELFMATCHING;
-            else
-                res->v.fl = READY BITWISE_OR_SELFMATCHING;
-            /*    res->v.fl |= g->sign;*/
-            if (res)
-                {
-                wipe(*arg);
-                *arg = same_as_w(res);
-                return TRUE;
-                }
-            }
-        }
-    return FALSE;
-    }
-#endif
-
 static forthvalue cpop(forthMemory* This)
     {
     assert(This->sp > This->stack);
@@ -641,7 +570,7 @@ static int polish1(psk code)
     {
     int C;
     int R;
-    printf("\npolish1{"); result(code); printf("}\n");
+    /*printf("\npolish1{"); result(code); printf("}\n");*/
     switch (Op(code))
         {
         case PLUS:
@@ -1016,7 +945,7 @@ static Boolean calculationnew(struct typedObjectnode* This, ppsk arg)
     forthMemory* forthstuff;
     int length;
     Nan = log(0.0);
-    printf("\ncalculationnew{"); result(code); printf("}\n");
+    /*printf("\ncalculationnew{"); result(code); printf("}\n");*/
     if (is_object(code))
         code = code->RIGHT;
     length = polish1(code);
@@ -1030,7 +959,7 @@ static Boolean calculationnew(struct typedObjectnode* This, ppsk arg)
     forthstuff->sp = forthstuff->stack;
     lastword = polish2(&(forthstuff->var), code, forthstuff->wordp, forthstuff->word);
     lastword->action = TheEnd;
-    printf("allocated for %d words\nActual number of words %d\n", length + 1, (int)(lastword - forthstuff->word) + 1);
+    /*printf("allocated for %d words\nActual number of words %d\n", length + 1, (int)(lastword - forthstuff->word) + 1);*/
     return TRUE;
     }
 
