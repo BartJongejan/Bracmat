@@ -21,7 +21,8 @@ for each pixel (Px, Py) on the screen do
 X=
   ( doit
   =   
-    .       new
+    .   new$(calculation,(="1.0E3")):?iter
+      &     new
           $ ( calculation
             , ( 
               =   "0.0E0":?x:?y
@@ -38,10 +39,12 @@ X=
               )
             )
         : ?iter
-      & out$"ITER DEFINED"
-      & (iter..print)$
-      & out$"ITER PRINTED"
-      & get'
+      & ( 
+        |   out$"ITER DEFINED"
+          & (iter..print)$
+          & out$"ITER PRINTED"
+          & get'
+        )
       & ( flt
         =   e,d,m,s,f
           .     !arg:(?arg,~<0:?d)
@@ -66,33 +69,39 @@ X=
                     !e
                   )
         )
-      & -200:?x0
+      & -2:?x0
       & :?alliters
       &   whl
-        ' ( !x0:~>47
-          & -112:?y0
+        ' ( !x0:~>47/100
+          & -112/100:?y0
           & :?iters
           &   whl
-            ' ( !y0:~>112
-              & (     (iter..calculate)
-                    $ (flt$(!x0*1/100,2),flt$(!y0*1/100,2))
+            ' ( !y0:~>112/100
+              & (   (iter..calculate)$(flt$(!x0,3),flt$(!y0,3))
                   : ?Niter
                 | "weet niet":?Niter
                 )
               & get$(str$("[" !Niter "]"),JSN,MEM):(,?Niter)
               &     ( !Niter:1000&"  "
-                    | ■■
+                    | "**"
                     )
                     !iters
                 : ?iters
-              & 1+!y0:?y0
+              & 1/1000+!y0:?y0
               )
           & str$(!iters \n) !alliters:?alliters
-          & 1+!x0:?x0
+          & 1/1000+!x0:?x0
           )
-      & put$(str$!alliters,"MandelbrotSet.txt",NEW WYD)
+      & put$(str$!alliters,"MandelbrotSet.txt",NEW WYD BIN)
   )
-  (new=.~|(its.doit)$);
+  ( new
+  =   
+    .   ~
+      |   clk$:?t0
+        & (its.doit)$
+        & clk$:?t1
+        & out$(flt$(!t1+-1*!t0,3))
+  );
 
 r=
   get'("mandelbrot.bra",TXT)
