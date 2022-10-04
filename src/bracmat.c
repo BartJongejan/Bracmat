@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "13 September 2022"
-#define VERSION "6.11.2"
-#define BUILD "258"
+#define DATUM "4 October 2022"
+#define VERSION "6.11.3"
+#define BUILD "259"
 /*
 COMPILATION
 -----------
@@ -3218,6 +3218,10 @@ static size_t complexity(psk Root, size_t max)
     static int Parent, Child;
     while (is_op(Root))
         {
+        max += 2; /* Each time reslt is called, level is incremented by 1.
+                     indent() calls complexity with twice that increment.
+                     So to predict what complexity says at each level, we have
+                     to add 2 in each iteration while descending the tree. */
         switch (Op(Root))
             {
                 case OR:
@@ -3742,6 +3746,7 @@ static void parenthesised_result(psk Root, int level, int ind, int space)
     if (is_op(Root))
         {
         int number_of_flags;
+
         if (Op(Root) == EQUALS)
             Root->RIGHT = Head(Root->RIGHT);
         indent(Root, level, -1);
