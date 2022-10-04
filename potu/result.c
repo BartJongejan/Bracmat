@@ -24,6 +24,10 @@ static size_t complexity(psk Root, size_t max)
     static int Parent, Child;
     while (is_op(Root))
         {
+        max += 2; /* Each time reslt is called, level is incremented by 1.
+                     indent() calls complexity with twice that increment.
+                     So to predict what complexity says at each level, we have
+                     to add 2 in each iteration while descending the tree. */
         switch (Op(Root))
             {
                 case OR:
