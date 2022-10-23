@@ -25,25 +25,45 @@ X=
       &     new
           $ ( calculation
             , ( 
-              =   "0.0E0":?x:?y
-                & "1.0E0":?J
-                &   whl
-                  ' ( hypot$(!x,!y):~>"2.0E0"
-                    & !J:<"1.0E3"
-                    & !x*!x+"-1.0E0"*!y*!y+!a0:?xtemp
-                    & "2.0E0"*!x*!y+!a1:?y
-                    & !xtemp:?x
-                    & "1.0E0"+!J:?J
-                    )
-                & !J
+              =   ( "0.0E0":?x:?y
+                  & "1.0E0":?J
+                  )
+                & ( !J:"0.0E0"&!x:<"0.0E0"
+                  |   "0.0E0":?K
+                    &   whl
+                      ' ( !K+"1.2E0":?K
+                        & !K:<"1.8E0"
+                        & "0.0E0":?I
+                        &   whl
+                          ' ( !I+"1.1E0":?I
+                            & !I:<"1.9E0"
+                            &   whl
+                              ' ( hypot$(!x,!y):~>"2.0E0"
+                                & !J:<"1.0E3"
+                                &   !x*!x+"-1.0E0"*!y*!y+!a0
+                                  : ?xtemp
+                                & "2.0E0"*!x*!y+!a1:?y
+                                & !xtemp:?x
+                                & "1.0E0"+!J:?J
+                                & ( ( ( "1.0E0":<"2.0E0"
+                                      | "4.0E0":>"3.9E0"
+                                      )
+                                    | "1.05E0":<"1.1E0"
+                                    )
+                                  | "9.0E0":~>"9.1E0"
+                                  )
+                                )
+                            )
+                        )
+                    & !J
+                  )
               )
             )
         : ?iter
-      & ( 
+      & ( ~
         |   out$"ITER DEFINED"
           & (iter..print)$
           & out$"ITER PRINTED"
-          & get'
         )
       & ( flt
         =   e,d,m,s,f
@@ -54,13 +74,18 @@ X=
                   )
                 : ?s
               &   10\L!arg
-                : ?e+(10\L?m|0&1:?m)
+                :   ?e
+                  + ( 10\L?m
+                    | 0&1:?m
+                    )
               & (   !m+1/2*1/10^!d:~<10
                   & 1+!e:?e
                   & !m*1/10:?m
                 | 
                 )
-              & @(div$(!m+1/2*(1/10^!d:?d),!d):`%?f ?m)
+              & @( div$(!m+1/2*(1/10^!d:?d),!d)
+                 : `%?f ?m
+                 )
               &   str
                 $ ( !s*!f
                     (!d:~1&"."|)
@@ -77,22 +102,25 @@ X=
           & :?iters
           &   whl
             ' ( !y0:~>112/100
-              & (   (iter..calculate)$(flt$(!x0,3),flt$(!y0,3))
+              & (     (iter..calculate)
+                    $ (flt$(!x0,3),flt$(!y0,3))
                   : ?Niter
                 | "weet niet":?Niter
                 )
-              & get$(str$("[" !Niter "]"),JSN,MEM):(,?Niter)
+              &   get$(str$("[" !Niter "]"),JSN,MEM)
+                : (,?Niter)
               &     ( !Niter:1000&"  "
                     | "**"
                     )
                     !iters
                 : ?iters
-              & 1/1000+!y0:?y0
+              & 1/10+!y0:?y0
               )
           & str$(!iters \n) !alliters:?alliters
-          & 1/1000+!x0:?x0
+          & 1/10+!x0:?x0
           )
-      & put$(str$!alliters,"MandelbrotSet.txt",NEW WYD BIN)
+      &   put
+        $ (str$!alliters,"MandelbrotSet.txt",NEW WYD BIN)
   )
   ( new
   =   
