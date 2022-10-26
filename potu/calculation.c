@@ -48,6 +48,13 @@ typedef enum {
     , CondBranch
     , UncondBranch
     , NoOp
+    /*
+    , fand 
+    , fand2
+    , fOr 
+    , fOr2 
+    , fOr 
+    , fwhl */
     } actionType;
 
 static char* ActionAsWord[] =
@@ -60,6 +67,12 @@ static char* ActionAsWord[] =
     , "CondBranch  "
     , "UncondBranch"
     , "NoOp        "
+    , "fand        "
+    , "fand        "
+    , "fOr         "
+    , "fOr2        "
+    , "fOr         "
+    , "fwhl        "
     };
 
 struct forthMemory;
@@ -348,7 +361,7 @@ static void flog(forthMemory* This)
     fpush(This, log(a) / log(b));
     }
 
-static int dumb = 0;
+static int dumb = 0; /* force compiler to create different functions. Remember to refer to 'dumb' somewhere. */
 static void fand(forthMemory* This)
     {
     dumb = 1;
@@ -413,10 +426,6 @@ static Cpair pairs[] =
         {"_times"        ,ftimes        },
         {"_exp"          ,fexp          },
         {"_log"          ,flog          },
-        {"_and"          ,fand          },
-        {"_and2"         ,fand2         },
-        {"_Or"           ,fOr           },
-        {"_Or2"          ,fOr2          },
         {"_less"         ,fless         },
         {"_less_equal"   ,fless_equal   },
         {"_more_equal"   ,fmore_equal   },
@@ -425,6 +434,10 @@ static Cpair pairs[] =
         {"_lessormore"   ,flessormore   },
         {"_equal"        ,fequal        },
         {"_notlessormore",fnotlessormore},
+        {"_and"          ,fand          },
+        {"_and2"         ,fand2         },
+        {"_Or"           ,fOr           },
+        {"_Or2"          ,fOr2          },
         {"_Or"           ,fOr           },
         {"_whl"          ,fwhl          },
         {0,0}
@@ -490,12 +503,8 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                     }
                 case Abranch:
                     {
-                    //                    mem->wordp->u.funcp(mem);
                     cpop(mem);
-                    if(mem->wordp->u.funcp == fwhl)
-                        mem->wordp = mem->word + mem->wordp->offset;
-                    else
-                        ++(mem->wordp);
+                    ++(mem->wordp);
                     break;
                     }
                 case CondBranch:
@@ -625,12 +634,8 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     naam = getFuncName(mem->wordp->u.funcp);
                     printf(" %s", naam);
                     printf(" conditional jump to %u", mem->wordp->offset);
-                    //	mem->wordp->u.funcp(mem);
                     cpop(mem);
-                    if(mem->wordp->u.funcp == fwhl)
-                        mem->wordp = mem->word + mem->wordp->offset;
-                    else
-                        ++(mem->wordp);
+                    ++(mem->wordp);
                     break;
                     }
                 case CondBranch:
@@ -647,11 +652,11 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     naam = getFuncName(mem->wordp->u.funcp);
                     printf(" %s", naam);
                     printf(" unconditional jump to %u", mem->wordp->offset);
-                    //	mem->wordp->u.funcp(mem);
                     cpop(mem);
                     mem->wordp = mem->word + mem->wordp->offset;
                     break;
                     }
+                    /*
                 case NoOp:
                     {
                     naam = getFuncName(mem->wordp->u.funcp);
@@ -659,7 +664,7 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     printf(" NoOp");
                     ++(mem->wordp);
                     break;
-                    }
+                    }*/
                 default:
                     ;
                 }
@@ -947,7 +952,7 @@ static void optimizeJumps(forthMemory* mem)
                         wordp->u.funcp = fand2; /* removes top from stack */
                         label = mem->word + wordp->offset + 1; /* label == The address after the loop. */
                         if(label->u.funcp == fand)             /* whl'(FAIL&BLA)&X            Jump to X for leaving the loop.                             */
-                            (wordp->offset) += 2;// INC;              /* 1 for the end of the loop, 1 for the AND */
+                            (wordp->offset) += 2;              /* 1 for the end of the loop, 1 for the AND */
                         else if(label->u.funcp == fOr        /* whl'(FAIL&BLA)|X            From FAIL jump to the offset of the OR for leaving the loop. X is unreachable! */
                                 || label->u.funcp == fwhl      /* whl'(ABC&whl'(FAIL&BLB))    From FAIL jump to the offset of the WHL, i.e. the start of the outer loop.                      */
                                 )
@@ -1045,16 +1050,12 @@ static void compaction(forthMemory* mem)
     int cells = 0;
     int* arr;
     int skipping = 0;
-    printf("compaction\n");
     for(wordp = mem->word; wordp->action != TheEnd; ++wordp)
         {
         ++cells;
-        printf("wordp->offset %u\n", wordp->offset);
         }
     ++cells;
-    printf("cells currently %d\n", cells);
     arr = (int*)bmalloc(__LINE__, sizeof(int) * cells+10);
-    printf("arr allocated\n");
     cells = 0;
     for(wordp = mem->word; wordp->action != TheEnd; ++wordp)
         {
@@ -1064,11 +1065,9 @@ static void compaction(forthMemory* mem)
         ++cells;
         }
     arr[cells] = skipping;
-    printf("cells %d skipping %d\n", cells, skipping);
     if(skipping == 0)
         return;
     newword = bmalloc(__LINE__, skipping * sizeof(forthword) + 10);
-    printf("newword allocated\n");
 
     cells = 0;
     for(wordp = mem->word, newwordp = newword; wordp->action != TheEnd; ++wordp)
@@ -1080,19 +1079,15 @@ static void compaction(forthMemory* mem)
                 newwordp->offset = arr[wordp->offset];
             else
                 newwordp->offset = 0;
-            printf("offset %u -> %u\n", wordp->offset, newwordp->offset);
             ++newwordp;
             }
         ++cells;
         }
-    printf("almost done %u %u\n", (unsigned int)(wordp - mem->word), (unsigned int)(newwordp - newword));
     *newwordp = *wordp;
     if(wordp->offset >= 0)
         newwordp->offset = arr[wordp->offset];
-    printf("offset %u -> %u\n", wordp->offset, newwordp->offset);
     bfree(mem->word);
     mem->word = newword;
-    printf("done\n");
     }
 #endif
 
@@ -1313,7 +1308,7 @@ static Boolean calculationnew(struct typedObjectnode* This, ppsk arg)
     forthMemory* forthstuff;
     int length;
     Nan = log(0.0);
-    printf("\ncalculationnew{"); result(code); printf("}\n");
+/*    printf("\ncalculationnew{"); result(code); printf("}\n");*/
     if(is_object(code))
         code = code->RIGHT;
     length = polish1(code);
