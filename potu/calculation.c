@@ -46,18 +46,20 @@ typedef enum {
     , Afunction
     , Abranch
     , CondBranch
+    , UncondBranch
     , NoOp
     } actionType;
 
 static char* ActionAsWord[] =
-    { "TheEnd    "
-    , "Rslv&Psh  "
-    , "Rslv&Get  "
-    , "Push      "
-    , "Func      "
-    , "Branch    "
-    , "CondBranch"
-    , "NoOp      "
+    { "TheEnd      "
+    , "Rslv&Psh    "
+    , "Rslv&Get    "
+    , "Push        "
+    , "Func        "
+    , "Branch      "
+    , "CondBranch  "
+    , "UncondBranch"
+    , "NoOp        "
     };
 
 struct forthMemory;
@@ -347,57 +349,35 @@ static void flog(forthMemory* This)
     }
 
 static int dumb = 0;
-static void fand(forthMemory* This) /* Consumes top of stack if no problem found. */
+static void fand(forthMemory* This)
     {
-    forthvalue v = cpop(This);
-    ++(This->wordp);
     dumb = 1;
     }
 
-static void fand2(forthMemory* This) /* Consumes top of stack. */
+static void fand2(forthMemory* This)
     {
-    forthvalue v = cpop(This);
-    ++(This->wordp);
     dumb = 2;
     }
 
-static void fOr(forthMemory* This) /* Consumes top of stack ! */
+static void fOr(forthMemory* This)
     {
-    forthvalue v = cpop(This);
-    ++(This->wordp);
     dumb = 3;
     }
 
-static void fOr2(forthMemory* This) /* Consumes top of stack ! */
+static void fOr2(forthMemory* This)
     {
-    forthvalue v = cpop(This);
-    ++(This->wordp);
     dumb = 4;
     }
 
 static void cpush(forthMemory* This, forthvalue val)
     {
-    assert(This->sp < &(This->stack[0]) + sizeof(This->stack) / sizeof(This->stack[0]));
-    (This->sp)->val = val;
-    ++(This->sp);
+    dumb = 5;
     }
 
-static void fwhl(forthMemory* This) /* Consumes top of stack ! */
+static void fwhl(forthMemory* This)
     {
-    forthvalue v = cpop(This);
-    if(!isnan(v.floating) && !isinf(v.floating) /* && v.integer != 0 */)
-        { /* No problem found. Continue after 'if false' branch. */
-        This->wordp = This->word + This->wordp->offset;
-        }
-    else
-        {
-        forthvalue w;
-        w.floating = 1.23456789;
-        cpush(This, w);
-        ++(This->wordp);
-        }
+    dumb = 6;
     }
-
 
 static Cpair pairs[] =
     {
@@ -523,11 +503,17 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                     mem->wordp->u.funcp(mem);
                     break;
                     }
-                case NoOp:
+                case UncondBranch:
+                    {
+                    cpop(mem);
+                    mem->wordp = mem->word + mem->wordp->offset;
+                    break;
+                    }
+                /*case NoOp:
                     {
                     ++(mem->wordp);
                     break;
-                    }
+                    }*/
                 default:
                     ;
                 }
@@ -654,6 +640,16 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     printf(" %s", naam);
                     printf(" test and jump on failure to %u", mem->wordp->offset);
                     mem->wordp->u.funcp(mem);
+                    break;
+                    }
+                case UncondBranch:
+                    {
+                    naam = getFuncName(mem->wordp->u.funcp);
+                    printf(" %s", naam);
+                    printf(" unconditional jump to %u", mem->wordp->offset);
+                    //	mem->wordp->u.funcp(mem);
+                    cpop(mem);
+                    mem->wordp = mem->word + mem->wordp->offset;
                     break;
                     }
                 case NoOp:
@@ -876,6 +872,12 @@ static Boolean print(struct typedObjectnode* This, ppsk arg)
                 printf(LONGD " Pop2 CondBranch %s %u\n", wordp - mem->word, naam, wordp->offset);
                 break;
                 }
+            case UncondBranch:
+                {
+                naam = getFuncName(wordp->u.funcp);
+                printf(LONGD " Pop UnconBranch %s %u\n", wordp - mem->word, naam, wordp->offset);
+                break;
+                }
             case NoOp:
                 {
                 naam = getFuncName(wordp->u.funcp);
@@ -980,19 +982,7 @@ static void optimizeJumps(forthMemory* mem)
                 break;
                 }
             case CondBranch:
-                if(wordp->u.funcp == fless
-                   || wordp->u.funcp == fless_equal
-                   || wordp->u.funcp == fmore_equal
-                   || wordp->u.funcp == fmore
-                   || wordp->u.funcp == funequal
-                   || wordp->u.funcp == flessormore
-                   || wordp->u.funcp == fequal
-                   || wordp->u.funcp == fnotlessormore
-                   )
-                    {
-                    ;
-                    }
-                break;
+            case UncondBranch:
             case NoOp:
                 {
                 break;
@@ -1001,7 +991,6 @@ static void optimizeJumps(forthMemory* mem)
                 ;
             }
         }
-    return TRUE;
     }
 
 static void combineTestsAndJumps(forthMemory* mem)
@@ -1011,7 +1000,12 @@ static void combineTestsAndJumps(forthMemory* mem)
 
     for(wordp = mem->word; wordp->action != TheEnd; ++wordp)
         {
-        if(wordp->action == Afunction)
+        if(wordp->action == Abranch)
+            {
+            if(wordp->u.funcp == fwhl)
+                wordp->action = UncondBranch;
+            }
+        else if(wordp->action == Afunction)
             {
             if(wordp->u.funcp == fless
                || wordp->u.funcp == fless_equal
@@ -1086,7 +1080,7 @@ static void compaction(forthMemory* mem)
                 newwordp->offset = arr[wordp->offset];
             else
                 newwordp->offset = 0;
-            printf("offset %d -> %d\n", wordp->offset, newwordp->offset);
+            printf("offset %u -> %u\n", wordp->offset, newwordp->offset);
             ++newwordp;
             }
         ++cells;
@@ -1095,7 +1089,7 @@ static void compaction(forthMemory* mem)
     *newwordp = *wordp;
     if(wordp->offset >= 0)
         newwordp->offset = arr[wordp->offset];
-    printf("offset %d -> %d\n", wordp->offset, newwordp->offset);
+    printf("offset %u -> %u\n", wordp->offset, newwordp->offset);
     bfree(mem->word);
     mem->word = newword;
     printf("done\n");
