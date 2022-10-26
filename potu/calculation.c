@@ -13,7 +13,7 @@
 
 #include "result.h" /* For debugging. Remove when done. */
 
-#define COMPACT 0
+#define COMPACT 1
 #if COMPACT
 #define INC 1
 #else
@@ -905,6 +905,7 @@ static void optimizeJumps(forthMemory* mem)
             case ResolveAndPush:
             case ResolveAndGet:
             case Push:
+                wordp->offset = 0;
                 break;
             case Afunction:
                 if(wordp->u.funcp == fless
