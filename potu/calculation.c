@@ -1,13 +1,5 @@
 #include "calculation.h"
-#include "hashtypes.h"
-#include "encoding.h"
-#include "memory.h"
-#include "copy.h"
-#include "wipecopy.h"
-#include "globals.h"
-#include "input.h"
-#include "eval.h"
-#include <string.h>
+#include "nodedefs.h"
 #include <assert.h>
 #include <math.h>
 
@@ -524,7 +516,7 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                     break;
                     }*/
                 default:
-                    ;
+                    break;
                 }
             }
         for(; mem->sp > mem->stack;)
