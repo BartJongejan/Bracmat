@@ -1,7 +1,11 @@
 #include "calculation.h"
 #include "nodedefs.h"
+#include "memory.h"
+#include "wipecopy.h"
 #include <assert.h>
 #include <math.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "result.h" /* For debugging. Remove when done. */
 
@@ -36,16 +40,50 @@ typedef enum {
     , ResolveAndGet
     , Push
     , Afunction
+    /*
+    , Cfunction1
+    , Cfunction2
+    */
     , Abranch
     , CondBranch
     , UncondBranch
+    , Acos
+    , Acosh
+    , Asin
+    , Asinh
+    , Atan
+    , Atanh
+    , Cbrt
+    , Ceil
+    , Cos
+    , Cosh
+    , Exp
+    , Fabs
+    , Floor
+    , Log
+    , Log10
+    , Sin
+    , Sinh
+    , Sqrt
+    , Tan
+    , Tanh
+    , Atan2
+    , Fdim
+    , Fmax
+    , Fmin
+    , Fmod
+    , Hypot
+    , Pow
+
+
+
     , NoOp
     /*
-    , fand 
+    , fand
     , fand2
-    , fOr 
-    , fOr2 
-    , fOr 
+    , fOr
+    , fOr2
+    , fOr
     , fwhl */
     } actionType;
 
@@ -70,6 +108,8 @@ static char* ActionAsWord[] =
 struct forthMemory;
 
 typedef void (*funct)(struct forthMemory* This);
+typedef double (*Cfunct1)(double x);
+typedef double (*Cfunct2)(double x, double y);
 
 struct forthvariable;
 
@@ -94,11 +134,11 @@ typedef struct forthvariable
 
 typedef struct forthword
     {
-    actionType action : 5;
-    unsigned int offset : 27;
+    actionType action : 8;
+    unsigned int offset : 24;
     union
         {
-        double floating; LONG integer; funct funcp; forthvalue* valp; forthvalue val;
+        double floating; LONG integer; funct funcp; Cfunct1 Cfunc1p; Cfunct2 Cfunc2p; forthvalue* valp; forthvalue val;
         } u;
     } forthword;
 
@@ -116,6 +156,24 @@ typedef struct
     char* name;
     funct Cfun;
     }Cpair;
+
+typedef struct
+    {
+    char* name;
+    actionType action;
+    }Epair;
+
+typedef struct
+    {
+    char* name;
+    Cfunct1 Cfun;
+    }Cpair1;
+
+typedef struct
+    {
+    char* name;
+    Cfunct2 Cfun;
+    }Cpair2;
 
 typedef struct
     {
@@ -203,35 +261,6 @@ static void fpush(forthMemory* This, double val)
     (This->sp)->val.floating = val;
     ++(This->sp);
     }
-
-static void Cacos(forthMemory* This) { double a = cpop(This).floating; fpush(This, acos(a)); }
-static void Cacosh(forthMemory* This) { double a = cpop(This).floating; fpush(This, acosh(a)); }
-static void Casin(forthMemory* This) { double a = cpop(This).floating; fpush(This, asin(a)); }
-static void Casinh(forthMemory* This) { double a = cpop(This).floating; fpush(This, asinh(a)); }
-static void Catan(forthMemory* This) { double a = cpop(This).floating; fpush(This, atan(a)); }
-static void Catanh(forthMemory* This) { double a = cpop(This).floating; fpush(This, atanh(a)); }
-static void Ccbrt(forthMemory* This) { double a = cpop(This).floating; fpush(This, cbrt(a)); }
-static void Cceil(forthMemory* This) { double a = cpop(This).floating; fpush(This, ceil(a)); }
-static void Ccos(forthMemory* This) { double a = cpop(This).floating; fpush(This, cos(a)); }
-static void Ccosh(forthMemory* This) { double a = cpop(This).floating; fpush(This, cosh(a)); }
-static void Cexp(forthMemory* This) { double a = cpop(This).floating; fpush(This, exp(a)); }
-static void Cfabs(forthMemory* This) { double a = cpop(This).floating; fpush(This, fabs(a)); }
-static void Cfloor(forthMemory* This) { double a = cpop(This).floating; fpush(This, floor(a)); }
-static void Clog(forthMemory* This) { double a = cpop(This).floating; fpush(This, log(a)); }
-static void Clog10(forthMemory* This) { double a = cpop(This).floating; fpush(This, log10(a)); }
-static void Csin(forthMemory* This) { double a = cpop(This).floating; fpush(This, sin(a)); }
-static void Csinh(forthMemory* This) { double a = cpop(This).floating; fpush(This, sinh(a)); }
-static void Csqrt(forthMemory* This) { double a = cpop(This).floating; fpush(This, sqrt(a)); }
-static void Ctan(forthMemory* This) { double a = cpop(This).floating; fpush(This, tan(a)); }
-static void Ctanh(forthMemory* This) { double a = cpop(This).floating; fpush(This, tanh(a)); }
-
-static void Catan2(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, atan2(a, b)); }
-static void Cfdim(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, fdim(a, b)); }
-static void Cfmax(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, fmax(a, b)); }
-static void Cfmin(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, fmin(a, b)); }
-static void Cfmod(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, fmod(a, b)); }
-static void Chypot(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, hypot(a, b)); }
-static void Cpow(forthMemory* This) { double b = cpop(This).floating; double a = cpop(This).floating; fpush(This, pow(a, b)); }
 
 static void fless(forthMemory* This)
     {
@@ -386,34 +415,6 @@ static void fwhl(forthMemory* This)
 
 static Cpair pairs[] =
     {
-        {"acos",  Cacos},
-        {"acosh", Cacosh},
-        {"asin",  Casin},
-        {"asinh", Casinh},
-        {"atan",  Catan},
-        {"atanh", Catanh},
-        {"cbrt",  Ccbrt},
-        {"ceil",  Cceil},
-        {"cos",   Ccos},
-        {"cosh",  Ccosh},
-        {"exp",   Cexp},
-        {"fabs",  Cfabs},
-        {"floor", Cfloor},
-        {"log",   Clog},
-        {"log10", Clog10},
-        {"sin",   Csin},
-        {"sinh",  Csinh},
-        {"sqrt",  Csqrt},
-        {"tan",   Ctan},
-        {"tanh",  Ctanh},
-        {"atan2", Catan2},
-        {"fdim",  Cfdim},
-        {"fmax",  Cfmax},
-        {"fmin",  Cfmin},
-        {"fmod",  Cfmod},
-        {"hypot", Chypot},
-        {"pow",   Cpow},
-
         {"_plus"         ,fplus         },
         {"_times"        ,ftimes        },
         {"_exp"          ,fexp          },
@@ -435,6 +436,77 @@ static Cpair pairs[] =
         {0,0}
     };
 
+static Epair epairs[] =
+    {
+        {"acos",  Acos},
+        {"acosh", Acosh},
+        {"asin",  Asin},
+        {"asinh", Asinh},
+        {"atan",  Atan},
+        {"atanh", Atanh},
+        {"cbrt",  Cbrt},
+        {"ceil",  Ceil},
+        {"cos",   Cos},
+        {"cosh",  Cosh},
+        {"exp",   Exp},
+        {"fabs",  Fabs},
+        {"floor", Floor},
+        {"log",   Log},
+        {"log10", Log10},
+        {"sin",   Sin},
+        {"sinh",  Sinh},
+        {"sqrt",  Sqrt},
+        {"tan",   Tan},
+        {"tanh",  Tanh},
+        {"atan2", Atan2},
+        {"fdim",  Fdim},
+        {"fmax",  Fmax},
+        {"fmin",  Fmin},
+        {"fmod",  Fmod},
+        {"hypot", Hypot},
+        {"pow",   Pow},
+        {0,0}
+    };
+
+/*
+static Cpair1 Cpairs1[] =
+    {
+        {"acos",  acos},
+        {"acosh", acosh},
+        {"asin",  asin},
+        {"asinh", asinh},
+        {"atan",  atan},
+        {"atanh", atanh},
+        {"cbrt",  cbrt},
+        {"ceil",  ceil},
+        {"cos",   cos},
+        {"cosh",  cosh},
+        {"exp",   exp},
+        {"fabs",  fabs},
+        {"floor", floor},
+        {"log",   log},
+        {"log10", log10},
+        {"sin",   sin},
+        {"sinh",  sinh},
+        {"sqrt",  sqrt},
+        {"tan",   tan},
+        {"tanh",  tanh},
+        {0,0}
+    };
+    */
+/*
+static Cpair2 Cpairs2[] =
+    {
+        {"atan2", atan2},
+        {"fdim",  fdim},
+        {"fmax",  fmax},
+        {"fmin",  fmin},
+        {"fmod",  fmod},
+        {"hypot", hypot},
+        {"pow",   pow},
+        {0,0}
+    };
+*/
 char* getFuncName(funct funcp)
     {
     Cpair* cpair;
@@ -448,10 +520,45 @@ char* getFuncName(funct funcp)
             return naam;
             }
         }
-    sprintf(buffer, "UNKNOWN[%p] %d", funcp,dumb);
+    sprintf(buffer, "UNKNOWN[%p] %d", funcp, dumb);
     return buffer;
     }
 
+/*
+char* getCFunc1Name(Cfunct1 funcp)
+    {
+    Cpair1* cpair;
+    char* naam = "UNK function";
+    static char buffer[64];
+    for(cpair = Cpairs1; cpair->name; ++cpair)
+        {
+        if(cpair->Cfun == funcp)
+            {
+            naam = cpair->name;
+            return naam;
+            }
+        }
+    sprintf(buffer, "UNKNOWN[%p] %d", funcp, dumb);
+    return buffer;
+    }
+
+char* getCFunc2Name(Cfunct2 funcp)
+    {
+    Cpair2* cpair;
+    char* naam = "UNK function";
+    static char buffer[64];
+    for(cpair = Cpairs2; cpair->name; ++cpair)
+        {
+        if(cpair->Cfun == funcp)
+            {
+            naam = cpair->name;
+            return naam;
+            }
+        }
+    sprintf(buffer, "UNKNOWN[%p] %d", funcp, dumb);
+    return buffer;
+    }
+*/
 static Boolean calculate(struct typedObjectnode* This, ppsk arg)
     {
     psk Arg = (*arg)->RIGHT;
@@ -493,6 +600,21 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                     ++(mem->wordp);
                     break;
                     }
+                    /*
+                case Cfunction1:
+                    {
+                    fpush(mem, mem->wordp->u.Cfunc1p(cpop(mem).floating));
+                    ++(mem->wordp);
+                    break;
+                    }
+                case Cfunction2:
+                    {
+                    double a = cpop(mem).floating;
+                    double b = cpop(mem).floating;
+                    fpush(mem, mem->wordp->u.Cfunc2p(a, b));
+                    ++(mem->wordp);
+                    break;
+                    }*/
                 case Abranch:
                     {
                     cpop(mem);
@@ -510,11 +632,44 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                     mem->wordp = mem->word + mem->wordp->offset;
                     break;
                     }
-                /*case NoOp:
-                    {
+                    /*case NoOp:
+                        {
+                        ++(mem->wordp);
+                        break;
+                        }*/
+                case Acos  :  fpush(mem, acos (cpop(mem).floating));++(mem->wordp);break; 
+                case Acosh :  fpush(mem, acosh(cpop(mem).floating));++(mem->wordp);break; 
+                case Asin  :  fpush(mem, asin (cpop(mem).floating));++(mem->wordp);break; 
+                case Asinh :  fpush(mem, asinh(cpop(mem).floating));++(mem->wordp);break; 
+                case Atan  :  fpush(mem, atan (cpop(mem).floating));++(mem->wordp);break; 
+                case Atanh :  fpush(mem, atanh(cpop(mem).floating));++(mem->wordp);break; 
+                case Cbrt  :  fpush(mem, cbrt (cpop(mem).floating));++(mem->wordp);break; 
+                case Ceil  :  fpush(mem, ceil (cpop(mem).floating));++(mem->wordp);break; 
+                case Cos   :  fpush(mem, cos  (cpop(mem).floating));++(mem->wordp);break; 
+                case Cosh  :  fpush(mem, cosh (cpop(mem).floating));++(mem->wordp);break; 
+                case Exp   :  fpush(mem, exp  (cpop(mem).floating));++(mem->wordp);break; 
+                case Fabs  :  fpush(mem, fabs (cpop(mem).floating));++(mem->wordp);break; 
+                case Floor :  fpush(mem, floor(cpop(mem).floating));++(mem->wordp);break; 
+                case Log   :  fpush(mem, log  (cpop(mem).floating));++(mem->wordp);break; 
+                case Log10 :  fpush(mem, log10(cpop(mem).floating));++(mem->wordp);break; 
+                case Sin   :  fpush(mem, sin  (cpop(mem).floating));++(mem->wordp);break; 
+                case Sinh  :  fpush(mem, sinh (cpop(mem).floating));++(mem->wordp);break; 
+                case Sqrt  :  fpush(mem, sqrt (cpop(mem).floating));++(mem->wordp);break; 
+                case Tan   :  fpush(mem, tan  (cpop(mem).floating));++(mem->wordp);break; 
+                case Tanh  :  fpush(mem, tanh (cpop(mem).floating));++(mem->wordp);break; 
+                case Fdim  :  {double a = cpop(mem).floating;double b = cpop(mem).floating;fpush(mem,fdim (a,b));++(mem->wordp);break; }
+                case Fmax  :  {double a = cpop(mem).floating;double b = cpop(mem).floating;fpush(mem,fmax (a,b));++(mem->wordp);break; }
+                case Atan2 :  {double a = cpop(mem).floating;double b = cpop(mem).floating;fpush(mem,atan2(a,b));++(mem->wordp);break; }
+                case Fmin  :  {double a = cpop(mem).floating;double b = cpop(mem).floating;fpush(mem,fmin (a,b));++(mem->wordp);break; }
+                case Fmod  :  {double a = cpop(mem).floating;double b = cpop(mem).floating;fpush(mem,fmod (a,b));++(mem->wordp);break; }
+                case Hypot :  {
+                    double a = cpop(mem).floating;double b = cpop(mem).floating;
+                    fpush(mem,hypot(a,b));
                     ++(mem->wordp);
-                    break;
-                    }*/
+                    break; }
+                case Pow   :  {double a = cpop(mem).floating;double b = cpop(mem).floating;fpush(mem,pow  (a,b));++(mem->wordp);break; }
+                case NoOp:
+                case TheEnd:
                 default:
                     break;
                 }
@@ -574,14 +729,14 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
             forthvariable* v;
             stackvalue* svp;
             printf("%s %d,%d ", ActionAsWord[mem->wordp->action], (int)(mem->wordp - mem->word), (int)(mem->sp - mem->stack));
-            for(v = mem->var; v; v = v->next) 
+            for(v = mem->var; v; v = v->next)
                 {
-                printf("%s=%.2f ", v->name, v->u.floating); 
+                printf("%s=%.2f ", v->name, v->u.floating);
                 };
             for(svp = mem->sp - 1; svp >= mem->stack; --svp)
                 {
                 if(svp->valp == (forthvalue*)0xCDCDCDCDCDCDCDCD)
-                    printf("<undef>"); 
+                    printf("<undef>");
                 else printf("<%.2f>", svp->val.floating/*, svp->valp*/);
                 }
             printf("\t");
@@ -621,6 +776,25 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     ++(mem->wordp);
                     break;
                     }
+                    /*
+                case Cfunction1:
+                    {
+                    naam = getCFunc1Name(mem->wordp->u.Cfunc1p);
+                    printf(" %s", naam);
+                    fpush(mem, mem->wordp->u.Cfunc1p(cpop(mem).floating));
+                    ++(mem->wordp);
+                    break;
+                    }
+                case Cfunction2:
+                    {
+                    double a = cpop(mem).floating;
+                    double b = cpop(mem).floating;
+                    naam = getCFunc2Name(mem->wordp->u.Cfunc2p);
+                    printf(" %s", naam);
+                    fpush(mem, mem->wordp->u.Cfunc2p(a, b));
+                    ++(mem->wordp);
+                    break;
+                    }*/
                 case Abranch:
                     {
                     naam = getFuncName(mem->wordp->u.funcp);
@@ -648,6 +822,33 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     mem->wordp = mem->word + mem->wordp->offset;
                     break;
                     }
+                case Acos  :  printf("acos  ");fpush(mem, acos (cpop(mem).floating));++(mem->wordp);break; 
+                case Acosh :  printf("acosh ");fpush(mem, acosh(cpop(mem).floating));++(mem->wordp);break; 
+                case Asin  :  printf("asin  ");fpush(mem, asin (cpop(mem).floating));++(mem->wordp);break; 
+                case Asinh :  printf("asinh ");fpush(mem, asinh(cpop(mem).floating));++(mem->wordp);break; 
+                case Atan  :  printf("atan  ");fpush(mem, atan (cpop(mem).floating));++(mem->wordp);break; 
+                case Atanh :  printf("atanh ");fpush(mem, atanh(cpop(mem).floating));++(mem->wordp);break; 
+                case Cbrt  :  printf("cbrt  ");fpush(mem, cbrt (cpop(mem).floating));++(mem->wordp);break; 
+                case Ceil  :  printf("ceil  ");fpush(mem, ceil (cpop(mem).floating));++(mem->wordp);break; 
+                case Cos   :  printf("cos   ");fpush(mem, cos  (cpop(mem).floating));++(mem->wordp);break; 
+                case Cosh  :  printf("cosh  ");fpush(mem, cosh (cpop(mem).floating));++(mem->wordp);break; 
+                case Exp   :  printf("exp   ");fpush(mem, exp  (cpop(mem).floating));++(mem->wordp);break; 
+                case Fabs  :  printf("fabs  ");fpush(mem, fabs (cpop(mem).floating));++(mem->wordp);break; 
+                case Floor :  printf("floor ");fpush(mem, floor(cpop(mem).floating));++(mem->wordp);break; 
+                case Log   :  printf("log   ");fpush(mem, log  (cpop(mem).floating));++(mem->wordp);break; 
+                case Log10 :  printf("log10 ");fpush(mem, log10(cpop(mem).floating));++(mem->wordp);break; 
+                case Sin   :  printf("sin   ");fpush(mem, sin  (cpop(mem).floating));++(mem->wordp);break; 
+                case Sinh  :  printf("sinh  ");fpush(mem, sinh (cpop(mem).floating));++(mem->wordp);break; 
+                case Sqrt  :  printf("sqrt  ");fpush(mem, sqrt (cpop(mem).floating));++(mem->wordp);break; 
+                case Tan   :  printf("tan   ");fpush(mem, tan  (cpop(mem).floating));++(mem->wordp);break; 
+                case Tanh  :  printf("tanh  ");fpush(mem, tanh (cpop(mem).floating));++(mem->wordp);break; 
+                case Fdim  : {double a = cpop(mem).floating;double b = cpop(mem).floating;printf("fdim  ");fpush(mem,fdim (a,b));++(mem->wordp);break; }
+                case Fmax  : {double a = cpop(mem).floating;double b = cpop(mem).floating;printf("fmax  ");fpush(mem,fmax (a,b));++(mem->wordp);break; }
+                case Atan2 : {double a = cpop(mem).floating;double b = cpop(mem).floating;printf("atan2 ");fpush(mem,atan2(a,b));++(mem->wordp);break; }
+                case Fmin  : {double a = cpop(mem).floating;double b = cpop(mem).floating;printf("fmin  ");fpush(mem,fmin (a,b));++(mem->wordp);break; }
+                case Fmod  : {double a = cpop(mem).floating;double b = cpop(mem).floating;printf("fmod  ");fpush(mem,fmod (a,b));++(mem->wordp);break; }
+                case Hypot : {double a = cpop(mem).floating;double b = cpop(mem).floating;printf("hypot ");fpush(mem,hypot(a,b));++(mem->wordp);break; }
+                case Pow   : {double a = cpop(mem).floating;double b = cpop(mem).floating;printf("pow   ");fpush(mem,pow  (a,b));++(mem->wordp);break; }
                     /*
                 case NoOp:
                     {
@@ -657,6 +858,8 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     ++(mem->wordp);
                     break;
                     }*/
+                case NoOp:
+                case TheEnd:
                 default:
                     ;
                 }
@@ -875,12 +1078,40 @@ static Boolean print(struct typedObjectnode* This, ppsk arg)
                 printf(LONGD " Pop UnconBranch %s %u\n", wordp - mem->word, naam, wordp->offset);
                 break;
                 }
+            case Acos  :  printf(LONGD " acos               %u\n", wordp - mem->word, wordp->offset);break; 
+            case Acosh :  printf(LONGD " acosh              %u\n", wordp - mem->word, wordp->offset);break; 
+            case Asin  :  printf(LONGD " asin               %u\n", wordp - mem->word, wordp->offset);break; 
+            case Asinh :  printf(LONGD " asinh              %u\n", wordp - mem->word, wordp->offset);break; 
+            case Atan  :  printf(LONGD " atan               %u\n", wordp - mem->word, wordp->offset);break; 
+            case Atanh :  printf(LONGD " atanh              %u\n", wordp - mem->word, wordp->offset);break; 
+            case Cbrt  :  printf(LONGD " cbrt               %u\n", wordp - mem->word, wordp->offset);break; 
+            case Ceil  :  printf(LONGD " ceil               %u\n", wordp - mem->word, wordp->offset);break; 
+            case Cos   :  printf(LONGD " cos                %u\n", wordp - mem->word, wordp->offset);break; 
+            case Cosh  :  printf(LONGD " cosh               %u\n", wordp - mem->word, wordp->offset);break; 
+            case Exp   :  printf(LONGD " exp                %u\n", wordp - mem->word, wordp->offset);break; 
+            case Fabs  :  printf(LONGD " fabs               %u\n", wordp - mem->word, wordp->offset);break; 
+            case Floor :  printf(LONGD " floor              %u\n", wordp - mem->word, wordp->offset);break; 
+            case Log   :  printf(LONGD " log                %u\n", wordp - mem->word, wordp->offset);break; 
+            case Log10 :  printf(LONGD " log10              %u\n", wordp - mem->word, wordp->offset);break; 
+            case Sin   :  printf(LONGD " sin                %u\n", wordp - mem->word, wordp->offset);break; 
+            case Sinh  :  printf(LONGD " sinh               %u\n", wordp - mem->word, wordp->offset);break; 
+            case Sqrt  :  printf(LONGD " sqrt               %u\n", wordp - mem->word, wordp->offset);break; 
+            case Tan   :  printf(LONGD " tan                %u\n", wordp - mem->word, wordp->offset);break; 
+            case Tanh  :  printf(LONGD " tanh               %u\n", wordp - mem->word, wordp->offset);break; 
+            case Fdim  :  printf(LONGD " fdim               %u\n", wordp - mem->word, wordp->offset);break;
+            case Fmax  :  printf(LONGD " fmax               %u\n", wordp - mem->word, wordp->offset);break;
+            case Atan2 :  printf(LONGD " atan2              %u\n", wordp - mem->word, wordp->offset);break;
+            case Fmin  :  printf(LONGD " fmin               %u\n", wordp - mem->word, wordp->offset);break;
+            case Fmod  :  printf(LONGD " fmod               %u\n", wordp - mem->word, wordp->offset);break;
+            case Hypot :  printf(LONGD " hypot              %u\n", wordp - mem->word, wordp->offset);break;
+            case Pow   :  printf(LONGD " pow                %u\n", wordp - mem->word, wordp->offset);break;
             case NoOp:
                 {
                 naam = getFuncName(wordp->u.funcp);
                 printf(LONGD " NoOp       %s\n", wordp - mem->word, naam);
                 break;
                 }
+            case TheEnd:
             default:
                 printf(LONGD " default         %d\n", wordp - mem->word, wordp->action);
                 ;
@@ -980,6 +1211,33 @@ static void optimizeJumps(forthMemory* mem)
                 }
             case CondBranch:
             case UncondBranch:
+            case Acos  : 
+            case Acosh : 
+            case Asin  : 
+            case Asinh : 
+            case Atan  : 
+            case Atanh : 
+            case Cbrt  : 
+            case Ceil  : 
+            case Cos   : 
+            case Cosh  : 
+            case Exp   : 
+            case Fabs  : 
+            case Floor : 
+            case Log   : 
+            case Log10 : 
+            case Sin   : 
+            case Sinh  : 
+            case Sqrt  : 
+            case Tan   : 
+            case Tanh  : 
+            case Fdim  :
+            case Fmax  :
+            case Atan2 :
+            case Fmin  :
+            case Fmod  :
+            case Hypot :
+            case Pow   :
             case NoOp:
                 {
                 break;
@@ -1047,7 +1305,7 @@ static void compaction(forthMemory* mem)
         ++cells;
         }
     ++cells;
-    arr = (int*)bmalloc(__LINE__, sizeof(int) * cells+10);
+    arr = (int*)bmalloc(__LINE__, sizeof(int) * cells + 10);
     cells = 0;
     for(wordp = mem->word; wordp->action != TheEnd; ++wordp)
         {
@@ -1067,16 +1325,16 @@ static void compaction(forthMemory* mem)
         if(wordp->action != NoOp)
             {
             *newwordp = *wordp;
-            if(wordp->offset >= 0)
+            /*if(wordp->offset >= 0) always true*/
                 newwordp->offset = arr[wordp->offset];
-            else
-                newwordp->offset = 0;
+            /*else
+                newwordp->offset = 0;*/
             ++newwordp;
             }
         ++cells;
         }
     *newwordp = *wordp;
-    if(wordp->offset >= 0)
+    /*if(wordp->offset >= 0) always true */
         newwordp->offset = arr[wordp->offset];
     bfree(mem->word);
     mem->word = newword;
@@ -1236,11 +1494,21 @@ static forthword* polish2(forthvariable** varp, psk code, forthword* wordp, fort
             }
         case FUN:
             {
+            Epair* ep = epairs;
             Cpair* p = pairs;
             char* name = &code->LEFT->u.sobj;
             wordp = polish2(varp, code->RIGHT, wordp, word);
-            wordp->action = Afunction;
             wordp->offset = 0;
+            for(; ep->name != 0; ++ep)
+                {
+                if(!strcmp(ep->name, name))
+                    {
+                    wordp->action = ep->action;
+                    return ++wordp;
+                    }
+                }
+
+            wordp->action = Afunction;
             for(; p->name != 0; ++p)
                 {
                 if(!strcmp(p->name, name))
@@ -1300,7 +1568,7 @@ static Boolean calculationnew(struct typedObjectnode* This, ppsk arg)
     forthMemory* forthstuff;
     int length;
     Nan = log(0.0);
-/*    printf("\ncalculationnew{"); result(code); printf("}\n");*/
+    /*    printf("\ncalculationnew{"); result(code); printf("}\n");*/
     if(is_object(code))
         code = code->RIGHT;
     length = polish1(code);

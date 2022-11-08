@@ -18,7 +18,7 @@ for each pixel (Px, Py) on the screen do
 
 }
 
-X=
+Mandelbrot=
   ( doit
   =   
     .   new$(calculation,(="1.0E3")):?iter
@@ -29,7 +29,7 @@ X=
                 & "1.0E0":?J
                 &   whl
                   ' ( hypot$(!x,!y):~>"2.0E0"
-                    & !J:<"1.0E3"
+                    & !J:<"5.0E3"
                     & !x*!x+"-1.0E0"*!y*!y+!a0:?xtemp
                     & "2.0E0"*!x*!y+!a1:?y
                     & !xtemp:?x
@@ -73,33 +73,62 @@ X=
                     !e
                   )
         )
-      & -2:?x0
+      &   ( "[0.2929859127507,0.6117848324958,1.0E-11]"
+          | "[-0.0452407411,0.9868162204352258,2.7E-10]"
+          | "[-0.7463,0.1102,0.005]"
+          | "[0.45272105023,0.396494224267,1.4E-10]"
+          | "[-0.235125,0.827215,4.0E-5]"
+          | "[-0.722,0.246,0.019]"
+          | "[-0.16070135,1.0375665,1.0E-7]"
+          )
+        : ?jsn
+      & (   get$(!jsn,MEM,JSN):(,#%?X #%?Y #%?R)
+          & !X+-2*!R:?x0
+          & !x0+4*!R:?endx
+          & !Y+-1*!R:?beginy
+          & !beginy+2*!R:?endy
+          & 1/500*!R:?delta
+        | -2:?x0
+        )
+      & ( f
+        =   
+          .   !arg:5000&" "
+            | !arg:>3000&"#"
+            | !arg:>2000&"*"
+            | !arg:>1000&","
+            | "."
+        )
       & :?alliters
+      & 100000:?miniter
       &   whl
-        ' ( !x0:~>47/100
-          & -112/100:?y0
+        ' ( ( !x0:~>!endx
+            | ~&!x0:~>47/100
+            )
+          & (!beginy|-112/100):?y0
           & :?iters
           &   whl
-            ' ( !y0:~>112/100
-              & (     (iter..calculate)
-                    $ (flt$(!x0,3),flt$(!y0,3))
-                  : ?Niter
+            ' ( ( !y0:~>!endy
+                | ~&!y0:~>112/100
+                )
+              & (       (iter..calculate)
+                      $ (flt$(!x0,19),flt$(!y0,19))
+                    : ?Niter
+                  &   get$(str$("[" !Niter "]"),MEM,JSN)
+                    : (,?Niter)
+                  & f$!Niter !iters:?iters
+                  & ( !Niter:<!miniter:?miniter
+                    | 
+                    )
                 | "weet niet":?Niter
                 )
-              &   get$(str$("[" !Niter "]"),JSN,MEM)
-                : (,?Niter)
-              &     ( !Niter:1000&"  "
-                    | "**"
-                    )
-                    !iters
-                : ?iters
-              & 1/10+!y0:?y0
+              & (!delta|1/1000)+!y0:?y0
               )
           & str$(!iters \n) !alliters:?alliters
-          & 1/10+!x0:?x0
+          & (2*!delta|1/1000)+!x0:?x0
           )
       &   put
         $ (str$!alliters,"MandelbrotSet.txt",NEW WYD BIN)
+      & out$(1+!miniter+-1)
   )
   ( new
   =   
@@ -140,10 +169,11 @@ for each pixel (Px, Py) on the screen do
     , NEW
     , BIN
     )
-& lst'(X,"mandelbrot.bra",APP)
+& lst'(Mandelbrot,"mandelbrot.bra",APP)
 & put'(\n,"mandelbrot.bra",APP,BIN)
 & lst'(r,"mandelbrot.bra",APP)
-& put$(str$("\nnew'" X ";\n"),"mandelbrot.bra",APP,BIN)
+&   put
+  $ (str$("\nnew'" Mandelbrot ";\n"),"mandelbrot.bra",APP,BIN)
 & ;
 
-new'X;
+new'Mandelbrot;
