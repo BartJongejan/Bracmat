@@ -34,8 +34,8 @@
 
 static double Nan;
 
-typedef enum {
-    TheEnd
+typedef enum 
+    { TheEnd
     , ResolveAndPush
     , ResolveAndGet
     , Push
@@ -45,8 +45,20 @@ typedef enum {
     , Cfunction2
     */
     , Abranch
-    , CondBranch
     , UncondBranch
+
+    , Fless
+    , Fless_equal
+    , Fmore_equal
+    , Fmore
+    , Funequal
+    , Flessormore
+    , Fequal
+    , Fnotlessormore
+
+    , Plus
+    , Times
+    
     , Acos
     , Acosh
     , Asin
@@ -94,7 +106,6 @@ static char* ActionAsWord[] =
     , "Push        "
     , "Func        "
     , "Branch      "
-    , "CondBranch  "
     , "UncondBranch"
     , "NoOp        "
     , "fand        "
@@ -177,8 +188,8 @@ typedef struct
 
 typedef struct
     {
-    funct Afun;
-    funct Bfun; /* negation of Afun */
+    actionType Afun;
+    actionType Bfun; /* negation of Afun */
     }neg;
 
 static char* getVarName(forthvariable* varp, forthvalue* u)
@@ -261,7 +272,7 @@ static void fpush(forthMemory* This, double val)
     (This->sp)->val.floating = val;
     ++(This->sp);
     }
-
+/*
 static void fless(forthMemory* This)
     {
     double b = cpop(This).floating;
@@ -334,21 +345,21 @@ static void fnotlessormore(forthMemory* This)
     else
         This->wordp += INC;
     }
-
+    */
 static neg negations[] =
     {
-        {fless         ,fmore_equal   },
-        {fless_equal   ,fmore         },
-        {fmore_equal   ,fless         },
-        {fmore         ,fless_equal   },
-        {funequal      ,fequal        },
-        {flessormore   ,fnotlessormore},
-        {fequal        ,funequal      },
-        {fnotlessormore,flessormore   },
-        {0             ,0             }
+        {Fless         ,Fmore_equal   },
+        {Fless_equal   ,Fmore         },
+        {Fmore_equal   ,Fless         },
+        {Fmore         ,Fless_equal   },
+        {Funequal      ,Fequal        },
+        {Flessormore   ,Fnotlessormore},
+        {Fequal        ,Funequal      },
+        {Fnotlessormore,Flessormore   },
+        {TheEnd        ,TheEnd        }
     };
 
-static funct negated(funct fun)
+static actionType negated(actionType fun)
     {
     int i;
     for(i = 0; negations[i].Afun != 0; ++i)
@@ -357,32 +368,8 @@ static funct negated(funct fun)
     return 0;
     }
 
-static void fplus(forthMemory* This)
-    {
-    double a = cpop(This).floating;
-    double b = cpop(This).floating;
-    fpush(This, a + b);
-    }
-static void ftimes(forthMemory* This)
-    {
-    double a = cpop(This).floating;
-    double b = cpop(This).floating;
-    fpush(This, a * b);
-    }
-static void fexp(forthMemory* This)
-    {
-    double a = cpop(This).floating;
-    double b = cpop(This).floating;
-    fpush(This, pow(a, b));
-    }
-static void flog(forthMemory* This)
-    {
-    double a = cpop(This).floating;
-    double b = cpop(This).floating;
-    fpush(This, log(a) / log(b));
-    }
-
 static int dumb = 0; /* force compiler to create different functions. Remember to refer to 'dumb' somewhere. */
+
 static void fand(forthMemory* This)
     {
     dumb = 1;
@@ -415,18 +402,6 @@ static void fwhl(forthMemory* This)
 
 static Cpair pairs[] =
     {
-        {"_plus"         ,fplus         },
-        {"_times"        ,ftimes        },
-        {"_exp"          ,fexp          },
-        {"_log"          ,flog          },
-        {"_less"         ,fless         },
-        {"_less_equal"   ,fless_equal   },
-        {"_more_equal"   ,fmore_equal   },
-        {"_more"         ,fmore         },
-        {"_unequal"      ,funequal      },
-        {"_lessormore"   ,flessormore   },
-        {"_equal"        ,fequal        },
-        {"_notlessormore",fnotlessormore},
         {"_and"          ,fand          },
         {"_and2"         ,fand2         },
         {"_Or"           ,fOr           },
@@ -438,6 +413,16 @@ static Cpair pairs[] =
 
 static Epair epairs[] =
     {
+        {"_less"         ,Fless         },
+        {"_less_equal"   ,Fless_equal   },
+        {"_more_equal"   ,Fmore_equal   },
+        {"_more"         ,Fmore         },
+        {"_unequal"      ,Funequal      },
+        {"_lessormore"   ,Flessormore   },
+        {"_equal"        ,Fequal        },
+        {"_notlessormore",Fnotlessormore},
+        {"plus",  Plus},
+        {"times", Times},
         {"acos",  Acos},
         {"acosh", Acosh},
         {"asin",  Asin},
@@ -569,6 +554,8 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
             mem->wordp->action != TheEnd;
             )
             {
+            double a;
+            double b;
             switch(mem->wordp->action)
                 {
                 case ResolveAndPush:
@@ -621,11 +608,6 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                     ++(mem->wordp);
                     break;
                     }
-                case CondBranch:
-                    {
-                    mem->wordp->u.funcp(mem);
-                    break;
-                    }
                 case UncondBranch:
                     {
                     cpop(mem);
@@ -637,6 +619,19 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                         ++(mem->wordp);
                         break;
                         }*/
+
+                case Fless          : b = cpop(mem).floating; a = cpop(mem).floating; if(a >= b) mem->wordp = mem->word + mem->wordp->offset; else mem->wordp += INC; break;
+                case Fless_equal    : b = cpop(mem).floating; a = cpop(mem).floating; if(a >  b) mem->wordp = mem->word + mem->wordp->offset; else mem->wordp += INC; break;
+                case Fmore_equal    : b = cpop(mem).floating; a = cpop(mem).floating; if(a <  b) mem->wordp = mem->word + mem->wordp->offset; else mem->wordp += INC; break;
+                case Fmore          : b = cpop(mem).floating; a = cpop(mem).floating; if(a <= b) mem->wordp = mem->word + mem->wordp->offset; else mem->wordp += INC; break;
+                case Funequal       :
+                case Flessormore    : b = cpop(mem).floating; a = cpop(mem).floating; if(a == b) mem->wordp = mem->word + mem->wordp->offset; else mem->wordp += INC; break;
+                case Fequal         :
+                case Fnotlessormore : b = cpop(mem).floating; a = cpop(mem).floating; if(a != b) mem->wordp = mem->word + mem->wordp->offset; else mem->wordp += INC; break;
+
+                case Plus  :  a = cpop(mem).floating; b = cpop(mem).floating; fpush(mem, a+b); ++(mem->wordp); break;
+                case Times :  a = cpop(mem).floating; b = cpop(mem).floating; fpush(mem, a*b); ++(mem->wordp); break;
+
                 case Acos  :  fpush(mem, acos (cpop(mem).floating));++(mem->wordp);break; 
                 case Acosh :  fpush(mem, acosh(cpop(mem).floating));++(mem->wordp);break; 
                 case Asin  :  fpush(mem, asin (cpop(mem).floating));++(mem->wordp);break; 
@@ -657,17 +652,13 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                 case Sqrt  :  fpush(mem, sqrt (cpop(mem).floating));++(mem->wordp);break; 
                 case Tan   :  fpush(mem, tan  (cpop(mem).floating));++(mem->wordp);break; 
                 case Tanh  :  fpush(mem, tanh (cpop(mem).floating));++(mem->wordp);break; 
-                case Fdim  :  {double a = cpop(mem).floating;double b = cpop(mem).floating;fpush(mem,fdim (a,b));++(mem->wordp);break; }
-                case Fmax  :  {double a = cpop(mem).floating;double b = cpop(mem).floating;fpush(mem,fmax (a,b));++(mem->wordp);break; }
-                case Atan2 :  {double a = cpop(mem).floating;double b = cpop(mem).floating;fpush(mem,atan2(a,b));++(mem->wordp);break; }
-                case Fmin  :  {double a = cpop(mem).floating;double b = cpop(mem).floating;fpush(mem,fmin (a,b));++(mem->wordp);break; }
-                case Fmod  :  {double a = cpop(mem).floating;double b = cpop(mem).floating;fpush(mem,fmod (a,b));++(mem->wordp);break; }
-                case Hypot :  {
-                    double a = cpop(mem).floating;double b = cpop(mem).floating;
-                    fpush(mem,hypot(a,b));
-                    ++(mem->wordp);
-                    break; }
-                case Pow   :  {double a = cpop(mem).floating;double b = cpop(mem).floating;fpush(mem,pow  (a,b));++(mem->wordp);break; }
+                case Fdim  :  a = cpop(mem).floating; b = cpop(mem).floating;fpush(mem,fdim (a,b));++(mem->wordp);break;
+                case Fmax  :  a = cpop(mem).floating; b = cpop(mem).floating;fpush(mem,fmax (a,b));++(mem->wordp);break;
+                case Atan2 :  a = cpop(mem).floating; b = cpop(mem).floating;fpush(mem,atan2(a,b));++(mem->wordp);break;
+                case Fmin  :  a = cpop(mem).floating; b = cpop(mem).floating;fpush(mem,fmin (a,b));++(mem->wordp);break;
+                case Fmod  :  a = cpop(mem).floating; b = cpop(mem).floating;fpush(mem,fmod (a,b));++(mem->wordp);break;
+                case Hypot :  a = cpop(mem).floating; b = cpop(mem).floating;fpush(mem,hypot(a,b));++(mem->wordp);break;
+                case Pow   :  a = cpop(mem).floating; b = cpop(mem).floating;fpush(mem,pow  (a,b));++(mem->wordp);break;
                 case NoOp:
                 case TheEnd:
                 default:
@@ -728,6 +719,8 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
             {
             forthvariable* v;
             stackvalue* svp;
+            double a;
+            double b;
             printf("%s %d,%d ", ActionAsWord[mem->wordp->action], (int)(mem->wordp - mem->word), (int)(mem->sp - mem->stack));
             for(v = mem->var; v; v = v->next)
                 {
@@ -804,15 +797,6 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     ++(mem->wordp);
                     break;
                     }
-                case CondBranch:
-                    {
-                    printf("CONDBRANCH\n");
-                    naam = getFuncName(mem->wordp->u.funcp);
-                    printf(" %s", naam);
-                    printf(" test and jump on failure to %u", mem->wordp->offset);
-                    mem->wordp->u.funcp(mem);
-                    break;
-                    }
                 case UncondBranch:
                     {
                     naam = getFuncName(mem->wordp->u.funcp);
@@ -822,6 +806,19 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     mem->wordp = mem->word + mem->wordp->offset;
                     break;
                     }
+
+                case Fless          : printf("< "); b = cpop(mem).floating; a = cpop(mem).floating; if(a >= b) mem->wordp = mem->word + mem->wordp->offset; else mem->wordp += INC; break;
+                case Fless_equal    : printf("<="); b = cpop(mem).floating; a = cpop(mem).floating; if(a >  b) mem->wordp = mem->word + mem->wordp->offset; else mem->wordp += INC; break;
+                case Fmore_equal    : printf(">="); b = cpop(mem).floating; a = cpop(mem).floating; if(a <  b) mem->wordp = mem->word + mem->wordp->offset; else mem->wordp += INC; break;
+                case Fmore          : printf("> "); b = cpop(mem).floating; a = cpop(mem).floating; if(a <= b) mem->wordp = mem->word + mem->wordp->offset; else mem->wordp += INC; break;
+                case Funequal       : 
+                case Flessormore    : printf("!="); b = cpop(mem).floating; a = cpop(mem).floating; if(a == b) mem->wordp = mem->word + mem->wordp->offset; else mem->wordp += INC; break;
+                case Fequal         : 
+                case Fnotlessormore : printf("=="); b = cpop(mem).floating; a = cpop(mem).floating; if(a != b) mem->wordp = mem->word + mem->wordp->offset; else mem->wordp += INC; break;
+
+                case Plus  :  printf("plus  "); a = cpop(mem).floating; b = cpop(mem).floating; fpush(mem, a+b); ++(mem->wordp); break;
+                case Times :  printf("times "); a = cpop(mem).floating; b = cpop(mem).floating; fpush(mem, a*b); ++(mem->wordp); break;
+
                 case Acos  :  printf("acos  ");fpush(mem, acos (cpop(mem).floating));++(mem->wordp);break; 
                 case Acosh :  printf("acosh ");fpush(mem, acosh(cpop(mem).floating));++(mem->wordp);break; 
                 case Asin  :  printf("asin  ");fpush(mem, asin (cpop(mem).floating));++(mem->wordp);break; 
@@ -842,13 +839,13 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                 case Sqrt  :  printf("sqrt  ");fpush(mem, sqrt (cpop(mem).floating));++(mem->wordp);break; 
                 case Tan   :  printf("tan   ");fpush(mem, tan  (cpop(mem).floating));++(mem->wordp);break; 
                 case Tanh  :  printf("tanh  ");fpush(mem, tanh (cpop(mem).floating));++(mem->wordp);break; 
-                case Fdim  : {double a = cpop(mem).floating;double b = cpop(mem).floating;printf("fdim  ");fpush(mem,fdim (a,b));++(mem->wordp);break; }
-                case Fmax  : {double a = cpop(mem).floating;double b = cpop(mem).floating;printf("fmax  ");fpush(mem,fmax (a,b));++(mem->wordp);break; }
-                case Atan2 : {double a = cpop(mem).floating;double b = cpop(mem).floating;printf("atan2 ");fpush(mem,atan2(a,b));++(mem->wordp);break; }
-                case Fmin  : {double a = cpop(mem).floating;double b = cpop(mem).floating;printf("fmin  ");fpush(mem,fmin (a,b));++(mem->wordp);break; }
-                case Fmod  : {double a = cpop(mem).floating;double b = cpop(mem).floating;printf("fmod  ");fpush(mem,fmod (a,b));++(mem->wordp);break; }
-                case Hypot : {double a = cpop(mem).floating;double b = cpop(mem).floating;printf("hypot ");fpush(mem,hypot(a,b));++(mem->wordp);break; }
-                case Pow   : {double a = cpop(mem).floating;double b = cpop(mem).floating;printf("pow   ");fpush(mem,pow  (a,b));++(mem->wordp);break; }
+                case Fdim  :  printf("fdim  ");a = cpop(mem).floating; b = cpop(mem).floating;fpush(mem,fdim (a,b));++(mem->wordp);break;
+                case Fmax  :  printf("fmax  ");a = cpop(mem).floating; b = cpop(mem).floating;fpush(mem,fmax (a,b));++(mem->wordp);break;
+                case Atan2 :  printf("atan2 ");a = cpop(mem).floating; b = cpop(mem).floating;fpush(mem,atan2(a,b));++(mem->wordp);break;
+                case Fmin  :  printf("fmin  ");a = cpop(mem).floating; b = cpop(mem).floating;fpush(mem,fmin (a,b));++(mem->wordp);break;
+                case Fmod  :  printf("fmod  ");a = cpop(mem).floating; b = cpop(mem).floating;fpush(mem,fmod (a,b));++(mem->wordp);break;
+                case Hypot :  printf("hypot ");a = cpop(mem).floating; b = cpop(mem).floating;fpush(mem,hypot(a,b));++(mem->wordp);break;
+                case Pow   :  printf("pow   ");a = cpop(mem).floating; b = cpop(mem).floating;fpush(mem,pow  (a,b));++(mem->wordp);break;
                     /*
                 case NoOp:
                     {
@@ -1066,18 +1063,25 @@ static Boolean print(struct typedObjectnode* This, ppsk arg)
                 printf(LONGD " Pop             %s %u\n", wordp - mem->word, naam, wordp->offset);
                 break;
                 }
-            case CondBranch:
-                {
-                naam = getFuncName(wordp->u.funcp);
-                printf(LONGD " Pop2 CondBranch %s %u\n", wordp - mem->word, naam, wordp->offset);
-                break;
-                }
             case UncondBranch:
                 {
                 naam = getFuncName(wordp->u.funcp);
                 printf(LONGD " Pop UnconBranch %s %u\n", wordp - mem->word, naam, wordp->offset);
                 break;
                 }
+
+            case Fless          : printf(LONGD "<                   %u\n", wordp - mem->word, wordp->offset);break;
+            case Fless_equal    : printf(LONGD "<=                  %u\n", wordp - mem->word, wordp->offset);break;
+            case Fmore_equal    : printf(LONGD ">=                  %u\n", wordp - mem->word, wordp->offset);break;
+            case Fmore          : printf(LONGD ">                   %u\n", wordp - mem->word, wordp->offset);break;
+            case Funequal       :
+            case Flessormore    : printf(LONGD "!=                  %u\n", wordp - mem->word, wordp->offset);break;
+            case Fequal         :
+            case Fnotlessormore : printf(LONGD "==                  %u\n", wordp - mem->word, wordp->offset);break;
+
+            case Plus  :  printf(LONGD " plus               %u\n", wordp - mem->word, wordp->offset); break;
+            case Times :  printf(LONGD " times              %u\n", wordp - mem->word, wordp->offset); break;
+
             case Acos  :  printf(LONGD " acos               %u\n", wordp - mem->word, wordp->offset);break; 
             case Acosh :  printf(LONGD " acosh              %u\n", wordp - mem->word, wordp->offset);break; 
             case Asin  :  printf(LONGD " asin               %u\n", wordp - mem->word, wordp->offset);break; 
@@ -1137,6 +1141,7 @@ static void optimizeJumps(forthMemory* mem)
             case Push:
                 wordp->offset = 0;
                 break;
+                /*
             case Afunction:
                 if(wordp->u.funcp == fless
                    || wordp->u.funcp == fless_equal
@@ -1150,7 +1155,7 @@ static void optimizeJumps(forthMemory* mem)
                     {
                     ;
                     }
-                break;
+                break;*/
             case Abranch:
                 {
                 if(wordp->u.funcp == fand)
@@ -1209,8 +1214,17 @@ static void optimizeJumps(forthMemory* mem)
                     }
                 break;
                 }
-            case CondBranch:
             case UncondBranch:
+            case Fless          :
+            case Fless_equal    :
+            case Fmore_equal    :
+            case Fmore          :
+            case Funequal       :
+            case Flessormore    :
+            case Fequal         :
+            case Fnotlessormore :
+            case Plus:
+            case Times:
             case Acos  : 
             case Acosh : 
             case Asin  : 
@@ -1255,37 +1269,38 @@ static void combineTestsAndJumps(forthMemory* mem)
 
     for(wordp = mem->word; wordp->action != TheEnd; ++wordp)
         {
-        if(wordp->action == Abranch)
+        switch(wordp->action)
             {
-            if(wordp->u.funcp == fwhl)
-                wordp->action = UncondBranch;
-            }
-        else if(wordp->action == Afunction)
-            {
-            if(wordp->u.funcp == fless
-               || wordp->u.funcp == fless_equal
-               || wordp->u.funcp == fmore_equal
-               || wordp->u.funcp == fmore
-               || wordp->u.funcp == funequal
-               || wordp->u.funcp == flessormore
-               || wordp->u.funcp == fequal
-               || wordp->u.funcp == fnotlessormore
-               )
+            case Abranch:
+                {
+                if(wordp->u.funcp == fwhl)
+                    wordp->action = UncondBranch;
+                break;
+                }
+
+            case Fless          :
+            case Fless_equal    :
+            case Fmore_equal    :
+            case Fmore          :
+            case Funequal       :
+            case Flessormore    :
+            case Fequal         :
+            case Fnotlessormore :
                 {
                 label = wordp + 1;
                 if(label->action == Abranch)
                     {
-                    wordp->action = CondBranch;
                     wordp->offset = label->offset;
                     label->action = NoOp;
                     if(label->u.funcp == fOr
-                       || label->u.funcp == fOr2
-                       || label->u.funcp == fwhl
-                       )
+                        || label->u.funcp == fOr2
+                        || label->u.funcp == fwhl
+                        )
                         {
-                        wordp->u.funcp = negated(wordp->u.funcp);
+                        wordp->action = negated(wordp->action);
                         }
                     }
+                break;
                 }
             }
         }
@@ -1348,30 +1363,26 @@ static forthword* polish2(forthvariable** varp, psk code, forthword* wordp, fort
         case PLUS:
             wordp = polish2(varp, code->LEFT, wordp, word);
             wordp = polish2(varp, code->RIGHT, wordp, word);
-            wordp->action = Afunction;
+            wordp->action = Plus;
             wordp->offset = 0;
-            wordp->u.funcp = fplus;
             return ++wordp;
         case TIMES:
             wordp = polish2(varp, code->LEFT, wordp, word);
             wordp = polish2(varp, code->RIGHT, wordp, word);
-            wordp->action = Afunction;
+            wordp->action = Times;
             wordp->offset = 0;
-            wordp->u.funcp = ftimes;
             return ++wordp;
         case EXP:
             wordp = polish2(varp, code->LEFT, wordp, word);
             wordp = polish2(varp, code->RIGHT, wordp, word);
-            wordp->action = Afunction;
+            wordp->action = Exp;
             wordp->offset = 0;
-            wordp->u.funcp = fexp;
             return ++wordp;
         case LOG:
             wordp = polish2(varp, code->LEFT, wordp, word);
             wordp = polish2(varp, code->RIGHT, wordp, word);
-            wordp->action = Afunction;
+            wordp->action = Log;
             wordp->offset = 0;
-            wordp->u.funcp = flog;
             return ++wordp;
         case AND:
             {
@@ -1423,58 +1434,58 @@ static forthword* polish2(forthvariable** varp, psk code, forthword* wordp, fort
                 {
                 if(FLESS(code->RIGHT))
                     {
-                    wordp->action = Afunction;
+                    wordp->action = Fless;
                     wordp->offset = 0;
-                    wordp->u.funcp = fless;
+//                    wordp->u.funcp = fless;
                     return ++wordp;
                     }
                 else if(FLESS_EQUAL(code->RIGHT))
                     {
-                    wordp->action = Afunction;
+                    wordp->action = Fless_equal;
                     wordp->offset = 0;
-                    wordp->u.funcp = fless_equal;
+//..                    wordp->u.funcp = fless_equal;
                     return ++wordp;
                     }
                 else if(FMORE_EQUAL(code->RIGHT))
                     {
-                    wordp->action = Afunction;
+                    wordp->action = Fmore_equal;
                     wordp->offset = 0;
-                    wordp->u.funcp = fmore_equal;
+  //                  wordp->u.funcp = fmore_equal;
                     return ++wordp;
                     }
                 else if(FMORE(code->RIGHT))
                     {
-                    wordp->action = Afunction;
+                    wordp->action = Fmore;
                     wordp->offset = 0;
-                    wordp->u.funcp = fmore;
+    //                wordp->u.funcp = fmore;
                     return ++wordp;
                     }
                 else if(FUNEQUAL(code->RIGHT))
                     {
-                    wordp->action = Afunction;
+                    wordp->action = Funequal;
                     wordp->offset = 0;
-                    wordp->u.funcp = funequal;
+      //              wordp->u.funcp = funequal;
                     return ++wordp;
                     }
                 else if(FLESSORMORE(code->RIGHT))
                     {
-                    wordp->action = Afunction;
+                    wordp->action = Flessormore;
                     wordp->offset = 0;
-                    wordp->u.funcp = flessormore;
+        //            wordp->u.funcp = flessormore;
                     return ++wordp;
                     }
                 else if(FEQUAL(code->RIGHT))
                     {
-                    wordp->action = Afunction;
+                    wordp->action = Fequal;
                     wordp->offset = 0;
-                    wordp->u.funcp = fequal;
+          //          wordp->u.funcp = fequal;
                     return ++wordp;
                     }
                 else if(FNOTLESSORMORE(code->RIGHT))
                     {
-                    wordp->action = Afunction;
+                    wordp->action = Fnotlessormore;
                     wordp->offset = 0;
-                    wordp->u.funcp = fnotlessormore;
+            //        wordp->u.funcp = fnotlessormore;
                     return ++wordp;
                     }
                 }
