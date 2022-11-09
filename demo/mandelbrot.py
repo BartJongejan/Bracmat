@@ -22,8 +22,8 @@ import math
 def calculate(a0, a1):
     x = 0.0;
     y = 0.0;
-    for J in range(1,1001):
-        if math.hypot(x, y) >= 2.0 or J == 1000:
+    for J in range(1,5001):
+        if math.hypot(x, y) >= 2.0 or J == 5000:
             break
         xtemp = x * x - y * y + a0
         y = 2.0 * x * y + a1
@@ -42,14 +42,26 @@ def calculate(a0, a1):
 def doit():
     alliters = []
     t0 = time.perf_counter()
-    for x0 in range(-2000, 471, 1):
-        for y0 in range(-1120, 1121, 1):
-            Niter = calculate(x0/1000.0, y0/1000.0)
-            if Niter == 1000:
-                alliters.append('  ')
+    X = -0.0452407411
+    Y = 0.9868162204352258
+    R = 2.7E-10
+    x0 = X - 2 * R
+    endx = x0 + 4 * R
+    beginy = Y - R
+    endy = beginy + 2 * R
+    delta = R / 500.0
+
+    while x0 <= endx:
+        y0 = beginy
+        while y0 <= endy:
+            Niter = calculate(x0, y0)
+            if Niter == 5000:
+                alliters.append(' ')
             else:
-                alliters.append('**')
+                alliters.append('*')
+            y0 = y0 + delta
         alliters.append('\n')
+        x0 = x0 + 2*delta
     print("looped")   
     textfile = open("mandelPy.txt", "w")
     a = textfile.write(''.join(alliters))

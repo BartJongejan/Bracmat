@@ -25,7 +25,7 @@ int calculate(double a0, double a1)
     double x = 0.0;
     double y = 0.0;
     int J;
-    for(J = 1;hypot(x, y) < 2.0 && J < 1000;++J)
+    for(J = 1;hypot(x, y) < 2.0 && J < 5000;++J)
         {
         double xtemp = x * x - y * y + a0;
         y = 2.0 * x * y + a1;
@@ -36,26 +36,33 @@ int calculate(double a0, double a1)
 
 int main(int argc, char **argv)
     {
-    double x0;
     static char alliters[100000000];
     char* p = alliters;
     FILE *fp;
     clock_t t0, t1;
     t0 = clock();
-    for(x0 = -2.0; x0 <= 0.47; x0 += 0.001)
+    double X = -0.0452407411;
+    double Y = 0.9868162204352258;
+    double R = 2.7E-10;
+    double x0 = X - 2 * R;
+    double endx = x0 + 4 * R;
+    double beginy = Y - R;
+    double endy = beginy + 2 * R;
+    double delta = R / 500.0;
+    double estimatedCells = 2.0 * (endx - x0) * (endy - beginy) / (delta * delta);
+    printf("estimatedCells %f\n", estimatedCells);
+    for(/* x0 = -2.0 */; x0 <= endx /* 0.47 */; x0 += 2.0*delta/*0.001*/)
         {
         double y0;
-        for(y0 = -1.12; y0 <= 1.12; y0 += 0.001)
+        for(y0 = beginy/*-1.12*/; y0 <= endy/*1.12*/; y0 += delta /*0.001*/)
             {
             int Niter = calculate(x0, y0);
-            if(Niter == 1000)
+            if(Niter == 5000)
                 {
-                *p++ = ' ';
                 *p++ = ' ';
                 }
             else
                 {
-                *p++ = '*';
                 *p++ = '*';
                 }
             }

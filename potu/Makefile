@@ -2,6 +2,7 @@ SRC = binding.c \
       branch.c \
       builtinmethod.c \
       canonization.c \
+      calculation.c \
       copy.c \
       encoding.c \
       equal.c \
@@ -26,6 +27,7 @@ SRC = binding.c \
       potu.c \
       quote.c \
       rational.c \
+      real.c \
       result.c \
       simil.c \
       stringmatch.c \
@@ -37,20 +39,20 @@ SRC = binding.c \
       xml.c
 
 potu: $(SRC) 
-	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -o potu $(SRC)
+	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -o potu $(SRC) -lm
 
 
 potu1: potu.c 
-	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DSINGLEOBJECT -o potu1 potu.c
+	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DSINGLEOBJECT -o potu1 potu.c -lm
 
 potusafe: $(SRC)
-	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DNO_C_INTERFACE -DNO_FILE_RENAME -DNO_FILE_REMOVE -DNO_SYSTEM_CALL -DNO_LOW_LEVEL_FILE_HANDLING -o potusafe $(SRC)
+	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DNO_C_INTERFACE -DNO_FILE_RENAME -DNO_FILE_REMOVE -DNO_SYSTEM_CALL -DNO_LOW_LEVEL_FILE_HANDLING -o potusafe $(SRC) -lm
 
 potu1safe: potu.c
-	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DNO_C_INTERFACE -DNO_FILE_RENAME -DNO_FILE_REMOVE -DNO_SYSTEM_CALL -DNO_LOW_LEVEL_FILE_HANDLING -DSINGLEOBJECT -o potu1safe potu.c
+	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DNO_C_INTERFACE -DNO_FILE_RENAME -DNO_FILE_REMOVE -DNO_SYSTEM_CALL -DNO_LOW_LEVEL_FILE_HANDLING -DSINGLEOBJECT -o potu1safe potu.c -lm
 
 profiling:
-	gcc -Wall -c -pg -DNDEBUG -DSINGLEOBJECT potu.c
+	gcc -Wall -c -pg -DNDEBUG -DSINGLEOBJECT potu.c -lm
 	gcc -Wall -pg potu.o
 	cp ../valid.bra .
 	cp ../pr-xml-utf-8.xml .
@@ -59,7 +61,7 @@ profiling:
 	rm a.out
 
 coverage:
-	gcc -fprofile-arcs -ftest-coverage -DNDEBUG -DSINGLEOBJECT potu.c
+	gcc -fprofile-arcs -ftest-coverage -DNDEBUG -DSINGLEOBJECT potu.c -lm
 	cp ../valid.bra .
 	cp ../pr-xml-utf-8.xml .
 	./a.out "get'\"../valid.bra\";!r"
