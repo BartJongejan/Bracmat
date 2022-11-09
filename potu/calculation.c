@@ -452,102 +452,96 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                 {
                 case ResolveAndPush:
                     {
-                    forthvalue val = *(wordp->u.valp);
-                    /*justpush(mem, val);*/
-                    sp++->val = val;
-                    ++(wordp);
+                    sp++->val = *(wordp++->u.valp);
                     break;
                     }
                 case ResolveAndGet:
                     {
-                    forthvalue* valp = wordp->u.valp;
-                    stackvalue* sv = sp;
-                    assert(sv > mem->stack);
-                    *valp = ((sv - 1)->val);
-                    ++(wordp);
+                    assert(sp > mem->stack);
+                    *(wordp++->u.valp) = ((sp - 1)->val);
                     break;
                     }
                 case Push:
                     {
-                    forthvalue val = wordp->u.val;
-                    sp++->val = val;
-                    ++(wordp);
+                    sp++->val = wordp++->u.val;
                     break;
                     }
                 case Afunction:
                     {
+                    mem->wordp = wordp;
+                    mem->sp = sp;
                     wordp->u.funcp(mem);
-                    ++(wordp);
+                    wordp = mem->wordp;
+                    sp = mem->sp;
+                    ++wordp;
                     break;
                     }
 #if CFUNCS
                 case Cfunction1:
                     {
-                    ((sp++)->val.floating = wordp->u.Cfunc1p(((--(sp))->val).floating));
-                    ++(wordp);
+                    ((sp++)->val.floating = wordp->u.Cfunc1p(((--sp)->val).floating));
+                    ++wordp;
                     break;
                     }
                 case Cfunction2:
                     {
-                    double a = ((--(sp))->val).floating;
-                    double b = ((--(sp))->val).floating;
+                    double a = ((--sp)->val).floating;
+                    double b = ((--sp)->val).floating;
                     ((sp++)->val.floating = wordp->u.Cfunc2p(a, b));
-                    ++(wordp);
+                    ++wordp;
                     break;
                     }
 #endif
                 case Pop:
                     {
-                    /*cpop(mem);*/
-                    --(sp);
-                    ++(wordp);
+                    --sp;
+                    ++wordp;
                     break;
                     }
                 case PopUncondBranch:
                     {
-                    /*cpop(mem);*/
-                    --(sp);
+                    --sp;
                     wordp = word + wordp->offset;
                     break;
                     }
 
-                case Fless          : b = ((--(sp))->val).floating; a = ((--(sp))->val).floating; if(a >= b) wordp = word + wordp->offset; else wordp += INC; break;
-                case Fless_equal    : b = ((--(sp))->val).floating; a = ((--(sp))->val).floating; if(a >  b) wordp = word + wordp->offset; else wordp += INC; break;
-                case Fmore_equal    : b = ((--(sp))->val).floating; a = ((--(sp))->val).floating; if(a <  b) wordp = word + wordp->offset; else wordp += INC; break;
-                case Fmore          : b = ((--(sp))->val).floating; a = ((--(sp))->val).floating; if(a <= b) wordp = word + wordp->offset; else wordp += INC; break;
-                case Funequal       : b = ((--(sp))->val).floating; a = ((--(sp))->val).floating; if(a == b) wordp = word + wordp->offset; else wordp += INC; break;
-                case Fequal         : b = ((--(sp))->val).floating; a = ((--(sp))->val).floating; if(a != b) wordp = word + wordp->offset; else wordp += INC; break;
+                case Fless          : b = ((--sp)->val).floating; a = ((--sp)->val).floating; if(a >= b) wordp = word + wordp->offset; else wordp += INC; break;
+                case Fless_equal    : b = ((--sp)->val).floating; a = ((--sp)->val).floating; if(a >  b) wordp = word + wordp->offset; else wordp += INC; break;
+                case Fmore_equal    : b = ((--sp)->val).floating; a = ((--sp)->val).floating; if(a <  b) wordp = word + wordp->offset; else wordp += INC; break;
+                case Fmore          : b = ((--sp)->val).floating; a = ((--sp)->val).floating; if(a <= b) wordp = word + wordp->offset; else wordp += INC; break;
+                case Funequal       : b = ((--sp)->val).floating; a = ((--sp)->val).floating; if(a == b) wordp = word + wordp->offset; else wordp += INC; break;
+                case Fequal         : b = ((--sp)->val).floating; a = ((--sp)->val).floating; if(a != b) wordp = word + wordp->offset; else wordp += INC; break;
 
-                case Plus  :  a = ((--(sp))->val).floating; b = ((--(sp))->val).floating; ((sp++)->val.floating = a+b); ++(wordp); break;
-                case Times :  a = ((--(sp))->val).floating; b = ((--(sp))->val).floating; ((sp++)->val.floating = a*b); ++(wordp); break;
+                case Plus  :  a = ((--sp)->val).floating; b = ((--sp)->val).floating; ((sp++)->val.floating = a+b); ++wordp; break;
+                case Times :  a = ((--sp)->val).floating; b = ((--sp)->val).floating; ((sp++)->val.floating = a*b); ++wordp; break;
 
-                case Acos  :  ((sp++)->val.floating = acos (((--(sp))->val).floating));++(wordp);break; 
-                case Acosh :  ((sp++)->val.floating = acosh(((--(sp))->val).floating));++(wordp);break; 
-                case Asin  :  ((sp++)->val.floating = asin (((--(sp))->val).floating));++(wordp);break; 
-                case Asinh :  ((sp++)->val.floating = asinh(((--(sp))->val).floating));++(wordp);break; 
-                case Atan  :  ((sp++)->val.floating = atan (((--(sp))->val).floating));++(wordp);break; 
-                case Atanh :  ((sp++)->val.floating = atanh(((--(sp))->val).floating));++(wordp);break; 
-                case Cbrt  :  ((sp++)->val.floating = cbrt (((--(sp))->val).floating));++(wordp);break; 
-                case Ceil  :  ((sp++)->val.floating = ceil (((--(sp))->val).floating));++(wordp);break; 
-                case Cos   :  ((sp++)->val.floating = cos  (((--(sp))->val).floating));++(wordp);break; 
-                case Cosh  :  ((sp++)->val.floating = cosh (((--(sp))->val).floating));++(wordp);break; 
-                case Exp   :  ((sp++)->val.floating = exp  (((--(sp))->val).floating));++(wordp);break; 
-                case Fabs  :  ((sp++)->val.floating = fabs (((--(sp))->val).floating));++(wordp);break; 
-                case Floor :  ((sp++)->val.floating = floor(((--(sp))->val).floating));++(wordp);break; 
-                case Log   :  ((sp++)->val.floating = log  (((--(sp))->val).floating));++(wordp);break; 
-                case Log10 :  ((sp++)->val.floating = log10(((--(sp))->val).floating));++(wordp);break; 
-                case Sin   :  ((sp++)->val.floating = sin  (((--(sp))->val).floating));++(wordp);break; 
-                case Sinh  :  ((sp++)->val.floating = sinh (((--(sp))->val).floating));++(wordp);break; 
-                case Sqrt  :  ((sp++)->val.floating = sqrt (((--(sp))->val).floating));++(wordp);break; 
-                case Tan   :  ((sp++)->val.floating = tan  (((--(sp))->val).floating));++(wordp);break; 
-                case Tanh  :  ((sp++)->val.floating = tanh (((--(sp))->val).floating));++(wordp);break; 
-                case Fdim  :  a = ((--(sp))->val).floating; b = ((--(sp))->val).floating;((sp++)->val.floating =fdim (a,b));++(wordp);break;
-                case Fmax  :  a = ((--(sp))->val).floating; b = ((--(sp))->val).floating;((sp++)->val.floating =fmax (a,b));++(wordp);break;
-                case Atan2 :  a = ((--(sp))->val).floating; b = ((--(sp))->val).floating;((sp++)->val.floating =atan2(a,b));++(wordp);break;
-                case Fmin  :  a = ((--(sp))->val).floating; b = ((--(sp))->val).floating;((sp++)->val.floating =fmin (a,b));++(wordp);break;
-                case Fmod  :  a = ((--(sp))->val).floating; b = ((--(sp))->val).floating;((sp++)->val.floating =fmod (a,b));++(wordp);break;
-                case Hypot :  a = ((--(sp))->val).floating; b = ((--(sp))->val).floating;((sp++)->val.floating =hypot(a,b));++(wordp);break;
-                case Pow   :  a = ((--(sp))->val).floating; b = ((--(sp))->val).floating;((sp++)->val.floating =pow  (a,b));++(wordp);break;
+                case Acos  :  (sp++)->val.floating = acos (((--sp)->val).floating);++wordp;break; 
+                case Acosh :  (sp++)->val.floating = acosh(((--sp)->val).floating);++wordp;break; 
+                case Asin  :  (sp++)->val.floating = asin (((--sp)->val).floating);++wordp;break; 
+                case Asinh :  (sp++)->val.floating = asinh(((--sp)->val).floating);++wordp;break; 
+                case Atan  :  (sp++)->val.floating = atan (((--sp)->val).floating);++wordp;break; 
+                case Atanh :  (sp++)->val.floating = atanh(((--sp)->val).floating);++wordp;break; 
+                case Cbrt  :  (sp++)->val.floating = cbrt (((--sp)->val).floating);++wordp;break; 
+                case Ceil  :  (sp++)->val.floating = ceil (((--sp)->val).floating);++wordp;break; 
+                case Cos   :  (sp++)->val.floating = cos  (((--sp)->val).floating);++wordp;break; 
+                case Cosh  :  (sp++)->val.floating = cosh (((--sp)->val).floating);++wordp;break; 
+                case Exp   :  (sp++)->val.floating = exp  (((--sp)->val).floating);++wordp;break; 
+                case Fabs  :  (sp++)->val.floating = fabs (((--sp)->val).floating);++wordp;break; 
+                case Floor :  (sp++)->val.floating = floor(((--sp)->val).floating);++wordp;break; 
+                case Log   :  (sp++)->val.floating = log  (((--sp)->val).floating);++wordp;break; 
+                case Log10 :  (sp++)->val.floating = log10(((--sp)->val).floating);++wordp;break; 
+                case Sin   :  (sp++)->val.floating = sin  (((--sp)->val).floating);++wordp;break; 
+                case Sinh  :  (sp++)->val.floating = sinh (((--sp)->val).floating);++wordp;break; 
+                case Sqrt  :  (sp++)->val.floating = sqrt (((--sp)->val).floating);++wordp;break; 
+                case Tan   :  (sp++)->val.floating = tan  (((--sp)->val).floating);++wordp;break; 
+                case Tanh  :  (sp++)->val.floating = tanh (((--sp)->val).floating);++wordp;break; 
+                case Fmax  :  a = ((--sp)->val).floating; b = ((--sp)->val).floating;(sp++)->val.floating = fmax (a,b);++wordp;break;
+                case Atan2 :  a = ((--sp)->val).floating; b = ((--sp)->val).floating;(sp++)->val.floating = atan2(a,b);++wordp;break;
+                case Fmin  :  a = ((--sp)->val).floating; b = ((--sp)->val).floating;(sp++)->val.floating = fmin (a,b);++wordp;break;
+                case Fdim  :  a = ((--sp)->val).floating; b = ((--sp)->val).floating;(sp++)->val.floating = fdim (a,b);++wordp;break;
+                case Fmod  :  a = ((--sp)->val).floating; b = ((--sp)->val).floating;(sp++)->val.floating = fmod (a,b);++wordp;break;
+                case Hypot :  a = ((--sp)->val).floating; b = ((--sp)->val).floating;(sp++)->val.floating = hypot(a,b);++wordp;break;
+                case Pow   :  a = ((--sp)->val).floating; b = ((--sp)->val).floating;(sp++)->val.floating = pow  (a,b);++wordp;break;
                 case NoOp:
                 case TheEnd:
                 default:
@@ -559,7 +553,7 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
             psk res;
             size_t len;
             char buf[64]; /* 64 bytes is even enough for quad https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF*/
-            double sv = (--(sp))->val.floating;
+            double sv = (--sp)->val.floating;
             int flags;
             if(isnan(sv))
                 {
@@ -629,36 +623,36 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                 {
                 case ResolveAndPush:
                     {
-                    forthvalue val = *(wordp->u.valp);
-                    printf("%s %.2f --> stack", getVarName(mem->var, (wordp->u.valp)), val.floating);
-                    sp++->val = val;
-                    ++(wordp);
+                    printf("%s %.2f --> stack", getVarName(mem->var, (wordp->u.valp)), (*(wordp->u.valp)).floating);
+                    sp++->val = *(wordp->u.valp);
+                    ++wordp;
                     break;
                     }
                 case ResolveAndGet:
                     {
-                    forthvalue* valp = wordp->u.valp;
-                    stackvalue* sv = sp;
-                    assert(sv > mem->stack);
-                    printf("%s %.2f <-- stack", getVarName(mem->var, valp), ((sv - 1)->val).floating);
-                    *valp = ((sv - 1)->val);
-                    ++(wordp);
+                    assert(sp > mem->stack);
+                    printf("%s %.2f <-- stack", getVarName(mem->var, wordp->u.valp), ((sp - 1)->val).floating);
+                    *(wordp->u.valp) = ((sp - 1)->val);
+                    ++wordp;
                     break;
                     }
                 case Push:
                     {
-                    forthvalue val = wordp->u.val;
-                    printf("%.2f", val.floating);
-                    sp++->val = val;
-                    ++(wordp);
+                    printf("%.2f", wordp->u.val.floating);
+                    sp++->val = wordp->u.val;
+                    ++wordp;
                     break;
                     }
                 case Afunction:
                     {
                     naam = getFuncName(wordp->u.funcp);
                     printf(" %s", naam);
+                    mem->wordp = wordp;
+                    mem->sp = sp;
                     wordp->u.funcp(mem);
-                    ++(wordp);
+                    wordp = mem->wordp;
+                    sp = mem->sp;
+                    ++wordp;
                     break;
                     }
 #if CFUNCS
@@ -666,18 +660,18 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     {
                     naam = getCFunc1Name(wordp->u.Cfunc1p);
                     printf(" %s", naam);
-                    ((sp++)->val.floating = wordp->u.Cfunc1p(((--(sp))->val).floating));
-                    ++(wordp);
+                    ((sp++)->val.floating = wordp->u.Cfunc1p(((--sp)->val).floating));
+                    ++wordp;
                     break;
                     }
                 case Cfunction2:
                     {
-                    double a = ((--(sp))->val).floating;
-                    double b = ((--(sp))->val).floating;
+                    double a = ((--sp)->val).floating;
+                    double b = ((--sp)->val).floating;
                     naam = getCFunc2Name(wordp->u.Cfunc2p);
                     printf(" %s", naam);
                     ((sp++)->val.floating = wordp->u.Cfunc2p(a, b));
-                    ++(wordp);
+                    ++wordp;
                     break;
                     }
 #endif
@@ -686,9 +680,8 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     naam = getLogiName(wordp->u.logic);
                     printf(" %s", naam);
                     printf(" conditional jump to %u", wordp->offset);
-                    /*cpop(mem); */
-                    --(sp);
-                    ++(wordp);
+                    --sp;
+                    ++wordp;
                     break;
                     }
                 case PopUncondBranch:
@@ -696,49 +689,48 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     naam = getLogiName(wordp->u.logic);
                     printf(" %s", naam);
                     printf(" unconditional jump to %u", wordp->offset);
-                    /*cpop(mem); */
-                    --(sp);
+                    --sp;
                     wordp = word + wordp->offset;
                     break;
                     }
 
-                case Fless          : printf("< "); b = ((--(sp))->val).floating; a = ((--(sp))->val).floating; if(a >= b) wordp = word + wordp->offset; else wordp += INC; break;
-                case Fless_equal    : printf("<="); b = ((--(sp))->val).floating; a = ((--(sp))->val).floating; if(a >  b) wordp = word + wordp->offset; else wordp += INC; break;
-                case Fmore_equal    : printf(">="); b = ((--(sp))->val).floating; a = ((--(sp))->val).floating; if(a <  b) wordp = word + wordp->offset; else wordp += INC; break;
-                case Fmore          : printf("> "); b = ((--(sp))->val).floating; a = ((--(sp))->val).floating; if(a <= b) wordp = word + wordp->offset; else wordp += INC; break;
-                case Funequal       : printf("!="); b = ((--(sp))->val).floating; a = ((--(sp))->val).floating; if(a == b) wordp = word + wordp->offset; else wordp += INC; break;
-                case Fequal         : printf("=="); b = ((--(sp))->val).floating; a = ((--(sp))->val).floating; if(a != b) wordp = word + wordp->offset; else wordp += INC; break;
+                case Fless          : printf("< "); b = ((--sp)->val).floating; a = ((--sp)->val).floating; if(a >= b) wordp = word + wordp->offset; else wordp += INC; break;
+                case Fless_equal    : printf("<="); b = ((--sp)->val).floating; a = ((--sp)->val).floating; if(a >  b) wordp = word + wordp->offset; else wordp += INC; break;
+                case Fmore_equal    : printf(">="); b = ((--sp)->val).floating; a = ((--sp)->val).floating; if(a <  b) wordp = word + wordp->offset; else wordp += INC; break;
+                case Fmore          : printf("> "); b = ((--sp)->val).floating; a = ((--sp)->val).floating; if(a <= b) wordp = word + wordp->offset; else wordp += INC; break;
+                case Funequal       : printf("!="); b = ((--sp)->val).floating; a = ((--sp)->val).floating; if(a == b) wordp = word + wordp->offset; else wordp += INC; break;
+                case Fequal         : printf("=="); b = ((--sp)->val).floating; a = ((--sp)->val).floating; if(a != b) wordp = word + wordp->offset; else wordp += INC; break;
 
-                case Plus  :  printf("plus  "); a = ((--(sp))->val).floating; b = ((--(sp))->val).floating; ((sp++)->val.floating = a+b); ++(wordp); break;
-                case Times :  printf("times "); a = ((--(sp))->val).floating; b = ((--(sp))->val).floating; ((sp++)->val.floating = a*b); ++(wordp); break;
+                case Plus  :  printf("plus  "); a = ((--sp)->val).floating; b = ((--sp)->val).floating; ((sp++)->val.floating = a+b); ++wordp; break;
+                case Times :  printf("times "); a = ((--sp)->val).floating; b = ((--sp)->val).floating; ((sp++)->val.floating = a*b); ++wordp; break;
 
-                case Acos  :  printf("acos  ");((sp++)->val.floating = acos (((--(sp))->val).floating));++(wordp);break; 
-                case Acosh :  printf("acosh ");((sp++)->val.floating = acosh(((--(sp))->val).floating));++(wordp);break; 
-                case Asin  :  printf("asin  ");((sp++)->val.floating = asin (((--(sp))->val).floating));++(wordp);break; 
-                case Asinh :  printf("asinh ");((sp++)->val.floating = asinh(((--(sp))->val).floating));++(wordp);break; 
-                case Atan  :  printf("atan  ");((sp++)->val.floating = atan (((--(sp))->val).floating));++(wordp);break; 
-                case Atanh :  printf("atanh ");((sp++)->val.floating = atanh(((--(sp))->val).floating));++(wordp);break; 
-                case Cbrt  :  printf("cbrt  ");((sp++)->val.floating = cbrt (((--(sp))->val).floating));++(wordp);break; 
-                case Ceil  :  printf("ceil  ");((sp++)->val.floating = ceil (((--(sp))->val).floating));++(wordp);break; 
-                case Cos   :  printf("cos   ");((sp++)->val.floating = cos  (((--(sp))->val).floating));++(wordp);break; 
-                case Cosh  :  printf("cosh  ");((sp++)->val.floating = cosh (((--(sp))->val).floating));++(wordp);break; 
-                case Exp   :  printf("exp   ");((sp++)->val.floating = exp  (((--(sp))->val).floating));++(wordp);break; 
-                case Fabs  :  printf("fabs  ");((sp++)->val.floating = fabs (((--(sp))->val).floating));++(wordp);break; 
-                case Floor :  printf("floor ");((sp++)->val.floating = floor(((--(sp))->val).floating));++(wordp);break; 
-                case Log   :  printf("log   ");((sp++)->val.floating = log  (((--(sp))->val).floating));++(wordp);break; 
-                case Log10 :  printf("log10 ");((sp++)->val.floating = log10(((--(sp))->val).floating));++(wordp);break; 
-                case Sin   :  printf("sin   ");((sp++)->val.floating = sin  (((--(sp))->val).floating));++(wordp);break; 
-                case Sinh  :  printf("sinh  ");((sp++)->val.floating = sinh (((--(sp))->val).floating));++(wordp);break; 
-                case Sqrt  :  printf("sqrt  ");((sp++)->val.floating = sqrt (((--(sp))->val).floating));++(wordp);break; 
-                case Tan   :  printf("tan   ");((sp++)->val.floating = tan  (((--(sp))->val).floating));++(wordp);break; 
-                case Tanh  :  printf("tanh  ");((sp++)->val.floating = tanh (((--(sp))->val).floating));++(wordp);break; 
-                case Fdim  :  printf("fdim  ");a = ((--(sp))->val).floating; b = ((--(sp))->val).floating;((sp++)->val.floating =fdim (a,b));++(wordp);break;
-                case Fmax  :  printf("fmax  ");a = ((--(sp))->val).floating; b = ((--(sp))->val).floating;((sp++)->val.floating =fmax (a,b));++(wordp);break;
-                case Atan2 :  printf("atan2 ");a = ((--(sp))->val).floating; b = ((--(sp))->val).floating;((sp++)->val.floating =atan2(a,b));++(wordp);break;
-                case Fmin  :  printf("fmin  ");a = ((--(sp))->val).floating; b = ((--(sp))->val).floating;((sp++)->val.floating =fmin (a,b));++(wordp);break;
-                case Fmod  :  printf("fmod  ");a = ((--(sp))->val).floating; b = ((--(sp))->val).floating;((sp++)->val.floating =fmod (a,b));++(wordp);break;
-                case Hypot :  printf("hypot ");a = ((--(sp))->val).floating; b = ((--(sp))->val).floating;((sp++)->val.floating =hypot(a,b));++(wordp);break;
-                case Pow   :  printf("pow   ");a = ((--(sp))->val).floating; b = ((--(sp))->val).floating;((sp++)->val.floating =pow  (a,b));++(wordp);break;
+                case Acos  :  printf("acos  ");(sp++)->val.floating = acos (((--sp)->val).floating);++wordp;break; 
+                case Acosh :  printf("acosh ");(sp++)->val.floating = acosh(((--sp)->val).floating);++wordp;break; 
+                case Asin  :  printf("asin  ");(sp++)->val.floating = asin (((--sp)->val).floating);++wordp;break; 
+                case Asinh :  printf("asinh ");(sp++)->val.floating = asinh(((--sp)->val).floating);++wordp;break; 
+                case Atan  :  printf("atan  ");(sp++)->val.floating = atan (((--sp)->val).floating);++wordp;break; 
+                case Atanh :  printf("atanh ");(sp++)->val.floating = atanh(((--sp)->val).floating);++wordp;break; 
+                case Cbrt  :  printf("cbrt  ");(sp++)->val.floating = cbrt (((--sp)->val).floating);++wordp;break; 
+                case Ceil  :  printf("ceil  ");(sp++)->val.floating = ceil (((--sp)->val).floating);++wordp;break; 
+                case Cos   :  printf("cos   ");(sp++)->val.floating = cos  (((--sp)->val).floating);++wordp;break; 
+                case Cosh  :  printf("cosh  ");(sp++)->val.floating = cosh (((--sp)->val).floating);++wordp;break; 
+                case Exp   :  printf("exp   ");(sp++)->val.floating = exp  (((--sp)->val).floating);++wordp;break; 
+                case Fabs  :  printf("fabs  ");(sp++)->val.floating = fabs (((--sp)->val).floating);++wordp;break; 
+                case Floor :  printf("floor ");(sp++)->val.floating = floor(((--sp)->val).floating);++wordp;break; 
+                case Log   :  printf("log   ");(sp++)->val.floating = log  (((--sp)->val).floating);++wordp;break; 
+                case Log10 :  printf("log10 ");(sp++)->val.floating = log10(((--sp)->val).floating);++wordp;break; 
+                case Sin   :  printf("sin   ");(sp++)->val.floating = sin  (((--sp)->val).floating);++wordp;break; 
+                case Sinh  :  printf("sinh  ");(sp++)->val.floating = sinh (((--sp)->val).floating);++wordp;break; 
+                case Sqrt  :  printf("sqrt  ");(sp++)->val.floating = sqrt (((--sp)->val).floating);++wordp;break; 
+                case Tan   :  printf("tan   ");(sp++)->val.floating = tan  (((--sp)->val).floating);++wordp;break; 
+                case Tanh  :  printf("tanh  ");(sp++)->val.floating = tanh (((--sp)->val).floating);++wordp;break; 
+                case Fdim  :  printf("fdim  ");a = ((--sp)->val).floating; b = ((--sp)->val).floating;(sp++)->val.floating = fdim (a,b);++wordp;break;
+                case Fmax  :  printf("fmax  ");a = ((--sp)->val).floating; b = ((--sp)->val).floating;(sp++)->val.floating = fmax (a,b);++wordp;break;
+                case Atan2 :  printf("atan2 ");a = ((--sp)->val).floating; b = ((--sp)->val).floating;(sp++)->val.floating = atan2(a,b);++wordp;break;
+                case Fmin  :  printf("fmin  ");a = ((--sp)->val).floating; b = ((--sp)->val).floating;(sp++)->val.floating = fmin (a,b);++wordp;break;
+                case Fmod  :  printf("fmod  ");a = ((--sp)->val).floating; b = ((--sp)->val).floating;(sp++)->val.floating = fmod (a,b);++wordp;break;
+                case Hypot :  printf("hypot ");a = ((--sp)->val).floating; b = ((--sp)->val).floating;(sp++)->val.floating = hypot(a,b);++wordp;break;
+                case Pow   :  printf("pow   ");a = ((--sp)->val).floating; b = ((--sp)->val).floating;(sp++)->val.floating = pow  (a,b);++wordp;break;
                 case NoOp:
                 case TheEnd:
                 default:
@@ -752,7 +744,7 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
             psk res;
             size_t len;
             char buf[64]; /* 64 bytes is even enough for quad https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF*/
-            double sv = (--(sp))->val.floating;
+            double sv = (--sp)->val.floating;
             int flags;
             if(isnan(sv))
                 {
