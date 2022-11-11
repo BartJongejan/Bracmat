@@ -135,8 +135,6 @@ typedef double (*Cfunct1)(double x);
 typedef double (*Cfunct2)(double x, double y);
 #endif
 
-struct forthvariable;
-
 typedef union forthvalue /* a number. either integer or 'real' */
     {
     double floating;
@@ -151,7 +149,7 @@ typedef union stackvalue
 
 typedef struct forthvariable
     {
-    forthvalue u;
+    forthvalue val;
     char* name;
     struct forthvariable* next;
     } forthvariable;
@@ -175,7 +173,7 @@ typedef struct forthword
     unsigned int offset : 24;
     union
         {
-        double floating; LONG integer; funct funcp; forthvalue* valp; forthvalue val; dumbl logic;
+        funct funcp; forthvalue* valp; forthvalue val; dumbl logic;
 #if CFUNCS
         Cfunct1 Cfunc1p; Cfunct2 Cfunc2p;
 #endif        
@@ -186,9 +184,9 @@ typedef struct forthMemory
     {
     forthword* word; /* fixed once calculation is compiled */
     forthword* wordp; /* runs through words when calculating */
-    stackvalue stack[64];
-    stackvalue* sp;
     forthvariable* var;
+    stackvalue* sp;
+    stackvalue stack[64];
     } forthMemory;
 
 typedef struct
@@ -223,11 +221,11 @@ typedef struct
     actionType Bfun; /* negation of Afun */
     }neg;
 
-static char* getVarName(forthvariable* varp, forthvalue* u)
+static char* getVarName(forthvariable* varp, forthvalue* val)
     {
     for(; varp; varp = varp->next)
         {
-        if(&(varp->u.floating) == &(u->floating))
+        if(&(varp->val.floating) == &(val->floating))
             return varp->name;
         }
     return "UNK variable";
@@ -249,7 +247,7 @@ static forthvalue* getVariablePointer(forthvariable** varp, char* name)
         (*varp)->next = curvarp;
         curvarp = *varp;
         }
-    return &(curvarp->u);
+    return &(curvarp->val);
     }
 
 static int setArgs(forthvariable** varp, psk args, int nr)
@@ -603,7 +601,7 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
             printf("%s %d,%d ", ActionAsWord[wordp->action], (int)(wordp - word), (int)(sp - mem->stack));
             for(v = mem->var; v; v = v->next)
                 {
-                printf("%s=%.2f ", v->name, v->u.floating);
+                printf("%s=%.2f ", v->name, v->val.floating);
                 };
             for(svp = sp - 1; svp >= mem->stack; --svp)
                 {
@@ -1387,17 +1385,17 @@ static forthword* polish2(forthvariable** varp, psk code, forthword* wordp, fort
                 {
                 if(INTEGER(code))
                     {
-                    wordp->u.integer = (int)STRTOL(&(code->u.sobj), 0, 10);
+                    wordp->u.val.integer = (int)STRTOL(&(code->u.sobj), 0, 10);
                     if(HAS_MINUS_SIGN(code))
                         {
-                        wordp->u.integer = -(wordp->u.integer);
+                        wordp->u.val.integer = -(wordp->u.val.integer);
                         }
                     wordp->action = Push;
                     /*When executing, push number onto the data stack*/
                     }
                 else if(code->v.fl & QDOUBLE)
                     {
-                    wordp->u.floating = strtod(&(code->u.sobj), 0);
+                    wordp->u.val.floating = strtod(&(code->u.sobj), 0);
                     wordp->action = Push;
                     /*When executing, push number onto the data stack*/
                     }
