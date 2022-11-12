@@ -27,6 +27,8 @@
 
     */
 
+#define TOINT(a) ((size_t)ceil(fabs(a)))
+
 typedef enum 
     { TheEnd
     , ResolveAndPush
@@ -269,12 +271,29 @@ static int setArgs(forthvariable** varp, psk args, int nr)
             val->floating = strtod(&(args->u.sobj), 0);
             return 1 + nr;
             }
-        else if(INTEGER(args))
+        else if(INTEGER_COMP(args))
             {
-            val->integer = strtol(&(args->u.sobj), 0, 10);
+            val->floating = strtod(&(args->u.sobj), 0);
             if(HAS_MINUS_SIGN(args))
-                val->integer = -val->integer;
+                val->floating = -val->floating;
             return 1 + nr;
+            }
+        else if(RAT_RAT_COMP(args))
+            {
+            char* slash = strchr(&(args->u.sobj), '/');
+            if(slash)
+                {
+                double numerator;
+                double denominator;
+                *slash = '\0';
+                numerator = strtod(&(args->u.sobj), 0);
+                denominator = strtod(slash+1, 0);
+                *slash = '/';
+                val->floating = numerator / denominator;
+                if(HAS_MINUS_SIGN(args))
+                    val->floating = -val->floating;
+                return 1 + nr;
+                }
             }
         }
     printf("setArgs fails\n");
@@ -847,7 +866,7 @@ static int polish1(psk code)
                 }
             else
                 {
-                if(code->v.fl & QDOUBLE || INTEGER(code))
+                if((code->v.fl & QDOUBLE) || INTEGER_COMP(code) || RAT_RAT_COMP(code))
                     return 1;
                 else if(code->v.fl & (UNIFY | INDIRECT))
                     return 1; /* variable */
@@ -860,10 +879,9 @@ static int polish1(psk code)
         }
     }
 
-static Boolean print(struct typedObjectnode* This, ppsk arg)
+static Boolean printmem(forthMemory* mem)
     {
     char* naam;
-    forthMemory* mem = (forthMemory*)(This->voiddata);
     forthword* wordp = mem->word;
     printf("print\n");
     for(;
@@ -961,6 +979,12 @@ static Boolean print(struct typedObjectnode* This, ppsk arg)
         }
     printf(LONGD " TheEnd          \n", wordp - mem->word);
     return TRUE;
+    }
+
+static Boolean print(struct typedObjectnode* This, ppsk arg)
+    {
+    forthMemory* mem = (forthMemory*)(This->voiddata);
+    return printmem(mem);
     }
 
 static void optimizeJumps(forthMemory* mem)
@@ -1282,7 +1306,7 @@ static forthword* polish2(forthvariable** varp, psk code, forthword* wordp, fort
             {
             wordp = polish2(varp, code->LEFT, wordp, word);
             wordp = polish2(varp, code->RIGHT, wordp, word);
-            if(!(code->RIGHT->v.fl & UNIFY))
+            if(!(code->RIGHT->v.fl & UNIFY) & !is_op(code->RIGHT))
                 {
                 if(FLESS(code->RIGHT))
                     {
@@ -1327,6 +1351,54 @@ static forthword* polish2(forthvariable** varp, psk code, forthword* wordp, fort
                     return ++wordp;
                     }
                 else if(FNOTLESSORMORE(code->RIGHT))
+                    {
+                    wordp->action = Fequal;
+                    wordp->offset = 0;
+                    return ++wordp;
+                    }
+                else if(ILESS(code->RIGHT))
+                    {
+                    wordp->action = Fless;
+                    wordp->offset = 0;
+                    return ++wordp;
+                    }
+                else if(ILESS_EQUAL(code->RIGHT))
+                    {
+                    wordp->action = Fless_equal;
+                    wordp->offset = 0;
+                    return ++wordp;
+                    }
+                else if(IMORE_EQUAL(code->RIGHT))
+                    {
+                    wordp->action = Fmore_equal;
+                    wordp->offset = 0;
+                    return ++wordp;
+                    }
+                else if(IMORE(code->RIGHT))
+                    {
+                    wordp->action = Fmore;
+                    wordp->offset = 0;
+                    return ++wordp;
+                    }
+                else if(IUNEQUAL(code->RIGHT))
+                    {
+                    wordp->action = Funequal;
+                    wordp->offset = 0;
+                    return ++wordp;
+                    }
+                else if(ILESSORMORE(code->RIGHT))
+                    {
+                    wordp->action = Funequal;
+                    wordp->offset = 0;
+                    return ++wordp;
+                    }
+                else if(IEQUAL(code->RIGHT))
+                    {
+                    wordp->action = Fequal;
+                    wordp->offset = 0;
+                    return ++wordp;
+                    }
+                else if(INOTLESSORMORE(code->RIGHT))
                     {
                     wordp->action = Fequal;
                     wordp->offset = 0;
@@ -1383,12 +1455,12 @@ static forthword* polish2(forthvariable** varp, psk code, forthword* wordp, fort
                 }
             else
                 {
-                if(INTEGER(code))
+                if(INTEGER_COMP(code))
                     {
-                    wordp->u.val.integer = (int)STRTOL(&(code->u.sobj), 0, 10);
+                    wordp->u.val.floating = strtod(&(code->u.sobj), 0);
                     if(HAS_MINUS_SIGN(code))
                         {
-                        wordp->u.val.integer = -(wordp->u.val.integer);
+                        wordp->u.val.floating = -(wordp->u.val.floating);
                         }
                     wordp->action = Push;
                     /*When executing, push number onto the data stack*/
@@ -1399,6 +1471,24 @@ static forthword* polish2(forthvariable** varp, psk code, forthword* wordp, fort
                     wordp->action = Push;
                     /*When executing, push number onto the data stack*/
                     }
+                else if(RAT_RAT_COMP(code))
+                    {
+                    char* slash = strchr(&(code->u.sobj), '/');
+                    if(slash)
+                        {
+                        double numerator;
+                        double denominator;
+                        *slash = '\0';
+                        numerator = strtod(&(code->u.sobj), 0);
+                        denominator = strtod(slash+1, 0);
+                        *slash = '/';
+                        wordp->u.val.floating = numerator / denominator;
+                        if(HAS_MINUS_SIGN(code))
+                            wordp->u.val.floating = -wordp->u.val.floating;
+                        wordp->action = Push;
+                        }
+                    }
+
                 else
                     {
                     /*variable*/

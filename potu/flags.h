@@ -149,62 +149,67 @@
 #define COPYFILTER ~(ALL_REFCOUNT_BITS_SET | BUILT_IN | CREATEDWITHNEW)
 #endif
 
-#define VISIBLE_FLAGS_WEAK      (INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)
-#define VISIBLE_FLAGS_NON_COMP  (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|FRACTION|UNIFY) /* allows < > ~< and ~> as flags on numbers */
-#define VISIBLE_FLAGS_POS0      (INDIRECT|DOUBLY_INDIRECT|NONIDENT|QFRACTION|QDOUBLE|UNIFY|QNUMBER)
-#define VISIBLE_FLAGS_POS       (INDIRECT|DOUBLY_INDIRECT|NONIDENT|QFRACTION|QDOUBLE|UNIFY|QNUMBER|NOT|GREATER_THAN|SMALLER_THAN)
-#define VISIBLE_FLAGS           (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|FRACTION|UNIFY|NOT|GREATER_THAN|SMALLER_THAN|FENCE|POSITION)
+#define VISIBLE_FLAGS_WEAK              (INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)
+#define VISIBLE_FLAGS_NON_COMP          (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|FRACTION|UNIFY) /* allows < > ~< and ~> as flags on numbers */
+#define VISIBLE_FLAGS_POS0              (INDIRECT|DOUBLY_INDIRECT|NONIDENT|QFRACTION|QDOUBLE|UNIFY|QNUMBER)
+#define VISIBLE_FLAGS_POS               (INDIRECT|DOUBLY_INDIRECT|NONIDENT|QFRACTION|QDOUBLE|UNIFY|QNUMBER|NOT|GREATER_THAN|SMALLER_THAN)
+#define VISIBLE_FLAGS                   (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|FRACTION|UNIFY|NOT|GREATER_THAN|SMALLER_THAN|FENCE|POSITION)
 
 #define HAS_VISIBLE_FLAGS_OR_MINUS(psk) ((psk)->v.fl & (VISIBLE_FLAGS|MINUS))
-#define RATIONAL(psk)      (((psk)->v.fl & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS)) == QNUMBER)
-#define REAL_COMP(psk) (((psk)->v.fl & (QNUMBER|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == (QNUMBER|QDOUBLE))
-#define RATIONAL_COMP(psk) (((psk)->v.fl & (QNUMBER|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
-#define RATIONAL_COMP_NOT_NUL(psk) (((psk)->v.fl & (QNUMBER|QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
-#define RATIONAL_WEAK(psk) (((psk)->v.fl & (QNUMBER|IS_OPERATOR|INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)) == QNUMBER)/* allows < > ~< and ~> as flags on numbers */
-#define       LESS(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN))
-#define LESS_EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|GREATER_THAN))
-#define MORE_EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN))
-#define       MORE(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|GREATER_THAN))
-#define    UNEQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT))
-#define LESSORMORE(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN|GREATER_THAN))
-#define      EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == QNUMBER)
-#define NOTLESSORMORE(psk) (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN|GREATER_THAN))
+#define RATIONAL(psk)                   (((psk)->v.fl & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS)) == QNUMBER)
+#define REAL_COMP(psk)                  (((psk)->v.fl & (QNUMBER|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == (QNUMBER|QDOUBLE))
+#define RATIONAL_COMP(psk)              (((psk)->v.fl & (QNUMBER|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
+#define RATIONAL_COMP_NOT_NUL(psk)      (((psk)->v.fl & (QNUMBER|QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
+#define RATIONAL_WEAK(psk)              (((psk)->v.fl & (QNUMBER|IS_OPERATOR|INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)) == QNUMBER)/* allows < > ~< and ~> as flags on numbers */
+#define          LESS(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN))
+#define    LESS_EQUAL(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|GREATER_THAN))
+#define    MORE_EQUAL(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN))
+#define          MORE(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|GREATER_THAN))
+#define       UNEQUAL(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT))
+#define    LESSORMORE(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN|GREATER_THAN))
+#define         EQUAL(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == QNUMBER)
+#define NOTLESSORMORE(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN|GREATER_THAN))
 
-#define          FLESS(psk) (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|QDOUBLE|SMALLER_THAN))
-#define    FLESS_EQUAL(psk) (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|QDOUBLE|NOT|GREATER_THAN))
-#define    FMORE_EQUAL(psk) (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|QDOUBLE|NOT|SMALLER_THAN))
-#define          FMORE(psk) (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|QDOUBLE|GREATER_THAN))
-#define       FUNEQUAL(psk) (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|QDOUBLE|NOT))
-#define    FLESSORMORE(psk) (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|QDOUBLE|SMALLER_THAN|GREATER_THAN))
-#define         FEQUAL(psk) (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|QDOUBLE))
-#define FNOTLESSORMORE(psk) (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|QDOUBLE|NOT|SMALLER_THAN|GREATER_THAN))
+#define          FLESS(psk)             (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|QDOUBLE|SMALLER_THAN))
+#define    FLESS_EQUAL(psk)             (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|QDOUBLE|NOT|GREATER_THAN))
+#define    FMORE_EQUAL(psk)             (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|QDOUBLE|NOT|SMALLER_THAN))
+#define          FMORE(psk)             (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|QDOUBLE|GREATER_THAN))
+#define       FUNEQUAL(psk)             (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|QDOUBLE|NOT))
+#define    FLESSORMORE(psk)             (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|QDOUBLE|SMALLER_THAN|GREATER_THAN))
+#define         FEQUAL(psk)             (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|QDOUBLE))
+#define FNOTLESSORMORE(psk)             (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|QDOUBLE|NOT|SMALLER_THAN|GREATER_THAN))
 
-#define INTEGER(pn)               (((pn)->v.fl & (QNUMBER|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS))                      == QNUMBER)
-#define INTEGER_COMP(pn)          (((pn)->v.fl & (QNUMBER|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))             == QNUMBER)
+#define          ILESS(psk)             (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN))
+#define    ILESS_EQUAL(psk)             (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|GREATER_THAN))
+#define    IMORE_EQUAL(psk)             (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN))
+#define          IMORE(psk)             (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|GREATER_THAN))
+#define       IUNEQUAL(psk)             (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT))
+#define    ILESSORMORE(psk)             (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN|GREATER_THAN))
+#define         IEQUAL(psk)             (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER))
+#define INOTLESSORMORE(psk)             (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN|GREATER_THAN))
 
-#define INTEGER_NOT_NEG(pn)       (((pn)->v.fl & (QNUMBER|MINUS|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS))                == QNUMBER)
-#define INTEGER_NOT_NEG_COMP(pn)  (((pn)->v.fl & (QNUMBER|MINUS|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))       == QNUMBER)
+#define INTEGER(pn)                     (((pn)->v.fl & (QNUMBER|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS))                      == QNUMBER)
+#define INTEGER_COMP(pn)                (((pn)->v.fl & (QNUMBER|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))             == QNUMBER)
 
-#define INTEGER_POS(pn)           (((pn)->v.fl & (QNUMBER|MINUS|QNUL|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS))           == QNUMBER)
-#define INTEGER_POS_COMP(pn)      (((pn)->v.fl & (QNUMBER|MINUS|QNUL|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))  == QNUMBER)
+#define INTEGER_NOT_NEG(pn)             (((pn)->v.fl & (QNUMBER|MINUS|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS))                == QNUMBER)
+#define INTEGER_NOT_NEG_COMP(pn)        (((pn)->v.fl & (QNUMBER|MINUS|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))       == QNUMBER)
 
-#define INTEGER_NOT_NUL_COMP(pn) (((pn)->v.fl & (QNUMBER|QNUL|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))        == QNUMBER)
-#define HAS_MINUS_SIGN(pn)         (((pn)->v.fl & (MINUS|IS_OPERATOR)) == MINUS)
+#define INTEGER_POS(pn)                 (((pn)->v.fl & (QNUMBER|MINUS|QNUL|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS))           == QNUMBER)
+#define INTEGER_POS_COMP(pn)            (((pn)->v.fl & (QNUMBER|MINUS|QNUL|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))  == QNUMBER)
 
-#define RAT_NUL(pn) (((pn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS)) == QNUL)
-#define RAT_NUL_COMP(pn) (((pn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUL)
-#define RAT_NEG(pn) (((pn)->v.fl & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS)) \
-                                == (QNUMBER|MINUS))
-#define RAT_NEG_COMP(pn) (((pn)->v.fl & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) \
-                                == (QNUMBER|MINUS))
+#define INTEGER_NOT_NUL_COMP(pn)        (((pn)->v.fl & (QNUMBER|QNUL|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))        == QNUMBER)
+#define HAS_MINUS_SIGN(pn)              (((pn)->v.fl & (MINUS|IS_OPERATOR)) == MINUS)
 
-#define RAT_RAT(pn) (((pn)->v.fl & (QNUMBER|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS))\
-                                == (QNUMBER|QFRACTION))
+#define RAT_NUL(pn)                     (((pn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS)) == QNUL)
+#define RAT_NUL_COMP(pn)                (((pn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUL)
+#define RAT_NEG(pn)                     (((pn)->v.fl & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS)) == (QNUMBER|MINUS))
+#define RAT_NEG_COMP(pn)                (((pn)->v.fl & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == (QNUMBER|MINUS))
 
-#define RAT_RAT_COMP(pn) (((pn)->v.fl & (QNUMBER|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))\
-                                == (QNUMBER|QFRACTION))
-#define IS_ONE(pn) ((pn)->u.lobj == ONE && !((pn)->v.fl & (MINUS | VISIBLE_FLAGS)))
-#define IS_NIL(pn) ((pn)->u.lobj == 0   && !((pn)->v.fl & (MINUS | VISIBLE_FLAGS)))
+#define RAT_RAT(pn)                     (((pn)->v.fl & (QNUMBER|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS)) == (QNUMBER|QFRACTION))
+
+#define RAT_RAT_COMP(pn)                (((pn)->v.fl & (QNUMBER|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == (QNUMBER|QFRACTION))
+#define IS_ONE(pn)                      ((pn)->u.lobj == ONE && !((pn)->v.fl & (MINUS | VISIBLE_FLAGS)))
+#define IS_NIL(pn)                      ((pn)->u.lobj == 0   && !((pn)->v.fl & (MINUS | VISIBLE_FLAGS)))
 
 
 #endif
