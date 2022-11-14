@@ -893,17 +893,11 @@ static Boolean printmem(forthMemory* mem)
         switch(wordp->action)
             {
             case ResolveAndPush:
-                {
-                forthvalue val = *(wordp->u.valp);
                 printf(LONGD " ResolveAndPush     %s\n", wordp - mem->word, getVarName(mem->var, (wordp->u.valp)));
                 break;
-                }
             case ResolveAndGet:
-                {
-                forthvalue val = *(wordp->u.valp);
                 printf(LONGD " ResolveAndGet      %s\n", wordp - mem->word, getVarName(mem->var, (wordp->u.valp)));
                 break;
-                }
             case Push:
                 {
                 forthvalue val = wordp->u.val;
@@ -911,28 +905,20 @@ static Boolean printmem(forthMemory* mem)
                 break;
                 }
             case Afunction:
-                {
                 naam = getFuncName(wordp->u.funcp);
                 printf(LONGD " Afunction       %u %s\n", wordp - mem->word, wordp->offset, naam);
                 break;
-                }
             case Pop:
-                {
                 naam = getLogiName(wordp->u.logic);
                 printf(LONGD " Pop             %u %s\n", wordp - mem->word, wordp->offset, naam);
                 break;
-                }
             case UncondBranch:
-                {
                 printf(LONGD " UncondBranch    %u\n", wordp - mem->word, wordp->offset);
                 break;
-                }
             case PopUncondBranch:
-                {
                 naam = getLogiName(wordp->u.logic);
                 printf(LONGD " PopUncondBranch %u %s\n", wordp - mem->word, wordp->offset, naam);
                 break;
-                }
 
             case Fless          : printf(LONGD " <               %u\n", wordp - mem->word, wordp->offset);break;
             case Fless_equal    : printf(LONGD " <=              %u\n", wordp - mem->word, wordp->offset);break;
@@ -972,11 +958,9 @@ static Boolean printmem(forthMemory* mem)
             case Hypot :  printf(LONGD " hypot  \n", wordp - mem->word);break;
             case Pow   :  printf(LONGD " pow    \n", wordp - mem->word);break;
             case NoOp:
-                {
                 naam = getFuncName(wordp->u.funcp);
                 printf(LONGD " NoOp       %s\n", wordp - mem->word, naam);
                 break;
-                }
             case TheEnd:
             default:
                 printf(LONGD " default         %d\n", wordp - mem->word, wordp->action);

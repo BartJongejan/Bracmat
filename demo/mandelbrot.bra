@@ -21,7 +21,7 @@ for each pixel (Px, Py) on the screen do
 Mandelbrot=
   ( doit
   =   
-    .   100:?iterations
+    .   1000:?iterations
       &   glf$('(<.$iterations))
         : (=?"<iterations")
       & 256*!iterations^-1:?colfactor
@@ -80,7 +80,7 @@ Mandelbrot=
                     !e
                   )
         )
-      & 100:?ypixels
+      & 2000:?ypixels
       & (1|20/9):?ratio
       & (   
           &   ( ~&"[0.2929859127507,0.6117848324958,1.0E-11]"
