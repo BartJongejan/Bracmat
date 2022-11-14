@@ -21,24 +21,31 @@ for each pixel (Px, Py) on the screen do
 Mandelbrot=
   ( doit
   =   
-    .   new$(calculation,(="1.0E3")):?iter
-      &     new
-          $ ( calculation
-            , ( 
-              =   "0.0E0":?x:?y
-                & "1.0E0":?J
-                &   whl
-                  ' ( hypot$(!x,!y):~>"2.0E0"
-                    & !J:<"5.0E3"
-                    & !x*!x+"-1.0E0"*!y*!y+!a0:?xtemp
-                    & "2.0E0"*!x*!y+!a1:?y
-                    & !xtemp:?x
-                    & "1.0E0"+!J:?J
-                    )
-                & !J
+    .   100:?iterations
+      &   glf$('(<.$iterations))
+        : (=?"<iterations")
+      & 256*!iterations^-1:?colfactor
+      &     
+          ' ( !a0*!a1+!a2:?x0
+            & !a3*!a4+!a5:?y0
+            & 0:?x:?y
+            & 1:?J
+            &   whl
+              ' ( hypot$(!x,!y):~>2
+                & !J:$"<iterations"
+                & !x*!x+-1*!y*!y+!x0:?xtemp
+                & 2*!x*!y+!y0:?y
+                & !xtemp:?x
+                & 1+!J:?J
+                )
+            & (   !J:$"<iterations"
+                & floor$(!J*$colfactor)
+              | 0
               )
             )
-        : ?iter
+        : ?calc
+      & lst$calc
+      & new$(calculation,!calc):?iter
       & ( ~
         |   out$"ITER DEFINED"
           & (iter..print)$
@@ -73,61 +80,76 @@ Mandelbrot=
                     !e
                   )
         )
-      &   ( ~&"[0.2929859127507,0.6117848324958,1.0E-11]"
-          | "[-0.0452407411,0.9868162204352258,2.7E-10]"
-          | "[-0.7463,0.1102,0.005]"
-          | "[0.45272105023,0.396494224267,1.4E-10]"
-          | "[-0.235125,0.827215,4.0E-5]"
-          | "[-0.722,0.246,0.019]"
-          | "[-0.16070135,1.0375665,1.0E-7]"
-          )
-        : ?jsn
-      & (   get$(!jsn,MEM,JSN):(,#%?X #%?Y #%?R)
-          & !X+-2*!R:?x0
-          & !x0+4*!R:?endx
-          & !Y+-1*!R:?beginy
-          & !beginy+2*!R:?endy
-          & 1/500*!R:?delta
-        | -2:?x0
-        )
-      & ( f
-        =   
-          .   !arg:5000&" "
-            | !arg:>3000&"#"
-            | !arg:>2000&"*"
-            | !arg:>1000&","
-            | "."
-        )
-      & :?alliters
-      & 100000:?miniter
-      &   whl
-        ' ( ( !x0:~>!endx
-            | ~&!x0:~>47/100
-            )
-          & (!beginy|-112/100):?y0
-          & :?iters
-          &   whl
-            ' ( ( !y0:~>!endy
-                | ~&!y0:~>112/100
-                )
-              & (       (iter..calculate)
-                      $ (flt$(!x0,19),flt$(!y0,19))
-                    : ?Niter
-                  &   get$(str$("[" !Niter "]"),MEM,JSN)
-                    : (,?Niter)
-                  & f$!Niter !iters:?iters
-                  & ( !Niter:<!miniter:?miniter
-                    | 
-                    )
-                | "weet niet":?Niter
-                )
-              & (!delta|1/1000)+!y0:?y0
+      & 100:?ypixels
+      & (1|20/9):?ratio
+      & (   
+          &   ( ~&"[0.2929859127507,0.6117848324958,1.0E-11]"
+              | ~&"[-0.0452407411,0.9868162204352258,2.7E-10]"
+              | &"[-0.7450,0.1102,0.005]"
+              | ~&"[-0.7463,0.1102,0.005]"
+              | ~&"[0.45272105023,0.396494224267,1.4E-10]"
+              | ~&"[-0.235125,0.827215,4.0E-5]"
+              | ~&"[-0.722,0.246,0.019]"
+              | "[-0.16070135,1.0375665,1.0E-7]"
               )
-          & str$(!iters \n) !alliters:?alliters
-          & (2*!delta|1/1000)+!x0:?x0
+            : ?jsn
+          & get$(!jsn,MEM,JSN):(,#%?X #%?Y #%?R)
+          & !X+-1*!R:?beginx
+          & !X+!R:?endx
+          & !Y+-1*!R:?beginy
+          & !Y+!R:?endy
+          & div$(!ratio*!ypixels,1):?xpixels
+        |   -2:?beginx
+          & 47/100:?endx
+          & -112/100:?beginy
+          & 112/100:?endy
+          &   (!endx+-1*!beginx)*(!endy+-1*!beginy)^-1
+            : ?X/Y
+          & div$(!ratio*!X/Y*!ypixels+1/2,1):?xpixels
+        )
+      & !xpixels+1:?linelength
+      & !linelength*!ypixels:?imagesize
+      & out$(imagesize !imagesize !xpixels x !ypixels)
+      & (!endx+-1*!beginx)*(!xpixels+-1)^-1:?deltax
+      & (!endy+-1*!beginy)*(!ypixels+-1)^-1:?deltay
+      & \n:?alliters
+      & 100000:?miniter
+      & -1+!ypixels:?i
+      &   whl
+        ' ( !i:~<0
+          & -1+!xpixels:?j
+          &   whl
+            ' ( !j:~<0
+              &     (iter..calculate)
+                  $ (!j,!deltax,!beginx,!i,!deltay,!beginy)
+                : ?Niter
+              &   get$(str$("[" !Niter "]"),MEM,JSN)
+                : (,?Niter)
+              & 1+!Niter+-1:?Niter
+              &   \n !Niter " " !Niter " " !Niter !alliters
+                : ?alliters
+              & ( !Niter:<!miniter:?miniter
+                | 
+                )
+              & !j+-1:?j
+              )
+          & !i+-1:?i
           )
       &   put
-        $ (str$!alliters,"MandelbrotSet.txt",NEW WYD BIN)
+        $ (   str
+            $ ( P3\n
+                "#Mandelbrot"
+                \n
+                !xpixels
+                " "
+                !ypixels
+                \n
+                255
+                !alliters
+              )
+          , "MandelbrotSet.pgm"
+          , NEW WYD BIN
+          )
       & out$(1+!miniter+-1)
   )
   ( new
