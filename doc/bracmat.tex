@@ -3532,6 +3532,10 @@ option is not used, input is coming from standard input. Take care that
 you put filenames in double quotes if they contain any characters that
 can be misunderstood, such as dots, (back)slashes or dollars.
 
+\bfun{\bc{let\d(}(\bi{atom-or-nil})}
+
+let\d checks whether a single character is a letter. This function uses the Unicode definitions of letters as found in Unicode.txt. On success, the single character is returned. The function fails if the argument is not a single character that is a letter.
+
 \bfun{\bc{lst\d(}(\bc=\bi{expression}) or \bi{variable}*[\bc{,LIN}][\bc{,RAW}][\bc{,WYD}]\bc)}
 \index{lst@\bc{lst}}
 

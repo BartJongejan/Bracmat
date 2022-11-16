@@ -7,7 +7,7 @@ help=
   . varmattxt,varprotxt,progsmenu,debugtxt,debugtxt2,debugtxt3
   . inbltmenu,alctxt,aligntxt,asctxt,utftxt,chrtxt,charset
   . chutxt,dbgtxt,dentxt,escappattxt,lambda,morexmlps,jsntxt
-  . divtxt,fretxt,funtxt1,funtxt3,beztxt,moptxt
+  . divtxt,fretxt,funtxt1,funtxt3,beztxt,moptxt,lettxt
   . lsttxt1,difftxt,pattxt2,methodtxt,predvartxt
   . lsttxt2,lsttxt3,memtxt,modtxt,peetxt,poktxt,Bracmat-name
   . puttxt1,puttxt2,puttxt3,rentxt,revtxt,seltxt,simtxt,strtxt
@@ -169,51 +169,53 @@ lex lexical analysis of help file"
     return allocated memory (low level)
 17 |_get_|
     get input (from file,keyboard or memory)
-18 |_low_|
+18 |_let_|
+    test whether unicode character is a letter
+19 |_low_|
     convert to lower case
-19 |_lst_|
+20 |_lst_|
     list un-evaluated expression(s) or value(s) of variable(s)
-20 |_map_|
+21 |_map_|
     apply function to each member of a list
-21 |_mem_|
+22 |_mem_|
     list existing variable names
-22 |_mod_|
+23 |_mod_|
     remainder
-23 |_mop_|
+24 |_mop_|
     map expression to space separated list
-24 |_new_|
+25 |_new_|
     create new object as a copy of another object
-25 |_pee_|
+26 |_pee_|
     get value from address (peek) (low level)
-26 |_pok_|
+27 |_pok_|
     put value at address (poke) (low level)
-27 |_put_|
+28 |_put_|
     write output
-28 |_ren_|
+29 |_ren_|
     rename file or directory or move file
-29 |_rev_|
+30 |_rev_|
     string reverse
-30 |_rmv_|
+31 |_rmv_|
     remove file
-31 |_sim_|
+32 |_sim_|
     similarity between two atoms
-32 |_str_|
+33 |_str_|
     stringize expression into atom
-33 |_swi_|
+34 |_swi_|
     software interrupt (low level)
-34 |_sys_|
+35 |_sys_|
     command line shell
-35 |_tbl_|
+36 |_tbl_|
     create array, remove array/variable
-36 |_upp_|
+37 |_upp_|
     convert to upper case
-37 |_utf_|
+38 |_utf_|
     convert UTF-8 character to Unicode codepoint
-38 |_vap_|
+39 |_vap_|
     deconstruct a string character-wise or according to specified separator
-39 |_whl_|
+40 |_whl_|
     while loop
-40 |_x2d_|
+41 |_x2d_|
     convert hexadecimal number to decimal number x2d$BABEFACE:3133078222
 "
       ,   (1,seltxt)
@@ -233,29 +235,30 @@ lex lexical analysis of help file"
           (15,glftxt)
           (16,fretxt)
           (17,gettxt)
-          (18,lowtxt DOSopttxt)
-          (19,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt)
-          (20,maptxt)
-          (21,memtxt)
-          (22,modtxt)
-          (23,moptxt)
-          (24,newobjecttxt)
-          (25,peetxt)
-          (26,poktxt)
-          (27,puttxt1 humtxt puttxt2 puttxt3 newtxt)
-          (28,rentxt)
-          (29,rmvtxt)
-          (30,revtxt)
-          (31,simtxt)
-          (32,strtxt)
-          (33,switxt)
-          (34,systxt)
-          (35,tbltxt)
-          (36,upptxt DOSopttxt)
-          (37,utftxt)
-          (38,vaptxt)
-          (39,whltxt)
-          (40,x2dtxt)
+          (18,lettxt)
+          (19,lowtxt DOSopttxt)
+          (20,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt)
+          (21,maptxt)
+          (22,memtxt)
+          (23,modtxt)
+          (24,moptxt)
+          (25,newobjecttxt)
+          (26,peetxt)
+          (27,poktxt)
+          (28,puttxt1 humtxt puttxt2 puttxt3 newtxt)
+          (29,rentxt)
+          (30,rmvtxt)
+          (31,revtxt)
+          (32,simtxt)
+          (33,strtxt)
+          (34,switxt)
+          (35,systxt)
+          (36,tbltxt)
+          (37,upptxt DOSopttxt)
+          (38,utftxt)
+          (39,vaptxt)
+          (40,whltxt)
+          (41,x2dtxt)
     )
   & ( intro
     =   M
@@ -1190,6 +1193,14 @@ trick is useful in batch processing."
 input is coming from standard input.
 Take care that you put filenames in double quotes if they contain any
 characters that can be misunderstood, such as dots, (back)slashes or dollars."
+    )
+  & ( lettxt
+    =   T
+      , "let$(<atom-or-nil>)"
+      , "let$ checks whether a single character is a letter.
+This function uses the Unicode definitions of letters as found in Unicode.txt.
+On success, the single character is returned. The function fails if the
+argument is not a single character that is a letter."
     )
   & ( lowtxt
     =   T
