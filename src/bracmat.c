@@ -1451,7 +1451,7 @@ Based on UnicodeData.txt (2022-08-03 17:00)
 
 Structures created with CaseFolding.bra
 */
-struct cletter { int L : 21; int range : 11; };
+struct cletter { unsigned int L : 21; unsigned int range : 11; };
 unsigned int lastindex = 671;
 struct cletter Cletters[] = { {0x41,25},{0x61,25},{0xAA,0},{0xB5,0},{0xBA,0},{0xC0,22},
 {0xD8,30},{0xF8,457},{0x2C6,11},{0x2E0,4},{0x2EC,0},{0x2EE,0},{0x370,4},{0x376,1},
