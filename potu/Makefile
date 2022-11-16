@@ -3,6 +3,7 @@ SRC = binding.c \
       builtinmethod.c \
       canonization.c \
       calculation.c \
+      cletters.c \
       copy.c \
       encoding.c \
       equal.c \

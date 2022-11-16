@@ -1,4 +1,5 @@
 #include "functions.h"
+#include "cletters.h"
 #include "nodedefs.h"
 #include "copy.h"
 #include "typedobjectnode.h"
