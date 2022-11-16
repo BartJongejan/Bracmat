@@ -303,38 +303,42 @@ typedef struct
 #endif
 #endif
 
+#define Chr O('c','h','r')
+#define Chu O('c','h','u')
+#define D2X O('d','2','x') /* dec -> hex */
 #define ECH O('E','C','H')
-#define ONE O('1', 0 , 0 )
 /* err$foo redirects error messages to foo */
 #define ERR O('e','r','r')
 #define EXT O('E','X','T')
 #define FLG O('f','l','g')
-#define GLF O('g','l','f') /* The opposite of flg */
 #define GET O('g','e','t')
+#define GLF O('g','l','f') /* The opposite of flg */
 /*#define HUM O('H','U','M')*/
 #define HT  O('H','T', 0 )
 #define IM  O('i', 0 , 0 )
 #define JSN O('J','S','N')
-#define Chr O('c','h','r')
-#define Chu O('c','h','u')
+#define LET O('l','e','t')
 #define LIN O('L','I','N')
 #define LOW O('l','o','w')
-#define REV O('r','e','v') /* strrev */
 #define LST O('l','s','t')
+#define MAP O('m','a','p')
 #define MEM O('M','E','M')
 #define MINONE O('-','1',0)
 #define ML  O('M','L',0)
 #define MMF O('m','e','m')
 #define MOD O('m','o','d')
+#define MOP O('m','o','p')
 #define NEW O('N','E','W')
 #define New O('n','e','w')
+#define ONE O('1', 0 , 0 )
 #define PI  O('p','i', 0 )
 #define PUT O('p','u','t')
 #define PRV O('?', 0 , 0 )
 #define RAW O('R','A','W')
-#define STR O('s','t','r')
+#define REV O('r','e','v') /* strrev */
 #define SIM O('s','i','m')
 #define STG O('S','T','R')
+#define STR O('s','t','r')
 #define TBL O('t','b','l')
 #define TRM O('T','R','M')
 #define TWO O('2', 0 , 0 )
@@ -342,14 +346,11 @@ typedef struct
 #define UPP O('u','p','p')
 #define UTF O('u','t','f')
 #define VAP O('V','A','P')
+#define Vap O('v','a','p') /* map for string instead of list */
 #define WHL O('w','h','l')
+#define WYD O('W','Y','D') /* lst option for wider lines */
 #define X   O('X', 0 , 0 )
 #define X2D O('x','2','d') /* hex -> dec */
-#define D2X O('d','2','x') /* dec -> hex */
-#define MAP O('m','a','p')
-#define MOP O('m','o','p')
-#define Vap O('v','a','p') /* map for string instead of list */
-#define WYD O('W','Y','D') /* lst option for wider lines */
 #define XX  O('e', 0 , 0 )
 
 

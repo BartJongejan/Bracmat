@@ -684,8 +684,8 @@ typedef struct
 #define UPP O('u','p','p')
 #define UTF O('u','t','f')
 #define VAP O('V','A','P')
-#define WHL O('w','h','l')
 #define Vap O('v','a','p') /* map for string instead of list */
+#define WHL O('w','h','l')
 #define WYD O('W','Y','D') /* lst option for wider lines */
 #define X   O('X', 0 , 0 )
 #define X2D O('x','2','d') /* hex -> dec */

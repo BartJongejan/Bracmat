@@ -136,7 +136,8 @@ TODO list:
 #include "u2l-l2u.h"
 #include "matchstate.h"
 
-#if defined SINGLEOBJECT      
+#if defined SINGLEOBJECT
+#define CLETTERS_H
 #define GLOBALS_H                  
 #define FILEWRITE_H
 #define NUMBERCHECK_H
@@ -175,6 +176,7 @@ TODO list:
 #define CANONIZATION_C
 #define EVALUATE_H
 
+#include "cletters.c"
 #include "u2l-l2u.c"
 #include "globals.c"
 #include "filewrite.c"

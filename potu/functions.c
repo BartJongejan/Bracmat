@@ -652,6 +652,40 @@ function_return_type functions(psk Pnode)
             Pnode = scopy((const char*)draft);
             return functionOk(Pnode);
             }
+        CASE(LET)
+            {
+            /*
+            @(abcædef:? (%@>"~" ?:?a & utf$!a) ?)
+            @(str$(abc chu$200 def):? (%@>"~" ?:?a & utf$!a) ?)
+            */
+            if(is_op(rightnode))
+                {
+                Pnode->v.fl |= FENCE;
+                return functionFail(Pnode);
+                }
+            else
+                {
+                const char* s = (const char*)POBJ(rightnode);
+                intVal.i = getCodePoint(&s);
+                if(intVal.i < 0 || *s)
+                    {
+                    if(intVal.i != -2)
+                        {
+                        Pnode->v.fl |= IMPLIEDFENCE;
+                        }
+                    return functionFail(Pnode);
+                    }
+
+                if(isAlpha(intVal.i))
+                    {
+                    rrightnode = same_as_w(rightnode);
+                    wipe(Pnode);
+                    Pnode = rrightnode;
+                    return functionOk(Pnode);
+                    }
+                else return functionFail(Pnode);
+                }
+            }
         CASE(UTF)
             {
             /*
