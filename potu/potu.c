@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "14 November 2022"
-#define VERSION "6.12.6"
-#define BUILD "263"
+#define DATUM "21 November 2022"
+#define VERSION "6.12.7"
+#define BUILD "264"
 /*
 COMPILATION
 -----------
@@ -133,11 +133,12 @@ TODO list:
 #include "objectnode.h"
 #include "nnumber.h"
 #include "hashtypes.h"
-#include "u2l-l2u.h"
+#include "unicaseconv.h"
 #include "matchstate.h"
 
 #if defined SINGLEOBJECT
-#define CLETTERS_H
+#define UNICASECONV_H
+#define UNICHARTYPES_H
 #define GLOBALS_H                  
 #define FILEWRITE_H
 #define NUMBERCHECK_H
@@ -176,8 +177,8 @@ TODO list:
 #define CANONIZATION_C
 #define EVALUATE_H
 
-#include "cletters.c"
-#include "u2l-l2u.c"
+#include "unicaseconv.c"
+#include "unichartypes.c"
 #include "globals.c"
 #include "filewrite.c"
 #include "numbercheck.c"

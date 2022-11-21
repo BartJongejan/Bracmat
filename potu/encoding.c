@@ -56,35 +56,6 @@ unsigned char CodePage850toISO8859(unsigned char kar)
     }
 #endif
 
-int convertLetter(int a, struct ccaseconv * T)
-    {
-    int i;
-    if (a > 0x10FFFF)
-        return a;
-    for (i = 0;; ++i)
-        {
-        if ((unsigned int)a < T[i].L)
-            {
-            if (i == 0)
-                return a;
-            --i;
-            if ((unsigned int)a <= (unsigned int)(T[i].L + T[i].range)
-                && (T[i].inc < 2
-                    || !((a - T[i].L) & 1)
-                    )
-                )
-                {
-                return a + T[i].dif;
-                }
-            else
-                {
-                break;
-                }
-            }
-        }
-    return a;
-    }
-
 /* extern, is called from xml.c json.c */
 unsigned char * putCodePoint(ULONG val, unsigned char * s)
     {
@@ -320,11 +291,6 @@ psk changeCase(psk Pnode
             }
         }
     return pnode;
-    }
-
-int toLowerUnicode(int a)
-    {
-    return convertLetter(a, u2l);
     }
 
 int hasUTF8MultiByteCharacters(const char * s)

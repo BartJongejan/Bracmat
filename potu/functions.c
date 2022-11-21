@@ -1,5 +1,5 @@
 #include "functions.h"
-#include "cletters.h"
+#include "unichartypes.h"
 #include "nodedefs.h"
 #include "copy.h"
 #include "typedobjectnode.h"
@@ -667,6 +667,7 @@ function_return_type functions(psk Pnode)
             else
                 {
                 const char* s = (const char*)POBJ(rightnode);
+                const char* cat;
                 intVal.i = getCodePoint(&s);
                 if(intVal.i < 0 || *s)
                     {
@@ -676,8 +677,8 @@ function_return_type functions(psk Pnode)
                         }
                     return functionFail(Pnode);
                     }
-
-                if(isAlpha(intVal.i))
+                cat = gencat(intVal.i);
+                if(cat[0] == 'L' || cat[0] == 'M') /* letter or mark */
                     {
                     rrightnode = same_as_w(rightnode);
                     wipe(Pnode);

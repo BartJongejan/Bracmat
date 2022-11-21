@@ -3,7 +3,6 @@ SRC = binding.c \
       builtinmethod.c \
       canonization.c \
       calculation.c \
-      cletters.c \
       copy.c \
       encoding.c \
       equal.c \
@@ -33,7 +32,8 @@ SRC = binding.c \
       simil.c \
       stringmatch.c \
       treematch.c \
-      u2l-l2u.c \
+      unicaseconv.c \
+      unichartypes.c \
       variables.c \
       wipecopy.c \
       writeerr.c \
