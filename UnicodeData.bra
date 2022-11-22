@@ -1,0 +1,981 @@
+{UnicodeData.bra
+
+Read UnicodeData.txt and extract convert tables for 
+(1) case conversion (Uppercase Mapping, Lowercase Mapping columns) and 
+(2) character type (General Category column)
+
+Produces 
+    
+    unicaseconv.c
+    unicaseconv.h
+    unichartypes.c
+    unichartypes.h
+    
+You need to install Bracmat to run this script:
+
+    git clone https://github.com/BartJongejan/Bracmat.git
+    
+After installing, start bracmat and then, after the prompt, type:
+
+    get$"UnicodeData.bra"
+
+ABout once a year the unicode data are updated. Download the latest version from:
+https://unicode.org/Public/UNIDATA/UnicodeData.txt
+}
+
+X=
+  (UnicodeDataFileName="UnicodeData.txt")
+  (UnicodeDataDate="2022-08-03 17:00")
+  (Upper=)
+  (Lower=)
+  ( do
+  =   
+    .   0:?p
+      & "
+0       Code value                      normative	            Code value. For characters in the range U+0000..U+FFFD the code value uses a 4-digit hexadecimal format; for characters in the range U+10000..U+FFFFD the code value uses a 5-digit hexadecimal format; and for characters in the range U+100000..U+10FFFD the code value uses a 6-digit hexadecimal format.
+1       Character name 	                normative 	            These names match exactly the names published in Chapter 14 of the Unicode Standard, Version 3.0.
+2       General Category 	            normative/informative   This is a useful breakdown into various character types which can be used as a default categorization in implementations. See below for a brief explanation.
+3       Canonical Combining Classes     normative 	            The classes used for the Canonical Ordering Algorithm in the Unicode Standard. These classes are also printed in Chapter 4 of the Unicode Standard.
+4       Bidirectional Category          normative 	            See the list below for an explanation of the abbreviations used in this field. These are the categories required by the Bidirectional Behavior Algorithm in the Unicode Standard. These categories are summarized in Chapter 3 of the Unicode Standard.
+5       Character Decomposition Mapping normative 	            In the Unicode Standard, not all of the mappings are full (maximal) decompositions. Recursive application of look-up for decompositions will, in all cases, lead to a maximal decomposition. The decomposition mappings match exactly the decomposition mappings published with the character names in the Unicode Standard.
+6       Decimal digit value	            normative 	            This is a numeric field. If the character has the decimal digit property, as specified in Chapter 4 of the Unicode Standard, the value of that digit is represented with an integer value in this field
+7       Digit value 	                normative 	            This is a numeric field. If the character represents a digit, not necessarily a decimal digit, the value is here. This covers digits which do not form decimal radix forms, such as the compatibility superscript digits
+8       Numeric value 	                normative 	            This is a numeric field. If the character has the numeric property, as specified in Chapter 4 of the Unicode Standard, the value of that character is represented with an integer or rational number in this field. This includes fractions as, e.g., 1/5 for U+2155 VULGAR FRACTION ONE FIFTH Also included are numerical values for compatibility characters such as circled numbers.
+9       Mirrored 		                normative 	            If the character has been identified as a mirrored character in bidirectional text, this field has the value Y; otherwise N. The list of mirrored characters is also printed in Chapter 4 of the Unicode Standard.
+10      Unicode 1.0 Name 	            informative             This is the old name as published in Unicode 1.0. This name is only provided when it is significantly different from the Unicode 3.0 name for the character.
+11      10646 comment field	            informative             This is the ISO 10646 comment field. It appears in parentheses in the 10646 names list, or contains an asterisk to mark an Annex P note.
+12      Uppercase Mapping 	            informative             Upper case equivalent mapping. If a character is part of an alphabet with case distinctions, and has an upper case equivalent, then the upper case equivalent is in this field. See the explanation below on case distinctions. These mappings are always one-to-one, not one-to-many or many-to-one. This field is informative.
+13      Lowercase Mapping 	            informative             Similar to Uppercase mapping
+14      Titlecase Mapping 	            informative             Similar to Uppercase mapping
+
+
+
+Lu 	Uppercase_Letter 	    an uppercase letter
+Ll 	Lowercase_Letter 	    a lowercase letter
+Lt 	Titlecase_Letter 	    a digraphic character, with first part uppercase
+LC 	Cased_Letter 	        Lu | Ll | Lt
+Lm 	Modifier_Letter 	    a modifier letter
+Lo 	Other_Letter 	        other letters, including syllables and ideographs
+L 	Letter 	                Lu | Ll | Lt | Lm | Lo
+Mn 	Nonspacing_Mark 	    a nonspacing combining mark (zero advance width)
+Mc 	Spacing_Mark 	        a spacing combining mark (positive advance width)
+Me 	Enclosing_Mark 	        an enclosing combining mark
+M 	Mark 	                Mn | Mc | Me
+Nd 	Decimal_Number 	        a decimal digit
+Nl 	Letter_Number 	        a letterlike numeric character
+No 	Other_Number 	        a numeric character of other type
+N 	Number 	                Nd | Nl | No
+Pc 	Connector_Punctuation 	a connecting punctuation mark, like a tie
+Pd 	Dash_Punctuation 	    a dash or hyphen punctuation mark
+Ps 	Open_Punctuation 	    an opening punctuation mark (of a pair)
+Pe 	Close_Punctuation 	    a closing punctuation mark (of a pair)
+Pi 	Initial_Punctuation     an initial quotation mark
+Pf 	Final_Punctuation 	    a final quotation mark
+Po 	Other_Punctuation 	    a punctuation mark of other type
+P 	Punctuation 	        Pc | Pd | Ps | Pe | Pi | Pf | Po
+Sm 	Math_Symbol 	        a symbol of mathematical use
+Sc 	Currency_Symbol 	    a currency sign
+Sk 	Modifier_Symbol 	    a non-letterlike modifier symbol
+So 	Other_Symbol 	        a symbol of other type
+S 	Symbol 	                Sm | Sc | Sk | So
+Zs 	Space_Separator 	    a space character (of various non-zero widths)
+Zl 	Line_Separator 	        U+2028 LINE SEPARATOR only
+Zp 	Paragraph_Separator     U+2029 PARAGRAPH SEPARATOR only
+Z 	Separator 	            Zs | Zl | Zp
+Cc 	Control 	            a C0 or C1 control code
+Cf 	Format 	                a format control character
+Cs 	Surrogate 	            a surrogate code point
+Co 	Private_Use 	        a private-use character
+Cn 	Unassigned 	            a reserved unassigned code point or a noncharacter
+C 	Other 	                Cc | Cf | Cs | Co | Cn
+"
+      & :?K
+      & :?u2l
+      & :?l2u
+      &   
+        : ?let
+        : ?mark
+        : ?number
+        : ?punctuation
+        : ?symbol
+        : ?separator
+        : ?other
+        : ?dec
+        : ?Mdecomposed
+      & 0:?whs:?ML:?ALLL:?largest
+      &     vap
+          $ ( ( 
+              =   
+                .     @( !arg
+                       : (   ?"Code value"
+                             ";"
+                             ?"Character name"
+                             ";"
+                             ?"General Category"
+                             ";"
+                             ?"Canonical Combining Classes"
+                             ";"
+                             ?"Bidirectional Category"
+                             ";"
+                             ?"Character Decomposition Mapping"
+                             ";"
+                             ?"Decimal digit value"
+                             ";"
+                             ?"Digit value"
+                             ";"
+                             ?"Numeric value"
+                             ";"
+                             ?Mirrored
+                             ";"
+                             ?"Unicode 1.0 Name"
+                             ";"
+                             ?"10646 comment field"
+                             ";"
+                             ?"Uppercase Mapping"
+                             ";"
+                             ?"Lowercase Mapping"
+                             ";"
+                             ?"Titlecase Mapping"
+                         & ( !"Lowercase Mapping":
+                           |     ( x2d$!"Code value":?V
+                                 . x2d$!"Lowercase Mapping":?W
+                                 . !W+-1*!V
+                                 . !"Code value"
+                                 . !"Lowercase Mapping"
+                                 )
+                                 !u2l
+                             : ?u2l
+                           )
+                         & ( !"Uppercase Mapping":
+                           |     ( x2d$!"Code value":?V
+                                 . x2d$!"Uppercase Mapping":?W
+                                 . !W+-1*!V
+                                 . !"Code value"
+                                 . !"Uppercase Mapping"
+                                 )
+                                 !l2u
+                             : ?l2u
+                           )
+                         & ( !"Character Decomposition Mapping":
+                           |   @( !"Character Decomposition Mapping"
+                                : ( "<" ?where ">" ?decomposed
+                                  |   ?decomposed
+                                    &   (   @( !"Character name"
+                                             : "CJK COMPATIBILITY IDEOGRAPH" ?
+                                             )
+                                          & "CJK COMPATIBILITY IDEOGRAPH"
+                                        | !"Character name"
+                                        )
+                                      : ?where
+                                    & "Ligatures, CJK COMPATIBILITY IDEOGRAPH"
+                                  )
+                                )
+                             & !where+!whs:?whs
+                             &     ( x2d$!"Code value"
+                                   . !"Code value"
+                                   . !where
+                                   . !decomposed
+                                   . chu$(x2d$!"Code value")
+                                   .   str
+                                     $ (   vap
+                                         $ ( ( 
+                                             =   
+                                               .   !arg:
+                                                 |   chu
+                                                   $ ( x2d$!arg
+                                                     : (   >!largest
+                                                         : ?largest
+                                                       | ?
+                                                       )
+                                                     )
+                                             )
+                                           . !decomposed
+                                           . " "
+                                           )
+                                       :   ?
+                                           ( [?LL
+                                           & !LL+!ALLL:?ALLL
+                                           & (   !LL:>!ML:?ML
+                                               &   !"Code value" !decomposed
+                                                 : ?Mdecomposed
+                                             | 
+                                             )
+                                           )
+                                       )
+                                   )
+                                   !dec
+                               : ?dec
+                           )
+                         & (   @(!"General Category":L ?k)
+                             &     ( x2d$!"Code value"
+                                   . !"Code value"
+                                   . !"Character name"
+                                   )
+                                   !let
+                               : ?let
+                             & ( !K:? !k ?
+                               |   !k !K:?K
+                                 & :?!k
+                               )
+                             &   (!"Code value".!"Character name") !!k
+                               : ?!k
+                             & 
+                           |   @(!"General Category":M ?)
+                             &     ( x2d$!"Code value"
+                                   . !"Code value"
+                                   . !"Character name"
+                                   . M
+                                   )
+                                   !mark
+                               : ?mark
+                             & 
+                           |   @(!"General Category":N ?)
+                             &     ( x2d$!"Code value"
+                                   . !"Code value"
+                                   . !"Character name"
+                                   . N
+                                   )
+                                   !number
+                               : ?number
+                             & 
+                           |   @(!"General Category":P ?)
+                             &     ( x2d$!"Code value"
+                                   . !"Code value"
+                                   . !"Character name"
+                                   . P
+                                   )
+                                   !punctuation
+                               : ?punctuation
+                             & 
+                           |   @(!"General Category":S ?)
+                             &     ( x2d$!"Code value"
+                                   . !"Code value"
+                                   . !"Character name"
+                                   . S
+                                   )
+                                   !symbol
+                               : ?symbol
+                             & 
+                           |   @(!"General Category":Z ?)
+                             &     ( x2d$!"Code value"
+                                   . !"Code value"
+                                   . !"Character name"
+                                   . Z
+                                   )
+                                   !separator
+                               : ?separator
+                             & 
+                           |   @(!"General Category":C ?)
+                             &     ( x2d$!"Code value"
+                                   . !"Code value"
+                                   . !"Character name"
+                                   . C
+                                   )
+                                   !other
+                               : ?other
+                           | 
+                           )
+                         )
+                       )
+                    & (x2d$!"Code value".!"General Category".!"Code value")
+                  | 
+              )
+            . !txt
+            . \n
+            )
+        : ?CGC
+      & lst$(whs,whs,NEW BIN)
+      & lst$(ML,ML,NEW)
+      & lst$(Mdecomposed,ML,NEW)
+      & lst$(ALLL,ML,NEW)
+      & lst$(largest d2x$!largest,ML,NEW)
+      & put$(d2x$!largest \n,ML,NEW)
+      & lst$(CGC,CGC,NEW,BIN)
+      & lst$(dec,dec,NEW BIN)
+      & 0:?periods
+      &   !CGC
+        :   ?CGC0
+            ((~<65536.?) ?:?CGC1)
+            ((~<131072.?) ?:?CGC2)
+      & !CGC0 STOP:?CGC0
+      & !CGC1 STOP:?CGC1
+      & !CGC2 STOP:?CGC2
+      & lst$(CGC0,CGC0,NEW BIN)
+      & lst$(CGC1,CGC1,NEW BIN)
+      & lst$(CGC2,CGC2,NEW BIN)
+      & ( statistics
+        =   periods cat I i prI ign
+          .   0:?periods
+            & :?cat
+            & :?I
+            & 0:?i:?prI
+            & !arg:(?arg.?ign)
+            &     map
+                $ ( ( 
+                    =   C H U
+                      .     !I:?prI
+                          & !arg:(?I.?C.?H)
+                          & ( !C:!cat&
+                            |     (   !cat:(|!ign)
+                                    & 
+                                  | ( !i
+                                    . d2x$!i
+                                    . !cat
+                                    . !prI+-1*!i
+                                    )
+                                  )
+                                : ?U
+                              & ( !cat:
+                                | !cat+!periods:?periods
+                                )
+                              & !I:?i
+                              & !C:?cat
+                              & !U
+                            )
+                        | (!i.d2x$!i.!cat.!prI+-1*!i)
+                    )
+                  . !arg
+                  )
+              : ?stats
+            & ( !cat:
+              | !cat+!periods:?periods
+              )
+            & (!periods.!stats)
+        )
+      & statistics$(!CGC0.):(?periods0.?)
+      & statistics$(!CGC1.):(?periods1.?)
+      & statistics$(!CGC2.):(?periods2.?)
+      & 0:?default0:?default1
+      & :?def0:?def1
+      & (   !periods0
+          :   ?
+            + ( #?n*@?def
+              & !n:>!default0:?default0
+              & !def:?def0
+              & ~
+              )
+            + ?
+        | out$(def0 !def0 default0 !default0)
+        )
+      & (   !periods1
+          :   ?
+            + ( #?n*@?def
+              & !n:>!default1:?default1
+              & !def:?def1
+              & ~
+              )
+            + ?
+        | out$(def1 !def1 default1 !default1)
+        )
+      & lst$(periods0,periods0,NEW BIN)
+      & lst$(periods1,periods1,NEW BIN)
+      & lst$(periods2,periods2,NEW BIN)
+      & statistics$(!CGC0.!def0):(?.?Groups0)
+      & statistics$(!CGC1.!def1):(?.?Groups1)
+      & statistics$(!CGC2.):(?.?Groups2)
+      & lst$(Groups0,Groups0,NEW BIN)
+      & lst$(Groups1,Groups1,NEW BIN)
+      & lst$(Groups2,Groups2,NEW BIN)
+      & !Groups0:? [?lastindex0
+      & !Groups1:? [?lastindex1
+      & !Groups2:? [?lastindex2
+      & (lst$(K,K,NEW BIN)|)
+      & (lst$(let,let,NEW BIN)|)
+      & (lst$(u2l,u2l,NEW BIN)|)
+      & (lst$(l2u,l2u,NEW BIN)|)
+      & (lst$(mark,mark,NEW BIN)|)
+      & (lst$(number,number,NEW BIN)|)
+      & ( lst$(punctuation,punctuation,NEW BIN)
+        | 
+        )
+      & (lst$(symbol,symbol,NEW BIN)|)
+      & (lst$(separator,separator,NEW BIN)|)
+      & (lst$(other,other,NEW BIN)|)
+      & 9:?crd
+      & ( theMarks
+        =   m1 m2
+          .   map
+            $ ( ( 
+                =   
+                  .   !arg:(?.?.@(?:%@?m1 @?m2).?)
+                    & -1+!crd:?crd
+                    &   (   !crd:0
+                          & 10:?crd
+                          & \n
+                        | 
+                        )
+                        "{"
+                        e1
+                        !m1
+                        ","
+                        e2
+                        !m2
+                        "},"
+                )
+              . !arg
+              )
+        )
+      &     "/*\n"
+            "Based on UnicodeData.txt ("
+            !(X.UnicodeDataDate)
+            ")\n"
+            "Structures created with UnicodeData.bra"
+            \n
+            "*/\n\n"
+            "#include \"unichartypes.h\""
+            \n
+            "#include <assert.h>"
+            \n\n
+            "typedef enum {e1L,e1M,e1N,e1P,e1S,e1Z,e1C,e1} mark1;"
+            \n
+            "typedef enum {e2C,e2c,e2d,e2e,e2f,e2i,e2k,e2l,e2m,e2n,e2o,e2p,e2s,e2t,e2u,e2} mark2;"
+            \n
+            "typedef struct tmark {unsigned char m1:4; unsigned char m2:4;} tmark;"
+            \n
+            "typedef struct cletter {unsigned short int L;unsigned short int range;} cletter;"
+            \n
+            "typedef struct cletter2 {unsigned int L;unsigned int range;} cletter2;"
+            \n\n
+            "static const char * firstMark = \"LMNPSZC\";"
+            \n
+            "static const char * secondMark = \"Ccdefiklmnopstu\";"
+            \n\n
+            "tmark Mark[] =     {"
+            theMarks$!Groups0
+            theMarks$!Groups1
+            theMarks$!Groups2
+            "{e1,e2}};"
+            \n\n
+            "cletter Cletters0[]={"
+            ( 9:?crd
+            &   map
+              $ ( ( 
+                  =   
+                    .   !arg:(?d.?h.?g.?l)
+                      & -1+!crd:?crd
+                      &   (   !crd:0
+                            & 10:?crd
+                            & \n
+                          | 
+                          )
+                          "{0x"
+                          !h
+                          ","
+                          !l
+                          "},"
+                  )
+                . !Groups0
+                )
+            )
+            "{0xFFFF,0}};"
+            \n\n
+            "cletter Cletters1[]={"
+            ( 9:?crd
+            &   map
+              $ ( ( 
+                  =   
+                    .     !arg
+                        : (?d.@(?:%@ ?h).?g.?l)
+                      & -1+!crd:?crd
+                      &   (   !crd:0
+                            & 10:?crd
+                            & \n
+                          | 
+                          )
+                          "{0x"
+                          !h
+                          ","
+                          !l
+                          "},"
+                  )
+                . !Groups1
+                )
+            )
+            "{0xFFFF,0}};"
+            \n\n
+            "cletter2 Cletters2[]={"
+            ( 9:?crd
+            &   map
+              $ ( ( 
+                  =   
+                    .   !arg:(?d.@(?:?h).?g.?l)
+                      & -1+!crd:?crd
+                      &   (   !crd:0
+                            & 10:?crd
+                            & \n
+                          | 
+                          )
+                          "{0x"
+                          !h
+                          ","
+                          !l
+                          "},"
+                  )
+                . !Groups2
+                )
+            )
+            "{0xFFFFF,0}};"
+            \n\n
+            "
+const char * gencat(int a)
+    {
+    unsigned int pivot;
+    unsigned int lo;
+    unsigned int hi;
+    unsigned int offset;
+    cletter *Cletters;
+    const char *def;
+    static char returnVal[3] = { '0','0','0' };
+    
+    if(a <= 0)
+        return 0;
+    lo = 0;
+    offset = 0;
+    Cletters = 0;
+    if(a < 0x10000)
+        {
+        pivot = 8;
+        hi = "
+            !lastindex0
+            "; /* Range starting at lastindex does not consists of letters, so pivot must always stay less than lastindex. */
+        assert(pivot < "
+            !lastindex0
+            ");
+        Cletters = Cletters0;
+        def = \""
+            !def0
+            "\";
+        }
+    else if(a >= 0x20000)
+        {
+        int i;
+        for(i = 0;i < "
+            !lastindex2
+            ";++i)
+            {
+            if(Cletters2[i].L <= (unsigned short)a && (unsigned short)a <= Cletters2[i].L + Cletters2[i].range)
+                {
+                tmark mrk = Mark[i + "
+            !lastindex0
+            " + "
+            !lastindex1
+            "];
+                returnVal[0] = firstMark[mrk.m1];
+                returnVal[1] = secondMark[mrk.m2];
+                returnVal[2] = '0';
+                break;
+                }
+            }
+        return returnVal;
+        }
+    else
+        {
+        a &= 0xFFFF;
+        pivot = "
+            !lastindex1
+            " >> 1;
+        hi = "
+            !lastindex1
+            ";
+        Cletters = Cletters1;
+        def = \""
+            !def1
+            "\";
+        offset = "
+            !lastindex0
+            ";
+        }
+    while(1)
+        {
+        assert(pivot < hi);
+        if((unsigned short)a < Cletters[pivot].L)
+            {
+            if(pivot == lo)
+                return def;
+            else
+                {
+                hi = pivot;
+                pivot = (pivot + lo) / 2;
+                }
+            }
+        else if((unsigned short)a <= Cletters[pivot].L + Cletters[pivot].range)
+            {
+            tmark mrk = Mark[pivot + offset];
+            returnVal[0] = firstMark[mrk.m1];
+            returnVal[1] = secondMark[mrk.m2];
+            returnVal[2] = '0';
+            return returnVal;
+            }
+        else if(pivot + 1 == hi)
+            return def;
+        else
+            {
+            lo = pivot + 1;
+            pivot = (hi + pivot) / 2;
+            }
+        }
+    }
+
+"
+        : ?Cletters
+      & put$(str$!Cletters,"unichartypes.c",NEW,BIN)
+      & out$"unichartypes.c written"
+      &   put
+        $ (   str
+            $ ( "#ifndef UNICHARTYPES_H"
+                \n
+                "#define UNICHARTYPES_H"
+                "\n/*\n"
+                "Uses the field 'General Category'. Values returned by gencat(int) are:"
+                \n\n
+                "Lu 	Uppercase_Letter 	    an uppercase letter"
+                \n
+                "Ll 	Lowercase_Letter 	    a lowercase letter"
+                \n
+                "Lt 	Titlecase_Letter 	    a digraphic character, with first part uppercase"
+                \n
+                "LC 	Cased_Letter 	        Lu | Ll | Lt"
+                \n
+                "Lm 	Modifier_Letter 	    a modifier letter"
+                \n
+                "Lo 	Other_Letter 	        other letters, including syllables and ideographs"
+                \n
+                "L 	Letter 	                Lu | Ll | Lt | Lm | Lo"
+                \n
+                "Mn 	Nonspacing_Mark 	    a nonspacing combining mark (zero advance width)"
+                \n
+                "Mc 	Spacing_Mark 	        a spacing combining mark (positive advance width)"
+                \n
+                "Me 	Enclosing_Mark 	        an enclosing combining mark"
+                \n
+                "M 	Mark 	                Mn | Mc | Me"
+                \n
+                "Nd 	Decimal_Number 	        a decimal digit"
+                \n
+                "Nl 	Letter_Number 	        a letterlike numeric character"
+                \n
+                "No 	Other_Number 	        a numeric character of other type"
+                \n
+                "N 	Number 	                Nd | Nl | No"
+                \n
+                "Pc 	Connector_Punctuation 	a connecting punctuation mark, like a tie"
+                \n
+                "Pd 	Dash_Punctuation 	    a dash or hyphen punctuation mark"
+                \n
+                "Ps 	Open_Punctuation 	    an opening punctuation mark (of a pair)"
+                \n
+                "Pe 	Close_Punctuation 	    a closing punctuation mark (of a pair)"
+                \n
+                "Pi 	Initial_Punctuation     an initial quotation mark"
+                \n
+                "Pf 	Final_Punctuation 	    a final quotation mark"
+                \n
+                "Po 	Other_Punctuation 	    a punctuation mark of other type"
+                \n
+                "P 	Punctuation 	        Pc | Pd | Ps | Pe | Pi | Pf | Po"
+                \n
+                "Sm 	Math_Symbol 	        a symbol of mathematical use"
+                \n
+                "Sc 	Currency_Symbol 	    a currency sign"
+                \n
+                "Sk 	Modifier_Symbol 	    a non-letterlike modifier symbol"
+                \n
+                "So 	Other_Symbol 	        a symbol of other type"
+                \n
+                "S 	Symbol 	                Sm | Sc | Sk | So"
+                \n
+                "Zs 	Space_Separator 	    a space character (of various non-zero widths)"
+                \n
+                "Zl 	Line_Separator 	        U+2028 LINE SEPARATOR only"
+                \n
+                "Zp 	Paragraph_Separator     U+2029 PARAGRAPH SEPARATOR only"
+                \n
+                "Z 	Separator 	            Zs | Zl | Zp"
+                \n
+                "Cc 	Control 	            a C0 or C1 control code"
+                \n
+                "Cf 	Format 	                a format control character"
+                \n
+                "Cs 	Surrogate 	            a surrogate code point"
+                \n
+                "Co 	Private_Use 	        a private-use character"
+                \n
+                "Cn 	Unassigned 	            a reserved unassigned code point or a noncharacter"
+                \n
+                "C 	Other 	                Cc | Cf | Cs | Co | Cn"
+                "\n*/\n\n"
+                "#ifdef __cplusplus"
+                \n
+                "extern \"C\" const char * gencat(int a);"
+                \n
+                "#else"
+                \n
+                "extern const char* gencat(int a);"
+                \n
+                "#endif"
+                \n\n
+                "#endif"
+                \n
+              )
+          , "unichartypes.h"
+          , NEW
+          , BIN
+          )
+      & out$"unichartypes.h written"
+      &   put
+        $ (   str
+            $ ( "/* Based on http://unicode.org/Public/UNIDATA/UnicodeData.txt "
+                !(X.UnicodeDataDate)
+                " ,\n"
+                "   structures created with UnicodeData.bra"
+                \n
+                "*/\n\n"
+                "#include  \"unicaseconv.h\""
+                \n
+              )
+          , "unicaseconv.c"
+          , NEW BIN
+          )
+      & ( comp
+        =   
+          .   !arg:(?arg.?name)
+            &   put
+              $ ( str$("
+struct ccaseconv " !name "[]={\n")
+                ,   ("unicaseconv.c",APP BIN)
+                  | (str$(!name ".c"):?name,NEW BIN)
+                )
+            & (pat1=!d1&-1+!d1:?d1)
+            & (pat2=!d2&-2+!d2:?d2)
+            & ( setpat
+              =     
+                  ' (   $pat1
+                      & 1:?dif
+                      & '$pat1:(=?pat)
+                    |   $pat2
+                      & 2:?dif
+                      & '$pat2:(=?pat)
+                    )
+                : (=?pat)
+              )
+            & :?conv:?LL
+            &   whl
+              ' ( !setpat
+                & :?dd
+                &   !arg
+                  :   (   ?d
+                        & -1+!d:?d1
+                        & -2+!d:?d2
+                      . ?
+                      . ?df
+                      . ?
+                      )
+                      ?
+                      (     ( ?ndd
+                            . ?
+                            .   !df
+                              & !ndd:!pat:?dd
+                            . ?
+                            )
+                            ?
+                        & `~
+                      |   ?arg
+                        &     (   !dd:
+                                & ( !d
+                                  . !df+!d
+                                  . !df
+                                  . d2x$!d:?let
+                                  . d2x$(!df+!d)
+                                  . 0:?inc
+                                  . 0:?range
+                                  . d2x$!d
+                                  . d2x$(!df+!d)
+                                  )
+                              | ( !dd
+                                . !df+!dd
+                                . !df
+                                . d2x$!dd:?let
+                                . d2x$(!df+!dd)
+                                . !dif:?inc
+                                . !d+-1*!dd:?range
+                                . d2x$!d
+                                . d2x$(!df+!d)
+                                )
+                              )
+                              !LL
+                          : ?LL
+                        &     "{0x"
+                              !let
+                              ","
+                              !range
+                              ","
+                              !inc
+                              ","
+                              !df
+                              "},\n"
+                              !conv
+                          : ?conv
+                      )
+                )
+            &   put
+              $ ( str$!conv
+                , "unicaseconv.c"|!name
+                , APP BIN
+                )
+            &   put
+              $ ( "{0x1FFFFF,0,0,0}};
+"
+                , "unicaseconv.c"|!name
+                , APP BIN
+                )
+            &   ( "LETTER DECIMAL"
+                . "CASE CONVERTED LETTER DECIMAL"
+                . DELTA
+                . "LETTER HEX"
+                . "CASE CONVERTED LETTER HEX"
+                . INCREMENT
+                . RANGE
+                . "LAST LETTER HEX"
+                . "LAST CASE CONVERTED LETTER HEX"
+                )
+                !LL
+        )
+      & ( writeCaseconvFunctions
+        =   
+          .   put
+            $ ( "
+int convertLetter(int a, struct ccaseconv * T)
+    {
+    int i;
+    if (a > 0x10FFFF)
+        return a;
+    for (i = 0;; ++i)
+        {
+        if ((unsigned int)a < T[i].L)
+            {
+            if (i == 0)
+                return a;
+            --i;
+            if (  (unsigned int)a <= (unsigned int)(T[i].L + T[i].range)
+               && (  T[i].inc < 2
+                  || !((a - T[i].L) & 1)
+                  )
+               )
+                {
+                return a + T[i].dif;
+                }
+            else
+                {
+                break;
+                }
+            }
+        }
+    return a;
+    }
+
+int toUpperUnicode(int a)
+    {
+    return convertLetter(a,l2u);
+    }
+
+int toLowerUnicode(int a)
+    {
+    return convertLetter(a, u2l);
+    }
+"
+              , "unicaseconv.c"
+              , APP BIN
+              )
+        )
+      & comp$(!l2u.l2u):?l2us
+      & lst$(l2us,l2us,NEW BIN)
+      & comp$(!u2l.u2l):?u2ls
+      & writeCaseconvFunctions$
+      & out$"unicaseconv.c written"
+      &   put
+        $ (   str
+            $ ( "#ifndef UNICASECONV_H"
+                \n
+                "#define UNICASECONV_H"
+                \n
+                "/* Uses the fields Uppercase Mapping and Lowercase Mapping in Unicodedata.txt to convert lower case to upper case and vice versa */"
+                \n\n
+                "struct ccaseconv {unsigned int L:21;int range:11;unsigned int inc:2;int dif:20;};"
+                \n
+                "extern struct ccaseconv l2u[];"
+                \n
+                "extern struct ccaseconv u2l[];"
+                \n\n
+                "int convertLetter(int a, struct ccaseconv * T);"
+                \n
+                "int toUpperUnicode(int a);"
+                \n
+                "int toLowerUnicode(int a);"
+                \n\n
+                "#endif"
+                \n
+              )
+          , "unicaseconv.h"
+          , NEW BIN
+          )
+      & out$"unicaseconv.h written"
+      & lst$(u2ls,u2ls,NEW BIN)
+      &   whl
+        ' ( !K:%?k ?K
+          & lst$(!k,!k,NEW BIN)
+          )
+  )
+  ( new
+  =   
+    .   ~
+      |     get$(!(its.UnicodeDataFileName),STR)
+          : ?txt
+        & (its.do)$
+        & DONE
+  );
+
+r=
+  get'"UnicodeData.bra"
+& rmv$"UnicodeData.bak"
+& ren$("UnicodeData.bra"."UnicodeData.bak")
+&   put
+  $ (   str
+      $ ( "{UnicodeData.bra
+
+Read "
+          !(X.UnicodeDataFileName)
+          " and extract convert tables for 
+(1) case conversion (Uppercase Mapping, Lowercase Mapping columns) and 
+(2) character type (General Category column)
+
+Produces 
+    
+    unicaseconv.c
+    unicaseconv.h
+    unichartypes.c
+    unichartypes.h
+    
+You need to install Bracmat to run this script:
+
+    git clone https://github.com/BartJongejan/Bracmat.git
+    
+After installing, start bracmat and then, after the prompt, type:
+
+    get$\"UnicodeData.bra\"
+
+ABout once a year the unicode data are updated. Download the latest version from:
+https://unicode.org/Public/UNIDATA/UnicodeData.txt
+}
+
+"
+        )
+    , "UnicodeData.bra"
+    , NEW BIN
+    )
+& lst'(X,"UnicodeData.bra",APP BIN)
+& put'(\n,"UnicodeData.bra",APP BIN)
+& lst'(r,"UnicodeData.bra",APP BIN)
+& put$(str$("\nnew'" X "&;\n"),"UnicodeData.bra",APP BIN)
+& done;
+
+new'X&;

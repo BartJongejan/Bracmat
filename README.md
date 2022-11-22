@@ -203,6 +203,14 @@ Bracmat is a good choice for tasks that require dynamic programming.
     * xml.c
     
       Source code that implements support for reading XML-files
+    
+    * unicaseconv.c + unicaseconv.h
+
+      Conversion to lowercase or uppercase, based on data extracted from https://unicode.org/Public/UNIDATA/UnicodeData.txt
+
+    * unichartypes.c + unichartypes.h
+
+      Categorization of characters in any of the general classes defined by unicode.org. Data extracted from https://unicode.org/Public/UNIDATA/UnicodeData.txt
 
     * CONFIGURE.COM
 
@@ -273,12 +281,11 @@ Bracmat is a good choice for tasks that require dynamic programming.
   Cyclus: edit program, save from editor, reread in  Bracmat, reload in editor,
   edit program.
 
-* uni.bra
+* UnicodeData.bra
 
   A utility that generates UNICODE-related tables from UnicodeData.txt 
-  (http://unicode.org/Public/UNIDATA/UnicodeData.txt).
-  These tables, which are also found in bracmat.c, have to be updated every
-  few years, when UnicodeData.txt is updated.
+  (https://unicode.org/Public/UNIDATA/UnicodeData.txt).
+  These tables have to be updated every few years, when UnicodeData.txt is updated.
   Conversion between lower and upper casing is based on these tables.
 
 * valid.bra
@@ -335,7 +342,7 @@ You can download Bracmat from GitHub.
 The Bracmat source code has no other dependencies than what is provided by
 Standard C. Building bracmat from source is extremely simple, e.g.:
 
-    gcc bracmat.c xml.c json.c
+    gcc bracmat.c xml.c json.c unicaseconv.c unichartypes.c
     
 You can also use the Makefile, which is in the src directory.    
 
