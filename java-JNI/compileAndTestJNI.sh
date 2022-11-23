@@ -15,7 +15,7 @@ rm bracmat
 rm dk_cst_bracmat.h
 
 # Create stand-alone bracmat.
-gcc -std=c99 -pedantic -Wall -O2 -DNDEBUG ../src/bracmat.c ../src/xml.c ../src/json.c
+gcc -std=c99 -pedantic -Wall -O2 -DNDEBUG ../src/bracmat.c ../src/xml.c ../src/json.c ../src/unicaseconv.c ../src/unichartypes.c
 mv a.out bracmat
 # Test the stand-alone version of Bracmat.
 # Expect a line only saying 'bracmat alife and kicking'.
@@ -43,8 +43,8 @@ javac ./dk/cst/*.java -h .. -Xlint
 cd ..
 
 # Compile bracmat.c as relocatable code for shared object
-# Create bracmatso.o, xml.o and json.o
-gcc -std=c99 -pedantic -Wall -O2 -c -fPIC -DNDEBUG ../safe/bracmatso.c ../src/xml.c ../src/json.c
+# Create bracmatso.o, xml.o, json.o, unicaseconv.o and unichartypes.o
+gcc -std=c99 -pedantic -Wall -O2 -c -fPIC -DNDEBUG ../safe/bracmatso.c ../src/xml.c ../src/json.c ../src/unicaseconv.c ../src/unichartypes.c
 
 cd java
 
@@ -58,7 +58,7 @@ cd ..
 # Compile the C code that exposes methods to Java.
 gcc -std=c99 -pedantic -Wall -pthread -c -fPIC -DNDEBUG -I$JAVA_HOME/include -I$JAVA_HOME/include/linux/ dk_cst_bracmat.c -o dk_cst_bracmat.o    
 # Link the two object files into a shared library (REALNAME).
-gcc -shared -Wl,-soname,libbracmat.so.1 -o libbracmat.so.1.0 bracmatso.o xml.o json.o dk_cst_bracmat.o -lpthread
+gcc -shared -Wl,-soname,libbracmat.so.1 -o libbracmat.so.1.0 bracmatso.o xml.o json.o unicaseconv.o unichartypes.o dk_cst_bracmat.o -lpthread
 # Link REALNAME to SONAME.
 ln -sf libbracmat.so.1.0 libbracmat.so.1
 # Link SONAME to LINKERNAME.
@@ -136,7 +136,7 @@ fi
 #       (Warning: not thread safe in Windows!)
 # Create a Win32 Project "bracmatdll"
 # In the Win32 Application Wizard, choose Application type "DLL", Additional option "Empty project". (Later we are going to kill off the precompiled header, which you cannot deselect in the wizard.)
-# Add existing items bracmatdll.cpp, bracmatso.c, dk_cst_bracmat.c, xml.c, json.c to source files
+# Add existing items bracmatdll.cpp, bracmatso.c, dk_cst_bracmat.c, xml.c, json.c, unicaseconv.c, unichartypes.c to source files
 # Edit the properties for the project:
 #   General
 #       Target Name
