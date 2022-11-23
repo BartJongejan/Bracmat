@@ -663,7 +663,6 @@ function_return_type functions(psk Pnode)
             else
                 {
                 const char* s = (const char*)POBJ(rightnode);
-                const char* cat;
                 intVal.i = getCodePoint(&s);
                 if(intVal.i < 0 || *s)
                     {
