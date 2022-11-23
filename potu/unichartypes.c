@@ -474,7 +474,7 @@ const char * gencat(int a)
     unsigned int offset;
     cletter *Cletters;
     const char *def;
-    static char returnVal[3] = { '0','0','0' };
+    static char returnVal[3] = { '\0','\0','\0' };
     
     if(a <= 0)
         return 0;
@@ -499,7 +499,7 @@ const char * gencat(int a)
                 tmark mrk = Mark[i + 1782 + 430];
                 returnVal[0] = firstMark[mrk.m1];
                 returnVal[1] = secondMark[mrk.m2];
-                returnVal[2] = '0';
+                returnVal[2] = '\0';
                 break;
                 }
             }
@@ -532,7 +532,7 @@ const char * gencat(int a)
             tmark mrk = Mark[pivot + offset];
             returnVal[0] = firstMark[mrk.m1];
             returnVal[1] = secondMark[mrk.m2];
-            returnVal[2] = '0';
+            returnVal[2] = '\0';
             return returnVal;
             }
         else if(pivot + 1 == hi)

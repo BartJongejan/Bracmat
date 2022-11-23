@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "21 November 2022"
-#define VERSION "6.12.1"
-#define BUILD "261"
+#define DATUM "23 November 2022"
+#define VERSION "6.12.2"
+#define BUILD "262"
 /*
 COMPILATION
 -----------
@@ -657,7 +657,6 @@ typedef struct
 #define HT  O('H','T', 0 )
 #define IM  O('i', 0 , 0 )
 #define JSN O('J','S','N')
-#define LET O('l','e','t')
 #define LIN O('L','I','N')
 #define LOW O('l','o','w')
 #define LST O('l','s','t')
@@ -684,6 +683,7 @@ typedef struct
 #define TWO O('2', 0 , 0 )
 #define TXT O('T','X','T')
 #define UPP O('u','p','p')
+#define UGC O('u','g','c') /* Unicode General Category, a two-letter string */
 #define UTF O('u','t','f')
 #define VAP O('V','A','P')
 #define Vap O('v','a','p') /* map for string instead of list */
@@ -13003,12 +13003,8 @@ static function_return_type functions(psk Pnode)
             Pnode = scopy((const char *)draft);
             return functionOk(Pnode);
             }
-        CASE(LET)
+        CASE(UGC)
             {
-            /*
-            @(abcædef:? (%@>"~" ?:?a & utf$!a) ?)
-            @(str$(abc chu$200 def):? (%@>"~" ?:?a & utf$!a) ?)
-            */
             if(is_op(rightnode))
                 {
                 Pnode->v.fl |= FENCE;
@@ -13027,15 +13023,10 @@ static function_return_type functions(psk Pnode)
                         }
                     return functionFail(Pnode);
                     }
-                cat = gencat(intVal.i);
-                if(cat[0] == 'L' || cat[0] == 'M') /* letter or mark */
-                    {
-                    rrightnode = same_as_w(rightnode);
-                    wipe(Pnode);
-                    Pnode = rrightnode;
-                    return functionOk(Pnode);
-                    }
-                else return functionFail(Pnode);
+                sprintf(draft, "%s", gencat(intVal.i));
+                wipe(Pnode);
+                Pnode = scopy((const char*)draft);
+                return functionOk(Pnode);
                 }
             }
         CASE(UTF)
@@ -16271,7 +16262,7 @@ int startProc(
                                 "?tay)&(fct=.!arg:%?cos ?arg&!cos:((?out.?)|?out)&'(? ($out|($out.?)"
                                 ") ?):(=?sgn)&(!flt:!sgn&!(glf$(=~.!sin:!sgn))&!cos|) fct$!arg|)&(:!flt:!sin&mem$!tay|(:!flt&mem$:?flt"
                                 "|)&fct$(mem$!tay))),",
-
+                                "(let=.@(ugc$!arg:(L|M) ?)&!arg),",
                                 "(out=(.put$!arg:?arg&put$\212&!arg)),"
                                 "(flt=((e,d,m,s,f).!arg:(?arg,~<0:?d)&!arg:0|(-1*!arg:>0:?arg&-1|1):?s&"
                                 "10\016!arg:?e+(10\016?m|0&1:?m)&(!m+1/2*1/10^!d:~<10&1+!e:?e&!m*1/10"

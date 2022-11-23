@@ -317,7 +317,6 @@ typedef struct
 #define HT  O('H','T', 0 )
 #define IM  O('i', 0 , 0 )
 #define JSN O('J','S','N')
-#define LET O('l','e','t')
 #define LIN O('L','I','N')
 #define LOW O('l','o','w')
 #define LST O('l','s','t')
@@ -344,6 +343,7 @@ typedef struct
 #define TWO O('2', 0 , 0 )
 #define TXT O('T','X','T')
 #define UPP O('u','p','p')
+#define UGC O('u','g','c') /* Unicode General Category, a two-letter string */
 #define UTF O('u','t','f')
 #define VAP O('V','A','P')
 #define Vap O('v','a','p') /* map for string instead of list */

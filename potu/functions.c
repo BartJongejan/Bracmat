@@ -653,12 +653,8 @@ function_return_type functions(psk Pnode)
             Pnode = scopy((const char*)draft);
             return functionOk(Pnode);
             }
-        CASE(LET)
+        CASE(UGC)
             {
-            /*
-            @(abcædef:? (%@>"~" ?:?a & utf$!a) ?)
-            @(str$(abc chu$200 def):? (%@>"~" ?:?a & utf$!a) ?)
-            */
             if(is_op(rightnode))
                 {
                 Pnode->v.fl |= FENCE;
@@ -677,15 +673,10 @@ function_return_type functions(psk Pnode)
                         }
                     return functionFail(Pnode);
                     }
-                cat = gencat(intVal.i);
-                if(cat[0] == 'L' || cat[0] == 'M') /* letter or mark */
-                    {
-                    rrightnode = same_as_w(rightnode);
-                    wipe(Pnode);
-                    Pnode = rrightnode;
-                    return functionOk(Pnode);
-                    }
-                else return functionFail(Pnode);
+                sprintf(draft, "%s", gencat(intVal.i));
+                wipe(Pnode);
+                Pnode = scopy((const char*)draft);
+                return functionOk(Pnode);
                 }
             }
         CASE(UTF)

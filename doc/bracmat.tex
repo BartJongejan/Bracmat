@@ -3532,10 +3532,6 @@ option is not used, input is coming from standard input. Take care that
 you put filenames in double quotes if they contain any characters that
 can be misunderstood, such as dots, (back)slashes or dollars.
 
-\bfun{\bc{let\d(}(\bi{atom-or-nil})}
-
-let\d checks whether a single character is a letter. This function uses the Unicode definitions of letters as found in Unicode.txt. On success, the single character is returned. The function fails if the argument is not a single character that is a letter.
-
 \bfun{\bc{lst\d(}(\bc=\bi{expression}) or \bi{variable}*[\bc{,LIN}][\bc{,RAW}][\bc{,WYD}]\bc)}
 \index{lst@\bc{lst}}
 
@@ -4020,6 +4016,52 @@ variables onto and from a stack.
 {?} lst_d[]bigarray
 \end{ex}
 
+\bfun{\bc{ugc\d(}\bi{atom-or-nil}\bc)} 
+\index{ugc@\bc{ugc}}
+
+\verb|ugc$| determines the Unicode General Category of a character.
+
+\begin{tabular}{lll}
+	Lu & Uppercase Letter      & an uppercase letter                               \\
+	Ll & Lowercase Letter      & a lowercase letter                                \\
+	Lt & Titlecase Letter      & a digraphic character, with first part uppercase  \\
+	LC & Cased Letter          & Lu | Ll | Lt                                      \\
+	Lm & Modifier Letter       & a modifier letter                                 \\
+	Lo & Other Letter          & other letters, including syllables and ideographs \\
+	L  & Letter                & Lu | Ll | Lt | Lm | Lo                            \\
+	Mn & Nonspacing Mark       & a nonspacing combining mark (zero advance width)  \\
+	Mc & Spacing Mark          & a spacing combining mark (positive advance width) \\
+	Me & Enclosing Mark        & an enclosing combining mark                       \\
+	M  & Mark                  & Mn | Mc | Me                                      \\
+	Nd & Decimal Number        & a decimal digit                                   \\
+	Nl & Letter Number         & a letterlike numeric character                    \\
+	No & Other Number          & a numeric character of other type                 \\
+	N  & Number                & Nd | Nl | No                                      \\
+	Pc & Connector Punctuation & a connecting punctuation mark, like a tie         \\
+	Pd & Dash Punctuation      & a dash or hyphen punctuation mark                 \\
+	Ps & Open Punctuation      & an opening punctuation mark (of a pair)           \\
+	Pe & Close Punctuation     & a closing punctuation mark (of a pair)            \\
+	Pi & Initial Punctuation   & an initial quotation mark                         \\
+	Pf & Final Punctuation     & a final quotation mark                            \\
+	Po & Other Punctuation     & a punctuation mark of other type                  \\
+	P  & Punctuation           & Pc | Pd | Ps | Pe | Pi | Pf | Po                  \\
+	Sm & Math Symbol           & a symbol of mathematical use                      \\
+	Sc & Currency Symbol       & a currency sign                                   \\
+	Sk & Modifier Symbol       & a non-letterlike modifier symbol                  \\
+	So & Other Symbol          & a symbol of other type                            \\
+	S  & Symbol                & Sm | Sc | Sk | So                                 \\
+	Zs & Space Separator       & a space character (of various non-zero widths)    \\
+	Zl & Line Separator        & U+2028 LINE SEPARATOR only                        \\
+	Zp & Paragraph Separator   & U+2029 PARAGRAPH SEPARATOR only                   \\
+	Z  & Separator             & Zs | Zl | Zp                                      \\
+	Cc & Control               & a C0 or C1 control code                           \\
+	Cf & Format                & a format control character                        \\
+	Cs & Surrogate             & a surrogate code point                            \\
+	Co & Private Use           & a private-use character                           \\
+	Cn & Unassigned            & a reserved unassigned code point or a noncharacter\\
+	C  & Other                 & Cc | Cf | Cs | Co | Cn                            \\
+\end{tabular}
+
 \bfun{\bc{vap\d(}\bi{fnc}\bc.\bi{string}\bc) or \bc{vap\d(}\bi{fnc}\bc.\bi{string}\bc.\bi{separator}\bc)}
 \index{vap@\bc{vap}}
 
@@ -4204,7 +4246,7 @@ Objects have their elements sorted.
 
 No attempt is made to make the result look pretty using indentation.
 
-\subsubsection*{Mapping between JSON and Bracmat expressions}
+\bi{Mapping between JSON and Bracmat expressions}
 
 A JSON object is represented as a sum of dotted pairs as the LHS (left
 hand side) of a comma operator, while the RHS must be empty. The
@@ -4220,6 +4262,11 @@ A string is mapped to the atomic RHS of a dot operator, leaving the
 LHS empty.
 
 \bc{true}, \bc{false} and \bc{null} map onto themselves.
+
+\bfun{\bc{let\d(}(\bi{atom-or-nil})}
+\index{let@\bc{let}}
+
+\verb|let$| checks whether a single character is a letter. This function uses the Unicode definitions of letters as found in Unicode.txt. On success, the single character is returned. The function fails if the argument is not a single character that is a letter.
 
 \bfun{\bc{MLencoding\d}\bi{internal-expression-of-XML-or-HTML-data}}
 \index{MLencoding@\bc{MLencoding}}

@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "21 November 2022"
-#define VERSION "6.12.7"
-#define BUILD "264"
+#define DATUM "23 November 2022"
+#define VERSION "6.12.8"
+#define BUILD "265"
 /*
 COMPILATION
 -----------
@@ -677,7 +677,7 @@ int startProc(
                                 "?tay)&(fct=.!arg:%?cos ?arg&!cos:((?out.?)|?out)&'(? ($out|($out.?)"
                                 ") ?):(=?sgn)&(!flt:!sgn&!(glf$(=~.!sin:!sgn))&!cos|) fct$!arg|)&(:!flt:!sin&mem$!tay|(:!flt&mem$:?flt"
                                 "|)&fct$(mem$!tay))),",
-
+                                "(let=.@(ugc$!arg:(L|M) ?)&!arg),",
                                 "(out=(.put$!arg:?arg&put$\212&!arg)),"
                                 "(flt=((e,d,m,s,f).!arg:(?arg,~<0:?d)&!arg:0|(-1*!arg:>0:?arg&-1|1):?s&"
                                 "10\016!arg:?e+(10\016?m|0&1:?m)&(!m+1/2*1/10^!d:~<10&1+!e:?e&!m*1/10"

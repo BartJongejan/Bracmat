@@ -7,7 +7,7 @@ help=
   . varmattxt,varprotxt,progsmenu,debugtxt,debugtxt2,debugtxt3
   . inbltmenu,alctxt,aligntxt,asctxt,utftxt,chrtxt,charset
   . chutxt,dbgtxt,dentxt,escappattxt,lambda,morexmlps,jsntxt
-  . divtxt,fretxt,funtxt1,funtxt3,beztxt,moptxt,lettxt
+  . divtxt,fretxt,funtxt1,funtxt3,beztxt,moptxt,lettxt,ugctxt
   . lsttxt1,difftxt,pattxt2,methodtxt,predvartxt
   . lsttxt2,lsttxt3,memtxt,modtxt,peetxt,poktxt,Bracmat-name
   . puttxt1,puttxt2,puttxt3,rentxt,revtxt,seltxt,simtxt,strtxt
@@ -169,44 +169,44 @@ lex lexical analysis of help file"
     return allocated memory (low level)
 17 |_get_|
     get input (from file,keyboard or memory)
-18 |_let_|
-    test whether unicode character is a letter
-19 |_low_|
+18 |_low_|
     convert to lower case
-20 |_lst_|
+19 |_lst_|
     list un-evaluated expression(s) or value(s) of variable(s)
-21 |_map_|
+20 |_map_|
     apply function to each member of a list
-22 |_mem_|
+21 |_mem_|
     list existing variable names
-23 |_mod_|
+22 |_mod_|
     remainder
-24 |_mop_|
+23 |_mop_|
     map expression to space separated list
-25 |_new_|
+24 |_new_|
     create new object as a copy of another object
-26 |_pee_|
+25 |_pee_|
     get value from address (peek) (low level)
-27 |_pok_|
+26 |_pok_|
     put value at address (poke) (low level)
-28 |_put_|
+27 |_put_|
     write output
-29 |_ren_|
+28 |_ren_|
     rename file or directory or move file
-30 |_rev_|
+29 |_rev_|
     string reverse
-31 |_rmv_|
+30 |_rmv_|
     remove file
-32 |_sim_|
+31 |_sim_|
     similarity between two atoms
-33 |_str_|
+32 |_str_|
     stringize expression into atom
-34 |_swi_|
+33 |_swi_|
     software interrupt (low level)
-35 |_sys_|
+34 |_sys_|
     command line shell
-36 |_tbl_|
+35 |_tbl_|
     create array, remove array/variable
+36 |_ugc_|
+    determine the Unicode General Category of a character
 37 |_upp_|
     convert to upper case
 38 |_utf_|
@@ -235,25 +235,25 @@ lex lexical analysis of help file"
           (15,glftxt)
           (16,fretxt)
           (17,gettxt)
-          (18,lettxt)
-          (19,lowtxt DOSopttxt)
-          (20,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt)
-          (21,maptxt)
-          (22,memtxt)
-          (23,modtxt)
-          (24,moptxt)
-          (25,newobjecttxt)
-          (26,peetxt)
-          (27,poktxt)
-          (28,puttxt1 humtxt puttxt2 puttxt3 newtxt)
-          (29,rentxt)
-          (30,rmvtxt)
-          (31,revtxt)
-          (32,simtxt)
-          (33,strtxt)
-          (34,switxt)
-          (35,systxt)
-          (36,tbltxt)
+          (18,lowtxt DOSopttxt)
+          (19,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt)
+          (20,maptxt)
+          (21,memtxt)
+          (22,modtxt)
+          (23,moptxt)
+          (24,newobjecttxt)
+          (25,peetxt)
+          (26,poktxt)
+          (27,puttxt1 humtxt puttxt2 puttxt3 newtxt)
+          (28,rentxt)
+          (29,rmvtxt)
+          (30,revtxt)
+          (31,simtxt)
+          (32,strtxt)
+          (33,switxt)
+          (34,systxt)
+          (35,tbltxt)
+          (36,ugctxt)
           (37,upptxt DOSopttxt)
           (38,utftxt)
           (39,vaptxt)
@@ -1209,6 +1209,51 @@ argument is not a single character that is a letter."
 The characters 'A'-'Z' are converted to 'a'-'z'. Other characters are handled
 as UTF-8 encoded Unicode characters, but default to ISO 8859 (Latin 1) if
 the argument is not valid UTF-8."
+    )
+
+  & ( ugctxt
+    =   T
+      , "ugc$(<atom-or-nil>)"
+      , "ugc$ determines the Unicode General Category of a character.
+Lu   Uppercase_Letter        an uppercase letter
+Ll   Lowercase_Letter        a lowercase letter
+Lt   Titlecase_Letter        a digraphic character, with first part uppercase
+LC   Cased_Letter            Lu | Ll | Lt
+Lm   Modifier_Letter         a modifier letter
+Lo   Other_Letter            other letters, including syllables and ideographs
+L    Letter                  Lu | Ll | Lt | Lm | Lo
+Mn   Nonspacing_Mark         a nonspacing combining mark (zero advance width)
+Mc   Spacing_Mark            a spacing combining mark (positive advance width)
+Me   Enclosing_Mark          an enclosing combining mark
+M    Mark                    Mn | Mc | Me
+Nd   Decimal_Number          a decimal digit
+Nl   Letter_Number           a letterlike numeric character
+No   Other_Number            a numeric character of other type
+N    Number                  Nd | Nl | No
+Pc   Connector_Punctuation   a connecting punctuation mark, like a tie
+Pd   Dash_Punctuation        a dash or hyphen punctuation mark
+Ps   Open_Punctuation        an opening punctuation mark (of a pair)
+Pe   Close_Punctuation       a closing punctuation mark (of a pair)
+Pi   Initial_Punctuation     an initial quotation mark
+Pf   Final_Punctuation       a final quotation mark
+Po   Other_Punctuation       a punctuation mark of other type
+P    Punctuation             Pc | Pd | Ps | Pe | Pi | Pf | Po
+Sm   Math_Symbol             a symbol of mathematical use
+Sc   Currency_Symbol         a currency sign
+Sk   Modifier_Symbol         a non-letterlike modifier symbol
+So   Other_Symbol            a symbol of other type
+S    Symbol                  Sm | Sc | Sk | So
+Zs   Space_Separator         a space character (of various non-zero widths)
+Zl   Line_Separator          U+2028 LINE SEPARATOR only
+Zp   Paragraph_Separator     U+2029 PARAGRAPH SEPARATOR only
+Z    Separator               Zs | Zl | Zp
+Cc   Control                 a C0 or C1 control code
+Cf   Format                  a format control character
+Cs   Surrogate               a surrogate code point
+Co   Private_Use             a private-use character
+Cn   Unassigned              a reserved unassigned code point or a noncharacter
+C    Other                   Cc | Cf | Cs | Co | Cn
+"
     )
   & ( upptxt
     =   T
@@ -2704,21 +2749,23 @@ visible functions are predefined:
     floating point notation of numbers
 5 |_jsn_|
     serialize data to JSON format
-6 |_MLencoding_|
+6 |_let_|
+    decide whether a uncode character is a 'letter'/'mark' or something else 
+7 |_MLencoding_|
     detect the encoding used in XML or HTML data
-7 |_nestML_|    
+8 |_nestML_|    
     nest the internal representation of XML or HTML data
-8 |_out_|
+9 |_out_|
     output to screen, then new line
-9 |_sgn_|
+10 |_sgn_|
     sign
-10 |_sin_|
+11 |_sin_|
     sine formula
-11 |_sub_|
+12 |_sub_|
     substitution
-12 |_tay_|
+13 |_tay_|
     Taylor series development    
-13 |_toML_|    
+14 |_toML_|    
     convert an internal representation of XML or HTML to XML resp. HTML"
       ,   (0,sgntxt)
           (1,cattxt)
@@ -2726,14 +2773,15 @@ visible functions are predefined:
           (3,factxt)
           (4,flttxt)
           (5,jsntxt jsntranstxt)
-          (6,MLencodingtxt)
-          (7,nestMLtxt)
-          (8,outtxt debugtxt2 debugtxt3)
-          (9,sgntxt)
-          (10,gontxt)
-          (11,subtxt1)
-          (12,taytxt)
-          (13,toMLtxt)
+          (6,lettxt)
+          (7,MLencodingtxt)
+          (8,nestMLtxt)
+          (9,outtxt debugtxt2 debugtxt3)
+          (10,sgntxt)
+          (11,gontxt)
+          (12,subtxt1)
+          (13,taytxt)
+          (14,toMLtxt)
     )
   & ( flttxt
     =   T
