@@ -84,6 +84,17 @@ Bracmat is a good choice for tasks that require dynamic programming.
 
       The documentation in Bracmat format. (You have to run Bracmat and issue
       'get$help' to see it properly.)
+      
+    * bracmat.tex
+    
+      The documentation in LaTeX format. This file has to be maintained manually;
+      it is not automatically generated from 'help' or 'bracmat.html'.
+      Remember to rerun 'makeindex bracmat.idx' from the command line to update
+      the index.
+      
+    * bracmat.pdf
+    
+      Documentation in PDF format, generated from bracmat.tex.
 
 * epoc
     * bracmat.SIS
