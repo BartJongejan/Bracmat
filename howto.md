@@ -44,7 +44,7 @@ Read the project you just created. The program file has got the extension .bra!
     {?} get$"hello.bra"
     
 Do a first reread (this step is not necessary, but is good for getting the
-coding rithm right.)
+coding rhythm right.)
 
     {?} !r
     
@@ -181,7 +181,7 @@ Both member variables are consulted.
           (~
           |   0:?i
             &   whl
-              ' (!i+1:<10:?i&str$(!i (!i:1&st|!i:2&nd|!i:3&d|th)) world:?(its.geoentity)&(its.do-it)$)    )
+              ' (!i+1:<10:?i&str$(!i (!i:1&st|!i:2&nd|!i:3&rd|th)) world:?(its.geoentity)&(its.do-it)$)    )
       );
        ...
 
@@ -192,7 +192,7 @@ command:
     1.0
     hello 1st world
     hello 2nd world
-    hello 3d world
+    hello 3rd world
     hello 4th world
     hello 5th world
     hello 6th world
@@ -220,7 +220,7 @@ The source code now looks like this:
                         $ ( !i
                             ( !i:1&st
                             | !i:2&nd
-                            | !i:3&d
+                            | !i:3&rd
                             | th
                             )
                           )
