@@ -807,34 +807,34 @@ logarithms and differentiate. This calculator was not programmable, all
 program flow had to be done in Basic. It became clear that the program could
 only solve the simplest algebraic problems. The reason for this was its
 inability to recognise complex patterns in the subject expressions. All
-pattern recognition had to be done in Basic and this was a very fault prone
+pattern recognition had to be done in Basic and this was a fault prone
 business. It would be nice to have an interpreter at hand that could interpret
-human readable production rules. That is exactly what Bracmat embodies.
+human-readable production rules. That is exactly what Bracmat embodies.
 This program is written in ANSI-C and developed on the fastest home computer
 that existed at that time (Acorn Archimedes). Although Bracmat is much faster
 than its predecessor, its main virtue lies in its programmability and the
 advanced pattern matching. The speed at which it processed formulae was not
 impressive, so Bracmat always needed a fast machine. Fortunately computers
 have become faster and faster, and nowadays Bracmat performs at a speed
-that is quite acceptable, even in real time systems with users expecting
+that is acceptable, even in real time systems with users expecting
 immediate responses."
           "Compared with other algebra systems, Bracmat has few built-in functions and
 even its set of mathematical operators is small. There are no operators for
 subtraction and division, for example. Nevertheless, Bracmat is general and
-flexible enough to solve even problems outside the field of computer algebra in
-an elegant way. This flexibility on the programming level is traded off against
+flexible enough to even solve problems elegantly outside the field of computer algebra. 
+This flexibility on the programming level is traded off against
 the inability to change the behaviour of the interpreter itself.
 There are no switches (toggles) that could influence, for example, the order of
-terms within a polynomial, or whether or not complex products are expanded, or
+terms within a polynomial, or whether complex products are expanded, or
 the way backtracking is done. This choice was, of course, easier to implement,
 but it also has benefits for the user: the working of Bracmat programs is not
-obscured by deep side effects of switch settings. The only side effects that
-Bracmat allows are expression binding and change of focus in a multiple valued
+obscured by deep side effects of switch settings. Bracmat's only side effects 
+are expression binding and change of focus in a multiple valued
 variable (array indexing, stacking). A later addition is support of objects,
 i.e. data structures that allow for partial updates. This introduced another
 kind of side effect."
           "One peculiar thing about the original, object-less Bracmat is
-the way in which it manages data:
+the way it manages data:
 1)  Processes are not periodically interrupted for garbage collection.
 2)  Each piece of data has a reference counter. If the reference counter equals
     zero, the occupied memory is returned to the memory pool at once. If the
@@ -848,11 +848,11 @@ the way in which it manages data:
 Leaving one of these features out would have severe consequences for the other
 features. (2) explains why (1) is true. (3) ensures that (2) is workable: if two
 pieces of data are created equal they will remain so. This, in turn, explains
-why (4) is true. (5) almost follows from (3) : in any full fledged programming
+why (4) is true. (5) almost follows from (3) : in any full-fledged programming
 language, named fields allow all types of actions on the named parts of a
 data structure that are allowed on whole data structures, that is: creation
 and destruction. But the possibility to destroy only part of a data structure
-means that the data structure as a whole is changeable, which violates (3)."
+means that the entire data structure is changeable, which violates (3)."
           "In the current version of Bracmat, with objects, the last restriction (5)
 no longer exists. As a consequence, restrictions (3) and (4) are not true for
 objects. (2) needs the additional remark that the reference counter for objects
@@ -864,8 +864,8 @@ object-less Bracmat)."
           "How can a programming language that is created for handling data structures
 do without named fields? If I only can create and destroy data, how can I let
 data evolve gradually, piecemeal? The answer lies in the well-developed
-pattern matching mechanism. Change of data is a two step process. In the first
-step you retrieve, by means of pattern matching, all those parts of the data
+pattern matching mechanism. Change of data is a two-step process. In the first
+step you retrieve, by pattern matching, all those parts of the data
 that you want to keep. The second step is building the new data from the
 retrieved parts, together with new pieces. Creation of complex data structures
 from parts is straightforward in Bracmat. For example, the variable Row is a
@@ -879,10 +879,10 @@ This may seem complicated and cumbersome, but look at this:
 {?} a sentence:?b
 {?} (a.silly,data*structure):?c
 {?} (!a.!b.!c):(?b.?c.?a)   {permutation of 3 values in just 1 \"statement\"}"
-          "Bracmat has no clear genealogy, but it has borrowed features from a number of
-programming languages. It is not declarative, like Prolog, nor deeply object
-oriented, like Smalltalk, but it is more or less procedural, like the majority
-of languages. Below, I have tried to make the origin of some details more
+          "Bracmat has no clear genealogy, but it has borrowed features from several
+programming languages. It is not declarative, like Prolog, nor deeply object-oriented, 
+like Smalltalk, but it is procedural, like most
+languages. Below, I have tried to make the origin of some details more
 explicit:
 
 C
@@ -897,7 +897,7 @@ Lisp
 Logo
     different notations for the same variable, depending on whether it produces or receives a value
 Snobol, Icon
-    * a well developed pattern matching apparatus including backtracking
+    * a well-developed pattern matching apparatus including backtracking
     * dual results of evaluations : both value and success/failure
 
 Every similarity to other computer algebra systems is a matter of evolutionary
@@ -910,17 +910,17 @@ convergence."
 subterraneum\", the history of Niels Klim who visits the planet Nazar and
 comments the habits of its inhabitants. For example, the people of the country
 Bracmat are clumsy juniper trees and Niels Klim initially thinks they must be
-more or less blind. But he discovers that their sight is so sharp that they
+blind. But he discovers that their sight is so sharp that they
 can see the smallest details in the far distance and therefore don't see
 what is right in front of them. They are mostly occupied with astronomy and
 transcendental philosophy, but the state also uses them to do prospection
 for minerals in the mines."
           "It so happens that the Latin word \"brachiatus\", meaning \"with arms\" or
-\"with branches\", in litterature of botany often is shortened to \"brachiat.\".
+\"with branches\", in literature of botany often is shortened to \"brachiat.\".
 I like to think that Ludvig Holberg, who wrote the story in 1741, knew about
 the works of Carl Linnaeus (1707 - 1778) and was inspired by him to populate
 his planet with smart trees. The word \"bracmat\" is easily morphed into the
-word \"brachiat.\", and there is at least one case that can be found on the
+word \"brachiat.\", and at least one case can be found on the
 internet where the Optical Character Reader has misinterpreted \"brachiat.\" as
 \"bracmat\", caused by a black speck that almost connects the \"h\" and the \"i\"
 in the word \"brachiat.\"! Whether true or not, this derivation highlights one
@@ -943,9 +943,9 @@ Alternatively, you can obtain a copy of Bracmat by sending an e-mail to me
   & ( morexmlps
     =   T
       , "Where to find example code on the internet"
-      , "At http://rosettacode.org/wiki/Category:Bracmat over 100 tasks are solved
+      , "At http://rosettacode.org/wiki/Category:Bracmat over 300 tasks are solved
 using Bracmat. The site is an excellent way to compare how the same task is
-solved in a great number of programming languages."
+solved in numerous programming languages."
     )
   & ( syntax
     =   T
@@ -979,13 +979,13 @@ Quotation marks. Comments are enclosed in {} and may be nested."
   & ( charset
     =   T
       , "Character set"
-      , "Bracmat supports UTF-8 as well as ISO 8859-1 encoded source code. In most cases
+      , "Bracmat supports UTF-8 as well as ISO 8859-1 encoded source code. Usually
 it does not matter how characters are encoded, because Bracmat merely sees
 sequences of non-zero bytes. Only a few functions explicitly handle UTF-8
 encoded characters. When lower- or uppercasing text, Bracmat assumes that the
 argument is UTF-8 encoded, but graciously falls back to regarding the argument
 as ISO 8859-1 encoded if parsing the argument as UTF-8 fails. UTF-16 and UTF-32
-is not supported, because those encodings make use of zero-bytes."
+is not supported, because those encodings use zero-bytes."
     )
   & ( atotxt
     =   T
@@ -994,10 +994,10 @@ is not supported, because those encodings make use of zero-bytes."
 expression as a tree like structure, atoms or strings are to be found in the
 leafs. In Bracmat terminology, an empty leaf is syntactically represented
 by <nil>. <nil> is not an <atom> proper, but an <atom-or-nil>. So not every
-leaf contains an atom. On the other hand, leafs may contain other things
+leaf contains an atom. However, leafs may contain other things
 besides <atoms>, such as prefixes.
 
-In Bracmat, atoms are less accessible than trees. Therefore there are some
+In Bracmat, atoms are less accessible than trees. There are, therefore, 
 ways to convert atoms to trees and back.
 1) Conversion between an atom and its constituent characters:
   - get$(<atom>,MEM,VAP) puts every character in the literal <atom> in its own
@@ -1012,9 +1012,9 @@ Atoms can be used as names for variables, functions, files, etc.. Often they
 are used as literals, such as mathematical symbols or text."
           "Atoms consist of any number of non-zero bytes, up to the limits set by the
 operating system and hardware. Atoms can be surrounded by quotation marks,
-but are in many cases optional. You do need them if you want parentheses,
+but are often optional. You do need them if you want parentheses,
 braces, semicolons, operators or prefixes to be part of an atom. All UTF-8
-encoded unicode characters can be used in strings. Some special characters
+encoded Unicode characters can be used in strings. Some special characters
 have to be preceded by a backslash:
 
 \\a
@@ -1038,7 +1038,7 @@ have to be preceded by a backslash:
 
 If you precede a string with the prefix @, then backslashes are treated as
 normal characters. E.g. sys$@\"C:\\dos\\edit\".
-In stead of the tab and new line characters above, you may enter tabs and
+Instead of the tab and new line characters above, you may enter tabs and
 new lines by pressing the tab and the return key, respectively."
           "Examples:
 
