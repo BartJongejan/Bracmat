@@ -638,11 +638,11 @@ in a list of nodes, a sum in this case:
 {!} 20+a+b+c
     S   0,00 sec
 
-This is what happened. The match operator |_:_| has a left hand side which is
-the subject of the pattern, which is right hand side of the match operator.
-If the match operation is to succeed, the pattern must be similar to the
-subject. This is the case here, because the question marks are similar to
-anything (like the Joker in some card plays) and the \"b\" is similar to
+This is what happened. The left-hand side of the match operator |_:_| is the subject,
+and the right-hand side of the match operator is the pattern.
+If the match operation is to succeed, the pattern must be like the
+subject. This is the case here, because the question marks behave like
+a wild card (like the Joker in some card plays) and the \"b\" is like
 itself. By the way, when a pattern match operation succeeds, the resulting
 expression is the subject. The second example shows a pattern match operation
 that fails:
@@ -650,10 +650,10 @@ that fails:
 {?} 20+a+b+c:?+q+?  { Is there a term \"q\" in the sum (20+a+b+c) ?}
     F
 
-The \"q\" in the pattern is not similar to anything in the subject 20+a+b+c
+The \"q\" in the pattern is not like anything in the subject 20+a+b+c
 and thus the pattern match operation must fail.
 
-The following examples are quite similar to the introductory example, merely
+The following examples are the same as the introductory example, merely
 replacing the |_+_| operator by the |_*_| and the blank operators:
 
 {?} 20*a*b*c:?*b*?  { Is there a factor \"b\" in the product (20*a*b*c) ?}
@@ -673,7 +673,7 @@ not the normal match operation, but a string match operation.
 {!} 20abc
     S   0,00 sec
 
-The patterns in string match operations are similar to patterns in normal match
+The patterns in string match operations are like patterns in normal match
 operations that have sentences (words separated by blank operators) as the
 subject."
     )
@@ -681,13 +681,13 @@ subject."
     =   T
       , "Rewriting data using pattern matching"
       , "
-An important application of pattern matching is rewriting data by means of a
-number of rules. Each rule consists of a pattern and a replacement expression.
+An important application of pattern matching is rewriting data by using
+several rules. Each rule consists of a pattern and a replacement expression.
 Often, the pattern explicitly specifies only parts of the subject, so that the
 same rule will fire for a broad class of subjects, all having the specified
 parts of the rule in common. The remaining, unspecified, parts normally have
 to reappear unscathed in the output of the transformation rule. To catch these
-parts, patterns can contain any number of variables that bind to the parts of
+parts, patterns can contain several variables that bind to the parts of
 the rule that are not completely fixed.
 
 Suppose we have the sentence |_My name is Ivan the terrible_| and we want to
@@ -715,8 +715,8 @@ use the same pattern and replacement expression to transform another sentence:
 
 To make a rewrite rule out of these two components, we can put them in a
 function that we can feed any sentence and that returns a transformed sentence,
-if the pattern matched the input. In addition, the function below simply
-returns the input if the pattern didn't match.
+if the pattern matched the input. Further, if the pattern doesn't match, as in the
+function below, it simply returns the input.
 
 {?} ( ivanRule
     =   begin end
@@ -751,7 +751,7 @@ same age in a list of name/year pairs:
   & ( recurpat
     =   T
       , "Pattern matching with recursive patterns"
-      , "Many real life problems can be solved by first solving a less complex problem.
+      , "Many life problems can be solved by first solving a less complex problem.
 If needed, this process can be done again and again, until we end with a
 problem that we know how to solve. In such cases, Bracmat's ability to handle
 recursive patterns can be of much help.
@@ -770,7 +770,7 @@ patterns and that checks whether an input is valid, according to this grammar.
 {!} 0 0 0 1 1 1
     S   0,00 sec
     
-The following example could be the basis for a yourney planner. We use a
+The following example could be the basis for a journey planner. We use a
 recursive pattern to find out whether two continents are connected over land.
 
 {?} connected=(\"South America\".\"North America\") (Africa.Asia) (Asia.Europe);

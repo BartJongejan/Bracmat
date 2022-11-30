@@ -620,11 +620,11 @@ _oct{!} 20+a+b+c
 _oct    S   0,00 sec
 \end{ex}
 
-This is what happened. The match operator \verb|:| has a left hand
-side which is the subject of the pattern, which is right hand side of
-the match operator. If the match operation is to succeed, the pattern
-must be similar to the subject. This is the case here, because the
-question marks are similar to anything (like the Joker in some card
+This is what happened. The left-hand side of the match operator \verb|:| 
+is the subject, and the right-hand side of the match operator is the pattern.
+If the match operation is to succeed, the pattern
+must be like the subject. This is the case here, because the
+question marks behave like a wild card (like the Joker in some card
 plays) and the \verb|b| is similar to itself. By the way, when a pattern
 match operation succeeds, the resulting expression is the subject. The
 second example shows a pattern match operation that fails:
@@ -632,10 +632,10 @@ second example shows a pattern match operation that fails:
 {?} 20+a+b+c:?+q+?  _com[is there a term _bc[q] in the sum _bc[(20+a+b+c)]?]
 _oct[]    F
 \end{ex}
-The \verb|q| in the pattern is not similar to anything in the subject
+The \verb|q| in the pattern is not like anything in the subject
 \verb|20+a+b+c| and thus the pattern match operation must fail.
 
-The following examples are quite similar to the introductory example,
+The following examples are the same as the introductory example,
 merely replacing the \verb|+| operator by the \verb|*| and the blank
 operators:
 \begin{ex}
@@ -658,20 +658,20 @@ _oct{!} 20abc
 _oct    S   0,00 sec
 \end{ex}
 
-The patterns in string match operations are similar to patterns in
+The patterns in string match operations are like patterns in
 normal match operations that have sentences (words separated by blank
 operators) as the subject.
 
 \subsection{Rewriting data using pattern matching}
 
 An important application of pattern matching is rewriting data by
-means of a number of rules. Each rule consists of a pattern and a
+using several rules. Each rule consists of a pattern and a
 replacement expression. Often, the pattern explicitly specifies only
 parts of the subject, so that the same rule will fire for a broad
 class of subjects, all having the specified parts of the rule in
 common. The remaining, unspecified, parts normally have to reappear
 unscathed in the output of the transformation rule. To catch these
-parts, patterns can contain any number of variables that bind to the
+parts, patterns can contain several variables that bind to the
 parts of the rule that are not completely fixed.
 
 Suppose we have the sentence \texttt{My name is Ivan the terrible} and
@@ -702,9 +702,9 @@ _oct{!} Wanja goes to school
 
 To make a rewrite rule out of these two components, we can put them in
 a function that we can feed any sentence and that returns a
-transformed sentence, if the pattern matched the input. In addition,
-the function below simply returns the input if the pattern didn't
-match.
+transformed sentence, if the pattern matched the input. 
+Further, if the pattern doesn't match, as in the
+function below, it simply returns the input.
 \begin{ex}
 {?} ( ivanRule
     =   begin end
@@ -740,7 +740,7 @@ _oct{!} sonar triode
 
 \subsection{Pattern matching with recursive patterns}
 
-Many real life problems can be solved by first solving a less complex
+Many life problems can be solved by first solving a less complex
 problem. If needed, this process can be done again and again, until we
 end with a problem that we know how to solve. In such cases, Bracmat's
 ability to handle recursive patterns can be of much help.
