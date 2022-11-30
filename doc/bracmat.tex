@@ -52,7 +52,7 @@
 \section{Introduction}
 
 Bracmat makes it a joy to find your way in oddly shaped data and
-manipulate it at your will. Bracmat occupies a niche were you find
+manipulate it at your will. Bracmat occupies a niche where you find
 few, if any, other computer programming languages.
 
 This chapter may give you an impression of what Bracmat can do for
@@ -137,7 +137,7 @@ operators dedicated to assignment, function calling, pattern matching and progra
 \subsection{Why use Bracmat?}
 
 Bracmat is not a general purpose programming language, but a
-programming language that was conceived in the 1980's with a single
+programming language that was conceived in the 1980s with a single
 aim: to make tedious algebraic manipulations easy and, most
 importantly, not prone to human errors. Now hang on.
 
@@ -149,7 +149,7 @@ Many problems can be solved by following steps similar to those taken when solvi
 \item Merge stuff
 \item Combine stuff
 \item Replace stuff
-\item Cope with labyrinthine problems with many culs-de-sac
+\item Cope with labyrinthine problems with many cul-de-sacs
 \end{itemize}
 
 \subsection{User interaction with Bracmat}
@@ -166,7 +166,7 @@ processor time it needed. Intermediary results may also appear on the
 screen.
 
 When instructions are entered from the keyboard, the program waits
-until all of the conditions below are fulfilled:
+until all the conditions below are fulfilled:
 \begin{itemize}
 \item \emph{return} (or \emph{enter}) is the last key that has been pressed
 \item every opening parenthesis has a closing counterpart
@@ -196,7 +196,7 @@ semicolons.
 You may freely surround binary operators with whitespace characters
 (e.g. space, tab, line feed). Take care not to put spaces between the
 characters that make up a fraction or negative number,
-\verb|- 1234 / 5678| is not the same as \verb|-1234/5678|.
+\verb|- 1234 / 5678| is different from \verb|-1234/5678|.
 
 Bracmat can open and read a text file and execute the instructions as
 they are read. After the last instruction has been executed, the file
@@ -233,9 +233,9 @@ _oct{!} 65536
 When you write programs in the Bracmat language you will normally use
 an external text editor. You can enter small programs directly at the
 Bracmat prompt \verb|{?}|, but a small change in an instruction can
-only be done by re-entering the whole instruction. You may save
+only be done by re-entering the entire instruction. You may save
 instructions that are still held in memory, by the built-in \verb|lst|
-function. This function takes a number of optional parameters that
+function. This function takes several optional parameters that
 tell the system whether the instruction has to be written in a compact
 and barely readable form, or in a more pretty form, with lots of
 indentations. Comments are never written, as they are ignored at input
@@ -256,12 +256,12 @@ here are some recommendations about programming habits:
   function before going on to the next one.
 \item Keep functions small, to begin with. Error messages point to
   functions, not to line numbers.
-\item Use meaningful names. There is no limit to their length and you
+\item Use meaningful names. There is no limit to their length, and you
   may use the minus-sign as separator in multiple-word-names.
 \item Let Bracmat indent your code: regularly save your code, read it
   in Bracmat, save it from Bracmat using the lst function to the file
   you are editing and reread the file in your editor.
-\item Try to evade the ``not'' prefix \verb|~| and the use of arrays.
+\item Try to avoid the ``not'' prefix \verb|~| and the use of arrays.
 \end{itemize}
 
 \subsection{Limitations}
@@ -303,7 +303,7 @@ So we see that an expression with binary minus operations and written
 without parentheses is a left descending tree: the topmost binary
 operator is the operator to the far right. And indeed, the first
 incarnation of Bracmat internally represented sums and products as
-left descending trees. However, we are used to see numerical factors
+left descending trees. However, we are used to seeing numerical factors
 to the left of non-numerical symbols. If sums and products are
 left-descending, adding \verb|3*a*b*c+4*a*b*c| becomes unnecessary
 expensive
@@ -396,7 +396,7 @@ integer) or the numerator and the denominator (if the number is a
 fraction) are less than \verb|2^32| (or \verb|2^64|, if Bracmat is compiled
 for a 64-bit platform).
 
-There is a predefined function, \verb|flt$|, that represents rational
+A predefined function, \verb|flt$|, represents rational
 numbers in a scientific floating point notation, but Bracmat cannot do
 calculations with these floating point numbers, unless you write a
 function to convert them back to rational numbers.
@@ -606,7 +606,7 @@ matching operation is started. Bracmat implements not only
 propositional rules comparable to regular expressions, but also first
 order predicate rules, backtracking to search the space of
 combinations of data that make its predicates come true. In this way
-it is very easy to implement a relational database. But it doesn't
+it is easy to implement a relational database. But it doesn't
 stop here, because Bracmat supports recursive invocations of pattern
 matching and other operations.
 
