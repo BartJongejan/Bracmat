@@ -663,19 +663,24 @@ function_return_type functions(psk Pnode)
             else
                 {
                 const char* s = (const char*)POBJ(rightnode);
-                intVal.i = getCodePoint(&s);
-                if(intVal.i < 0 || *s)
+                if(*s)
                     {
-                    if(intVal.i != -2)
+                    intVal.i = getCodePoint(&s);
+                    if(intVal.i < 0 || *s)
                         {
-                        Pnode->v.fl |= IMPLIEDFENCE;
+                        if(intVal.i != -2)
+                            {
+                            Pnode->v.fl |= IMPLIEDFENCE;
+                            }
+                        return functionFail(Pnode);
                         }
-                    return functionFail(Pnode);
+                    sprintf(draft, "%s", gencat(intVal.i));
+                    wipe(Pnode);
+                    Pnode = scopy((const char*)draft);
+                    return functionOk(Pnode);
                     }
-                sprintf(draft, "%s", gencat(intVal.i));
-                wipe(Pnode);
-                Pnode = scopy((const char*)draft);
-                return functionOk(Pnode);
+                else
+                    return functionFail(Pnode);
                 }
             }
         CASE(UTF)
