@@ -1,3 +1,8 @@
+1 December 2022
+Built-in function ugc$<atom> returns Unicode General Class. 
+Predefined function let$<atom> says whether character could be part of a word
+(a letter or a marking).
+
 4 October, (Both Bracmat and Potu): Fixed an error in the computation of an expression's
 'complexity'. The (not serious) error sometimes caused indentation to go awry.
 
