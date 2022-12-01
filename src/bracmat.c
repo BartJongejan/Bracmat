@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "23 November 2022"
-#define VERSION "6.12.2"
-#define BUILD "262"
+#define DATUM "1 December 2022"
+#define VERSION "6.12.3"
+#define BUILD "263"
 /*
 COMPILATION
 -----------
@@ -13013,19 +13013,24 @@ static function_return_type functions(psk Pnode)
             else
                 {
                 const char* s = (const char*)POBJ(rightnode);
-                intVal.i = getCodePoint(&s);
-                if(intVal.i < 0 || *s)
+                if(*s)
                     {
-                    if(intVal.i != -2)
+                    intVal.i = getCodePoint(&s);
+                    if(intVal.i < 0 || *s)
                         {
-                        Pnode->v.fl |= IMPLIEDFENCE;
+                        if(intVal.i != -2)
+                            {
+                            Pnode->v.fl |= IMPLIEDFENCE;
+                            }
+                        return functionFail(Pnode);
                         }
-                    return functionFail(Pnode);
+                    sprintf(draft, "%s", gencat(intVal.i));
+                    wipe(Pnode);
+                    Pnode = scopy((const char*)draft);
+                    return functionOk(Pnode);
                     }
-                sprintf(draft, "%s", gencat(intVal.i));
-                wipe(Pnode);
-                Pnode = scopy((const char*)draft);
-                return functionOk(Pnode);
+                else
+                    return functionFail(Pnode);
                 }
             }
         CASE(UTF)
