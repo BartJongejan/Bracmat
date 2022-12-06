@@ -551,8 +551,8 @@ read. After the last instruction has been executed, the file is closed. For
 example, the program that produces the text you are reading just now, is read
 from a file named |_help_| and immediately executed.
 
-The instruction for reading a file |_myprog_| and executing the instructions
-therein is |_get$myprog_|. The $ is a binary operator that initiates
+The instruction for reading a file |_myprog_| and executing its instructions
+is |_get$myprog_|. The $ is a binary operator that initiates
 function evaluation. |_get_| is the function name of one of the few built-in
 functions.
 
@@ -930,7 +930,7 @@ it is all about tree branches."
   & ( colofon
     =   T
       , "How to obtain Bracmat"
-      , "There are a few download options. You can get the last revision from
+      , "There are a few download options. Get the last revision from
 https://github.com/BartJongejan/Bracmat.
 
 At http://cst.dk/download/bracmat/ you can follow the history of Bracmat from
@@ -3566,7 +3566,9 @@ behaviour of the program.
       , "Definition of a function"
       , "<function-name>=<var1> [,<var2>, ...].<function-body>
       
-<var1>,<var2>, etc. are explicitly declared local variables. A function is
+<var1>,<var2>, etc. are explicitly declared local variables.
+
+A function is
 called by <function-name>$<argument-expression>
 or |_<function-name>'<argument-expression>_| ,
 depending on whether <argument-expression> must be evaluated ($) 

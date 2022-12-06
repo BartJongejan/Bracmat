@@ -204,8 +204,8 @@ is closed. For example, the program that produces the text you are
 reading just now, is read from a file named \verb|help| and
 immediately executed.
 
-The instruction for reading a file \verb|myprog| and executing the
-instructions therein is \verb|get$myprog|. The \verb|$| is a binary
+The instruction for reading a file \verb|myprog| and executing its
+instructions is \verb|get$myprog|. The \verb|$| is a binary
 operator that initiates function evaluation. \verb|get| is the
 function name of one of the few built-in functions.
 
@@ -575,8 +575,8 @@ programming language Bracmat: it is all about tree branches.
 
 \subsection{How to obtain Bracmat}
 
-There are a few download options. You can get the last revision from
-\texttt{https://github.com/\allowbreak{}BartJongejan/\allowbreak{}Bracmat}.
+There are a few download options. Get the last revision from
+\allowbreak{}\texttt{https://github.com/\allowbreak{}BartJongejan/\allowbreak{}Bracmat}.
 
 At \texttt{http://cst.dk/download/bracmat/} you can follow the history
 of Bracmat from its inception somewhere in the eighties up to the last
@@ -1725,7 +1725,7 @@ and the \verb|_| operator.
 \end{ex}
 % $
 
-\subsection{The dummy operator \texttt{\char`\_}}
+\subsection{The dummy operator \texttt{\_}}
 
 Bracmat has only one variable that binds to a binary operator, the
 \verb|_| operator. Worse even, this variable is global. Nevertheless
@@ -1758,7 +1758,7 @@ hand side operands are evaluated. That explains why new assignments in
 the operands do not result in unwanted side effects in the upper node
 with the \verb|_|.
 
-\subsection{Recursion and the \texttt{\char`\_} operator}
+\subsection{Recursion and the \texttt{\_} operator}
 
 In Bracmat functions are allowed to call themselves. Often this
 happens if a function's argument is split into a left subtree and
@@ -2280,14 +2280,15 @@ the \verb|!!| prefixes in front of the variable name or object member
 name.
 \begin{description}
 \item \verb|!|\emph{atom}\par
-  is replaced by the binding of \emph{atom}
+  is replaced by:
+\emph{atom}
 \item \verb|!!|\emph{atom}\par
   is replaced by the binding of the binding (after evaluation) of
   \emph{atom}
 \end{description}
 
 Likewise \verb|!(|\emph{object-name}\verb|.|\emph{member-name}\verb|)|
-is replaced by the binding of
+is replaced by:
 \emph{object-name}\verb|.|\emph{member-name}.
 
 Bindings can be evaluated or unevaluated. In the last case, the next
@@ -2858,7 +2859,9 @@ to the \verb|dbg| function.
   [\texttt{,}\emph{var2}\texttt{,} \ldots]\texttt{.}\emph{function-body}}
 
 \emph{var1}, \emph{var2}, etc. are explicitly declared local
-variables. A function is called by
+variables.
+
+A function is called by
 \emph{function-name}\verb|$|\emph{argument-expression} or
 \emph{function-name}\texttt'\emph{argument-expression}, depending on
 whether argument expression must be evaluated (\verb|$|) or not
