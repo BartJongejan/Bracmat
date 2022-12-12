@@ -1,0 +1,59 @@
+{arr.bra
+
+Send an array to a calculation object and multiply two of its elements, returning the result.
+}
+
+ArrayTest=
+  ( doit
+  =   
+    .       
+          ' ( ind$(a0,2)
+            & !a0:?x
+            & ind$(a0,3)
+            & !a0:?y
+            & !x*!y
+            )
+        : ?calc
+      & lst$calc
+      & new$(calculation,!calc):?iter
+      & ( ~
+        |   out$"ITER DEFINED"
+          & (iter..print)$
+          & out$"ITER PRINTED"
+        )
+      &     (iter..calculate)
+          $ (2,3,41,59,.)
+        : ?u
+      & out$(u !u)
+  )
+  ( new
+  =   
+    .   ~
+      |   clk$:?t0
+        & (its.doit)$
+        & clk$:?t1
+        & out$(flt$(!t1+-1*!t0,3))
+  );
+
+r=
+  get'("arr.bra",TXT)
+& rmv$(str$(arr ".bak"))
+& ren$("arr.bra".str$(arr ".bak"))
+&   put
+  $ ( "{arr.bra
+
+Send an array to a calculation object and multiply two of its elements, returning the result.
+}
+
+"
+    , "arr.bra"
+    , NEW
+    , BIN
+    )
+& lst'(ArrayTest,"arr.bra",APP)
+& put'(\n,"arr.bra",APP,BIN)
+& lst'(r,"arr.bra",APP)
+& put$(str$("\nnew'" ArrayTest ";\n"),"arr.bra",APP,BIN)
+& ;
+
+new'ArrayTest;
