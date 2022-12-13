@@ -78,6 +78,8 @@ typedef enum
     , Pow
     , Tbl
     , Ind
+    , QInd /* ?(ind$(<array name>,<index>)) */
+    , EInd /* !(ind$(<array name>,<index>)) */
     , NoOp
     /*
     , Cfunction1
@@ -133,6 +135,8 @@ static char* ActionAsWord[] =
     , "Pow                        "
     , "tbl                        "
     , "ind                        "
+    , "Qind                        "
+    , "Eind                        "
     , "NoOp                       "
     /*
     , Cfunction1
@@ -160,7 +164,7 @@ typedef struct fortharray
     char* name;
     struct fortharray* next;
     size_t size;
-    int index;
+    size_t index;
     } fortharray;
 
 typedef union stackvalue
@@ -214,13 +218,13 @@ typedef struct forthMemory
     stackvalue stack[64];
     } forthMemory;
 
-typedef struct
+typedef struct Cpair
     {
     char* name;
     funct Cfun;
     }Cpair;
 
-typedef struct
+typedef struct Epair
     {
     char* name;
     actionType action;
@@ -321,6 +325,7 @@ static fortharray* getOrCreateArrayPointer(fortharray** arrp, char* name, size_t
     if(curarrp->pval == 0)
         {
         curarrp->pval = (forthvalue*)bmalloc(__LINE__, size * sizeof(forthvalue));
+        memset(curarrp->pval, 0, size * sizeof(forthvalue));
         curarrp->size = size;
         curarrp->index = 0;
         }
@@ -508,6 +513,8 @@ static Epair epairs[] =
         {"pow",   Pow},
         {"tbl",   Tbl},
         {"ind",   Ind},
+        {"Qind",  QInd},
+        {"Eind",  EInd},
         {"NoOp",  NoOp},
         {0,0}
     };
@@ -596,7 +603,7 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
     forthword* word = mem->word;
     forthword* wordp = mem->wordp;
     stackvalue* sp = mem->sp - 1;
-    if(setArgs(&(mem->var), &(mem->arr), Arg, 0) > 0)
+    if(setArgs(&(mem->var), &(mem->arr), Arg, 0) >= 0)
         {
         for(wordp = word; wordp->action != TheEnd;)
             {
@@ -691,7 +698,16 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                 case Fmod:  a = ((sp--)->val).floating; sp->val.floating = fmod(a, (sp->val).floating); ++wordp; break;
                 case Hypot:  a = ((sp--)->val).floating; sp->val.floating = hypot(a, (sp->val).floating); ++wordp; break;
                 case Pow:  a = ((sp--)->val).floating; sp->val.floating = pow(a, (sp->val).floating); ++wordp; break;
-                case Tbl: break;
+                case Tbl:
+                    {
+                    size_t size = (size_t)((sp--)->val).floating;
+                    sp->arrp->size = size;
+                    sp->arrp->index = 0;
+                    sp->arrp->pval = (forthvalue*)bmalloc(__LINE__, size * sizeof(forthvalue));
+                    memset(sp->arrp->pval, 0, size * sizeof(forthvalue));
+                    ++wordp;
+                    break;
+                    }
                 case Ind:
                     {
                     int i = (int)((sp--)->val).floating;
@@ -699,6 +715,44 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                     ++wordp;
                     break;
                     }
+                case QInd:
+                    {
+                    int i = (int)(sp->val).floating;
+                    forthvalue* v = (--sp)->arrp->pval + i;
+                    *v = (--sp)->val;
+                    ++wordp;
+                    break;
+                    }
+                case EInd:
+                    {
+                    int i = (int)((sp--)->val).floating;
+                    sp->val = (sp->arrp->pval)[i];
+                    ++wordp;
+                    break;
+                    }
+/*
+                case Ind:
+                    {
+                    int i = (int)((sp--)->val).floating;
+                    sp->arrp->index = i;
+                    ++wordp;
+                    break;
+                    }
+                case QInd:
+                    {
+                    int i = (int)((sp--)->val).floating;
+                    (sp->arrp->pval)[i] = sp->val;
+                    ++wordp;
+                    break;
+                    }
+                case EInd:
+                    {
+                    int i = (int)((sp--)->val).floating;
+                    sp->val = (sp->arrp->pval)[i];
+                    ++wordp;
+                    break;
+                    }
+                    */
                 case NoOp:
                 case TheEnd:
                 default:
@@ -910,12 +964,40 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                 case Fmod:  printf("fmod  "); a = ((sp--)->val).floating; sp->val.floating = fmod(a, (sp->val).floating); ++wordp; break;
                 case Hypot:  printf("hypot "); a = ((sp--)->val).floating; sp->val.floating = hypot(a, (sp->val).floating); ++wordp; break;
                 case Pow:  printf("pow   "); a = ((sp--)->val).floating; sp->val.floating = pow(a, (sp->val).floating); ++wordp; break;
-                case Tbl: break;
+                case Tbl:
+                    {
+                    size_t size = (size_t)((sp--)->val).floating;
+                    printf("tbl   ");
+                    sp->arrp->size = size;
+                    sp->arrp->index = 0;
+                    sp->arrp->pval = (forthvalue*)bmalloc(__LINE__, size * sizeof(forthvalue));
+                    memset(sp->arrp->pval, 0, size * sizeof(forthvalue));
+                    printf("%p size %zu index %zu", sp->arrp, sp->arrp->size, sp->arrp->index);
+                    ++wordp;
+                    break;
+                    }
                 case Ind:
                     {
                     int i = (int)((sp--)->val).floating;
                     printf("index   ");
                     sp->arrp->index = i;
+                    ++wordp;
+                    break;
+                    }
+                case QInd:
+                    {
+                    int i = (int)(sp->val).floating;
+                    printf("?index  ");
+                    forthvalue * v = (--sp)->arrp->pval+i;
+                    *v = (--sp)->val;
+                    ++wordp;
+                    break;
+                    }
+                case EInd:
+                    {
+                    int i = (int)((sp--)->val).floating;
+                    printf("!index  ");
+                    sp->val = (sp->arrp->pval)[i];
                     ++wordp;
                     break;
                     }
@@ -1070,9 +1152,8 @@ static int polish1(psk code)
                 else
                     {
                     if(argumentArrayNumber(code) >= 0)
-                        return 1; /* aN  (N >= 0): name of array passed as argument */
-                    printf("Not parsed: [%s]\n", &(code->u.sobj));
-                    return 1;
+                        return 1; /* aN  (N >= 0): name of implicit array passed as argument */
+                    return 1; /* Variables & arrays explicitly declared in the code. */
                     }
                 }
         }
@@ -1160,6 +1241,8 @@ static Boolean printmem(forthMemory* mem)
             case Pow:  printf(LONGD " pow    \n", wordp - mem->word); break;
             case Tbl:  printf(LONGD " tbl    \n", wordp - mem->word); break;
             case Ind:  printf(LONGD " ind    \n", wordp - mem->word); break;
+            case QInd:  printf(LONGD " Qind    \n", wordp - mem->word); break;
+            case EInd:  printf(LONGD " Eind    \n", wordp - mem->word); break;
             case NoOp:
                 naam = getFuncName(wordp->u.funcp);
                 printf(LONGD " NoOp       %s\n", wordp - mem->word, naam);
@@ -1296,6 +1379,8 @@ static void optimizeJumps(forthMemory* mem)
             case Pow:
             case Tbl:
             case Ind:
+            case QInd:
+            case EInd:
             case NoOp:
                 {
                 break;
@@ -1386,6 +1471,8 @@ static void combineTestsAndJumps(forthMemory* mem)
             case Pow:
             case Tbl:
             case Ind:
+            case QInd:
+            case EInd:
             case NoOp:
                 break;
             }
@@ -1632,14 +1719,37 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
             char* name = &code->LEFT->u.sobj;
             wordp = polish2(mem, code->RIGHT, wordp);
             wordp->offset = 0;
-            for(; ep->name != 0; ++ep)
+            if(code->v.fl & INDIRECT)
                 {
-                if(!strcmp(ep->name, name))
+                for(; ep->name != 0; ++ep)
                     {
-                    wordp->action = ep->action;
-                    return ++wordp;
+                    if(!strcmp(ep->name+1, name) && ep->name[0] == 'E') /* ! -> E(xclamation) */
+                        {
+                        wordp->action = ep->action;
+                        return ++wordp;
+                        }
                     }
                 }
+            else if(code->v.fl & UNIFY)
+                {
+                for(; ep->name != 0; ++ep)
+                    {
+                    if(!strcmp(ep->name + 1, name) && ep->name[0] == 'Q') /* ? -> Q(uestion)*/
+                        {
+                        wordp->action = ep->action;
+                        return ++wordp;
+                        }
+                    }
+                }
+            else
+                for(; ep->name != 0; ++ep)
+                    {
+                    if(!strcmp(ep->name, name))
+                        {
+                        wordp->action = ep->action;
+                        return ++wordp;
+                        }
+                    }
 
             wordp->action = Afunction;
             for(; p->name != 0; ++p)
@@ -1711,8 +1821,17 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                                 }
                             else
                                 {
-                                wordp->u.valp = createVariablePointer(varp, &(code->u.sobj));
-                                wordp->action = (code->v.fl & INDIRECT) ? ResolveAndPush : ResolveAndGet;
+                                fortharray* a = getArrayPointer(arrp, &(code->u.sobj));
+                                if(a)
+                                    {
+                                    wordp->u.arrp = a;
+                                    wordp->action = (code->v.fl & INDIRECT) ? RslvPshArrElm : RslvGetArrElm;
+                                    }
+                                else
+                                    {
+                                    wordp->u.valp = createVariablePointer(varp, &(code->u.sobj));
+                                    wordp->action = (code->v.fl & INDIRECT) ? ResolveAndPush : ResolveAndGet;
+                                    }
                                 }
                             }
                         else

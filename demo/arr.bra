@@ -6,25 +6,34 @@ Send an array to a calculation object and multiply two of its elements, returnin
 ArrayTest=
   ( doit
   =   
-    .       
-          ' ( ind$(a0,2)
-            & !a0:?x
+    .   
+      &     
+          ' ( !(ind$(a0,2)):?x
             & ind$(a0,3)
             & !a0:?y
             & !x*!y
             )
-        : ?calc
-      & lst$calc
-      & new$(calculation,!calc):?iter
-      & ( ~
-        |   out$"ITER DEFINED"
-          & (iter..print)$
-          & out$"ITER PRINTED"
-        )
-      &     (iter..calculate)
+        : ?calc1
+      & lst$calc1
+      & new$(calculation,!calc1):?clc1
+      & (clc1..print)$
+      &     (clc1..calculate)
           $ (2,3,41,59,.)
         : ?u
       & out$(u !u)
+      &     
+          ' ( tbl$(T,5)
+            & ind$(T,3)
+            & 71:?T
+            & 13:?(ind$(T,2))
+            & !(ind$(T,3))+!(ind$(T,2))
+            )
+        : ?calc2
+      & lst$calc2
+      & new$(calculation,!calc2):?clc2
+      & (clc2..print)$
+      & (clc2..calculate)$:?v
+      & out$(clc2 !v)
   )
   ( new
   =   
