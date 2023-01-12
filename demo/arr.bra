@@ -1,0 +1,68 @@
+{arr.bra
+
+Send an array to a calculation object and multiply two of its elements, returning the result.
+}
+
+ArrayTest=
+  ( doit
+  =   
+    .   
+      &     
+          ' ( !(ind$(a0,2)):?x
+            & ind$(a0,3)
+            & !a0:?y
+            & !x*!y
+            )
+        : ?calc1
+      & lst$calc1
+      & new$(calculation,!calc1):?clc1
+      & (clc1..print)$
+      &     (clc1..calculate)
+          $ (2,3,41,59,.)
+        : ?u
+      & out$(u !u)
+      &     
+          ' ( tbl$(T,5)
+            & ind$(T,3)
+            & 71:?T
+            & 13:?(ind$(T,2))
+            & !(ind$(T,3))+!(ind$(T,2))
+            )
+        : ?calc2
+      & lst$calc2
+      & new$(calculation,!calc2):?clc2
+      & (clc2..print)$
+      & (clc2..calculate)$:?v
+      & out$(clc2 !v)
+  )
+  ( new
+  =   
+    .   ~
+      |   clk$:?t0
+        & (its.doit)$
+        & clk$:?t1
+        & out$(flt$(!t1+-1*!t0,3))
+  );
+
+r=
+  get'("arr.bra",TXT)
+& rmv$(str$(arr ".bak"))
+& ren$("arr.bra".str$(arr ".bak"))
+&   put
+  $ ( "{arr.bra
+
+Send an array to a calculation object and multiply two of its elements, returning the result.
+}
+
+"
+    , "arr.bra"
+    , NEW
+    , BIN
+    )
+& lst'(ArrayTest,"arr.bra",APP)
+& put'(\n,"arr.bra",APP,BIN)
+& lst'(r,"arr.bra",APP)
+& put$(str$("\nnew'" ArrayTest ";\n"),"arr.bra",APP,BIN)
+& ;
+
+new'ArrayTest;
