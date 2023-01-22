@@ -79,7 +79,24 @@ int numbercheck(const char* begin)
         {
         if(op_or_0 == '0')
             {
-            check |= QNUL;
+            if(*(begin + 1) == 'x' || *(begin + 1) == 'X')
+                {
+                /* hexadecimal number, must be in domain of strtod */
+                char* endptr;
+                double testdouble = strtod(begin, &endptr);
+                if(*endptr)
+                    return 0; /* format error */
+                if(testdouble == 0.0)
+                    check |= QNUL;
+                /* Since doubles can be serialised to hex strings without
+                   losing bits, hex numbers are treated like doubles, not like
+                   integer or fractional numbers.
+                   Format as the printf() "%a" format specifier. The 'p'
+                   (exponent) specification is optional. */
+                return check;
+                }
+            else
+                check |= QNUL;
             }
         if(optab[op_or_0 = *++begin] != -1)
             {
