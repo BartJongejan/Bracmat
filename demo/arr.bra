@@ -18,14 +18,15 @@ ArrayTest=
       & new$(calculation,!calc1):?clc1
       & (clc1..print)$
       &     (clc1..calculate)
-          $ (2,3,41,59,.)
+          $ (2,"-3",41,-"3.0E5",.)
         : ?u
       & out$(u !u)
       &     
           ' ( tbl$(T,5)
             & ind$(T,3)
             & 71:?T
-            & 13:?(ind$(T,2))
+            & -13/3:?(ind$(T,2))
+            & "-0x1.1555555555555zP+3":?(ind$(T,1))
             & !(ind$(T,3))+!(ind$(T,2))
             )
         : ?calc2
@@ -34,6 +35,22 @@ ArrayTest=
       & (clc2..print)$
       & (clc2..calculate)$:?v
       & out$(clc2 !v)
+      & out$EKSPORTFLOAT!
+      & (clc2..export)$(R,T):?eks
+      & out$(eks !eks)
+      & out$\nEKSPORTED
+      & out$EKSPORTINT!
+      & (clc2..export)$(N,T):?eks
+      & out$(eks !eks)
+      & out$\nEKSPORTED
+      & out$EKSPORTFRAC!
+      & (clc2..export)$(Q,T):?eks
+      & out$(eks !eks)
+      & out$\nEKSPORTED
+      & out$EKSPORTHEX!
+      & (clc2..export)$("%a",T):?eks
+      & out$(eks !eks)
+      & out$\nEKSPORTED
   )
   ( new
   =   

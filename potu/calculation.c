@@ -2,6 +2,7 @@
 #include "nodedefs.h"
 #include "memory.h"
 #include "wipecopy.h"
+#include "input.h"
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -363,6 +364,10 @@ static int setFloat(forthvalue* destination, psk args)
     if(args->v.fl & QDOUBLE)
         {
         destination->floating = strtod(&(args->u.sobj), 0);
+        if(HAS_MINUS_SIGN(args))
+            {
+            destination->floating = -(destination->floating);
+            }
         return 1;
         }
     else if(INTEGER_COMP(args))
@@ -730,29 +735,29 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                     ++wordp;
                     break;
                     }
-/*
-                case Ind:
-                    {
-                    int i = (int)((sp--)->val).floating;
-                    sp->arrp->index = i;
-                    ++wordp;
-                    break;
-                    }
-                case QInd:
-                    {
-                    int i = (int)((sp--)->val).floating;
-                    (sp->arrp->pval)[i] = sp->val;
-                    ++wordp;
-                    break;
-                    }
-                case EInd:
-                    {
-                    int i = (int)((sp--)->val).floating;
-                    sp->val = (sp->arrp->pval)[i];
-                    ++wordp;
-                    break;
-                    }
-                    */
+                    /*
+                                    case Ind:
+                                        {
+                                        int i = (int)((sp--)->val).floating;
+                                        sp->arrp->index = i;
+                                        ++wordp;
+                                        break;
+                                        }
+                                    case QInd:
+                                        {
+                                        int i = (int)((sp--)->val).floating;
+                                        (sp->arrp->pval)[i] = sp->val;
+                                        ++wordp;
+                                        break;
+                                        }
+                                    case EInd:
+                                        {
+                                        int i = (int)((sp--)->val).floating;
+                                        sp->val = (sp->arrp->pval)[i];
+                                        ++wordp;
+                                        break;
+                                        }
+                                        */
                 case NoOp:
                 case TheEnd:
                 default:
@@ -988,7 +993,7 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     {
                     int i = (int)(sp->val).floating;
                     printf("?index  ");
-                    forthvalue * v = (--sp)->arrp->pval+i;
+                    forthvalue* v = (--sp)->arrp->pval + i;
                     *v = (--sp)->val;
                     ++wordp;
                     break;
@@ -1261,6 +1266,151 @@ static Boolean print(struct typedObjectnode* This, ppsk arg)
     {
     forthMemory* mem = (forthMemory*)(This->voiddata);
     return printmem(mem);
+    }
+
+static Boolean eksport(struct typedObjectnode* This, ppsk arg)
+    {
+    forthMemory* mem = (forthMemory*)(This->voiddata);
+    if(mem)
+        {
+        enum formt { floating, integer, fraction, hex } format = floating;
+        fortharray** arrp = &(mem->arr);
+        psk Arg = (*arg)->RIGHT;
+        char* name = "";
+        if(is_op(Arg))
+            {
+            psk lhs = Arg->LEFT;
+            psk rhs = Arg->RIGHT;
+            if(!is_op(lhs))
+                {
+                if(!strcmp(&lhs->u.sobj, "R"))
+                    format = floating;
+                else if(!strcmp(&lhs->u.sobj, "N"))
+                    format = integer;
+                else if(!strcmp(&lhs->u.sobj, "Q"))
+                    format = fraction;
+                else if(!strcmp(&lhs->u.sobj, "%a"))
+                    format = hex;
+                }
+            if(!is_op(rhs))
+                {
+                name = &rhs->u.sobj;
+                fortharray* a = getArrayPointer(arrp, name);
+                if(a)
+                    {
+                    int i;
+                    char jotter[500];
+                    char* buffer;
+                    int totalbytes = 0;
+                    size_t len;
+                    psk res;
+                    switch(format)
+                        {
+                        case floating:
+                            for(i = 0; i < a->size; ++i)
+                                {
+                                totalbytes += sprintf(jotter, "%e ", a->pval[i].floating);
+                                }
+                            len = offsetof(sk, u.obj) + totalbytes;
+                            res = (psk)bmalloc(__LINE__, len + 1);
+                            buffer = &(res->u.sobj);
+                            totalbytes = 0;
+                            for(i = 0; i < a->size; ++i)
+                                {
+                                totalbytes += sprintf(buffer + totalbytes, "%e ", a->pval[i].floating);
+                                }
+                            break;
+                        case integer:
+                            for(i = 0; i < a->size; ++i)
+                                {
+                                int I = (int)(a->pval[i].floating);
+                                totalbytes += sprintf(jotter,"%d ", I);
+                                }
+                            len = offsetof(sk, u.obj) + totalbytes;
+                            res = (psk)bmalloc(__LINE__, len + 1);
+                            buffer = &(res->u.sobj);
+                            totalbytes = 0;
+                            for(i = 0; i < a->size; ++i)
+                                {
+                                int I = (int)(a->pval[i].floating);
+                                totalbytes += sprintf(buffer + totalbytes, "%d ", I);
+                                }
+                            break;
+                        case fraction:
+                            {
+                            LONG long1 = (LONG)1;
+                            double fcac = (double)(long1 << 52);
+                            for(i = 0; i < a->size; ++i)
+                                {
+                                int exponent;
+                                double mantissa = frexp(a->pval[i].floating, &exponent);
+                                LONG Mantissa = (LONG)(fcac * mantissa);
+                                if(Mantissa)
+                                    {
+                                    int shft;
+                                    for(shft = 52 - exponent; (Mantissa & long1) == 0; --shft, Mantissa >>= 1)
+                                        ;
+
+                                    if(shft == 0)
+                                        totalbytes += sprintf(jotter, LONGD " ", Mantissa);
+                                    else
+                                        totalbytes += sprintf(jotter, LONGD "/" LONGD " ", Mantissa, (LONG)(long1 << shft));
+                                    }
+                                else
+                                    totalbytes += sprintf(jotter, "0 ");
+                                }
+                            len = offsetof(sk, u.obj) + totalbytes;
+                            res = (psk)bmalloc(__LINE__, len + 1);
+                            buffer = &(res->u.sobj);
+                            totalbytes = 0;
+                            for(i = 0; i < a->size; ++i)
+                                {
+                                int exponent;
+                                double mantissa = frexp(a->pval[i].floating, &exponent);
+                                LONG Mantissa = (LONG)(fcac * mantissa);
+                                if(Mantissa)
+                                    {
+                                    int shft;
+                                    for(shft = 52 - exponent; (Mantissa & long1) == 0; --shft, Mantissa >>= 1)
+                                        ;
+
+                                    if(shft == 0)
+                                        totalbytes += sprintf(buffer + totalbytes, LONGD " ", Mantissa);
+                                    else
+                                        totalbytes += sprintf(buffer + totalbytes, LONGD "/" LONGD " ", Mantissa, (LONG)(long1 << shft));
+                                    }
+                                else
+                                    totalbytes += sprintf(buffer + totalbytes, "0 ");
+                                }
+                            break;
+                            }
+                        case hex:
+                            for(i = 0; i < a->size; ++i)
+                                {
+                                totalbytes += sprintf(jotter, "%a ", a->pval[i].floating);
+                                }
+                            len = offsetof(sk, u.obj) + totalbytes;
+                            res = (psk)bmalloc(__LINE__, len + 1);
+                            buffer = &(res->u.sobj);
+                            totalbytes = 0;
+                            for(i = 0; i < a->size; ++i)
+                                {
+                                totalbytes += sprintf(buffer + totalbytes, "%a ", a->pval[i].floating);
+                                }
+                            break;
+                        }
+                    if(res)
+                        {
+                        wipe(*arg);
+                        *arg = same_as_w(res);
+                        res->v.fl = READY | SUCCESS;
+                        return TRUE;
+                        }
+                    }
+                }
+            }
+        }
+    return TRUE;
     }
 
 static void optimizeJumps(forthMemory* mem)
@@ -1723,7 +1873,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                 {
                 for(; ep->name != 0; ++ep)
                     {
-                    if(!strcmp(ep->name+1, name) && ep->name[0] == 'E') /* ! -> E(xclamation) */
+                    if(!strcmp(ep->name + 1, name) && ep->name[0] == 'E') /* ! -> E(xclamation) */
                         {
                         wordp->action = ep->action;
                         return ++wordp;
@@ -1784,6 +1934,10 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                 else if(code->v.fl & QDOUBLE)
                     {
                     wordp->u.val.floating = strtod(&(code->u.sobj), 0);
+                    if(HAS_MINUS_SIGN(code))
+                        {
+                        wordp->u.val.floating = -(wordp->u.val.floating);
+                        }
                     wordp->action = Push;
                     /*When executing, push number onto the data stack*/
                     }
@@ -1940,6 +2094,7 @@ method calculation[] = {
     {"calculate",calculate},
     {"trc",trc},
     {"print",print},
+    {"export",eksport},
     {"New",calculationnew},
     {"Die",calculationdie},
     {NULL,NULL} };
