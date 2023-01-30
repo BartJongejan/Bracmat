@@ -723,8 +723,8 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                 case QInd:
                     {
                     int i = (int)(sp->val).floating;
-                    forthvalue* v = (--sp)->arrp->pval + i;
-                    *v = (--sp)->val;
+                    forthvalue* val = (--sp)->arrp->pval + i;
+                    *val = (--sp)->val;
                     ++wordp;
                     break;
                     }
@@ -993,8 +993,8 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     {
                     int i = (int)(sp->val).floating;
                     printf("?index  ");
-                    forthvalue* v = (--sp)->arrp->pval + i;
-                    *v = (--sp)->val;
+                    forthvalue* val = (--sp)->arrp->pval + i;
+                    *val = (--sp)->val;
                     ++wordp;
                     break;
                     }
