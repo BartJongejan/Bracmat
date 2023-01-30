@@ -1,3 +1,6 @@
+30 January 2023
+Undid change made 2022.09.13
+
 1 December 2022
 Built-in function ugc$<atom> returns Unicode General Class. 
 Predefined function let$<atom> says whether character could be part of a word

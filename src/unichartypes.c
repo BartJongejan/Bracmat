@@ -494,7 +494,7 @@ const char * gencat(int a)
         int i;
         for(i = 0;i < 4;++i)
             {
-            if(Cletters2[i].L <= (unsigned short)a && (unsigned short)a <= Cletters2[i].L + Cletters2[i].range)
+            if(Cletters2[i].L <= (unsigned int)a && (unsigned int)a <= Cletters2[i].L + Cletters2[i].range)
                 {
                 tmark mrk = Mark[i + 1782 + 430];
                 returnVal[0] = firstMark[mrk.m1];
