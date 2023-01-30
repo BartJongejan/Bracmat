@@ -7159,8 +7159,8 @@ string line 2\"
             : a b c
           | Out$"Expression can be a list if call is mop' and not mop$."
           )
-          (   let$(let$(chu$(x2d$2FA1D)))
-            & ~(let$(chu$(x2d$30001)))
+          (   let$(chu$(x2d$2FA1D))
+            & let$(chu$(x2d$30001))
             & let$(chu$(x2d$30000))
             & let$a
             & ~(let$" ")
@@ -7172,6 +7172,18 @@ string line 2\"
             & ~(let$(chu$(x2d$2E5)))
             & ~(let$ZZ)
           | Out$"let$ has an error"
+          )
+          (   abc:?name
+            & x y z:?(&!name)
+            & str$(P !name):Pabc
+          |   Out
+            $ "A ? flag is permanently added to a name. An undesired side-effect."
+          )
+          (   abc:?name
+            & @(xyz:?(&!name))
+            & str$(P !name):Pabc
+          |   Out
+            $ "A ? flag is permanently added to a name. An undesired side-effect."
           )
       &   out
         $ ( str
