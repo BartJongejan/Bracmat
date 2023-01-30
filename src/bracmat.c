@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "1 December 2022"
-#define VERSION "6.12.3"
-#define BUILD "263"
+#define DATUM "30 January 2023"
+#define VERSION "6.12.4"
+#define BUILD "264"
 /*
 COMPILATION
 -----------
@@ -9256,6 +9256,7 @@ static char stringmatch
                     ok = FALSE;
                 if (Op(name) != EQUALS)
                     {
+                    name = isolated(name);
                     name->v.fl |= saveflgs;
                     }
                 pat = name;
@@ -9819,7 +9820,8 @@ static char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk exp
                     ok = FALSE;
                 if (Op(name) != EQUALS)
                     {
-                    /*name = isolated(name);*//*Is this needed? 20220913*/
+                    name = isolated(name);/*Is this needed? 20220913*/
+                    /* Yes, it is. Otherwise a '?' flag is permanently attached to name. 20230130*/
                     name->v.fl |= saveflgs;
                     }
                 pat = name;
