@@ -262,6 +262,7 @@ char stringmatch
                     ok = FALSE;
                 if (Op(name) != EQUALS)
                     {
+                    name = isolated(name);
                     name->v.fl |= saveflgs;
                     }
                 pat = name;

@@ -223,7 +223,8 @@ char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk expr, unsi
                     ok = FALSE;
                 if (Op(name) != EQUALS)
                     {
-                    /*name = isolated(name);*//*Is this needed? 20220913*/
+                    name = isolated(name);/*Is this needed? 20220913*/
+                    /* Yes, it is. Otherwise a '?' flag is permanently attached to name. 20230130*/
                     name->v.fl |= saveflgs;
                     }
                 pat = name;
