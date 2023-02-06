@@ -26,8 +26,8 @@ Mandelbrot=
         : (=?"<iterations")
       & 256*!iterations^-1:?colfactor
       &     
-          ' ( !a0*!a1+!a2:?x0
-            & !a3*!a4+!a5:?y0
+          ' ( !v0*!v1+!v2:?x0
+            & !v3*!v4+!v5:?y0
             & 0:?x:?y
             & 1:?J
             &   whl
