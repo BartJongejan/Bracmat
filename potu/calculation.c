@@ -736,28 +736,28 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                     break;
                     }
                     /*
-                                    case Ind:
-                                        {
-                                        int i = (int)((sp--)->val).floating;
-                                        sp->arrp->index = i;
-                                        ++wordp;
-                                        break;
-                                        }
-                                    case QInd:
-                                        {
-                                        int i = (int)((sp--)->val).floating;
-                                        (sp->arrp->pval)[i] = sp->val;
-                                        ++wordp;
-                                        break;
-                                        }
-                                    case EInd:
-                                        {
-                                        int i = (int)((sp--)->val).floating;
-                                        sp->val = (sp->arrp->pval)[i];
-                                        ++wordp;
-                                        break;
-                                        }
-                                        */
+                    case Ind:
+                        {
+                        int i = (int)((sp--)->val).floating;
+                        sp->arrp->index = i;
+                        ++wordp;
+                        break;
+                        }
+                    case QInd:
+                        {
+                        int i = (int)((sp--)->val).floating;
+                        (sp->arrp->pval)[i] = sp->val;
+                        ++wordp;
+                        break;
+                        }
+                    case EInd:
+                        {
+                        int i = (int)((sp--)->val).floating;
+                        sp->val = (sp->arrp->pval)[i];
+                        ++wordp;
+                        break;
+                        }
+                        */
                 case NoOp:
                 case TheEnd:
                 default:
@@ -1471,7 +1471,9 @@ static void optimizeJumps(forthMemory* mem)
                         {
                         wordp->u.logic = fand2; /* removes top from stack */
                         label = mem->word + wordp->offset + 1; /* label == The address after the loop. */
-                        if(label->u.logic == fand)             /* whl'(FAIL&BLA)&X            Jump to X for leaving the loop.                             */
+                        if(label->action == TheEnd)
+                            (wordp->offset) += 1;
+                        else if(label->u.logic == fand)             /* whl'(FAIL&BLA)&X            Jump to X for leaving the loop.                             */
                             (wordp->offset) += 2;              /* 1 for the end of the loop, 1 for the AND */
                         else if(label->u.logic == fOr        /* whl'(FAIL&BLA)|X            From FAIL jump to the offset of the OR for leaving the loop. X is unreachable! */
                                 || label->u.logic == fwhl      /* whl'(ABC&whl'(FAIL&BLB))    From FAIL jump to the offset of the WHL, i.e. the start of the outer loop.                      */
@@ -1705,6 +1707,7 @@ static void compaction(forthMemory* mem)
     *newwordp = *wordp;
     newwordp->offset = arr[wordp->offset];
     bfree(mem->word);
+    bfree(arr);
     mem->word = newword;
     }
 
@@ -2081,27 +2084,38 @@ static Boolean calculationnew(struct typedObjectnode* This, ppsk arg)
     /*
         printf("Not optimized:\n");
         printmem(forthstuff);
-    */
+    //*/
     optimizeJumps(forthstuff);
     /*
         printf("Optimized jumps:\n");
         printmem(forthstuff);
-    */
+    //*/
     combineTestsAndJumps(forthstuff);
     /*
         printf("Combined testst and jumps:\n");
         printmem(forthstuff);
-    */
+    //*/
     compaction(forthstuff);
     /*
         printf("Compacted:\n");
         printmem(forthstuff);
-    */
+    //*/
     return TRUE;
     }
 
 static Boolean calculationdie(struct typedObjectnode* This, ppsk arg)
     {
+    /*
+    typedef struct forthMemory
+    {
+    forthword* word;
+    forthword* wordp;
+    forthvariable* var;
+    fortharray* arr;
+    stackvalue* sp;
+    stackvalue stack[64];
+    } forthMemory;
+    */
     forthvariable* curvarp = ((forthMemory*)(This->voiddata))->var;
     fortharray* curarr = ((forthMemory*)(This->voiddata))->arr;
     while(curvarp)
