@@ -1203,11 +1203,11 @@ void stringEval(const char *s, const char ** out, int * err)
 void init_opcode(void)
     {
     int tel;
+#if TELLING
+    initcnts();
+#endif
     for (tel = 0; tel < 256; tel++)
         {
-#if TELLING
-        cnts[tel] = 0;
-#endif
         switch (tel)
             {
 
