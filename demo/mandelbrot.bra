@@ -22,33 +22,47 @@ Mandelbrot=
   ( doit
   =   
     .   1000:?iterations
+      & 2000:?ypixels
+      & (1|20/9):?ratio
       &   glf$('(<.$iterations))
         : (=?"<iterations")
       & 256*!iterations^-1:?colfactor
       &     
-          ' ( !v0*!v1+!v2:?x0
-            & !v3*!v4+!v5:?y0
-            & 0:?x:?y
-            & 1:?J
+          ' ( -1+!v3:?i
+            & tbl$(T,!v0*!v3)
             &   whl
-              ' ( hypot$(!x,!y):~>2
-                & !J:$"<iterations"
-                & !x*!x+-1*!y*!y+!x0:?xtemp
-                & 2*!x*!y+!y0:?y
-                & !xtemp:?x
-                & 1+!J:?J
+              ' ( !i:~<0
+                & -1+!v0:?j
+                &   whl
+                  ' ( !j:~<0
+                    & !j*!v1+!v2:?x0
+                    & !i*!v4+!v5:?y0
+                    & 0:?x:?y
+                    & 1:?J
+                    &   whl
+                      ' ( hypot$(!x,!y):~>2
+                        & !J:$"<iterations"
+                        & !x*!x+-1*!y*!y+!x0:?xtemp
+                        & 2*!x*!y+!y0:?y
+                        & !xtemp:?x
+                        & 1+!J:?J
+                        )
+                    &   (   !J:$"<iterations"
+                          & floor$(!J*$colfactor)
+                        | 0
+                        )
+                      : ?(ind$(T,!j+!v0*!i))
+                    & !j+-1:?j
+                    )
+                & !i+-1:?i
                 )
-            & (   !J:$"<iterations"
-                & floor$(!J*$colfactor)
-              | 0
-              )
             )
-        : ?calc
-      & lst$calc
-      & new$(calculation,!calc):?iter
-      & ( ~
-        |   out$"ITER DEFINED"
-          & (iter..print)$
+        : ?calcule
+      & new$(calculation,!calcule):?compiledCalcule
+      & ( 
+        |   lst$calc
+          & out$"ITER DEFINED"
+          & (compiledCalcule..print)$
           & out$"ITER PRINTED"
         )
       & ( flt
@@ -80,8 +94,6 @@ Mandelbrot=
                     !e
                   )
         )
-      & 2000:?ypixels
-      & (1|20/9):?ratio
       & (   
           &   ( ~&"[0.2929859127507,0.6117848324958,1.0E-11]"
               | ~&"[-0.0452407411,0.9868162204352258,2.7E-10]"
@@ -107,34 +119,38 @@ Mandelbrot=
             : ?X/Y
           & div$(!ratio*!X/Y*!ypixels+1/2,1):?xpixels
         )
-      & !xpixels+1:?linelength
-      & !linelength*!ypixels:?imagesize
-      & out$(imagesize !imagesize !xpixels x !ypixels)
       & (!endx+-1*!beginx)*(!xpixels+-1)^-1:?deltax
       & (!endy+-1*!beginy)*(!ypixels+-1)^-1:?deltay
-      & \n:?alliters
-      & 100000:?miniter
-      & -1+!ypixels:?i
-      &   whl
-        ' ( !i:~<0
-          & -1+!xpixels:?j
-          &   whl
-            ' ( !j:~<0
-              &     (iter..calculate)
-                  $ (!j,!deltax,!beginx,!i,!deltay,!beginy)
-                : ?Niter
-              &   get$(str$("[" !Niter "]"),MEM,JSN)
-                : (,?Niter)
-              & 1+!Niter+-1:?Niter
-              &   \n !Niter " " !Niter " " !Niter !alliters
-                : ?alliters
-              & ( !Niter:<!miniter:?miniter
-                | 
-                )
-              & !j+-1:?j
-              )
-          & !i+-1:?i
+      &   out
+        $ ( imagesize
+            (!xpixels+1)*!ypixels
+            xpixels
+            !xpixels
+            deltax
+            !deltax
+            beginx
+            !beginx
+            ypixels
+            !ypixels
+            deltay
+            !deltay
+            beginy
+            !beginy
           )
+      & (       (compiledCalcule..calculate)
+              $ ( !xpixels
+                , !deltax
+                , !beginx
+                , !ypixels
+                , !deltay
+                , !beginy
+                )
+            : ?Result
+          & out$(Result !Result)
+        | out$"Calculation did not return a value."
+        )
+      & (compiledCalcule..export)$(N,T):?eks
+      & out$calculated
       &   put
         $ (   str
             $ ( P3\n
@@ -145,12 +161,22 @@ Mandelbrot=
                 !ypixels
                 \n
                 255
-                !alliters
+                  vap
+                $ ( ( 
+                    =   
+                      .   \n
+                          ( !arg:
+                          | !arg " " !arg " " !arg
+                          )
+                    )
+                  . !eks
+                  . " "
+                  )
               )
-          , "MandelbrotSet.pgm"
+          , "MandelbrotSetArr.pgm"
           , NEW WYD BIN
           )
-      & out$(1+!miniter+-1)
+      & out$eksported
   )
   ( new
   =   
