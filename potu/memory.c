@@ -179,13 +179,12 @@ static struct memblock * initializeMemBlock(size_t elementSize, size_t numberOfE
             }
         else
             {
-#if TELMAX
-            mb->numberOfElementsBetweenAddresses = numberOfElements;
-#endif
             mEa = mb->lowestAddress;
             mb->highestAddress = mEa + nlongpointers;
 #if TELMAX
             mb->numberOfFreeElementsBetweenAddresses = numberOfElements;
+            mb->numberOfElementsBetweenAddresses = numberOfElements;
+            mb->minimumNumberOfFreeElementsBetweenAddresses = numberOfElements;
 #endif
             mEz = mb->highestAddress - stepSize;
             for (; mEa < mEz; )
@@ -563,39 +562,32 @@ void bfree(void *p)
     }
 
 #if TELLING
-static void bezetting(void)
+void bezetting(void)
     {
     struct memblock * mb = 0;
     size_t words = 0;
     int i;
-    Printf("\noccupied (promilles)\n");
+    Printf("\nfree\n");
     for (i = 0; i < NumberOfMemBlocks; ++i)
         {
         mb = pMemBlocks[i];
 #if WORD32 || defined __VMS
-        Printf("%zd word : %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->numberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
-#else
-        Printf("%zd word : %zu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->numberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
+        Printf("%zd words per node : %lu of %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), mb->numberOfFreeElementsBetweenAddresses, mb->numberOfElementsBetweenAddresses);
+#else                                                                                                                                         
+        Printf("%zd words per node : %zu of %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), mb->numberOfFreeElementsBetweenAddresses, mb->numberOfElementsBetweenAddresses);
 #endif
         }
-    Printf("\nmax occupied (promilles)\n");
+    Printf("\nmin free\n");
     for (i = 0; i < NumberOfMemBlocks; ++i)
         {
         mb = pMemBlocks[i];
 #if WORD32 || defined __VMS
-        Printf("%zd word : %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->minimumNumberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
-#else
-        Printf("%zd word : %zu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->minimumNumberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
+        Printf("%zd words per node : %lu of %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), mb->minimumNumberOfFreeElementsBetweenAddresses, mb->numberOfElementsBetweenAddresses);
+#else                                                                                                                                                
+        Printf("%zd words per node : %zu of %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), mb->minimumNumberOfFreeElementsBetweenAddresses, mb->numberOfElementsBetweenAddresses);
 #endif
         }
-    Printf("\noccupied (absolute)\n");
-    for (i = 0; i < NumberOfMemBlocks; ++i)
-        {
-        mb = pMemBlocks[i];
-        words = mb->sizeOfElement / sizeof(struct memoryElement);
-        Printf("%zd word : %zu\n", words, (mb->numberOfElementsBetweenAddresses - mb->numberOfFreeElementsBetweenAddresses));
-        }
-    Printf("more than %zd words : %u\n", words, malloced);
+    Printf("more than %zd words per node : %u\n", words, malloced);
     }
 #endif
 
@@ -710,7 +702,7 @@ int init_memoryspace(void)
                     ,pMemBlocks[i]->sizeOfElement
                     );
             }
-        */
+        //*/
         return 1;
         }
     else
@@ -742,4 +734,29 @@ void dec_refcount(psk pnode)
 #endif
     }
 
+#if TELMAX
+#if TELLING
+void initcnts(void)
+    {
+    for(int tel = 0;tel < sizeof(cnts)/sizeof(cnts[0]);++tel)
+        cnts[tel] = 0;
+    }
+#endif
 
+void Bez(char draft[22])
+    {
+#if MAXSTACK
+#if defined _WIN32 || defined __VMS
+    sprintf(draft, "%lu.%lu.%d", (unsigned long)globalloc, (unsigned long)maxgloballoc, maxstack);
+#else
+    sprintf(draft, "%zu.%zu.%d", globalloc, maxgloballoc, maxstack);
+#endif
+#else
+#if defined _WIN32 || defined __VMS
+    sprintf(draft, "%lu.%lu", (unsigned long)globalloc, (unsigned long)maxgloballoc);
+#else
+    sprintf(draft, "%zu.%zu", globalloc, maxgloballoc);
+#endif
+#endif
+    }
+#endif

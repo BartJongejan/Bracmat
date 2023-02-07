@@ -19,5 +19,10 @@ void dec_refcount(psk pnode);
 void bfree(void *p);
 void pskfree(psk p);
 int all_refcount_bits_set(psk pnode);
-
+#if TELMAX
+#if TELLING
+void bezetting(void);
+#endif
+void Bez(char draft[22]);
+#endif
 #endif

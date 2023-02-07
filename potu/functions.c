@@ -778,19 +778,7 @@ function_return_type functions(psk Pnode)
 #if TELMAX
         CASE(BEZ) /* bez $  */
             {
-#if MAXSTACK
-#if defined _WIN32 || defined __VMS
-            sprintf(draft, "%lu.%lu.%d", (unsigned long)globalloc, (unsigned long)maxgloballoc, maxstack);
-#else
-            sprintf(draft, "%zu.%zu.%d", globalloc, maxgloballoc, maxstack);
-#endif
-#else
-#if defined _WIN32 || defined __VMS
-            sprintf(draft, "%lu.%lu", (unsigned long)globalloc, (unsigned long)maxgloballoc);
-#else
-            sprintf(draft, "%zu.%zu", globalloc, maxgloballoc);
-#endif
-#endif
+            Bez(draft);
             Pnode = build_up(Pnode, draft, NULL);
 #if TELLING
             bezetting();
