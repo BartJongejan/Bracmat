@@ -7185,6 +7185,101 @@ string line 2\"
           |   Out
             $ "A ? flag is permanently added to a name. An undesired side-effect."
           )
+          (   (A=.4*!arg)
+            & map$(A.1 2 3):4 8 12
+          | Out$"Function name must be valid in map, vap and mop"
+          )
+          (   (A=.4*!arg)
+            &   map$((=.4*!arg).1 2 3)
+              : 4 8 12
+          | Out$"Anonymous function must be valid in map, vap and mop"
+          )
+          (   tbl$(A,10)
+            & tbl$(B,10)
+            & vap$(6,AB)
+            & 13:?B
+            & !(5$B):0
+            & !(6$B):13
+            & tbl$(A,0)
+            & tbl$(B,0)
+          | Out$"Integer must be valid in map, vap and mop"
+          )
+          (   ( A
+              = B
+              = C
+              = 
+              = D
+              = .2*!arg
+              )
+            &   map$((A.B.C..D),1 2 3)
+              : 2 4 6
+          | Out$"Member function must be valid in map, vap and mop"
+          )
+          (     mop
+              $ ( /('(x.3*$x))
+                . (1.2.3)
+                . (=.)
+                )
+            : 3 6 9
+          | Out$"Lambda expression must be valid in map, vap and mop"
+          )
+          (   new$hash:?H
+            &   mop
+              $ ( (H..insert)
+                . (a.1),(b.2),(c.3)
+                . (=,)
+                )
+            & (H..find)$c:(c.3)
+          |   Out
+            $ "Member function of built in class must be valid in map and mop"
+          )
+          (   (j=8)
+            & (k=9)
+            &   map'(.$j ()$k)
+              : (=8) (=9)
+            &     mop
+                ' (.$j,$k.(=,))
+              : (=8) (=9)
+          | Out$"Macro evaluation must be valid in map and mop"
+          )
+          (   (x=(a=2) (b=3))
+            & !(x.a):2
+            &   !((=(a=2) (b=3)).a)
+              : 2
+          | Out$"Member selection on anonymous object"
+          )
+          (     7
+              : ?((=(a=2) (b=3)).a)
+              : 7
+            & !loss
+          |   Out
+            $ "(Meaningless) member selection on anonymous object. Same as 310."
+          )
+          (   (TTT.do)$7
+            & Out$"Can not call member of non-existent object."
+          | 
+          )
+          (   ((.(did=.!arg+2)).did)$3
+            & Out$"Invalid object specification."
+          | 
+          )
+          (   (a=b=4)
+            & !(a.c)
+            & Out$"Fetching undefined member."
+          | 
+          )
+          (   (new$hash..insert)$(a.b)
+            & Out$"No external method 'insert' defined."
+          | 
+          )
+          (   0:?n
+            &   whl
+              ' ( 1+!n:<10:?n
+                & (new$hash.insert)$(a.b)
+                )
+            & fine
+          | Out$"Cannot call built-in method on anonymous built-in object."
+          )
       &   out
         $ ( str
           $ ( "Done. "
@@ -7208,8 +7303,8 @@ r=
 & lst$(r,"valid.bra",APP)
 & put$(\n,"valid.bra",APP,BIN)
 & (   666:?aaa
-    & fast:?speed
     & slow:?speed
+    & fast:?speed
     & "LL keeps the '0' alife if 'lost' is incremented"
     & 0:?lost
     & (loss=1+!lost:?lost)

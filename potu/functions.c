@@ -173,7 +173,7 @@ static void combiflags(psk pnode)
     }
 
 
-static function_return_type find_func(psk Pnode)
+static function_return_type execFnc(psk Pnode)
     {
     psk lnode = Pnode->LEFT;
     objectStuff Object = { 0,0,0 };
@@ -351,7 +351,7 @@ function_return_type functions(psk Pnode)
                 }
             }
 
-        return find_func(Pnode);
+        return execFnc(Pnode);
         }
     rightnode = Pnode->RIGHT;
     {
@@ -1620,7 +1620,7 @@ function_return_type functions(psk Pnode)
             if(!(rightnode->v.fl & SUCCESS))
                 return functionFail(Pnode);
             addr[1] = NULL;
-            return find_func(Pnode);
+            return execFnc(Pnode);
             }
         }
     }
