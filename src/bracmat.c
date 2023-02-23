@@ -1323,6 +1323,36 @@ static void dec_refcount(psk pnode)
 #endif
     }
 
+#if TELMAX
+#if TELLING
+void initcnts(void)
+    {
+    for(int tel = 0; tel < sizeof(cnts) / sizeof(cnts[0]); ++tel)
+        cnts[tel] = 0;
+    }
+#endif
+
+static size_t globalloc = 0, maxgloballoc = 0;
+
+void Bez(char draft[22])
+    {
+#if MAXSTACK
+#if defined _WIN32 || defined __VMS
+    sprintf(draft, "%lu.%lu.%d", (unsigned long)globalloc, (unsigned long)maxgloballoc, maxstack);
+#else
+    sprintf(draft, "%zu.%zu.%d", globalloc, maxgloballoc, maxstack);
+#endif
+#else
+#if defined _WIN32 || defined __VMS
+    sprintf(draft, "%lu.%lu", (unsigned long)globalloc, (unsigned long)maxgloballoc);
+#else
+    sprintf(draft, "%zu.%zu", globalloc, maxgloballoc);
+#endif
+#endif
+    }
+#endif
+
+
 #define STRING    1
 #define VAPORIZED 2
 #define MEMORY    4
@@ -1392,10 +1422,6 @@ fct[] = "(fct=f G T P C V I B W H J O.(T=m Z a p r R Q.!arg:(?m.?Z)&0:?R:?Q&"
 "))&fct$(!A*!a^(!n*!x)*(1+!a^(-1*!n*!x)*!m+-1)*!Z)|!arg)&H$(B$(f$(!arg.'$V))))";
 
 static size_t telling = 0;
-
-#if TELMAX
-static size_t globalloc = 0, maxgloballoc = 0;
-#endif
 
 #if TELLING
 static size_t cnts[256], alloc_cnt = 0, totcnt = 0;
@@ -8324,7 +8350,6 @@ static psk findsub(psk namenode)
         }
     }
 
-
 static psk find2(psk namenode, int* newval)
     {
     vars* nxtvar;
@@ -8427,7 +8452,6 @@ static psk find2(psk namenode, int* newval)
             }
         }
     }
-
 
 static psk find(psk namenode, int* newval, objectStuff * Object)
 /* Only for finding 'function' definitions. (LHS of ' or $)*/
@@ -12302,6 +12326,37 @@ static int output(ppsk PPnode, void(*how)(psk k))
     return TRUE;
     }
 
+#if !defined NO_FOPEN
+static psk fileget(psk rlnode, int intval_i, psk Pnode, int* err, Boolean* GoOn)
+        {
+        FILE* saveFp;
+        fileStatus* fs;
+        saveFp = global_fpi;
+        fs = myfopen((char*)POBJ(rlnode), (intval_i & OPT_TXT) ? READTXT : READBIN
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
+                     , TRUE
+#endif
+        );
+        if(fs == NULL)
+            {
+            global_fpi = saveFp;
+            return 0L;
+            }
+        else
+            global_fpi = fs->fp;
+        for(;;)
+            {
+            Pnode = input(global_fpi, Pnode, intval_i, err, GoOn);
+            if(!*GoOn || *err)
+                break;
+            Pnode = eval(Pnode);
+            }
+        deallocateFileStatus(fs);
+        global_fpi = saveFp;
+        return Pnode;
+        }
+#endif
+
 static LONG simil
 (const char* s1
  , const char* s1end
@@ -12401,12 +12456,11 @@ static function_return_type execFnc(psk Pnode)
     psk lnode;
     objectStuff Object = { 0,0,0 };
     int isNewRef = FALSE;
+
     lnode = find(Pnode->LEFT, &isNewRef, &Object);
     if(lnode) /* lnode is null if either the function wasn't found or it is a built-in member function of an object. */
         {
-        if(/*is_op(lnode)
-           &&*/ Op(lnode) == DOT
-           )
+        if(Op(lnode) == DOT)
             {
             psh(&argNode, Pnode->RIGHT, NULL);
 
@@ -12473,15 +12527,7 @@ static function_return_type execFnc(psk Pnode)
             { // A built-in method of an anonymous object.
             if(Object.theMethod((struct typedObjectnode*)Object.object, &Pnode))
                 {
-/*                if(isNewRef)
-                    {*/
-                    wipe(lnode); /* This is the built-in object, which got increased refcount to evade untimely wiping. */
-  /*                  printf("wiped\n");
-                    }
-                else
-                    {
-                    printf("NOWIPE\n");
-                    }*/
+                wipe(lnode); /* This is the built-in object, which got increased refcount to evade untimely wiping. */
                 return functionOk(Pnode);
                 }
             else
@@ -12533,8 +12579,7 @@ static function_return_type execFnc(psk Pnode)
         }
     else
         {
-        DBGSRC(errorprintf("Function not found"); writeError(Pnode); \
-               Printf("\n");)
+        DBGSRC(errorprintf("Function not found"); writeError(Pnode); Printf("\n");)
         }
     return functionFail(Pnode);
     }
@@ -12862,6 +12907,7 @@ static void stringreverse(char* a, size_t len)
         }
     }
 
+#if 0
 static void print_clock(char* pjotter, clock_t time)
     {
     if(time == (clock_t)-1)
@@ -12873,6 +12919,23 @@ static void print_clock(char* pjotter, clock_t time)
         sprintf(pjotter, LONG0D "/" LONGD, (LONG)time, (LONG)CLOCKS_PER_SEC);
 #endif
     }
+#else
+static void print_clock(char* pjotter)
+    {
+    clock_t time = clock();
+#ifdef DELAY_DUE_TO_INPUT
+    time -= delayDueToInput;
+#endif
+    if(time == (clock_t)-1)
+        sprintf(pjotter, "-1");
+    else
+#if defined __TURBOC__ && !defined __BORLANDC__
+        sprintf(pjotter, "%0lu/%lu", (ULONG)time, (ULONG)(10.0 * CLOCKS_PER_SEC));/* CLOCKS_PER_SEC == 18.2 */
+#else
+        sprintf(pjotter, LONG0D "/" LONGD, (LONG)time, (LONG)CLOCKS_PER_SEC);
+#endif
+    }
+#endif
 
 #define LONGCASE
 
@@ -12931,7 +12994,58 @@ static function_return_type functions(psk Pnode)
         int i;
         ULONG ul;
         } intVal;
+#if 1
     lnode = Pnode->LEFT;
+#else
+    if(is_op(lnode = Pnode->LEFT))
+        {
+        if(!is_op(rlnode = lnode->LEFT) && !strcmp((char*)POBJ(rlnode), "math"))
+            {
+            if(is_op(Pnode->RIGHT))
+                {
+                if(REAL_COMP(Pnode->RIGHT->LEFT))
+                    {
+                    if(is_op(Pnode->RIGHT->RIGHT))
+                        {
+                        ;
+                        }
+                    else
+                        {
+                        if(REAL_COMP(Pnode->RIGHT->RIGHT))
+                            {
+                            psk restl = Cmath2(lnode->RIGHT, Pnode->RIGHT->LEFT, Pnode->RIGHT->RIGHT);
+                            if(restl)
+                                {
+                                wipe(Pnode);
+                                Pnode = restl;
+                                return functionOk(Pnode);
+                                }
+                            else
+                                return functionFail(Pnode);
+                            }
+                        }
+                                }
+                }
+            else
+                {
+                if(REAL_COMP(Pnode->RIGHT))
+                    {
+                    psk restl = Cmath(lnode->RIGHT, Pnode->RIGHT);
+                    if(restl)
+                        {
+                        wipe(Pnode);
+                        Pnode = restl;
+                        return functionOk(Pnode);
+                        }
+                    else
+                        return functionFail(Pnode);
+                    }
+                }
+            }
+
+        return find_func(Pnode);
+        }
+#endif
     rightnode = Pnode->RIGHT;
     {
     SWITCH(PLOBJ(lnode))
@@ -13035,6 +13149,7 @@ static function_return_type functions(psk Pnode)
                 rlnode = rightnode->LEFT;
                 rrightnode = rightnode->RIGHT;
                 if(!is_op(rrightnode))
+                    {
                     switch(rrightnode->u.obj)
                         {
                         case '2':
@@ -13044,6 +13159,7 @@ static function_return_type functions(psk Pnode)
                             intVal.i = 4;
                             break;
                         }
+                    }
                 }
             else
                 rlnode = rightnode;
@@ -13068,7 +13184,7 @@ static function_return_type functions(psk Pnode)
 #endif                    
                 case 1:
                 default:
-                    sprintf(draft, "%u", (int)*(unsigned char*)p);
+                    sprintf(draft, "%u", (unsigned int)*(unsigned char*)p);
                     break;
                 }
             wipe(Pnode);
@@ -13091,6 +13207,7 @@ static function_return_type functions(psk Pnode)
                 rrrightnode = rrightnode->RIGHT;
                 rrlnode = rrightnode->LEFT;
                 if(!is_op(rrrightnode))
+                    {
                     switch(rrrightnode->u.obj)
                         {
                         case '2':
@@ -13105,6 +13222,7 @@ static function_return_type functions(psk Pnode)
                         default:
                             ;
                         }
+                    }
                 }
             else
                 rrlnode = rrightnode;
@@ -13213,7 +13331,7 @@ static function_return_type functions(psk Pnode)
             if(is_op(rightnode) || !INTEGER_POS(rightnode))
                 return functionFail(Pnode);
             val = STRTOUL((char*)POBJ(rightnode), (char**)NULL, 10);
-            if(putCodePoint(val, (char*)draft) == NULL)
+            if(putCodePoint(val, (unsigned char*)draft) == NULL)
                 return functionFail(Pnode);
             wipe(Pnode);
             Pnode = scopy((const char*)draft);
@@ -13311,18 +13429,18 @@ static function_return_type functions(psk Pnode)
                 {
                 addr[2]->v.fl &= ~READY; /* {?} flg$(=!a):(=?X.?)&lst$X */
                 addr[3]->v.fl |= READY;  /* {?} flg$(=!a):(=?.?Y)&!Y */
-                }
+            }
             if(NOTHINGF(intVal.ul))
                 {
                 addr[2]->v.fl ^= SUCCESS;
                 addr[3]->v.fl ^= SUCCESS;
-                }
+                            }
             sprintf(draft, "=\2.\3");
             Pnode = build_up(Pnode, draft, NULL);
             wipe(addr[2]);
             wipe(addr[3]);
             return functionOk(Pnode);
-            }
+                        }
         CASE(GLF) /* glf $ (=<flags>.<exp>) : (=?a)  a=<flags><exp> */
             {
             if(is_object(rightnode)
@@ -13353,19 +13471,7 @@ static function_return_type functions(psk Pnode)
 #if TELMAX
         CASE(BEZ) /* bez $  */
             {
-#if MAXSTACK
-#if defined _WIN32 || defined __VMS
-            sprintf(draft, "%lu.%lu.%d", (unsigned long)globalloc, (unsigned long)maxgloballoc, maxstack);
-#else
-            sprintf(draft, "%zu.%zu.%d", globalloc, maxgloballoc, maxstack);
-#endif
-#else
-#if defined _WIN32 || defined __VMS
-            sprintf(draft, "%lu.%lu", (unsigned long)globalloc, (unsigned long)maxgloballoc);
-#else
-            sprintf(draft, "%zu.%zu", globalloc, maxgloballoc);
-#endif
-#endif
+            Bez(draft);
             Pnode = build_up(Pnode, draft, NULL);
 #if TELLING
             bezetting();
@@ -13388,9 +13494,9 @@ static function_return_type functions(psk Pnode)
                 wipe(Pnode);
                 Pnode = pnode;
                 return functionOk(Pnode);
-            }
+                }
             return functionFail(Pnode);
-            }
+                    }
         CASE(REV)
             {
             if(!is_op(rightnode))
@@ -13402,7 +13508,7 @@ static function_return_type functions(psk Pnode)
                     {
                     pnode = isolated(pnode);
                     stringreverse((char*)POBJ(pnode), len);
-                    }
+            }
                 wipe(Pnode);
                 Pnode = pnode;
                 return functionOk(Pnode);
@@ -13460,11 +13566,11 @@ static function_return_type functions(psk Pnode)
                )
                 {
                 psk pnode;
-                    pnode = qIntegerDivision(rlnode, rrightnode);
-                    wipe(Pnode);
-                    Pnode = pnode;
-                    return functionOk(Pnode);
-            }
+                pnode = qIntegerDivision(rlnode, rrightnode);
+                wipe(Pnode);
+                Pnode = pnode;
+                return functionOk(Pnode);
+                }
             return functionFail(Pnode);
             }
         CASE(DEN)
@@ -13843,8 +13949,8 @@ static function_return_type functions(psk Pnode)
                                         nnode = rlnode;
                                     else
                                         nnode = execFnc(nnode);
-                                    }
                                 }
+                            }
 
                             if(*subject)
                                 {
@@ -13858,16 +13964,16 @@ static function_return_type functions(psk Pnode)
                                 {
                                 *ppnode = nnode;
                                 }
-                            }
                         }
+                    }
                     wipe(Pnode);
                     Pnode = nPnode ? nPnode : same_as_w(&nilNode);
                     return functionOk(Pnode);
-                    }
                 }
+            }
             else
                 return functionFail(Pnode);
-            }
+        }
 #if !defined NO_FILE_RENAME
         CASE(REN)
             {
@@ -13907,7 +14013,7 @@ static function_return_type functions(psk Pnode)
                         default:
                             sprintf(draft, "%d", errno);
                             break;
-                        }
+                    }
 #endif
                     }
                 else
@@ -13918,7 +14024,7 @@ static function_return_type functions(psk Pnode)
                 }
             else
                 return functionFail(Pnode);
-            }
+                }
 #endif
 #if !defined NO_FILE_REMOVE
         CASE(RMV)
@@ -13952,6 +14058,7 @@ static function_return_type functions(psk Pnode)
                             strcpy(draft, "ENOENT");
                             break;
                         default:
+                            {
 #ifdef __VMS
                             if(!strcmp("file currently locked by another user", (const char*)strerror(errno)))
                                 {  /* OpenVMS */
@@ -13967,6 +14074,7 @@ static function_return_type functions(psk Pnode)
                                 }
                             /* sprintf(draft,"%d",errno);
                              break;*/
+                            }
                         }
 #endif
                     }
@@ -13975,10 +14083,10 @@ static function_return_type functions(psk Pnode)
                 wipe(Pnode);
                 Pnode = scopy((const char*)draft);
                 return functionOk(Pnode);
-                        }
+                }
             else
                 return functionFail(Pnode);
-                    }
+            }
 #endif
         CASE(ARG) /* arg$ or arg$N  (N == 0,1,... and N < argc) */
             {
@@ -14051,35 +14159,16 @@ static function_return_type functions(psk Pnode)
                 {
                 if(rlnode->u.obj && strcmp((char*)POBJ(rlnode), "stdin"))
                     {
-#if !defined NO_FOPEN
-                    FILE* saveFp;
-                    fileStatus* fs;
-                    saveFp = global_fpi;
-                    fs = myfopen((char*)POBJ(rlnode), (intVal.i & OPT_TXT) ? READTXT : READBIN
-#if !defined NO_LOW_LEVEL_FILE_HANDLING
-                                 , TRUE
-#endif
-                    );
-                    if(fs == NULL)
-                        {
-                        global_fpi = saveFp;
-                        return functionFail(Pnode);
-                        }
-                    else
-                        global_fpi = fs->fp;
-                    for(;;)
-                        {
-                        Pnode = input(global_fpi, Pnode, intVal.i, &err, &GoOn);
-                        if(!GoOn || err)
-                            break;
-                        Pnode = eval(Pnode);
-                        }
-                    deallocateFileStatus(fs);
-                    global_fpi = saveFp;
-#else
+#if defined NO_FOPEN
                     return functionFail(Pnode);
+#else
+                    psk pnode = fileget(rlnode, intVal.i, Pnode, &err, &GoOn);
+                    if(pnode)
+                        Pnode = pnode;
+                    else
+                        return functionFail(Pnode);
 #endif
-                    }
+                }
                 else
                     {
                     intVal.i |= OPT_ECH;
@@ -14101,12 +14190,12 @@ static function_return_type functions(psk Pnode)
                         if(!GoOn || err)
                             break;
                         Pnode = eval(Pnode);
-                        }
-#endif
                     }
-                }
-            return err ? functionFail(Pnode) : functionOk(Pnode);
+#endif
             }
+            }
+            return err ? functionFail(Pnode) : functionOk(Pnode);
+    }
         CASE(PUT) /* put$(file,mode,node) of put$node */
             {
             return output(&Pnode, result) ? functionOk(Pnode) : functionFail(Pnode);
@@ -14121,6 +14210,7 @@ static function_return_type functions(psk Pnode)
                 {
                 intVal.i = system((const char*)POBJ(rightnode));
                 if(intVal.i)
+                    {
 #ifndef E2BIG
                     sprintf(draft, "%d", intVal.i);
 #else
@@ -14157,13 +14247,14 @@ static function_return_type functions(psk Pnode)
                             break;
                         }
 #endif
+                    }
                 else
                     strcpy(draft, "0");
                 wipe(Pnode);
                 Pnode = scopy((const char*)draft);
                 return functionOk(Pnode);
-                }
-            }
+                        }
+                    }
 #endif
 #endif
         CASE(TBL) /* tbl$(varname,length) */
@@ -14188,11 +14279,7 @@ static function_return_type functions(psk Pnode)
 #endif
         CASE(CLK) /* clk' */
             {
-            clock_t time = clock();
-#ifdef DELAY_DUE_TO_INPUT
-            time -= delayDueToInput;
-#endif
-            print_clock(draft, time);
+            print_clock(draft);
             wipe(Pnode);
             Pnode = scopy((const char*)draft);
             return functionOk(Pnode);
@@ -14307,24 +14394,25 @@ static function_return_type functions(psk Pnode)
                         Pnode = rrightnode;
                         Pnode->v.fl |= intVal.ul; /* (a=b)&!('$a)*/
                         }
-                        }
+                    }
                 else
                     {
                     combiflags(Pnode);
                     Pnode = rightbranch(Pnode);
                     }
                 return functionOk(Pnode);
-                    }
+                }
             else
                 {
                 return functionFail(Pnode);
                 }
-                }
+            }
         DEFAULT
             {
 #if 1
             return 0;
 #else
+#if 1
             if(INTEGER(lnode))
                 {
                 vars* nxtvar;
@@ -14349,11 +14437,30 @@ static function_return_type functions(psk Pnode)
                 return functionFail(Pnode);
             addr[1] = NULL;
             return execFnc(Pnode);
+#else
+            if(INTEGER(lnode))
+                {
+                if(is_op(rightnode))
+                    return functionFail(Pnode);
+                else
+                    {
+                    if(setIndex(rightnode,lnode))
+                        {
+                        Pnode = rightbranch(Pnode);
+                        return functionOk(Pnode);
+                        }
+                    }
+                }
+            if(!(rightnode->v.fl & SUCCESS))
+                return functionFail(Pnode);
+            addr[1] = NULL;
+            return execFnc(Pnode);
 #endif
+#endif
+                }
             }
         }
-    }
-    /*return functionOk(Pnode); 20 Dec 1995, unreachable code in Borland C */
+/*return functionOk(Pnode); 20 Dec 1995, unreachable code in Borland C */
     }
 
 static psk handleExponents(psk Pnode)
@@ -14370,7 +14477,7 @@ static psk handleExponents(psk Pnode)
         addr[2] = lnode->RIGHT;
         addr[3] = Pnode->RIGHT;
         Pnode = build_up(Pnode, "(\1^(\2*\3))", NULL);
-                    }
+        }
     if(done)
         {
         return Pnode;
@@ -14423,7 +14530,7 @@ static psk handleExponents(psk Pnode)
                         return Pnode; /*{?} -3^2/3 => -3^2/3 */
                         }
                     /* Missing here is n^m, with m > 2.
-                       That case is handled in casemacht. */
+                        That case is handled in casemacht. */
                     }
                 else if(PLOBJ(lnode) == IM)
                     {
@@ -14592,7 +14699,8 @@ static psk handleExponents(psk Pnode)
         Pnode = tryq(Pnode, f4, &ok);
         }
     return Pnode;
-                }
+    }
+
 
 /*
 Improvement that DOES evaluate b+(i*c+i*d)+-i*c
