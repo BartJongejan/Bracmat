@@ -49,9 +49,6 @@
 static clock_t delayDueToInput = 0;
 #endif
 
-#define functionFail(x) ((x)->v.fl ^= SUCCESS,(x))
-#define functionOk(x) (x)
-
 #if !defined NO_C_INTERFACE
 static void* strToPointer(const char* str)
     {
@@ -172,30 +169,25 @@ static void combiflags(psk pnode)
         }
     }
 
-
-static function_return_type execFnc(psk Pnode)
+function_return_type execFnc(psk Pnode)
     {
-    psk lnode = Pnode->LEFT;
+    psk lnode;
     objectStuff Object = { 0,0,0 };
     int isNewRef = FALSE;
-    addr[1] = NULL;
-    addr[1] = find(lnode, &isNewRef, &Object);
-    if(addr[1])
+
+    lnode = find(Pnode->LEFT, &isNewRef, &Object);
+    if(lnode) /* lnode is null if either the function wasn't found or it is a built-in member function of an object. */
         {
-        if(is_op(addr[1])
-           && Op(addr[1]) == DOT
-           )
+        if(Op(lnode) == DOT)
             {
             psh(&argNode, Pnode->RIGHT, NULL);
+
             if(Object.self)
                 {
                 psh(&selfNode, Object.self, NULL);
-                }
-            Pnode = dopb(Pnode, addr[1]);
-            if(isNewRef)
-                wipe(addr[1]);
-            if(Object.self)
-                {
+                Pnode = dopb(Pnode, lnode);
+                if(isNewRef)
+                    wipe(lnode);
                 /*
                 psh(&selfNode,self,NULL); Must precede dopb(...).
                 Example where this is relevant:
@@ -219,7 +211,6 @@ static function_return_type execFnc(psk Pnode)
                     deleteNode(&argNode);
                     deleteNode(&selfNode);
                     deleteNode(&SelfNode);
-                    return functionOk(Pnode);
                     }
                 else
                     {
@@ -232,11 +223,13 @@ static function_return_type execFnc(psk Pnode)
                         }
                     deleteNode(&argNode);
                     deleteNode(&selfNode);
-                    return functionOk(Pnode);
                     }
                 }
             else
                 {
+                Pnode = dopb(Pnode, lnode);
+                if(isNewRef)
+                    wipe(lnode);
                 if(Op(Pnode) == DOT)
                     {
                     psh(Pnode->LEFT, &zeroNode, NULL);
@@ -245,22 +238,36 @@ static function_return_type execFnc(psk Pnode)
                     Pnode = dopb(Pnode, Pnode->RIGHT);
                     }
                 deleteNode(&argNode);
+                }
+            return functionOk(Pnode);
+            }
+        else if(Object.theMethod)
+            { // A built-in method of an anonymous object.
+            if(Object.theMethod((struct typedObjectnode*)Object.object, &Pnode))
+                {
+                wipe(lnode); /* This is the built-in object, which got increased refcount to evade untimely wiping. */
                 return functionOk(Pnode);
                 }
-            }
+            else
+                {
+                if(isNewRef)
+                    wipe(lnode);
+                return functionFail(Pnode);
+                }
+                }
         else
             {
 #if defined NO_EXIT_ON_NON_SEVERE_ERRORS
             return functionFail(Pnode);
 #else
             errorprintf("(Syntax error) The following is not a function:\n\n  ");
-            writeError(lnode);
+            writeError(Pnode->LEFT);
             exit(116);
 #endif
             }
-        }
+            }
     else if(Object.theMethod)
-        {
+        { // A built-in method of a named object.
         if(Object.theMethod((struct typedObjectnode*)Object.object, &Pnode))
             {
             return functionOk(Pnode);
@@ -272,18 +279,17 @@ static function_return_type execFnc(psk Pnode)
             && (!is_op(Pnode->LEFT->RIGHT->LEFT))
             )
         {
-        psk rightnode;
-        rightnode = lambda(Pnode->LEFT->RIGHT->RIGHT, Pnode->LEFT->RIGHT->LEFT, Pnode->RIGHT);
-        if(rightnode)
+        lnode = lambda(Pnode->LEFT->RIGHT->RIGHT, Pnode->LEFT->RIGHT->LEFT, Pnode->RIGHT);
+        if(lnode)
             {
             wipe(Pnode);
-            Pnode = rightnode;
+            Pnode = lnode;
             }
         else
             {
-            psk npkn = subtreecopy(Pnode->LEFT->RIGHT->RIGHT);
+            lnode = subtreecopy(Pnode->LEFT->RIGHT->RIGHT);
             wipe(Pnode);
-            Pnode = npkn;
+            Pnode = lnode;
             if(!is_op(Pnode) && !(Pnode->v.fl & INDIRECT))
                 Pnode->v.fl |= READY;
             }
@@ -291,8 +297,7 @@ static function_return_type execFnc(psk Pnode)
         }
     else
         {
-        DBGSRC(errorprintf("Function not found"); writeError(Pnode); \
-               Printf("\n");)
+        DBGSRC(errorprintf("Function not found"); writeError(Pnode); Printf("\n");)
         }
     return functionFail(Pnode);
     }

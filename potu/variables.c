@@ -435,7 +435,135 @@ void pop(psk pnode)
     deleteNode(pnode);
     }
 
-psk find(psk namenode, int *newval, objectStuff * Object)
+static psk findsub(psk namenode)
+    {
+    vars* nxtvar;
+    assert(!is_op(namenode));
+    for(nxtvar = variables[namenode->u.obj];
+        nxtvar && (STRCMP(VARNAME(nxtvar), POBJ(namenode)) < 0);
+        nxtvar = nxtvar->next)
+        ;
+    if(nxtvar && !STRCMP(VARNAME(nxtvar), POBJ(namenode))
+       && nxtvar->selector <= nxtvar->n
+       )
+        {
+        ppsk self;
+        assert(nxtvar->pvaria);
+        self = Entry(nxtvar->n, nxtvar->selector, &nxtvar->pvaria);
+        *self = Head(*self);
+        return *self;
+        }
+    else
+        {
+        return NULL;
+        }
+    }
+
+psk find2(psk namenode, int* newval)
+    {
+    vars* nxtvar;
+    if(is_op(namenode))
+        {
+        switch(Op(namenode))
+            {
+            case EQUALS:
+                {
+                /* namenode is /!(=b) when evaluating (a=b)&/!('$a):b */
+                *newval = TRUE;
+                namenode->RIGHT = Head(namenode->RIGHT);
+                return same_as_w(namenode->RIGHT);
+                }
+            case DOT: /*
+                      e.g.
+
+                            x  =  (a=2) (b=3)
+
+                            !(x.a)
+                      and
+                            !((=  (a=2) (b=3)).a)
+
+                      must give same result.
+                      */
+                {
+                psk tmp;
+                psk tmp2;
+                psk goal;
+                if(is_op(namenode->LEFT))
+                    {
+                    if(Op(namenode->LEFT) == EQUALS) /* namenode->LEFT == (=  (a=2) (b=3))   */
+                        {
+                        tmp = namenode->LEFT->RIGHT; /* tmp == ((a=2) (b=3))   */
+                        }
+                    else
+                        {
+                        return NULL; /* !(+a.a) */
+                        }
+                    }
+                else                                   /* x */
+                    {
+                    if((tmp = findsub(namenode->LEFT)) == NULL)
+                        {
+                        return NULL; /* !(xua.gjh) if xua isn't defined */
+                        }
+                    /*
+                    tmp == ((a=2) (b=3))
+                    tmp == (=)
+                    */
+                    }
+                /* The number of '=' to reach the method name in 'tmp' must be one greater
+                   than the number of '.' that precedes the method name in 'namenode->RIGHT'
+
+                   e.g (= (say=.out$!arg)) and (.say) match
+
+                   For built-in methods (definitions of which are not visible) an invisible '=' has to be assumed.
+
+                   The function getmember resolves this.
+                */
+                tmp2 = getmember2(namenode->RIGHT, tmp);
+
+                if(tmp2)
+                    {
+                    *newval = TRUE;
+                    return same_as_w(tmp2);
+                    }
+                else
+                    {
+                    return NULL; /* !(a.c) if a=(b=4) */
+                    }
+                }
+            default:
+                {
+                *newval = FALSE;
+                return NULL; /* !(a,b) because of comma instead of dot */
+                }
+            }
+        }
+    else
+        {
+        for(nxtvar = variables[namenode->u.obj];
+            nxtvar && (STRCMP(VARNAME(nxtvar), POBJ(namenode)) < 0);
+            nxtvar = nxtvar->next)
+            ;
+        if(nxtvar && !STRCMP(VARNAME(nxtvar), POBJ(namenode))
+           && nxtvar->selector <= nxtvar->n
+           )
+            {
+            ppsk self;
+            assert(nxtvar->pvaria);
+            *newval = FALSE;
+            self = Entry(nxtvar->n, nxtvar->selector, &nxtvar->pvaria);
+            *self = Head(*self);
+            return *self;
+            }
+        else
+            {
+            return NULL; /* !hjgkg if hjgkg not defined */
+            }
+        }
+    }
+
+psk find(psk namenode, int* newval, objectStuff* Object)
+/* Only for finding 'function' definitions. (LHS of ' or $)*/
 /*
 'namenode' is the expression that has to lead to a binding.
 Conceptually, expression (or its complement) and binding are separated by a '=' operator.
@@ -470,115 +598,107 @@ and
 must be equivalent
 */
     {
-    vars *nxtvar;
-    if (is_op(namenode))
+    vars* nxtvar;
+    if(is_op(namenode))
         {
-        switch (Op(namenode))
+        switch(Op(namenode))
             {
-                case EQUALS: /* Lambda function: (=.out$!arg)$HELLO -> namenode == (=.out$!arg) */
+            case EQUALS: /* Anonymous function: (=.out$!arg)$HELLO -> namenode == (=.out$!arg) */
+                {
+                *newval = TRUE;
+                namenode->RIGHT = Head(namenode->RIGHT);
+                return same_as_w(namenode->RIGHT);
+                }
+            case DOT: /*
+                      e.g.
+
+                      new$hash:?y
+
+                      (y..insert)$
+                      (!y.insert)$
+                      */
+                {
+                psk tmp;
+                psk tmp2;
+                psk goal;
+                /* (=hash).New when evaluating new$hash:?y
+                   y..insert when evaluating (y..insert)$
+                */
+                if(is_op(namenode->LEFT))
                     {
-                    *newval = TRUE;
-                    namenode->RIGHT = Head(namenode->RIGHT);
-                    return same_as_w(namenode->RIGHT);
-                    }
-                case DOT: /*
-                          e.g.
-
-                          (1)
-                                x  =  (a=2) (b=3)
-
-                                !(x.a)
-                          and
-                                !((=  (a=2) (b=3)).a)
-
-                          must give same result.
-
-                          (2)
-
-                          new$hash:?y
-
-                          ((=).insert)$
-                          (y..insert)$
-                          (!y.insert)$
-                          */
-                    {
-                    psk tmp;
-                    psk tmp2;
-                    psk goal;
-                    int isNewRef = FALSE;
-                    if (is_op(namenode->LEFT))
+                    if(Op(namenode->LEFT) == EQUALS) /* namenode->LEFT == (=  (a=2) (b=3))   */
                         {
-                        if (Op(namenode->LEFT) == EQUALS) /* namenode->LEFT == (=  (a=2) (b=3))   */
+                        if(ISBUILTIN((objectnode*)(namenode->LEFT))
+                           )
                             {
-                            if (Object
-                                && ISBUILTIN((objectnode*)(namenode->LEFT))
-                                )
+                            Object->theMethod = findBuiltInMethod((typedObjectnode*)(namenode->LEFT), namenode->RIGHT);
+                            /* findBuiltInMethod((=),(insert)) */
+                            Object->object = namenode->LEFT;  /* object == (=) */
+                            if(Object->theMethod)
                                 {
-                                Object->theMethod = findBuiltInMethod((typedObjectnode *)(namenode->LEFT), namenode->RIGHT);
-                                /* findBuiltInMethod((=),(insert)) */
-                                Object->object = namenode->LEFT;  /* object == (=) */
-                                if (Object->theMethod)
-                                    {
-                                    return NULL;
-                                    }
+                                namenode->LEFT = same_as_w(namenode->LEFT);
+                                //*newval = TRUE;
+                                return namenode->LEFT; /* (=hash).New when evaluating (new$hash..insert)$(a.b) */
                                 }
-                            tmp = namenode->LEFT->RIGHT; /* tmp == ((a=2) (b=3))   */
                             }
-                        else
-                            return NULL;
-                        }
-                    else                                   /* x */
-                        {
-                        if ((tmp = find(namenode->LEFT, &isNewRef, NULL)) == NULL)
-                            return NULL;
-                        /*
-                        tmp == ((a=2) (b=3))
-                        tmp == (=)
-                        */
-                        }
-                    if (Object)
-                        Object->self = tmp; /* self == ((a=2) (b=3))   */
-                    /* The number of '=' to reach the method name in 'tmp' must be one greater
-                       than the number of '.' that precedes the method name in 'namenode->RIGHT'
-
-                       e.g (= (say=.out$!arg)) and (.say) match
-
-                       For built-in methods (definitions of which are not visible) an invisible '=' has to be assumed.
-
-                       The function getmember resolves this.
-                    */
-                    tmp2 = getmember(namenode->RIGHT, tmp, Object);
-
-                    if (tmp2)
-                        {
-                        *newval = TRUE;
-                        goal = same_as_w(tmp2);
+                        tmp = namenode->LEFT->RIGHT; /* tmp == ((a=2) (b=3))   */
                         }
                     else
-                        goal = NULL;
-                    assert(!isNewRef);
-                    return goal;
+                        {
+                        return NULL;  /* ((.(did=.!arg+2)).did)$3 */
+                        }
                     }
-                default:
+                else                                   /* x */
                     {
-                    *newval = FALSE;
-                    return NULL;
+                    if((tmp = findsub(namenode->LEFT)) == NULL)
+                        {
+                        return NULL;   /* (y.did)$3  when y is not defined at all */
+                        }
+                    /*
+                    tmp == ((a=2) (b=3))
+                    tmp == (=)
+                    */
                     }
+                Object->self = tmp; /* self == ((a=2) (b=3))   */
+                /* The number of '=' to reach the method name in 'tmp' must be one greater
+                   than the number of '.' that precedes the method name in 'namenode->RIGHT'
+
+                   e.g (= (say=.out$!arg)) and (.say) match
+
+                   For built-in methods (definitions of which are not visible) an invisible '=' has to be assumed.
+
+                   The function getmember resolves this.
+                */
+                tmp2 = getmember(namenode->RIGHT, tmp, Object);
+
+                if(tmp2)
+                    {
+                    *newval = TRUE;
+                    return same_as_w(tmp2);
+                    }
+                else
+                    { /* You get here if a built-in method is called. */
+                    return NULL; /* (=hash)..insert when evaluating (new$hash..insert)$(a.b) */
+                    }
+                }
+            default:
+                {
+                return NULL; /* /('(x.$x^2)) when evaluating /('(x.$x^2))$3 */
+                }
             }
         }
     else
         {
-        for (nxtvar = variables[namenode->u.obj];
-             nxtvar && (STRCMP(VARNAME(nxtvar), POBJ(namenode)) < 0);
-             nxtvar = nxtvar->next)
+        for(nxtvar = variables[namenode->u.obj];
+            nxtvar && (STRCMP(VARNAME(nxtvar), POBJ(namenode)) < 0);
+            nxtvar = nxtvar->next)
             ;
-        if (nxtvar && !STRCMP(VARNAME(nxtvar), POBJ(namenode))
-            && nxtvar->selector <= nxtvar->n
-            )
+        if(nxtvar && !STRCMP(VARNAME(nxtvar), POBJ(namenode))
+           && nxtvar->selector <= nxtvar->n
+           )
             {
             ppsk self;
             assert(nxtvar->pvaria);
-            *newval = FALSE;
             self = Entry(nxtvar->n, nxtvar->selector, &nxtvar->pvaria);
             *self = Head(*self);
             return *self;
@@ -801,6 +921,7 @@ void lst(psk pnode)
     lstsub(pnode);
     }
 
+#if 0
 int setIndex(psk rightnode,psk lnode)
     {
     vars *nxtvar;
@@ -819,6 +940,42 @@ int setIndex(psk rightnode,psk lnode)
         }
     return FALSE;
     }
+#else
+function_return_type setIndex(psk Pnode)
+    {
+    psk lnode = Pnode->LEFT;
+    psk rightnode = Pnode->RIGHT;
+    if(INTEGER(lnode))
+        {
+        vars* nxtvar;
+        if(is_op(rightnode))
+            return functionFail(Pnode);
+        for(nxtvar = variables[rightnode->u.obj];
+            nxtvar && (STRCMP(VARNAME(nxtvar), POBJ(rightnode)) < 0);
+            nxtvar = nxtvar->next);
+        /* find first name in a row of equal names */
+        if(nxtvar && !STRCMP(VARNAME(nxtvar), POBJ(rightnode)))
+            {
+            nxtvar->selector =
+                (int)toLong(lnode)
+                % (nxtvar->n + 1);
+            if(nxtvar->selector < 0)
+                nxtvar->selector += (nxtvar->n + 1);
+            Pnode = rightbranch(Pnode);
+            return functionOk(Pnode);
+            }
+        else
+            return functionFail(Pnode);
+        }
+    return 0;
+    /*
+    if(!(rightnode->v.fl & SUCCESS))
+        return functionFail(Pnode);
+    addr[1] = NULL;
+    return execFnc(Pnode);
+    */
+    }
+#endif
 
 void initVariables(void)
     {

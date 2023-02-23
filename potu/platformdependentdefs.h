@@ -131,13 +131,16 @@ typedef   signed long  INT32_T;
 #if BIGENDIAN
 #define iobj lobj
 #define O(a,b,c) (a*0x1000000L+b*0x10000L+c*0x100)
+#define notO 0xFF
 #else
 #if !WORD32
 #define iobj lobj
 #endif
 #define O(a,b,c) (a+b*0x100+c*0x10000L)
+#define notO 0xFF000000
 #endif
 
+#define not_built_in(pn) (((pn)->v.fl & IS_OPERATOR) || (((pn)->u.lobj) & (notO)))
 
 #if defined __TURBOC__ || defined __MSDOS__ || defined _WIN32 || defined __GNUC__
 #define DELAY_DUE_TO_INPUT

@@ -41,6 +41,7 @@ psk eval(psk Pnode)
             if (is_op(Pnode))
                 {
                 sk lkn = *Pnode;
+                psk auxkn;
                 /* The operators MATCH, AND and OR are treated in another way than
                 the other operators. These three operators are the only 'volatile'
                 operators: they cannot occur in a fully evaluated tree. For that reason
@@ -346,7 +347,27 @@ psk eval(psk Pnode)
                                 {
                                 Pnode->RIGHT = eval(Pnode->RIGHT);
                                 }
+#if 0
                             Pnode = functions(Pnode);
+#else
+                            auxkn = setIndex(Pnode);
+                            if(auxkn)
+                                Pnode = auxkn;
+                            else
+                                {
+                                if(not_built_in(Pnode->LEFT)) /* Do not use ternary operator! That eats stack! */
+                                    Pnode = execFnc(Pnode);
+                                else
+                                    {
+                                    auxkn = functions(Pnode);
+                                    if(auxkn)
+                                        Pnode = auxkn;
+                                    else
+                                        Pnode = execFnc(Pnode);
+                                    }
+                                }
+
+#endif
                             if (lkn.v.fl & INDIRECT)
                                 {
                                 Pnode = evalvar(Pnode);
@@ -360,17 +381,17 @@ psk eval(psk Pnode)
                             Pnode->v.fl |= READY;
                             if (dummy_op == EQUALS)
                                 {
-                                psk old = Pnode;
+                                auxkn = Pnode;
                                 Pnode = (psk)bmalloc(__LINE__, sizeof(objectnode));
 #if WORD32
                                 ((typedObjectnode*)(Pnode))->u.Int = 0;
 #else
                                 ((typedObjectnode*)(Pnode))->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
 #endif
-                                Pnode->LEFT = subtreecopy(old->LEFT);
-                                old->RIGHT = Head(old->RIGHT);
-                                Pnode->RIGHT = subtreecopy(old->RIGHT);
-                                wipe(old);
+                                Pnode->LEFT = subtreecopy(auxkn->LEFT);
+                                auxkn->RIGHT = Head(auxkn->RIGHT);
+                                Pnode->RIGHT = subtreecopy(auxkn->RIGHT);
+                                wipe(auxkn);
                                 }
                             Pnode->v.fl &= (~OPERATOR & ~READY);
                             Pnode->v.fl |= dummy_op;

@@ -211,5 +211,7 @@
 #define IS_ONE(pn)                      ((pn)->u.lobj == ONE && !((pn)->v.fl & (MINUS | VISIBLE_FLAGS)))
 #define IS_NIL(pn)                      ((pn)->u.lobj == 0   && !((pn)->v.fl & (MINUS | VISIBLE_FLAGS)))
 
+#define functionFail(x) ((x)->v.fl ^= SUCCESS,(x))
+#define functionOk(x) (x)
 
 #endif
