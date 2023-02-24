@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "30 January 2023"
-#define VERSION "6.12.4"
-#define BUILD "264"
+#define DATUM "24 February 2023"
+#define VERSION "6.12.5"
+#define BUILD "265"
 /*
 COMPILATION
 -----------
@@ -12788,10 +12788,10 @@ static psk changeCase(psk Pnode
                             if(obuf != SPOBJ(pnode))
                                 bfree(obuf);
                             obuf = buf;
-                    }
-                }
+                            }
+                        }
                     d = putCodePoint(D, d);
-            }
+                    }
                 else
                     *d++ = (unsigned char)D;
                 }
@@ -13319,7 +13319,7 @@ static function_return_type functions(psk Pnode)
             if(is_op(rightnode) || !INTEGER_POS(rightnode))
                 return functionFail(Pnode);
             val = STRTOUL((char*)POBJ(rightnode), (char**)NULL, 10);
-            if(putCodePoint(val, (unsigned char*)draft) == NULL)
+            if(putCodePoint(val, draft) == NULL)
                 return functionFail(Pnode);
             wipe(Pnode);
             Pnode = scopy((const char*)draft);
