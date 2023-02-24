@@ -8633,8 +8633,6 @@ static int deleteNode(psk name)
         return FALSE;
     }
 
-static psk SymbolBinding_w(psk variabele, int twolevelsofindirection);
-
 static psk SymbolBinding(psk variabele, int* newval, int twolevelsofindirection)
     {
     psk pbinding;
