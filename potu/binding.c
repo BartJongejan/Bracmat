@@ -7,8 +7,6 @@
 #include "wipecopy.h"
 #include <assert.h>
 
-psk SymbolBinding_w(psk variabele, int twolevelsofindirection);
-
 static psk SymbolBinding(psk variabele, int* newval, int twolevelsofindirection)
     {
     psk pbinding;
