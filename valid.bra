@@ -7277,6 +7277,7 @@ string line 2\"
               ' ( 1+!n:<10:?n
                 & (new$hash.insert)$(a.b)
                 )
+            & !n:9
             & fine
           | Out$"Cannot call built-in method on anonymous built-in object."
           )
