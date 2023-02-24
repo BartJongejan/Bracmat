@@ -4,6 +4,7 @@
 #include "copy.h"
 #include "typedobjectnode.h"
 #include "globals.h"
+#include "branch.h"
 #include "variables.h"
 #include "input.h"
 #include "wipecopy.h"
@@ -25,7 +26,6 @@
 #include "objectdef.h"
 #include "objectnode.h"
 #include "macro.h"
-#include "branch.h"
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
@@ -169,11 +169,69 @@ static void combiflags(psk pnode)
         }
     }
 
+psk perhapsMath(psk Pnode)
+    {
+    psk lnode,restl;
+    if(is_op(Pnode)&&is_op(lnode = Pnode->LEFT))
+        {
+        psk llnode = lnode->LEFT;
+        if(!is_op(llnode = lnode->LEFT) && !strcmp((char*)POBJ(llnode), "math"))
+            {
+            psk rnode = Pnode->RIGHT;
+            if(is_op(rnode))
+                {
+                psk lrnode = rnode->LEFT;
+                if(REAL_COMP(lrnode))
+                    {
+                    psk rrnode = rnode->RIGHT;
+                    if(!is_op(rrnode))
+                        {
+                        if(REAL_COMP(rrnode))
+                            {
+                            restl = Cmath2(lnode->RIGHT, lrnode, rrnode);
+                            if(restl)
+                                {
+                                wipe(Pnode);
+                                Pnode = restl;
+                                return functionOk(Pnode);
+                                }
+                            else
+                                return functionFail(Pnode);
+                            }
+                        }
+                    }
+                }
+            else
+                {
+                if(REAL_COMP(rnode))
+                    {
+                    restl = Cmath(lnode->RIGHT, rnode);
+                    if(restl)
+                        {
+                        wipe(Pnode);
+                        Pnode = restl;
+                        return functionOk(Pnode);
+                        }
+                    else
+                        return functionFail(Pnode);
+                    }
+                }
+            }
+        }
+    return 0;
+    }
+
 function_return_type execFnc(psk Pnode)
     {
     psk lnode;
     objectStuff Object = { 0,0,0 };
     int isNewRef = FALSE;
+
+    /*lnode = perhapsMath(Pnode);
+    if(lnode)
+        {
+        return lnode;
+        }*/
 
     lnode = find(Pnode->LEFT, &isNewRef, &Object);
     if(lnode) /* lnode is null if either the function wasn't found or it is a built-in member function of an object. */
@@ -254,7 +312,7 @@ function_return_type execFnc(psk Pnode)
                     wipe(lnode);
                 return functionFail(Pnode);
                 }
-                }
+            }
         else
             {
 #if defined NO_EXIT_ON_NON_SEVERE_ERRORS
@@ -265,7 +323,7 @@ function_return_type execFnc(psk Pnode)
             exit(116);
 #endif
             }
-            }
+        }
     else if(Object.theMethod)
         { // A built-in method of a named object.
         if(Object.theMethod((struct typedObjectnode*)Object.object, &Pnode))
@@ -310,6 +368,9 @@ function_return_type functions(psk Pnode)
         int i;
         ULONG ul;
         } intVal;
+#if 1
+    lnode = Pnode->LEFT;
+#else
     if(is_op(lnode = Pnode->LEFT))
         {
         if(!is_op(rlnode = lnode->LEFT) && !strcmp((char*)POBJ(rlnode), "math"))
@@ -356,8 +417,9 @@ function_return_type functions(psk Pnode)
                 }
             }
 
-        return execFnc(Pnode);
+        return find_func(Pnode);
         }
+#endif
     rightnode = Pnode->RIGHT;
     {
     SWITCH(PLOBJ(lnode))
@@ -434,9 +496,9 @@ function_return_type functions(psk Pnode)
             {
             void* p;
             if(is_op(rightnode)
-               || !INTEGER_POS(rightnode)
-               || (p = bmalloc(__LINE__, (int)strtoul((char*)POBJ(rightnode), (char**)NULL, 10)))
-               == NULL)
+                || !INTEGER_POS(rightnode)
+                || (p = bmalloc(__LINE__, (int)strtoul((char*)POBJ(rightnode), (char**)NULL, 10)))
+                == NULL)
                 return functionFail(Pnode);
             pointerToStr(draft, p);
             wipe(Pnode);
@@ -539,7 +601,7 @@ function_return_type functions(psk Pnode)
             else
                 rrlnode = rrightnode;
             if(is_op(rlnode) || !INTEGER_POS(rlnode)
-               || is_op(rrlnode) || !INTEGER(rrlnode))
+                || is_op(rrlnode) || !INTEGER(rrlnode))
                 return functionFail(Pnode);
             p = strToPointer((char*)POBJ(rlnode));
             p = (void*)((char*)p - (ptrdiff_t)((size_t)p % intVal.i));
@@ -571,7 +633,7 @@ function_return_type functions(psk Pnode)
                 {
                 fncTp pfnc; /* Hoping this works. */
                 void* vp;  /* Pointers to data and pointers to functions may
-                               have different sizes. */
+                                have different sizes. */
                 } u;
             void* argStruct;
             if(sizeof(int(*)(void*)) != sizeof(void*) || !is_op(rightnode))
@@ -588,8 +650,8 @@ function_return_type functions(psk Pnode)
             char* endptr;
             ULONG val;
             if(is_op(rightnode)
-               || HAS_VISIBLE_FLAGS_OR_MINUS(rightnode)
-               )
+                || HAS_VISIBLE_FLAGS_OR_MINUS(rightnode)
+                )
                 return functionFail(Pnode);
             errno = 0;
             val = STRTOUL((char*)POBJ(rightnode), &endptr, 16);
@@ -608,16 +670,16 @@ function_return_type functions(psk Pnode)
                 return functionFail(Pnode);
 #ifdef __BORLANDC__
             if(strlen((char*)POBJ(rightnode)) > 10
-               || strlen((char*)POBJ(rightnode)) == 10
-               && strcmp((char*)POBJ(rightnode), "4294967295") > 0
-               )
+                || strlen((char*)POBJ(rightnode)) == 10
+                && strcmp((char*)POBJ(rightnode), "4294967295") > 0
+                )
                 return functionFail(Pnode); /*not all characters scanned*/
 #endif
             errno = 0;
             val = STRTOUL((char*)POBJ(rightnode), &endptr, 10);
             if(errno == ERANGE
-               || (endptr && *endptr)
-               )
+                || (endptr && *endptr)
+                )
                 return functionFail(Pnode); /*not all characters scanned*/
             sprintf(draft, LONGX, val);
             wipe(Pnode);
@@ -756,8 +818,8 @@ function_return_type functions(psk Pnode)
         CASE(GLF) /* glf $ (=<flags>.<exp>) : (=?a)  a=<flags><exp> */
             {
             if(is_object(rightnode)
-               && Op(rightnode->RIGHT) == DOT
-               )
+                && Op(rightnode->RIGHT) == DOT
+                )
                 {
                 intVal.ul = rightnode->RIGHT->LEFT->v.fl & VISIBLE_FLAGS;
                 if(intVal.ul && (rightnode->RIGHT->RIGHT->v.fl & intVal.ul))
@@ -799,7 +861,7 @@ function_return_type functions(psk Pnode)
         CASE(MOD)
             {
             if(RATIONAL_COMP(rlnode = rightnode->LEFT) &&
-               RATIONAL_COMP_NOT_NUL(rrightnode = rightnode->RIGHT))
+                RATIONAL_COMP_NOT_NUL(rrightnode = rightnode->RIGHT))
                 {
                 psk pnode;
                 pnode = qModulo(rlnode, rrightnode);
@@ -834,15 +896,15 @@ function_return_type functions(psk Pnode)
             if(!is_op(rightnode))
                 pnode = changeCase(rightnode
 #if CODEPAGE850
-                                   , FALSE
+                                    , FALSE
 #endif
-                                   , TRUE);
+                                    , TRUE);
             else if(!is_op(rlnode = rightnode->LEFT))
                 pnode = changeCase(rlnode
 #if CODEPAGE850
-                                   , search_opt(rightnode->RIGHT, DOS)
+                                    , search_opt(rightnode->RIGHT, DOS)
 #endif
-                                   , TRUE);
+                                    , TRUE);
             else
                 return functionFail(Pnode);
             wipe(Pnode);
@@ -855,15 +917,15 @@ function_return_type functions(psk Pnode)
             if(!is_op(rightnode))
                 pnode = changeCase(rightnode
 #if CODEPAGE850
-                                   , FALSE
+                                    , FALSE
 #endif
-                                   , FALSE);
+                                    , FALSE);
             else if(!is_op(rlnode = rightnode->LEFT))
                 pnode = changeCase(rlnode
 #if CODEPAGE850
-                                   , search_opt(rightnode->RIGHT, DOS)
+                                    , search_opt(rightnode->RIGHT, DOS)
 #endif
-                                   , FALSE);
+                                    , FALSE);
             else
                 return functionFail(Pnode);
             wipe(Pnode);
@@ -873,9 +935,9 @@ function_return_type functions(psk Pnode)
         CASE(DIV)
             {
             if(is_op(rightnode)
-               && RATIONAL_COMP(rlnode = rightnode->LEFT)
-               && RATIONAL_COMP_NOT_NUL(rrightnode = rightnode->RIGHT)
-               )
+                && RATIONAL_COMP(rlnode = rightnode->LEFT)
+                && RATIONAL_COMP_NOT_NUL(rrightnode = rightnode->RIGHT)
+                )
                 {
                 psk pnode;
                 pnode = qIntegerDivision(rlnode, rrightnode);
@@ -912,19 +974,36 @@ function_return_type functions(psk Pnode)
                     nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                     nnode->LEFT = same_as_w(rightnode->LEFT);
                     nnode->RIGHT = same_as_w(rrightnode->LEFT);
-                    nnode = functions(nnode);
+                    rlnode = setIndex(nnode);
+                    if(rlnode)
+                        nnode = rlnode;
+                    else
+                        {
+                        if(not_built_in(nnode->LEFT)) /* Do not use ternary operator! That eats stack! */
+                            nnode = execFnc(nnode);
+                        else
+                            {
+                            rlnode = functions(nnode);
+                            if(rlnode)
+                                nnode = rlnode;
+                            else
+                                nnode = execFnc(nnode);
+                            }
+                        }
+
                     if(!is_op(nnode) && IS_NIL(nnode))
                         {
                         wipe(nnode);
                         }
                     else
                         {
-                        psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                        wnode->v.fl = WHITE | SUCCESS;
-                        *ppnode = wnode;
-                        ppnode = &(wnode->RIGHT);
-                        wnode->LEFT = nnode;
+                        rlnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                        rlnode->v.fl = WHITE | SUCCESS;
+                        *ppnode = rlnode;
+                        ppnode = &(rlnode->RIGHT);
+                        rlnode->LEFT = nnode;
                         }
+
                     rrightnode = rrightnode->RIGHT;
                     }
                 if(is_op(rrightnode) || !IS_NIL(rrightnode))
@@ -934,7 +1013,22 @@ function_return_type functions(psk Pnode)
                     nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                     nnode->LEFT = same_as_w(rightnode->LEFT);
                     nnode->RIGHT = same_as_w(rrightnode);
-                    nnode = functions(nnode);
+                    rlnode = setIndex(nnode);
+                    if(rlnode)
+                        nnode = rlnode;
+                    else
+                        {
+                        if(not_built_in(nnode->LEFT)) /* Do not use ternary operator! That eats stack! */
+                            nnode = execFnc(nnode);
+                        else
+                            {
+                            rlnode = functions(nnode);
+                            if(rlnode)
+                                nnode = rlnode;
+                            else
+                                nnode = execFnc(nnode);
+                            }
+                        }
                     *ppnode = nnode;
                     }
                 else
@@ -948,14 +1042,14 @@ function_return_type functions(psk Pnode)
             else
                 return functionFail(Pnode);
             }
-        CASE(MOP) /*     mop $ (<function>.<tree1>.(=<tree2>))
-                mop regards tree1 as a right descending 'list' with a backbone
-                operator that is the same as the heading operator of tree 2.
-                For example,
-          mop$((=.!arg).2*a+e\Lb+c^2.(=+))
-                generates the list
+        CASE(MOP)/*     mop $ (<function>.<tree1>.(=<tree2>))
+                    mop regards tree1 as a right descending 'list' with a backbone
+                    operator that is the same as the heading operator of tree 2.
+                    For example,
+                        mop$((=.!arg).2*a+e\Lb+c^2.(=+))
+                    generates the list
                         2*a e\Lb c^2
-                  */
+                    */
             {
             if(is_op(rightnode))
                 {/*XXX*/
@@ -981,18 +1075,34 @@ function_return_type functions(psk Pnode)
                                     nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                                     nnode->LEFT = same_as_w(rightnode->LEFT);
                                     nnode->RIGHT = same_as_w(rrightnode->LEFT);
-                                    nnode = functions(nnode);
+                                    rlnode = setIndex(nnode);
+                                    if(rlnode)
+                                        nnode = rlnode;
+                                    else
+                                        {
+                                        if(not_built_in(nnode->LEFT)) /* Do not use ternary operator! That eats stack! */
+                                            nnode = execFnc(nnode);
+                                        else
+                                            {
+                                            rlnode = functions(nnode);
+                                            if(rlnode)
+                                                nnode = rlnode;
+                                            else
+                                                nnode = execFnc(nnode);
+                                            }
+                                        }
+
                                     if(!is_op(nnode) && IS_NIL(nnode))
                                         {
                                         wipe(nnode);
                                         }
                                     else
                                         {
-                                        psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                                        wnode->v.fl = WHITE | SUCCESS;
-                                        *ppnode = wnode;
-                                        ppnode = &(wnode->RIGHT);
-                                        wnode->LEFT = nnode;
+                                        rlnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                        rlnode->v.fl = WHITE | SUCCESS;
+                                        *ppnode = rlnode;
+                                        ppnode = &(rlnode->RIGHT);
+                                        rlnode->LEFT = nnode;
                                         }
                                     rrightnode = rrightnode->RIGHT;
                                     }
@@ -1027,7 +1137,23 @@ function_return_type functions(psk Pnode)
                     nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                     nnode->LEFT = same_as_w(rightnode->LEFT);
                     nnode->RIGHT = same_as_w(rrightnode);
-                    nnode = functions(nnode);
+                    rlnode = setIndex(nnode);
+                    if(rlnode)
+                        nnode = rlnode;
+                    else
+                        {
+                        if(not_built_in(nnode->LEFT)) /* Do not use ternary operator! That eats stack! */
+                            nnode = execFnc(nnode);
+                        else
+                            {
+                            rlnode = functions(nnode);
+                            if(rlnode)
+                                nnode = rlnode;
+                            else
+                                nnode = execFnc(nnode);
+                            }
+                        }
+
                     *ppnode = nnode;
                     }
                 else
@@ -1042,8 +1168,8 @@ function_return_type functions(psk Pnode)
                 return functionFail(Pnode);
             }
         CASE(Vap) /*    vap $ (<function>.<string>.<char>)
-                 or vap $ (<function>.<string>)
-                 Second form splits in characters. */
+                        or vap $ (<function>.<string>)
+                        Second form splits in characters. */
             {
             if(is_op(rightnode))
                 {/*XXX*/
@@ -1088,14 +1214,30 @@ function_return_type functions(psk Pnode)
                                     {
                                     nnode->RIGHT = scopy(oldsubject);
                                     }
-                                nnode = functions(nnode);
+                                rlnode = setIndex(nnode);
+                                if(rlnode)
+                                    nnode = rlnode;
+                                else
+                                    {
+                                    if(not_built_in(nnode->LEFT)) /* Do not use ternary operator! That eats stack! */
+                                        nnode = execFnc(nnode);
+                                    else
+                                        {
+                                        rlnode = functions(nnode);
+                                        if(rlnode)
+                                            nnode = rlnode;
+                                        else
+                                            nnode = execFnc(nnode);
+                                        }
+                                    }
+
                                 if(subject)
                                     {
-                                    psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                                    wnode->v.fl = WHITE | SUCCESS;
-                                    *ppnode = wnode;
-                                    ppnode = &(wnode->RIGHT);
-                                    wnode->LEFT = nnode;
+                                    rlnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                    rlnode->v.fl = WHITE | SUCCESS;
+                                    *ppnode = rlnode;
+                                    ppnode = &(rlnode->RIGHT);
+                                    rlnode->LEFT = nnode;
                                     }
                                 else
                                     {
@@ -1126,14 +1268,30 @@ function_return_type functions(psk Pnode)
                             nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                             nnode->LEFT = same_as_w(rightnode->LEFT);
                             nnode->RIGHT = charcopy(oldsubject, subject);
-                            nnode = functions(nnode);
+                            rlnode = setIndex(nnode);
+                            if(rlnode)
+                                nnode = rlnode;
+                            else
+                                {
+                                if(not_built_in(nnode->LEFT)) /* Do not use ternary operator! That eats stack! */
+                                    nnode = execFnc(nnode);
+                                else
+                                    {
+                                    rlnode = functions(nnode);
+                                    if(rlnode)
+                                        nnode = rlnode;
+                                    else
+                                        nnode = execFnc(nnode);
+                                    }
+                                }
+
                             if(*subject)
                                 {
-                                psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                                wnode->v.fl = WHITE | SUCCESS;
-                                *ppnode = wnode;
-                                ppnode = &(wnode->RIGHT);
-                                wnode->LEFT = nnode;
+                                rlnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                rlnode->v.fl = WHITE | SUCCESS;
+                                *ppnode = rlnode;
+                                ppnode = &(rlnode->RIGHT);
+                                rlnode->LEFT = nnode;
                                 }
                             else
                                 {
@@ -1151,14 +1309,30 @@ function_return_type functions(psk Pnode)
                             nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                             nnode->LEFT = same_as_w(rightnode->LEFT);
                             nnode->RIGHT = charcopy(oldsubject, subject);
-                            nnode = functions(nnode);
+                            rlnode = setIndex(nnode);
+                            if(rlnode)
+                                nnode = rlnode;
+                            else
+                                {
+                                if(not_built_in(nnode->LEFT)) /* Do not use ternary operator! That eats stack! */
+                                    nnode = execFnc(nnode);
+                                else
+                                    {
+                                    rlnode = functions(nnode);
+                                    if(rlnode)
+                                        nnode = rlnode;
+                                    else
+                                        nnode = execFnc(nnode);
+                                    }
+                                }
+
                             if(*subject)
                                 {
-                                psk wnode = (psk)bmalloc(__LINE__, sizeof(knode));
-                                wnode->v.fl = WHITE | SUCCESS;
-                                *ppnode = wnode;
-                                ppnode = &(wnode->RIGHT);
-                                wnode->LEFT = nnode;
+                                rlnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                rlnode->v.fl = WHITE | SUCCESS;
+                                *ppnode = rlnode;
+                                ppnode = &(rlnode->RIGHT);
+                                rlnode->LEFT = nnode;
                                 }
                             else
                                 {
@@ -1178,9 +1352,9 @@ function_return_type functions(psk Pnode)
         CASE(REN)
             {
             if(is_op(rightnode)
-               && !is_op(rlnode = rightnode->LEFT)
-               && !is_op(rrightnode = rightnode->RIGHT)
-               )
+                && !is_op(rlnode = rightnode->LEFT)
+                && !is_op(rrightnode = rightnode->RIGHT)
+                )
                 {
                 intVal.i = rename((const char*)POBJ(rlnode), (const char*)POBJ(rrightnode));
                 if(intVal.i)
@@ -1273,7 +1447,7 @@ function_return_type functions(psk Pnode)
                                 return functionOk(Pnode);
                                 }
                             /* sprintf(draft,"%d",errno);
-                             break;*/
+                                break;*/
                             }
                         }
 #endif
@@ -1471,7 +1645,7 @@ function_return_type functions(psk Pnode)
         CASE(PRV) /* "?"$<expr> */
             {
             if((rightnode->v.fl & SUCCESS)
-               && (is_op(rightnode) || rightnode->u.obj || HAS_UNOPS(rightnode)))
+                && (is_op(rightnode) || rightnode->u.obj || HAS_UNOPS(rightnode)))
                 insert(&nilNode, rightnode);
             Pnode = rightbranch(Pnode);
             return functionOk(Pnode);
@@ -1488,8 +1662,8 @@ function_return_type functions(psk Pnode)
         CASE(SIM) /* sim$(<atom>,<atom>) , fuzzy compare (percentage) */
             {
             if(is_op(rightnode)
-               && !is_op(rlnode = rightnode->LEFT)
-               && !is_op(rrightnode = rightnode->RIGHT))
+                && !is_op(rlnode = rightnode->LEFT)
+                && !is_op(rrightnode = rightnode->RIGHT))
                 {
                 Sim(draft, (char*)POBJ(rlnode), (char*)POBJ(rrightnode));
                 wipe(Pnode);
@@ -1535,7 +1709,7 @@ function_return_type functions(psk Pnode)
                     Pnode = build_up(Pnode, "(((\2.New)'\3)|)&\2", NULL);
                 /* We might be able to call 'new' if 'New' had attached the argument
                     (containing the definition of a 'new' method) to the rhs of the '='.
-                   This cannot be done in a general way without introducing new syntax rules for the new$ function.
+                    This cannot be done in a general way without introducing new syntax rules for the new$ function.
                 */
                 else
                     Pnode = build_up(Pnode, "(((\2.new)'\3)|)&\2", NULL);
@@ -1564,10 +1738,10 @@ function_return_type functions(psk Pnode)
                     {
                     intVal.ul = Pnode->v.fl & UNOPS;
                     if(intVal.ul == FRACTION
-                       && is_op(Pnode->RIGHT)
-                       && Op(Pnode->RIGHT) == DOT
-                       && !is_op(Pnode->RIGHT->LEFT)
-                       )
+                        && is_op(Pnode->RIGHT)
+                        && Op(Pnode->RIGHT) == DOT
+                        && !is_op(Pnode->RIGHT->LEFT)
+                        )
                         { /* /('(a.a+2))*/
                         return functionOk(Pnode);
                         }
@@ -1609,6 +1783,35 @@ function_return_type functions(psk Pnode)
             }
         DEFAULT
             {
+#if 1
+            return 0;
+#else
+#if 1
+            if(INTEGER(lnode))
+                {
+                vars* nxtvar;
+                if(is_op(rightnode))
+                    return functionFail(Pnode);
+                for(nxtvar = variables[rightnode->u.obj];
+                    nxtvar && (STRCMP(VARNAME(nxtvar),POBJ(rightnode)) < 0);
+                    nxtvar = nxtvar->next);
+                /* find first name in a row of equal names */
+                if(nxtvar && !STRCMP(VARNAME(nxtvar),POBJ(rightnode)))
+                    {
+                    nxtvar->selector =
+                        (int)toLong(lnode)
+                        % (nxtvar->n + 1);
+                    if(nxtvar->selector < 0)
+                        nxtvar->selector += (nxtvar->n + 1);
+                    Pnode = rightbranch(Pnode);
+                    return functionOk(Pnode);
+                    }
+                }
+            if(!(rightnode->v.fl & SUCCESS))
+                return functionFail(Pnode);
+            addr[1] = NULL;
+            return execFnc(Pnode);
+#else
             if(INTEGER(lnode))
                 {
                 if(is_op(rightnode))
@@ -1626,6 +1829,8 @@ function_return_type functions(psk Pnode)
                 return functionFail(Pnode);
             addr[1] = NULL;
             return execFnc(Pnode);
+#endif
+#endif
             }
         }
     }

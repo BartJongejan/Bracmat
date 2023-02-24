@@ -10,8 +10,8 @@
 #include "input.h"
 #include "opt.h"
 #include "filewrite.h"
-#include "variables.h"
 #include "branch.h"
+#include "variables.h"
 #include "eval.h"
 #include <stdio.h>
 #include <string.h>

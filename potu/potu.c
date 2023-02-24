@@ -20,8 +20,8 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "7 February 2023"
-#define VERSION "6.12.11"
+#define DATUM "23 February 2023"
+#define VERSION "6.12.12"
 #define BUILD "268"
 /*
 COMPILATION
@@ -201,6 +201,7 @@ TODO list:
 #include "nodeutil.c"
 #include "lambda.c"
 #include "opt.c"
+#include "branch.c"
 #include "variables.c"
 #include "macro.c"
 #include "hash.c"
@@ -209,7 +210,6 @@ TODO list:
 #include "position.c"
 #include "stringmatch.c"
 #include "treematch.c"
-#include "branch.c"
 #include "filestatus.c"
 #include "simil.c"
 #include "objectdef.c"
@@ -240,6 +240,7 @@ TODO list:
 #include "nodeutil.h"
 #include "lambda.h"
 #include "opt.h"
+#include "branch.h"
 #include "variables.h"
 #include "macro.h"
 #include "hash.h"
@@ -248,7 +249,6 @@ TODO list:
 #include "position.h"
 #include "stringmatch.h"
 #include "treematch.h"
-#include "branch.h"
 #include "filestatus.h"
 #include "simil.h"
 #include "objectdef.h"

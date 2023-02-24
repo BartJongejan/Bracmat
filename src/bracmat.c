@@ -3078,12 +3078,6 @@ static psk Head(psk pnode)
     {
     if(pnode->v.fl & LATEBIND)
         {
-        if(shared(pnode))
-            {
-            printf("EEEEERRRRRR");
-            result(pnode);
-            printf("\n");
-            }
         assert(!shared(pnode));
         if(is_op(pnode))
             {
@@ -8377,8 +8371,6 @@ static psk find2(psk namenode, int* newval)
                       */
                 {
                 psk tmp;
-                psk tmp2;
-                psk goal;
                 if(is_op(namenode->LEFT))
                     {
                     if(Op(namenode->LEFT) == EQUALS) /* namenode->LEFT == (=  (a=2) (b=3))   */
@@ -8410,12 +8402,12 @@ static psk find2(psk namenode, int* newval)
 
                    The function getmember resolves this.
                 */
-                tmp2 = getmember2(namenode->RIGHT, tmp);
+                tmp = getmember2(namenode->RIGHT, tmp);
 
-                if(tmp2)
+                if(tmp)
                     {
                     *newval = TRUE;
-                    return same_as_w(tmp2);
+                    return same_as_w(tmp);
                     }
                 else
                     {
@@ -8510,8 +8502,6 @@ must be equivalent
                       */
                 {
                 psk tmp;
-                psk tmp2;
-                psk goal;
                 /* (=hash).New when evaluating new$hash:?y
                    y..insert when evaluating (y..insert)$
                 */
@@ -8560,12 +8550,12 @@ must be equivalent
 
                    The function getmember resolves this.
                 */
-                tmp2 = getmember(namenode->RIGHT, tmp, Object);
+                tmp = getmember(namenode->RIGHT, tmp, Object);
 
-                if(tmp2)
+                if(tmp)
                     {
                     *newval = TRUE;
-                    return same_as_w(tmp2);
+                    return same_as_w(tmp);
                     }
                 else
                     { /* You get here if a built-in method is called. */

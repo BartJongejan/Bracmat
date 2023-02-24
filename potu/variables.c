@@ -1,4 +1,5 @@
 #include "variables.h"
+#include "branch.h"
 #include "nodedefs.h"
 #include "equal.h"
 #include "nonnodetypes.h"
@@ -486,8 +487,6 @@ psk find2(psk namenode, int* newval)
                       */
                 {
                 psk tmp;
-                psk tmp2;
-                psk goal;
                 if(is_op(namenode->LEFT))
                     {
                     if(Op(namenode->LEFT) == EQUALS) /* namenode->LEFT == (=  (a=2) (b=3))   */
@@ -519,12 +518,12 @@ psk find2(psk namenode, int* newval)
 
                    The function getmember resolves this.
                 */
-                tmp2 = getmember2(namenode->RIGHT, tmp);
+                tmp = getmember2(namenode->RIGHT, tmp);
 
-                if(tmp2)
+                if(tmp)
                     {
                     *newval = TRUE;
-                    return same_as_w(tmp2);
+                    return same_as_w(tmp);
                     }
                 else
                     {
@@ -619,8 +618,6 @@ must be equivalent
                       */
                 {
                 psk tmp;
-                psk tmp2;
-                psk goal;
                 /* (=hash).New when evaluating new$hash:?y
                    y..insert when evaluating (y..insert)$
                 */
@@ -669,12 +666,12 @@ must be equivalent
 
                    The function getmember resolves this.
                 */
-                tmp2 = getmember(namenode->RIGHT, tmp, Object);
+                tmp = getmember(namenode->RIGHT, tmp, Object);
 
-                if(tmp2)
+                if(tmp)
                     {
                     *newval = TRUE;
-                    return same_as_w(tmp2);
+                    return same_as_w(tmp);
                     }
                 else
                     { /* You get here if a built-in method is called. */
@@ -921,26 +918,6 @@ void lst(psk pnode)
     lstsub(pnode);
     }
 
-#if 0
-int setIndex(psk rightnode,psk lnode)
-    {
-    vars *nxtvar;
-    for (nxtvar = variables[rightnode->u.obj];
-         nxtvar && (STRCMP(VARNAME(nxtvar), POBJ(rightnode)) < 0);
-         nxtvar = nxtvar->next);
-    /* find first name in a row of equal names */
-    if (nxtvar && !STRCMP(VARNAME(nxtvar), POBJ(rightnode)))
-        {
-        nxtvar->selector =
-            (int)toLong(lnode)
-            % (nxtvar->n + 1);
-        if (nxtvar->selector < 0)
-            nxtvar->selector += (nxtvar->n + 1);
-        return TRUE;
-        }
-    return FALSE;
-    }
-#else
 function_return_type setIndex(psk Pnode)
     {
     psk lnode = Pnode->LEFT;
@@ -975,7 +952,6 @@ function_return_type setIndex(psk Pnode)
     return execFnc(Pnode);
     */
     }
-#endif
 
 void initVariables(void)
     {

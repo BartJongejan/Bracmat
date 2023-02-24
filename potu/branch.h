@@ -1,7 +1,6 @@
 #ifndef BRANCH_H
 #define BRANCH_H
 
-#include "branch.h"
 #include "nodestruct.h"
 
 psk _leftbranch(psk Pnode);
