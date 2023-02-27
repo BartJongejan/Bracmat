@@ -30,6 +30,7 @@ Mandelbrot=
       &     
           ' ( -1+!v3:?i
             & tbl$(T,!v0*!v3)
+            & !i*!v0:?row
             &   whl
               ' ( !i:~<0
                 & -1+!v0:?j
@@ -51,10 +52,11 @@ Mandelbrot=
                           & floor$(!J*$colfactor)
                         | 0
                         )
-                      : ?(ind$(T,!j+!v0*!i))
+                      : ?(ind$(T,!j+!row))
                     & !j+-1:?j
                     )
                 & !i+-1:?i
+                & !row+-1*!v0:?row
                 )
             )
         : ?calcule
