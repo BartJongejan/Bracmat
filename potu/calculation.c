@@ -632,6 +632,7 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                 {
                 double a;
                 double b;
+                int i;
                 switch(wordp->action)
                     {
                     case ResolveAndPush:
@@ -733,49 +734,32 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                         }
                     case Ind:
                         {
-                        int i = (int)((sp--)->val).floating;
+                        i = (int)((sp--)->val).floating;
+                        if(i < 0 || i >= sp->arrp->size)
+                            return FALSE;
                         sp->arrp->index = i;
                         ++wordp;
                         break;
                         }
                     case QInd:
                         {
-                        int i = (int)(sp->val).floating;
-                        forthvalue* val = (--sp)->arrp->pval + i;
+                        i = (int)((sp--)->val).floating;
+                        if(i < 0 || i >= sp->arrp->size)
+                            return FALSE;
+                        forthvalue* val = sp->arrp->pval + i;
                         *val = (--sp)->val;
                         ++wordp;
                         break;
                         }
                     case EInd:
                         {
-                        int i = (int)((sp--)->val).floating;
+                        i = (int)((sp--)->val).floating;
+                        if(i < 0 || i >= sp->arrp->size)
+                            return FALSE;
                         sp->val = (sp->arrp->pval)[i];
                         ++wordp;
                         break;
                         }
-                        /*
-                        case Ind:
-                            {
-                            int i = (int)((sp--)->val).floating;
-                            sp->arrp->index = i;
-                            ++wordp;
-                            break;
-                            }
-                        case QInd:
-                            {
-                            int i = (int)((sp--)->val).floating;
-                            (sp->arrp->pval)[i] = sp->val;
-                            ++wordp;
-                            break;
-                            }
-                        case EInd:
-                            {
-                            int i = (int)((sp--)->val).floating;
-                            sp->val = (sp->arrp->pval)[i];
-                            ++wordp;
-                            break;
-                            }
-                            */
                     case NoOp:
                     case TheEnd:
                     default:
