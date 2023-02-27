@@ -8,7 +8,7 @@
 #include "wipecopy.h"
 #include "input.h"
 #include "rational.h"
-#include "real.h"
+//#include "real.h"
 #include "memory.h"
 #include "treematch.h"
 #include "nodeutil.h"
@@ -105,6 +105,7 @@ psk handleExponents(psk Pnode)
 
             if(!is_op(rightnode)) 
                 {
+#ifdef REAL_COMP
                 if(REAL_COMP(rightnode) && REAL_COMP(lnode))
                     {
                     /*"2.0E0" ^ "5.0E-1"*/
@@ -117,7 +118,9 @@ psk handleExponents(psk Pnode)
                     wipe(addr[6]);
                     return Pnode;
                     }
-                else if(RATIONAL_COMP(rightnode))
+                else
+#endif
+                    if(RATIONAL_COMP(rightnode))
                     {
                     if(RATIONAL_COMP(lnode))
                         {
@@ -515,6 +518,7 @@ psk mergeOrSortTerms(psk Pnode)
     leftoperand_and_tail(top, &Lterm, &Ltail);
     assert(Ltail == NULL);
 
+#ifdef REAL_COMP
     if(REAL_COMP(Lterm))
         {
         switch(PLOBJ(Rterm))
@@ -553,7 +557,9 @@ psk mergeOrSortTerms(psk Pnode)
                 return Pnode;
             }
         }
-    else if(RATIONAL_COMP(Lterm))
+    else
+#endif
+        if(RATIONAL_COMP(Lterm))
         {
         if(RATIONAL_COMP(Rterm))
             {
@@ -979,6 +985,7 @@ psk substtimes(psk Pnode)
                     }
                 }
             }
+#ifdef REAL_COMP
         else if(REAL_COMP(lkn) && rvar)
             {
             switch(PLOBJ(rkn))
@@ -1017,6 +1024,7 @@ psk substtimes(psk Pnode)
                         }
                 }
             }
+#endif
         }
 
     rlnode = Op(rkn) == EXP ? rkn->LEFT : rkn; /*{?} (f.e)*(y.s) => (f.e)*(y.s) */

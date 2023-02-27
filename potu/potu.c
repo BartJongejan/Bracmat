@@ -194,7 +194,9 @@ TODO list:
 #include "input.c"
 #include "wipecopy.c"
 #include "rational.c"
+#ifdef REAL_COMP
 #include "real.c"
+#endif
 #include "encoding.c"
 #include "equal.c"
 #include "object.c"
@@ -233,7 +235,9 @@ TODO list:
 #include "input.h"
 #include "wipecopy.h"
 #include "rational.h"
+#ifdef REAL_COMP
 #include "real.h"
+#endif
 #include "encoding.h"
 #include "equal.h"
 #include "object.h"

@@ -26,8 +26,10 @@ LONG toLong(psk pnode)
 
 int number_degree(psk pnode)
     {
+#ifdef REAL_COMP
     if (REAL_COMP(pnode))
         return 3;
+#endif
     if (RATIONAL_COMP(pnode))
         return 5;
     switch (PLOBJ(pnode))

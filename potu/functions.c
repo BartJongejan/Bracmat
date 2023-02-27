@@ -169,6 +169,7 @@ static void combiflags(psk pnode)
         }
     }
 
+#ifdef REAL_COMP
 psk perhapsMath(psk Pnode)
     {
     psk lnode,restl;
@@ -220,18 +221,20 @@ psk perhapsMath(psk Pnode)
         }
     return 0;
     }
-
+#endif
 function_return_type execFnc(psk Pnode)
     {
     psk lnode;
     objectStuff Object = { 0,0,0 };
     int isNewRef = FALSE;
 
-    /*lnode = perhapsMath(Pnode);
+#ifdef REAL_COMP
+    lnode = perhapsMath(Pnode);
     if(lnode)
         {
         return lnode;
-        }*/
+        }
+#endif
 
     lnode = find(Pnode->LEFT, &isNewRef, &Object);
     if(lnode) /* lnode is null if either the function wasn't found or it is a built-in member function of an object. */
@@ -377,6 +380,7 @@ function_return_type functions(psk Pnode)
             {
             if(is_op(Pnode->RIGHT))
                 {
+#ifdef REAL_COMP
                 if(REAL_COMP(Pnode->RIGHT->LEFT))
                     {
                     if(is_op(Pnode->RIGHT->RIGHT))
@@ -399,9 +403,11 @@ function_return_type functions(psk Pnode)
                             }
                         }
                     }
+#endif
                 }
             else
                 {
+#ifdef REAL_COMP
                 if(REAL_COMP(Pnode->RIGHT))
                     {
                     psk restl = Cmath(lnode->RIGHT, Pnode->RIGHT);
@@ -415,6 +421,7 @@ function_return_type functions(psk Pnode)
                         return functionFail(Pnode);
                     }
                 }
+#endif
             }
 
         return find_func(Pnode);
