@@ -133,7 +133,7 @@ psk evalmacro(psk Pnode)
                     }
                 else
                     {
-                    int newval;
+                    int newval = 0;
                     psk tmp = same_as_w(Pnode->RIGHT);
                     psk h;
                     tmp = eval(tmp);

@@ -1,3 +1,6 @@
+1 March 2023
+Speeded up look-up of functions, and allowing more recursions for same stack size.
+
 7 February 2023
 First fully debugged version of potu with 'calculation' object type for floating
 point computations. No memory leaking. If 'calculate' method fails, it just says

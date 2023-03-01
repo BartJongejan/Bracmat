@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
+#include <assert.h>
 
 typedef struct varia
     {
@@ -436,7 +437,7 @@ void pop(psk pnode)
     deleteNode(pnode);
     }
 
-static psk findsub(psk namenode)
+psk findsub(psk namenode)
     {
     vars* nxtvar;
     assert(!is_op(namenode));
@@ -462,7 +463,6 @@ static psk findsub(psk namenode)
 
 psk find2(psk namenode, int* newval)
     {
-    vars* nxtvar;
     if(is_op(namenode))
         {
         switch(Op(namenode))
@@ -539,29 +539,11 @@ psk find2(psk namenode, int* newval)
         }
     else
         {
-        for(nxtvar = variables[namenode->u.obj];
-            nxtvar && (STRCMP(VARNAME(nxtvar), POBJ(namenode)) < 0);
-            nxtvar = nxtvar->next)
-            ;
-        if(nxtvar && !STRCMP(VARNAME(nxtvar), POBJ(namenode))
-           && nxtvar->selector <= nxtvar->n
-           )
-            {
-            ppsk self;
-            assert(nxtvar->pvaria);
-            *newval = FALSE;
-            self = Entry(nxtvar->n, nxtvar->selector, &nxtvar->pvaria);
-            *self = Head(*self);
-            return *self;
-            }
-        else
-            {
-            return NULL; /* !hjgkg if hjgkg not defined */
-            }
+        return findsub(namenode);
         }
     }
 
-psk find(psk namenode, int* newval, objectStuff* Object)
+psk findMethod(psk namenode, objectStuff* Object)
 /* Only for finding 'function' definitions. (LHS of ' or $)*/
 /*
 'namenode' is the expression that has to lead to a binding.
@@ -580,7 +562,6 @@ E.g.
 
         'find' returns returns a binding or NULL.
         If the function returns NULL, 'theMethod' may still be bound.
-        The parameter 'newval' is set to TRUE if 'goal' has increased a reference counter. (must be ignored if find returns FALSE.)
         The parameter 'self' is the rhs of the root '=' of an object. It is used for non-built-ins
         The parameter 'object' is the root of an object, possibly having built-in methods.
 
@@ -597,114 +578,89 @@ and
 must be equivalent
 */
     {
-    vars* nxtvar;
-    if(is_op(namenode))
+    psk tmp;
+    assert(is_op(namenode));
+    assert(Op(namenode) == DOT);
+    /*
+    e.g.
+
+    new$hash:?y
+
+    (y..insert)$
+    (!y.insert)$
+    */
+    /* (=hash).New when evaluating new$hash:?y
+        y..insert when evaluating (y..insert)$
+    */
+    if(is_op(namenode->LEFT))
         {
-        switch(Op(namenode))
+        if(Op(namenode->LEFT) == EQUALS)
             {
-            case EQUALS: /* Anonymous function: (=.out$!arg)$HELLO -> namenode == (=.out$!arg) */
+            if(ISBUILTIN((objectnode*)(namenode->LEFT))
+               )
                 {
-                *newval = TRUE;
-                namenode->RIGHT = Head(namenode->RIGHT);
-                return same_as_w(namenode->RIGHT);
-                }
-            case DOT: /*
-                      e.g.
-
-                      new$hash:?y
-
-                      (y..insert)$
-                      (!y.insert)$
-                      */
-                {
-                psk tmp;
-                /* (=hash).New when evaluating new$hash:?y
-                   y..insert when evaluating (y..insert)$
-                */
-                if(is_op(namenode->LEFT))
+                Object->theMethod = findBuiltInMethod((typedObjectnode*)(namenode->LEFT), namenode->RIGHT);
+                /* findBuiltInMethod((=),(insert)) */
+                Object->object = namenode->LEFT;  /* object == (=) */
+                if(Object->theMethod)
                     {
-                    if(Op(namenode->LEFT) == EQUALS) /* namenode->LEFT == (=  (a=2) (b=3))   */
-                        {
-                        if(ISBUILTIN((objectnode*)(namenode->LEFT))
-                           )
-                            {
-                            Object->theMethod = findBuiltInMethod((typedObjectnode*)(namenode->LEFT), namenode->RIGHT);
-                            /* findBuiltInMethod((=),(insert)) */
-                            Object->object = namenode->LEFT;  /* object == (=) */
-                            if(Object->theMethod)
-                                {
-                                namenode->LEFT = same_as_w(namenode->LEFT);
-                                //*newval = TRUE;
-                                return namenode->LEFT; /* (=hash).New when evaluating (new$hash..insert)$(a.b) */
-                                }
-                            }
-                        tmp = namenode->LEFT->RIGHT; /* tmp == ((a=2) (b=3))   */
-                        }
-                    else
-                        {
-                        return NULL;  /* ((.(did=.!arg+2)).did)$3 */
-                        }
-                    }
-                else                                   /* x */
-                    {
-                    if((tmp = findsub(namenode->LEFT)) == NULL)
-                        {
-                        return NULL;   /* (y.did)$3  when y is not defined at all */
-                        }
-                    /*
-                    tmp == ((a=2) (b=3))
-                    tmp == (=)
-                    */
-                    }
-                Object->self = tmp; /* self == ((a=2) (b=3))   */
-                /* The number of '=' to reach the method name in 'tmp' must be one greater
-                   than the number of '.' that precedes the method name in 'namenode->RIGHT'
-
-                   e.g (= (say=.out$!arg)) and (.say) match
-
-                   For built-in methods (definitions of which are not visible) an invisible '=' has to be assumed.
-
-                   The function getmember resolves this.
-                */
-                tmp = getmember(namenode->RIGHT, tmp, Object);
-
-                if(tmp)
-                    {
-                    *newval = TRUE;
-                    return same_as_w(tmp);
-                    }
-                else
-                    { /* You get here if a built-in method is called. */
-                    return NULL; /* (=hash)..insert when evaluating (new$hash..insert)$(a.b) */
+                    namenode->LEFT = same_as_w(namenode->LEFT);
+                    return namenode->LEFT; /* (=hash).New when evaluating (new$hash..insert)$(a.b) */
                     }
                 }
-            default:
-                {
-                return NULL; /* /('(x.$x^2)) when evaluating /('(x.$x^2))$3 */
-                }
-            }
-        }
-    else
-        {
-        for(nxtvar = variables[namenode->u.obj];
-            nxtvar && (STRCMP(VARNAME(nxtvar), POBJ(namenode)) < 0);
-            nxtvar = nxtvar->next)
-            ;
-        if(nxtvar && !STRCMP(VARNAME(nxtvar), POBJ(namenode))
-           && nxtvar->selector <= nxtvar->n
-           )
-            {
-            ppsk self;
-            assert(nxtvar->pvaria);
-            self = Entry(nxtvar->n, nxtvar->selector, &nxtvar->pvaria);
-            *self = Head(*self);
-            return *self;
+            tmp = namenode->LEFT->RIGHT;
+            /* e.g. tmp == hash
+            Or  tmp ==
+                  (name=(first=John),(last=Bull))
+                , (age=20)
+                , ( new
+                  =
+                    .   new$(its.name):(=?(its.name))
+                      &   !arg
+                        : ( ?(its.name.first)
+                          . ?(its.name.last)
+                          . ?(its.age)
+                          )
+                  )
+            */
             }
         else
             {
-            return NULL;
+            return NULL;  /* ((.(did=.!arg+2)).did)$3 */
             }
         }
+    else                                   /* x */
+        {
+        if((tmp = findsub(namenode->LEFT)) == NULL)
+            {
+            return NULL;   /* (y.did)$3  when y is not defined at all */
+            }
+        /*
+        tmp == ((a=2) (b=3))
+        tmp == (=)
+        */
+        }
+    Object->self = tmp; /* self == ((a=2) (b=3))   */
+    /* The number of '=' to reach the method name in 'tmp' must be one greater
+        than the number of '.' that precedes the method name in 'namenode->RIGHT'
+
+        e.g (= (say=.out$!arg)) and (.say) match
+
+        For built-in methods (definitions of which are not visible) an invisible '=' has to be assumed.
+
+        The function getmember resolves this.
+    */
+    tmp = getmember(namenode->RIGHT, tmp, Object);
+
+    if(tmp)
+        {
+        return same_as_w(tmp);
+        }
+    else
+        { /* You get here if a built-in method is called. */
+        return NULL; /* (=hash)..insert when evaluating (new$hash..insert)$(a.b) */
+        }
+
     }
 
 int copy_insert(psk name, psk pnode, psk cutoff)

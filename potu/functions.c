@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include <assert.h>
 
 /*MOVETO FUNCTIONS*/
 #define LONGCASE
@@ -222,12 +223,11 @@ psk perhapsMath(psk Pnode)
     return 0;
     }
 #endif
+
 function_return_type execFnc(psk Pnode)
     {
     psk lnode;
     objectStuff Object = { 0,0,0 };
-    int isNewRef = FALSE;
-
 #ifdef REAL_COMP
     lnode = perhapsMath(Pnode);
     if(lnode)
@@ -236,131 +236,277 @@ function_return_type execFnc(psk Pnode)
         }
 #endif
 
-    lnode = find(Pnode->LEFT, &isNewRef, &Object);
-    if(lnode) /* lnode is null if either the function wasn't found or it is a built-in member function of an object. */
+    lnode = Pnode->LEFT;
+    if(is_op(lnode))
         {
-        if(Op(lnode) == DOT)
+        switch(Op(lnode))
             {
-            psh(&argNode, Pnode->RIGHT, NULL);
-
-            if(Object.self)
-                {
-                psh(&selfNode, Object.self, NULL);
-                Pnode = dopb(Pnode, lnode);
-                if(isNewRef)
-                    wipe(lnode);
-                /*
-                psh(&selfNode,self,NULL); Must precede dopb(...).
-                Example where this is relevant:
-
-                {?} ((==.lst$its).)'
-                (its=
-                =.lst$its);
-                {!} its
-
-                */
-                if(Object.object)
+            case EQUALS: /* Anonymous function: (=.out$!arg)$HELLO -> lnode == (=.out$!arg) */
+                lnode->RIGHT = Head(lnode->RIGHT);
+                lnode = same_as_w(lnode->RIGHT);
+                if(lnode) /* lnode is null if either the function wasn't found or it is a built-in member function of an object. */
                     {
-                    psh(&SelfNode, Object.object, NULL);
-                    if(Op(Pnode) == DOT)
+                    if(Op(lnode) == DOT) /* The dot separating local variables from the function body. */
                         {
-                        psh(Pnode->LEFT, &zeroNode, NULL);
-                        Pnode = eval(Pnode);
-                        pop(Pnode->LEFT);
-                        Pnode = dopb(Pnode, Pnode->RIGHT);
+                        psh(&argNode, Pnode->RIGHT, NULL);
+                        Pnode = dopb(Pnode, lnode);
+                        wipe(lnode);
+                        if(Op(Pnode) == DOT)
+                            {
+                            psh(Pnode->LEFT, &zeroNode, NULL);
+                            Pnode = eval(Pnode);
+                            /**** Evaluate anonymous function.
+
+                                     (=.!arg)$XYZ
+                            ****/
+                            pop(Pnode->LEFT);
+                            Pnode = dopb(Pnode, Pnode->RIGHT);
+                            }
+                        deleteNode(&argNode);
+                        return functionOk(Pnode);
                         }
-                    deleteNode(&argNode);
-                    deleteNode(&selfNode);
-                    deleteNode(&SelfNode);
+                    else
+                        {
+#if defined NO_EXIT_ON_NON_SEVERE_ERRORS
+                        return functionFail(Pnode);
+#else
+                        errorprintf("(Syntax error) The following is not a function:\n\n  ");
+                        writeError(Pnode->LEFT);
+                        exit(116);
+#endif
+                        }
+                    }
+                break;
+            case DOT: /* Method. Dot separating object name (or anonymous definition) from method name */
+                lnode = findMethod(lnode, &Object);
+                if(lnode)
+                    {
+                    if(Op(lnode) == DOT) /* The dot separating local variables from the function body. */
+                        {
+                        psh(&argNode, Pnode->RIGHT, NULL);
+
+                        if(Object.self)
+                            {
+                            psh(&selfNode, Object.self, NULL); /* its */
+                            Pnode = dopb(Pnode, lnode);
+                            wipe(lnode);
+                            /*
+                            psh(&selfNode,self,NULL); Must precede dopb(...).
+                            Example where this is relevant:
+
+                            {?} ((==.lst$its).)'
+                            (its=
+                            =.lst$its);
+                            {!} its
+
+                            */
+                            if(Object.object)
+                                {
+                                psh(&SelfNode, Object.object, NULL); /* Its */
+                                if(Op(Pnode) == DOT)
+                                    {
+                                    psh(Pnode->LEFT, &zeroNode, NULL);
+                                    Pnode = eval(Pnode);
+                                    /**** Evaluate member function of built-in
+                                          object from within an enveloping
+                                          object. -----------------
+                                                                   |
+                                    ( new$hash:?myhash             |
+                                    &   (                          |
+                                        = ( myInsert               |
+                                          = . (Its..insert)$!arg <-
+                                          )
+                                        )
+                                      : (=?(myhash.))
+                                    & (myhash..myInsert)$(X.12)
+                                    )
+                                    ****/
+                                    pop(Pnode->LEFT);
+                                    Pnode = dopb(Pnode, Pnode->RIGHT);
+                                    }
+                                deleteNode(&SelfNode);
+                                }
+                            else
+                                {
+                                if(Op(Pnode) == DOT)
+                                    {
+                                    psh(Pnode->LEFT, &zeroNode, NULL);
+                                    Pnode = eval(Pnode);
+                                    /**** Evaluate member function from
+                                          within an other member function
+                                        ( ( Object                    |
+                                          =   (do=.out$!arg)          |
+                                              ( A                     |
+                                              =                       |
+                                                . (its.do)$!arg <-----
+                                              )
+                                          )
+                                        & (Object.A)$XYZ
+                                        )
+                                    ****/
+                                    pop(Pnode->LEFT);
+                                    Pnode = dopb(Pnode, Pnode->RIGHT);
+                                    }
+                                }
+                            deleteNode(&selfNode);
+                            deleteNode(&argNode);
+                            return functionOk(Pnode);
+                            }
+                        else
+                            { /* Unreachable? */
+                            deleteNode(&argNode);
+                            }
+                        }
+                    else if(Object.theMethod)
+                        {
+                        if(Object.theMethod((struct typedObjectnode*)Object.object, &Pnode))
+                            {
+                            /**** Evaluate a built-in method of an anonymous object.
+
+                                    (new$hash.insert)$(a.2)
+                            ****/
+                            wipe(lnode); /* This is the built-in object, which got increased refcount to evade untimely wiping. */
+                            return functionOk(Pnode);
+                            }
+                        else
+                            { /* method failed. E.g. (new$hash.insert)$(a) */
+                            wipe(lnode);
+                            }
+                        }
+                    else
+                        {
+#if defined NO_EXIT_ON_NON_SEVERE_ERRORS
+                        return functionFail(Pnode);
+#else
+                        errorprintf("(Syntax error) The following is not a function:\n\n  ");
+                        writeError(Pnode->LEFT);
+                        exit(116);
+#endif
+                        }
                     }
                 else
                     {
-                    if(Op(Pnode) == DOT)
+                    if(Object.theMethod)
                         {
-                        psh(Pnode->LEFT, &zeroNode, NULL);
-                        Pnode = eval(Pnode);
-                        pop(Pnode->LEFT);
-                        Pnode = dopb(Pnode, Pnode->RIGHT);
-                        }
-                    deleteNode(&argNode);
-                    deleteNode(&selfNode);
+                        if(Object.theMethod((struct typedObjectnode*)Object.object, &Pnode))
+                            {
+                            /**** Evaluate a built-in method of a named object.
+                                                            |
+                                      new$hash:?H           |
+                                    & (H..insert)$(XYZ.2) <-
+                            ****/
+                            return functionOk(Pnode);
+                            }
                     }
-                }
-            else
+    }
+                break;
+            default:
                 {
+                /* /('(x.$x^2)) when evaluating /('(x.$x^2))$3 */
+                if((Op(lnode) == FUU)
+                   && (lnode->v.fl & FRACTION)
+                   && (Op(lnode->RIGHT) == DOT)
+                   && (!is_op(lnode->RIGHT->LEFT))
+                   )
+                    {
+                    lnode = lambda(lnode->RIGHT->RIGHT, lnode->RIGHT->LEFT, Pnode->RIGHT);
+                    /**** Evaluate a lambda expression
+
+                            /('(x.$x^2))$3
+                    ****/
+                    if(lnode)
+                        {
+                        /*
+                              /(
+                               ' ( g
+                                 .   /('(x.$g'($x'$x)))
+                                   $ /('(x.$g'($x'$x)))
+                                 )
+                               )
+                            $ /(
+                               ' ( r
+                                 . /(
+                                    ' ( n
+                                      .   $n:~>0&1
+                                        | $n*($r)$($n+-1)
+                                      )
+                                    )
+                                 )
+                               )
+                        */
+                        wipe(Pnode);
+                        Pnode = lnode;
+                        }
+                    else
+                        {
+                        /*
+                            /('(x./('(x.$x ()$x))$aap))$noot
+                        */
+                        lnode = subtreecopy(Pnode->LEFT->RIGHT->RIGHT);
+                        wipe(Pnode);
+                        Pnode = lnode;
+                        if(!is_op(Pnode) && !(Pnode->v.fl & INDIRECT))
+                            Pnode->v.fl |= READY;  /*  /('(x.u))$7  */
+                        }
+                    return functionOk(Pnode);
+                    }
+                return functionFail(Pnode);/* completely wrong expression, e.g. (+(x.$x^2))$3 */
+                }
+            }
+        }
+    else
+        {
+#if 0
+        lnode = findsub(lnode);
+#else
+        static psk oldlnode = 0;
+        static psk lastEvaluatedFunction = 0;
+        if(oldlnode == lnode)
+            lnode = lastEvaluatedFunction;  /* Speeding up! Esp. in map, vap, mop. */
+        else
+            {
+            oldlnode = lnode;
+            lnode = findsub(lnode);
+            lastEvaluatedFunction = lnode;
+            }
+#endif
+
+        if(lnode) /* lnode is null if either the function wasn't found or it is a built-in member function of an object. */
+            {
+            if(Op(lnode) == DOT) /* The dot separating local variables from the function body. */
+                {
+                psh(&argNode, Pnode->RIGHT, NULL);
                 Pnode = dopb(Pnode, lnode);
-                if(isNewRef)
-                    wipe(lnode);
                 if(Op(Pnode) == DOT)
                     {
                     psh(Pnode->LEFT, &zeroNode, NULL);
                     Pnode = eval(Pnode);
+                    /**** Evaluate a named function
+                                             |
+                          (  f=.2*!arg       |
+                          & f$6        <-----
+                          )
+                    ****/
                     pop(Pnode->LEFT);
                     Pnode = dopb(Pnode, Pnode->RIGHT);
                     }
                 deleteNode(&argNode);
-                }
-            return functionOk(Pnode);
-            }
-        else if(Object.theMethod)
-            { // A built-in method of an anonymous object.
-            if(Object.theMethod((struct typedObjectnode*)Object.object, &Pnode))
-                {
-                wipe(lnode); /* This is the built-in object, which got increased refcount to evade untimely wiping. */
                 return functionOk(Pnode);
                 }
             else
                 {
-                if(isNewRef)
-                    wipe(lnode);
+#if defined NO_EXIT_ON_NON_SEVERE_ERRORS
                 return functionFail(Pnode);
+#else
+                errorprintf("(Syntax error) The following is not a function:\n\n  ");
+                writeError(Pnode->LEFT);
+                exit(116);
+#endif
                 }
             }
-        else
-            {
-#if defined NO_EXIT_ON_NON_SEVERE_ERRORS
-            return functionFail(Pnode);
-#else
-            errorprintf("(Syntax error) The following is not a function:\n\n  ");
-            writeError(Pnode->LEFT);
-            exit(116);
-#endif
-            }
         }
-    else if(Object.theMethod)
-        { // A built-in method of a named object.
-        if(Object.theMethod((struct typedObjectnode*)Object.object, &Pnode))
-            {
-            return functionOk(Pnode);
-            }
-        }
-    else if((Op(Pnode->LEFT) == FUU)
-            && (Pnode->LEFT->v.fl & FRACTION)
-            && (Op(Pnode->LEFT->RIGHT) == DOT)
-            && (!is_op(Pnode->LEFT->RIGHT->LEFT))
-            )
-        {
-        lnode = lambda(Pnode->LEFT->RIGHT->RIGHT, Pnode->LEFT->RIGHT->LEFT, Pnode->RIGHT);
-        if(lnode)
-            {
-            wipe(Pnode);
-            Pnode = lnode;
-            }
-        else
-            {
-            lnode = subtreecopy(Pnode->LEFT->RIGHT->RIGHT);
-            wipe(Pnode);
-            Pnode = lnode;
-            if(!is_op(Pnode) && !(Pnode->v.fl & INDIRECT))
-                Pnode->v.fl |= READY;
-            }
-        return functionOk(Pnode);
-        }
-    else
-        {
-        DBGSRC(errorprintf("Function not found"); writeError(Pnode); Printf("\n");)
-        }
-    return functionFail(Pnode);
+    DBGSRC(errorprintf("Function not found"); writeError(Pnode); Printf("\n");)
+        return functionFail(Pnode);
     }
 
 function_return_type functions(psk Pnode)
@@ -1790,54 +1936,7 @@ function_return_type functions(psk Pnode)
             }
         DEFAULT
             {
-#if 1
             return 0;
-#else
-#if 1
-            if(INTEGER(lnode))
-                {
-                vars* nxtvar;
-                if(is_op(rightnode))
-                    return functionFail(Pnode);
-                for(nxtvar = variables[rightnode->u.obj];
-                    nxtvar && (STRCMP(VARNAME(nxtvar),POBJ(rightnode)) < 0);
-                    nxtvar = nxtvar->next);
-                /* find first name in a row of equal names */
-                if(nxtvar && !STRCMP(VARNAME(nxtvar),POBJ(rightnode)))
-                    {
-                    nxtvar->selector =
-                        (int)toLong(lnode)
-                        % (nxtvar->n + 1);
-                    if(nxtvar->selector < 0)
-                        nxtvar->selector += (nxtvar->n + 1);
-                    Pnode = rightbranch(Pnode);
-                    return functionOk(Pnode);
-                    }
-                }
-            if(!(rightnode->v.fl & SUCCESS))
-                return functionFail(Pnode);
-            addr[1] = NULL;
-            return execFnc(Pnode);
-#else
-            if(INTEGER(lnode))
-                {
-                if(is_op(rightnode))
-                    return functionFail(Pnode);
-                else
-                    {
-                    if(setIndex(rightnode,lnode))
-                        {
-                        Pnode = rightbranch(Pnode);
-                        return functionOk(Pnode);
-                        }
-                    }
-                }
-            if(!(rightnode->v.fl & SUCCESS))
-                return functionFail(Pnode);
-            addr[1] = NULL;
-            return execFnc(Pnode);
-#endif
-#endif
             }
         }
     }

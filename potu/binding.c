@@ -10,6 +10,7 @@
 static psk SymbolBinding(psk variabele, int* newval, int twolevelsofindirection)
     {
     psk pbinding;
+    *newval = 0;
     if ((pbinding = find2(variabele, newval)) != NULL)
         {
         if (twolevelsofindirection)

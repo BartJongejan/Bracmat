@@ -1853,6 +1853,7 @@ towards operators that are closer to the root of the tree"
             : 2*x^(y*(a+b))
           | Out$150
           )
+          out$151
           (   fil$("FILE98741LFN.TXT",w)
             & fil$(,STR," \n\r\t")
             & fil$(,,,"Workers lost their jobs.")
@@ -1885,6 +1886,7 @@ towards operators that are closer to the root of the tree"
             & rmv$"FILE98741LFN.TXT"
           | Out$151
           )
+          out$152
           (   0:?pos
             & :?L
             & @( "Proletarier aller Länder, vereinigt euch!"
@@ -1920,12 +1922,14 @@ towards operators that are closer to the root of the tree"
                 )
           | Out$152
           )
+          out$153
           (   (ab=ab (|!ab))
             & @(aaaaaaabababababbaaaa:?x !ab b ?y)
             & !x:aaaaaa
             & !y:aaaa
           | Out$153
           )
+          out$154
           (   "Looping by backtracking"
             & :?p
             & @( " sdak hkj from=\"#12\" askl >twelve< alkjsda from=\"#7\" askl >seven< fhur"
@@ -1943,6 +1947,7 @@ towards operators that are closer to the root of the tree"
           | !p:(7.seven) (12.twelve)
           | Out$154
           )
+          out$154b
           (   (ut=.utf$(chu$!arg):!arg)
             & ( map
               =   f,l,c
@@ -1969,9 +1974,11 @@ towards operators that are closer to the root of the tree"
                     67108864
                     2147483647
                 )
-          | Out$154
+          | Out$154b
           )
+          out$155
           (chu$2147483648&Out$155)
+          out$156
           (       str
                 $ ( abcde
                     chu$67108863
@@ -2013,14 +2020,17 @@ towards operators that are closer to the root of the tree"
             & @(!txt:chr$200 ?)
           | Out$156
           )
+          out$157
           (   @("   xyz  ":?a (>xx:?y) ?b)
             & !y:xy
           | Out$157
           )
+          out$158
           (   @("   xyz  ":?a (>@xx:?y) ?b)
             & !y:y
           | Out$158
           )
+          out$159
           (   @("   \txyz  ":?a (<" ":?y) ?b)
             & !y:
           | Out$159
@@ -7280,6 +7290,14 @@ string line 2\"
             & !n:9
             & fine
           | Out$"Cannot call built-in method on anonymous built-in object."
+          )
+          (   (+(x.$x^2))$3
+            & Out$"Invalid function definition"
+          | 
+          )
+          (   (new$hash.insert)$a
+            & Out$"Hash insert: Missing value"
+          | 
           )
       &   out
         $ ( str
