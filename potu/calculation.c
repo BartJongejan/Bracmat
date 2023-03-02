@@ -2075,7 +2075,7 @@ static Boolean calculationnew(struct typedObjectnode* This, ppsk arg)
     forthword* lastword;
     forthMemory* forthstuff;
     int length;
-    code = find2(code, &newval);
+    code = getValue(code, &newval);
     if(code)
         {
         length = polish1(code);

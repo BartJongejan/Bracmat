@@ -8320,7 +8320,7 @@ static psk getmember(psk name, psk tree, objectStuff * Object)
     return NULL;
     }
 
-static psk findsub(psk namenode)
+static psk getValueByVariableName(psk namenode)
     {
     vars* nxtvar;
     assert(!is_op(namenode));
@@ -8344,7 +8344,7 @@ static psk findsub(psk namenode)
         }
     }
 
-static psk find2(psk namenode, int* newval)
+static psk getValue(psk namenode, int* newval)
     {
     if(is_op(namenode))
         {
@@ -8383,7 +8383,7 @@ static psk find2(psk namenode, int* newval)
                     }
                 else                                   /* x */
                     {
-                    if((tmp = findsub(namenode->LEFT)) == NULL)
+                    if((tmp = getValueByVariableName(namenode->LEFT)) == NULL)
                         {
                         return NULL; /* !(xua.gjh) if xua isn't defined */
                         }
@@ -8422,7 +8422,7 @@ static psk find2(psk namenode, int* newval)
         }
     else
         {
-        return findsub(namenode);
+        return getValueByVariableName(namenode);
         }
     }
 
@@ -8514,7 +8514,7 @@ must be equivalent
         }
     else                                   /* x */
         {
-        if((tmp = findsub(namenode->LEFT)) == NULL)
+        if((tmp = getValueByVariableName(namenode->LEFT)) == NULL)
             {
             return NULL;   /* (y.did)$3  when y is not defined at all */
             }
@@ -8592,7 +8592,7 @@ static psk SymbolBinding(psk variabele, int* newval, int twolevelsofindirection)
     {
     psk pbinding;
     *newval = 0;
-    if((pbinding = find2(variabele, newval)) != NULL)
+    if((pbinding = getValue(variabele, newval)) != NULL)
         {
         if(twolevelsofindirection)
             {
@@ -10934,7 +10934,7 @@ static psk evalmacro(psk Pnode)
                     psk h;
                     tmp = eval(tmp);
 
-                    if((h = find2(tmp, &newval)) != NULL)
+                    if((h = getValue(tmp, &newval)) != NULL)
                         {
                         int Flgs;
                         psk first = NULL;
@@ -12630,7 +12630,7 @@ static function_return_type execFnc(psk Pnode)
         else
             {
             oldlnode = lnode;
-            lnode = findsub(lnode);
+            lnode = getValueByVariableName(lnode);
             lastEvaluatedFunction = lnode;
             }
 #endif

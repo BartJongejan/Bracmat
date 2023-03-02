@@ -138,7 +138,7 @@ psk evalmacro(psk Pnode)
                     psk h;
                     tmp = eval(tmp);
 
-                    if ((h = find2(tmp, &newval)) != NULL)
+                    if ((h = getValue(tmp, &newval)) != NULL)
                         {
                         int Flgs;
                         psk first = NULL;

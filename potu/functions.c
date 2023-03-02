@@ -466,7 +466,7 @@ function_return_type execFnc(psk Pnode)
         else
             {
             oldlnode = lnode;
-            lnode = findsub(lnode);
+            lnode = getValueByVariableName(lnode);
             lastEvaluatedFunction = lnode;
             }
 #endif

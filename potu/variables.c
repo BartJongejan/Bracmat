@@ -437,7 +437,7 @@ void pop(psk pnode)
     deleteNode(pnode);
     }
 
-psk findsub(psk namenode)
+psk getValueByVariableName(psk namenode)
     {
     vars* nxtvar;
     assert(!is_op(namenode));
@@ -461,7 +461,7 @@ psk findsub(psk namenode)
         }
     }
 
-psk find2(psk namenode, int* newval)
+psk getValue(psk namenode, int* newval)
     {
     if(is_op(namenode))
         {
@@ -500,7 +500,7 @@ psk find2(psk namenode, int* newval)
                     }
                 else                                   /* x */
                     {
-                    if((tmp = findsub(namenode->LEFT)) == NULL)
+                    if((tmp = getValueByVariableName(namenode->LEFT)) == NULL)
                         {
                         return NULL; /* !(xua.gjh) if xua isn't defined */
                         }
@@ -539,7 +539,7 @@ psk find2(psk namenode, int* newval)
         }
     else
         {
-        return findsub(namenode);
+        return getValueByVariableName(namenode);
         }
     }
 
@@ -631,7 +631,7 @@ must be equivalent
         }
     else                                   /* x */
         {
-        if((tmp = findsub(namenode->LEFT)) == NULL)
+        if((tmp = getValueByVariableName(namenode->LEFT)) == NULL)
             {
             return NULL;   /* (y.did)$3  when y is not defined at all */
             }

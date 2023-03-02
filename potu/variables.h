@@ -7,8 +7,8 @@
 void lst(psk pnode);
 psk Head(psk pnode);
 int insert(psk name, psk pnode);
-psk findsub(psk namenode);
-psk find2(psk namenode, int* newval);
+psk getValueByVariableName(psk namenode);
+psk getValue(psk namenode, int* newval);
 psk findMethod(psk namenode, objectStuff* Object);
 int psh(psk name, psk pnode, psk dim);
 int deleteNode(psk name);
