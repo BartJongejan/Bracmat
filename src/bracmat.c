@@ -4703,7 +4703,7 @@ static void wipe(psk top)
         }
     dec_refcount(top);
     }
-
+#define POWER2
 static int power2(int n)
 /* returns MSB of n */
     {
@@ -4724,6 +4724,7 @@ static ppsk Entry(int n, int index, varia** pv)
         }
     else
         {
+#if defined POWER2
         varia* hv;
         int MSB = power2(n);
         for(hv = *pv /* begin with longest varia record */
@@ -4732,6 +4733,24 @@ static ppsk Entry(int n, int index, varia** pv)
             )
             hv = hv->prev;
         index -= MSB;   /* if index == 0, then index becomes -1 */
+#else
+        /* This code does not make Bracmat noticeably faster*/
+        int MSB;
+        varia* hv = *pv;
+        for(MSB = 1; MSB <= index; MSB <<= 1)
+            ;
+
+        if(MSB > 1)
+            index %= (MSB >> 1);
+        else
+            {
+            index = -1;
+            MSB <<= 1;
+            }
+
+        for(; MSB <= n; MSB <<= 1)
+            hv = hv->prev;
+#endif
         return &hv->variableValue[index];  /* variableValue[-1] == (psk)*prev */
         }
     }
@@ -4745,6 +4764,7 @@ static psk Entry2(int n, int index, varia* pv)
     else
         {
         varia* hv;
+#if defined POWER2
         int MSB = power2(n);
         for(hv = pv /* begin with longest varia record */
             ; MSB > 1 && index < MSB
@@ -4752,6 +4772,24 @@ static psk Entry2(int n, int index, varia* pv)
             )
             hv = hv->prev;
         index -= MSB;   /* if index == 0, then index becomes -1 */
+#else
+        /* This code does not make Bracmat noticeably faster*/
+        int MSB;
+        hv = pv;
+        for(MSB = 1; MSB <= index; MSB <<= 1)
+            ;
+
+        if(MSB > 1)
+            index %= (MSB >> 1);
+        else
+            {
+            index = -1;
+            MSB <<= 1;
+            }
+
+        for(; MSB <= n; MSB <<= 1)
+            hv = hv->prev;
+#endif
         return hv->variableValue[index];  /* variableValue[-1] == (psk)*prev */
         }
     }
@@ -12420,7 +12458,7 @@ static function_return_type execFnc(psk Pnode)
                             psh(Pnode->LEFT, &zeroNode, NULL);
                             Pnode = eval(Pnode);
                             /**** Evaluate anonymous function.
-                            
+
                                      (=.!arg)$XYZ
                             ****/
                             pop(Pnode->LEFT);
@@ -12470,21 +12508,21 @@ static function_return_type execFnc(psk Pnode)
                                 if(Op(Pnode) == DOT)
                                     {
                                     psh(Pnode->LEFT, &zeroNode, NULL);
-                                    Pnode = eval(Pnode); 
-                                        /**** Evaluate member function of built-in
-                                              object from within an enveloping
-                                              object. -----------------
-                                                                       |
-                                        ( new$hash:?myhash             |
-                                        &   (                          |
-                                            = ( myInsert               |
-                                              = . (Its..insert)$!arg <-
-                                              )
-                                            )
-                                          : (=?(myhash.))
-                                        & (myhash..myInsert)$(X.12)
+                                    Pnode = eval(Pnode);
+                                    /**** Evaluate member function of built-in
+                                          object from within an enveloping
+                                          object. -----------------
+                                                                   |
+                                    ( new$hash:?myhash             |
+                                    &   (                          |
+                                        = ( myInsert               |
+                                          = . (Its..insert)$!arg <-
+                                          )
                                         )
-                                        ****/
+                                      : (=?(myhash.))
+                                    & (myhash..myInsert)$(X.12)
+                                    )
+                                    ****/
                                     pop(Pnode->LEFT);
                                     Pnode = dopb(Pnode, Pnode->RIGHT);
                                     }
@@ -12495,7 +12533,7 @@ static function_return_type execFnc(psk Pnode)
                                 if(Op(Pnode) == DOT)
                                     {
                                     psh(Pnode->LEFT, &zeroNode, NULL);
-                                    Pnode = eval(Pnode); 
+                                    Pnode = eval(Pnode);
                                     /**** Evaluate member function from
                                           within an other member function
                                         ( ( Object                    |
@@ -12555,7 +12593,7 @@ static function_return_type execFnc(psk Pnode)
                         if(Object.theMethod((struct typedObjectnode*)Object.object, &Pnode))
                             {
                             /**** Evaluate a built-in method of a named object.
-                                                            | 
+                                                            |
                                       new$hash:?H           |
                                     & (H..insert)$(XYZ.2) <-
                             ****/
@@ -12659,18 +12697,18 @@ static function_return_type execFnc(psk Pnode)
                 }
             else
                 {
-        #if defined NO_EXIT_ON_NON_SEVERE_ERRORS
+#if defined NO_EXIT_ON_NON_SEVERE_ERRORS
                 return functionFail(Pnode);
-        #else
+#else
                 errorprintf("(Syntax error) The following is not a function:\n\n  ");
                 writeError(Pnode->LEFT);
                 exit(116);
-        #endif
+#endif
                 }
             }
         }
     DBGSRC(errorprintf("Function not found"); writeError(Pnode); Printf("\n");)
-    return functionFail(Pnode);
+        return functionFail(Pnode);
     }
 
 static int hasSubObject(psk src)
