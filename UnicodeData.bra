@@ -847,14 +847,12 @@ struct ccaseconv " !name "[]={\n")
 int convertLetter(int a, struct ccaseconv * T)
     {
     int i;
-    if (a > 0x10FFFF)
+    if ((unsigned int)a < T[0].L || a > 0x10FFFF)
         return a;
-    for (i = 0;; ++i)
+    for (i = 1;; ++i)
         {
         if ((unsigned int)a < T[i].L)
             {
-            if (i == 0)
-                return a;
             --i;
             if (  (unsigned int)a <= (unsigned int)(T[i].L + T[i].range)
                && (  T[i].inc < 2
