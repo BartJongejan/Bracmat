@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "2 March 2023"
-#define VERSION "6.12.7"
-#define BUILD "268"
+#define DATUM "3 March 2023"
+#define VERSION "6.12.8"
+#define BUILD "269"
 /*
 COMPILATION
 -----------
