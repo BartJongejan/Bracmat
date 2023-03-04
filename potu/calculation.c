@@ -425,7 +425,7 @@ static int setArgs(forthvariable** varp, fortharray** arrp, psk args, int nr)
         {
         if(is_op(args->LEFT))
             {
-            size_t size = 0;
+            size_t size = 1;
             psk x = args->LEFT;
             static char name[24];/*Enough for 64 bit number in decimal.*/
             fortharray* a;
@@ -440,7 +440,7 @@ static int setArgs(forthvariable** varp, fortharray** arrp, psk args, int nr)
             sprintf(name, "a%d", nr);
             a = getOrCreateArrayPointer(arrp, name, size);
 
-            for(index = 0, x = args->LEFT; index < size; ++index, x = x->RIGHT)
+            for(index = 0, x = args->LEFT; index < size && is_op(x); ++index, x = x->RIGHT)
                 {
                 setFloat(a->pval + index, x->LEFT);
                 }
