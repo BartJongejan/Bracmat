@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "3 March 2023"
+#define DATUM "5 March 2023"
 #define VERSION "6.12.8"
-#define BUILD "269"
+#define BUILD "270"
 /*
 COMPILATION
 -----------
@@ -891,7 +891,14 @@ typedef  sk* psk;
 typedef psk* ppsk;
 
 static psk addr[7], m0 = NULL, m1 = NULL, f0 = NULL, f1 = NULL, f4 = NULL, f5 = NULL;
-
+#if 0 
+/* UNSAFE */
+/* The next two variables are used to cache the address of the most recently called user function. 
+These values must be reset each time stringEval() is called.
+(When Bracmat is embedded in a Java program as a JNI, data addresses are not stable, it seems.) */
+static psk oldlnode = 0;
+static psk lastEvaluatedFunction = 0;
+#endif
 /*
 0:?n&whl'(1+!n:<100000:?n&57265978465924376578234566767834625978465923745729775787627876873875436743934786450097*53645235643259824350824580457283955438957043287250857432895703498700987123454567897656:?T)&!T
 NEWMULT
@@ -4445,26 +4452,35 @@ void stringEval(const char* s, const char** out, int* err)
     {
 #if _BRACMATEMBEDDED
     char* buf = (char*)malloc(strlen(s) + 11);
-    sprintf(buf, "put$(%s,MEM)", s);
+    if(buf)
+        {
+        sprintf(buf, "put$(%s,MEM)", s);
 #else
     char* buf = (char*)malloc(strlen(s) + 7);
-    sprintf(buf, "str$(%s)", s);
-#endif
-    source = (unsigned char*)buf;
-    global_anchor = input(NULL, global_anchor, OPT_MEM, err, NULL); /* 4 -> OPT_MEM*/
-    if(err && *err)
-        return;
-#if JMP
-    if(setjmp(jumper) != 0)
+    if(buf)
         {
-        free(buf);
-        return -1;
-        }
+        sprintf(buf, "str$(%s)", s);
 #endif
-    global_anchor = eval(global_anchor);
-    if(out != NULL)
-        *out = is_op(global_anchor) ? (const char*)"" : (const char*)POBJ(global_anchor);
-    free(buf);
+        source = (unsigned char*)buf;
+#if 0
+        oldlnode = 0;
+        lastEvaluatedFunction = 0;
+#endif
+        global_anchor = input(NULL, global_anchor, OPT_MEM, err, NULL); /* 4 -> OPT_MEM*/
+        if(err && *err)
+            return;
+#if JMP
+        if(setjmp(jumper) != 0)
+            {
+            free(buf);
+            return -1;
+            }
+#endif
+        global_anchor = eval(global_anchor);
+        if(out != NULL)
+            *out = is_op(global_anchor) ? (const char*)"" : (const char*)POBJ(global_anchor);
+        free(buf);
+        }
     return;
     }
 
@@ -12658,11 +12674,10 @@ static function_return_type execFnc(psk Pnode)
         }
     else
         {
-#if 0
-        lnode = findsub(lnode);
+#if 1
+        lnode = getValueByVariableName(lnode);
 #else
-        static psk oldlnode = 0;
-        static psk lastEvaluatedFunction = 0;
+        /* Unsafe, esp. in JNI */
         if(oldlnode == lnode)
             lnode = lastEvaluatedFunction;  /* Speeding up! Esp. in map, vap, mop. */
         else

@@ -456,9 +456,10 @@ function_return_type execFnc(psk Pnode)
         }
     else
         {
-#if 0
-        lnode = findsub(lnode);
+#if 1
+        lnode = getValueByVariableName(lnode);
 #else
+        /* UNSAFE */
         static psk oldlnode = 0;
         static psk lastEvaluatedFunction = 0;
         if(oldlnode == lnode)
