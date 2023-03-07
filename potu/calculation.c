@@ -316,17 +316,18 @@ static fortharray* getOrCreateArrayPointer(fortharray** arrp, char* name, size_t
         {
         curarrp = curarrp->next;
         }
+
     if(curarrp == 0)
         {
         curarrp = *arrp;
         *arrp = (fortharray*)bmalloc(__LINE__, sizeof(fortharray));
-        (*arrp)->name = bmalloc(__LINE__, strlen(name) + 1);
-        strcpy((*arrp)->name, name);
         (*arrp)->next = curarrp;
         curarrp = *arrp;
+        curarrp->name = bmalloc(__LINE__, strlen(name) + 1);
+        strcpy(curarrp->name, name);
+        curarrp->pval = 0;
         }
-
-    if(curarrp->pval != 0)
+    else if(curarrp->pval != 0)
         {
         if(curarrp->size != size)
             {
@@ -347,6 +348,7 @@ static fortharray* getOrCreateArrayPointer(fortharray** arrp, char* name, size_t
         curarrp->size = size;
         curarrp->index = 0;
         }
+
     if(!*arrp)
         *arrp = curarrp;
     return curarrp;
@@ -460,8 +462,9 @@ static int setArgs(forthvariable** varp, fortharray** arrp, psk args, int nr)
         forthvalue* val;
         sprintf(name, "v%d", nr);
         val = &(getVariablePointer(varp, name)->val);
-        if(setFloat(val, args))
-            return 1 + nr;
+        if(val)
+            setFloat(val, args);
+        return 1 + nr;
         }
     else
         return nr;
@@ -736,7 +739,9 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                         {
                         i = (int)((sp--)->val).floating;
                         if(i < 0 || i >= sp->arrp->size)
+                            {
                             return FALSE;
+                            }
                         sp->arrp->index = i;
                         ++wordp;
                         break;
@@ -745,7 +750,9 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                         {
                         i = (int)((sp--)->val).floating;
                         if(i < 0 || i >= sp->arrp->size)
+                            {
                             return FALSE;
+                            }
                         forthvalue* val = sp->arrp->pval + i;
                         *val = (--sp)->val;
                         ++wordp;
@@ -755,7 +762,9 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                         {
                         i = (int)((sp--)->val).floating;
                         if(i < 0 || i >= sp->arrp->size)
+                            {
                             return FALSE;
+                            }
                         sp->val = (sp->arrp->pval)[i];
                         ++wordp;
                         break;
@@ -793,7 +802,6 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                     }
                 len = offsetof(sk, u.obj) + strlen(buf);
                 res = (psk)bmalloc(__LINE__, len + 1);
-                /*strcpy((char*)POBJ(res), buf);*/
                 if(res)
                     {
                     strcpy((char*)(res)+offsetof(sk, u.sobj), buf);
@@ -831,6 +839,7 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                 {
                 printf("%s=%.2f ", v->name, v->val.floating);
                 };
+            
             for(arr = mem->arr; arr; arr = arr->next)
                 {
                 size_t i;
@@ -1330,7 +1339,7 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                         case floating:
                             for(i = 0; i < a->size; ++i)
                                 {
-                                totalbytes += sprintf(jotter, "%e ", a->pval[i].floating);
+                                totalbytes += sprintf(jotter, "%e\n", a->pval[i].floating);
                                 }
                             len = offsetof(sk, u.obj) + totalbytes;
                             res = (psk)bmalloc(__LINE__, len + 1);
@@ -1338,14 +1347,14 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                             totalbytes = 0;
                             for(i = 0; i < a->size; ++i)
                                 {
-                                totalbytes += sprintf(buffer + totalbytes, "%e ", a->pval[i].floating);
+                                totalbytes += sprintf(buffer + totalbytes, "%e\n", a->pval[i].floating);
                                 }
                             break;
                         case integer:
                             for(i = 0; i < a->size; ++i)
                                 {
                                 int I = (int)(a->pval[i].floating);
-                                totalbytes += sprintf(jotter,"%d ", I);
+                                totalbytes += sprintf(jotter,"%d\n", I);
                                 }
                             len = offsetof(sk, u.obj) + totalbytes;
                             res = (psk)bmalloc(__LINE__, len + 1);
@@ -1354,7 +1363,7 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                             for(i = 0; i < a->size; ++i)
                                 {
                                 int I = (int)(a->pval[i].floating);
-                                totalbytes += sprintf(buffer + totalbytes, "%d ", I);
+                                totalbytes += sprintf(buffer + totalbytes, "%d\n", I);
                                 }
                             break;
                         case fraction:
@@ -1377,9 +1386,9 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                                         ;
 
                                     if(shft == 0)
-                                        totalbytes += sprintf(jotter, LONGD " ", Mantissa);
+                                        totalbytes += sprintf(jotter, LONGD "\n", Mantissa);
                                     else
-                                        totalbytes += sprintf(jotter, LONGD "/" LONGD " ", Mantissa, (LONG)(long1 << shft));
+                                        totalbytes += sprintf(jotter, LONGD "/" LONGD "\n", Mantissa, (LONG)(long1 << shft));
                                     }
                                 else
                                     totalbytes += sprintf(jotter, "0 ");
@@ -1400,9 +1409,9 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                                         ;
 
                                     if(shft == 0)
-                                        totalbytes += sprintf(buffer + totalbytes, LONGD " ", Mantissa);
+                                        totalbytes += sprintf(buffer + totalbytes, LONGD "\n", Mantissa);
                                     else
-                                        totalbytes += sprintf(buffer + totalbytes, LONGD "/" LONGD " ", Mantissa, (LONG)(long1 << shft));
+                                        totalbytes += sprintf(buffer + totalbytes, LONGD "/" LONGD "\n", Mantissa, (LONG)(long1 << shft));
                                     }
                                 else
                                     totalbytes += sprintf(buffer + totalbytes, "0 ");
@@ -1412,7 +1421,7 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                         case hex:
                             for(i = 0; i < a->size; ++i)
                                 {
-                                totalbytes += sprintf(jotter, "%a ", a->pval[i].floating);
+                                totalbytes += sprintf(jotter, "%a\n", a->pval[i].floating);
                                 }
                             len = offsetof(sk, u.obj) + totalbytes;
                             res = (psk)bmalloc(__LINE__, len + 1);
@@ -1420,7 +1429,7 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                             totalbytes = 0;
                             for(i = 0; i < a->size; ++i)
                                 {
-                                totalbytes += sprintf(buffer + totalbytes, "%a ", a->pval[i].floating);
+                                totalbytes += sprintf(buffer + totalbytes, "%a\n", a->pval[i].floating);
                                 }
                             break;
                         }
@@ -1712,11 +1721,25 @@ static void compaction(forthMemory* mem)
         ++cells;
         }
     *newwordp = *wordp;
-    newwordp->offset = arr[wordp->offset];
+    assert(wordp->action == TheEnd);
+    newwordp->offset = 0;// arr[wordp->offset];
     bfree(mem->word);
     bfree(arr);
     mem->word = newword;
     }
+
+
+#define VARCOMP (NOT|GREATER_THAN|SMALLER_THAN|INDIRECT)
+
+#define          VLESS(psk)             (((psk)->v.fl & (VARCOMP)) == (INDIRECT|SMALLER_THAN))
+#define    VLESS_EQUAL(psk)             (((psk)->v.fl & (VARCOMP)) == (INDIRECT|NOT|GREATER_THAN))
+#define    VMORE_EQUAL(psk)             (((psk)->v.fl & (VARCOMP)) == (INDIRECT|NOT|SMALLER_THAN))
+#define          VMORE(psk)             (((psk)->v.fl & (VARCOMP)) == (INDIRECT|GREATER_THAN))
+#define       VUNEQUAL(psk)             (((psk)->v.fl & (VARCOMP)) == (INDIRECT|NOT))
+#define    VLESSORMORE(psk)             (((psk)->v.fl & (VARCOMP)) == (INDIRECT|SMALLER_THAN|GREATER_THAN))
+#define         VEQUAL(psk)             (((psk)->v.fl & (VARCOMP)) == (INDIRECT))
+#define VNOTLESSORMORE(psk)             (((psk)->v.fl & (VARCOMP)) == (INDIRECT|NOT|SMALLER_THAN|GREATER_THAN))
+
 
 static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
     {
@@ -1839,6 +1862,54 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                     return ++wordp;
                     }
                 else if(FNOTLESSORMORE(code->RIGHT))
+                    {
+                    wordp->action = Fequal;
+                    wordp->offset = 0;
+                    return ++wordp;
+                    }
+                else if(VLESS(code->RIGHT))
+                    {
+                    wordp->action = Fless;
+                    wordp->offset = 0;
+                    return ++wordp;
+                    }
+                else if(VLESS_EQUAL(code->RIGHT))
+                    {
+                    wordp->action = Fless_equal;
+                    wordp->offset = 0;
+                    return ++wordp;
+                    }
+                else if(VMORE_EQUAL(code->RIGHT))
+                    {
+                    wordp->action = Fmore_equal;
+                    wordp->offset = 0;
+                    return ++wordp;
+                    }
+                else if(VMORE(code->RIGHT))
+                    {
+                    wordp->action = Fmore;
+                    wordp->offset = 0;
+                    return ++wordp;
+                    }
+                else if(VUNEQUAL(code->RIGHT))
+                    {
+                    wordp->action = Funequal;
+                    wordp->offset = 0;
+                    return ++wordp;
+                    }
+                else if(VLESSORMORE(code->RIGHT))
+                    {
+                    wordp->action = Funequal;
+                    wordp->offset = 0;
+                    return ++wordp;
+                    }
+                else if(VEQUAL(code->RIGHT))
+                    {
+                    wordp->action = Fequal;
+                    wordp->offset = 0;
+                    return ++wordp;
+                    }
+                else if(VNOTLESSORMORE(code->RIGHT))
                     {
                     wordp->action = Fequal;
                     wordp->offset = 0;
