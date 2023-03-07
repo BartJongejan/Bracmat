@@ -1,0 +1,158 @@
+{gravity.bra
+𝕌𝕋𝔽-𝟠
+
+have some points move under influence of gravity}
+
+X=
+  ( do
+  =   
+    .   2:?planets
+      & 3:?dimensions
+      & 17:?iterations
+      & 1/77:?g
+      & 1/3:?M
+      & 1/2:?U
+      &     
+          ' (   tbl
+              $ (T,$planets*$dimensions*$iterations)
+            & $iterations:?n
+            & !v1:?V
+            &   whl
+              ' ( !n:>0
+                & -1+!n:?n
+                & $planets:?p
+                &   whl
+                  ' ( !p:>0
+                    & -1+!p:?p
+                    & $planets:?q
+                    &   whl
+                      ' ( !q:>0
+                        & -1+!q:?q
+                        & (   !q:<!p
+                            & 0:?dist2
+                            & $dimensions:?d
+                            &   whl
+                              ' ( !d:>0
+                                & -1+!d:?d
+                                & $dimensions*!p+!d:?i
+                                & $dimensions*!q+!d:?j
+                                &       ( !(ind$(a0,!i))
+                                        + -1*!(ind$(a0,!j))
+                                        )
+                                      ^ 2
+                                    + !dist2
+                                  : ?dist2
+                                &     $dimensions*$planets*!n
+                                    + !i
+                                  : ?k
+                                )
+                            & ( !dist2:0
+                              |   !dist2^-2:?tsid2
+                                & sqrt$!dist2^2:?tsid
+                                & $dimensions:?f
+                                &   whl
+                                  ' ( !f:>0
+                                    & -1+!f:?f
+                                    &   $dimensions*!p+!f
+                                      : ?Ip
+                                    &   $dimensions*!q+!f
+                                      : ?Jp
+                                    &     !(ind$(a0,!Ip))
+                                        + -1*!(ind$(a0,!Jp))
+                                      : ?delta
+                                    &       2
+                                          * $dimensions
+                                          * $planets
+                                        + $dimensions*!p
+                                        + !f
+                                      : ?Ia
+                                    &     $g*!delta*!tsid*!tsid2
+                                        + !(ind$(a0,!Ia))
+                                      : ?(ind$(a0,!Ia))
+                                    &     $dimensions*$planets
+                                        + $dimensions*!p
+                                        + !f
+                                      : ?Iv
+                                    &     $M*!(ind$(a0,!Ia))
+                                        + !(ind$(a0,!Iv))
+                                      : ?(ind$(a0,!Iv))
+                                    &     $U*!(ind$(a0,!Iv))
+                                        + !(ind$(a0,!Ip))
+                                      : ?(ind$(a0,!Ip))
+                                    &       2
+                                          * $dimensions
+                                          * $planets
+                                        + $dimensions*!q
+                                        + !f
+                                      : ?Ja
+                                    &       -1
+                                          * $g
+                                          * !delta
+                                          * !tsid
+                                          * !tsid2
+                                        + !(ind$(a0,!Ja))
+                                      : ?(ind$(a0,!Ja))
+                                    &     $dimensions*$planets
+                                        + $dimensions*!q
+                                        + !f
+                                      : ?Jv
+                                    &     $M*!(ind$(a0,!Ja))
+                                        + !(ind$(a0,!Jv))
+                                      : ?(ind$(a0,!Jv))
+                                    &     $U*!(ind$(a0,!Jv))
+                                        + !(ind$(a0,!Jp))
+                                      : ?(ind$(a0,!Jp))
+                                    & out$!(ind$(a0,!Ip))
+                                    )
+                                & !f
+                              )
+                          | 
+                          )
+                        )
+                    )
+                )
+            & !n
+            )
+        : ?code
+      & new$(calculation,!code):?calc
+      & (calc..print)$
+      & (     (calc..calculate)
+            $ (   ((1,0,0),-1,1,0)
+                , ((0,1,0),0,-1/2,0)
+                , (0,0,2)
+                , 0
+                , 0
+                , 0
+              . 123
+              )
+          & out$executed
+          & (calc..export)$(R,a0):?points
+          & out$exported
+          & lst$(points,points,NEW)
+        | out$"something wrogn"
+        )
+  )
+  (new=.~|(its.do)$);
+
+r=
+  get'("gravity.bra",TXT)
+& rmv$(str$(gravity ".bak"))
+& ren$("gravity.bra".str$(gravity ".bak"))
+&   put
+  $ ( "{gravity.bra
+𝕌𝕋𝔽-𝟠
+
+have some points move under influence of gravity}
+
+"
+    , "gravity.bra"
+    , NEW
+    , BIN
+    )
+& lst'(X,"gravity.bra",APP)
+& put'(\n,"gravity.bra",APP,BIN)
+& lst'(r,"gravity.bra",APP)
+& put$(str$("\nnew'" X ";\n"),"gravity.bra",APP,BIN)
+& ;
+
+new'X;
