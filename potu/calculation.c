@@ -758,6 +758,7 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                             {
                             return FALSE;
                             }
+                        sp->arrp->index = i;
                         forthvalue* val = sp->arrp->pval + i;
                         *val = (--sp)->val;
                         ++wordp;
@@ -770,6 +771,7 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                             {
                             return FALSE;
                             }
+                        sp->arrp->index = i;
                         sp->val = (sp->arrp->pval)[i];
                         ++wordp;
                         break;
@@ -1019,7 +1021,9 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     forthvalue* val;
                     printf("PopPop ?index  ");
                     assert(sp >= mem->stack);
-                    val = (--sp)->arrp->pval + i;
+                    --sp;
+                    sp->arrp->index = i;
+                    val = sp->arrp->pval + i;
                     assert(sp >= mem->stack);
                     *val = (--sp)->val;
                     ++wordp;
@@ -1030,6 +1034,7 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     int i = (int)((sp--)->val).floating;
                     printf("Pop !index  ");
                     assert(sp >= mem->stack);
+                    sp->arrp->index = i;
                     sp->val = (sp->arrp->pval)[i];
                     ++wordp;
                     break;
