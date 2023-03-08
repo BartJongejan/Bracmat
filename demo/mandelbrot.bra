@@ -61,7 +61,7 @@ Mandelbrot=
             )
         : ?calcule
       & new$(calculation,!calcule):?compiledCalcule
-      & ( 
+      & ( ~
         |   lst$calc
           & out$"ITER DEFINED"
           & (compiledCalcule..print)$
@@ -172,7 +172,7 @@ Mandelbrot=
                           )
                     )
                   . !eks
-                  . " "
+                  . \n
                   )
               )
           , "MandelbrotSetArr.pgm"
