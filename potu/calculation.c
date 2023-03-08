@@ -80,6 +80,7 @@ typedef enum
     , Hypot
     , Pow
     , Tbl
+    , Out
     , Ind
     , QInd /* ?(ind$(<array name>,<index>)) */
     , EInd /* !(ind$(<array name>,<index>)) */
@@ -536,6 +537,7 @@ static Epair epairs[] =
         {"hypot", Hypot},
         {"pow",   Pow},
         {"tbl",   Tbl},
+        {"out",   Out},
         {"ind",   Ind},
         {"Qind",  QInd},
         {"Eind",  EInd},
@@ -735,6 +737,9 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                         ++wordp;
                         break;
                         }
+                    case Out:
+                        printf("%f\n", sp->val.floating); ++wordp; break;
+                        break;
                     case Ind:
                         {
                         i = (int)((sp--)->val).floating;
@@ -996,6 +1001,9 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     ++wordp;
                     break;
                     }
+                case Out:
+                    printf("%f\n", sp->val.floating); ++wordp; break;
+                    break;
                 case Ind:
                     {
                     int i = (int)((sp--)->val).floating;
@@ -1275,6 +1283,7 @@ static Boolean printmem(forthMemory* mem)
             case Hypot:  printf(INDNT);printf(LONGD " Pop hypot  \n", wordp - mem->word); --In; break;
             case Pow:  printf(INDNT);printf(LONGD " Pop pow    \n", wordp - mem->word); --In; break;
             case Tbl:  printf(INDNT);printf(LONGD " Pop tbl    \n", wordp - mem->word); --In; break;
+            case Out:  printf(INDNT); printf(LONGD " Pop out    \n", wordp - mem->word); --In; break;
             case Ind:  printf(INDNT);printf(LONGD " Pop ind    \n", wordp - mem->word); --In; break;
             case QInd:  printf(INDNT);printf(LONGD " PopPop Qind    \n", wordp - mem->word); --In; --In; break;
             case EInd:  printf(INDNT);printf(LONGD " Pop Eind    \n", wordp - mem->word); --In; break;
@@ -1466,9 +1475,9 @@ static void optimizeJumps(forthMemory* mem)
             case Afunction: break;
             case Pop:
                 {
+                forthword* label;
                 if(wordp->u.logic == fand)
                     {
-                    forthword* label;
                     while(1)
                         {
                         label = mem->word + wordp->offset; /* Address to jump to if previous failed. */
@@ -1495,13 +1504,15 @@ static void optimizeJumps(forthMemory* mem)
                                 || label->u.logic == fwhl      /* whl'(ABC&whl'(FAIL&BLB))    From FAIL jump to the offset of the WHL, i.e. the start of the outer loop.                      */
                                 )
                             {
-                            wordp->offset = label->offset;
+                            do {
+                                wordp->offset = label->offset;
+                                label = mem->word + wordp->offset;
+                                } while(label->action == Pop);
                             }
                         }
                     }
                 else if(wordp->u.logic == fOr)
                     {
-                    forthword* label;
                     while(1)
                         {
                         label = mem->word + wordp->offset; /* Address to jump to if previous was OK. */
@@ -1564,6 +1575,7 @@ static void optimizeJumps(forthMemory* mem)
             case Hypot:
             case Pow:
             case Tbl:
+            case Out:
             case Ind:
             case QInd:
             case EInd:
@@ -1656,6 +1668,7 @@ static void combineTestsAndJumps(forthMemory* mem)
             case Hypot:
             case Pow:
             case Tbl:
+            case Out:
             case Ind:
             case QInd:
             case EInd:
@@ -1760,9 +1773,9 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
             wordp->offset = 0;
             return ++wordp;
         case EXP:
+            wordp = polish2(mem, code->RIGHT, wordp); /* SIC! */
             wordp = polish2(mem, code->LEFT, wordp);
-            wordp = polish2(mem, code->RIGHT, wordp);
-            wordp->action = Exp;
+            wordp->action = Pow;
             wordp->offset = 0;
             return ++wordp;
         case LOG:
