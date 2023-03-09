@@ -1124,9 +1124,11 @@ options :
     evaluated after the whole expression has been read.
 |_TXT_|
     <present>
-    File is read in ``text'' mode (file mode r)
+    File is read in ``text'' mode (file mode |_r_|). When in combination with |_STR_|,
+    any zero byte in the input will cause failure. 
     <not present>
-    File is read in binary mode (file mode rb)
+    File is read in binary mode (file mode |_rb_|). However, reading stops at the
+    first zero byte! (Only |_fil$_| can read binary files.)
 |_BIN_|
     <present>
     File is read in binary mode

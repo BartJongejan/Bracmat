@@ -1,3 +1,11 @@
+9 March 2023
+input(): On reading, if options STR as well as TXT are given, then any zero byte
+in the input files will cause input() to fail. Also, if STR is given, but not TXT,
+then reading simply stops at the first zero byte, but input() will not fail.
+(Previously, all of the input was read into a leaf. However, all bytes after the
+first zero were unreachable to any Bracmat functionality.)
+The file src/xml.c is replaced by potu/xml.c, except for two #includes.
+
 1 March 2023
 Speeded up look-up of functions, and allowing more recursions for same stack size.
 

@@ -3453,8 +3453,11 @@ Options:
     characters are interpreted as parts of a Bracmat expression and
     evaluated after the whole expression has been read.
   \item \bc{TXT}\par
-    Present: File is read in ``text'' mode (file mode \verb|r|.) Not present:
-    File is read in binary mode (file mode \verb|rb|).
+    Present: File is read in ``text'' mode (file mode \verb|r|.) 
+    When in combination with \bc{STR}, any zero byte in the input will cause failure. 
+    Not present:
+    File is read in binary mode (file mode \verb|rb|). However, reading stops at the
+    first zero byte! (Only \verb|fil$| can read binary files.)
   \item \bc{BIN}\par
     Present: File is read in binary mode. Not present: File is still
     read in binary mode.

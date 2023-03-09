@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "5 March 2023"
-#define VERSION "6.12.8"
-#define BUILD "270"
+#define DATUM "9 March 2023"
+#define VERSION "6.13.0"
+#define BUILD "271"
 /*
 COMPILATION
 -----------
@@ -722,7 +722,7 @@ typedef struct
 #define OPT_TRM (1 << SHIFT_TRM)
 #define OPT_HT  (1 << SHIFT_HT)
 #define OPT_X   (1 << SHIFT_X)
-extern void XMLtext(FILE* fpi, char* source, int trim, int html, int xml);
+extern void XMLtext(FILE* fpi, unsigned char* source, int trim, int html, int xml);
 #endif
 
 #if READJSON
@@ -893,7 +893,7 @@ typedef psk* ppsk;
 static psk addr[7], m0 = NULL, m1 = NULL, f0 = NULL, f1 = NULL, f4 = NULL, f5 = NULL;
 #if 0 
 /* UNSAFE */
-/* The next two variables are used to cache the address of the most recently called user function. 
+/* The next two variables are used to cache the address of the most recently called user function.
 These values must be reset each time stringEval() is called.
 (When Bracmat is embedded in a Java program as a JNI, data addresses are not stable, it seems.) */
 static psk oldlnode = 0;
@@ -4031,7 +4031,7 @@ static void politelyWriteError(psk Pnode)
         writeError(Pnode);
     }
 
-static psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrm, Boolean* err, Boolean* GoOn)
+static psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrmtxt, Boolean* err, Boolean* GoOn)
     {
     static int stdinEOF = FALSE;
     int braces, ikar, hasop, whiteSpaceSeen, escape, backslashesAreEscaped,
@@ -4064,10 +4064,10 @@ static psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrm, Boolean* err, Bool
     inString = FALSE;
 
 #if READMARKUPFAMILY
-    if(echmemvapstrmltrm & OPT_ML)
+    if(echmemvapstrmltrmtxt & OPT_ML)
         {
         inputBufferPointer = input_buffer;
-        XMLtext(fpi, (char*)source, (echmemvapstrmltrm & OPT_TRM), (echmemvapstrmltrm & OPT_HT), (echmemvapstrmltrm & OPT_X));
+        XMLtext(fpi, source, (echmemvapstrmltrmtxt & OPT_TRM), (echmemvapstrmltrmtxt & OPT_HT), (echmemvapstrmltrmtxt & OPT_X));
         *inputBufferPointer = 0;
         Pnode = buildtree_w(Pnode);
         if(err) *err = error;
@@ -4081,7 +4081,7 @@ static psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrm, Boolean* err, Bool
     else
 #endif
 #if READJSON
-        if(echmemvapstrmltrm & OPT_JSON)
+        if(echmemvapstrmltrmtxt & OPT_JSON)
             {
             inputBufferPointer = input_buffer;
             error = JSONtext(fpi, (char*)source);
@@ -4097,9 +4097,9 @@ static psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrm, Boolean* err, Bool
             }
         else
 #endif
-            if(echmemvapstrmltrm & (OPT_VAP | OPT_STR))
+            if(echmemvapstrmltrmtxt & (OPT_VAP | OPT_STR))
                 {
-                for(inputBufferPointer = input_buffer;;)
+                for(inputBufferPointer = input_buffer; !error;)
                     {
                     if(fpi)
                         {
@@ -4117,13 +4117,24 @@ static psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrm, Boolean* err, Bool
                         }
                     else
                         if((ikar = *source++) == 0)
+                            {
                             break;
+                            }
+                    if(ikar == 0) /* 20230309 We can just as well stop here.
+                        Bracmat leafs are always treated as null terminated strings,
+                        so anything after a null byte is ignored and would just occupy memory. */
+                        {
+                        if(echmemvapstrmltrmtxt & OPT_TXT)
+                            error = TRUE; /* Fail if the user explicitly asked for text input. */
+                        break;
+                        }
+
                     if(ikar & 0x80)
                         lput(0x7F);
                     lput(ikar | 0x80);
-                    if(echmemvapstrmltrm & OPT_VAP)
+                    if(echmemvapstrmltrmtxt & OPT_VAP)
                         {
-                        if(echmemvapstrmltrm & OPT_STR)
+                        if(echmemvapstrmltrmtxt & OPT_STR)
                             lput(' ' | 0x80);
                         else
                             lput(' ');
@@ -4151,7 +4162,7 @@ static psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrm, Boolean* err, Bool
         ;
         )
         {
-        if(echmemvapstrmltrm & OPT_ECH)
+        if(echmemvapstrmltrmtxt & OPT_ECH)
             {
             if(fpi != stdin)
                 Printf("%c", ikar);
@@ -4289,7 +4300,7 @@ static psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrm, Boolean* err, Bool
                                         errorprintf("\n%d %s \"(\"", parentheses, unbalanced);
                                         error = TRUE;
                                         }
-                                    if(echmemvapstrmltrm & OPT_ECH)
+                                    if(echmemvapstrmltrmtxt & OPT_ECH)
                                         Printf("\n");
                                     /* fall through */
                                 case '\n':
@@ -4412,7 +4423,7 @@ static psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrm, Boolean* err, Bool
                 /*exit(1);*/
                 }
             }
-        if(echmemvapstrmltrm & OPT_ECH)
+        if(echmemvapstrmltrmtxt & OPT_ECH)
             Printf("\n");
         /*if(*InputArray[0].buffer)*/
         {
@@ -4668,7 +4679,7 @@ static psk dopb(psk Pnode, psk src)
     return okn;
     }
 
-static method_pnt findBuiltInMethodByName(typedObjectnode* object, const char* name)
+static method_pnt findBuiltInMethodByName(typedObjectnode * object, const char* name)
     {
     method* methods = object->vtab;
     if(methods)
@@ -4732,7 +4743,7 @@ static int power2(int n)
     return m >> 1;
     }
 
-static ppsk Entry(int n, int index, varia** pv)
+static ppsk Entry(int n, int index, varia * *pv)
     {
     if(n == 0)
         {
@@ -4771,7 +4782,7 @@ static ppsk Entry(int n, int index, varia** pv)
         }
     }
 
-static psk Entry2(int n, int index, varia* pv)
+static psk Entry2(int n, int index, varia * pv)
     {
     if(n == 0)
         {
@@ -4811,7 +4822,7 @@ static psk Entry2(int n, int index, varia* pv)
     }
 
 #if INTSCMP
-static int intscmp(LONG* s1, LONG* s2) /* this routine produces different results
+static int intscmp(LONG * s1, LONG * s2) /* this routine produces different results
                                   depending on BIGENDIAN */
     {
     while(*((char*)s1 + 3))
@@ -4840,8 +4851,8 @@ static int intscmp(LONG* s1, LONG* s2) /* this routine produces different result
 
 
 static int searchname(psk name,
-                      vars** pprevvar,
-                      vars** pnxtvar)
+                      vars * *pprevvar,
+                      vars * *pnxtvar)
     {
     unsigned char* strng;
     vars* nxtvar, * prevvar;
@@ -4872,7 +4883,7 @@ static Qnumber qTimesMinusOne(Qnumber _qx)
 /* Create a node from a number, allocating memory for the node.
 The numbers' memory isn't deallocated. */
 
-static char* iconvert2decimal(nnumber* res, char* g)
+static char* iconvert2decimal(nnumber * res, char* g)
     {
     LONG* ipointer;
     g[0] = '0';
@@ -4896,7 +4907,7 @@ static char* iconvert2decimal(nnumber* res, char* g)
     return g;
     }
 
-static ptrdiff_t numlength(nnumber* n)
+static ptrdiff_t numlength(nnumber * n)
     {
     ptrdiff_t len;
     LONG H;
@@ -4924,7 +4935,7 @@ static ptrdiff_t numlength(nnumber* n)
     return len;
     }
 
-static psk inumberNode(nnumber* g)
+static psk inumberNode(nnumber * g)
     {
     psk res;
     size_t len;
@@ -4945,7 +4956,7 @@ static psk inumberNode(nnumber* g)
 /* Create a node from a number, only allocating memory for the node if the
 number hasn't the right size (== too large). If new memory is allocated,
 the number's memory is deallocated. */
-static psk numberNode2(nnumber* g)
+static psk numberNode2(nnumber * g)
     {
     psk res;
     size_t neededlen;
@@ -4993,7 +5004,7 @@ static Qnumber not_a_number(void)
     return res;
     }
 
-static void convert2binary(nnumber* x)
+static void convert2binary(nnumber * x)
     {
     LONG* ipointer;
     char* charpointer;
@@ -5018,7 +5029,7 @@ static void convert2binary(nnumber* x)
     assert((LONG)TEN_LOG_RADIX * x->ilength >= charpointer - x->number);
     }
 
-static char* isplit(Qnumber _qget, nnumber* ptel, nnumber* pnoem)
+static char* isplit(Qnumber _qget, nnumber * ptel, nnumber * pnoem)
     {
     ptel->sign = _qget->v.fl & (MINUS | QNUL);
     pnoem->sign = 0;
@@ -5047,7 +5058,7 @@ static char* isplit(Qnumber _qget, nnumber* ptel, nnumber* pnoem)
         }
     }
 
-static char* split(Qnumber _qget, nnumber* ptel, nnumber* pnoem)
+static char* split(Qnumber _qget, nnumber * ptel, nnumber * pnoem)
     {
     ptel->sign = _qget->v.fl & (MINUS | QNUL);
     pnoem->sign = 0;
@@ -5149,7 +5160,7 @@ static int decrease(char** pres, char* bx, char* ex, char* by, char* ey)
 
 
 
-static void skipnullen(nnumber* nget, int Sign)
+static void skipnullen(nnumber * nget, int Sign)
     {
     for(
         ; nget->length > 0 && *(nget->number) == '0'
@@ -5166,7 +5177,7 @@ Old algorithm: 1520,32 s
 {?} get$longint&!x*!x:?y&lst$(y,verylongint,NEW)&ok
 */
 #ifndef NDEBUG
-static void pbint(LONG* high, LONG* low)
+static void pbint(LONG * high, LONG * low)
     {
     for(; high <= low; ++high)
         {
@@ -5184,7 +5195,7 @@ static void pbint(LONG* high, LONG* low)
         }
     }
 
-static void fpbint(FILE* fp, LONG* high, LONG* low)
+static void fpbint(FILE * fp, LONG * high, LONG * low)
     {
     for(; high <= low; ++high)
         {
@@ -5202,7 +5213,7 @@ static void fpbint(FILE* fp, LONG* high, LONG* low)
         }
     }
 
-static void validt(LONG* high, LONG* low)
+static void validt(LONG * high, LONG * low)
     {
     for(; high <= low; ++high)
         {
@@ -5211,13 +5222,13 @@ static void validt(LONG* high, LONG* low)
         }
     }
 
-static void valid(nnumber* res)
+static void valid(nnumber * res)
     {
     validt(res->inumber, res->inumber + res->ilength - 1);
     }
 #endif
 
-static void nTimes(nnumber* x, nnumber* y, nnumber* product)
+static void nTimes(nnumber * x, nnumber * y, nnumber * product)
     {
     LONG* I1, * I2;
     LONG* ipointer, * itussen;
@@ -5301,7 +5312,7 @@ static void nTimes(nnumber* x, nnumber* y, nnumber* product)
     product->sign = product->inumber[0] ? ((x->sign ^ y->sign) & MINUS) : QNUL;
     }
 
-static LONG iAddSubtractFinal(LONG* highRemainder, LONG* lowRemainder, LONG carry)
+static LONG iAddSubtractFinal(LONG * highRemainder, LONG * lowRemainder, LONG carry)
     {
     while(highRemainder <= lowRemainder)
         {
@@ -5335,7 +5346,7 @@ static LONG iAddSubtractFinal(LONG* highRemainder, LONG* lowRemainder, LONG carr
     }
 
 
-static LONG iAdd(LONG* highRemainder, LONG* lowRemainder, LONG* highDivisor, LONG* lowDivisor)
+static LONG iAdd(LONG * highRemainder, LONG * lowRemainder, LONG * highDivisor, LONG * lowDivisor)
     {
     LONG carry = 0;
     assert(*highRemainder == 0);
@@ -5364,10 +5375,10 @@ static LONG iAdd(LONG* highRemainder, LONG* lowRemainder, LONG* highDivisor, LON
         return iAddSubtractFinal(highRemainder, lowRemainder, carry);
     }
 
-static LONG iSubtract(LONG* highRemainder
-                      , LONG* lowRemainder
-                      , LONG* highDivisor
-                      , LONG* lowDivisor
+static LONG iSubtract(LONG * highRemainder
+                      , LONG * lowRemainder
+                      , LONG * highDivisor
+                      , LONG * lowDivisor
                       , LONG factor
 )
     {
@@ -5398,10 +5409,10 @@ static LONG iSubtract(LONG* highRemainder
         return iAddSubtractFinal(highRemainder, lowRemainder, carry);
     }
 
-static LONG iSubtract2(LONG* highRemainder
-                       , LONG* lowRemainder
-                       , LONG* highDivisor
-                       , LONG* lowDivisor
+static LONG iSubtract2(LONG * highRemainder
+                       , LONG * lowRemainder
+                       , LONG * highDivisor
+                       , LONG * lowDivisor
                        , LONG factor
 )
     {
@@ -5449,7 +5460,7 @@ static LONG iSubtract2(LONG* highRemainder
         assert(lowRemainder == highRemainder);
         *lowRemainder += carry * RADIX;
         assert(*lowRemainder < 0);
-        assert(-((HEADROOM + 1) * RADIX) < HEADROOM * *lowRemainder && HEADROOM * *lowRemainder < ((HEADROOM + 1)* RADIX));
+        assert(-((HEADROOM + 1) * RADIX) < HEADROOM * *lowRemainder && HEADROOM * *lowRemainder < ((HEADROOM + 1) * RADIX));
         lowRemainder = slowRemainder;
         carry = 0;
         while(lowRemainder >= highRemainder)
@@ -5462,14 +5473,14 @@ static LONG iSubtract2(LONG* highRemainder
                 }
             else
                 carry = 0;
-            assert(0 <= *lowRemainder && (*lowRemainder < RADIX || (lowRemainder == highRemainder && HEADROOM * *lowRemainder < ((HEADROOM + 1)* RADIX))));
+            assert(0 <= *lowRemainder && (*lowRemainder < RADIX || (lowRemainder == highRemainder && HEADROOM * *lowRemainder < ((HEADROOM + 1) * RADIX))));
             if(*lowRemainder)
                 allzero = FALSE;
             --lowRemainder;
             }
         assert(carry == 0);
 
-        assert(0 <= *++lowRemainder && HEADROOM * *lowRemainder < ((HEADROOM + 1)* RADIX));
+        assert(0 <= *++lowRemainder && HEADROOM * *lowRemainder < ((HEADROOM + 1) * RADIX));
         if(*lowRemainder == 0)
             return allzero ? 0 : -1;
         else
@@ -5477,7 +5488,7 @@ static LONG iSubtract2(LONG* highRemainder
         }
     }
 
-static LONG nnDivide(nnumber* dividend, nnumber* divisor, nnumber* quotient, nnumber* remainder)
+static LONG nnDivide(nnumber * dividend, nnumber * divisor, nnumber * quotient, nnumber * remainder)
     {
     LONG* low, * quot, * head, * oldhead;
     /* Remainder starts out as copy of dividend. As the division progresses,
@@ -5576,7 +5587,7 @@ static LONG nnDivide(nnumber* dividend, nnumber* divisor, nnumber* quotient, nnu
                 div$(2999000000,2999001)        -> factor 1499
                     (RADIX 3 HEADROOM 2)
                 */
-                assert(factor * HEADROOM < RADIX* (HEADROOM + 1));
+                assert(factor * HEADROOM < RADIX * (HEADROOM + 1));
                 *quot += sign * factor;
                 assert(0 <= *quot);
                 /*assert(*quot < RADIX);*/
@@ -5637,7 +5648,7 @@ static LONG nnDivide(nnumber* dividend, nnumber* divisor, nnumber* quotient, nnu
     }
 
 
-static Qnumber nn2q(nnumber* num, nnumber* den)
+static Qnumber nn2q(nnumber * num, nnumber * den)
     {
     Qnumber res;
     assert(!(num->sign & QNUL));
@@ -5668,7 +5679,7 @@ static Qnumber nn2q(nnumber* num, nnumber* den)
     return res;
     }
 
-static Qnumber qnDivide(nnumber* x, nnumber* y)
+static Qnumber qnDivide(nnumber * x, nnumber * y)
     {
     Qnumber res;
     nnumber gcd = { 0 }, hrem = { 0 };
@@ -5745,7 +5756,7 @@ static Qnumber qnDivide(nnumber* x, nnumber* y)
     }
 
 
-static nnumber nPlus(nnumber* x, nnumber* y)
+static nnumber nPlus(nnumber * x, nnumber * y)
     {
     nnumber res = { 0 };
     char* hres;
@@ -5776,7 +5787,7 @@ static nnumber nPlus(nnumber* x, nnumber* y)
     return res;
     }
 
-static void nnSPlus(nnumber* x, nnumber* y, nnumber* som)
+static void nnSPlus(nnumber * x, nnumber * y, nnumber * som)
     {
     LONG* hres, * px, * py, * ex;
     ptrdiff_t xGreaterThany;
@@ -5895,7 +5906,7 @@ ok
     S   7,29 sec  (16497.31239.1022)
 */
 
-static Qnumber qDivideMultiply(nnumber* x1, nnumber* x2, nnumber* y1, nnumber* y2)
+static Qnumber qDivideMultiply(nnumber * x1, nnumber * x2, nnumber * y1, nnumber * y2)
     {
     nnumber pa = { 0 }, pb = { 0 };
     Qnumber res;
@@ -5951,7 +5962,7 @@ ok
     S   7,26 sec  (16497.31292.1022)
 */
 
-static Qnumber qDivideMultiply2(nnumber* x1, nnumber* x2, nnumber* y1, nnumber* y2)
+static Qnumber qDivideMultiply2(nnumber * x1, nnumber * x2, nnumber * y1, nnumber * y2)
     {
     nnumber pa = { 0 }, pb = { 0 };
     Qnumber res;
@@ -5984,7 +5995,7 @@ static Qnumber qTimes2(Qnumber _qx, Qnumber _qy)
         }
     }
 
-static int nnDivide(nnumber* x, nnumber* y)
+static int nnDivide(nnumber * x, nnumber * y)
     {
     division resx, resy;
     nnumber gcd = { 0 }, hrem = { 0 };
@@ -6033,7 +6044,7 @@ reduce the numerators with the denominators of the other
 number. Numerators and denominators may get smaller, speeding
 up the following multiplication.
 */
-static Qnumber qDivideMultiply(nnumber* x1, nnumber* x2, nnumber* y1, nnumber* y2)
+static Qnumber qDivideMultiply(nnumber * x1, nnumber * x2, nnumber * y1, nnumber * y2)
     {
     Qnumber res;
     nnumber z1 = { 0 }, z2 = { 0 };
@@ -16683,7 +16694,7 @@ static psk eval(psk Pnode)
 
 int startProc(
 #if _BRACMATEMBEDDED
-    startStruct* init
+    startStruct * init
 #else
     void
 #endif
