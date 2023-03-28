@@ -1,3 +1,10 @@
+28 March 2023
+HTML input is assumed to be UTF-8 encoded. All character entities are converted
+to UTF-8 characters. (This has not unchanged.) While reading HTML input, when a
+non-UTF-8 character is seen, it is assumed to be coded iso-8859-1 and converted
+to UTF-8 accordingly, as are all bytes with the high-bit set that follow.  This
+ensures that the internal representation of the HTML file is UTF-8 encoded.
+
 9 March 2023
 input(): On reading, if options STR as well as TXT are given, then any zero byte
 in the input files will cause input() to fail. Also, if STR is given, but not TXT,

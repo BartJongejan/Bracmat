@@ -59,12 +59,15 @@ attributes can be empty (no =[valuex])
 extern void putOperatorChar(int c);
 extern void putLeafChar(int c);
 extern unsigned char * putCodePoint(unsigned LONG val,unsigned char * s);
+extern int getCodePoint(const char** ps);
 
 typedef enum {notag,tag,endoftag,endoftag_startoftag} estate;
 static estate (*tagState)(const unsigned char * pkar);
 
 static int Put(const unsigned char * c);
 static int (*xput)(const unsigned char * c) = Put;
+
+static int assumeUTF8 = 1; /* Turned off when a non-UTF-8 sequence is seen. */
 
 static int rawput(int c)
     {
@@ -2426,6 +2429,25 @@ static int Put(const unsigned char * c)
         }
     else if(*c == 127) /* DEL, used as escape character for & before unrecognised entity reference */
         rawput(*c); /* double the escape character */
+    if(*c & 0x80)
+        {
+        /* Since entities always are converted to UTF-8 encoded characters, we have to do the same
+           with ALL characters. */
+        unsigned char tmp[8];
+        if(assumeUTF8)
+            {
+            const char* d = (const char *)c;
+            int R = getCodePoint(&d);
+            if(R >= 0)
+                return rawput(*c);
+            else
+                assumeUTF8 = FALSE;
+            }
+        if(putCodePoint(*c, tmp))
+            return nrawput(tmp);
+        else
+            return 0;
+        }
     return rawput(*c);
     }
 
@@ -3635,6 +3657,7 @@ void XMLtext(FILE * fpi,unsigned char * bron,int trim,int html,int xml)
     if(filesize > 0)
         {
         unsigned char * alltext;
+        assumeUTF8 = TRUE;
         doctypei = 0;
         cdatai = 0;
         bufx = (unsigned char*)malloc(BUFSIZE);

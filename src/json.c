@@ -41,6 +41,7 @@ Convert JSONL file to Bracmat file.
 extern void putOperatorChar(int c);
 extern void putLeafChar(int c);
 extern char * putCodePoint(unsigned LONG val,char * s);
+extern int errorprintf(const char* fmt, ...);
 
 typedef enum {nojson,json} jstate;
 
@@ -118,15 +119,27 @@ static stateFncTp push(stateFncTp arg)
     ++stackpointer;
     if(stackpointer == stack + stacksiz)
         {
+        stateFncTp* newstack;
         unsigned int newsiz = (2 * stacksiz + 1);
-        stack = (stateFncTp *)realloc(stack,newsiz * sizeof(stateFncTp));
-        stackpointer = stack + stacksiz; 
-        stacksiz = newsiz;
+        newstack = (stateFncTp *)realloc(stack,newsiz * sizeof(stateFncTp));
+        if(newstack)
+            {
+            stack = newstack;
+            stackpointer = stack + stacksiz;
+            stacksiz = newsiz;
+            }
+        else
+            {
+            errorprintf(
+                "memory full (requested block of %d bytes could not be allocated)",
+                newsiz * sizeof(stateFncTp));
+            exit(1);
+            }
         }
     return *stackpointer=(arg);
     }
 
-static stateFncTp pop(void)
+static stateFncTp popj(void)
     {
     --stackpointer;
     assert(stackpointer >= stack);
@@ -148,14 +161,14 @@ static jstate hexdigits(int arg)
     hexvalue = (hexvalue << 4) + arg; 
     if(--needed == 0)
         {
-        char tmp[22];
-        if(putCodePoint(hexvalue,tmp))
+        unsigned char tmp[22];
+        if(putCodePoint(hexvalue,(char*)tmp))
             {
-            char * c = tmp;
+            unsigned char * c = tmp;
             while(*c)
                 putLeafChar(*c++);
             }
-        action = pop();
+        action = popj();
         }
     return json;
     }
@@ -181,11 +194,11 @@ static jstate escape(int arg)
         case 't': 
             putLeafChar('\t'); break;
         case 'u': 
-            pop(); needed = 4; hexvalue = 0L; action = push(hexdigits); return json;
+            popj(); needed = 4; hexvalue = 0L; action = push(hexdigits); return json;
         default: 
-            action = pop(); return nojson;
+            action = popj(); return nojson;
         }
-    action = pop();
+    action = popj();
     return json;
     }
 
@@ -194,7 +207,7 @@ static jstate string(int arg)
     switch(arg)
         {
         case '"': 
-            endString(); action = pop(); break;
+            endString(); action = popj(); break;
         case '\\': 
             action = push(escape); break;
         default:
@@ -220,7 +233,7 @@ static jstate name(int arg)
     {
     if(arg == '"')
         {
-        action = pop();
+        action = popj();
         return json;
         }
     else
@@ -234,7 +247,7 @@ static jstate commaOrCloseSquareBracket(int arg)
     switch(arg)
         {
         case ']': 
-            action = pop(); lastValue(); endArray(); return json;
+            action = popj(); lastValue(); endArray(); return json;
         case ',': 
             action = push(value); lastValue(); firstValue(); return json;
         case ' ':
@@ -254,9 +267,9 @@ static jstate commaOrCloseBrace(int arg)
     switch(arg)
         {
         case '}': 
-            action = pop(); lastValue(); endObject(); return json;
+            action = popj(); lastValue(); endObject(); return json;
         case ',': 
-            pop(); action = push(startNamestring); nextValue(); return json;
+            popj(); action = push(startNamestring); nextValue(); return json;
         case ' ':
         case '\t':
         case '\r':
@@ -272,7 +285,7 @@ static jstate colon(int arg)
         switch(arg)
             {
             case ':': 
-                pop(); putOperatorChar('.'); push(commaOrCloseBrace); action = push(value);
+                popj(); putOperatorChar('.'); push(commaOrCloseBrace); action = push(value);
             case ' ':
             case '\t':
             case '\r':
@@ -288,7 +301,7 @@ static jstate startNamestring(int arg)
     switch(arg)
         {
         case '"': 
-            pop(); push(colon); action = push(name);
+            popj(); push(colon); action = push(name);
         case ' ':
         case '\t':
         case '\r':
@@ -305,14 +318,14 @@ static jstate valueOrCloseSquareBracket(int arg)
     switch(arg)
         {
         case ']': 
-            action = pop(); endArray();
+            action = popj(); endArray();
         case ' ':
         case '\t':
         case '\r':
         case '\n':
             return json;
         default:
-            pop(); 
+            popj(); 
             firstValue(); 
             push(commaOrCloseSquareBracket);
             action = push(value);
@@ -330,7 +343,7 @@ static jstate fixed(int arg)
         {
         if(!*FIXED)
             {
-            action = pop();
+            action = popj();
             }
         putLeafChar(next);
         return json;
@@ -338,7 +351,7 @@ static jstate fixed(int arg)
     return nojson;
     }
 
-static int sign;
+static int signj;
 static int Nexp;
 
 static void aftermath(int zeros)
@@ -367,8 +380,8 @@ static jstate exponentdigits(int arg)
         Nexp = 10*Nexp + arg - '0';
         return json;
         }
-    aftermath(sign*Nexp - decimals);
-    action = pop();
+    aftermath(signj*Nexp - decimals);
+    action = popj();
     return action(arg);
     }
 
@@ -377,7 +390,7 @@ static jstate exponent(int arg)
     if('0' <= arg && arg <= '9')
         {
         Nexp = 10*Nexp + arg - '0';
-        pop();
+        popj();
         action = push(exponentdigits);
         return json;
         }
@@ -389,9 +402,9 @@ static jstate plusOrMinusOrDigit(int arg)
     switch(arg)
         {
         case '-':
-            sign = -1;
+            signj = -1;
         case '+':
-            pop();
+            popj();
             action = push(exponent);
             return json;
         default:
@@ -405,8 +418,8 @@ static jstate decimal(int arg)
         {
         case 'e':
         case 'E':
-            pop();
-            sign = 1;
+            popj();
+            signj = 1;
             Nexp = 0;
             action = push(plusOrMinusOrDigit);
             return json;
@@ -425,7 +438,7 @@ static jstate decimal(int arg)
                 }
         }
     aftermath(-decimals);
-    action = pop();
+    action = popj();
     return action(arg);
     }
 
@@ -433,7 +446,7 @@ static jstate firstdecimal(int arg)
     {
     if('0' == arg)
         {
-        pop();
+        popj();
         decimals = 1;
         if(!leadingzeros)
             putLeafChar(arg);
@@ -442,7 +455,7 @@ static jstate firstdecimal(int arg)
         }
     else if('1' <= arg && arg <= '9')
         {
-        pop();
+        popj();
         decimals = 1;
         leadingzeros = FALSE;
         putLeafChar(arg);
@@ -458,15 +471,15 @@ static jstate dotOrE(int arg)
         {
         case 'e':
         case 'E':
-            pop();
-            sign = 1;
+            popj();
+            signj = 1;
             Nexp = 0;
             action = push(plusOrMinusOrDigit);
             return json;
         case '.': 
-            pop(); action = push(firstdecimal); return json;
+            popj(); action = push(firstdecimal); return json;
         default: 
-            action = pop(); aftermath(0); return action(arg);
+            action = popj(); aftermath(0); return action(arg);
         }
     }
 
@@ -487,7 +500,7 @@ static jstate firstdigit(int arg)
     switch(arg)
         {
         case '0': 
-            pop(); action = push(dotOrE); leadingzeros = TRUE;
+            popj(); action = push(dotOrE); leadingzeros = TRUE;
         case ' ':
         case '\t':
         case '\r':
@@ -498,7 +511,7 @@ static jstate firstdigit(int arg)
                 {
                 leadingzeros = FALSE;
                 putLeafChar(arg);
-                pop();
+                popj();
                 action = push(digitsOrDotOrE);
                 return json;
                 }
@@ -511,9 +524,9 @@ static jstate startNamestringOrCloseBrace(int arg)
     switch(arg)
         {
         case '"':
-            pop(); push(colon); action = push(name); return json;
+            popj(); push(colon); action = push(name); return json;
         case '}':
-            action = pop(); putLeafChar('0'); lastValue(); endObject(); return json;
+            action = popj(); putLeafChar('0'); lastValue(); endObject(); return json;
         case ' ':
         case '\t':
         case '\r':
@@ -529,19 +542,20 @@ static jstate value(int arg)
     switch(arg)
         {
         case '"':
-            pop(); action = push(string); startString(); return json;
+            popj(); action = push(string); startString(); return json;
         case '[':
-            pop(); action = push(valueOrCloseSquareBracket); startArray(); return json;
+            popj
+            (); action = push(valueOrCloseSquareBracket); startArray(); return json;
         case '{':
-            pop(); action = push(startNamestringOrCloseBrace); startObject(); firstValue(); return json;
+            popj(); action = push(startNamestringOrCloseBrace); startObject(); firstValue(); return json;
         case 't':
-            pop(); action = push(fixed); putLeafChar('t'); FIXED = "rue"; return json;
+            popj(); action = push(fixed); putLeafChar('t'); FIXED = "rue"; return json;
         case 'f': 
-            pop(); action = push(fixed); putLeafChar('f'); FIXED = "alse"; return json;
+            popj(); action = push(fixed); putLeafChar('f'); FIXED = "alse"; return json;
         case 'n':
-            pop(); action = push(fixed); putLeafChar('n'); FIXED = "ull"; return json;
+            popj(); action = push(fixed); putLeafChar('n'); FIXED = "ull"; return json;
         case '-':
-            pop(); action = push(firstdigit); putOperatorChar(arg); return json;
+            popj(); action = push(firstdigit); putOperatorChar(arg); return json;
         default:
             return firstdigit(arg);
         }
@@ -569,30 +583,36 @@ static int doit(char * arg)
     {
     stacksiz = 1;
     stack = (stateFncTp *)malloc(stacksiz * sizeof(stateFncTp));
-    *stack = 0;
-    stackpointer = stack + 0; 
+    if(stack)
+        {
+        int R;
+        *stack = 0;
+        stackpointer = stack + 0;
 
-    action = top;
-    for(;*arg && action;++arg)
-        {
-        if(action(*arg) == nojson)
-            return FALSE;
-        }
-    for(;*arg;++arg)
-        {
-        switch(*arg)
+        action = top;
+        for(; *arg && action; ++arg)
             {
-            case ' ':
-            case '\t':
-            case '\r':
-            case '\n':
-                break;
-            default:
+            if(action(*arg) == nojson)
                 return FALSE;
             }
+        for(; *arg; ++arg)
+            {
+            switch(*arg)
+                {
+                case ' ':
+                case '\t':
+                case '\r':
+                case '\n':
+                    break;
+                default:
+                    return FALSE;
+                }
+            }
+        R = stackpointer == stack;
+        free(stack);
+        return R;
         }
-    free(stack);
-    return stackpointer == stack;
+    return 0;
     }
 
 
@@ -636,9 +656,16 @@ int JSONtext(FILE * fpi,char * bron)
                     if(p >= alltext + incs * inc)
                         {
                         size_t dif = p - alltext; 
+                        char* newalltext;
                         ++incs;                            
-                        alltext = (char *)realloc(alltext,incs * inc);
-                        p = alltext + dif;
+                        newalltext = (char *)realloc(alltext,incs * inc);
+                        if(newalltext)
+                            {
+                            alltext = newalltext;
+                            p = alltext + dif;
+                            }
+                        else
+                            break; /* out of memory! */
                         }
                     }
                 *p = '\0';

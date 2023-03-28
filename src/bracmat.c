@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "9 March 2023"
-#define VERSION "6.13.0"
-#define BUILD "271"
+#define DATUM "28 March 2023"
+#define VERSION "6.14.0"
+#define BUILD "272"
 /*
 COMPILATION
 -----------
@@ -1631,8 +1631,8 @@ static psk global_anchor;
 typedef struct inputBuffer
     {
     unsigned char* buffer;
-    unsigned int cutoff : 1;    /* Set to true if very long string does not fit in buffer of size DEFAULT_INPUT_BUFFER_SIZE */
-    unsigned int mallocallocated : 1; /* True if allocated with malloc. Otherwise on stack (except EPOC). */
+    unsigned int cutoff : 8;    /* Set to true if very long string does not fit in buffer of size DEFAULT_INPUT_BUFFER_SIZE */
+    unsigned int mallocallocated : 8; /* True if allocated with malloc. Otherwise on stack (except EPOC). */
     } inputBuffer;
 
 static inputBuffer* InputArray;
@@ -1777,7 +1777,7 @@ static int Printf(const char* fmt, ...)
 #define Printf printf
 #endif
 
-static int errorprintf(const char* fmt, ...)
+int errorprintf(const char* fmt, ...)
     {
     char buffer[1000];
     int ret;
@@ -4006,7 +4006,8 @@ static int redirectError(char* name)
 
 static void politelyWriteError(psk Pnode)
     {
-    unsigned char name[256] = "";
+    unsigned char name[256];
+    *name = '\0';
 #if !_BRACMATEMBEDDED
 #if !defined NO_FOPEN
     if(errorFileName)
@@ -6695,7 +6696,7 @@ static int string_copy_insert(psk name, psk pnode, char* str, char* cutoff)
     return ret;
     }
 
-static int getCodePoint(const char** ps)
+int getCodePoint(const char** ps)
     {
     /*
     return values:

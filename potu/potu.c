@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "9 March 2023"
-#define VERSION "6.13.17"
-#define BUILD "274"
+#define DATUM "28 March 2023"
+#define VERSION "6.14.0"
+#define BUILD "275"
 /*
 COMPILATION
 -----------
@@ -135,6 +135,7 @@ TODO list:
 #include "hashtypes.h"
 #include "unicaseconv.h"
 #include "matchstate.h"
+#include "charput.h"
 
 #if defined SINGLEOBJECT
 #define UNICASECONV_H
@@ -148,6 +149,8 @@ TODO list:
 #define BUILTINMETHOD_H
 #define QUOTE_H
 #define RESULT_H
+#define CHARPUT_H
+#define ENCODING_H
 #define JSON_H
 #define XML_H
 #define WRITEERR_H
@@ -155,7 +158,6 @@ TODO list:
 #define WIPECOPY_H
 #define RATIONAL_H
 #define REAL_H
-#define ENCODING_H
 #define EQUAL_H
 #define OBJECT_H
 #define NODEUTIL_H
@@ -188,6 +190,8 @@ TODO list:
 #include "builtinmethod.c"
 #include "quote.c"
 #include "result.c"
+#include "charput.c"
+#include "encoding.c"
 #include "json.c"
 #include "xml.c"
 #include "writeerr.c"
@@ -197,7 +201,6 @@ TODO list:
 #ifdef REAL_COMP
 #include "real.c"
 #endif
-#include "encoding.c"
 #include "equal.c"
 #include "object.c"
 #include "nodeutil.c"
@@ -229,6 +232,7 @@ TODO list:
 #include "builtinmethod.h"
 #include "quote.h"
 #include "result.h"
+#include "charput.h"
 #include "json.h"
 #include "xml.h"
 #include "writeerr.h"

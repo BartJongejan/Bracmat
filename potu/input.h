@@ -19,6 +19,10 @@ psk build_up(psk Pnode, ...);
 void writeError(psk Pnode);
 int redirectError(char* name);
 */
-void stringEval(const char *s, const char ** out, int * err);
+/*
+void putOperatorChar(int c);
+void putLeafChar(int c);
+*/
+void stringEval(const char* s, const char** out, int* err);
 
 #endif

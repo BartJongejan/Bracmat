@@ -22,6 +22,10 @@ Convert JSONL file to Bracmat file.
 */
 
 #include "json.h"
+#include "encoding.h"
+#include "input.h"
+#include "filewrite.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -38,10 +42,6 @@ Convert JSONL file to Bracmat file.
 
 #define TRUE 1
 #define FALSE 0
-
-extern void putOperatorChar(int c);
-extern void putLeafChar(int c);
-extern unsigned char * putCodePoint(unsigned LONG val, unsigned char * s);
 
 typedef enum {nojson,json} jstate;
 
@@ -119,10 +119,22 @@ static stateFncTp push(stateFncTp arg)
     ++stackpointer;
     if(stackpointer == stack + stacksiz)
         {
+        stateFncTp* newstack;
         unsigned int newsiz = (2 * stacksiz + 1);
-        stack = (stateFncTp *)realloc(stack,newsiz * sizeof(stateFncTp));
-        stackpointer = stack + stacksiz; 
-        stacksiz = newsiz;
+        newstack = (stateFncTp *)realloc(stack,newsiz * sizeof(stateFncTp));
+        if(newstack)
+            {
+            stack = newstack;
+            stackpointer = stack + stacksiz;
+            stacksiz = newsiz;
+            }
+        else
+            {
+            errorprintf(
+                "memory full (requested block of %d bytes could not be allocated)",
+                newsiz * sizeof(stateFncTp));
+            exit(1);
+            }
         }
     return *stackpointer=(arg);
     }
@@ -571,30 +583,36 @@ static int doit(char * arg)
     {
     stacksiz = 1;
     stack = (stateFncTp *)malloc(stacksiz * sizeof(stateFncTp));
-    *stack = 0;
-    stackpointer = stack + 0; 
+    if(stack)
+        {
+        int R;
+        *stack = 0;
+        stackpointer = stack + 0;
 
-    action = top;
-    for(;*arg && action;++arg)
-        {
-        if(action(*arg) == nojson)
-            return FALSE;
-        }
-    for(;*arg;++arg)
-        {
-        switch(*arg)
+        action = top;
+        for(; *arg && action; ++arg)
             {
-            case ' ':
-            case '\t':
-            case '\r':
-            case '\n':
-                break;
-            default:
+            if(action(*arg) == nojson)
                 return FALSE;
             }
+        for(; *arg; ++arg)
+            {
+            switch(*arg)
+                {
+                case ' ':
+                case '\t':
+                case '\r':
+                case '\n':
+                    break;
+                default:
+                    return FALSE;
+                }
+            }
+        R = stackpointer == stack;
+        free(stack);
+        return R;
         }
-    free(stack);
-    return stackpointer == stack;
+    return 0;
     }
 
 
@@ -638,9 +656,16 @@ int JSONtext(FILE * fpi,char * bron)
                     if(p >= alltext + incs * inc)
                         {
                         size_t dif = p - alltext; 
+                        char* newalltext;
                         ++incs;                            
-                        alltext = (char *)realloc(alltext,incs * inc);
-                        p = alltext + dif;
+                        newalltext = (char *)realloc(alltext,incs * inc);
+                        if(newalltext)
+                            {
+                            alltext = newalltext;
+                            p = alltext + dif;
+                            }
+                        else
+                            break; /* out of memory! */
                         }
                     }
                 *p = '\0';
