@@ -231,20 +231,21 @@ Bracmat is a good choice for tasks that require dynamic programming.
      
       OpenVMS makefile.
 
-* web
+* WebAssembly
 
    All that is needed to create a version of Bracmat that runs in a browser.  
 
     * bracmatJS.html
     
-      Bracmat compiled to Javascript using emscripten, embedded in a single
-      HTML-page. Nice for toy scripts, slow.
+      Bracmat compiled to WebAssembly and Javascript using emscripten, embedded
+      in a single HTML-page. Nice for toy scripts, slow.
       
       
     * editbracmatjs.bra
     
       A Bracmat script that edits the output of the emscripten C-to-Javascript
-      compiler and creates a HTML page containing Javascript embodying Bracmat.
+      compiler and creates a HTML page that also contains a large amount of
+      WebAssembly and a sliver of Javascript. The result is bracmatJS.html.
       
     * emscriptenHowToHTML.sh
     
