@@ -2436,12 +2436,17 @@ static int Put(const unsigned char * c)
         unsigned char tmp[8];
         if(assumeUTF8)
             {
-            const char* d = (const char *)c;
-            int R = getCodePoint(&d);
-            if(R >= 0)
-                return rawput(*c);
+            if(*c & 0x40) /* first byte of multibyte char */
+                {
+                const char* d = (const char*)c;
+                int R = getCodePoint(&d); /* look ahead. Is it UTF-8 encoded ? */
+                if(R >= 0)
+                    return rawput(*c);
+                else
+                    assumeUTF8 = FALSE;
+                }
             else
-                assumeUTF8 = FALSE;
+                return rawput(*c); /* second or later byte of multubute char */
             }
         if(putCodePoint(*c, tmp))
             return nrawput(tmp);
