@@ -2443,7 +2443,7 @@ static int Put(const unsigned char * c)
                 int R = getCodePoint(&d); /* look ahead. Is it UTF-8 encoded ? */
                 if(R >= 0)
                     {
-                    safebytes = (d - c) - 1;
+                    safebytes = (d - (const char*)c) - 1;
                     return rawput(*c);
                     }
                 else
