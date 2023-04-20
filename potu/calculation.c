@@ -428,15 +428,20 @@ static int setFloat(double* destination, psk args)
 
 static int fsetArgs(stackvalue *sp,int arity,forthMemory *thatmem)
     {
-    forthvariable* varp = thatmem->var;
+    /*forthvariable* varp = thatmem->var;
     for(; --arity >= 0;)
         {
-        static char name[24];/*Enough for 64 bit number in decimal.*/
+        static char name[24];
         double* val;
         sprintf(name, "v%d", arity);
         val = &(getVariablePointer(varp, name)->val.floating);
         if(val)
             *val = (sp--)->val.floating;
+        }
+        */
+    for(forthvariable* varp = thatmem->var; --arity >= 0 && varp;varp = varp->next)
+        {
+        varp->val.floating = (sp--)->val.floating;
         }
     }
 

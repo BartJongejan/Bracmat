@@ -6,7 +6,7 @@ have some points move under influence of gravity}
 X=
   ( do
   =   
-    .   3:?planets
+    .   4:?planets
       & 3:?dimensions
       & 6000:?iterations
       & 300:?g
@@ -18,7 +18,7 @@ X=
             & tbl$(T,$dimpla*$iterations)
             & $iterations:?n
             & !v1:?V
-            & (add=!v0+!v1)
+            & (add=2*!v0+!v1)
             & add$(5,6):?eleven
             &   whl
               ' ( !n:>0
@@ -106,10 +106,23 @@ X=
       & new$(calculation,!code):?calc
       & (~|(calc..print)$)
       & (     (calc..calculate)
-            $ (   ((0,100,0),(0,-100,0),1,0,0)
-                , ((2,0,0),(-2,0,0),-10/21,0,0)
-                , (0,0,0)
-                , (0,0,0)
+            $ (   ( (0,100,0)
+                  , (0,-100,0)
+                  , (0,10,30)
+                  , 1
+                  , 0
+                  , 0
+                  )
+                , ( (2,0,0)
+                  , (-2,0,0)
+                  , (0,1,0)
+                  , -10/21
+                  , 0
+                  , 0
+                  )
+                , (0,0,0,0)
+                , (0,0,0,0)
+                , 0
                 , 0
                 , 0
                 , 0
