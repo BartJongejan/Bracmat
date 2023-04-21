@@ -14,8 +14,14 @@ X=
       & 1/11:?U
       & !dimensions*!planets:?dimpla
       &     
-          ' ( tbl$(Diff,$dimensions)
-            & tbl$(T,$dimpla*$iterations)
+          ' ( tbl$(Diff,$dimensions,1)
+            &   tbl
+              $ ( T
+                , $iterations
+                , $planets
+                , $dimensions
+                , 3
+                )
             & $iterations:?n
             & !v1:?V
             & (add=2*!v0+!v1)
@@ -31,9 +37,7 @@ X=
                     &   whl
                       ' ( !d:>0
                         & -1+!d:?d
-                        &   2*$dimpla+$dimensions*!p+!d
-                          : ?Ia
-                        & 0:?(ind$(a0,!Ia))
+                        & 0:?(ind$(a0,2,!p,!d))
                         )
                     )
                 & $planets:?p
@@ -50,13 +54,10 @@ X=
                             &   whl
                               ' ( !d:>0
                                 & -1+!d:?d
-                                & $dimensions*!p+!d:?i
-                                & $dimensions*!q+!d:?j
-                                &     !(ind$(a0,!i))
-                                    + -1*!(ind$(a0,!j))
+                                &     !(ind$(a0,0,!p,!d))
+                                    + -1*!(ind$(a0,0,!q,!d))
                                   : ?(ind$(Diff,!d))
                                 & !Diff^2+!dist2:?dist2
-                                & $dimpla*!n+!i:?k
                                 )
                             & ( !dist2:0
                               |   !dist2^-3/2:?tsid3
@@ -64,15 +65,11 @@ X=
                                 &   whl
                                   ' ( !d:>0
                                     & -1+!d:?d
-                                    &   $dimensions*!p+!d
-                                      : ?Ip
-                                    & $dimpla+!Ip:?Iv
-                                    & $dimpla+!Iv:?Ia
                                     &     -1
                                         * $g
                                         * !(ind$(Diff,!d))
                                         * !tsid3
-                                      : ?(ind$(a0,!Ia))
+                                      : ?(ind$(a0,2,!p,!d))
                                     )
                               )
                           | 
@@ -87,16 +84,12 @@ X=
                     &   whl
                       ' ( !d:>0
                         & -1+!d:?d
-                        & $dimensions*!p+!d:?Ip
-                        & $dimpla+!Ip:?Iv
-                        & $dimpla+!Iv:?Ia
-                        &     $M*!(ind$(a0,!Ia))
-                            + !(ind$(a0,!Iv))
+                        &     $M*!(ind$(a0,2,!p,!d))
+                            + !(ind$(a0,1,!p,!d))
                           : ?a0
-                        &   $U*!a0+!(ind$(a0,!Ip))
+                        &   $U*!a0+!(ind$(a0,0,!p,!d))
                           : ?a0
-                        &   !a0
-                          : ?(ind$(T,$dimpla*!n+!Ip))
+                        & !a0:?(ind$(T,!n,!p,!d))
                         )
                     )
                 )
@@ -104,28 +97,27 @@ X=
             )
         : ?code
       & new$(calculation,!code):?calc
-      & (~|(calc..print)$)
+      & (|(calc..print)$)
       & (     (calc..calculate)
-            $ (   ( (0,100,0)
-                  , (0,-100,0)
-                  , (0,10,30)
-                  , 1
-                  , 0
-                  , 0
-                  )
-                , ( (2,0,0)
-                  , (-2,0,0)
-                  , (0,1,0)
-                  , -10/21
-                  , 0
-                  , 0
-                  )
-                , (0,0,0,0)
-                , (0,0,0,0)
-                , 0
-                , 0
-                , 0
-                , 0
+            $ (   
+                ,   ( 
+                    ,   (,0 100 0)
+                        (,0 -100 0)
+                        (,0 10 30)
+                        (,1 0 0)
+                    )
+                    ( 
+                    ,   (,2 0 0)
+                        (,-2 0 0)
+                        (,0 1 0)
+                        (,-10/21 0 0)
+                    )
+                    ( 
+                    ,   (,0 0 0)
+                        (,0 0 0)
+                        (,0 0 0)
+                        (,0 0 0)
+                    )
               . 123
               )
           & out$executed

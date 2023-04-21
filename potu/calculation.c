@@ -14,6 +14,7 @@
 
 
 #define CFUNCS 0
+#define CFUNC 0
 
 /*
 (     new$(calculation,(=sin$!a0)):?calc
@@ -85,10 +86,10 @@ typedef enum
     , QInd /* ?(ind$(<array name>,<index>)) */
     , EInd /* !(ind$(<array name>,<index>)) */
     , NoOp
-    /*
+#if CFUNCS
     , Cfunction1
     , Cfunction2
-    */
+#endif
     } actionType;
 
 static char* ActionAsWord[] =
@@ -139,18 +140,20 @@ static char* ActionAsWord[] =
     , "Pow                        "
     , "tbl                        "
     , "ind                        "
-    , "Qind                        "
-    , "Eind                        "
+    , "Qind                       "
+    , "Eind                       "
     , "NoOp                       "
-    /*
-    , Cfunction1
-    , Cfunction2
-    */
+#if CFUNCS
+    , "Cfunction1                 "
+    , "Cfunction2                 "
+#endif
     };
 
 struct forthMemory;
 
+#if CFUNC
 typedef void (*funct)(struct forthMemory* This);
+#endif
 #if CFUNCS
 typedef double (*Cfunct1)(double x);
 typedef double (*Cfunct2)(double x, double y);
@@ -169,6 +172,8 @@ typedef struct fortharray
     struct fortharray* next;
     size_t size;
     size_t index;
+    size_t rank;
+    size_t* range;
     } fortharray;
 
 typedef union stackvalue
@@ -207,7 +212,10 @@ typedef struct forthword
     unsigned int offset : 24; /* Interpreted as arity if action is Afunction */
     union
         {
-        /*funct funcp;*/ fortharray* arrp; forthvalue* valp; forthvalue val; dumbl logic; struct forthMemory* that;
+#if CFUNC
+        funct funcp;
+#endif
+        fortharray* arrp; forthvalue* valp; forthvalue val; dumbl logic; struct forthMemory* that;
 #if CFUNCS
         Cfunct1 Cfunc1p; Cfunct2 Cfunc2p;
 #endif        
@@ -226,11 +234,13 @@ typedef struct forthMemory
     stackvalue stack[64];
     } forthMemory;
 
+#if CFUNC
 typedef struct Cpair
     {
     char* name;
     funct Cfun;
     }Cpair;
+#endif
 
 typedef struct Epair
     {
@@ -330,6 +340,8 @@ static fortharray* getOrCreateArrayPointer(fortharray** arrp, char* name, size_t
         curarrp = *arrp;
         curarrp->name = bmalloc(__LINE__, strlen(name) + 1);
         strcpy(curarrp->name, name);
+        curarrp->rank = 1;
+        curarrp->range = 0;
         curarrp->pval = 0;
         }
     else if(curarrp->pval != 0)
@@ -376,6 +388,8 @@ static fortharray* getOrCreateArrayPointerButNoArray(fortharray** arrp, char* na
         (*arrp)->pval = 0;
         (*arrp)->size = 0;
         (*arrp)->index = 0;
+        (*arrp)->rank = 0;
+        (*arrp)->range = 0;
         curarrp = *arrp;
         }
     if(!*arrp)
@@ -426,60 +440,182 @@ static int setFloat(double* destination, psk args)
     return 1;
     }
 
-static int fsetArgs(stackvalue *sp,int arity,forthMemory *thatmem)
+static void fsetArgs(stackvalue* sp, int arity, forthMemory* thatmem)
     {
-    /*forthvariable* varp = thatmem->var;
-    for(; --arity >= 0;)
-        {
-        static char name[24];
-        double* val;
-        sprintf(name, "v%d", arity);
-        val = &(getVariablePointer(varp, name)->val.floating);
-        if(val)
-            *val = (sp--)->val.floating;
-        }
-        */
-    for(forthvariable* varp = thatmem->var; --arity >= 0 && varp;varp = varp->next)
+    for(forthvariable* varp = thatmem->var; --arity >= 0 && varp; varp = varp->next)
         {
         varp->val.floating = (sp--)->val.floating;
         }
     }
 
+static int arrlen(psk commaNode)
+    {
+    assert(Op(commaNode) == COMMA);
+    int length = 1;
+    for(psk el = commaNode->RIGHT; is_op(el) && Op(el) == WHITE; el = el->RIGHT)
+        ++length;
+    return length;
+    }
+
+static size_t find_rank(psk Node)
+    {
+    assert(Op(Node) == COMMA);
+    size_t subrank;
+    size_t
+        msubrank = 0;
+    psk el;
+    for(el = Node->RIGHT; is_op(el) && Op(el) == WHITE; el = el->RIGHT)
+        if(is_op(el->LEFT) && Op(el->LEFT) == COMMA)
+            {
+            subrank = find_rank(el->LEFT);
+            if(subrank > msubrank)
+                msubrank = subrank;
+            }
+    if(is_op(el) && Op(el) == COMMA)
+        {
+        subrank = find_rank(el);
+        if(subrank > msubrank)
+            msubrank = subrank;
+        }
+    return 1 + msubrank;
+    }
+
+static void set_range(size_t* range, psk Node)
+    {
+    assert(Op(Node) == COMMA);
+    size_t lrange = 1;
+    psk el;
+    for(el = Node->RIGHT; is_op(el) && Op(el) == WHITE; el = el->RIGHT)
+        {
+        ++lrange;
+        if(is_op(el->LEFT) && Op(el->LEFT) == COMMA)
+            {
+            set_range(range - 1, el->LEFT);
+            }
+        }
+    if(is_op(el) && Op(el) == COMMA)
+        {
+        set_range(range - 1, el);
+        }
+    if(lrange > *range)
+        {
+        printf("%p lrange %d\n", range,lrange);
+        *range = lrange;
+        }
+    }
+
+static void set_vals(forthvalue* pval, int rank, size_t* range, psk Node)
+    {
+    assert(Op(Node) == COMMA);
+    psk el;
+    size_t stride = 1;
+    size_t N;
+    size_t index;
+
+    for(int k = 1; k < rank; ++k)
+        stride *= range[k];
+    N = stride * range[0];
+    for(index = 0, el = Node->RIGHT; index < N && is_op(el) && Op(el) == WHITE; index += stride, el = el->RIGHT)
+        {
+        if(is_op(el->LEFT) && Op(el->LEFT) == COMMA)
+            {
+            set_vals(pval + index, rank - 1, range + 1, el->LEFT);
+            }
+        else
+            {
+            for(size_t t = 0; t < stride; ++t)
+                setFloat(&(pval[index + t].floating), el->LEFT);
+            }
+        }
+    if(is_op(el) && Op(el) == COMMA)
+        {
+        set_vals(pval + index, rank - 1, range + 1, el);
+        }
+    else
+        {
+        for(size_t t = 0; t < stride; ++t)
+            setFloat(&(pval[index + t].floating), el);
+        }
+    }
 
 static int setArgs(forthvariable* varp, fortharray** arrp, psk args, int nr)
     {
     if(is_op(args))
         {
-        if(is_op(args->LEFT))
-            {
-            size_t size = 1;
-            psk x = args->LEFT;
+        assert(Op(args) == DOT || Op(args) == COMMA || Op(args) == WHITE);
+        if(Op(args) == COMMA && !is_op(args->LEFT) && args->LEFT->u.sobj == '\0')
+            { /* args is an array */
+            /* find rank and ranges */
+            size_t rank = find_rank(args);
+            size_t* range = (size_t*)bmalloc(__LINE__, rank * sizeof(size_t));
+            memset(range, 0, rank * sizeof(size_t));
+            set_range(range+rank-1, args);
+            size_t totsize = 1;
+            for(int k = 0; k < rank; ++k)
+                {
+                totsize *= range[k];
+                }
             static char name[24];/*Enough for 64 bit number in decimal.*/
-            fortharray* a;
-            size_t index;
-            while(1)
-                {
-                ++size;
-                x = x->RIGHT;
-                if(!is_op(x))
-                    break;
-                }
             sprintf(name, "a%d", nr);
-            a = getOrCreateArrayPointer(arrp, name, size);
-
-            for(index = 0, x = args->LEFT; index < size && is_op(x); ++index, x = x->RIGHT)
+            fortharray* a = getOrCreateArrayPointer(arrp, name, totsize);
+            a->range = range;
+            a->rank = rank;
+            set_vals(a->pval, rank, range, args);
+            for(int h = 0; h < a->size; ++h)
                 {
-                setFloat(&(a->pval[index].floating), x->LEFT);
+                if((h % 3) == 0)
+                    printf("\n");
+                if((h % 12) == 0)
+                    printf("\n");
+                printf("%f ", a->pval[h].floating);
                 }
-            setFloat(&(a->pval[index].floating), x);
-            return setArgs(varp, arrp, args->RIGHT, 1 + nr);
+            printf("\n");
+            for(int l = 0; l < a->rank; ++l)
+                {
+                printf("%d ", (int)a->range[l]);
+                }
+            printf("\n");
+            printf("rank %d size %d\n", (int)a->rank,(int)a->size);
+            return 1 + nr;
             }
         else
-            {
-            nr = setArgs(varp, arrp, args->LEFT, nr);
-            if(nr > 0)
-                return setArgs(varp, arrp, args->RIGHT, nr);
-            }
+            if(is_op(args->LEFT))
+                {
+                if(Op(args->LEFT) == COMMA)
+                    {
+                    return setArgs(varp, arrp, args->LEFT, nr);
+                    }
+                else
+                    {
+                    size_t size = 1;
+                    psk x = args->LEFT;
+                    static char name[24];/*Enough for 64 bit number in decimal.*/
+                    fortharray* a;
+                    size_t index;
+                    while(1)
+                        {
+                        ++size;
+                        x = x->RIGHT;
+                        if(!is_op(x))
+                            break;
+                        }
+                    sprintf(name, "a%d", nr);
+                    a = getOrCreateArrayPointer(arrp, name, size);
+
+                    for(index = 0, x = args->LEFT; index < size && is_op(x); ++index, x = x->RIGHT)
+                        {
+                        setFloat(&(a->pval[index].floating), x->LEFT);
+                        }
+                    setFloat(&(a->pval[index].floating), x);
+                    return setArgs(varp, arrp, args->RIGHT, 1 + nr);
+                    }
+                }
+            else
+                {
+                nr = setArgs(varp, arrp, args->LEFT, nr);
+                if(nr > 0)
+                    return setArgs(varp, arrp, args->RIGHT, nr);
+                }
         }
     else if(args->u.sobj != '\0')
         {
@@ -517,11 +653,12 @@ static actionType negated(actionType fun)
     }
 
 
-
+#if CFUNC
 static Cpair pairs[] =
     {
         {0,0}
     };
+#endif
 
 static Epair epairs[] =
     {
@@ -593,6 +730,7 @@ static char* getLogiName(dumbl logi)
     return logics[logi];
     }
 
+#if CFUNC
 static char* getFuncName(funct funcp)
     {
     Cpair* cpair;
@@ -609,6 +747,7 @@ static char* getFuncName(funct funcp)
     sprintf(buffer, "UNKNOWN");
     return buffer;
     }
+#endif
 
 #if CFUNCS
 static char* getCFunc1Name(Cfunct1 funcp)
@@ -646,6 +785,42 @@ static char* getCFunc2Name(Cfunct2 funcp)
     }
 #endif
 
+static stackvalue* getArrayIndex(stackvalue* sp, forthword* wordp)
+    {
+    /*size_t rank = (size_t)((sp--)->val).floating;*/
+    size_t rank = wordp->offset - 1;
+    fortharray* arrp = (sp - rank)->arrp;
+    int i;
+    if(arrp->range == 0) /* linear array passed as argument to calculation, a0, a1, ... */
+        {
+        i = (int)((sp--)->val).floating;
+        /*
+            */
+        }
+    else
+        {
+        i = (int)((sp--)->val).floating;
+        size_t arank = arrp->rank;
+        int stride = arrp->range[0];
+        int range_index = 1;
+        for(; arank > rank; --arank)
+            {
+            stride *= arrp->range[range_index++];
+            }
+
+        for(; range_index < rank;)
+            {
+            int k = (int)((sp--)->val).floating;
+            i += k * stride;
+            stride *= arrp->range[range_index++];
+            }
+        }
+    sp->arrp->index = i;
+    return sp;
+    }
+
+static Boolean fcalculate(stackvalue* sp, forthword* wordp, double* ret);
+
 static stackvalue* calculateBody(forthMemory* mem)
     {
     forthword* word = mem->word;
@@ -679,14 +854,10 @@ static stackvalue* calculateBody(forthMemory* mem)
                 break;
             case Afunction:
                 {
-                double ret;
-                mem->wordp = wordp;
-                mem->sp = sp;
-                fcalculate(sp, wordp, &ret);
-                printf("\nret %f\n", ret);
+                double ret = 0;
+                fcalculate(sp, wordp, &ret); // May fail!
                 (++sp)->val.floating = ret;
-                wordp = mem->wordp + 1;
-//                sp = mem->sp;
+                ++wordp;
                 break;
                 }
 #if CFUNCS
@@ -752,10 +923,19 @@ static stackvalue* calculateBody(forthMemory* mem)
             case Pow:  a = ((sp--)->val).floating; sp->val.floating = pow(a, (sp->val).floating); ++wordp; break;
             case Tbl:
                 {
-                size_t size = (size_t)((sp--)->val).floating;
+                size_t rank = (size_t)((sp--)->val).floating;
+                size_t size = 1;
+                size_t* range = (size_t*)bmalloc(__LINE__, rank * sizeof(size_t));
+                for(int j = 0; j < rank; ++j)
+                    {
+                    range[j] = (size_t)((sp--)->val).floating; /* range[0] = range of last index*/
+                    size *= range[j];
+                    }
                 sp->arrp->size = size;
                 sp->arrp->index = 0;
                 sp->arrp->pval = (forthvalue*)bmalloc(__LINE__, size * sizeof(forthvalue));
+                sp->arrp->rank = rank;
+                sp->arrp->range = range;
                 memset(sp->arrp->pval, 0, size * sizeof(forthvalue));
                 ++wordp;
                 break;
@@ -765,7 +945,8 @@ static stackvalue* calculateBody(forthMemory* mem)
                 break;
             case Ind:
                 {
-                i = (int)((sp--)->val).floating;
+                sp = getArrayIndex(sp, wordp);
+                i = sp->arrp->index;
                 if(i < 0 || i >= sp->arrp->size)
                     {
                     return FALSE;
@@ -776,12 +957,13 @@ static stackvalue* calculateBody(forthMemory* mem)
                 }
             case QInd:
                 {
-                i = (int)((sp--)->val).floating;
+                sp = getArrayIndex(sp, wordp);
+                i = sp->arrp->index;
                 if(i < 0 || i >= sp->arrp->size)
                     {
-                    return FALSE;
+                    return 0;
                     }
-                sp->arrp->index = i;
+
                 forthvalue* val = sp->arrp->pval + i;
                 *val = (--sp)->val;
                 ++wordp;
@@ -789,7 +971,8 @@ static stackvalue* calculateBody(forthMemory* mem)
                 }
             case EInd:
                 {
-                i = (int)((sp--)->val).floating;
+                sp = getArrayIndex(sp, wordp);
+                i = sp->arrp->index;
                 if(i < 0 || i >= sp->arrp->size)
                     {
                     return FALSE;
@@ -863,14 +1046,15 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
     return FALSE;
     }
 
-static Boolean fcalculate(stackvalue * sp, forthword* wordp, double* ret)
+static Boolean fcalculate(stackvalue* sp, forthword* wordp, double* ret)
     {
     forthMemory* thatmem = wordp->u.that;
     if(sp && thatmem)
         {
+        stackvalue* sp2;
         fsetArgs(sp, wordp->offset, thatmem);
-        stackvalue* sp = calculateBody(thatmem);
-        if(sp && sp >= thatmem->stack)
+        sp2 = calculateBody(thatmem);
+        if(sp2 && sp2 >= thatmem->stack)
             {
             *ret = thatmem->stack->val.floating;
             return TRUE;
@@ -953,16 +1137,27 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     break;
                     }
                 case Afunction:
-                    {/*
+                    {
+                    double ret = 0;
+                    naam = wordp->u.that->name;
+                    printf(" %s", naam);
+                    fcalculate(sp, wordp, &ret); // May fail!
+                    (++sp)->val.floating = ret;
+                    ++wordp;
+                    break;
+                    }
+#if CFUNC
+                    {
                     naam = getFuncName(wordp->u.funcp);
                     printf(" %s", naam);
                     mem->wordp = wordp;
                     mem->sp = sp;
                     wordp->u.funcp(mem);
                     wordp = mem->wordp + 1;
-                    sp = mem->sp;*/
+                    sp = mem->sp;
                     break;
                     }
+#endif
 #if CFUNCS
                 case Cfunction1:
                     {
@@ -1051,11 +1246,20 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                 case Pow:  printf("Pop pow   "); a = ((sp--)->val).floating; sp->val.floating = pow(a, (sp->val).floating); ++wordp; break;
                 case Tbl:
                     {
-                    size_t size = (size_t)((sp--)->val).floating;
+                    size_t rank = (size_t)((sp--)->val).floating;
+                    size_t size = 1;
+                    size_t* range = (size_t*)bmalloc(__LINE__, rank * sizeof(size_t));
                     printf("Pop tbl   ");
+                    for(int j = 0; j < rank; ++j)
+                        {
+                        range[j] = (size_t)((sp--)->val).floating; /* range[0] = range of last index*/
+                        size *= range[j];
+                        }
                     sp->arrp->size = size;
                     sp->arrp->index = 0;
                     sp->arrp->pval = (forthvalue*)bmalloc(__LINE__, size * sizeof(forthvalue));
+                    sp->arrp->rank = rank;
+                    sp->arrp->range = range;
                     memset(sp->arrp->pval, 0, size * sizeof(forthvalue));
                     printf("%p size %zu index %zu", (void*)sp->arrp, sp->arrp->size, sp->arrp->index);
                     ++wordp;
@@ -1066,6 +1270,7 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     break;
                 case Ind:
                     {
+                    size_t rank = (size_t)((sp--)->val).floating;
                     int i = (int)((sp--)->val).floating;
                     assert(sp + 1 >= mem->stack);
                     printf("Pop index   ");
@@ -1075,6 +1280,7 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     }
                 case QInd:
                     {
+                    size_t rank = (size_t)((sp--)->val).floating;
                     int i = (int)(sp->val).floating;
                     forthvalue* val;
                     printf("PopPop ?index  ");
@@ -1089,6 +1295,7 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     }
                 case EInd:
                     {
+                    size_t rank = (size_t)((sp--)->val).floating;
                     int i = (int)((sp--)->val).floating;
                     printf("Pop !index  ");
                     assert(sp >= mem->stack);
@@ -1296,8 +1503,10 @@ static Boolean printmem(forthMemory* mem)
                 break;
                 }
             case Afunction:
-                //naam = getFuncName(wordp->u.funcp);
-                //printf(INDNT); printf(LONGD " Afunction       %u %s\n", wordp - mem->word, wordp->offset, naam);
+#if CFUNC
+                naam = getFuncName(wordp->u.funcp);
+                printf(INDNT); printf(LONGD " Afunction       %u %s\n", wordp - mem->word, wordp->offset, naam);
+#endif
                 break;
             case Pop:
                 naam = getLogiName(wordp->u.logic);
@@ -1356,8 +1565,10 @@ static Boolean printmem(forthMemory* mem)
             case QInd:  printf(INDNT); printf(LONGD " PopPop Qind    \n", wordp - mem->word); --In; --In; break;
             case EInd:  printf(INDNT); printf(LONGD " Pop Eind    \n", wordp - mem->word); --In; break;
             case NoOp:
-                /*                naam = getFuncName(wordp->u.funcp);
-                                printf(INDNT); printf(LONGD " NoOp       %s\n", wordp - mem->word, naam);*/
+#if CFUNC
+                naam = getFuncName(wordp->u.funcp);
+                printf(INDNT); printf(LONGD " NoOp       %s\n", wordp - mem->word, naam);
+#endif
                 break;
             case TheEnd:
             default:
@@ -1410,7 +1621,7 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                     char* buffer;
                     int totalbytes = 0;
                     size_t len;
-                    psk res;
+                    psk res = 0;
                     switch(format)
                         {
                         case floating:
@@ -1823,6 +2034,19 @@ static void compaction(forthMemory* mem)
 
 static forthMemory* calcnew(psk arg);
 
+static void setArity(forthword* wordp, psk code)
+    {
+    int arity = 1;
+    psk tmp = code->RIGHT;
+    for(; is_op(tmp) && Op(tmp) == COMMA; tmp = tmp->RIGHT)
+        ++arity;
+    if(arity == 1)
+        {
+        /*TODO: check whether function does not take a single argument!*/
+        }
+    wordp->offset = arity;
+    }
+
 static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
     {
     forthvariable** varp = &(mem->var);
@@ -2081,7 +2305,9 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
         case FUN:
             {
             Epair* ep = epairs;
+#if CFUNC
             Cpair* p = pairs;
+#endif
             char* name = &code->LEFT->u.sobj;
             wordp = polish2(mem, code->RIGHT, wordp);
             wordp->offset = 0;
@@ -2092,6 +2318,8 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                     if(!strcmp(ep->name + 1, name) && ep->name[0] == 'E') /* ! -> E(xclamation) */
                         {
                         wordp->action = ep->action;
+                        if(wordp->action == EInd)
+                            setArity(wordp, code);
                         return ++wordp;
                         }
                     }
@@ -2103,6 +2331,8 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                     if(!strcmp(ep->name + 1, name) && ep->name[0] == 'Q') /* ? -> Q(uestion)*/
                         {
                         wordp->action = ep->action;
+                        if(wordp->action == QInd)
+                            setArity(wordp, code);
                         return ++wordp;
                         }
                     }
@@ -2114,13 +2344,15 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                     if(!strcmp(ep->name, name))
                         {
                         wordp->action = ep->action;
+                        if(wordp->action == Ind)
+                            setArity(wordp, code);
                         return ++wordp;
                         }
                     }
                 }
 
             wordp->action = Afunction;
-            /*
+#if CFUNC
             for(; p->name != 0; ++p)
                 {
                 if(!strcmp(p->name, name))
@@ -2129,24 +2361,13 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                     return ++wordp;
                     }
                 }
-                */
+#endif
             for(forthMemory* fm = mem->nextFnc; fm; fm = fm->nextFnc)
                 {
                 if(!strcmp(fm->name, name))
                     {
-                    int arity = 1;
+                    setArity(wordp, code);
                     wordp->action = Afunction;
-                    psk tmp = code->RIGHT;
-                    printf("tmp[");
-                    result(tmp);
-                    printf("]\n");
-                    for(;is_op(tmp) && Op(tmp) == COMMA; tmp = tmp->RIGHT)
-                        ++arity;
-                    if(arity == 1)
-                        {
-                        /*TODO: check whether function does not take a single argument!*/
-                        }
-                    wordp->offset = arity;
                     wordp->u.that = fm;
                     return ++wordp;
                     }
@@ -2353,6 +2574,8 @@ static Boolean calcdie(forthMemory* mem)
         {
         fortharray* nextarrp = curarr->next;
         bfree(curarr->name);
+        if(curarr->range)
+            bfree(curarr->range);
         if(curarr->pval)
             bfree(curarr->pval);
         bfree(curarr);
