@@ -37,7 +37,7 @@ X=
                     &   whl
                       ' ( !d:>0
                         & -1+!d:?d
-                        & 0:?(ind$(a0,2,!p,!d))
+                        & 0:?(ind$(a2,!p,!d))
                         )
                     )
                 & $planets:?p
@@ -54,8 +54,8 @@ X=
                             &   whl
                               ' ( !d:>0
                                 & -1+!d:?d
-                                &     !(ind$(a0,0,!p,!d))
-                                    + -1*!(ind$(a0,0,!q,!d))
+                                &     !(ind$(a0,!p,!d))
+                                    + -1*!(ind$(a0,!q,!d))
                                   : ?(ind$(Diff,!d))
                                 & !Diff^2+!dist2:?dist2
                                 )
@@ -69,7 +69,7 @@ X=
                                         * $g
                                         * !(ind$(Diff,!d))
                                         * !tsid3
-                                      : ?(ind$(a0,2,!p,!d))
+                                      : ?(ind$(a2,!p,!d))
                                     )
                               )
                           | 
@@ -84,10 +84,10 @@ X=
                     &   whl
                       ' ( !d:>0
                         & -1+!d:?d
-                        &     $M*!(ind$(a0,2,!p,!d))
-                            + !(ind$(a0,1,!p,!d))
-                          : ?a0
-                        &   $U*!a0+!(ind$(a0,0,!p,!d))
+                        &     $M*!(ind$(a2,!p,!d))
+                            + !(ind$(a1,!p,!d))
+                          : ?a1
+                        &   $U*!a1+!(ind$(a0,!p,!d))
                           : ?a0
                         & !a0:?(ind$(T,!n,!p,!d))
                         )
@@ -97,35 +97,37 @@ X=
             )
         : ?code
       & new$(calculation,!code):?calc
-      & (|(calc..print)$)
+      & (~|(calc..print)$)
       & (     (calc..calculate)
-            $ (   
-                ,   ( 
-                    ,   (,0 100 0)
-                        (,0 -100 0)
-                        (,0 10 30)
-                        (,1 0 0)
-                    )
-                    ( 
-                    ,   (,2 0 0)
-                        (,-2 0 0)
-                        (,0 1 0)
-                        (,-10/21 0 0)
-                    )
-                    ( 
-                    ,   (,0 0 0)
-                        (,0 0 0)
-                        (,0 0 0)
-                        (,0 0 0)
-                    )
+            $ ( 
+              .   
+                ,   (,0 100 0)
+                    (,0 -100 0)
+                    (,0 10 30)
+                    (,1 0 0)
+              .   
+                ,   (,2 0 0)
+                    (,-2 0 0)
+                    (,0 1 0)
+                    (,-10/21 0 0)
+              .   
+                ,   (,0 0 0)
+                    (,0 0 0)
+                    (,0 0 0)
+                    (,0 0 0)
               . 123
               )
           & out$executed
           & (calc..export)$(N,T):?pointsT
           & (calc..export)$(N,a0):?pointsa0
+          & (calc..export)$(N,a1):?pointsa1
+          & (calc..export)$(N,a2):?pointsa2
+          & (calc..export)$(N,v3):?varv3
           & out$exported
+          & out$(varv3 !varv3)
           & lst$(pointsT,pointsT,NEW)
           & lst$(pointsa0,pointsa0,NEW)
+          & lst$(pointsa2,pointsa2,NEW)
           &   vap$((=.!arg).!pointsT.\n)
             : ?points
           & :?L
