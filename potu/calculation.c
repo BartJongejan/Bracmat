@@ -4,6 +4,7 @@
 #include "memory.h"
 #include "wipecopy.h"
 #include "input.h"
+#include "globals.h" /*nilNode*/
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -158,6 +159,9 @@ typedef void (*funct)(struct forthMemory* This);
 typedef double (*Cfunct1)(double x);
 typedef double (*Cfunct2)(double x, double y);
 #endif
+
+typedef psk(*exportfunct)(double x);
+exportfunct xprtfnc;
 
 typedef union forthvalue /* a number. either integer or 'real' */
     {
@@ -518,9 +522,9 @@ static void set_vals(forthvalue* pval, size_t rank, size_t* range, psk Node)
     size_t N;
     size_t index;
 
-    for(int k = 0; k < rank -1 ; ++k)
+    for(int k = 0; k < rank - 1; ++k)
         stride *= range[k];
-    N = stride * range[rank -1];
+    N = stride * range[rank - 1];
     for(index = 0, el = Node->RIGHT; index < N && is_op(el) && Op(el) == WHITE; index += stride, el = el->RIGHT)
         {
         if(is_op(el->LEFT) && Op(el->LEFT) == COMMA)
@@ -1250,7 +1254,8 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     break;
                 case Ind:
                     {
-                    size_t rank = (size_t)((sp--)->val).floating;
+                    --sp;
+                    /*size_t rank = (size_t)((sp--)->val).floating;*/
                     int i = (int)((sp--)->val).floating;
                     assert(sp + 1 >= mem->stack);
                     printf("Pop index   ");
@@ -1260,7 +1265,8 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     }
                 case QInd:
                     {
-                    size_t rank = (size_t)((sp--)->val).floating;
+                    --sp;
+                    /*size_t rank = (size_t)((sp--)->val).floating;*/
                     int i = (int)(sp->val).floating;
                     forthvalue* val;
                     printf("PopPop ?index  ");
@@ -1275,7 +1281,8 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                     }
                 case EInd:
                     {
-                    size_t rank = (size_t)((sp--)->val).floating;
+                    --sp;
+                    /*size_t rank = (size_t)((sp--)->val).floating;*/
                     int i = (int)((sp--)->val).floating;
                     printf("Pop !index  ");
                     assert(sp >= mem->stack);
@@ -1578,6 +1585,160 @@ static enum formt getFormat(char* psobj)
         return fraction;
     else if(!strcmp(psobj, "%a"))
         return hex;
+    return floating;
+    }
+
+static psk createOperatorNode(int operator)
+    {
+    assert(operator == DOT || operator == COMMA || operator == WHITE);
+    psk operatorNode = (psk)bmalloc(__LINE__, sizeof(knode));
+    operatorNode->v.fl = operator | SUCCESS | READY;
+    operatorNode->LEFT = 0;
+    operatorNode->RIGHT = 0;
+    return operatorNode;
+    }
+
+static psk FloatNode(double val)
+    {
+    char jotter[500];
+    size_t bytes = offsetof(sk, u.obj) + 1;
+    char* buffer;
+    bytes += sprintf(jotter, "%e", val);
+    psk res = (psk)bmalloc(__LINE__, bytes);
+    if(res)
+        {
+        buffer = &(res->u.sobj);
+        strcpy(buffer, jotter);
+        res->v.fl = READY | SUCCESS BITWISE_OR_SELFMATCHING;
+        }
+    return res;
+    }
+
+static psk HexNode(double val)
+    {
+    char jotter[500];
+    size_t bytes = offsetof(sk, u.obj) + 1;
+    char* buffer;
+    bytes += sprintf(jotter, "%a", val);
+    psk res = (psk)bmalloc(__LINE__, bytes);
+    if(res)
+        {
+        buffer = &(res->u.sobj);
+        strcpy(buffer, jotter);
+        res->v.fl = READY | SUCCESS BITWISE_OR_SELFMATCHING;
+        }
+    return res;
+    }
+
+static psk IntegerNode(double val)
+    {
+    char jotter[500];
+    size_t bytes = offsetof(sk, u.obj) + 1;
+    char* buffer;
+    if(val < 0)
+        bytes += sprintf(jotter, "%d", (int)-val);
+    else
+        bytes += sprintf(jotter, "%d", (int)val);
+    psk res = (psk)bmalloc(__LINE__, bytes);
+    if(res)
+        {
+        buffer = &(res->u.sobj);
+        strcpy(buffer, jotter);
+        res->v.fl = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
+        if(val < 0)
+            res->v.fl |= MINUS;
+        else if(val == 0)
+            res->v.fl |= QNUL;
+        }
+    return res;
+    }
+
+static psk FractionNode(double val)
+    {
+    char jotter[500];
+    size_t bytes = offsetof(sk, u.obj) + 1;
+    char* buffer;
+#if defined __EMSCRIPTEN__ 
+    long long long1 = (long long)1;
+#else
+    LONG long1 = (LONG)1;
+#endif
+    double fcac = (double)(long1 << 52);
+    int exponent;
+    ULONG flg = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
+    if(val < 0)
+        {
+        flg |= MINUS;
+        val = -val;
+        }
+    else if(val == 0)
+        flg |= QNUL;
+    double mantissa = frexp(val, &exponent);
+    LONG Mantissa = (LONG)(fcac * mantissa);
+
+    if(Mantissa)
+        {
+        int shft;
+        for(shft = 52 - exponent; (Mantissa & long1) == 0; --shft, Mantissa >>= 1)
+            ;
+
+        if(shft == 0)
+            bytes += sprintf(jotter, LONGD "\n", Mantissa);
+        else
+            {
+            bytes += sprintf(jotter, LONGD "/" LONGD "\n", Mantissa, (LONG)(long1 << shft));
+            flg |= QFRACTION;
+            }
+        }
+    else
+        bytes += sprintf(jotter, "0 ");
+
+    psk res = (psk)bmalloc(__LINE__, bytes);
+    if(res)
+        {
+        buffer = &(res->u.sobj);
+        strcpy(buffer, jotter);
+        res->v.fl = flg;
+        }
+    return res;
+    }
+
+static psk eksportArray(forthvalue* val, size_t rank, size_t* range)
+    {
+    psk res;
+    psk head = createOperatorNode(COMMA);
+    res = head;
+    head->LEFT = same_as_w(&nilNode);
+    if(rank > 1)
+        { /* Go deeper */
+        /*
+        printf("range\n");
+        for(int j = 0; j < rank; ++j)
+            printf("%d ", range[j]);
+        printf("\n");
+        */
+        size_t stride = 1;
+        for(int k = 0; k < rank - 1; ++k)
+            stride *= range[k];
+        for(size_t r = range[rank-1]; --r > 0; val += stride)
+            {
+            head->RIGHT = createOperatorNode(WHITE);
+            head = head->RIGHT;
+            head->LEFT = eksportArray(val, rank - 1, range);
+            }
+        head->RIGHT = eksportArray(val, rank - 1, range);
+        }
+    else
+        { /* Export list of values. */
+        for(size_t r = *range; --r > 0; ++val)
+            {
+            head->RIGHT = createOperatorNode(WHITE);
+            head = head->RIGHT;
+            head->LEFT = xprtfnc(val->floating);
+            }
+        head->RIGHT = xprtfnc(val->floating);
+        }
+    return res;
     }
 
 static Boolean eksport(struct typedObjectnode* This, ppsk arg)
@@ -1662,7 +1823,7 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                         res->v.fl = READY | SUCCESS;
                         return TRUE;
                         }
-                    }
+                }
                 else
                     {
                     fortharray* a = getArrayPointer(arrp, name);
@@ -1675,7 +1836,7 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                         psk res = 0;
                         switch(format)
                             {
-                            case floating:
+                            case floating:/*
                                 for(i = 0; i < a->size; ++i)
                                     {
                                     totalbytes += sprintf(jotter, "%e\n", a->pval[i].floating);
@@ -1687,9 +1848,10 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                                 for(i = 0; i < a->size; ++i)
                                     {
                                     totalbytes += sprintf(buffer + totalbytes, "%e\n", a->pval[i].floating);
-                                    }
+                                    }*/
+                                xprtfnc = FloatNode;
                                 break;
-                            case integer:
+                            case integer:/*
                                 for(i = 0; i < a->size; ++i)
                                     {
                                     int I = (int)(a->pval[i].floating);
@@ -1703,10 +1865,11 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                                     {
                                     int I = (int)(a->pval[i].floating);
                                     totalbytes += sprintf(buffer + totalbytes, "%d\n", I);
-                                    }
+                                    }*/
+                                xprtfnc = IntegerNode;
                                 break;
                             case fraction:
-                                {
+                                {/*
 #if defined __EMSCRIPTEN__ 
                                 long long long1 = (long long)1;
 #else
@@ -1754,10 +1917,11 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                                         }
                                     else
                                         totalbytes += sprintf(buffer + totalbytes, "0 ");
-                                    }
+                                    }*/
+                                xprtfnc = FractionNode;
                                 break;
                                 }
-                            case hex:
+                            case hex:/*
                                 for(i = 0; i < a->size; ++i)
                                     {
                                     totalbytes += sprintf(jotter, "%a\n", a->pval[i].floating);
@@ -1769,21 +1933,33 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                                 for(i = 0; i < a->size; ++i)
                                     {
                                     totalbytes += sprintf(buffer + totalbytes, "%a\n", a->pval[i].floating);
-                                    }
+                                    }*/
+                                xprtfnc = HexNode;
                                 break;
                             }
+                        res = eksportArray(a->pval, a->rank, a->range);
+                        /*
+                        printf("res:");
+                        result(res);
+                        printf("\n");
+                        */
                         if(res)
                             {
                             wipe(*arg);
-                            *arg = same_as_w(res);
-                            res->v.fl = READY | SUCCESS;
+                            *arg = res;
+                            /*
+                            printf("*arg:");
+                            result(*arg);
+                            printf("\n");
+                            */
+//                            res->v.fl = READY | SUCCESS;
                             return TRUE;
                             }
                         }
                     }
-                }
             }
         }
+    }
     return TRUE;
     }
 
@@ -2426,7 +2602,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                     }
                 }
             return 0;
-            }
+                        }
         default:
             if(is_op(code))
                 {
@@ -2529,7 +2705,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                             {
                             wordp->action = Push;
                             /* We can get here if an expression is empty, e.g.
-                            in a case like 
+                            in a case like
                                 whl'(!n+1:<10:?n&(!n:>3&dosomething$|))*/
                             }
                         }
@@ -2538,8 +2714,8 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                 ++wordp;
                 return wordp;
                 };
-        }
-    }
+                    }
+                }
 
 static forthMemory* calcnew(psk arg)
     {

@@ -128,14 +128,25 @@ X=
           & lst$(pointsT,pointsT,NEW)
           & lst$(pointsa0,pointsa0,NEW)
           & lst$(pointsa2,pointsa2,NEW)
-          &   vap$((=.!arg).!pointsT.\n)
-            : ?points
-          & :?L
-          &   whl
-            ' ( !points:%?x %?y %?z ?points
-              & (!x+!z.!y) !L:?L
-              )
-          & lst$(L,L,NEW)
+          & !pointsT:(,?times)
+          & out$map
+          &     map
+              $ ( ( 
+                  =   
+                    .   !arg:(,?pla)
+                      &   map
+                        $ ( ( 
+                            =   
+                              .   !arg:(,%?x %?y %?z)
+                                & (!x+!z.!y)
+                            )
+                          . !pla
+                          )
+                  )
+                . !times
+                )
+            : ?L
+          & out$mapped
           &     ("!DOCTYPE html".)
                 ( html
                 .   
@@ -173,6 +184,7 @@ X=
                       )
                 )
             : ?SVG
+          & out$writing
           & put$(toML$!SVG,"svg.html",NEW)
         | out$"something wrogn"
         )
