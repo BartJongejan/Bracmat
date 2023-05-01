@@ -1560,7 +1560,7 @@ static Boolean print(struct typedObjectnode* This, ppsk arg)
     return printmem(mem);
     }
 
-enum formt { floating, integer, fraction, hex };
+enum formt { floating, integer, fraction, hexadecimal };
 
 static enum formt getFormat(char* psobj)
     {
@@ -1571,7 +1571,7 @@ static enum formt getFormat(char* psobj)
     else if(!strcmp(psobj, "Q"))
         return fraction;
     else if(!strcmp(psobj, "%a"))
-        return hex;
+        return hexadecimal;
     return floating;
     }
 
@@ -1754,7 +1754,7 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                 case fraction:
                     xprtfnc = FractionNode;
                     break;
-                case hex:
+                case hexadecimal:
                     xprtfnc = HexNode;
                     break;
                 }
