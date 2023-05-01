@@ -29,9 +29,9 @@ typedef struct inputBuffer
     unsigned int mallocallocated : 8; /* True if allocated with malloc. Otherwise on stack (except EPOC). */
     } inputBuffer;
 
-inputBuffer* InputArray;
-unsigned char* inputBufferPointer;
-unsigned char* maxInputBufferPointer; /* inputBufferPointer <= maxInputBufferPointer,
+extern inputBuffer* InputArray;
+extern unsigned char* inputBufferPointer;
+extern unsigned char* maxInputBufferPointer; /* inputBufferPointer <= maxInputBufferPointer,
                             if inputBufferPointer == maxInputBufferPointer, don't assign to *inputBufferPointer */
 
 void lput(int c);

@@ -20,6 +20,11 @@
 #include <assert.h>
 
 
+inputBuffer* InputArray;
+unsigned char* inputBufferPointer;
+unsigned char* maxInputBufferPointer; /* inputBufferPointer <= maxInputBufferPointer,
+                            if inputBufferPointer == maxInputBufferPointer, don't assign to *inputBufferPointer */
+
 void lput(int c)
     {
     if(inputBufferPointer >= maxInputBufferPointer)

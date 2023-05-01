@@ -25,6 +25,7 @@ Convert JSONL file to Bracmat file.
 #include "encoding.h"
 #include "input.h"
 #include "filewrite.h"
+#include "charput.h"
 
 #include <stdio.h>
 #include <string.h>

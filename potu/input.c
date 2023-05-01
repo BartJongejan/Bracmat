@@ -387,13 +387,13 @@ static psk leftDescend_rightDescend(psk top)
 #endif
 
 #if GLOBALARGPTR
-static psk lex(int* nxt, int priority, int Flags)
+static psk lex(unsigned int* nxt, int priority, int Flags)
 #else
-static psk lex(int* nxt, int priority, int Flags, va_list* pargptr)
+static psk lex(unsigned int* nxt, int priority, int Flags, va_list* pargptr)
 #endif
 /* *nxt (if nxt != 0) is set to the character following the expression. */
     {
-    int op_or_0;
+    unsigned int op_or_0;
     psk Pnode;
     if(*start > 0 && *start <= '\6')
         Pnode = same_as_w(addr[*start++]);
@@ -447,7 +447,7 @@ static psk lex(int* nxt, int priority, int Flags, va_list* pargptr)
                 {
                 /* op_or_0 == an operator */
                 psk operatorNode;
-                int child_op_or_0;
+                unsigned int child_op_or_0;
                 if(optab[op_or_0] < priority) /* 'op_or_0' has too low priority */
                     {
                     /* Our Pnode is followed by an operator, but it turns out
