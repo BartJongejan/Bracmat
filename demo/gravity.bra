@@ -23,7 +23,7 @@ X=
                 , 3
                 )
             & $iterations:?n
-            & !v1:?V
+            & !v3:?V
             & (add=2*!v0+!v1)
             & add$(5,6):?eleven
             &   whl
@@ -99,8 +99,7 @@ X=
       & new$(calculation,!code):?calc
       & (~|(calc..print)$)
       & (     (calc..calculate)
-            $ ( 
-              .   
+            $ (   
                 ,   (,0 100 0)
                     (,0 -100 0)
                     (,0 10 30)
