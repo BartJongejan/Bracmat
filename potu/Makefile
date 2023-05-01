@@ -54,8 +54,8 @@ potu1safe: potu.c
 	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DNO_C_INTERFACE -DNO_FILE_RENAME -DNO_FILE_REMOVE -DNO_SYSTEM_CALL -DNO_LOW_LEVEL_FILE_HANDLING -DSINGLEOBJECT -o potu1safe potu.c -lm
 
 profiling:
-	gcc -Wall -c -pg -DNDEBUG -DSINGLEOBJECT potu.c -lm
-	gcc -Wall -pg potu.o
+	gcc -std=c99 -pedantic -Wall -O2 -static -c -pg -DNDEBUG -DSINGLEOBJECT potu.c -lm
+	gcc -std=c99 -pedantic -Wall -O2 -static -pg potu.o -lm
 	cp ../valid.bra .
 	cp ../pr-xml-utf-8.xml .
 	./a.out "get'\"valid.bra\";!r" 
