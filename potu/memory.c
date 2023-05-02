@@ -527,6 +527,19 @@ static void checkAllBounds(void)
 
 void bfree(void *p)
     {
+    assert(p != (void*)&zeroNode);
+    assert(p != (void*)&oneNode);
+    assert(p != (void*)&minusOneNode);
+    assert(p != (void*)&nilNode);
+    assert(p != (void*)&nilNodeNotNeutral);
+    assert(p != (void*)&zeroNodeNotNeutral);
+    assert(p != (void*)&oneNodeNotNeutral);
+    assert(p != (void*)&argNode);
+    assert(p != (void*)&selfNode);
+    assert(p != (void*)&SelfNode);
+    assert(p != (void*)&twoNode);
+    assert(p != (void*)&fourNode);
+    assert(p != (void*)&sjtNode);
     struct memblock ** q;
 #if CHECKALLOCBOUNDS
     LONG * lp = (LONG *)p;

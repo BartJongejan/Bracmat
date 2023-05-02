@@ -1004,7 +1004,7 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                         {
                         strcpy((char*)(res)+offsetof(sk, u.sobj), buf);
                         wipe(*arg);
-                        *arg = same_as_w(res);
+                        *arg = /*same_as_w*/(res);
                         res->v.fl = flags;
                         return TRUE;
                         }
@@ -1330,7 +1330,7 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                         //strcpy((char*)SPOBJ(res), buf); /* gcc: generates buffer overflow. Why? (Addresses are the same!) */
                         printf("value on stack %s\n", buf);
                         wipe(*arg);
-                        *arg = same_as_w(res);
+                        *arg = /*same_as_w*/(res);
                         res->v.fl = flags;
                         return TRUE;
                         }

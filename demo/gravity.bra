@@ -5,10 +5,33 @@ have some points move under influence of gravity}
 
 X=
   ( do
-  =   
+  =     L
+        M
+        Q
+        SVG
+        U
+        a
+        b
+        calc
+        code
+        dimensions
+        dimpla
+        g
+        iterations
+        pla
+        planets
+        pointsT
+        pointsa0
+        pointsa1
+        pointsa2
+        times
+        varv3
+        x
+        y
+        z
     .   4:?planets
       & 3:?dimensions
-      & 6000:?iterations
+      & 30000:?iterations
       & 300:?g
       & 1:?M
       & 1/11:?U
