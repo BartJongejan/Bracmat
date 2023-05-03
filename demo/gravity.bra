@@ -5,30 +5,10 @@ have some points move under influence of gravity}
 
 X=
   ( do
-  =     L
-        M
-        Q
-        SVG
-        U
-        a
-        b
-        calc
-        code
-        dimensions
-        dimpla
-        g
-        iterations
-        pla
-        planets
-        pointsT
-        pointsa0
-        pointsa1
-        pointsa2
-        times
-        varv3
-        x
-        y
-        z
+  =     L M Q SVG U a b calc code
+      , dimensions dimpla g iterations
+      , pla planets pointsT pointsa0 pointsa1 pointsa2
+      , times varv3 x y z
     .   4:?planets
       & 3:?dimensions
       & 30000:?iterations
@@ -37,86 +17,101 @@ X=
       & 1/11:?U
       & !dimensions*!planets:?dimpla
       &     
-          ' ( tbl$(Diff,$dimensions,1)
-            &   tbl
-              $ ( T
-                , $iterations
-                , $planets
-                , $dimensions
-                , 3
+          ' (   (a.position)
+                (a.velocity)
+                (a.acceleration)
+                (s.v3)
+                (s.v4)
+            .   tbl$(Diff,$dimensions,1)
+              &   tbl
+                $ ( T
+                  , $iterations
+                  , $planets
+                  , $dimensions
+                  , 3
+                  )
+              & $iterations:?n
+              & !v3+!v4:?V
+              & ( add
+                =     (s.aap)
+                      (s.noot)
+                      (a.mies)
+                  .     2*!aap+!noot+!(ind$(mies,0,0))
+                      : ?H
+                    & !H+-1
                 )
-            & $iterations:?n
-            & !v3:?V
-            & (add=2*!v0+!v1)
-            & add$(5,6):?eleven
-            &   whl
-              ' ( !n:>0
-                & -1+!n:?n
-                & $planets:?p
-                &   whl
-                  ' ( !p:>0
-                    & -1+!p:?p
-                    & $dimensions:?d
-                    &   whl
-                      ' ( !d:>0
-                        & -1+!d:?d
-                        & 0:?(ind$(a2,!p,!d))
-                        )
-                    )
-                & $planets:?p
-                &   whl
-                  ' ( !p:>0
-                    & -1+!p:?p
-                    & $planets:?q
-                    &   whl
-                      ' ( !q:>0
-                        & -1+!q:?q
-                        & (   !q:~!p
-                            & 0:?dist2
-                            & $dimensions:?d
-                            &   whl
-                              ' ( !d:>0
-                                & -1+!d:?d
-                                &     !(ind$(a0,!p,!d))
-                                    + -1*!(ind$(a0,!q,!d))
-                                  : ?(ind$(Diff,!d))
-                                & !Diff^2+!dist2:?dist2
-                                )
-                            & ( !dist2:0
-                              |   !dist2^-3/2:?tsid3
-                                & $dimensions:?d
-                                &   whl
-                                  ' ( !d:>0
-                                    & -1+!d:?d
-                                    &     -1
-                                        * $g
-                                        * !(ind$(Diff,!d))
-                                        * !tsid3
-                                      : ?(ind$(a2,!p,!d))
-                                    )
-                              )
-                          | 
+              & add$(5,!v3,velocity):?eleven
+              &   whl
+                ' ( !n:>0
+                  & -1+!n:?n
+                  & $planets:?p
+                  &   whl
+                    ' ( !p:>0
+                      & -1+!p:?p
+                      & $dimensions:?d
+                      &   whl
+                        ' ( !d:>0
+                          & -1+!d:?d
+                          & 0:?(ind$(acceleration,!p,!d))
                           )
-                        )
-                    )
-                & $planets:?p
-                &   whl
-                  ' ( !p:>0
-                    & -1+!p:?p
-                    & $dimensions:?d
-                    &   whl
-                      ' ( !d:>0
-                        & -1+!d:?d
-                        &     $M*!(ind$(a2,!p,!d))
-                            + !(ind$(a1,!p,!d))
-                          : ?a1
-                        &   $U*!a1+!(ind$(a0,!p,!d))
-                          : ?a0
-                        & !a0:?(ind$(T,!n,!p,!d))
-                        )
-                    )
-                )
-            & !n
+                      )
+                  & $planets:?p
+                  &   whl
+                    ' ( !p:>0
+                      & -1+!p:?p
+                      & $planets:?q
+                      &   whl
+                        ' ( !q:>0
+                          & -1+!q:?q
+                          & (   !q:~!p
+                              & 0:?dist2
+                              & $dimensions:?d
+                              &   whl
+                                ' ( !d:>0
+                                  & -1+!d:?d
+                                  &     !(ind$(position,!p,!d))
+                                      + -1*!(ind$(position,!q,!d))
+                                    : ?(ind$(Diff,!d))
+                                  & !Diff^2+!dist2:?dist2
+                                  )
+                              & ( !dist2:0
+                                |   !dist2^-3/2:?tsid3
+                                  & $dimensions:?d
+                                  &   whl
+                                    ' ( !d:>0
+                                      & -1+!d:?d
+                                      &     -1
+                                          * $g
+                                          * !(ind$(Diff,!d))
+                                          * !tsid3
+                                        : ?(ind$(acceleration,!p,!d))
+                                      )
+                                )
+                            | 
+                            )
+                          )
+                      )
+                  & $planets:?p
+                  &   whl
+                    ' ( !p:>0
+                      & -1+!p:?p
+                      & $dimensions:?d
+                      &   whl
+                        ' ( !d:>0
+                          & -1+!d:?d
+                          &       $M
+                                * !(ind$(acceleration,!p,!d))
+                              + !(ind$(velocity,!p,!d))
+                            : ?velocity
+                          &     $U*!velocity
+                              + !(ind$(position,!p,!d))
+                            : ?position
+                          &   !position
+                            : ?(ind$(T,!n,!p,!d))
+                          )
+                      )
+                  )
+              & !n
             )
         : ?code
       & new$(calculation,!code):?calc
@@ -138,15 +133,21 @@ X=
                     (,0 0 0)
                     (,0 0 0)
               . 123
+              . 77
               )
           & out$executed
           & (calc..export)$(N,T):?pointsT
-          & (calc..export)$(N,a0):?pointsa0
-          & (calc..export)$(N,a1):?pointsa1
-          & (calc..export)$(N,a2):?pointsa2
+          & (calc..export)$(N,position):?pointsa0
+          & (calc..export)$(N,velocity):?pointsa1
+          &   (calc..export)$(N,acceleration)
+            : ?pointsa2
           & (calc..export)$(N,v3):?varv3
+          & (calc..export)$(N,eleven):?eleven
+          & (calc..export)$(N,V):?V
           & out$exported
           & out$(varv3 !varv3)
+          & out$(eleven !eleven)
+          & out$(V !V)
           & lst$(pointsT,pointsT,NEW)
           & lst$(pointsa0,pointsa0,NEW)
           & lst$(pointsa2,pointsa2,NEW)
