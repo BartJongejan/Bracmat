@@ -83,9 +83,11 @@ typedef enum
     , Pow
     , Tbl
     , Out
-    , Ind
-    , QInd /* ?(ind$(<array name>,<index>)) */
-    , EInd /* !(ind$(<array name>,<index>)) */
+    , Idx   /*   idx$(<array name>,<index>,...)  */
+    , QIdx  /* ?(idx$(<array name>,<index>,...)) */
+    , EIdx  /* !(idx$(<array name>,<index>,...)) */
+    , Range /* range$(<array name>,d)) 0 <= d < rank, returns 0 if d < 0 or d >= array rank */
+    , Rank  /* rank$(<array name>)) */
     , NoOp
 #if CFUNCS
     , Cfunction1
@@ -140,9 +142,9 @@ static char* ActionAsWord[] =
     , "Hypot                      "
     , "Pow                        "
     , "tbl                        "
-    , "ind                        "
-    , "Qind                       "
-    , "Eind                       "
+    , "idx                        "
+    , "Qidx                       "
+    , "Eidx                       "
     , "NoOp                       "
 #if CFUNCS
     , "Cfunction1                 "
@@ -198,7 +200,7 @@ typedef enum { Scalar, Array } scalarORarray;
 
 typedef struct parameter
     {
-    enum scalarORarray scalar_or_array;
+    scalarORarray scalar_or_array;
     union
         {
         forthvariable* v;
@@ -584,12 +586,8 @@ static void set_vals(forthvalue* pval, size_t rank, size_t* range, psk Node)
         }
     }
 
-static int setArgs(forthMemory* mem, parameter** curparm, psk args, int nr)
+static parameter* setArgs(forthMemory* mem, parameter* curparm, psk args)
     {
-    forthvariable* varp = mem->var;
-    fortharray** arrp = &(mem->arr);
-    parameter* opar;
-    parameter* npar;
     if(is_op(args))
         {
         assert(Op(args) == DOT || Op(args) == COMMA || Op(args) == WHITE);
@@ -605,75 +603,34 @@ static int setArgs(forthMemory* mem, parameter** curparm, psk args, int nr)
                 {
                 totsize *= range[k];
                 }
-            fortharray* a;
-            if(curparm && *curparm)
+            fortharray* a = 0;
+            if(curparm)
                 {
-                a = (*curparm)->u.a;
+                a = curparm->u.a;
                 initialise(a, totsize);
-                *curparm = (*curparm)->next;
-                }
-            else
-                {
-                static char name[24];/*Enough for 64 bit number in decimal.*/
-                sprintf(name, "a%d", nr);
-                a = getOrCreateArrayPointer(arrp, name, totsize);
-                if(a)
-                    {
-                    opar = mem->parameters;
-                    npar = mem->parameters = (parameter*)bmalloc(__LINE__, sizeof(parameter));
-                    npar->next = opar;
-                    npar->scalar_or_array = Array;
-                    npar->u.a = a;
-                    ++nr;
-                    }
-                }
-
-            if(a)
-                {
                 a->range = range;
                 a->rank = rank;
                 set_vals(a->pval, rank, range, args);
+                curparm = curparm->next;
                 }
-            return nr;
             }
         else
             {
-            nr = setArgs(mem, curparm, args->RIGHT, nr);
-            return setArgs(mem, curparm, args->LEFT, nr);
+            curparm = setArgs(mem, curparm, args->RIGHT);
+            curparm = setArgs(mem, curparm, args->LEFT);
             }
         }
     else if(args->u.sobj != '\0')
         {
-        forthvariable* var;
-        if(curparm && *curparm)
+        forthvariable* var = 0;
+        if(curparm)
             {
-            var = (*curparm)->u.v;
-            *curparm = (*curparm)->next;
-            }
-        else
-            {
-            static char name[24];/*Enough for 64 bit number in decimal.*/
-            sprintf(name, "v%d", nr);
-            var = getVariablePointer(varp, name);
-            if(var)
-                {
-                opar = mem->parameters;
-                mem->parameters = (parameter*)bmalloc(__LINE__, sizeof(parameter));
-                mem->parameters->next = opar;
-                mem->parameters->scalar_or_array = Scalar;
-                mem->parameters->u.v = var;
-                ++nr;
-                }
-            }
-        if(var)
-            {
+            var = curparm->u.v;
             setFloat(&(var->val.floating), args);
+            curparm = curparm->next;
             }
-        return nr;
         }
-    else
-        return nr;
-    return -1;
+    return curparm;
     }
 
 static neg negations[] =
@@ -743,9 +700,11 @@ static Epair epairs[] =
         {"pow",   Pow},
         {"tbl",   Tbl},
         {"out",   Out},
-        {"ind",   Ind},
-        {"Qind",  QInd},
-        {"Eind",  EInd},
+        {"idx",   Idx},
+        {"Qidx",  QIdx},
+        {"Eidx",  EIdx},
+        {"range", Range},
+        {"rank",  Rank},
         {"NoOp",  NoOp},
         {0,0}
     };
@@ -858,6 +817,21 @@ static stackvalue* getArrayIndex(stackvalue* sp, forthword* wordp)
             }
         }
     sp->arrp->index = i;
+    return sp;
+    }
+
+static stackvalue* getArrayRange(stackvalue* sp)
+    {
+    fortharray* arrp = (sp - 1)->arrp;
+    size_t rank = arrp->rank;
+    LONG arg = (LONG)sp->val.floating;
+    sp->val.floating = (double)((0 <= arg && arg < (LONG)rank) ? (arrp->range[rank - arg - 1]) : 0);
+    return sp;
+    }
+
+static stackvalue* getArrayRank(stackvalue* sp)
+    {
+    sp->val.floating = (double)(sp->arrp->rank);
     return sp;
     }
 
@@ -979,14 +953,15 @@ static stackvalue* calculateBody(forthMemory* mem)
                 sp->arrp->pval = (forthvalue*)bmalloc(__LINE__, size * sizeof(forthvalue));
                 sp->arrp->rank = rank;
                 sp->arrp->range = range;
-                memset(sp->arrp->pval, 0, size * sizeof(forthvalue));
+                if(sp->arrp->pval)
+                    memset(sp->arrp->pval, 0, size * sizeof(forthvalue));
                 ++wordp;
                 break;
                 }
             case Out:
                 printf("%f\n", sp->val.floating); ++wordp; break;
                 break;
-            case Ind:
+            case Idx:
                 {
                 sp = getArrayIndex(sp, wordp);
                 i = sp->arrp->index;
@@ -998,7 +973,7 @@ static stackvalue* calculateBody(forthMemory* mem)
                 ++wordp;
                 break;
                 }
-            case QInd:
+            case QIdx:
                 {
                 sp = getArrayIndex(sp, wordp);
                 i = sp->arrp->index;
@@ -1012,7 +987,7 @@ static stackvalue* calculateBody(forthMemory* mem)
                 ++wordp;
                 break;
                 }
-            case EInd:
+            case EIdx:
                 {
                 sp = getArrayIndex(sp, wordp);
                 i = sp->arrp->index;
@@ -1025,14 +1000,26 @@ static stackvalue* calculateBody(forthMemory* mem)
                 ++wordp;
                 break;
                 }
+            case Range:
+                {
+                sp = getArrayRange(sp);
+                ++wordp;
+                break;
+                }
+            case Rank:
+                {
+                sp = getArrayRank(sp);
+                ++wordp;
+                break;
+                }
             case NoOp:
             case TheEnd:
             default:
                 break;
-                }
             }
-    return sp;
         }
+    return sp;
+    }
 
 static Boolean calculate(struct typedObjectnode* This, ppsk arg)
     {
@@ -1041,51 +1028,49 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
     parameter* curparm = mem->parameters;
     if(mem)
         {
-        if(setArgs(mem, &curparm, Arg, 0) >= 0)
+        curparm = setArgs(mem, curparm, Arg);
+        stackvalue* sp = calculateBody(mem);
+        if(sp)
             {
-            stackvalue* sp = calculateBody(mem);
-            if(sp)
+            for(; sp >= mem->stack;)
                 {
-                for(; sp >= mem->stack;)
+                psk res;
+                size_t len;
+                char buf[64]; /* 64 bytes is even enough for quad https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF*/
+                double sv = (sp--)->val.floating;
+                int flags;
+                if(isnan(sv))
                     {
-                    psk res;
-                    size_t len;
-                    char buf[64]; /* 64 bytes is even enough for quad https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF*/
-                    double sv = (sp--)->val.floating;
-                    int flags;
-                    if(isnan(sv))
-                        {
-                        strcpy(buf, "NAN");
-                        flags = READY BITWISE_OR_SELFMATCHING;
-                        }
-                    else if(isinf(sv))
-                        {
-                        if(sv > DBL_MAX)
-                            strcpy(buf, "INF");
-                        else
-                            strcpy(buf, "-INF");
-                        flags = READY BITWISE_OR_SELFMATCHING;
-                        }
+                    strcpy(buf, "NAN");
+                    flags = READY BITWISE_OR_SELFMATCHING;
+                    }
+                else if(isinf(sv))
+                    {
+                    if(sv > DBL_MAX)
+                        strcpy(buf, "INF");
                     else
-                        {
-                        sprintf(buf, "%.16E", sv);
-                        flags = READY | SUCCESS | QNUMBER | QDOUBLE BITWISE_OR_SELFMATCHING;
-                        }
-                    len = offsetof(sk, u.obj) + strlen(buf);
-                    res = (psk)bmalloc(__LINE__, len + 1);
-                    if(res)
-                        {
-                        strcpy((char*)(res)+offsetof(sk, u.sobj), buf);
-                        wipe(*arg);
-                        *arg = /*same_as_w*/(res);
-                        res->v.fl = flags;
-                        return TRUE;
-                        }
+                        strcpy(buf, "-INF");
+                    flags = READY BITWISE_OR_SELFMATCHING;
+                    }
+                else
+                    {
+                    sprintf(buf, "%.16E", sv);
+                    flags = READY | SUCCESS | QNUMBER | QDOUBLE BITWISE_OR_SELFMATCHING;
+                    }
+                len = offsetof(sk, u.obj) + strlen(buf);
+                res = (psk)bmalloc(__LINE__, len + 1);
+                if(res)
+                    {
+                    strcpy((char*)(res)+offsetof(sk, u.sobj), buf);
+                    wipe(*arg);
+                    *arg = /*same_as_w*/(res);
+                    res->v.fl = flags;
+                    return TRUE;
                     }
                 }
-            else
-                return FALSE;
             }
+        else
+            return FALSE;
         }
     return FALSE;
     }
@@ -1299,7 +1284,7 @@ static stackvalue* trcBody(forthMemory* mem)
             case Out:
                 printf("%f\n", sp->val.floating); ++wordp; break;
                 break;
-            case Ind:
+            case Idx:
                 {
                 sp = getArrayIndex(sp, wordp);
                 i = sp->arrp->index;
@@ -1312,7 +1297,7 @@ static stackvalue* trcBody(forthMemory* mem)
                 ++wordp;
                 break;
                 }
-            case QInd:
+            case QIdx:
                 {
                 sp = getArrayIndex(sp, wordp);
                 i = sp->arrp->index;
@@ -1330,7 +1315,7 @@ static stackvalue* trcBody(forthMemory* mem)
                 ++wordp;
                 break;
                 }
-            case EInd:
+            case EIdx:
                 {
                 sp = getArrayIndex(sp, wordp);
                 i = sp->arrp->index;
@@ -1343,6 +1328,22 @@ static stackvalue* trcBody(forthMemory* mem)
                 assert(sp >= mem->stack);
                 sp->arrp->index = i;
                 sp->val = (sp->arrp->pval)[i];
+                ++wordp;
+                break;
+                }
+            case Range:
+                {
+                printf("Range       ");
+                assert(sp >= mem->stack);
+                sp = getArrayRange(sp);
+                ++wordp;
+                break;
+                }
+            case Rank:
+                {
+                printf("Rank        ");
+                assert(sp >= mem->stack);
+                sp = getArrayRank(sp);
                 ++wordp;
                 break;
                 }
@@ -1364,60 +1365,58 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
     parameter* curparm = mem->parameters;
     if(mem)
         {
-        if(setArgs(mem, &curparm, Arg, 0) >= 0)
+        curparm = setArgs(mem, curparm, Arg);
+        stackvalue* sp = trcBody(mem);
+        if(sp)
             {
-            stackvalue* sp = trcBody(mem);
-            if(sp)
+            printf("calculation DONE. On Stack %d\n", (int)(sp - mem->stack));
+            assert(sp + 1 >= mem->stack);
+            for(; sp >= mem->stack;)
                 {
-                printf("calculation DONE. On Stack %d\n", (int)(sp - mem->stack));
-                assert(sp + 1 >= mem->stack);
-                for(; sp >= mem->stack;)
+                psk res;
+                size_t len;
+                char buf[64]; /* 64 bytes is even enough for quad https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF*/
+                double sv = (sp--)->val.floating;
+                int flags;
+                if(isnan(sv))
                     {
-                    psk res;
-                    size_t len;
-                    char buf[64]; /* 64 bytes is even enough for quad https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF*/
-                    double sv = (sp--)->val.floating;
-                    int flags;
-                    if(isnan(sv))
-                        {
-                        strcpy(buf, "NAN");
-                        flags = READY BITWISE_OR_SELFMATCHING;
-                        }
-                    else if(isinf(sv))
-                        {
-                        if(sv > DBL_MAX)
-                            strcpy(buf, "INF");
-                        else
-                            strcpy(buf, "-INF");
-                        flags = READY BITWISE_OR_SELFMATCHING;
-                        }
-                    else
-                        {
-                        sprintf(buf, "%.16E", sv);
-                        flags = READY | SUCCESS | QNUMBER | QDOUBLE BITWISE_OR_SELFMATCHING;
-                        }
-                    len = offsetof(sk, u.obj) + strlen(buf);
-                    res = (psk)bmalloc(__LINE__, len + 1);
-
-                    if(res)
-                        {
-                        strcpy((char*)(res)+offsetof(sk, u.sobj), buf);
-                        //strcpy((char*)SPOBJ(res), buf); /* gcc: generates buffer overflow. Why? (Addresses are the same!) */
-                        printf("value on stack %s\n", buf);
-                        wipe(*arg);
-                        *arg = /*same_as_w*/(res);
-                        res->v.fl = flags;
-                        return TRUE;
-                        }
-                    /*
-                    2.6700000000000000E+02
-                    */
+                    strcpy(buf, "NAN");
+                    flags = READY BITWISE_OR_SELFMATCHING;
                     }
-                }
-            else
-                return FALSE;
+                else if(isinf(sv))
+                    {
+                    if(sv > DBL_MAX)
+                        strcpy(buf, "INF");
+                    else
+                        strcpy(buf, "-INF");
+                    flags = READY BITWISE_OR_SELFMATCHING;
+                    }
+                else
+                    {
+                    sprintf(buf, "%.16E", sv);
+                    flags = READY | SUCCESS | QNUMBER | QDOUBLE BITWISE_OR_SELFMATCHING;
+                    }
+                len = offsetof(sk, u.obj) + strlen(buf);
+                res = (psk)bmalloc(__LINE__, len + 1);
 
+                if(res)
+                    {
+                    strcpy((char*)(res)+offsetof(sk, u.sobj), buf);
+                    //strcpy((char*)SPOBJ(res), buf); /* gcc: generates buffer overflow. Why? (Addresses are the same!) */
+                    printf("value on stack %s\n", buf);
+                    wipe(*arg);
+                    *arg = /*same_as_w*/(res);
+                    res->v.fl = flags;
+                    return TRUE;
+                    }
+                /*
+                2.6700000000000000E+02
+                */
+                }
             }
+        else
+            return FALSE;
+
         }
     return FALSE;
     }
@@ -1642,9 +1641,11 @@ static Boolean printmem(forthMemory* mem)
             case Pow:  printf(INDNT); printf(LONGD " Pop pow    \n", wordp - mem->word); --In; break;
             case Tbl:  printf(INDNT); printf(LONGD " Pop tbl    \n", wordp - mem->word); --In; break;
             case Out:  printf(INDNT); printf(LONGD " Pop out    \n", wordp - mem->word); --In; break;
-            case Ind:  printf(INDNT); printf(LONGD " Pop ind    \n", wordp - mem->word); --In; break;
-            case QInd:  printf(INDNT); printf(LONGD " PopPop Qind    \n", wordp - mem->word); --In; --In; break;
-            case EInd:  printf(INDNT); printf(LONGD " Pop Eind    \n", wordp - mem->word); --In; break;
+            case Idx:  printf(INDNT); printf(LONGD " Pop idx    \n", wordp - mem->word); --In; break;
+            case QIdx:  printf(INDNT); printf(LONGD " PopPop Qidx    \n", wordp - mem->word); --In; --In; break;
+            case EIdx:  printf(INDNT); printf(LONGD " Pop Eidx    \n", wordp - mem->word); --In; break;
+            case Range: printf(INDNT); printf(LONGD " Pop range  \n", wordp - mem->word); --In; break;
+            case Rank: printf(INDNT); printf(LONGD " Pop rank   \n", wordp - mem->word); --In; break;
             case NoOp:
 #if CFUNC
                 naam = getFuncName(wordp->u.funcp);
@@ -1655,11 +1656,11 @@ static Boolean printmem(forthMemory* mem)
             default:
                 printf(INDNT); printf(LONGD " default         %d\n", wordp - mem->word, wordp->action);
                 ;
-                }
             }
+        }
     printf(INDNT); printf(LONGD " TheEnd          \n", wordp - mem->word);
     return TRUE;
-        }
+    }
 
 static Boolean print(struct typedObjectnode* This, ppsk arg)
     {
@@ -2024,9 +2025,11 @@ static void optimizeJumps(forthMemory* mem)
             case Pow:
             case Tbl:
             case Out:
-            case Ind:
-            case QInd:
-            case EInd:
+            case Idx:
+            case QIdx:
+            case EIdx:
+            case Range:
+            case Rank:
             case NoOp:
                 {
                 break;
@@ -2117,9 +2120,11 @@ static void combineTestsAndJumps(forthMemory* mem)
             case Pow:
             case Tbl:
             case Out:
-            case Ind:
-            case QInd:
-            case EInd:
+            case Idx:
+            case QIdx:
+            case EIdx:
+            case Range:
+            case Rank:
             case NoOp:
                 break;
             }
@@ -2487,7 +2492,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                     if(!strcmp(ep->name + 1, name) && ep->name[0] == 'E') /* ! -> E(xclamation) */
                         {
                         wordp->action = ep->action;
-                        if(wordp->action == EInd)
+                        if(wordp->action == EIdx)
                             setArity(wordp, code);
                         return ++wordp;
                         }
@@ -2500,7 +2505,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                     if(!strcmp(ep->name + 1, name) && ep->name[0] == 'Q') /* ? -> Q(uestion)*/
                         {
                         wordp->action = ep->action;
-                        if(wordp->action == QInd)
+                        if(wordp->action == QIdx)
                             setArity(wordp, code);
                         return ++wordp;
                         }
@@ -2513,7 +2518,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                     if(!strcmp(ep->name, name))
                         {
                         wordp->action = ep->action;
-                        if(wordp->action == Ind)
+                        if(wordp->action == Idx)
                             setArity(wordp, code);
                         return ++wordp;
                         }
@@ -2528,8 +2533,8 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                     {
                     wordp->u.funcp = p->Cfun;
                     return ++wordp;
-        }
-    }
+                    }
+                }
 #endif
             for(forthMemory* fm = mem->nextFnc; fm; fm = fm->nextFnc)
                 {
@@ -2542,7 +2547,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                     }
                 }
             return 0;
-    }
+            }
         default:
             if(is_op(code))
                 {
@@ -2656,7 +2661,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                 ++wordp;
                 return wordp;
                 };
-    }
+        }
     }
 
 static void setparm(forthMemory* forthstuff, psk declaration)

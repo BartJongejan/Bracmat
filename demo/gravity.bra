@@ -30,13 +30,22 @@ X=
                   , $dimensions
                   , 3
                   )
+              & rank$T:?DD
+              & 0:?b
+              &   whl
+                ' ( !b:<!DD
+                  & range$(T,!b):?R
+                  & out$!b
+                  & out$!R
+                  & 1+!b:?b
+                  )
               & $iterations:?n
               & !v3+!v4:?V
               & ( add
                 =     (s.aap)
                       (s.noot)
                       (a.mies)
-                  .     2*!aap+!noot+!(ind$(mies,0,0))
+                  .     2*!aap+!noot+!(idx$(mies,0,0))
                       : ?H
                     & !H+-1
                 )
@@ -52,7 +61,7 @@ X=
                       &   whl
                         ' ( !d:>0
                           & -1+!d:?d
-                          & 0:?(ind$(acceleration,!p,!d))
+                          & 0:?(idx$(acceleration,!p,!d))
                           )
                       )
                   & $planets:?p
@@ -69,9 +78,9 @@ X=
                               &   whl
                                 ' ( !d:>0
                                   & -1+!d:?d
-                                  &     !(ind$(position,!p,!d))
-                                      + -1*!(ind$(position,!q,!d))
-                                    : ?(ind$(Diff,!d))
+                                  &     !(idx$(position,!p,!d))
+                                      + -1*!(idx$(position,!q,!d))
+                                    : ?(idx$(Diff,!d))
                                   & !Diff^2+!dist2:?dist2
                                   )
                               & ( !dist2:0
@@ -82,9 +91,9 @@ X=
                                       & -1+!d:?d
                                       &     -1
                                           * $g
-                                          * !(ind$(Diff,!d))
+                                          * !(idx$(Diff,!d))
                                           * !tsid3
-                                        : ?(ind$(acceleration,!p,!d))
+                                        : ?(idx$(acceleration,!p,!d))
                                       )
                                 )
                             | 
@@ -100,14 +109,14 @@ X=
                         ' ( !d:>0
                           & -1+!d:?d
                           &       $M
-                                * !(ind$(acceleration,!p,!d))
-                              + !(ind$(velocity,!p,!d))
+                                * !(idx$(acceleration,!p,!d))
+                              + !(idx$(velocity,!p,!d))
                             : ?velocity
                           &     $U*!velocity
-                              + !(ind$(position,!p,!d))
+                              + !(idx$(position,!p,!d))
                             : ?position
                           &   !position
-                            : ?(ind$(T,!n,!p,!d))
+                            : ?(idx$(T,!n,!p,!d))
                           )
                       )
                   )
