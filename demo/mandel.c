@@ -41,111 +41,124 @@ double ypixels = 2000.0;
 double ratio = 1.0;
 #define colfactor 256.0 / iterations
 
-static void * compiledCalcule(
-/*
-&
-  ' (
-    (s.v0)
-    (s.v1)
-    (s.v2)
-    (s.v3)
-    (s.v4)
-    (s.v5)
-*/
-    double v0,
-    double v1,
-    double v2,
-    double v3,
-    double v4,
-    double v5
-    )
+static void* compiledCalcule(
+    /*
+      &
+            ' (   (s.xpixels)
+                  (s.ypixels)
+                  (s.X)
+                  (s.Y)
+                  (s.R)
+    */
+    double xpixels,
+    double ypixels,
+    double X,
+    double Y,
+    double R
+)
     {
-/*
-.   -1+!v3:?i
-*/
-    double i = -1 + v3;
-/*
-  & tbl$(T, !v3, !v0, 2)
-*/
-    void * ret = malloc(sizeof(double[(long)v3][(long)v0]));
-    double(*T)[(long)v0] = ret;
-/*
-  &   whl
-    ' ( !i:~<0
-*/
+    /*
+              .   !X+-1*!R:?beginx
+                & !X+!R:?endx
+                & !Y+-1*!R:?beginy
+                & !Y+!R:?endy
+    */
+    double beginx = X + -1.0 * R;
+    double endx = X + R;
+    double beginy = Y + -1.0 * R;
+    double endy = Y + R;
+    /*
+                & (!endx+-1*!beginx)*(!xpixels+-1)^-1:?deltax
+                & (!endy+-1*!beginy)*(!ypixels+-1)^-1:?deltay
+    */
+    double deltax = (endx + -1.0 * beginx) / (xpixels + -1.0);
+    double deltay = (endy + -1.0 * beginy) / (ypixels + -1.0);
+    /*
+                & tbl$(T, !ypixels, !xpixels, 2)
+    */
+    void* ret = malloc(sizeof(double[(long)ypixels][(long)xpixels]));
+    double(*T)[(long)xpixels] = ret;
+    /*
+                & -1+!ypixels:?i
+    */
+    double i = -1 + ypixels;
+    /*
+                &   whl
+                  ' ( !i:~<0
+    */
     while(i >= 0.0)
         {
-/*
-      & -1+!v0:?j
-*/
-        double j = -1 + v0;
-/*
-      &   whl
-        ' ( !j:~<0
-*/
+        /*
+                    & -1+!xpixels:?j
+        */
+        double j = -1 + xpixels;
+        /*
+                    &   whl
+                      ' ( !j:~<0
+        */
         while(j >= 0.0)
             {
-/*
-          & !j*!v1+!v2:?x0
-          & !i*!v4+!v5:?y0
-          & 0:?x:?y
-          & 1:?J
-*/
-            double x0 = j * v1 + v2;
-            double y0 = i * v4 + v5;
+            /*
+                        & !j*!deltax+!beginx:?x0
+                        & !i*!deltay+!beginy:?y0
+                        & 0:?x:?y
+                        & 1:?J
+            */
+            double x0 = j * deltax + beginx;
+            double y0 = i * deltay + beginy;
             double x = 0.0;
             double y = 0.0;
             double J = 1;
-/*
-          &   whl
-            ' ( hypot$(!x,!y):~>2
-*/
+            /*
+                        &   whl
+                          ' ( hypot$(!x,!y):~>2
+            */
             while(hypot(x, y) <= 2.0)
                 {
-/*
-              & !J:$"<iterations"
-*/
+                /*
+                            & !J:$"<iterations"
+                */
                 if(J >= iterations)
                     break;
-/*
-              & !x*!x+-1*!y*!y+!x0:?xtemp
-              & 2*!x*!y+!y0:?y
-              & !xtemp:?x
-*/
-                double xtemp = x * x + -1.0 * y * y + x0;
+                /*
+                            & !x*!x+-1*!y*!y+!x0:?xtemp
+                            & 2*!x*!y+!y0:?y
+                            & !xtemp:?x
+                */
+                double xtemp = -1.0 * y * y + x0 + x * x; /* Notice: C adds terms from left to right. Bracmat evaluates LHS, RHS and finally top. */
                 y = 2.0 * x * y + y0;
                 x = xtemp;
-/*
-              & 1+!J:?J
-              )
-*/
+                /*
+                            & 1+!J:?J
+                            )
+                */
                 J = J + 1.0;
                 }
-/*
-          &   (   !J:$"<iterations"
-                & floor$(!J*$colfactor)
-              | 0
-              )
-            : ?(idx$(T,!i,!j))
-*/
+            /*
+                        &   (   !J:$"<iterations"
+                              & floor$(!J*$colfactor)
+                            | 0
+                            )
+                          : ?(idx$(T,!i,!j))
+            */
             T[(long)i][(long)j] = J < iterations ? floor(J * colfactor) : 0.0;
-/*
-          & !j+-1:?j
-          )
-*/
+            /*
+                        & !j+-1:?j
+                        )
+            */
             j = j + -1.0;
             }
-/*
-      &!i + -1: ?i
-      )
-*/
+        /*
+                    &!i + -1: ?i
+                    )
+        */
         i = i + -1.0;
         }
-/*
-          )
-      : ?calcule
-    & new$(calculation,!calcule):?compiledCalcule
-*/
+    /*
+                )
+            : ?calcule
+          & new$(calculation,!calcule):?compiledCalcule
+    */
     return ret;
     }
 
@@ -177,7 +190,8 @@ static void doit()
                     |
                     )
                   & @( div$(!m+1/2*(1/10^!d:?d),!d)
-                     : `%?f ?m
+
+                  : `%?f ?m
                      )
                   &   str
                     $ ( !s*!f
@@ -203,134 +217,85 @@ static void doit()
     double X = -0.0452407411;
     double Y = 0.9868162204352258;
     double R = 2.7E-10;
-/*
-              & !X+-1*!R:?beginx
-              & !X+!R:?endx
-              & !Y+-1*!R:?beginy
-              & !Y+!R:?endy
-*/
-    double beginx = X + -1.0 * R;
-    double endx = X + R;
-    double beginy = Y + -1.0 * R;
-    double endy = Y + R;
-/*
-              & div$(!ratio * !ypixels, 1) :?xpixels
-*/
+    /*
+                  & div$(!ratio * !ypixels, 1) :?xpixels
+    */
     double xpixels = floor(ratio * ypixels);
-/*
-            |   -2:?beginx
-              & 47/100:?endx
-              & -112/100:?beginy
-              & 112/100:?endy
-              &   (!endx+-1*!beginx)*(!endy+-1*!beginy)^-1
-                : ?X/Y
-              & div$(!ratio*!X/Y*!ypixels+1/2,1):?xpixels
-            )
-          & (!endx+-1*!beginx)*(!xpixels+-1)^-1:?deltax
-          & (!endy+-1*!beginy)*(!ypixels+-1)^-1:?deltay
-*/
-    double deltax = (endx + -1.0 * beginx) / (xpixels + -1.0);
-    double deltay = (endy + -1.0 * beginy) / (ypixels + -1.0);
-/*
-          &   out
-            $ ( imagesize
-                (!xpixels+1)*!ypixels
-                xpixels
-                !xpixels
-                deltax
-                !deltax
-                beginx
-                !beginx
-                ypixels
-                !ypixels
-                deltay
-                !deltay
-                beginy
-                !beginy
-              )
-*/
-    printf("imagesize %e\n xpixels %e\n deltax %e\n beginx %e\n endx %e\n ypixels %e\n deltay %e\n beginy %e\n endy %e\n"
-           ,(xpixels+1.0)*ypixels
-           ,xpixels
-           ,deltax
-           ,beginx
-           ,endx
-           ,ypixels
-           ,deltay
-           ,beginy
-           ,endy
-           );
-/*
-          & clk$:?t0
-*/
+    /*
+                |   -2:?beginx
+                  & 47/100:?endx
+                  & -112/100:?beginy
+                  & 112/100:?endy
+                  & 1/2*(!endx+-1*!beginx):?R
+                  & 1/2*(!beginx+!endx):?X
+                  & 1/2*(!beginy+!endy):?Y
+                )
+    */
+    /*
+              & clk$:?t0
+    */
     time_t t0 = clock();
-/*
-          & (       (compiledCalcule..calculate)
-                  $ ( !xpixels
-                    , !deltax
-                    , !beginx
-                    , !ypixels
-                    , !deltay
-                    , !beginy
-                    )
-                : ?Result
-              & out$(Result !Result)
-            | out$"Calculation did not return a value."
-            )
-*/
-    double(*T)[(long)xpixels] = compiledCalcule(xpixels, deltax, beginx, ypixels, deltay, beginy);
-/*
-          & out$(div$(clk$+-1*!t0,1) S)
-*/
+    /*
+              & (       (compiledCalcule..calculate)
+                      $ (!xpixels,!ypixels,!X,!Y,!R)
+                    : ?Result
+                  & out$(Result !Result)
+                | out$"Calculation did not return a value."
+                )
+    */
+    double(*T)[(long)xpixels] = compiledCalcule(xpixels, ypixels, X, Y, R);
+    /*
+              & out$(div$(clk$+-1*!t0,1) S)
+    */
     time_t t1 = clock();
     printf("time: %d\n", (int)floor(((double)t1 - (double)t0) / (double)CLOCKS_PER_SEC));
-/*
-          & (compiledCalcule..export)$(N,T):(,?eks)
-          & out$calculated
-          &   put
-            $ (   str
-                $ ( P3\n
-                    "#Mandelbrot"
-                    \n
-                    !xpixels
-                    " "
-                    !ypixels
-                    \n
-                    255
-                    \n
-                      map
-                    $ ( (
-                        =
-                          .   !arg:(,?arg)
-                            &   map
-                              $ ( (
-                                  =
-                                    .   !arg:
-                                      | !arg " " !arg " " !arg \n
-                                  )
-                                . !arg
-                                )
-                        )
-                      . !eks
+    /*
+              & (compiledCalcule..export)$(N,T):(,?eks)
+              & out$calculated
+              &   put
+                $ (   str
+                    $ ( P3\n
+                        "#Mandelbrot"
+                        \n
+                        !xpixels
+                        " "
+                        !ypixels
+                        \n
+                        255
+                        \n
+                          map
+                        $ ( (
+                            =
+                              .   !arg:(,?arg)
+                                &   map
+                                  $ ( (
+                                      =
+                                        .   !arg:
+                                          | !arg " " !arg " " !arg \n
+                                      )
+                                    . !arg
+                                    )
+                            )
+                          . !eks
+                          )
                       )
+                  , "MandelbrotSetArr.pgm"
+                  , NEW WYD BIN
                   )
-              , "MandelbrotSetArr.pgm"
-              , NEW WYD BIN
-              )
-*/
+    */
     FILE* fp = fopen("MandelbrotSetArrC.pgm", "wb");
     fprintf(fp, "P3\n#Mandelbrot\n%d %d\n255\n", (int)xpixels, (int)ypixels);
-        for(int k = 0; k < (long)xpixels; ++k)
-            for(int m = 0; m < (long)ypixels; ++m)
-                {
-                int arg = (int)T[k][m];
-                fprintf(fp, "%d %d %d\n", arg, arg, arg);
-                }
+    for(int k = 0; k < (long)xpixels; ++k)
+        for(int m = 0; m < (long)ypixels; ++m)
+            {
+            int arg = (int)T[k][m];
+            fprintf(fp, "%d %d %d\n", arg, arg, arg);
+            }
     fclose(fp);
-/*
-          & out$eksported
-      )
-*/
+    /*
+              & out$eksported
+          )
+    */
     }
 /*
       ( new
@@ -383,7 +348,7 @@ static void doit()
     new'Mandelbrot;
 */
 
-    int main()
-        {
-        doit();
-        }
+int main()
+    {
+    doit();
+    }

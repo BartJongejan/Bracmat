@@ -22,27 +22,33 @@ Mandelbrot=
   ( doit
   =   
     .   1000:?iterations
-      & 2000:?ypixels
-      & (1|20/9):?ratio
+      & 2000:?xpixels:?ypixels
       &   glf$('(<.$iterations))
         : (=?"<iterations")
       & 256*!iterations^-1:?colfactor
       &     
-          ' (   (s.v0)
-                (s.v1)
-                (s.v2)
-                (s.v3)
-                (s.v4)
-                (s.v5)
-            .   -1+!v3:?i
-              & tbl$(T,!v3,!v0,2)
+          ' (   (s.xpixels)
+                (s.ypixels)
+                (s.X)
+                (s.Y)
+                (s.R)
+            .   !X+-1*!R:?beginx
+              & !X+!R:?endx
+              & !Y+-1*!R:?beginy
+              & !Y+!R:?endy
+              &   (!endx+-1*!beginx)*(!xpixels+-1)^-1
+                : ?deltax
+              &   (!endy+-1*!beginy)*(!ypixels+-1)^-1
+                : ?deltay
+              & tbl$(T,!ypixels,!xpixels,2)
+              & -1+!ypixels:?i
               &   whl
                 ' ( !i:~<0
-                  & -1+!v0:?j
+                  & -1+!xpixels:?j
                   &   whl
                     ' ( !j:~<0
-                      & !j*!v1+!v2:?x0
-                      & !i*!v4+!v5:?y0
+                      & !j*!deltax+!beginx:?x0
+                      & !i*!deltay+!beginy:?y0
                       & 0:?x:?y
                       & 1:?J
                       &   whl
@@ -112,46 +118,17 @@ Mandelbrot=
               )
             : ?jsn
           & get$(!jsn,MEM,JSN):(,#%?X #%?Y #%?R)
-          & !X+-1*!R:?beginx
-          & !X+!R:?endx
-          & !Y+-1*!R:?beginy
-          & !Y+!R:?endy
-          & div$(!ratio*!ypixels,1):?xpixels
         |   -2:?beginx
           & 47/100:?endx
           & -112/100:?beginy
           & 112/100:?endy
-          &   (!endx+-1*!beginx)*(!endy+-1*!beginy)^-1
-            : ?X/Y
-          & div$(!ratio*!X/Y*!ypixels+1/2,1):?xpixels
+          & 1/2*(!endx+-1*!beginx):?R
+          & 1/2*(!beginx+!endx):?X
+          & 1/2*(!beginy+!endy):?Y
         )
-      & (!endx+-1*!beginx)*(!xpixels+-1)^-1:?deltax
-      & (!endy+-1*!beginy)*(!ypixels+-1)^-1:?deltay
-      &   out
-        $ ( imagesize
-            (!xpixels+1)*!ypixels
-            xpixels
-            !xpixels
-            deltax
-            !deltax
-            beginx
-            !beginx
-            ypixels
-            !ypixels
-            deltay
-            !deltay
-            beginy
-            !beginy
-          )
       & clk$:?t0
       & (       (compiledCalcule..calculate)
-              $ ( !xpixels
-                , !deltax
-                , !beginx
-                , !ypixels
-                , !deltay
-                , !beginy
-                )
+              $ (!xpixels,!ypixels,!X,!Y,!R)
             : ?Result
           & out$(Result !Result)
         | out$"Calculation did not return a value."
