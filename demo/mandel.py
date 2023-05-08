@@ -20,26 +20,31 @@ import time
 import math 
 
 iterations = 1000.0
-ypixels = 2000.0
-ratio = 1.0
+xpixels = ypixels = 2000.0
 colfactor = 256.0 / iterations
 
 
-def compiledCalcule(v0,v1,v2,v3,v4,v5):
-    i = -1 + v3
-    T = [[0 for x in range(math.floor(v0))] for y in range(math.floor(v3))] 
+def compiledCalcule(xpixels,ypixels,X,Y,R):
+    beginx = X + -1.0 * R
+    endx = X + R
+    beginy = Y + -1.0 * R
+    endy = Y + R
+    deltax = (endx + -1.0 * beginx) / (xpixels + -1.0)
+    deltay = (endy + -1.0 * beginy) / (ypixels + -1.0)
+    i = -1 + ypixels
+    T = [[0 for x in range(math.floor(xpixels))] for y in range(math.floor(ypixels))] 
     while i >= 0.0:
-        j = -1 + v0
+        j = -1 + xpixels
         while j >= 0.0:
-            x0 = j * v1 + v2
-            y0 = i * v4 + v5
+            x0 = j * deltax + beginx
+            y0 = i * deltay + beginy
             x = 0.0
             y = 0.0
             J = 1.0
             while math.hypot(x, y) <= 2.0:
                 if J >= iterations:
                     break
-                xtemp = x * x + -1.0 * y * y + x0
+                xtemp = -1.0 * y * y + x0 + x * x
                 y = 2.0 * x * y + y0
                 x = xtemp
                 J = J + 1.0
@@ -65,17 +70,10 @@ def doit():
     X = -0.0452407411
     Y = 0.9868162204352258
     R = 2.7E-10
-    beginx = X + -1.0 * R
-    endx = X + R
-    beginy = Y + -1.0 * R
-    endy = Y + R
-    xpixels = math.floor(ratio * ypixels)
-    deltax = (endx + -1.0 * beginx) / (xpixels + -1.0)
-    deltay = (endy + -1.0 * beginy) / (ypixels + -1.0)
 
     t0 = time.perf_counter()
 
-    T = compiledCalcule(xpixels, deltax, beginx, ypixels, deltay, beginy)
+    T = compiledCalcule(xpixels,ypixels,X,Y,R)
 
     t1 = time.perf_counter()
     print("Time:", t1 - t0 )
@@ -91,5 +89,7 @@ def doit():
     textfile.close()
 
     print("done")
+    t2 = time.perf_counter()
+    print("Total Time:", t2 - t0 )
 
 doit()
