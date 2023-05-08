@@ -38,7 +38,6 @@ Mandelbrot=
 */
 #define iterations 1000.0
 double ypixels = 2000.0;
-double ratio = 1.0;
 #define colfactor 256.0 / iterations
 
 static void* compiledCalcule(
@@ -217,10 +216,7 @@ static void doit()
     double X = -0.0452407411;
     double Y = 0.9868162204352258;
     double R = 2.7E-10;
-    /*
-                  & div$(!ratio * !ypixels, 1) :?xpixels
-    */
-    double xpixels = floor(ratio * ypixels);
+    double xpixels = ypixels;
     /*
                 |   -2:?beginx
                   & 47/100:?endx
@@ -292,6 +288,8 @@ static void doit()
             fprintf(fp, "%d %d %d\n", arg, arg, arg);
             }
     fclose(fp);
+    time_t t2 = clock();
+    printf("Total Time: %d\n", (int)floor(((double)t2 - (double)t0) / (double)CLOCKS_PER_SEC));
     /*
               & out$eksported
           )
