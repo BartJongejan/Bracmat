@@ -167,6 +167,7 @@ Mandelbrot=
           , NEW WYD BIN
           )
       & out$eksported
+      & out$("Total Time:" div$(clk$+-1*!t0,1) S)
   )
   ( new
   =   
