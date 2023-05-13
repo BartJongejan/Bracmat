@@ -81,6 +81,8 @@ typedef enum
     , Fmod
     , Hypot
     , Pow
+    , Subtract
+    , Divide
     , Tbl
     , Out
     , Idx   /*   idx$(<array name>,<index>,...)  */
@@ -141,6 +143,8 @@ static char* ActionAsWord[] =
     , "Fmod                       "
     , "Hypot                      "
     , "Pow                        "
+    , "Subtract                   "
+    , "Divide                     "
     , "tbl                        "
     , "idx                        "
     , "Qidx                       "
@@ -698,6 +702,8 @@ static Epair epairs[] =
         {"fmod",  Fmod},
         {"hypot", Hypot},
         {"pow",   Pow},
+        {"Subtract",    Subtract},
+        {"Divide",Divide},
         {"tbl",   Tbl},
         {"out",   Out},
         {"idx",   Idx},
@@ -937,6 +943,9 @@ static stackvalue* calculateBody(forthMemory* mem)
             case Fmod:  a = ((sp--)->val).floating; sp->val.floating = fmod(a, (sp->val).floating); ++wordp; break;
             case Hypot:  a = ((sp--)->val).floating; sp->val.floating = hypot(a, (sp->val).floating); ++wordp; break;
             case Pow:  a = ((sp--)->val).floating; sp->val.floating = pow(a, (sp->val).floating); ++wordp; break;
+            case Subtract: a = ((sp--)->val).floating; sp->val.floating = a - (sp->val).floating; ++wordp; break;
+            case Divide: a = ((sp--)->val).floating; sp->val.floating = a / (sp->val).floating; ++wordp; break;
+
             case Tbl:
                 {
                 size_t rank = (size_t)((sp--)->val).floating;
@@ -1258,7 +1267,9 @@ static stackvalue* trcBody(forthMemory* mem)
             case Fdim:  printf("Pop fmin  "); a = ((sp--)->val).floating; sp->val.floating = fdim(a, (sp->val).floating); ++wordp; break;
             case Fmod:  printf("Pop fmod  "); a = ((sp--)->val).floating; sp->val.floating = fmod(a, (sp->val).floating); ++wordp; break;
             case Hypot:  printf("Pop hypot "); a = ((sp--)->val).floating; sp->val.floating = hypot(a, (sp->val).floating); ++wordp; break;
-            case Pow:  printf("Pop pow   "); a = ((sp--)->val).floating; sp->val.floating = pow(a, (sp->val).floating); ++wordp; break;
+            case Pow:    printf("Pop pow   "); a = ((sp--)->val).floating; sp->val.floating = pow(a, (sp->val).floating); ++wordp; break;
+            case Subtract: printf("Pop subtract"); a = ((sp--)->val).floating; sp->val.floating = a - (sp->val).floating; ++wordp; break;
+            case Divide: printf("Pop divide"); a = ((sp--)->val).floating; sp->val.floating = a / (sp->val).floating; ++wordp; break;
             case Tbl:
                 {
                 size_t rank = (size_t)((sp--)->val).floating;
@@ -1638,7 +1649,9 @@ static Boolean printmem(forthMemory* mem)
             case Fmin:  printf(INDNT); printf(LONGD " Pop fmin   \n", wordp - mem->word); --In; break;
             case Fmod:  printf(INDNT); printf(LONGD " Pop fmod   \n", wordp - mem->word); --In; break;
             case Hypot:  printf(INDNT); printf(LONGD " Pop hypot  \n", wordp - mem->word); --In; break;
-            case Pow:  printf(INDNT); printf(LONGD " Pop pow    \n", wordp - mem->word); --In; break;
+            case Pow:  printf(INDNT); printf(LONGD      " Pop pow    \n", wordp - mem->word); --In; break;
+            case Subtract:  printf(INDNT); printf(LONGD " Pop subtract\n", wordp - mem->word); --In; break;
+            case Divide:  printf(INDNT); printf(LONGD   " Pop divide \n", wordp - mem->word); --In; break;
             case Tbl:  printf(INDNT); printf(LONGD " Pop tbl    \n", wordp - mem->word); --In; break;
             case Out:  printf(INDNT); printf(LONGD " Pop out    \n", wordp - mem->word); --In; break;
             case Idx:  printf(INDNT); printf(LONGD " Pop idx    \n", wordp - mem->word); --In; break;
@@ -2023,6 +2036,8 @@ static void optimizeJumps(forthMemory* mem)
             case Fmod:
             case Hypot:
             case Pow:
+            case Subtract:
+            case Divide:
             case Tbl:
             case Out:
             case Idx:
@@ -2118,6 +2133,8 @@ static void combineTestsAndJumps(forthMemory* mem)
             case Fmod:
             case Hypot:
             case Pow:
+            case Subtract:
+            case Divide:
             case Tbl:
             case Out:
             case Idx:
