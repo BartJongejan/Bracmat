@@ -702,8 +702,8 @@ static Epair epairs[] =
         {"fmod",  Fmod},
         {"hypot", Hypot},
         {"pow",   Pow},
-        {"Subtract",    Subtract},
-        {"Divide",Divide},
+        {"subtract",    Subtract},
+        {"divide",Divide},
         {"tbl",   Tbl},
         {"out",   Out},
         {"idx",   Idx},
@@ -943,8 +943,8 @@ static stackvalue* calculateBody(forthMemory* mem)
             case Fmod:  a = ((sp--)->val).floating; sp->val.floating = fmod(a, (sp->val).floating); ++wordp; break;
             case Hypot:  a = ((sp--)->val).floating; sp->val.floating = hypot(a, (sp->val).floating); ++wordp; break;
             case Pow:  a = ((sp--)->val).floating; sp->val.floating = pow(a, (sp->val).floating); ++wordp; break;
-            case Subtract: a = ((sp--)->val).floating; sp->val.floating = a - (sp->val).floating; ++wordp; break;
-            case Divide: a = ((sp--)->val).floating; sp->val.floating = a / (sp->val).floating; ++wordp; break;
+            case Subtract: a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating - a; ++wordp; break;
+            case Divide: a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating / a; ++wordp; break;
 
             case Tbl:
                 {
@@ -1268,8 +1268,8 @@ static stackvalue* trcBody(forthMemory* mem)
             case Fmod:  printf("Pop fmod  "); a = ((sp--)->val).floating; sp->val.floating = fmod(a, (sp->val).floating); ++wordp; break;
             case Hypot:  printf("Pop hypot "); a = ((sp--)->val).floating; sp->val.floating = hypot(a, (sp->val).floating); ++wordp; break;
             case Pow:    printf("Pop pow   "); a = ((sp--)->val).floating; sp->val.floating = pow(a, (sp->val).floating); ++wordp; break;
-            case Subtract: printf("Pop subtract"); a = ((sp--)->val).floating; sp->val.floating = a - (sp->val).floating; ++wordp; break;
-            case Divide: printf("Pop divide"); a = ((sp--)->val).floating; sp->val.floating = a / (sp->val).floating; ++wordp; break;
+            case Subtract: printf("Pop subtract"); a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating - a; ++wordp; break;
+            case Divide: printf("Pop divide"); a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating / a; ++wordp; break;
             case Tbl:
                 {
                 size_t rank = (size_t)((sp--)->val).floating;
