@@ -44,7 +44,7 @@ def compiledCalcule(xpixels,ypixels,X,Y,R):
             while math.hypot(x, y) <= 2.0:
                 if J >= iterations:
                     break
-                xtemp = -1.0 * y * y + x0 + x * x
+                xtemp = - y * y + x0 + x * x
                 y = 2.0 * x * y + y0
                 x = xtemp
                 J = J + 1.0
@@ -67,10 +67,16 @@ def calculate(a0, a1):
 '''
 
 def doit():
+    json = "[-0.16070135,1.0375665,1.0E-7]";
+    X = -0.16070135;
+    Y = 1.0375665;
+    R = 1.0E-7;
+
+    '''
     X = -0.0452407411
     Y = 0.9868162204352258
     R = 2.7E-10
-
+    '''
     t0 = time.perf_counter()
 
     T = compiledCalcule(xpixels,ypixels,X,Y,R)
@@ -79,9 +85,9 @@ def doit():
     print("Time:", t1 - t0 )
 
     print("\nlooped")   
-    textfile = open("mandelPy.pgm", "w")
+    textfile = open("mandelPy"+json+".pgm", "w")
 
-    textfile.write("P3\n#Mandelbrot\n" + str(xpixels) + " " + str(math.floor(ypixels)) + "\n255\n")
+    textfile.write("P3\n#Mandelbrot\n" + str(math.floor(xpixels)) + " " + str(math.floor(ypixels)) + "\n255\n")
     for k in range(0,math.floor(xpixels)):
         for m in range(0,math.floor(ypixels)):
             arg = math.floor(T[k][m])

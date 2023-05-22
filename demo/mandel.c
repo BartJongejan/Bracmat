@@ -124,7 +124,7 @@ static void* compiledCalcule(
                             & 2*!x*!y+!y0:?y
                             & !xtemp:?x
                 */
-                double xtemp = -1.0 * y * y + x0 + x * x; /* Notice: C adds terms from left to right. Bracmat evaluates LHS, RHS and finally top. */
+                double xtemp = - y * y + x0 + x * x; /* Notice: C adds terms from left to right. Bracmat evaluates LHS, RHS and finally top. */
                 y = 2.0 * x * y + y0;
                 x = xtemp;
                 /*
@@ -213,9 +213,10 @@ static void doit()
                 : ?jsn
               & get$(!jsn,MEM,JSN):(,#%?X #%?Y #%?R)
 */
-    double X = -0.0452407411;
-    double Y = 0.9868162204352258;
-    double R = 2.7E-10;
+    char json[] = "[-0.16070135,1.0375665,1.0E-7]";
+    double X = -0.16070135;
+    double Y = 1.0375665;
+    double R = 1.0E-7;
     double xpixels = ypixels;
     /*
                 |   -2:?beginx
@@ -279,7 +280,9 @@ static void doit()
                   , NEW WYD BIN
                   )
     */
-    FILE* fp = fopen("MandelbrotSetArrC.pgm", "wb");
+    char name[256];
+    sprintf(name, "MandelbrotSetArrC-%s.pgm", json);
+    FILE* fp = fopen(name, "wb");
     fprintf(fp, "P3\n#Mandelbrot\n%d %d\n255\n", (int)xpixels, (int)ypixels);
     for(int k = 0; k < (long)xpixels; ++k)
         for(int m = 0; m < (long)ypixels; ++m)

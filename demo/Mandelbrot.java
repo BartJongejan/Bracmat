@@ -3,6 +3,9 @@ class Mandelbrot {
 static double iterations = 1000.0;
 static double ypixels = 2000.0;
 static double colfactor = 256.0 / iterations;
+static long startTime;
+static long computeTime;
+static long endTime;
 
 
 static void compiledCalcule(
@@ -35,7 +38,7 @@ static void compiledCalcule(
                 {
                 if(J >= iterations)
                     break;
-                double xtemp = -1.0 * y * y + x0 + x * x; /* Notice: C adds terms from left to right. Bracmat evaluates LHS, RHS and finally top. */
+                double xtemp = - y * y + x0 + x * x; /* Notice: C adds terms from left to right. Bracmat evaluates LHS, RHS and finally top. */
                 y = 2.0 * x * y + y0;
                 x = xtemp;
                 J = J + 1.0;
@@ -50,17 +53,25 @@ static void compiledCalcule(
 
 static void doit()
     {
-    double X = -0.0452407411;
-    double Y = 0.9868162204352258;
-    double R = 2.7E-10;
+    String json = "[-0.16070135,1.0375665,1.0E-7]";
+    double X = -0.16070135;
+    double Y = 1.0375665;
+    double R = 1.0E-7;
+
+//    double X = -0.0452407411;
+//    double Y = 0.9868162204352258;
+//    double R = 2.7E-10;
     double xpixels = ypixels;
     double[][] T = new double[(int)ypixels][(int)xpixels];
     compiledCalcule(xpixels, ypixels, X, Y, R,T);
+    computeTime = System.nanoTime();
+    long duration = (computeTime - startTime);
+    System.out.println("Computation:"+String.valueOf(duration)); 
 //    System.out.println("time: %d\n", (int)floor(((double)t1 - (double)t0) / (double)CLOCKS_PER_SEC));
     java.io.OutputStreamWriter writer = null;
     try 
         {
-        writer = new java.io.OutputStreamWriter(new java.io.FileOutputStream("MandelbrotSetArrJava.pgm"));
+        writer = new java.io.OutputStreamWriter(new java.io.FileOutputStream("MandelbrotSetArrJava-"+json+".pgm"));
         writer.write("P3\n#Mandelbrot\n"+String.valueOf((int)xpixels)+" "+String.valueOf((int)ypixels)+"\n255\n");
         for(int k = 0; k < (int)xpixels; ++k)
             for(int m = 0; m < (int)ypixels; ++m)
@@ -91,12 +102,12 @@ static void doit()
 
 public static void main(String[] args) 
     {
-    long startTime = System.nanoTime();
+    startTime = System.nanoTime();
 
     doit();
-    long endTime = System.nanoTime();
+    endTime = System.nanoTime();
 
     long duration = (endTime - startTime);
-    System.out.println("Hello, World!" + String.valueOf(duration)); 
+    System.out.println("Total:"+String.valueOf(duration)); 
     }
 }

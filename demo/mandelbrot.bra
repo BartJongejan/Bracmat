@@ -22,7 +22,7 @@ Mandelbrot=
   ( doit
   =   
     .   1000:?iterations
-      & 1000:?xpixels:?ypixels
+      & 2000:?xpixels:?ypixels
       &   glf$('(<.$iterations))
         : (=?"<iterations")
       & 256*!iterations^-1:?colfactor
@@ -54,7 +54,7 @@ Mandelbrot=
                       &   whl
                         ' ( hypot$(!x,!y):~>2
                           & !J:$"<iterations"
-                          &   subtract$(!x*!x,!y*!y)+!x0
+                          &   !x*!x+subtract$(!x0,!y*!y)
                             : ?xtemp
                           & 2*!x*!y+!y0:?y
                           & !xtemp:?x
