@@ -13,7 +13,7 @@ X=
       & 3:?dimensions
       & 30000:?iterations
       & 300:?g
-      & 1:?M
+      & 1:?MB
       & 1/11:?U
       & !dimensions*!planets:?dimpla
       &     
