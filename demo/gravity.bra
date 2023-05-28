@@ -11,25 +11,20 @@ X=
       , times varv3 x y z
     .   4:?planets
       & 3:?dimensions
-      & 30000:?iterations
+      & 3000:?iterations
       & 300:?g
-      & 1:?MB
+      & 1:?M
       & 1/11:?U
       & !dimensions*!planets:?dimpla
       &     
-          ' (   (a.position)
-                (a.velocity)
-                (a.acceleration)
+          ' (   (a.position,4,3)
+                (a.velocity,4,3)
+                (a.acceleration,4,3)
                 (s.v3)
                 (s.v4)
-            .   tbl$(Diff,$dimensions,1)
+            .   tbl$(Diff,$dimensions)
               &   tbl
-                $ ( T
-                  , $iterations
-                  , $planets
-                  , $dimensions
-                  , 3
-                  )
+                $ (T,$iterations,$planets,$dimensions)
               & rank$T:?DD
               & 0:?b
               &   whl
@@ -124,7 +119,7 @@ X=
             )
         : ?code
       & new$(calculation,!code):?calc
-      & (~|(calc..print)$)
+      & (|(calc..print)$)
       & (     (calc..calculate)
             $ (   
                 ,   (,0 100 0)
