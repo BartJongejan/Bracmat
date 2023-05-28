@@ -2764,7 +2764,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                                 size_t rank = arr->rank;
                                 if(rank == 0)
                                     {
-                                    fprintf(stderr, "%s: Array \"%s\" has unknown rank and range(s). Assuming %zu, based on idx.\n", name, arrname, h);
+//                                    fprintf(stderr, "%s: Array \"%s\" has unknown rank and range(s). Assuming %zu, based on idx.\n", name, arrname, h);
                                     rank = arr->rank = h;
 //                                    return 0;
                                     }
@@ -2825,11 +2825,12 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                     if(!strcmp(funcs->name, name))
                         {
                         parameter* parms;
-                        for(parms = mem->parameters + mem->nparameters; --parms >= mem->parameters;)
+                        printf("%s: nparameters %zu\n", name, funcs->nparameters);
+                        for(parms = funcs->parameters + funcs->nparameters; --parms >= funcs->parameters;)
                             {
                             printf("%s rhs:", name); result(rhs); printf("\n");
 
-                            if(!is_op(rhs))
+                            if(!is_op(rhs) && parms > funcs->parameters)
                                 {
                                 fprintf(stderr, "Too few parameters.\n");
                             //    return 0;
@@ -2850,6 +2851,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                                     {
                                     if(HAS_VISIBLE_FLAGS_OR_MINUS(parm))
                                         {
+                                        printf("%s rhs:", name); result(parm); printf("\n");
                                         fprintf(stderr, "When passing an array to a function, the array name must be free of any prefixes.\n");
                                         return 0;
                                         }
@@ -2859,7 +2861,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                                 rhs = rhs->RIGHT;
                             else
                                 {
-                                assert(parms == mem->parameters);
+                                assert(parms == funcs->parameters);
                                 }
                             }
                         }
