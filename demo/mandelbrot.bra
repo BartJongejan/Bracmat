@@ -40,7 +40,7 @@ Mandelbrot=
                 : ?deltax
               &   (!endy+-1*!beginy)*(!ypixels+-1)^-1
                 : ?deltay
-              & tbl$(T,!ypixels,!xpixels,2)
+              & tbl$(T,!ypixels,!xpixels)
               & -1+!ypixels:?i
               &   whl
                 ' ( !i:~<0

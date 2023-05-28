@@ -332,11 +332,9 @@ static forthvariable* createVariablePointer(forthvariable** varp, char* name)
     forthvariable* newvarp = (forthvariable*)bmalloc(__LINE__, sizeof(forthvariable));
     if(newvarp)
         {
-        //printf("bmalloc:%s\n", "forthvariable");
         newvarp->name = bmalloc(__LINE__, strlen(name) + 1);
         if(newvarp->name)
             {
-            //printf("bmalloc:%s\n", "char[]");
             strcpy(newvarp->name, name);
             }
         newvarp->next = *varp;
@@ -362,7 +360,6 @@ Boolean initialise(fortharray* curarrp, size_t size)
     curarrp->pval = (forthvalue*)bmalloc(__LINE__, size * sizeof(forthvalue));
     if(curarrp->pval)
         {
-        //printf("bmalloc:%s\n", "forthvalue[]");
         memset(curarrp->pval, 0, size * sizeof(forthvalue));
         curarrp->size = size;
         }
@@ -393,16 +390,15 @@ static fortharray* getOrCreateArrayPointer(fortharray** arrp, char* name, size_t
         curarrp = *arrp;
         //assert(*arrp == 0);
         *arrp = (fortharray*)bmalloc(__LINE__, sizeof(fortharray));
+        memset(*arrp, 0, sizeof(fortharray));
         if(*arrp)
             {
-            //printf("bmalloc:%s\n", "fortharray");
             (*arrp)->next = curarrp;
             curarrp = *arrp;
             assert(curarrp->name == 0);
             curarrp->name = bmalloc(__LINE__, strlen(name) + 1);
             if(curarrp->name)
                 {
-                //printf("bmalloc:%s\n", "char[]");
                 strcpy(curarrp->name, name);
                 curarrp->rank = 0;
                 curarrp->range = 0;
@@ -465,11 +461,9 @@ static fortharray* getOrCreateArrayPointerButNoArray(fortharray** arrp, char* na
         *arrp = (fortharray*)bmalloc(__LINE__, sizeof(fortharray));
         if(*arrp)
             {
-            //printf("bmalloc:%s\n", "fortharray");
             (*arrp)->name = bmalloc(__LINE__, strlen(name) + 1);
             if((*arrp)->name)
                 {
-                //printf("bmalloc:%s\n", "char[]");
                 strcpy((*arrp)->name, name);
                 (*arrp)->next = curarrp;
                 (*arrp)->pval = 0;
@@ -523,7 +517,6 @@ static int setFloat(double* destination, psk args)
         }
     else if(args->u.sobj == '\0')
         {
-        /*printf("setArgsArr fails, numerical value missing\n");*/
         fprintf(stderr, "Numerical value missing.\n");
         return 0; /* Something wrong happened. */
         }
@@ -633,7 +626,7 @@ static void set_vals(forthvalue* pval, size_t rank, size_t* range, psk Node)
         }
     }
 
-static long setArgs(forthMemory * mem, size_t Nparm, psk args)
+static long setArgs(forthMemory* mem, size_t Nparm, psk args)
     {
     parameter* curparm = mem->parameters;
     long ParmIndex = (long)Nparm;
@@ -647,7 +640,6 @@ static long setArgs(forthMemory * mem, size_t Nparm, psk args)
             size_t* range = (size_t*)bmalloc(__LINE__, rank * sizeof(size_t));
             if(range != 0)
                 {
-                //printf("bmalloc:%s\n", "size_t[]");
                 memset(range, 0, rank * sizeof(size_t));
                 set_range(range + rank - 1, args);
                 size_t totsize = 1;
@@ -1027,7 +1019,6 @@ static stackvalue* calculateBody(forthMemory* mem)
                     }
                 if(range != 0)
                     {
-                    //printf("bmalloc:%s\n", "size_t[]");
                     for(size_t j = 0; j < rank; ++j)
                         {
                         if(range[j] == 0)
@@ -1046,7 +1037,6 @@ static stackvalue* calculateBody(forthMemory* mem)
                     arr->pval = (forthvalue*)bmalloc(__LINE__, size * sizeof(forthvalue));
                     if(arr->pval)
                         {
-                        //printf("bmalloc:%s\n", "forthvalue[]");
                         memset(arr->pval, 0, size * sizeof(forthvalue));
                         }
                     arr->rank = rank;
@@ -1123,9 +1113,9 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
     {
     psk Arg = (*arg)->RIGHT;
     forthMemory* mem = (forthMemory*)(This->voiddata);
-    parameter* curparm = mem->parameters;
     if(mem)
         {
+        parameter* curparm = mem->parameters;
         if(!curparm || setArgs(mem, 0, Arg) > 0)
             {
             stackvalue* sp = calculateBody(mem);
@@ -1160,7 +1150,6 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                     res = (psk)bmalloc(__LINE__, len + 1);
                     if(res)
                         {
-                        //                    printf("bmalloc:%s\n", "char[]");
                         strcpy((char*)(res)+offsetof(sk, u.sobj), buf);
                         wipe(*arg);
                         *arg = /*same_as_w*/(res);
@@ -1809,7 +1798,6 @@ static psk createOperatorNode(int operator)
     psk operatorNode = (psk)bmalloc(__LINE__, sizeof(knode));
     if(operatorNode)
         {
-        //        printf("bmalloc:%s\n", "knode");
         operatorNode->v.fl = (operator | SUCCESS | READY) & COPYFILTER;
         //operatorNode->v.fl &= COPYFILTER;
         operatorNode->LEFT = 0;
@@ -1826,7 +1814,6 @@ static psk FloatNode(double val)
     psk res = (psk)bmalloc(__LINE__, bytes);
     if(res)
         {
-        //printf("bmalloc:%s\n", "psk");
         strcpy((char*)(res)+offsetof(sk, u.sobj), jotter);
         res->v.fl = READY | SUCCESS BITWISE_OR_SELFMATCHING;
         res->v.fl &= COPYFILTER;
@@ -1842,7 +1829,6 @@ static psk HexNode(double val)
     psk res = (psk)bmalloc(__LINE__, bytes);
     if(res)
         {
-        //printf("bmalloc:%s\n", "psk");
         strcpy((char*)(res)+offsetof(sk, u.sobj), jotter);
         res->v.fl = READY | SUCCESS BITWISE_OR_SELFMATCHING;
         res->v.fl &= COPYFILTER;
@@ -1861,7 +1847,6 @@ static psk IntegerNode(double val)
     psk res = (psk)bmalloc(__LINE__, bytes);
     if(res)
         {
-        //printf("bmalloc:%s\n", "psk");
         strcpy((char*)(res)+offsetof(sk, u.sobj), jotter);
         res->v.fl = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
         res->v.fl &= COPYFILTER;
@@ -1915,7 +1900,6 @@ static psk FractionNode(double val)
     psk res = (psk)bmalloc(__LINE__, bytes);
     if(res)
         {
-        //printf("bmalloc:%s\n", "psk");
         strcpy((char*)(res)+offsetof(sk, u.sobj), jotter);
         res->v.fl = flg;
         res->v.fl &= COPYFILTER;
@@ -1931,12 +1915,6 @@ static psk eksportArray(forthvalue* val, size_t rank, size_t* range)
     head->LEFT = same_as_w(&nilNode);
     if(rank > 1)
         { /* Go deeper */
-        /*
-        printf("range\n");
-        for(int j = 0; j < rank; ++j)
-            printf("%d ", range[j]);
-        printf("\n");
-        */
         size_t stride = 1;
         for(size_t k = 0; k < rank - 1; ++k)
             stride *= range[k];
@@ -2280,7 +2258,6 @@ static void compaction(forthMemory* mem)
     arr = (int*)bmalloc(__LINE__, sizeof(int) * cells + 10);
     if(arr)
         {
-        //printf("bmalloc:%s\n", "int[]");
         cells = 0;
 
         for(wordp = mem->word; wordp->action != TheEnd; ++wordp)
@@ -2305,7 +2282,6 @@ static void compaction(forthMemory* mem)
     newword = bmalloc(__LINE__, skipping * sizeof(forthword) + 10);
     if(newword)
         {
-        //printf("bmalloc:%s\n", "forthword[]");
         cells = 0;
         fwhlseen = 0;
         for(wordp = mem->word, newwordp = newword; wordp->action != TheEnd; ++wordp)
@@ -2345,7 +2321,7 @@ static void compaction(forthMemory* mem)
 #define         VEQUAL(psk)             (((psk)->v.fl & (VARCOMP)) == (INDIRECT))
 #define VNOTLESSORMORE(psk)             (((psk)->v.fl & (VARCOMP)) == (INDIRECT|NOT|SMALLER_THAN|GREATER_THAN))
 
-static forthMemory* calcnew(psk arg);
+static forthMemory* calcnew(psk arg, Boolean in_function);
 
 static void setArity(forthword* wordp, psk code)
     {
@@ -2360,23 +2336,26 @@ static void setArity(forthword* wordp, psk code)
     wordp->offset = arity;
     }
 
-static fortharray* haveArray(forthMemory* forthstuff, psk declaration)
+static fortharray* haveArray(forthMemory* forthstuff, psk declaration, Boolean in_function)
     {
     psk pname = 0;
     psk ranges = 0;
-    printf("haveArray::decl: ");
-    result(declaration);
-    printf("\n");
 
     if(is_op(declaration))
         {
         if(is_op(declaration->LEFT))
             {
             fprintf(stderr, "Array parameter declaration requires name.\n");
-            return FALSE;
+            return 0;
             }
         pname = declaration->LEFT;
         ranges = declaration->RIGHT;
+
+        if(in_function)
+            {
+            fprintf(stderr, "In functions, array parameter (here: [%s]) declarations do not take range specs.\n",&(pname->u.sobj));
+            //   return FALSE;
+            }
         }
     else
         {
@@ -2388,20 +2367,19 @@ static fortharray* haveArray(forthMemory* forthstuff, psk declaration)
     if(HAS_VISIBLE_FLAGS_OR_MINUS(pname))
         {
         fprintf(stderr, "Array name may not have any prefixes.\n");
-        return FALSE;
+        return 0;
         }
 
     fortharray* a = getOrCreateArrayPointer(&(forthstuff->arr), &(pname->u.sobj), 0);
-    if(a && ranges)
+    if(!in_function && a && ranges)
         {
-        size_t rank = 0;
+        size_t rank = 1;
         psk kn;
         for(kn = ranges; is_op(kn); kn = kn->RIGHT)
             {
             ++rank;
             }
-        if(INTEGER_POS(kn))
-            ++rank;
+
         a->rank = rank;
         assert(a->range == 0);
         a->range = (size_t*)bmalloc(__LINE__, rank * sizeof(size_t));
@@ -2410,10 +2388,12 @@ static fortharray* haveArray(forthMemory* forthstuff, psk declaration)
         for(kn = ranges, prange = a->range + rank - 1;; )
             {
             psk H;
+
             if(is_op(kn))
                 H = kn->LEFT;
             else
                 H = kn;
+
             if(INTEGER_POS(H))
                 *prange = strtod(&(H->u.sobj), 0);
             else if((H->v.fl & VISIBLE_FLAGS) == INDIRECT)
@@ -2421,10 +2401,9 @@ static fortharray* haveArray(forthMemory* forthstuff, psk declaration)
             else
                 {
                 fprintf(stderr, "Range specification of array \"%s\" invalid. It must be a positive number or a variable name prefixed with '!'\n", a->name);
-                //bfree(a->range);
-                //a->range = 0;
                 return 0;
                 }
+
             totsize *= *prange;
             if(!is_op(kn))
                 break;
@@ -2446,7 +2425,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
         {
         case EQUALS:
             {
-            forthMemory* acalc = calcnew(code);
+            forthMemory* acalc = calcnew(code, TRUE);
             if(acalc)
                 {
                 acalc->nextFnc = mem->nextFnc;
@@ -2724,7 +2703,6 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
 #endif
             char* name = &code->LEFT->u.sobj;
             psk rhs = code->RIGHT;
-            printf("FUN rhs:"); result(rhs); printf("\n");
             if(!strcmp(name, "idx") || !strcmp(name, "tbl"))
                 { /* Check that name is array name and that arity is correct. */
                 if(is_op(rhs))
@@ -2746,7 +2724,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
 
                             if(arr == 0 && !strcmp(name, "tbl"))
                                 {
-                                arr = haveArray(mem, rhs);
+                                arr = haveArray(mem, rhs, FALSE);
                                 }
 
                             if(arr == 0)
@@ -2764,9 +2742,9 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                                 size_t rank = arr->rank;
                                 if(rank == 0)
                                     {
-//                                    fprintf(stderr, "%s: Array \"%s\" has unknown rank and range(s). Assuming %zu, based on idx.\n", name, arrname, h);
+                                    //                                    fprintf(stderr, "%s: Array \"%s\" has unknown rank and range(s). Assuming %zu, based on idx.\n", name, arrname, h);
                                     rank = arr->rank = h;
-//                                    return 0;
+                                    //                                    return 0;
                                     }
                                 if(h != rank)
                                     {
@@ -2825,15 +2803,12 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                     if(!strcmp(funcs->name, name))
                         {
                         parameter* parms;
-                        printf("%s: nparameters %zu\n", name, funcs->nparameters);
                         for(parms = funcs->parameters + funcs->nparameters; --parms >= funcs->parameters;)
                             {
-                            printf("%s rhs:", name); result(rhs); printf("\n");
-
                             if(!is_op(rhs) && parms > funcs->parameters)
                                 {
                                 fprintf(stderr, "Too few parameters.\n");
-                            //    return 0;
+                                //    return 0;
                                 }
                             psk parm;
                             if(Op(rhs) == COMMA)
@@ -2851,7 +2826,6 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                                     {
                                     if(HAS_VISIBLE_FLAGS_OR_MINUS(parm))
                                         {
-                                        printf("%s rhs:", name); result(parm); printf("\n");
                                         fprintf(stderr, "When passing an array to a function, the array name must be free of any prefixes.\n");
                                         return 0;
                                         }
@@ -3054,13 +3028,10 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
         }
     }
 
-static Boolean setparm(size_t Ndecl, forthMemory* forthstuff, psk declaration)
+static Boolean setparm(size_t Ndecl, forthMemory* forthstuff, psk declaration, Boolean in_function)
     {
     parameter* opar;
     parameter* npar;
-    printf("setparm::decl[%zu]: ", Ndecl);
-    result(declaration);
-    printf("\n");
     if(is_op(declaration->LEFT))
         {
         fprintf(stderr, "Parameter declaration requires 's' or 'a'.\n");
@@ -3090,7 +3061,7 @@ static Boolean setparm(size_t Ndecl, forthMemory* forthstuff, psk declaration)
         }
     else // array
         {
-        fortharray* a = haveArray(forthstuff, declaration->RIGHT);
+        fortharray* a = haveArray(forthstuff, declaration->RIGHT, in_function);
         if(a)
             {
             npar = forthstuff->parameters + Ndecl;
@@ -3110,7 +3081,6 @@ static Boolean calcdie(forthMemory* mem);
 
 static Boolean functiondie(forthMemory* mem)
     {
-    //printf("functiondie %p\n", mem);
     if(!mem)
         {
         fprintf(stderr, "calculation.functiondie does not deallocate, member \"mem\" is zero.\n");
@@ -3125,10 +3095,8 @@ static Boolean functiondie(forthMemory* mem)
         forthvariable* nextvarp = curvarp->next;
         if(curvarp->name)
             {
-            //printf("bfree:%s\n", "char[]");
             bfree(curvarp->name);
             }
-        //printf("bfree:%s\n", "forthvariable");
         bfree(curvarp);
         curvarp = nextvarp;
         }
@@ -3156,15 +3124,13 @@ static Boolean functiondie(forthMemory* mem)
                 if(curarr->pval)
                     bfree(curarr->pval);
                 }
-            printf("bfree:char[%s]\n", curarr->name);
             bfree(curarr->name);
             }
 
-        //printf("bfree:%s\n", "fortharray");
         bfree(curarr);
         curarr = nextarrp;
         }
-    if(mem->parameters)    
+    if(mem->parameters)
         bfree(mem->parameters);
     for(; functions;)
         {
@@ -3174,20 +3140,17 @@ static Boolean functiondie(forthMemory* mem)
         }
     if(mem->name)
         {
-        //printf("bfree:%s\n", "char[]");
         bfree(mem->name);
         }
     if(mem->word)
         {
-        //printf("bfree:%s\n", "forthword");
         bfree(mem->word);
         }
-    //printf("bfree:%s\n", "forthMemory");
     bfree(mem);
     return TRUE;
     }
 
-static forthMemory* calcnew(psk arg)
+static forthMemory* calcnew(psk arg, Boolean in_function)
     {
     int newval = 0;
     psk code, fullcode;
@@ -3214,7 +3177,6 @@ static forthMemory* calcnew(psk arg)
         forthstuff = (forthMemory*)bmalloc(__LINE__, sizeof(forthMemory));
         if(forthstuff)
             {
-            //printf("bmalloc:%s\n", "forthMemory");
             memset(forthstuff, 0, sizeof(forthMemory));
             forthstuff->name = 0;
             if(!is_op(arg->LEFT))
@@ -3226,7 +3188,6 @@ static forthMemory* calcnew(psk arg)
                     forthstuff->name = (char*)bmalloc(__LINE__, strlen(name) + 1);
                     if(forthstuff->name)
                         {
-                        //printf("bmalloc:%s\n", "char[]");
                         strcpy(forthstuff->name, name);
                         }
                     }
@@ -3237,7 +3198,6 @@ static forthMemory* calcnew(psk arg)
                 forthstuff->word = bmalloc(__LINE__, length * sizeof(forthword) + 1);
                 if(forthstuff->word)
                     {
-                    //printf("bmalloc:%s\n", "forthword[]");
                     forthstuff->wordp = forthstuff->word;
                     forthstuff->sp = forthstuff->stack;
                     forthstuff->parameters = 0;
@@ -3245,7 +3205,6 @@ static forthMemory* calcnew(psk arg)
                         {
                         psk decl;
                         size_t Ndecl = 0;
-                        printf("Determine Ndecl"); result(declarations); printf("\n");
                         for(decl = declarations; decl && is_op(decl); decl = decl->RIGHT)
                             {
                             ++Ndecl;
@@ -3263,7 +3222,7 @@ static forthMemory* calcnew(psk arg)
                                     {
                                     if(Op(decl) == DOT)
                                         {
-                                        if(!setparm(Ndecl, forthstuff, decl))
+                                        if(!setparm(Ndecl, forthstuff, decl, in_function))
                                             {
                                             fprintf(stderr, "Error in parameter declaration.\n");
                                             return 0; /* Something wrong happened. */
@@ -3273,7 +3232,7 @@ static forthMemory* calcnew(psk arg)
                                     else
                                         {
                                         if(is_op(decl->LEFT) && Op(decl->LEFT) == DOT)
-                                            if(!setparm(Ndecl, forthstuff, decl->LEFT))
+                                            if(!setparm(Ndecl, forthstuff, decl->LEFT, in_function))
                                                 {
                                                 fprintf(stderr, "Error in parameter declaration.\n");
                                                 return 0; /* Something wrong happened. */
@@ -3324,7 +3283,7 @@ static Boolean calculationnew(struct typedObjectnode* This, ppsk arg)
     {
     if(is_op(*arg))
         {
-        forthMemory* forthstuff = calcnew((*arg)->RIGHT);
+        forthMemory* forthstuff = calcnew((*arg)->RIGHT, FALSE);
         if(forthstuff)
             {
             This->voiddata = forthstuff;

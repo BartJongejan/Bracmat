@@ -39,7 +39,7 @@ X=
               & ( add
                 =     (s.aap)
                       (s.noot)
-                      (a.mies)
+                      (a.mies,2)
                   .     2*!aap+!noot+!(idx$(mies,0,0))
                       : ?H
                     & !H+-1
