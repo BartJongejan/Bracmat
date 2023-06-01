@@ -12,16 +12,25 @@ X=
     .   4:?planets
       & 3:?dimensions
       & 3000:?iterations
-      & 300:?g
+      & 3000/10:?g
       & 1:?M
+      & "F elasticity"
+      & -2/100000:?F
+      & "W friction"
+      & 297/300:?W
+      & 1:?W
+      & 3000/10:?g
+      & 1:?M
+      & "F elasticity"
+      & -1/10000:?F
+      & "W friction"
+      & 2985/3000:?W
       & 1/11:?U
       & !dimensions*!planets:?dimpla
       &     
-          ' (   (a.position,4,3)
-                (a.velocity,4,3)
-                (a.acceleration,4,3)
-                (s.v3)
-                (s.v4)
+          ' (   (a.position,$planets,$dimensions)
+                (a.velocity,$planets,$dimensions)
+                (a.acceleration,$planets,$dimensions)
             .   tbl$(Diff,$dimensions)
               &   tbl
                 $ (T,$iterations,$planets,$dimensions)
@@ -30,24 +39,11 @@ X=
               &   whl
                 ' ( !b:<!DD
                   & range$(T,!b):?R
-                  & out$!b
-                  & out$!R
                   & 1+!b:?b
                   )
-              & $iterations:?n
-              & !v3+!v4:?V
-              & ( add
-                =     (s.aap)
-                      (s.noot)
-                      (a.mies,2)
-                  .     2*!aap+!noot+!(idx$(mies,0,0))
-                      : ?H
-                    & !H+-1
-                )
-              & add$(5,!v3,velocity):?eleven
+              & -1:?n
               &   whl
-                ' ( !n:>0
-                  & -1+!n:?n
+                ' ( 1+!n:?n:<($iterations)
                   & $planets:?p
                   &   whl
                     ' ( !p:>0
@@ -67,52 +63,59 @@ X=
                       &   whl
                         ' ( !q:>0
                           & -1+!q:?q
-                          & (   !q:~!p
-                              & 0:?dist2
-                              & $dimensions:?d
+                          & ( !q:!p
+                            |   0:?dist2
+                              & 0:?d
                               &   whl
-                                ' ( !d:>0
-                                  & -1+!d:?d
-                                  &     !(idx$(position,!p,!d))
-                                      + -1*!(idx$(position,!q,!d))
+                                ' ( !d:<($dimensions)
+                                  &     subtract
+                                      $ ( !(idx$(position,!p,!d))
+                                        , !(idx$(position,!q,!d))
+                                        )
                                     : ?(idx$(Diff,!d))
                                   & !Diff^2+!dist2:?dist2
+                                  & 1+!d:?d
                                   )
                               & ( !dist2:0
-                                |   !dist2^-3/2:?tsid3
-                                  & $dimensions:?d
+                                |   sqrt$!dist2:?dist
+                                  & !dist^-3:?tsid3
+                                  & !dist^-1:?tsid1
+                                  & $F*!dist:?elastiek
+                                  &   divide$($g,!dist2)
+                                    : ?coulomb
+                                  & !elastiek+!coulomb:?Force
+                                  & 0:?d
                                   &   whl
-                                    ' ( !d:>0
-                                      & -1+!d:?d
-                                      &     -1
-                                          * $g
-                                          * !(idx$(Diff,!d))
-                                          * !tsid3
-                                        : ?(idx$(acceleration,!p,!d))
+                                    ' ( !d:<($dimensions)
+                                      &       !(idx$(Diff,!d))
+                                            * !tsid1
+                                            * !Force
+                                          + !(idx$(acceleration,!p,!d))
+                                        : ?acceleration
+                                      & 1+!d:?d
                                       )
                                 )
-                            | 
                             )
                           )
                       )
-                  & $planets:?p
+                  & 0:?p
                   &   whl
-                    ' ( !p:>0
-                      & -1+!p:?p
-                      & $dimensions:?d
+                    ' ( !p:<($planets)
+                      & 1+!J:?J
+                      & 0:?d
                       &   whl
-                        ' ( !d:>0
-                          & -1+!d:?d
+                        ' ( !d:<($dimensions)
+                          &   !(idx$(position,!p,!d))
+                            : ?(idx$(T,!n,!p,!d))
                           &       $M
                                 * !(idx$(acceleration,!p,!d))
-                              + !(idx$(velocity,!p,!d))
+                              + $W*!(idx$(velocity,!p,!d))
                             : ?velocity
-                          &     $U*!velocity
-                              + !(idx$(position,!p,!d))
+                          &   $U*!velocity+!position
                             : ?position
-                          &   !position
-                            : ?(idx$(T,!n,!p,!d))
+                          & 1+!d:?d
                           )
+                      & 1+!p:?p
                       )
                   )
               & !n
@@ -136,24 +139,17 @@ X=
                     (,0 0 0)
                     (,0 0 0)
                     (,0 0 0)
-              . 123
-              . 77
               )
           & out$executed
           & (calc..export)$(N,T):?pointsT
-          & (calc..export)$(N,position):?pointsa0
-          & (calc..export)$(N,velocity):?pointsa1
-          &   (calc..export)$(N,acceleration)
+          & (calc..export)$(R,position):?pointsa0
+          & (calc..export)$(R,velocity):?pointsa1
+          &   (calc..export)$(R,acceleration)
             : ?pointsa2
-          & (calc..export)$(N,v3):?varv3
-          & (calc..export)$(N,eleven):?eleven
-          & (calc..export)$(N,V):?V
           & out$exported
-          & out$(varv3 !varv3)
-          & out$(eleven !eleven)
-          & out$(V !V)
           & lst$(pointsT,pointsT,NEW)
           & lst$(pointsa0,pointsa0,NEW)
+          & lst$(pointsa1,pointsa1,NEW)
           & lst$(pointsa2,pointsa2,NEW)
           & !pointsT:(,?times)
           & out$map
@@ -174,6 +170,10 @@ X=
                 )
             : ?L
           & out$mapped
+          & lst$(L,LLL,NEW)
+          & !L:? [?NN
+          & !NN^-1:?MM
+          & 0:?nn
           &     ("!DOCTYPE html".)
                 ( html
                 .   
@@ -196,11 +196,27 @@ X=
                               $ ( ( 
                                   =   
                                     .   !arg:(?a.?b)
+                                      & 1+!nn:?nn
+                                      &     255
+                                          +   -1
+                                            *   div
+                                              $ (255*!nn*!MM,1)
+                                        : ?col
                                       & ( circle
                                         .     (cx.!a+300)
                                               (cy.!b+300)
                                               (r.1)
-                                              (stroke.black)
+                                              ( stroke
+                                              .   str
+                                                $ ( "rgb("
+                                                    !col
+                                                    ","
+                                                    !col
+                                                    ","
+                                                    !col
+                                                    ")"
+                                                  )
+                                              )
                                               (fill.red)
                                           , 
                                         )

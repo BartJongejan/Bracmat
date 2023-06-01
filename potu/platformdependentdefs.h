@@ -84,6 +84,7 @@ typedef   signed __int32  INT32_T; /* pre VS2010 has no int32_t */
 #define ULONG unsigned long long
 #define LONGU "%llu"
 #define LONGD "%lld"
+#define LONGnD "%*lld"
 #define LONG0D "%0lld"
 #define LONG0nD "%0*lld"
 #define LONGX "%llX"

@@ -60,11 +60,11 @@ Mandelbrot=
                           & !xtemp:?x
                           & 1+!J:?J
                           )
-                      &   (   !J:$"<iterations"
-                            & floor$(!J*$colfactor)
-                          | 0
-                          )
-                        : ?(idx$(T,!i,!j))
+                      & idx$(T,!i,!j)
+                      & (   !J:$"<iterations"
+                          & floor$(!J*$colfactor):?T
+                        | 0:?T
+                        )
                       & !j+-1:?j
                       )
                   & !i+-1:?i
@@ -72,7 +72,7 @@ Mandelbrot=
             )
         : ?calcule
       & new$(calculation,!calcule):?compiledCalcule
-      & ( 
+      & ( ~
         |   lst$calc
           & out$"ITER DEFINED"
           & (compiledCalcule..print)$
@@ -128,7 +128,8 @@ Mandelbrot=
           & 1/2*(!beginy+!endy):?Y
         )
       & clk$:?t0
-      & (       (compiledCalcule..calculate)
+      & ( ~
+        |       (compiledCalcule..calculate)
               $ (!xpixels,!ypixels,!X,!Y,!R)
             : ?Result
           & out$(Result !Result)

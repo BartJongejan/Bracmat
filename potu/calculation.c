@@ -85,6 +85,7 @@ typedef enum
     , Divide
     , Tbl
     , Out
+    , Outln
     , Idx   /*   idx$(<array name>,<index>,...)  */
     , QIdx  /* ?(idx$(<array name>,<index>,...)) */
     , EIdx  /* !(idx$(<array name>,<index>,...)) */
@@ -98,61 +99,65 @@ typedef enum
     } actionType;
 
 static char* ActionAsWord[] =
-    { "TheEnd                     "
-    , "ResolveAndPush             "
-    , "ResolveAndGet              "
-    , "RslvPshArrElm              "
-    , "RslvGetArrElm              "
-    , "Push                       "
-    , "Afunction                  "
-    , "Pop                        "
-    , "UncondBranch               "
-    , "PopUncondBranch            "
-    , "Fless                      "
-    , "Fless_equal                "
-    , "Fmore_equal                "
-    , "Fmore                      "
-    , "Funequal                   "
-    , "Fequal                     "
-    , "Plus                       "
-    , "Times                      "
-    , "Acos                       "
-    , "Acosh                      "
-    , "Asin                       "
-    , "Asinh                      "
-    , "Atan                       "
-    , "Atanh                      "
-    , "Cbrt                       "
-    , "Ceil                       "
-    , "Cos                        "
-    , "Cosh                       "
-    , "Exp                        "
-    , "Fabs                       "
-    , "Floor                      "
-    , "Log                        "
-    , "Log10                      "
-    , "Sin                        "
-    , "Sinh                       "
-    , "Sqrt                       "
-    , "Tan                        "
-    , "Tanh                       "
-    , "Atan2                      "
-    , "Fdim                       "
-    , "Fmax                       "
-    , "Fmin                       "
-    , "Fmod                       "
-    , "Hypot                      "
-    , "Pow                        "
-    , "Subtract                   "
-    , "Divide                     "
-    , "tbl                        "
-    , "idx                        "
-    , "Qidx                       "
-    , "Eidx                       "
-    , "NoOp                       "
+    { "TheEnd          "
+    , "ResolveAndPush  "
+    , "ResolveAndGet   "
+    , "RslvPshArrElm   "
+    , "RslvGetArrElm   "
+    , "Push            "
+    , "Afunction       "
+    , "Pop             "
+    , "UncondBranch    "
+    , "PopUncondBranch "
+    , "Fless           "
+    , "Fless_equal     "
+    , "Fmore_equal     "
+    , "Fmore           "
+    , "Funequal        "
+    , "Fequal          "
+    , "Plus            "
+    , "Times           "
+    , "Acos            "
+    , "Acosh           "
+    , "Asin            "
+    , "Asinh           "
+    , "Atan            "
+    , "Atanh           "
+    , "Cbrt            "
+    , "Ceil            "
+    , "Cos             "
+    , "Cosh            "
+    , "Exp             "
+    , "Fabs            "
+    , "Floor           "
+    , "Log             "
+    , "Log10           "
+    , "Sin             "
+    , "Sinh            "
+    , "Sqrt            "
+    , "Tan             "
+    , "Tanh            "
+    , "Atan2           "
+    , "Fdim            "
+    , "Fmax            "
+    , "Fmin            "
+    , "Fmod            "
+    , "Hypot           "
+    , "Pow             "
+    , "Subtract        "
+    , "Divide          "
+    , "tbl             "
+    , "out             "
+    , "outln           "
+    , "idx             "
+    , "Qidx            "
+    , "Eidx            "
+    , "range           "
+    , "rank            "
+    , "NoOp            "
 #if CFUNCS
-    , "Cfunction1                 "
-    , "Cfunction2                 "
+    , "Cfunction1      "
+    , "Cfunction2      "
 #endif
     };
 
@@ -214,11 +219,12 @@ typedef struct parameter
 
 typedef enum
     {
-    fand, fand2, fOr, fOr2, cpush, fwhl
+    fother = 0, fand, fand2, fOr, fOr2, cpush, fwhl
     } dumbl;
 
 static char* logics[] =
-    { "fand "
+    { "fother"
+    , "fand "
     , "fand2"
     , "fOr  "
     , "fOr2 "
@@ -766,6 +772,7 @@ static Etriple etriples[] =
         {"divide",Divide,2},
         {"tbl",   Tbl,0},
         {"out",   Out,1},
+        {"outln", Outln,1},
         {"idx",   Idx,0},
         {"Qidx",  QIdx,0},
         {"Eidx",  EIdx,0},
@@ -944,27 +951,38 @@ static stackvalue* calculateBody(forthMemory* mem)
         double a;
         double b;
         size_t i;
+        assert(sp >= mem->sp - 1);
         switch(wordp->action)
             {
             case ResolveAndPush:
+                {
                 (++sp)->val = *(wordp++->u.valp);
                 break;
+                }
             case ResolveAndGet:
+                {
                 assert(sp >= mem->stack);
                 *(wordp++->u.valp) = sp->val;
                 break;
+                }
             case RslvPshArrElm:
+                {
                 (++sp)->val = (wordp->u.arrp->pval)[wordp->u.arrp->index];
                 ++wordp;
                 break;
+                }
             case RslvGetArrElm:
+                {
                 assert(sp >= mem->stack);
                 (wordp->u.arrp->pval)[wordp->u.arrp->index] = sp->val;
                 ++wordp;
                 break;
+                }
             case Push:
+                {
                 (++sp)->val = wordp++->u.val;
                 break;
+                }
             case Afunction:
                 {
                 double ret = 0;
@@ -977,71 +995,111 @@ static stackvalue* calculateBody(forthMemory* mem)
                 }
 #if CFUNCS
             case Cfunction1:
+                {
                 sp->val.floating = wordp->u.Cfunc1p((sp->val).floating);
                 ++wordp;
                 break;
+                }
             case Cfunction2:
+                {
                 a = ((sp--)->val).floating;
                 b = (sp->val).floating;
                 sp->val.floating = wordp->u.Cfunc2p(a, b);
                 ++wordp;
                 break;
+                }
 #endif
             case Pop:
+                {
                 --sp;
                 ++wordp;
                 break;
+                }
             case UncondBranch:
                 wordp = word + wordp->offset;
                 break;
             case PopUncondBranch:
+                {
                 --sp;
                 wordp = word + wordp->offset;
                 break;
-
-            case Fless: b = ((sp--)->val).floating; if(((sp--)->val).floating >= b) wordp = word + wordp->offset; else ++wordp; break;
-            case Fless_equal: b = ((sp--)->val).floating; if(((sp--)->val).floating > b) wordp = word + wordp->offset; else ++wordp; break;
-            case Fmore_equal: b = ((sp--)->val).floating; if(((sp--)->val).floating < b) wordp = word + wordp->offset; else ++wordp; break;
-            case Fmore: b = ((sp--)->val).floating; if(((sp--)->val).floating <= b) wordp = word + wordp->offset; else ++wordp; break;
-            case Funequal: b = ((sp--)->val).floating; if(((sp--)->val).floating == b) wordp = word + wordp->offset; else ++wordp; break;
-            case Fequal: b = ((sp--)->val).floating; if(((sp--)->val).floating != b) wordp = word + wordp->offset; else ++wordp; break;
-
-            case Plus:  a = ((sp--)->val).floating; sp->val.floating += a; ++wordp; break;
-            case Times:  a = ((sp--)->val).floating; sp->val.floating *= a; ++wordp; break;
-
-            case Acos:  sp->val.floating = acos((sp->val).floating); ++wordp; break;
-            case Acosh:  sp->val.floating = acosh((sp->val).floating); ++wordp; break;
-            case Asin:  sp->val.floating = asin((sp->val).floating); ++wordp; break;
-            case Asinh:  sp->val.floating = asinh((sp->val).floating); ++wordp; break;
-            case Atan:  sp->val.floating = atan((sp->val).floating); ++wordp; break;
-            case Atanh:  sp->val.floating = atanh((sp->val).floating); ++wordp; break;
-            case Cbrt:  sp->val.floating = cbrt((sp->val).floating); ++wordp; break;
-            case Ceil:  sp->val.floating = ceil((sp->val).floating); ++wordp; break;
-            case Cos:  sp->val.floating = cos((sp->val).floating); ++wordp; break;
-            case Cosh:  sp->val.floating = cosh((sp->val).floating); ++wordp; break;
-            case Exp:  sp->val.floating = exp((sp->val).floating); ++wordp; break;
-            case Fabs:  sp->val.floating = fabs((sp->val).floating); ++wordp; break;
-            case Floor:  sp->val.floating = floor((sp->val).floating); ++wordp; break;
-            case Log:  sp->val.floating = log((sp->val).floating); ++wordp; break;
-            case Log10:  sp->val.floating = log10((sp->val).floating); ++wordp; break;
-            case Sin:  sp->val.floating = sin((sp->val).floating); ++wordp; break;
-            case Sinh:  sp->val.floating = sinh((sp->val).floating); ++wordp; break;
-            case Sqrt:  sp->val.floating = sqrt((sp->val).floating); ++wordp; break;
-            case Tan:  sp->val.floating = tan((sp->val).floating); ++wordp; break;
-            case Tanh:  sp->val.floating = tanh((sp->val).floating); ++wordp; break;
-            case Atan2:  a = ((sp--)->val).floating; sp->val.floating = atan2(a, (sp->val).floating); ++wordp; break;
-            case Fdim:  a = ((sp--)->val).floating; sp->val.floating = fdim(a, (sp->val).floating); ++wordp; break;
-            case Fmax:  a = ((sp--)->val).floating; sp->val.floating = fmax(a, (sp->val).floating); ++wordp; break;
-            case Fmin:  a = ((sp--)->val).floating; sp->val.floating = fmin(a, (sp->val).floating); ++wordp; break;
-            case Fmod:  a = ((sp--)->val).floating; sp->val.floating = fmod(a, (sp->val).floating); ++wordp; break;
-            case Hypot:  a = ((sp--)->val).floating; sp->val.floating = hypot(a, (sp->val).floating); ++wordp; break;
-            case Pow:  a = ((sp--)->val).floating; sp->val.floating = pow(a, (sp->val).floating); ++wordp; break;
-            case Subtract: a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating - a; ++wordp; break;
-            case Divide: a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating / a; ++wordp; break;
-
+                }
+            case Fless:
+                b = ((sp--)->val).floating; if(((sp--)->val).floating >= b) wordp = word + wordp->offset; else ++wordp; break;
+            case Fless_equal:
+                b = ((sp--)->val).floating; if(((sp--)->val).floating > b) wordp = word + wordp->offset; else ++wordp; break;
+            case Fmore_equal:
+                b = ((sp--)->val).floating; if(((sp--)->val).floating < b) wordp = word + wordp->offset; else ++wordp; break;
+            case Fmore:
+                b = ((sp--)->val).floating; if(((sp--)->val).floating <= b) wordp = word + wordp->offset; else ++wordp; break;
+            case Funequal:
+                b = ((sp--)->val).floating; if(((sp--)->val).floating == b) wordp = word + wordp->offset; else ++wordp; break;
+            case Fequal:
+                b = ((sp--)->val).floating; if(((sp--)->val).floating != b) wordp = word + wordp->offset; else ++wordp; break;
+            case Plus:
+                a = ((sp--)->val).floating; sp->val.floating += a; ++wordp; break;
+            case Times:
+                a = ((sp--)->val).floating; sp->val.floating *= a; ++wordp; break;
+            case Acos:
+                sp->val.floating = acos((sp->val).floating); ++wordp; break;
+            case Acosh:
+                sp->val.floating = acosh((sp->val).floating); ++wordp; break;
+            case Asin:
+                sp->val.floating = asin((sp->val).floating); ++wordp; break;
+            case Asinh:
+                sp->val.floating = asinh((sp->val).floating); ++wordp; break;
+            case Atan:
+                sp->val.floating = atan((sp->val).floating); ++wordp; break;
+            case Atanh:
+                sp->val.floating = atanh((sp->val).floating); ++wordp; break;
+            case Cbrt:
+                sp->val.floating = cbrt((sp->val).floating); ++wordp; break;
+            case Ceil:
+                sp->val.floating = ceil((sp->val).floating); ++wordp; break;
+            case Cos:
+                sp->val.floating = cos((sp->val).floating); ++wordp; break;
+            case Cosh:
+                sp->val.floating = cosh((sp->val).floating); ++wordp; break;
+            case Exp:
+                sp->val.floating = exp((sp->val).floating); ++wordp; break;
+            case Fabs:
+                sp->val.floating = fabs((sp->val).floating); ++wordp; break;
+            case Floor:
+                sp->val.floating = floor((sp->val).floating); ++wordp; break;
+            case Log:
+                sp->val.floating = log((sp->val).floating); ++wordp; break;
+            case Log10:
+                sp->val.floating = log10((sp->val).floating); ++wordp; break;
+            case Sin:
+                sp->val.floating = sin((sp->val).floating); ++wordp; break;
+            case Sinh:
+                sp->val.floating = sinh((sp->val).floating); ++wordp; break;
+            case Sqrt:
+                sp->val.floating = sqrt((sp->val).floating); ++wordp; break;
+            case Tan:
+                sp->val.floating = tan((sp->val).floating); ++wordp; break;
+            case Tanh:
+                sp->val.floating = tanh((sp->val).floating); ++wordp; break;
+            case Atan2:
+                a = ((sp--)->val).floating; sp->val.floating = atan2(a, (sp->val).floating); ++wordp; break;
+            case Fdim:
+                a = ((sp--)->val).floating; sp->val.floating = fdim(a, (sp->val).floating); ++wordp; break;
+            case Fmax:
+                a = ((sp--)->val).floating; sp->val.floating = fmax(a, (sp->val).floating); ++wordp; break;
+            case Fmin:
+                a = ((sp--)->val).floating; sp->val.floating = fmin(a, (sp->val).floating); ++wordp; break;
+            case Fmod:
+                a = ((sp--)->val).floating; sp->val.floating = fmod(a, (sp->val).floating); ++wordp; break;
+            case Hypot:
+                a = ((sp--)->val).floating; sp->val.floating = hypot(a, (sp->val).floating); ++wordp; break;
+            case Pow:
+                a = ((sp--)->val).floating; sp->val.floating = pow(a, (sp->val).floating); ++wordp; break;
+            case Subtract:
+                a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating - a; ++wordp; break;
+            case Divide:
+                a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating / a; ++wordp; break;
             case Tbl:
                 {
-                //size_t rank = (size_t)((sp--)->val).floating;
                 stackvalue* sph = setArray(sp, wordp);
                 if(sph == 0)
                     return 0;
@@ -1069,7 +1127,7 @@ static stackvalue* calculateBody(forthMemory* mem)
                             }
                         size *= range[j];
                         }
-                    fortharray* arr = sp->arrp;
+                    arr = sp->arrp;
                     arr->size = size;
                     arr->index = 0;
                     assert(arr->pval == 0);
@@ -1085,19 +1143,15 @@ static stackvalue* calculateBody(forthMemory* mem)
                 break;
                 }
             case Out:
+                printf("%f ", sp->val.floating); ++wordp; break;
+                break;
+            case Outln:
                 printf("%f\n", sp->val.floating); ++wordp; break;
                 break;
             case Idx:
                 {
                 if((sp = getArrayIndex(sp, wordp)) == 0)
                     return 0;
-                /*                i = sp->arrp->index;
-                if(i >= sp->arrp->size)
-                    {
-                    fprintf(stderr, "%a: index %zu is out of array bound %zu.\n", sp->arrp->name, sp->arrp->size, i);
-                    return 0;
-                    }
-                sp->arrp->index = i;*/
                 ++wordp;
                 break;
                 }
@@ -1106,11 +1160,6 @@ static stackvalue* calculateBody(forthMemory* mem)
                 if((sp = getArrayIndex(sp, wordp)) == 0)
                     return 0;
                 i = sp->arrp->index;
-                /*                if(i >= sp->arrp->size)
-                                    {
-                                    fprintf(stderr, "Index past upper bound.\n");
-                                    return 0;
-                                    }*/
 
                 forthvalue* val = sp->arrp->pval + i;
                 *val = (--sp)->val;
@@ -1122,10 +1171,6 @@ static stackvalue* calculateBody(forthMemory* mem)
                 if((sp = getArrayIndex(sp, wordp)) == 0)
                     return 0;
                 i = sp->arrp->index;
-                /*if(i >= sp->arrp->size)
-                    {
-                    return FALSE;
-                    }*/
                 sp->arrp->index = i;
                 sp->val = (sp->arrp->pval)[i];
                 ++wordp;
@@ -1144,6 +1189,8 @@ static stackvalue* calculateBody(forthMemory* mem)
                 break;
                 }
             case NoOp:
+                ++wordp;
+                break;
             case TheEnd:
             default:
                 break;
@@ -1191,11 +1238,12 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                         }
                     len = offsetof(sk, u.obj) + strlen(buf);
                     res = (psk)bmalloc(__LINE__, len + 1);
+
                     if(res)
                         {
                         strcpy((char*)(res)+offsetof(sk, u.sobj), buf);
                         wipe(*arg);
-                        *arg = /*same_as_w*/(res);
+                        *arg = res;
                         res->v.fl = flags;
                         return TRUE;
                         }
@@ -1236,6 +1284,7 @@ static stackvalue* trcBody(forthMemory* mem)
     forthword* word = mem->word;
     forthword* wordp = mem->wordp;
     stackvalue* sp = mem->sp - 1;
+    printf("ACTION            WORD STACK  variables <stack elements> other\n");
     for(wordp = word; wordp->action != TheEnd;)
         {
         double a;
@@ -1246,24 +1295,27 @@ static stackvalue* trcBody(forthMemory* mem)
         stackvalue* svp;
         char* naam;
         assert(sp + 1 >= mem->stack);
-        printf("%s wordp %d, sp %d: ", ActionAsWord[wordp->action], (int)(wordp - word), (int)(sp - mem->stack));
+        printf("%s %5d %5d: ", ActionAsWord[wordp->action], (int)(wordp - word), (int)(sp - mem->stack));
+        /*
         for(v = mem->var; v; v = v->next)
             {
             printf("%s=%.2f ", v->name, v->val.floating);
             };
-
         for(arr = mem->arr; arr; arr = arr->next)
             {
             printf("%s=%zu index=%zu ", arr->name, arr->size, arr->index);
-            for(i = 0; i < arr->size; ++i)
-                printf("%s[%zu]=%f ", arr->name, i, arr->pval[i].floating);
+            if(arr->pval != 0)
+                for(i = 0; i < arr->size; ++i)
+                    printf("%s[%zu]=%f ", arr->name, i, arr->pval[i].floating);
             };
+
         for(svp = sp; svp >= mem->stack; --svp)
             {
             if(svp->valp == (forthvalue*)0xCDCDCDCDCDCDCDCD)
                 printf("<undef>");
             else printf("<%.2f>", svp->val.floating);
             }
+            */
         printf("\t");
         switch(wordp->action)
             {
@@ -1282,16 +1334,20 @@ static stackvalue* trcBody(forthMemory* mem)
                 break;
                 }
             case RslvPshArrElm:
+                {
                 printf("%s %.2f --> stack", wordp->u.arrp->name, (wordp->u.arrp->pval)[wordp->u.arrp->index].floating);
                 (++sp)->val = (wordp->u.arrp->pval)[wordp->u.arrp->index];
                 ++wordp;
                 break;
+                }
             case RslvGetArrElm:
+                {
                 assert(sp >= mem->stack);
                 (wordp->u.arrp->pval)[wordp->u.arrp->index] = sp->val;
                 printf("%s %.2f <-- stack", wordp->u.arrp->name, (wordp->u.arrp->pval)[wordp->u.arrp->index].floating);
                 ++wordp;
                 break;
+                }
             case Push:
                 {
                 printf("%.2f %p ", wordp->u.val.floating, (void*)wordp->u.arrp);
@@ -1303,7 +1359,9 @@ static stackvalue* trcBody(forthMemory* mem)
                 double ret = 0;
                 naam = wordp->u.that->name;
                 printf(" %s", naam);
-                ftrc(sp, wordp, &ret); // May fail!
+                Boolean res = ftrc(sp, wordp, &ret); // May fail!
+                if(!res)
+                    return 0;
                 (++sp)->val.floating = ret;
                 ++wordp;
                 break;
@@ -1332,14 +1390,9 @@ static stackvalue* trcBody(forthMemory* mem)
                 naam = getLogiName(wordp->u.logic);
                 printf(" %s", naam);
                 printf(" conditional jump to %u", wordp->offset);
-                /* if(wordp->u.logic == fOr)
-                     wordp = word + wordp->offset;
-                 else*/
-                {
                 assert(sp >= mem->stack);
                 --sp;
                 ++wordp;
-                }
                 break;
                 }
             case UncondBranch:
@@ -1356,68 +1409,154 @@ static stackvalue* trcBody(forthMemory* mem)
                 wordp = word + wordp->offset;
                 break;
                 }
-
-            case Fless: printf("PopPop < "); b = ((sp--)->val).floating; if(((sp--)->val).floating >= b) wordp = word + wordp->offset; else ++wordp; break;
-            case Fless_equal: printf("PopPop <="); b = ((sp--)->val).floating; if(((sp--)->val).floating > b) wordp = word + wordp->offset; else ++wordp; break;
-            case Fmore_equal: printf("PopPop >="); b = ((sp--)->val).floating; if(((sp--)->val).floating < b) wordp = word + wordp->offset; else ++wordp; break;
-            case Fmore: printf("PopPop > "); b = ((sp--)->val).floating; if(((sp--)->val).floating <= b) wordp = word + wordp->offset; else ++wordp; break;
-            case Funequal: printf("PopPop !="); b = ((sp--)->val).floating; if(((sp--)->val).floating == b) wordp = word + wordp->offset; else ++wordp; break;
-            case Fequal: printf("PopPop =="); b = ((sp--)->val).floating; if(((sp--)->val).floating != b) wordp = word + wordp->offset; else ++wordp; break;
-
-            case Plus:  printf("Pop plus  "); a = ((sp--)->val).floating; sp->val.floating += a; ++wordp; break;
-            case Times:  printf("Pop times "); a = ((sp--)->val).floating; sp->val.floating *= a; ++wordp; break;
-
-            case Acos:  printf("acos  "); sp->val.floating = acos((sp->val).floating); ++wordp; break;
-            case Acosh:  printf("acosh "); sp->val.floating = acosh((sp->val).floating); ++wordp; break;
-            case Asin:  printf("asin  "); sp->val.floating = asin((sp->val).floating); ++wordp; break;
-            case Asinh:  printf("asinh "); sp->val.floating = asinh((sp->val).floating); ++wordp; break;
-            case Atan:  printf("atan  "); sp->val.floating = atan((sp->val).floating); ++wordp; break;
-            case Atanh:  printf("atanh "); sp->val.floating = atanh((sp->val).floating); ++wordp; break;
-            case Cbrt:  printf("cbrt  "); sp->val.floating = cbrt((sp->val).floating); ++wordp; break;
-            case Ceil:  printf("ceil  "); sp->val.floating = ceil((sp->val).floating); ++wordp; break;
-            case Cos:  printf("cos   "); sp->val.floating = cos((sp->val).floating); ++wordp; break;
-            case Cosh:  printf("cosh  "); sp->val.floating = cosh((sp->val).floating); ++wordp; break;
-            case Exp:  printf("exp   "); sp->val.floating = exp((sp->val).floating); ++wordp; break;
-            case Fabs:  printf("fabs  "); sp->val.floating = fabs((sp->val).floating); ++wordp; break;
-            case Floor:  printf("floor "); sp->val.floating = floor((sp->val).floating); ++wordp; break;
-            case Log:  printf("log   "); sp->val.floating = log((sp->val).floating); ++wordp; break;
-            case Log10:  printf("log10 "); sp->val.floating = log10((sp->val).floating); ++wordp; break;
-            case Sin:  printf("sin   "); sp->val.floating = sin((sp->val).floating); ++wordp; break;
-            case Sinh:  printf("sinh  "); sp->val.floating = sinh((sp->val).floating); ++wordp; break;
-            case Sqrt:  printf("sqrt  "); sp->val.floating = sqrt((sp->val).floating); ++wordp; break;
-            case Tan:  printf("tan   "); sp->val.floating = tan((sp->val).floating); ++wordp; break;
-            case Tanh:  printf("tanh  "); sp->val.floating = tanh((sp->val).floating); ++wordp; break;
-            case Atan2:  printf("Pop fmax  "); a = ((sp--)->val).floating; sp->val.floating = atan2(a, (sp->val).floating); ++wordp; break;
-            case Fdim:  printf("Pop fmin  "); a = ((sp--)->val).floating; sp->val.floating = fdim(a, (sp->val).floating); ++wordp; break;
-            case Fmax:  printf("Pop fdim  "); a = ((sp--)->val).floating; sp->val.floating = fmax(a, (sp->val).floating); ++wordp; break;
-            case Fmin:  printf("Pop atan2 "); a = ((sp--)->val).floating; sp->val.floating = fmin(a, (sp->val).floating); ++wordp; break;
-            case Fmod:  printf("Pop fmod  "); a = ((sp--)->val).floating; sp->val.floating = fmod(a, (sp->val).floating); ++wordp; break;
-            case Hypot:  printf("Pop hypot "); a = ((sp--)->val).floating; sp->val.floating = hypot(a, (sp->val).floating); ++wordp; break;
-            case Pow:    printf("Pop pow   "); a = ((sp--)->val).floating; sp->val.floating = pow(a, (sp->val).floating); ++wordp; break;
-            case Subtract: printf("Pop subtract"); a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating - a; ++wordp; break;
-            case Divide: printf("Pop divide"); a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating / a; ++wordp; break;
+            case Fless:
+                printf("PopPop < ");
+                b = ((sp--)->val).floating; if(((sp--)->val).floating >= b) wordp = word + wordp->offset; else ++wordp; break;
+            case Fless_equal:
+                printf("PopPop <=");
+                b = ((sp--)->val).floating; if(((sp--)->val).floating > b) wordp = word + wordp->offset; else ++wordp; break;
+            case Fmore_equal:
+                printf("PopPop >=");
+                b = ((sp--)->val).floating; if(((sp--)->val).floating < b) wordp = word + wordp->offset; else ++wordp; break;
+            case Fmore:
+                printf("PopPop > ");
+                b = ((sp--)->val).floating; if(((sp--)->val).floating <= b) wordp = word + wordp->offset; else ++wordp; break;
+            case Funequal:
+                printf("PopPop !=");
+                b = ((sp--)->val).floating; if(((sp--)->val).floating == b) wordp = word + wordp->offset; else ++wordp; break;
+            case Fequal:
+                printf("PopPop ==");
+                b = ((sp--)->val).floating; if(((sp--)->val).floating != b) wordp = word + wordp->offset; else ++wordp; break;
+            case Plus:
+                printf("Pop plus  ");
+                a = ((sp--)->val).floating; sp->val.floating += a; ++wordp; break;
+            case Times:
+                printf("Pop times ");
+                a = ((sp--)->val).floating; sp->val.floating *= a; ++wordp; break;
+            case Acos:
+                printf("acos  ");
+                sp->val.floating = acos((sp->val).floating); ++wordp; break;
+            case Acosh:
+                printf("acosh ");
+                sp->val.floating = acosh((sp->val).floating); ++wordp; break;
+            case Asin:
+                printf("asin  ");
+                sp->val.floating = asin((sp->val).floating); ++wordp; break;
+            case Asinh:
+                printf("asinh ");
+                sp->val.floating = asinh((sp->val).floating); ++wordp; break;
+            case Atan:
+                printf("atan  ");
+                sp->val.floating = atan((sp->val).floating); ++wordp; break;
+            case Atanh:
+                printf("atanh ");
+                sp->val.floating = atanh((sp->val).floating); ++wordp; break;
+            case Cbrt:
+                printf("cbrt  ");
+                sp->val.floating = cbrt((sp->val).floating); ++wordp; break;
+            case Ceil:
+                printf("ceil  ");
+                sp->val.floating = ceil((sp->val).floating); ++wordp; break;
+            case Cos:
+                printf("cos   ");
+                sp->val.floating = cos((sp->val).floating); ++wordp; break;
+            case Cosh:
+                printf("cosh  ");
+                sp->val.floating = cosh((sp->val).floating); ++wordp; break;
+            case Exp:
+                printf("exp   ");
+                sp->val.floating = exp((sp->val).floating); ++wordp; break;
+            case Fabs:
+                printf("fabs  ");
+                sp->val.floating = fabs((sp->val).floating); ++wordp; break;
+            case Floor:
+                printf("floor ");
+                sp->val.floating = floor((sp->val).floating); ++wordp; break;
+            case Log:
+                printf("log   ");
+                sp->val.floating = log((sp->val).floating); ++wordp; break;
+            case Log10:
+                printf("log10 ");
+                sp->val.floating = log10((sp->val).floating); ++wordp; break;
+            case Sin:
+                printf("sin   ");
+                sp->val.floating = sin((sp->val).floating); ++wordp; break;
+            case Sinh:
+                printf("sinh  ");
+                sp->val.floating = sinh((sp->val).floating); ++wordp; break;
+            case Sqrt:
+                printf("sqrt  ");
+                sp->val.floating = sqrt((sp->val).floating); ++wordp; break;
+            case Tan:
+                printf("tan   ");
+                sp->val.floating = tan((sp->val).floating); ++wordp; break;
+            case Tanh:
+                printf("tanh  ");
+                sp->val.floating = tanh((sp->val).floating); ++wordp; break;
+            case Atan2:
+                printf("Pop fmax  ");
+                a = ((sp--)->val).floating; sp->val.floating = atan2(a, (sp->val).floating); ++wordp; break;
+            case Fdim:
+                printf("Pop fmin  ");
+                a = ((sp--)->val).floating; sp->val.floating = fdim(a, (sp->val).floating); ++wordp; break;
+            case Fmax:
+                printf("Pop fdim  ");
+                a = ((sp--)->val).floating; sp->val.floating = fmax(a, (sp->val).floating); ++wordp; break;
+            case Fmin:
+                printf("Pop atan2 ");
+                a = ((sp--)->val).floating; sp->val.floating = fmin(a, (sp->val).floating); ++wordp; break;
+            case Fmod:
+                printf("Pop fmod  ");
+                a = ((sp--)->val).floating; sp->val.floating = fmod(a, (sp->val).floating); ++wordp; break;
+            case Hypot:
+                printf("Pop hypot ");
+                a = ((sp--)->val).floating; sp->val.floating = hypot(a, (sp->val).floating); ++wordp; break;
+            case Pow:
+                printf("Pop pow   ");
+                a = ((sp--)->val).floating; sp->val.floating = pow(a, (sp->val).floating); ++wordp; break;
+            case Subtract:
+                printf("Pop subtract");
+                a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating - a; ++wordp; break;
+            case Divide:
+                printf("Pop divide");
+                a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating / a; ++wordp; break;
             case Tbl:
                 {
-                size_t rank = (size_t)((sp--)->val).floating;
+                stackvalue* sph = setArray(sp, wordp);
+                if(sph == 0)
+                    return 0;
+                arr = sph->arrp;
+                if(arr == 0)
+                    return 0;
+                size_t rank = arr->rank;
                 size_t size = 1;
-                size_t* range = (size_t*)bmalloc(__LINE__, rank * sizeof(size_t));
                 printf("Pop tbl   ");
+                size_t* range = arr->range;
+                if(range == 0)
+                    {
+                    range = (size_t*)bmalloc(__LINE__, rank * sizeof(size_t));
+                    arr->range = range;
+                    }
                 if(range != 0)
                     {
-                    //printf("bmalloc:%s\n", "size_t[]");
                     for(size_t j = 0; j < rank; ++j)
                         {
-                        range[j] = (size_t)((sp--)->val).floating; /* range[0] = range of last index*/
+                        if(range[j] == 0)
+                            range[j] = (size_t)((sp--)->val).floating; /* range[0] = range of last index*/
+                        else if(range[j] != (size_t)((sp--)->val).floating)
+                            {
+                            fprintf(stderr, "tbl: attempting to change fixed range from %zu to %zu.\n", range[j], (size_t)((sp--)->val).floating);
+                            return 0;
+                            }
                         size *= range[j];
                         }
-                    fortharray* arr = sp->arrp;
+                    arr = sp->arrp;
                     arr->size = size;
                     arr->index = 0;
                     assert(arr->pval == 0);
                     arr->pval = (forthvalue*)bmalloc(__LINE__, size * sizeof(forthvalue));
                     if(arr->pval)
                         {
-                        //printf("bmalloc:%s\n", "forthvalue[]");
                         memset(arr->pval, 0, size * sizeof(forthvalue));
                         }
                     arr->rank = rank;
@@ -1428,19 +1567,16 @@ static stackvalue* trcBody(forthMemory* mem)
                 break;
                 }
             case Out:
+                printf("%f ", sp->val.floating); ++wordp; break;
+                break;
+            case Outln:
                 printf("%f\n", sp->val.floating); ++wordp; break;
                 break;
             case Idx:
                 {
                 if((sp = getArrayIndex(sp, wordp)) == 0)
                     return 0;
-                i = sp->arrp->index;
-                /*if(i >= sp->arrp->size)
-                    {
-                    return FALSE;
-                    }*/
                 printf("Pop index   ");
-                sp->arrp->index = i;
                 ++wordp;
                 break;
                 }
@@ -1449,12 +1585,6 @@ static stackvalue* trcBody(forthMemory* mem)
                 if((sp = getArrayIndex(sp, wordp)) == 0)
                     return 0;
                 i = sp->arrp->index;
-                /*
-                if(i >= sp->arrp->size)
-                    {
-                    fprintf(stderr, "Index past upper bound.\n");
-                    return 0;
-                    }*/
 
                 forthvalue* val = sp->arrp->pval + i;
 
@@ -1470,10 +1600,6 @@ static stackvalue* trcBody(forthMemory* mem)
                 if((sp = getArrayIndex(sp, wordp)) == 0)
                     return 0;
                 i = sp->arrp->index;
-                /*if(i >= sp->arrp->size)
-                    {
-                    return FALSE;
-                    }*/
 
                 printf("Pop !index  ");
                 assert(sp >= mem->stack);
@@ -1499,7 +1625,12 @@ static stackvalue* trcBody(forthMemory* mem)
                 break;
                 }
             case NoOp:
+                printf("NoOp        ");
+                ++wordp;
+                break;
             case TheEnd:
+                printf("TheEnd      ");
+                break;
             default:
                 break;
             }
@@ -1513,10 +1644,10 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
     {
     psk Arg = (*arg)->RIGHT;
     forthMemory* mem = (forthMemory*)(This->voiddata);
-    parameter* curparm = mem->parameters;
     if(mem)
         {
-        if(curparm && setArgs(mem, 0, Arg) > 0)
+        parameter* curparm = mem->parameters;
+        if(!curparm || setArgs(mem, 0, Arg) > 0)
             {
             stackvalue* sp = trcBody(mem);
             if(sp)
@@ -1553,24 +1684,20 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
 
                     if(res)
                         {
-                        //printf("bmalloc:%s\n", "char[]");
                         strcpy((char*)(res)+offsetof(sk, u.sobj), buf);
-                        //strcpy((char*)SPOBJ(res), buf); /* gcc: generates buffer overflow. Why? (Addresses are the same!) */
                         printf("value on stack %s\n", buf);
                         wipe(*arg);
-                        *arg = /*same_as_w*/(res);
+                        *arg = res;
                         res->v.fl = flags;
                         return TRUE;
                         }
-                    /*
-                    2.6700000000000000E+02
-                    */
                     }
                 }
+            else
+                return FALSE;
             }
         else
             return FALSE;
-
         }
     return FALSE;
     }
@@ -1649,7 +1776,9 @@ static int polish1(psk code)
             C = polish1(code->RIGHT);
             if(C == -1)
                 return -1;
-            return 1 + R + C; /* one for OR, containing address to 'if true' branch */
+            return 2 + R + C; /* one for OR, containing address to 'if true' branch, 
+                              and one for potential Pop, if the lhs and the rhs do
+                              not both leave (or not leave) something on the stack. */
             }
         case MATCH:
             {
@@ -1719,104 +1848,108 @@ static Boolean printmem(forthMemory* mem)
         switch(wordp->action)
             {
             case ResolveAndPush:
-                printf(INDNT); printf(LONGD " ResolveAndPush     %s\n", wordp - mem->word, getVarName(mem, (wordp->u.valp)));
+                printf(INDNT); printf(LONGnD " ResolveAndPush             %s\n", 5, wordp - mem->word, getVarName(mem, (wordp->u.valp)));
                 ++In;
                 break;
             case ResolveAndGet:
-                printf(INDNT); printf(LONGD " ResolveAndGet      %s\n", wordp - mem->word, getVarName(mem, (wordp->u.valp)));
+                printf(INDNT); printf(LONGnD " ResolveAndGet              %s\n", 5, wordp - mem->word, getVarName(mem, (wordp->u.valp)));
                 break;
             case RslvPshArrElm:
-                printf(INDNT); printf(LONGD " RslvPshArrElm      %s\n", wordp - mem->word, wordp->u.arrp->name);
+                printf(INDNT); printf(LONGnD " RslvPshArrElm              %s\n", 5, wordp - mem->word, wordp->u.arrp->name);
                 break;
             case RslvGetArrElm:
-                printf(INDNT); printf(LONGD " RslvGetArrElm      %s\n", wordp - mem->word, wordp->u.arrp->name);
+                printf(INDNT); printf(LONGnD " RslvGetArrElm              %s\n", 5, wordp - mem->word, wordp->u.arrp->name);
                 break;
             case Push:
                 {
                 forthvalue val = wordp->u.val;
-                printf(INDNT); printf(LONGD " Push               %f or @%p\n", wordp - mem->word, val.floating, (void*)wordp->u.arrp);
+                printf(INDNT); printf(LONGnD " Push                       %f or @%p\n", 5, wordp - mem->word, val.floating, (void*)wordp->u.arrp);
                 ++In;
                 break;
                 }
             case Afunction:
 #if CFUNC
                 naam = getFuncName(wordp->u.funcp);
-                printf(INDNT); printf(LONGD " Afunction       %u %s\n", wordp - mem->word, wordp->offset, naam);
+                printf(INDNT); printf(LONGnD " Afunction       " LONGnD " %s\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset), naam);
 #endif
                 break;
             case Pop:
                 naam = getLogiName(wordp->u.logic);
-                printf(INDNT); printf(LONGD " Pop             %u %s\n", wordp - mem->word, wordp->offset, naam);
+                printf(INDNT); printf(LONGnD " Pop             " LONGnD " %s\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset), naam);
                 --In;
                 break;
             case UncondBranch:
-                printf(INDNT); printf(LONGD " UncondBranch    %u\n", wordp - mem->word, wordp->offset);
+                naam = getLogiName(wordp->u.logic);
+                printf(INDNT); printf(LONGnD " UncondBranch    " LONGnD " %s\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset), naam);
                 break;
             case PopUncondBranch:
                 naam = getLogiName(wordp->u.logic);
-                printf(INDNT); printf(LONGD " PopUncondBranch %u %s\n", wordp - mem->word, wordp->offset, naam);
+                printf(INDNT); printf(LONGnD " PopUncondBranch " LONGnD " %s\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset), naam);
                 --In;
                 break;
 
-            case Fless: printf(INDNT); printf(LONGD " PopPop <               %u\n", wordp - mem->word, wordp->offset); --In; --In; break;
-            case Fless_equal: printf(INDNT); printf(LONGD " PopPop <=              %u\n", wordp - mem->word, wordp->offset); --In; --In; break;
-            case Fmore_equal: printf(INDNT); printf(LONGD " PopPop >=              %u\n", wordp - mem->word, wordp->offset); --In; --In; break;
-            case Fmore: printf(INDNT); printf(LONGD " PopPop >               %u\n", wordp - mem->word, wordp->offset); --In; --In; break;
-            case Funequal: printf(INDNT); printf(LONGD " PopPop !=              %u\n", wordp - mem->word, wordp->offset); --In; --In; break;
-            case Fequal: printf(INDNT); printf(LONGD " PopPop ==              %u\n", wordp - mem->word, wordp->offset); --In; --In; break;
+            case Fless: printf(INDNT); printf(LONGnD " PopPop <        " LONGnD "\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset)); --In; --In; break;
+            case Fless_equal: printf(INDNT); printf(LONGnD " PopPop <=       " LONGnD "\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset)); --In; --In; break;
+            case Fmore_equal: printf(INDNT); printf(LONGnD " PopPop >=       " LONGnD "\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset)); --In; --In; break;
+            case Fmore: printf(INDNT); printf(LONGnD " PopPop >        " LONGnD "\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset)); --In; --In; break;
+            case Funequal: printf(INDNT); printf(LONGnD " PopPop !=       " LONGnD "\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset)); --In; --In; break;
+            case Fequal: printf(INDNT); printf(LONGnD " PopPop ==       " LONGnD "\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset)); --In; --In; break;
 
-            case Plus:  printf(INDNT); printf(LONGD " Pop plus   \n", wordp - mem->word); --In; break;
-            case Times:  printf(INDNT); printf(LONGD " Pop times  \n", wordp - mem->word); --In; break;
+            case Plus:  printf(INDNT); printf(LONGnD " Pop plus   \n", 5, wordp - mem->word); --In; break;
+            case Times:  printf(INDNT); printf(LONGnD " Pop times  \n", 5, wordp - mem->word); --In; break;
 
-            case Acos:  printf(INDNT); printf(LONGD " acos   \n", wordp - mem->word); break;
-            case Acosh:  printf(INDNT); printf(LONGD " acosh  \n", wordp - mem->word); break;
-            case Asin:  printf(INDNT); printf(LONGD " asin   \n", wordp - mem->word); break;
-            case Asinh:  printf(INDNT); printf(LONGD " asinh  \n", wordp - mem->word); break;
-            case Atan:  printf(INDNT); printf(LONGD " atan   \n", wordp - mem->word); break;
-            case Atanh:  printf(INDNT); printf(LONGD " atanh  \n", wordp - mem->word); break;
-            case Cbrt:  printf(INDNT); printf(LONGD " cbrt   \n", wordp - mem->word); break;
-            case Ceil:  printf(INDNT); printf(LONGD " ceil   \n", wordp - mem->word); break;
-            case Cos:  printf(INDNT); printf(LONGD " cos    \n", wordp - mem->word); break;
-            case Cosh:  printf(INDNT); printf(LONGD " cosh   \n", wordp - mem->word); break;
-            case Exp:  printf(INDNT); printf(LONGD " exp    \n", wordp - mem->word); break;
-            case Fabs:  printf(INDNT); printf(LONGD " fabs   \n", wordp - mem->word); break;
-            case Floor:  printf(INDNT); printf(LONGD " floor  \n", wordp - mem->word); break;
-            case Log:  printf(INDNT); printf(LONGD " log    \n", wordp - mem->word); break;
-            case Log10:  printf(INDNT); printf(LONGD " log10  \n", wordp - mem->word); break;
-            case Sin:  printf(INDNT); printf(LONGD " sin    \n", wordp - mem->word); break;
-            case Sinh:  printf(INDNT); printf(LONGD " sinh   \n", wordp - mem->word); break;
-            case Sqrt:  printf(INDNT); printf(LONGD " sqrt   \n", wordp - mem->word); break;
-            case Tan:  printf(INDNT); printf(LONGD " tan    \n", wordp - mem->word); break;
-            case Tanh:  printf(INDNT); printf(LONGD " tanh   \n", wordp - mem->word); break;
-            case Atan2:  printf(INDNT); printf(LONGD " Pop atan2  \n", wordp - mem->word); --In; break;
-            case Fdim:  printf(INDNT); printf(LONGD " Pop fdim   \n", wordp - mem->word); --In; break;
-            case Fmax:  printf(INDNT); printf(LONGD " Pop fmax   \n", wordp - mem->word); --In; break;
-            case Fmin:  printf(INDNT); printf(LONGD " Pop fmin   \n", wordp - mem->word); --In; break;
-            case Fmod:  printf(INDNT); printf(LONGD " Pop fmod   \n", wordp - mem->word); --In; break;
-            case Hypot:  printf(INDNT); printf(LONGD " Pop hypot  \n", wordp - mem->word); --In; break;
-            case Pow:  printf(INDNT); printf(LONGD      " Pop pow    \n", wordp - mem->word); --In; break;
-            case Subtract:  printf(INDNT); printf(LONGD " Pop subtract\n", wordp - mem->word); --In; break;
-            case Divide:  printf(INDNT); printf(LONGD   " Pop divide \n", wordp - mem->word); --In; break;
-            case Tbl:  printf(INDNT); printf(LONGD " Pop tbl    \n", wordp - mem->word); --In; break;
-            case Out:  printf(INDNT); printf(LONGD " Pop out    \n", wordp - mem->word); --In; break;
-            case Idx:  printf(INDNT); printf(LONGD " Pop idx    \n", wordp - mem->word); --In; break;
-            case QIdx:  printf(INDNT); printf(LONGD " PopPop Qidx    \n", wordp - mem->word); --In; --In; break;
-            case EIdx:  printf(INDNT); printf(LONGD " Pop Eidx    \n", wordp - mem->word); --In; break;
-            case Range: printf(INDNT); printf(LONGD " Pop range  \n", wordp - mem->word); --In; break;
-            case Rank: printf(INDNT); printf(LONGD " Pop rank   \n", wordp - mem->word); --In; break;
+            case Acos:  printf(INDNT); printf(LONGnD " acos   \n", 5, wordp - mem->word); break;
+            case Acosh:  printf(INDNT); printf(LONGnD " acosh  \n", 5, wordp - mem->word); break;
+            case Asin:  printf(INDNT); printf(LONGnD " asin   \n", 5, wordp - mem->word); break;
+            case Asinh:  printf(INDNT); printf(LONGnD " asinh  \n", 5, wordp - mem->word); break;
+            case Atan:  printf(INDNT); printf(LONGnD " atan   \n", 5, wordp - mem->word); break;
+            case Atanh:  printf(INDNT); printf(LONGnD " atanh  \n", 5, wordp - mem->word); break;
+            case Cbrt:  printf(INDNT); printf(LONGnD " cbrt   \n", 5, wordp - mem->word); break;
+            case Ceil:  printf(INDNT); printf(LONGnD " ceil   \n", 5, wordp - mem->word); break;
+            case Cos:  printf(INDNT); printf(LONGnD " cos    \n", 5, wordp - mem->word); break;
+            case Cosh:  printf(INDNT); printf(LONGnD " cosh   \n", 5, wordp - mem->word); break;
+            case Exp:  printf(INDNT); printf(LONGnD " exp    \n", 5, wordp - mem->word); break;
+            case Fabs:  printf(INDNT); printf(LONGnD " fabs   \n", 5, wordp - mem->word); break;
+            case Floor:  printf(INDNT); printf(LONGnD " floor  \n", 5, wordp - mem->word); break;
+            case Log:  printf(INDNT); printf(LONGnD " log    \n", 5, wordp - mem->word); break;
+            case Log10:  printf(INDNT); printf(LONGnD " log10  \n", 5, wordp - mem->word); break;
+            case Sin:  printf(INDNT); printf(LONGnD " sin    \n", 5, wordp - mem->word); break;
+            case Sinh:  printf(INDNT); printf(LONGnD " sinh   \n", 5, wordp - mem->word); break;
+            case Sqrt:  printf(INDNT); printf(LONGnD " sqrt   \n", 5, wordp - mem->word); break;
+            case Tan:  printf(INDNT); printf(LONGnD " tan    \n", 5, wordp - mem->word); break;
+            case Tanh:  printf(INDNT); printf(LONGnD " tanh   \n", 5, wordp - mem->word); break;
+            case Atan2:  printf(INDNT); printf(LONGnD " Pop atan2  \n", 5, wordp - mem->word); --In; break;
+            case Fdim:  printf(INDNT); printf(LONGnD " Pop fdim   \n", 5, wordp - mem->word); --In; break;
+            case Fmax:  printf(INDNT); printf(LONGnD " Pop fmax   \n", 5, wordp - mem->word); --In; break;
+            case Fmin:  printf(INDNT); printf(LONGnD " Pop fmin   \n", 5, wordp - mem->word); --In; break;
+            case Fmod:  printf(INDNT); printf(LONGnD " Pop fmod   \n", 5, wordp - mem->word); --In; break;
+            case Hypot:  printf(INDNT); printf(LONGnD " Pop hypot  \n", 5, wordp - mem->word); --In; break;
+            case Pow:  printf(INDNT); printf(LONGnD      " Pop pow    \n", 5, wordp - mem->word); --In; break;
+            case Subtract:  printf(INDNT); printf(LONGnD " Pop subtract\n", 5, wordp - mem->word); --In; break;
+            case Divide:  printf(INDNT); printf(LONGnD   " Pop divide \n", 5, wordp - mem->word); --In; break;
+            case Tbl:  printf(INDNT); printf(LONGnD " Pop tbl    \n", 5, wordp - mem->word); --In; break;
+            case Out:  printf(INDNT); printf(LONGnD " Pop out    \n", 5, wordp - mem->word); --In; break;
+            case Outln:  printf(INDNT); printf(LONGnD " Pop outln    \n", 5, wordp - mem->word); --In; break;
+            case Idx:  printf(INDNT); printf(LONGnD " Pop idx    \n", 5, wordp - mem->word); --In; break;
+            case QIdx:  printf(INDNT); printf(LONGnD " PopPop Qidx    \n", 5, wordp - mem->word); --In; --In; break;
+            case EIdx:  printf(INDNT); printf(LONGnD " Pop Eidx    \n", 5, wordp - mem->word); --In; break;
+            case Range: printf(INDNT); printf(LONGnD " Pop range  \n", 5, wordp - mem->word); --In; break;
+            case Rank: printf(INDNT); printf(LONGnD " Pop rank   \n", 5, wordp - mem->word); --In; break;
             case NoOp:
 #if CFUNC
                 naam = getFuncName(wordp->u.funcp);
-                printf(INDNT); printf(LONGD " NoOp       %s\n", wordp - mem->word, naam);
+#else
+                naam = getLogiName(wordp->u.logic);
 #endif
+                printf(INDNT); printf(LONGnD " NoOp                  %s\n", 5, wordp - mem->word, naam);
                 break;
             case TheEnd:
             default:
-                printf(INDNT); printf(LONGD " default         %d\n", wordp - mem->word, wordp->action);
+                printf(INDNT); printf(LONGnD " default         %d\n", 5, wordp - mem->word, wordp->action);
                 ;
             }
         }
-    printf(INDNT); printf(LONGD " TheEnd          \n", wordp - mem->word);
+    printf(INDNT); printf(LONGnD " TheEnd          \n", 5, wordp - mem->word);
     return TRUE;
     }
 
@@ -2182,6 +2315,7 @@ static void optimizeJumps(forthMemory* mem)
             case Divide:
             case Tbl:
             case Out:
+            case Outln:
             case Idx:
             case QIdx:
             case EIdx:
@@ -2201,9 +2335,13 @@ static void combineTestsAndJumps(forthMemory* mem)
     {
     forthword* wordp;
     forthword* label;
+    forthword* label1;
+    forthword* label2;
 
     for(wordp = mem->word; wordp->action != TheEnd; ++wordp)
         {
+        label1 = wordp + 1;
+        label2 = wordp + 2;
         switch(wordp->action)
             {
             case TheEnd:
@@ -2279,12 +2417,25 @@ static void combineTestsAndJumps(forthMemory* mem)
             case Divide:
             case Tbl:
             case Out:
+            case Outln:
             case Idx:
             case QIdx:
             case EIdx:
             case Range:
             case Rank:
+                break;
             case NoOp:
+                {
+                if(wordp->u.logic == fwhl)
+                    {
+                    label = wordp + 1;
+                    if(label->action == Pop && (label->u.logic == fwhl || label->u.logic == fOr2 || label->u.logic == fOr))
+                        {
+                        label->action = UncondBranch;
+                        }
+                    }
+                break;
+                }
                 break;
             }
         }
@@ -2374,14 +2525,14 @@ static forthMemory* calcnew(psk arg, Boolean in_function);
 
 static Boolean setArity(forthword* wordp, psk code, unsigned int expectedArity)
     {
-    int arity = 1;
+    unsigned int arity = 1;
     psk tmp = code->RIGHT;
     for(; is_op(tmp) && Op(tmp) == COMMA; tmp = tmp->RIGHT)
         ++arity;
     if(expectedArity > 0 && arity != expectedArity)
         {
         /*TODO: check whether function does not take a single argument!*/
-        fprintf(stderr, "The arity is %u, but %d arguments found.\n", expectedArity, arity);
+        fprintf(stderr, "The arity is %u, but %u arguments found.\n", expectedArity, arity);
         return FALSE;
         }
     wordp->offset = arity;
@@ -2447,7 +2598,7 @@ static fortharray* haveArray(forthMemory* forthstuff, psk declaration, Boolean i
                 H = kn;
 
             if(INTEGER_POS(H))
-                *prange = strtod(&(H->u.sobj), 0);
+                *prange = strtol(&(H->u.sobj), 0, 10);
             else if((H->v.fl & VISIBLE_FLAGS) == INDIRECT)
                 *prange = 0; /* range still unknown. */
             else
@@ -2555,6 +2706,81 @@ static fortharray* namedArray(char* name, forthMemory* mem, psk node)
         }
     }
 
+static Boolean popReq(forthword* wordp)
+    {
+    switch(wordp->action)
+        {
+        case Fless:
+        case Fless_equal:
+        case Fmore_equal:
+        case Fmore:
+        case Funequal:
+        case Fequal:
+            return FALSE;
+        case TheEnd:
+        case ResolveAndPush:
+        case ResolveAndGet:
+        case RslvPshArrElm:
+        case RslvGetArrElm:
+        case Push:
+        case Afunction:
+        case Pop:
+        case UncondBranch:
+        case PopUncondBranch:
+        case Plus:
+        case Times:
+        case Acos:
+        case Acosh:
+        case Asin:
+        case Asinh:
+        case Atan:
+        case Atanh:
+        case Cbrt:
+        case Ceil:
+        case Cos:
+        case Cosh:
+        case Exp:
+        case Fabs:
+        case Floor:
+        case Log:
+        case Log10:
+        case Sin:
+        case Sinh:
+        case Sqrt:
+        case Tan:
+        case Tanh:
+        case Atan2:
+        case Fdim:
+        case Fmax:
+        case Fmin:
+        case Fmod:
+        case Hypot:
+        case Pow:
+        case Subtract:
+        case Divide:
+        case Tbl:
+        case Out:
+        case Outln:
+        case Idx:
+        case QIdx:
+        case EIdx:
+        case Range:
+        case Rank:
+        case NoOp:
+            switch(wordp->u.logic)
+                {
+                case fwhl:
+                case fOr:
+                    return FALSE;
+                case fother:
+                case fand:
+                case fand2:
+                case fOr2:
+                case cpush:
+                    return TRUE;
+                }
+        }
+    }
 
 static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
     {
@@ -2629,13 +2855,27 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                 }
             else
                 {
+                forthword* prevwordp = wordp - 1;
                 saveword = wordp;
-                saveword->action = Pop;
-                saveword->u.logic = fand;
-                wordp = polish2(mem, code->RIGHT, ++wordp);
-                if(wordp == 0)
-                    return 0; /* Something wrong happened. */
-                saveword->offset = (unsigned int)(wordp - mem->word);
+                if(popReq(prevwordp))
+                    {
+                    saveword->action = Pop;
+                    saveword->u.logic = fand;
+                    wordp = polish2(mem, code->RIGHT, ++wordp);
+                    if(wordp == 0)
+                        return 0; /* Something wrong happened. */
+                    saveword->offset = (unsigned int)(wordp - mem->word);
+                    }
+                else
+                    {
+                    saveword->action = NoOp;
+                    saveword->u.logic = fand;
+                    wordp = polish2(mem, code->RIGHT, ++wordp);
+                    if(wordp == 0)
+                        return 0; /* Something wrong happened. */
+                    if(prevwordp->u.logic != fwhl)
+                        prevwordp->offset = 1 + (unsigned int)(wordp - mem->word);
+                    }
                 }
             return wordp;
             }
@@ -2656,11 +2896,27 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
             if(wordp == 0)
                 return 0; /* Something wrong happened. */
             saveword = wordp;
-            saveword->action = Pop;
+            forthword* prevwordp = wordp - 1;
+            if(popReq(prevwordp))
+                saveword->action = PopUncondBranch;
+            else
+                {
+                saveword->action = UncondBranch;
+                if(prevwordp->u.logic != fwhl)
+                    prevwordp->offset = 1 + (unsigned int)(ULONG)(wordp - mem->word);
+                }
             saveword->u.logic = fOr;
             wordp = polish2(mem, code->RIGHT, ++wordp);
             if(wordp == 0)
                 return 0; /* Something wrong happened. */
+            prevwordp = wordp - 1;
+            if(popReq(prevwordp))
+                {
+                wordp->action = Pop;
+                wordp->u.logic = fOr;
+                (++wordp)->action = UncondBranch;
+                wordp->u.logic = fOr;
+                }
             saveword->offset = (unsigned int)(ULONG)(wordp - mem->word); /* the address of the word after the 'if false' branch.*/
             return wordp;
             }
@@ -2831,9 +3087,24 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
             wordp = polish2(mem, code->RIGHT, wordp);
             if(wordp == 0)
                 return 0; /* Something wrong happened. */
-            wordp->action = Pop;
+            forthword* prevwordp = wordp - 1;
+            if(popReq(prevwordp))
+                {
+                wordp->action = PopUncondBranch;
+                wordp->offset = here; /* If all good, jump back to start of loop */
+                }
+            else
+                {
+                wordp->action = UncondBranch;
+                if(prevwordp->u.logic != fwhl)
+                    prevwordp->offset = 1 + (unsigned int)(ULONG)(wordp - mem->word);
+                wordp->offset = here;
+                prevwordp = wordp - 1;
+                if(prevwordp->action == PopUncondBranch && prevwordp->offset == 0)
+                    prevwordp->offset = here;
+                /* If all good, jump back to start of loop */
+                }
             wordp->u.logic = fwhl;
-            wordp->offset = here; /* If all good, jump back to start of loop */
             return ++wordp;;
             }
         case FUN:
@@ -2893,7 +3164,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                                         Arg = R;
                                     if(INTEGER_NOT_NEG(Arg))
                                         {
-                                        long index = strtod(&(Arg->u.sobj), 0);
+                                        long index = strtol(&(Arg->u.sobj), 0, 10);
                                         if(index < 0 || index >= (long)(*rng))
                                             {
                                             fprintf(stderr, "%s: Array \"%s\": index %zu is out of bounds 0 <= index < %zu, found %ld\n", name, arr->name, rank - (rng - arr->range), *rng, index);
@@ -3051,7 +3322,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                     wordp->u.funcp = p->Cfun;
                     return ++wordp;
                     }
-                }
+            }
 #endif
             for(forthMemory* fm = mem->nextFnc; fm; fm = fm->nextFnc)
                 {
@@ -3065,7 +3336,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                 }
             fprintf(stderr, "Function named \"%s\" not found.\n", name);
             return 0; /* Something wrong happened. */
-            }
+        }
         default:
             if(is_op(code))
                 {
@@ -3180,8 +3451,8 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                 ++wordp;
                 return wordp;
                 };
-        }
     }
+        }
 
 static Boolean setparm(size_t Ndecl, forthMemory* forthstuff, psk declaration, Boolean in_function)
     {
@@ -3333,7 +3604,7 @@ static forthMemory* calcnew(psk arg, Boolean in_function)
             {
             memset(forthstuff, 0, sizeof(forthMemory));
             forthstuff->name = 0;
-            if(!is_op(arg->LEFT))
+            if(is_op(arg) && !is_op(arg->LEFT))
                 {
                 name = &(arg->LEFT->u.sobj);
                 if(*name)
@@ -3345,84 +3616,91 @@ static forthMemory* calcnew(psk arg, Boolean in_function)
                         strcpy(forthstuff->name, name);
                         }
                     }
-                forthstuff->nextFnc = 0;
-                forthstuff->var = 0;
-                forthstuff->arr = 0;
-                assert(forthstuff->word == 0);
-                forthstuff->word = bmalloc(__LINE__, length * sizeof(forthword) + 1);
-                if(forthstuff->word)
+                }
+            forthstuff->nextFnc = 0;
+            forthstuff->var = 0;
+            forthstuff->arr = 0;
+            assert(forthstuff->word == 0);
+            forthstuff->word = bmalloc(__LINE__, length * sizeof(forthword) + 1);
+            if(forthstuff->word)
+                {
+                memset(forthstuff->word, 0, length * sizeof(forthword) + 1);
+                forthstuff->wordp = forthstuff->word;
+                forthstuff->sp = forthstuff->stack;
+                forthstuff->parameters = 0;
+                if(declarations)
                     {
-                    forthstuff->wordp = forthstuff->word;
-                    forthstuff->sp = forthstuff->stack;
-                    forthstuff->parameters = 0;
-                    if(declarations)
+                    psk decl;
+                    size_t Ndecl = 0;
+                    for(decl = declarations; decl && is_op(decl); decl = decl->RIGHT)
                         {
-                        psk decl;
-                        size_t Ndecl = 0;
-                        for(decl = declarations; decl && is_op(decl); decl = decl->RIGHT)
-                            {
-                            ++Ndecl;
-                            if(Op(decl) == DOT) /*Just one parameter that is an array*/
-                                break;
-                            }
+                        ++Ndecl;
+                        if(Op(decl) == DOT) /*Just one parameter that is an array*/
+                            break;
+                        }
 
-                        forthstuff->nparameters = Ndecl;
-                        if(Ndecl > 0)
+                    forthstuff->nparameters = Ndecl;
+                    if(Ndecl > 0)
+                        {
+                        forthstuff->parameters = bmalloc(__LINE__, Ndecl * sizeof(parameter));
+                        if(forthstuff->parameters != 0)
                             {
-                            forthstuff->parameters = bmalloc(__LINE__, Ndecl * sizeof(parameter));
-                            if(forthstuff->parameters != 0)
+                            for(decl = declarations; Ndecl-- > 0 && decl && is_op(decl); decl = decl->RIGHT)
                                 {
-                                for(decl = declarations; Ndecl-- > 0 && decl && is_op(decl); decl = decl->RIGHT)
+                                if(Op(decl) == DOT)
                                     {
-                                    if(Op(decl) == DOT)
+                                    if(!setparm(Ndecl, forthstuff, decl, in_function))
                                         {
-                                        if(!setparm(Ndecl, forthstuff, decl, in_function))
+                                        fprintf(stderr, "Error in parameter declaration.\n");
+                                        return 0; /* Something wrong happened. */
+                                        }
+                                    break;
+                                    }
+                                else
+                                    {
+                                    if(is_op(decl->LEFT) && Op(decl->LEFT) == DOT)
+                                        if(!setparm(Ndecl, forthstuff, decl->LEFT, in_function))
                                             {
                                             fprintf(stderr, "Error in parameter declaration.\n");
                                             return 0; /* Something wrong happened. */
                                             }
-                                        break;
-                                        }
-                                    else
-                                        {
-                                        if(is_op(decl->LEFT) && Op(decl->LEFT) == DOT)
-                                            if(!setparm(Ndecl, forthstuff, decl->LEFT, in_function))
-                                                {
-                                                fprintf(stderr, "Error in parameter declaration.\n");
-                                                return 0; /* Something wrong happened. */
-                                                }
-                                        }
                                     }
                                 }
                             }
                         }
-                    lastword = polish2(forthstuff, code, forthstuff->wordp);
-                    if(lastword != 0)
-                        {
-                        lastword->action = TheEnd;
-                        if(newval)
-                            wipe(fullcode);
-                        /*
-                            printf("Not optimized:\n");
-                            printmem(forthstuff);
-                        //*/
-                        optimizeJumps(forthstuff);
-                        /*
-                            printf("Optimized jumps:\n");
-                            printmem(forthstuff);
-                        //*/
-                        combineTestsAndJumps(forthstuff);
-                        /*
-                            printf("Combined testst and jumps:\n");
-                            printmem(forthstuff);
-                        //*/
-                        compaction(forthstuff);
-                        /*
-                            printf("Compacted:\n");
-                            printmem(forthstuff);
-                        //*/
-                        return forthstuff;
-                        }
+                    }
+                lastword = polish2(forthstuff, code, forthstuff->wordp);
+                if(lastword != 0)
+                    {
+                    lastword->action = TheEnd;
+                    if(newval)
+                        wipe(fullcode);
+                    //*
+                    printf("Not optimized:\n");
+                    printmem(forthstuff);
+                    //*/
+
+                    /*/
+                    optimizeJumps(forthstuff);
+                    //*
+                    printf("Optimized jumps:\n");
+                    printmem(forthstuff);
+                    //*/
+
+                    /*/
+                    combineTestsAndJumps(forthstuff);
+                    //*
+                    printf("Combined testst and jumps:\n");
+                    printmem(forthstuff);
+                    //*/
+
+                    /*/
+                    compaction(forthstuff);
+                    //*
+                    printf("Compacted:\n");
+                    printmem(forthstuff);
+                    //*/
+                    return forthstuff;
                     }
                 }
             }
