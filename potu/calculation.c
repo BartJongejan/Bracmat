@@ -11,7 +11,7 @@
 #include <string.h>
 #include <float.h>
 
-/*#include "result.h"*/ /* For debugging. Remove when done. */
+#include "result.h" /* For debugging. Remove when done. */
 
 
 #define CFUNCS 0
@@ -83,6 +83,7 @@ typedef enum
     , Pow
     , Subtract
     , Divide
+    , Drand
     , Tbl
     , Out
     , Outln
@@ -146,6 +147,7 @@ static char* ActionAsWord[] =
     , "Pow             "
     , "Subtract        "
     , "Divide          "
+    , "Drand           "
     , "tbl             "
     , "out             "
     , "outln           "
@@ -253,7 +255,8 @@ typedef struct forthword
 typedef struct forthMemory
     {
     char* name;
-    struct forthMemory* nextFnc;
+    struct forthMemory* functions; /* points to first of child functions. */
+    struct forthMemory* nextFnc; /* points to sibling function */
     forthword* word; /* fixed once calculation is compiled */
     forthword* wordp; /* runs through words when calculating */
     forthvariable* var;
@@ -298,6 +301,21 @@ typedef struct
     actionType Afun;
     actionType Bfun; /* negation of Afun */
     }neg;
+
+static showProblematicNode(char * msg,psk node)
+    {
+    FILE * saveFpo = global_fpo;
+    global_fpo = stderr;
+    fprintf(stderr,"%s", msg);
+    result(node);
+    fprintf(stderr, "\n");
+    global_fpo = saveFpo;
+    }
+
+static double drand(double range)
+    {
+    return range * (double)rand() / (double)(RAND_MAX + 1);
+    }
 
 static char* getVarName(forthMemory* mem, forthvalue* val)
     {
@@ -530,7 +548,7 @@ static int setFloat(double* destination, psk args)
     return 1;
     }
 
-static void fsetArgs(stackvalue* sp, int arity, forthMemory* thatmem)
+static stackvalue* fsetArgs(stackvalue* sp, int arity, forthMemory* thatmem)
     {
     parameter* parms = thatmem->parameters;
     size_t Ndecl = 0;
@@ -552,6 +570,7 @@ static void fsetArgs(stackvalue* sp, int arity, forthMemory* thatmem)
             }
         --sp;
         }
+    return sp;
     }
 
 static size_t find_rank(psk Node)
@@ -770,6 +789,7 @@ static Etriple etriples[] =
         {"pow",   Pow,2},
         {"subtract",    Subtract,2},
         {"divide",Divide,2},
+        {"rand",  Drand,1},
         {"tbl",   Tbl,0},
         {"out",   Out,1},
         {"outln", Outln,1},
@@ -929,7 +949,7 @@ static stackvalue* getArrayRange(stackvalue* sp)
     fortharray* arrp = (sp - 1)->arrp;
     size_t rank = arrp->rank;
     LONG arg = (LONG)sp->val.floating;
-    sp->val.floating = (double)((0 <= arg && arg < (LONG)rank) ? (arrp->range[rank - arg - 1]) : 0);
+    (--sp)->val.floating = (double)((0 <= arg && arg < (LONG)rank) ? (arrp->range[rank - arg - 1]) : 0);
     return sp;
     }
 
@@ -939,7 +959,7 @@ static stackvalue* getArrayRank(stackvalue* sp)
     return sp;
     }
 
-static Boolean fcalculate(stackvalue* sp, forthword* wordp, double* ret);
+static stackvalue* fcalculate(stackvalue* sp, forthword* wordp, double* ret);
 
 static stackvalue* calculateBody(forthMemory* mem)
     {
@@ -986,9 +1006,10 @@ static stackvalue* calculateBody(forthMemory* mem)
             case Afunction:
                 {
                 double ret = 0;
-                Boolean res = fcalculate(sp, wordp, &ret);
+                stackvalue* res = fcalculate(sp, wordp, &ret);
                 if(!res)
                     return 0;
+                sp = res;
                 (++sp)->val.floating = ret;
                 ++wordp;
                 break;
@@ -1098,6 +1119,8 @@ static stackvalue* calculateBody(forthMemory* mem)
                 a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating - a; ++wordp; break;
             case Divide:
                 a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating / a; ++wordp; break;
+            case Drand:
+                sp->val.floating = drand((sp->val).floating); ++wordp; break;
             case Tbl:
                 {
                 stackvalue* sph = setArray(sp, wordp);
@@ -1258,26 +1281,26 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
     return FALSE;
     }
 
-static Boolean fcalculate(stackvalue* sp, forthword* wordp, double* ret)
+static stackvalue* fcalculate(stackvalue* sp, forthword* wordp, double* ret)
     {
     forthMemory* thatmem = wordp->u.that;
     if(sp && thatmem)
         {
         stackvalue* sp2;
-        fsetArgs(sp, wordp->offset, thatmem);
+        sp = fsetArgs(sp, wordp->offset, thatmem);
         sp2 = calculateBody(thatmem);
         if(sp2 && sp2 >= thatmem->stack)
             {
             *ret = thatmem->stack->val.floating;
-            return TRUE;
+            return sp;
             }
         else
-            return FALSE;
+            return 0;
         }
-    return FALSE;
+    return 0;
     }
 
-static Boolean ftrc(stackvalue* sp, forthword* wordp, double* ret);
+static stackvalue* ftrc(stackvalue* sp, forthword* wordp, double* ret);
 
 static stackvalue* trcBody(forthMemory* mem)
     {
@@ -1290,9 +1313,9 @@ static stackvalue* trcBody(forthMemory* mem)
         double a;
         double b;
         size_t i;
-        forthvariable* v;
+//        forthvariable* v;
         fortharray* arr;
-        stackvalue* svp;
+  //      stackvalue* svp;
         char* naam;
         assert(sp + 1 >= mem->stack);
         printf("%s %5d %5d: ", ActionAsWord[wordp->action], (int)(wordp - word), (int)(sp - mem->stack));
@@ -1358,10 +1381,12 @@ static stackvalue* trcBody(forthMemory* mem)
                 {
                 double ret = 0;
                 naam = wordp->u.that->name;
-                printf(" %s", naam);
-                Boolean res = ftrc(sp, wordp, &ret); // May fail!
+                printf("%s\n", naam);
+                stackvalue* res = ftrc(sp, wordp, &ret); // May fail!
+                printf("%s DONE\n", naam);
                 if(!res)
                     return 0;
+                sp = res;
                 (++sp)->val.floating = ret;
                 ++wordp;
                 break;
@@ -1520,6 +1545,9 @@ static stackvalue* trcBody(forthMemory* mem)
             case Divide:
                 printf("Pop divide");
                 a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating / a; ++wordp; break;
+            case Drand:
+                printf("Pop rand");
+                sp->val.floating = drand((sp->val).floating); ++wordp; break;
             case Tbl:
                 {
                 stackvalue* sph = setArray(sp, wordp);
@@ -1542,12 +1570,14 @@ static stackvalue* trcBody(forthMemory* mem)
                     for(size_t j = 0; j < rank; ++j)
                         {
                         if(range[j] == 0)
-                            range[j] = (size_t)((sp--)->val).floating; /* range[0] = range of last index*/
-                        else if(range[j] != (size_t)((sp--)->val).floating)
+                            range[j] = (size_t)(sp->val).floating; /* range[0] = range of last index*/
+                        else if(range[j] != (size_t)(sp->val).floating)
                             {
-                            fprintf(stderr, "tbl: attempting to change fixed range from %zu to %zu.\n", range[j], (size_t)((sp--)->val).floating);
+                            fprintf(stderr, "tbl: attempting to change fixed range from %zu to %zu.\n", range[j], (size_t)(sp->val).floating);
+                            --sp;
                             return 0;
                             }
+                        --sp;
                         size *= range[j];
                         }
                     arr = sp->arrp;
@@ -1702,23 +1732,23 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
     return FALSE;
     }
 
-static Boolean ftrc(stackvalue* sp, forthword* wordp, double* ret)
+static stackvalue* ftrc(stackvalue* sp, forthword* wordp, double* ret)
     {
     forthMemory* thatmem = wordp->u.that;
     if(sp && thatmem)
         {
         stackvalue* sp2;
-        fsetArgs(sp, wordp->offset, thatmem);
+        sp = fsetArgs(sp, wordp->offset, thatmem);
         sp2 = trcBody(thatmem);
         if(sp2 && sp2 >= thatmem->stack)
             {
             *ret = thatmem->stack->val.floating;
-            return TRUE;
+            return sp;
             }
         else
-            return FALSE;
+            return 0;
         }
-    return FALSE;
+    return 0;
     }
 
 static long argumentArrayNumber(psk code)
@@ -1776,7 +1806,7 @@ static int polish1(psk code)
             C = polish1(code->RIGHT);
             if(C == -1)
                 return -1;
-            return 2 + R + C; /* one for OR, containing address to 'if true' branch, 
+            return 2 + R + C; /* one for OR, containing address to 'if true' branch,
                               and one for potential Pop, if the lhs and the rhs do
                               not both leave (or not leave) something on the stack. */
             }
@@ -1842,7 +1872,7 @@ static Boolean printmem(forthMemory* mem)
     char* naam;
     int In = 0;
     forthword* wordp = mem->word;
-    printf("print\n");
+    printf("print %s\n",mem->name);
     for(; wordp->action != TheEnd; ++wordp)
         {
         switch(wordp->action)
@@ -1875,66 +1905,67 @@ static Boolean printmem(forthMemory* mem)
                 break;
             case Pop:
                 naam = getLogiName(wordp->u.logic);
-                printf(INDNT); printf(LONGnD " Pop             " LONGnD " %s\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset), naam);
+                printf(INDNT); printf(LONGnD " Pop                   %s\n", 5, wordp - mem->word, naam);
                 --In;
                 break;
             case UncondBranch:
                 naam = getLogiName(wordp->u.logic);
-                printf(INDNT); printf(LONGnD " UncondBranch    " LONGnD " %s\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset), naam);
+                printf(INDNT); printf(LONGnD " UncondBranch    " LONGnD " %s\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset), naam);
                 break;
             case PopUncondBranch:
                 naam = getLogiName(wordp->u.logic);
-                printf(INDNT); printf(LONGnD " PopUncondBranch " LONGnD " %s\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset), naam);
+                printf(INDNT); printf(LONGnD " PopUncondBranch " LONGnD " %s\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset), naam);
                 --In;
                 break;
 
-            case Fless: printf(INDNT); printf(LONGnD " PopPop <        " LONGnD "\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset)); --In; --In; break;
-            case Fless_equal: printf(INDNT); printf(LONGnD " PopPop <=       " LONGnD "\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset)); --In; --In; break;
-            case Fmore_equal: printf(INDNT); printf(LONGnD " PopPop >=       " LONGnD "\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset)); --In; --In; break;
-            case Fmore: printf(INDNT); printf(LONGnD " PopPop >        " LONGnD "\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset)); --In; --In; break;
-            case Funequal: printf(INDNT); printf(LONGnD " PopPop !=       " LONGnD "\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset)); --In; --In; break;
-            case Fequal: printf(INDNT); printf(LONGnD " PopPop ==       " LONGnD "\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset)); --In; --In; break;
+            case Fless: printf(INDNT); printf(LONGnD " PopPop <        " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
+            case Fless_equal: printf(INDNT); printf(LONGnD " PopPop <=       " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
+            case Fmore_equal: printf(INDNT); printf(LONGnD " PopPop >=       " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
+            case Fmore: printf(INDNT); printf(LONGnD     " PopPop >        " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
+            case Funequal: printf(INDNT); printf(LONGnD  " PopPop !=       " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
+            case Fequal: printf(INDNT); printf(LONGnD    " PopPop ==       " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
 
-            case Plus:  printf(INDNT); printf(LONGnD " Pop plus   \n", 5, wordp - mem->word); --In; break;
-            case Times:  printf(INDNT); printf(LONGnD " Pop times  \n", 5, wordp - mem->word); --In; break;
+            case Plus:  printf(INDNT); printf(LONGnD     " Pop plus\n", 5, wordp - mem->word); --In; break;
+            case Times:  printf(INDNT); printf(LONGnD    " Pop times\n", 5, wordp - mem->word); --In; break;
 
-            case Acos:  printf(INDNT); printf(LONGnD " acos   \n", 5, wordp - mem->word); break;
-            case Acosh:  printf(INDNT); printf(LONGnD " acosh  \n", 5, wordp - mem->word); break;
-            case Asin:  printf(INDNT); printf(LONGnD " asin   \n", 5, wordp - mem->word); break;
-            case Asinh:  printf(INDNT); printf(LONGnD " asinh  \n", 5, wordp - mem->word); break;
-            case Atan:  printf(INDNT); printf(LONGnD " atan   \n", 5, wordp - mem->word); break;
-            case Atanh:  printf(INDNT); printf(LONGnD " atanh  \n", 5, wordp - mem->word); break;
-            case Cbrt:  printf(INDNT); printf(LONGnD " cbrt   \n", 5, wordp - mem->word); break;
-            case Ceil:  printf(INDNT); printf(LONGnD " ceil   \n", 5, wordp - mem->word); break;
-            case Cos:  printf(INDNT); printf(LONGnD " cos    \n", 5, wordp - mem->word); break;
-            case Cosh:  printf(INDNT); printf(LONGnD " cosh   \n", 5, wordp - mem->word); break;
-            case Exp:  printf(INDNT); printf(LONGnD " exp    \n", 5, wordp - mem->word); break;
-            case Fabs:  printf(INDNT); printf(LONGnD " fabs   \n", 5, wordp - mem->word); break;
-            case Floor:  printf(INDNT); printf(LONGnD " floor  \n", 5, wordp - mem->word); break;
-            case Log:  printf(INDNT); printf(LONGnD " log    \n", 5, wordp - mem->word); break;
-            case Log10:  printf(INDNT); printf(LONGnD " log10  \n", 5, wordp - mem->word); break;
-            case Sin:  printf(INDNT); printf(LONGnD " sin    \n", 5, wordp - mem->word); break;
-            case Sinh:  printf(INDNT); printf(LONGnD " sinh   \n", 5, wordp - mem->word); break;
-            case Sqrt:  printf(INDNT); printf(LONGnD " sqrt   \n", 5, wordp - mem->word); break;
-            case Tan:  printf(INDNT); printf(LONGnD " tan    \n", 5, wordp - mem->word); break;
-            case Tanh:  printf(INDNT); printf(LONGnD " tanh   \n", 5, wordp - mem->word); break;
-            case Atan2:  printf(INDNT); printf(LONGnD " Pop atan2  \n", 5, wordp - mem->word); --In; break;
-            case Fdim:  printf(INDNT); printf(LONGnD " Pop fdim   \n", 5, wordp - mem->word); --In; break;
-            case Fmax:  printf(INDNT); printf(LONGnD " Pop fmax   \n", 5, wordp - mem->word); --In; break;
-            case Fmin:  printf(INDNT); printf(LONGnD " Pop fmin   \n", 5, wordp - mem->word); --In; break;
-            case Fmod:  printf(INDNT); printf(LONGnD " Pop fmod   \n", 5, wordp - mem->word); --In; break;
-            case Hypot:  printf(INDNT); printf(LONGnD " Pop hypot  \n", 5, wordp - mem->word); --In; break;
-            case Pow:  printf(INDNT); printf(LONGnD      " Pop pow    \n", 5, wordp - mem->word); --In; break;
+            case Acos:  printf(INDNT); printf(LONGnD     " acos\n", 5, wordp - mem->word); break;
+            case Acosh:  printf(INDNT); printf(LONGnD    " acosh\n", 5, wordp - mem->word); break;
+            case Asin:  printf(INDNT); printf(LONGnD     " asin\n", 5, wordp - mem->word); break;
+            case Asinh:  printf(INDNT); printf(LONGnD    " asinh\n", 5, wordp - mem->word); break;
+            case Atan:  printf(INDNT); printf(LONGnD     " atan\n", 5, wordp - mem->word); break;
+            case Atanh:  printf(INDNT); printf(LONGnD    " atanh\n", 5, wordp - mem->word); break;
+            case Cbrt:  printf(INDNT); printf(LONGnD     " cbrt\n", 5, wordp - mem->word); break;
+            case Ceil:  printf(INDNT); printf(LONGnD     " ceil\n", 5, wordp - mem->word); break;
+            case Cos:  printf(INDNT); printf(LONGnD      " cos\n", 5, wordp - mem->word); break;
+            case Cosh:  printf(INDNT); printf(LONGnD     " cosh\n", 5, wordp - mem->word); break;
+            case Exp:  printf(INDNT); printf(LONGnD      " exp\n", 5, wordp - mem->word); break;
+            case Fabs:  printf(INDNT); printf(LONGnD     " fabs\n", 5, wordp - mem->word); break;
+            case Floor:  printf(INDNT); printf(LONGnD    " floor\n", 5, wordp - mem->word); break;
+            case Log:  printf(INDNT); printf(LONGnD      " log\n", 5, wordp - mem->word); break;
+            case Log10:  printf(INDNT); printf(LONGnD    " log10\n", 5, wordp - mem->word); break;
+            case Sin:  printf(INDNT); printf(LONGnD      " sin\n", 5, wordp - mem->word); break;
+            case Sinh:  printf(INDNT); printf(LONGnD     " sinh\n", 5, wordp - mem->word); break;
+            case Sqrt:  printf(INDNT); printf(LONGnD     " sqrt\n", 5, wordp - mem->word); break;
+            case Tan:  printf(INDNT); printf(LONGnD      " tan\n", 5, wordp - mem->word); break;
+            case Tanh:  printf(INDNT); printf(LONGnD     " tanh\n", 5, wordp - mem->word); break;
+            case Atan2:  printf(INDNT); printf(LONGnD    " Pop atan2\n", 5, wordp - mem->word); --In; break;
+            case Fdim:  printf(INDNT); printf(LONGnD     " Pop fdim\n", 5, wordp - mem->word); --In; break;
+            case Fmax:  printf(INDNT); printf(LONGnD     " Pop fmax\n", 5, wordp - mem->word); --In; break;
+            case Fmin:  printf(INDNT); printf(LONGnD     " Pop fmin\n", 5, wordp - mem->word); --In; break;
+            case Fmod:  printf(INDNT); printf(LONGnD     " Pop fmod\n", 5, wordp - mem->word); --In; break;
+            case Hypot:  printf(INDNT); printf(LONGnD    " Pop hypot\n", 5, wordp - mem->word); --In; break;
+            case Pow:  printf(INDNT); printf(LONGnD      " Pop pow\n", 5, wordp - mem->word); --In; break;
             case Subtract:  printf(INDNT); printf(LONGnD " Pop subtract\n", 5, wordp - mem->word); --In; break;
-            case Divide:  printf(INDNT); printf(LONGnD   " Pop divide \n", 5, wordp - mem->word); --In; break;
-            case Tbl:  printf(INDNT); printf(LONGnD " Pop tbl    \n", 5, wordp - mem->word); --In; break;
-            case Out:  printf(INDNT); printf(LONGnD " Pop out    \n", 5, wordp - mem->word); --In; break;
-            case Outln:  printf(INDNT); printf(LONGnD " Pop outln    \n", 5, wordp - mem->word); --In; break;
-            case Idx:  printf(INDNT); printf(LONGnD " Pop idx    \n", 5, wordp - mem->word); --In; break;
-            case QIdx:  printf(INDNT); printf(LONGnD " PopPop Qidx    \n", 5, wordp - mem->word); --In; --In; break;
-            case EIdx:  printf(INDNT); printf(LONGnD " Pop Eidx    \n", 5, wordp - mem->word); --In; break;
-            case Range: printf(INDNT); printf(LONGnD " Pop range  \n", 5, wordp - mem->word); --In; break;
-            case Rank: printf(INDNT); printf(LONGnD " Pop rank   \n", 5, wordp - mem->word); --In; break;
+            case Divide:  printf(INDNT); printf(LONGnD   " Pop divide\n", 5, wordp - mem->word); --In; break;
+            case Drand:  printf(INDNT); printf(LONGnD    " Pop rand\n", 5, wordp - mem->word); --In; break;
+            case Tbl:  printf(INDNT); printf(LONGnD      " Pop tbl\n", 5, wordp - mem->word); --In; break;
+            case Out:  printf(INDNT); printf(LONGnD      " Pop out\n", 5, wordp - mem->word); --In; break;
+            case Outln:  printf(INDNT); printf(LONGnD    " Pop outln\n", 5, wordp - mem->word); --In; break;
+            case Idx:  printf(INDNT); printf(LONGnD      " Pop idx\n", 5, wordp - mem->word); --In; break;
+            case QIdx:  printf(INDNT); printf(LONGnD     " PopPop Qidx\n", 5, wordp - mem->word); --In; --In; break;
+            case EIdx:  printf(INDNT); printf(LONGnD     " Pop Eidx\n", 5, wordp - mem->word); --In; break;
+            case Range: printf(INDNT); printf(LONGnD     " Pop range\n", 5, wordp - mem->word); --In; break;
+            case Rank: printf(INDNT); printf(LONGnD      " Pop rank\n", 5, wordp - mem->word); --In; break;
             case NoOp:
 #if CFUNC
                 naam = getFuncName(wordp->u.funcp);
@@ -1947,9 +1978,13 @@ static Boolean printmem(forthMemory* mem)
             default:
                 printf(INDNT); printf(LONGnD " default         %d\n", 5, wordp - mem->word, wordp->action);
                 ;
+                }
             }
-        }
-    printf(INDNT); printf(LONGnD " TheEnd          \n", 5, wordp - mem->word);
+    printf(INDNT); printf(LONGnD " TheEnd\n", 5, wordp - mem->word);
+    if(mem->functions)
+        printmem(mem->functions);
+    if(mem->nextFnc)
+        printmem(mem->nextFnc);
     return TRUE;
     }
 
@@ -2313,6 +2348,7 @@ static void optimizeJumps(forthMemory* mem)
             case Pow:
             case Subtract:
             case Divide:
+            case Drand:
             case Tbl:
             case Out:
             case Outln:
@@ -2415,6 +2451,7 @@ static void combineTestsAndJumps(forthMemory* mem)
             case Pow:
             case Subtract:
             case Divide:
+            case Drand:
             case Tbl:
             case Out:
             case Outln:
@@ -2504,6 +2541,7 @@ static void compaction(forthMemory* mem)
         assert(wordp->action == TheEnd);
         newwordp->offset = 0;
         bfree(mem->word);
+        mem->word = 0;
         bfree(arr);
         mem->word = newword;
         }
@@ -2636,9 +2674,16 @@ static int argcount(psk rhs)
             return 1;
         else if(is_op(rhs->LEFT))
             {
-            if(Op(rhs->LEFT) == FUN)
-                return 1;
-            fprintf(stderr, "Function argument must be atomic. (A number or a variable prefixed with \"!\")\n");
+            switch(Op(rhs->LEFT))
+                {
+                case FUN:
+                case PLUS:
+                case TIMES:
+                case EXP:
+                case LOG:
+                    return 1;
+                }
+            showProblematicNode("Function argument must be atomic. (A number or a variable prefixed with \"!\")\n",rhs);
             return -1;
             }
         else if((rhs->LEFT->u.sobj) == 0)
@@ -2758,6 +2803,7 @@ static Boolean popReq(forthword* wordp)
         case Pow:
         case Subtract:
         case Divide:
+        case Drand:
         case Tbl:
         case Out:
         case Outln:
@@ -2780,6 +2826,7 @@ static Boolean popReq(forthword* wordp)
                     return TRUE;
                 }
         }
+    return TRUE;
     }
 
 static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
@@ -2795,8 +2842,9 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
             forthMemory* acalc = calcnew(code, TRUE);
             if(acalc)
                 {
-                acalc->nextFnc = mem->nextFnc;
-                mem->nextFnc = acalc;
+                forthMemory* funcs = mem->functions;
+                mem->functions = acalc;
+                acalc->nextFnc = funcs;
                 }
             return wordp;
             }
@@ -3198,6 +3246,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                 if(!is_op(rhs) || namedArray(name, mem, rhs->LEFT) == 0 || argcount(rhs->RIGHT) != 1)
                     {
                     fprintf(stderr, "\"range\" takes two arguments: the name of an array and the range index.\n");
+                    showProblematicNode("Here", rhs);
                     return 0;
                     }
                 }
@@ -3206,7 +3255,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                 /* Check whether built in or user defined. */
 
                 forthMemory* funcs;
-                for(funcs = mem->nextFnc; funcs; funcs = funcs->nextFnc)
+                for(funcs = mem->functions; funcs; funcs = funcs->nextFnc)
                     {
                     if(!strcmp(funcs->name, name))
                         break;
@@ -3321,14 +3370,14 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                     {
                     wordp->u.funcp = p->Cfun;
                     return ++wordp;
-                    }
-            }
+        }
+    }
 #endif
-            for(forthMemory* fm = mem->nextFnc; fm; fm = fm->nextFnc)
+            for(forthMemory* fm = mem->functions; fm; fm = fm->nextFnc)
                 {
                 if(!strcmp(fm->name, name))
                     {
-                    setArity(wordp, code, fm->nparameters);
+                    setArity(wordp, code, (unsigned int)fm->nparameters);
                     wordp->action = Afunction;
                     wordp->u.that = fm;
                     return ++wordp;
@@ -3336,7 +3385,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                 }
             fprintf(stderr, "Function named \"%s\" not found.\n", name);
             return 0; /* Something wrong happened. */
-        }
+    }
         default:
             if(is_op(code))
                 {
@@ -3513,7 +3562,7 @@ static Boolean functiondie(forthMemory* mem)
         }
     forthvariable* curvarp = mem->var;
     fortharray* curarr = mem->arr;
-    forthMemory* functions = mem->nextFnc;
+    forthMemory* functions = mem->functions;
     parameter* parameters = mem->parameters;
     while(curvarp)
         {
@@ -3521,6 +3570,7 @@ static Boolean functiondie(forthMemory* mem)
         if(curvarp->name)
             {
             bfree(curvarp->name);
+            curvarp->name = 0;
             }
         bfree(curvarp);
         curvarp = nextvarp;
@@ -3545,31 +3595,45 @@ static Boolean functiondie(forthMemory* mem)
             if(pars == parameters + mem->nparameters)
                 { /* This array is not a function parameter. So the function owns the data and should delete them. */
                 if(curarr->range)
+                    {
                     bfree(curarr->range);
+                    curarr->range = 0;
+                    }
                 if(curarr->pval)
+                    {
                     bfree(curarr->pval);
+                    curarr->pval = 0;
+                    }
                 }
             bfree(curarr->name);
+            curarr->name = 0;
             }
 
         bfree(curarr);
         curarr = nextarrp;
         }
+    mem->arr = 0;
     if(mem->parameters)
+        {
         bfree(mem->parameters);
+        mem->parameters = 0;
+        }
     for(; functions;)
         {
         forthMemory* nextfunc = functions->nextFnc;
-        calcdie(functions);
+        functiondie(functions);
         functions = nextfunc;
         }
+    mem->functions = 0;
     if(mem->name)
         {
         bfree(mem->name);
+        mem->name = 0;
         }
     if(mem->word)
         {
         bfree(mem->word);
+        mem->word = 0;
         }
     bfree(mem);
     return TRUE;
@@ -3617,6 +3681,7 @@ static forthMemory* calcnew(psk arg, Boolean in_function)
                         }
                     }
                 }
+            forthstuff->functions = 0;
             forthstuff->nextFnc = 0;
             forthstuff->var = 0;
             forthstuff->arr = 0;
@@ -3675,7 +3740,7 @@ static forthMemory* calcnew(psk arg, Boolean in_function)
                     lastword->action = TheEnd;
                     if(newval)
                         wipe(fullcode);
-                    //*
+                    /*
                     printf("Not optimized:\n");
                     printmem(forthstuff);
                     //*/
@@ -3729,13 +3794,19 @@ static Boolean calcdie(forthMemory* mem)
     {
     if(mem != 0)
         {
+        if(mem->word)
+            {
+            bfree(mem->word);
+            mem->word = 0;
+            }
         forthvariable* curvarp = mem->var;
         fortharray* curarr = mem->arr;
-        forthMemory* functions = mem->nextFnc;
+        forthMemory* functions = mem->functions;
         while(curvarp)
             {
             forthvariable* nextvarp = curvarp->next;
             bfree(curvarp->name);
+            curvarp->name = 0;
             bfree(curvarp);
             curvarp = nextvarp;
             }
@@ -3743,24 +3814,38 @@ static Boolean calcdie(forthMemory* mem)
             {
             fortharray* nextarrp = curarr->next;
             bfree(curarr->name);
+            curarr->name = 0;
             if(curarr->range)
+                {
                 bfree(curarr->range);
+                curarr->range = 0;
+                }
             if(curarr->pval)
+                {
                 bfree(curarr->pval);
+                curarr->pval = 0;
+                }
             bfree(curarr);
             curarr = nextarrp;
             }
+        mem->arr = 0;
         if(mem->parameters)
+            {
             bfree(mem->parameters);
+            mem->parameters = 0;
+            }
         for(; functions;)
             {
             forthMemory* nextfunc = functions->nextFnc;
             functiondie(functions);
             functions = nextfunc;
             }
+        mem->functions = 0;
         if(mem->name)
+            {
             bfree(mem->name);
-        bfree(mem->word);
+            mem->name = 0;
+            }
         bfree(mem);
         }
     return TRUE;
