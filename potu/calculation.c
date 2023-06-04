@@ -249,7 +249,7 @@ typedef struct
     actionType Bfun; /* negation of Afun */
     }neg;
 
-static showProblematicNode(char* msg, psk node)
+static void showProblematicNode(char* msg, psk node)
     {
     FILE* saveFpo = global_fpo;
     global_fpo = stderr;
@@ -1025,6 +1025,7 @@ static stackvalue* calculateBody(forthMemory* mem)
                 if((sp = getArrayIndex(sp, wordp)) == 0)
                     return 0;
                 ++wordp;
+                --sp;
                 break;
                 }
             case QIdx:
@@ -1034,6 +1035,9 @@ static stackvalue* calculateBody(forthMemory* mem)
                 i = sp->arrp->index;
 
                 forthvalue* val = sp->arrp->pval + i;
+
+                assert(sp >= mem->stack);
+                assert(sp >= mem->stack);
                 *val = (--sp)->val;
                 ++wordp;
                 break;
@@ -1043,6 +1047,8 @@ static stackvalue* calculateBody(forthMemory* mem)
                 if((sp = getArrayIndex(sp, wordp)) == 0)
                     return 0;
                 i = sp->arrp->index;
+
+                assert(sp >= mem->stack);
                 sp->arrp->index = i;
                 sp->val = (sp->arrp->pval)[i];
                 ++wordp;
@@ -1385,7 +1391,10 @@ static stackvalue* trcBody(forthMemory* mem)
                     return 0;
                 arr = sph->arrp;
                 if(arr == 0)
+                    {
+                    sp = sph - 1;
                     return 0;
+                    }
                 size_t rank = arr->rank;
                 size_t size = 1;
                 printf("Pop tbl   ");
@@ -1405,6 +1414,7 @@ static stackvalue* trcBody(forthMemory* mem)
                             {
                             fprintf(stderr, "tbl: attempting to change fixed range from %zu to %zu.\n", range[j], (size_t)(sp->val).floating);
                             --sp;
+                            --sp;
                             return 0;
                             }
                         --sp;
@@ -1423,6 +1433,7 @@ static stackvalue* trcBody(forthMemory* mem)
                     arr->range = range;
                     printf("%p size %zu index %zu", (void*)arr, arr->size, arr->index);
                     }
+                --sp;
                 ++wordp;
                 break;
                 }
@@ -1438,6 +1449,7 @@ static stackvalue* trcBody(forthMemory* mem)
                     return 0;
                 printf("Pop index   ");
                 ++wordp;
+                --sp;
                 break;
                 }
             case QIdx:
@@ -1744,7 +1756,7 @@ static Boolean printmem(forthMemory* mem)
                 }
             case Afunction:
                 naam = wordp->u.that->name;
-                printf(INDNT); printf(LONGnD " Afunction       " LONGnD " %s\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset), naam);
+                printf(INDNT); printf(LONGnD " Afunction       " LONGnD " %s\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset), naam);
                 break;
             case Pop:
                 naam = getLogiName(wordp->u.logic);
@@ -1779,7 +1791,10 @@ static Boolean printmem(forthMemory* mem)
             case Atanh:  printf(INDNT); printf(LONGnD    " atanh\n", 5, wordp - mem->word); break;
             case Cbrt:  printf(INDNT); printf(LONGnD     " cbrt\n", 5, wordp - mem->word); break;
             case Ceil:  printf(INDNT); printf(LONGnD     " ceil\n", 5, wordp - mem->word); break;
-            case Cos:  printf(INDNT); printf(LONGnD      " cos\n", 5, wordp - mem->word); break;
+            case Cos:  
+                printf(INDNT);
+                printf(LONGnD      " cos\n", 5, wordp - mem->word); 
+                break;
             case Cosh:  printf(INDNT); printf(LONGnD     " cosh\n", 5, wordp - mem->word); break;
             case Exp:  printf(INDNT); printf(LONGnD      " exp\n", 5, wordp - mem->word); break;
             case Fabs:  printf(INDNT); printf(LONGnD     " fabs\n", 5, wordp - mem->word); break;
@@ -2756,28 +2771,28 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                 {
                 wordp->action = UncondBranch;
                 wordp->u.logic = fand;
-                wordp->offset = (j5->j + ((mustpop == epop) ? epopS : eS)) - mem->word;
+                wordp->offset = (unsigned int)((j5->j + ((mustpop == epop) ? epopS : eS)) - mem->word);
                 ++wordp;
-                j5->j[estart].offset = ((j5->j + estart) + sizeof(jumpblock) / sizeof(forthword)) - mem->word;
+                j5->j[estart].offset = (unsigned int)(((j5->j + estart) + sizeof(jumpblock) / sizeof(forthword)) - mem->word);
                 j5->j[estart].action = UncondBranch;
                 j5->j[estart].u.logic = fand;
                 j5->j[epopS].offset = 1;
                 j5->j[epopS].action = Pop;
                 j5->j[epopS].u.logic = fand;
-                j5->j[eS].offset = wordp - mem->word;
+                j5->j[eS].offset = (unsigned int)(wordp - mem->word);
                 j5->j[eS].action = UncondBranch;
                 j5->j[eS].u.logic = fand;
                 j5->j[epopF].offset = 1;
                 j5->j[epopF].action = Pop;
                 j5->j[epopF].u.logic = fand;
-                j5->j[eF].offset = (jumps->j + eF) - mem->word;
+                j5->j[eF].offset = (unsigned int)((jumps->j + eF) - mem->word);
                 j5->j[eF].action = UncondBranch;
                 j5->j[eF].u.logic = fand;
                 saveword = wordp;
                 wordp = polish2(mem, jumps, code->RIGHT, wordp);
                 wordp->action = UncondBranch;
                 wordp->u.logic = fand;
-                wordp->offset = (jumps->j + ((mustpop == epop) ? epopS : eS)) - mem->word;
+                wordp->offset = (unsigned int)((jumps->j + ((mustpop == epop) ? epopS : eS)) - mem->word);
                 ++wordp;
                 }
             mustpop = enopop;
@@ -2813,28 +2828,28 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                 {
                 wordp->action = UncondBranch;
                 wordp->u.logic = fOr;
-                wordp->offset = (j5->j + ((mustpop == epop) ? epopS : eS)) - mem->word;
+                wordp->offset = (unsigned int)((j5->j + ((mustpop == epop) ? epopS : eS)) - mem->word);
                 ++wordp;
-                j5->j[estart].offset = ((j5->j + estart) + sizeof(jumpblock) / sizeof(forthword)) - mem->word;
+                j5->j[estart].offset = (unsigned int)(((j5->j + estart) + sizeof(jumpblock) / sizeof(forthword)) - mem->word);
                 j5->j[estart].action = UncondBranch;
                 j5->j[estart].u.logic = fOr;
                 j5->j[epopS].offset = 1;
                 j5->j[epopS].action = Pop;
                 j5->j[epopS].u.logic = fOr;
-                j5->j[eS].offset = &(jumps->j[eS]) - mem->word;
+                j5->j[eS].offset = (unsigned int)(&(jumps->j[eS]) - mem->word);
                 j5->j[eS].action = UncondBranch;
                 j5->j[eS].u.logic = fOr;
                 j5->j[epopF].offset = 1;
                 j5->j[epopF].action = Pop;
                 j5->j[epopF].u.logic = fOr;
-                j5->j[eF].offset = wordp - mem->word;
+                j5->j[eF].offset = (unsigned int)(wordp - mem->word);
                 j5->j[eF].action = UncondBranch;
                 j5->j[eF].u.logic = fOr;
                 saveword = wordp;
                 wordp = polish2(mem, jumps, code->RIGHT, wordp);
                 wordp->action = UncondBranch;
                 wordp->u.logic = fOr;
-                wordp->offset = (jumps->j + ((mustpop == epop) ? epopS : eS)) - mem->word;
+                wordp->offset = (unsigned int)((jumps->j + ((mustpop == epop) ? epopS : eS)) - mem->word);
                 ++wordp;
                 }
             mustpop = enopop;
@@ -2949,7 +2964,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                     }
                 else
                     return wordp;
-                wordp->offset = &(jumps->j[epopF]) - mem->word;
+                wordp->offset = (unsigned int)(&(jumps->j[epopF]) - mem->word);
                 mustpop = epop;
                 return ++wordp;
                 }
@@ -2975,11 +2990,11 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                 {
                 wordp->action = UncondBranch;
                 wordp->u.logic = fwhl;
-                wordp->offset = (j5->j + ((mustpop == epop) ? epopS : eS)) - mem->word; /* If all good, jump back to start of loop */
+                wordp->offset = (unsigned int)((j5->j + ((mustpop == epop) ? epopS : eS)) - mem->word); /* If all good, jump back to start of loop */
 
                 ++wordp;
 
-                j5->j[estart].offset = ((j5->j + estart) + sizeof(jumpblock) / sizeof(forthword)) - mem->word;
+                j5->j[estart].offset = (unsigned int)(((j5->j + estart) + sizeof(jumpblock) / sizeof(forthword)) - mem->word);
                 j5->j[estart].action = UncondBranch;
                 j5->j[estart].u.logic = fwhl;
                 j5->j[epopS].offset = 1;
@@ -2991,7 +3006,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                 j5->j[epopF].offset = 1;
                 j5->j[epopF].action = Pop;
                 j5->j[epopF].u.logic = fwhl;
-                j5->j[eF].offset = &(jumps->j[eS]) - mem->word; /* whl loop terminates when one of the steps in the loop failed */
+                j5->j[eF].offset = (unsigned int)(&(jumps->j[eS]) - mem->word); /* whl loop terminates when one of the steps in the loop failed */
                 j5->j[eF].action = UncondBranch;
                 j5->j[eF].u.logic = fwhl;
                 mustpop = enopop;
@@ -3583,7 +3598,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                             }
                         }
                     jumpblock* j5 = (jumpblock*)(forthstuff->word);
-                    j5->j[estart].offset = (&(j5->j[0]) + sizeof(jumpblock) / sizeof(forthword)) - forthstuff->word;
+                    j5->j[estart].offset = (unsigned int)((&(j5->j[0]) + sizeof(jumpblock) / sizeof(forthword)) - forthstuff->word);
                     j5->j[estart].action = UncondBranch;
                     //j5->j[epopS].offset = 1;
                     //j5->j[epopS].action = Pop;
@@ -3597,7 +3612,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                     mustpop = enopop;
 
                     lastword = polish2(forthstuff, j5, code, forthstuff->word + sizeof(jumpblock) / sizeof(forthword));
-                    unsigned int theend = lastword - forthstuff->word;
+                    unsigned int theend = (unsigned int)(lastword - forthstuff->word);
                     j5->j[epopS].offset = theend;
                     j5->j[epopS].action = UncondBranch; /* Leave last value on the stack. (If there is one.) */
                     j5->j[eS].offset = theend;
