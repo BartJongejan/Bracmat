@@ -13,26 +13,10 @@
 
 #include "result.h" /* For debugging. Remove when done. */
 
-
-#define CFUNCS 0
-#define CFUNC 0
-
-/*
-(     new$(calculation,(=sin$!a0)):?calc
-    & (calc..calculate)$"1.0E-01"
-)
-
-(      new$(calculation,(=hypot$(!a0.!a1))):?calc
-    & (calc..calculate)$("1.0E-01"."2.0E0")
-)
-
-(    new$(calculation,(=!a0*!a1:?p&!p:>"1.0E1"&"1.0E0"|"0.0E0")):?calc&(calc..print)$
-   & (calc..calculate)$("3.4E0","4.0E0")
-)
-
-    */
-
 #define TOINT(a) ((size_t)ceil(fabs(a)))
+
+typedef enum { epop, enopop } popping;
+static popping mustpop = enopop;
 
 typedef enum
     {
@@ -93,10 +77,6 @@ typedef enum
     , Range /* range$(<array name>,d)) 0 <= d < rank, returns 0 if d < 0 or d >= array rank */
     , Rank  /* rank$(<array name>)) */
     , NoOp
-#if CFUNCS
-    , Cfunction1
-    , Cfunction2
-#endif
     } actionType;
 
 static char* ActionAsWord[] =
@@ -157,21 +137,9 @@ static char* ActionAsWord[] =
     , "range           "
     , "rank            "
     , "NoOp            "
-#if CFUNCS
-    , "Cfunction1      "
-    , "Cfunction2      "
-#endif
     };
 
 struct forthMemory;
-
-#if CFUNC
-typedef void (*funct)(struct forthMemory* This);
-#endif
-#if CFUNCS
-typedef double (*Cfunct1)(double x);
-typedef double (*Cfunct2)(double x, double y);
-#endif
 
 typedef psk(*exportfunct)(double x);
 exportfunct xprtfnc;
@@ -242,15 +210,16 @@ typedef struct forthword
     unsigned int offset : 24; /* Interpreted as arity if action is Afunction */
     union
         {
-#if CFUNC
-        funct funcp;
-#endif
         fortharray* arrp; forthvalue* valp; forthvalue val; dumbl logic; struct forthMemory* that;
-#if CFUNCS
-        Cfunct1 Cfunc1p; Cfunct2 Cfunc2p;
-#endif        
         } u;
     } forthword;
+
+typedef enum { estart, epopS, eS, epopF, eF, ecode } ejump;
+
+typedef struct jumpblock
+    {
+    forthword j[ecode]; /* estart ... eF */
+    } jumpblock;
 
 typedef struct forthMemory
     {
@@ -267,14 +236,6 @@ typedef struct forthMemory
     stackvalue stack[64];
     } forthMemory;
 
-#if CFUNC
-typedef struct Cpair
-    {
-    char* name;
-    funct Cfun;
-    }Cpair;
-#endif
-
 typedef struct Etriple
     {
     char* name;
@@ -282,31 +243,17 @@ typedef struct Etriple
     unsigned int arity;
     }Etriple;
 
-#if CFUNCS
-typedef struct
-    {
-    char* name;
-    Cfunct1 Cfun;
-    }Cpair1;
-
-typedef struct
-    {
-    char* name;
-    Cfunct2 Cfun;
-    }Cpair2;
-#endif
-
 typedef struct
     {
     actionType Afun;
     actionType Bfun; /* negation of Afun */
     }neg;
 
-static showProblematicNode(char * msg,psk node)
+static showProblematicNode(char* msg, psk node)
     {
-    FILE * saveFpo = global_fpo;
+    FILE* saveFpo = global_fpo;
     global_fpo = stderr;
-    fprintf(stderr,"%s", msg);
+    fprintf(stderr, "%s", msg);
     result(node);
     fprintf(stderr, "\n");
     global_fpo = saveFpo;
@@ -742,14 +689,6 @@ static actionType negated(actionType fun)
     return TheEnd;
     }
 
-
-#if CFUNC
-static Cpair pairs[] =
-    {
-        {0,0}
-    };
-#endif
-
 static Etriple etriples[] =
     {
         {"_less"         ,Fless         ,2},
@@ -802,84 +741,10 @@ static Etriple etriples[] =
         {0,0}
     };
 
-#if CFUNCS
-static Cpair1 Cpairs1[] =
-    {
-        {0,0}
-    };
-
-static Cpair2 Cpairs2[] =
-    {
-        {"atan2", atan2},
-        {"fdim",  fdim},
-        {"fmax",  fmax},
-        {"fmin",  fmin},
-        {"fmod",  fmod},
-        {"hypot", hypot},
-        {"pow",   pow},
-        {0,0}
-    };
-#endif
-
 static char* getLogiName(dumbl logi)
     {
     return logics[logi];
     }
-
-#if CFUNC
-static char* getFuncName(funct funcp)
-    {
-    Cpair* cpair;
-    char* naam = "UNK function";
-    static char buffer[64];
-    for(cpair = pairs; cpair->name; ++cpair)
-        {
-        if(cpair->Cfun == funcp)
-            {
-            naam = cpair->name;
-            return naam;
-            }
-        }
-    sprintf(buffer, "UNKNOWN");
-    return buffer;
-    }
-#endif
-
-#if CFUNCS
-static char* getCFunc1Name(Cfunct1 funcp)
-    {
-    Cpair1* cpair;
-    char* naam = "UNK function";
-    static char buffer[64];
-    for(cpair = Cpairs1; cpair->name; ++cpair)
-        {
-        if(cpair->Cfun == funcp)
-            {
-            naam = cpair->name;
-            return naam;
-            }
-        }
-    sprintf(buffer, "UNKNOWN[%p] %d", funcp, dumb);
-    return buffer;
-    }
-
-static char* getCFunc2Name(Cfunct2 funcp)
-    {
-    Cpair2* cpair;
-    char* naam = "UNK function";
-    static char buffer[64];
-    for(cpair = Cpairs2; cpair->name; ++cpair)
-        {
-        if(cpair->Cfun == funcp)
-            {
-            naam = cpair->name;
-            return naam;
-            }
-        }
-    sprintf(buffer, "UNKNOWN[%p] %d", funcp, dumb);
-    return buffer;
-    }
-#endif
 
 static stackvalue* setArray(stackvalue* sp, forthword* wordp)
     {
@@ -1014,22 +879,6 @@ static stackvalue* calculateBody(forthMemory* mem)
                 ++wordp;
                 break;
                 }
-#if CFUNCS
-            case Cfunction1:
-                {
-                sp->val.floating = wordp->u.Cfunc1p((sp->val).floating);
-                ++wordp;
-                break;
-                }
-            case Cfunction2:
-                {
-                a = ((sp--)->val).floating;
-                b = (sp->val).floating;
-                sp->val.floating = wordp->u.Cfunc2p(a, b);
-                ++wordp;
-                break;
-                }
-#endif
             case Pop:
                 {
                 --sp;
@@ -1046,17 +895,17 @@ static stackvalue* calculateBody(forthMemory* mem)
                 break;
                 }
             case Fless:
-                b = ((sp--)->val).floating; if(((sp--)->val).floating >= b) wordp = word + wordp->offset; else ++wordp; break;
+                b = ((sp--)->val).floating; if((sp->val).floating >= b) wordp = word + wordp->offset; else ++wordp; break;
             case Fless_equal:
-                b = ((sp--)->val).floating; if(((sp--)->val).floating > b) wordp = word + wordp->offset; else ++wordp; break;
+                b = ((sp--)->val).floating; if((sp->val).floating > b) wordp = word + wordp->offset; else ++wordp; break;
             case Fmore_equal:
-                b = ((sp--)->val).floating; if(((sp--)->val).floating < b) wordp = word + wordp->offset; else ++wordp; break;
+                b = ((sp--)->val).floating; if((sp->val).floating < b) wordp = word + wordp->offset; else ++wordp; break;
             case Fmore:
-                b = ((sp--)->val).floating; if(((sp--)->val).floating <= b) wordp = word + wordp->offset; else ++wordp; break;
+                b = ((sp--)->val).floating; if((sp->val).floating <= b) wordp = word + wordp->offset; else ++wordp; break;
             case Funequal:
-                b = ((sp--)->val).floating; if(((sp--)->val).floating == b) wordp = word + wordp->offset; else ++wordp; break;
+                b = ((sp--)->val).floating; if((sp->val).floating == b) wordp = word + wordp->offset; else ++wordp; break;
             case Fequal:
-                b = ((sp--)->val).floating; if(((sp--)->val).floating != b) wordp = word + wordp->offset; else ++wordp; break;
+                b = ((sp--)->val).floating; if((sp->val).floating != b) wordp = word + wordp->offset; else ++wordp; break;
             case Plus:
                 a = ((sp--)->val).floating; sp->val.floating += a; ++wordp; break;
             case Times:
@@ -1166,10 +1015,10 @@ static stackvalue* calculateBody(forthMemory* mem)
                 break;
                 }
             case Out:
-                printf("%f ", sp->val.floating); ++wordp; break;
+                printf("%f ", (sp--)->val.floating); ++wordp; break;
                 break;
             case Outln:
-                printf("%f\n", sp->val.floating); ++wordp; break;
+                printf("%f\n", (sp--)->val.floating); ++wordp; break;
                 break;
             case Idx:
                 {
@@ -1313,9 +1162,9 @@ static stackvalue* trcBody(forthMemory* mem)
         double a;
         double b;
         size_t i;
-//        forthvariable* v;
+        //        forthvariable* v;
         fortharray* arr;
-  //      stackvalue* svp;
+        //      stackvalue* svp;
         char* naam;
         assert(sp + 1 >= mem->stack);
         printf("%s %5d %5d: ", ActionAsWord[wordp->action], (int)(wordp - word), (int)(sp - mem->stack));
@@ -1391,25 +1240,6 @@ static stackvalue* trcBody(forthMemory* mem)
                 ++wordp;
                 break;
                 }
-#if CFUNCS
-            case Cfunction1:
-                {
-                printf("%.2f", wordp->u.val.floating);
-                sp->val.floating = wordp->u.Cfunc1p((sp->val).floating);
-                ++wordp;
-                break;
-                }
-            case Cfunction2:
-                {
-                naam = getCFunc2Name(wordp->u.Cfunc2p);
-                printf(" %s", naam);
-                a = ((sp--)->val).floating;
-                b = (sp->val).floating;
-                sp->val.floating = wordp->u.Cfunc2p(a, b);
-                ++wordp;
-                break;
-                }
-#endif
             case Pop:
                 {
                 naam = getLogiName(wordp->u.logic);
@@ -1435,23 +1265,23 @@ static stackvalue* trcBody(forthMemory* mem)
                 break;
                 }
             case Fless:
-                printf("PopPop < ");
-                b = ((sp--)->val).floating; if(((sp--)->val).floating >= b) wordp = word + wordp->offset; else ++wordp; break;
+                printf("Pop < ");
+                b = ((sp--)->val).floating; if((sp->val).floating >= b) wordp = word + wordp->offset; else ++wordp; break;
             case Fless_equal:
-                printf("PopPop <=");
-                b = ((sp--)->val).floating; if(((sp--)->val).floating > b) wordp = word + wordp->offset; else ++wordp; break;
+                printf("Pop <=");
+                b = ((sp--)->val).floating; if((sp->val).floating > b) wordp = word + wordp->offset; else ++wordp; break;
             case Fmore_equal:
-                printf("PopPop >=");
-                b = ((sp--)->val).floating; if(((sp--)->val).floating < b) wordp = word + wordp->offset; else ++wordp; break;
+                printf("Pop >=");
+                b = ((sp--)->val).floating; if((sp->val).floating < b) wordp = word + wordp->offset; else ++wordp; break;
             case Fmore:
-                printf("PopPop > ");
-                b = ((sp--)->val).floating; if(((sp--)->val).floating <= b) wordp = word + wordp->offset; else ++wordp; break;
+                printf("Pop > ");
+                b = ((sp--)->val).floating; if((sp->val).floating <= b) wordp = word + wordp->offset; else ++wordp; break;
             case Funequal:
-                printf("PopPop !=");
-                b = ((sp--)->val).floating; if(((sp--)->val).floating == b) wordp = word + wordp->offset; else ++wordp; break;
+                printf("Pop !=");
+                b = ((sp--)->val).floating; if((sp->val).floating == b) wordp = word + wordp->offset; else ++wordp; break;
             case Fequal:
-                printf("PopPop ==");
-                b = ((sp--)->val).floating; if(((sp--)->val).floating != b) wordp = word + wordp->offset; else ++wordp; break;
+                printf("Pop ==");
+                b = ((sp--)->val).floating; if((sp->val).floating != b) wordp = word + wordp->offset; else ++wordp; break;
             case Plus:
                 printf("Pop plus  ");
                 a = ((sp--)->val).floating; sp->val.floating += a; ++wordp; break;
@@ -1597,10 +1427,10 @@ static stackvalue* trcBody(forthMemory* mem)
                 break;
                 }
             case Out:
-                printf("%f ", sp->val.floating); ++wordp; break;
+                printf("%f ", (sp--)->val.floating); ++wordp; break;
                 break;
             case Outln:
-                printf("%f\n", sp->val.floating); ++wordp; break;
+                printf("%f\n", (sp--)->val.floating); ++wordp; break;
                 break;
             case Idx:
                 {
@@ -1796,7 +1626,9 @@ static int polish1(psk code)
                 return -1;
             if(R == 0 || C == 0)
                 return R + C; /* Function definition on the left and/or right side. */
-            return 1 + R + C; /* one for AND (containing address to 'if false' branch). */
+            return 7 + R + C;
+            /* 0: jump +5 1: pop 2 : jump to success branch 3: pop 4: jump to fail branch.
+            Two more for jumps after lhs and rhs*/
             }
         case OR:
             {
@@ -1806,9 +1638,9 @@ static int polish1(psk code)
             C = polish1(code->RIGHT);
             if(C == -1)
                 return -1;
-            return 2 + R + C; /* one for OR, containing address to 'if true' branch,
-                              and one for potential Pop, if the lhs and the rhs do
-                              not both leave (or not leave) something on the stack. */
+            return 7 + R + C;
+            /* 0: jump +5 1: pop 2 : jump to success branch 3: pop 4: jump to fail branch.
+            Two more for jumps after lhs and rhs*/
             }
         case MATCH:
             {
@@ -1824,16 +1656,29 @@ static int polish1(psk code)
                 return 1 + R + C;
             }
         case FUN:
+            if(is_op(code->LEFT))
+                {
+                fprintf(stderr, "calculation: lhs of $ is operator\n");
+                return -1;
+                }
+            C = polish1(code->RIGHT);
+            if(C == 1 && code->RIGHT->u.sobj == '\0') /* No parameters at all. */
+                C = 0;
+            if(C == -1)
+                return -1;
+            return 1 + C;
         case FUU:
             if(is_op(code->LEFT))
                 {
-                fprintf(stderr, "calculation: lhs of $ or ' is operator\n");
+                fprintf(stderr, "calculation: lhs of ' is operator\n");
                 return -1;
                 }
             C = polish1(code->RIGHT);
             if(C == -1)
                 return -1;
-            return 1 + C;
+            return 6 + C;
+            /* 0: jump +5 1: pop 2 : jump to start of loop 3: pop 4: jump out of the loop.
+            One more for jump after loop*/
         default:
             if(is_op(code))
                 {
@@ -1872,7 +1717,7 @@ static Boolean printmem(forthMemory* mem)
     char* naam;
     int In = 0;
     forthword* wordp = mem->word;
-    printf("print %s\n",mem->name);
+    printf("print %s\n", mem->name == 0 ? "(main)" : mem->name);
     for(; wordp->action != TheEnd; ++wordp)
         {
         switch(wordp->action)
@@ -1898,10 +1743,8 @@ static Boolean printmem(forthMemory* mem)
                 break;
                 }
             case Afunction:
-#if CFUNC
-                naam = getFuncName(wordp->u.funcp);
+                naam = wordp->u.that->name;
                 printf(INDNT); printf(LONGnD " Afunction       " LONGnD " %s\n", 5, wordp - mem->word, 5, (ULONG)(wordp->offset), naam);
-#endif
                 break;
             case Pop:
                 naam = getLogiName(wordp->u.logic);
@@ -1918,12 +1761,12 @@ static Boolean printmem(forthMemory* mem)
                 --In;
                 break;
 
-            case Fless: printf(INDNT); printf(LONGnD " PopPop <        " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
-            case Fless_equal: printf(INDNT); printf(LONGnD " PopPop <=       " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
-            case Fmore_equal: printf(INDNT); printf(LONGnD " PopPop >=       " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
-            case Fmore: printf(INDNT); printf(LONGnD     " PopPop >        " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
-            case Funequal: printf(INDNT); printf(LONGnD  " PopPop !=       " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
-            case Fequal: printf(INDNT); printf(LONGnD    " PopPop ==       " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
+            case Fless: printf(INDNT); printf(LONGnD " Pop <        " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
+            case Fless_equal: printf(INDNT); printf(LONGnD " Pop <=       " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
+            case Fmore_equal: printf(INDNT); printf(LONGnD " Pop >=       " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
+            case Fmore: printf(INDNT); printf(LONGnD     " Pop >        " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
+            case Funequal: printf(INDNT); printf(LONGnD  " Pop !=       " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
+            case Fequal: printf(INDNT); printf(LONGnD    " Pop ==       " LONGnD "\n", 5, wordp - mem->word, 5, (LONG)(wordp->offset)); --In; --In; break;
 
             case Plus:  printf(INDNT); printf(LONGnD     " Pop plus\n", 5, wordp - mem->word); --In; break;
             case Times:  printf(INDNT); printf(LONGnD    " Pop times\n", 5, wordp - mem->word); --In; break;
@@ -1967,19 +1810,14 @@ static Boolean printmem(forthMemory* mem)
             case Range: printf(INDNT); printf(LONGnD     " Pop range\n", 5, wordp - mem->word); --In; break;
             case Rank: printf(INDNT); printf(LONGnD      " Pop rank\n", 5, wordp - mem->word); --In; break;
             case NoOp:
-#if CFUNC
-                naam = getFuncName(wordp->u.funcp);
-#else
-                naam = getLogiName(wordp->u.logic);
-#endif
                 printf(INDNT); printf(LONGnD " NoOp                  %s\n", 5, wordp - mem->word, naam);
                 break;
             case TheEnd:
             default:
                 printf(INDNT); printf(LONGnD " default         %d\n", 5, wordp - mem->word, wordp->action);
                 ;
-                }
             }
+        }
     printf(INDNT); printf(LONGnD " TheEnd\n", 5, wordp - mem->word);
     if(mem->functions)
         printmem(mem->functions);
@@ -2683,7 +2521,7 @@ static int argcount(psk rhs)
                 case LOG:
                     return 1;
                 }
-            showProblematicNode("Function argument must be atomic. (A number or a variable prefixed with \"!\")\n",rhs);
+            showProblematicNode("Function argument must be atomic. (A number or a variable prefixed with \"!\")\n", rhs);
             return -1;
             }
         else if((rhs->LEFT->u.sobj) == 0)
@@ -2829,7 +2667,9 @@ static Boolean popReq(forthword* wordp)
     return TRUE;
     }
 
-static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
+
+static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthword* wordp)
+/* jumps points to 5 words as explained for AND and OR */
     {
     if(wordp == 0)
         return 0; /* Something wrong happened. */
@@ -2846,39 +2686,44 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                 mem->functions = acalc;
                 acalc->nextFnc = funcs;
                 }
+            mustpop = enopop;
             return wordp;
             }
         case PLUS:
-            wordp = polish2(mem, code->LEFT, wordp);
-            wordp = polish2(mem, code->RIGHT, wordp);
+            wordp = polish2(mem, jumps, code->LEFT, wordp);
+            wordp = polish2(mem, jumps, code->RIGHT, wordp);
             if(wordp == 0)
                 return 0; /* Something wrong happened. */
             wordp->action = Plus;
             wordp->offset = 0;
+            mustpop = epop;
             return ++wordp;
         case TIMES:
-            wordp = polish2(mem, code->LEFT, wordp);
-            wordp = polish2(mem, code->RIGHT, wordp);
+            wordp = polish2(mem, jumps, code->LEFT, wordp);
+            wordp = polish2(mem, jumps, code->RIGHT, wordp);
             if(wordp == 0)
                 return 0; /* Something wrong happened. */
             wordp->action = Times;
             wordp->offset = 0;
+            mustpop = epop;
             return ++wordp;
         case EXP:
-            wordp = polish2(mem, code->RIGHT, wordp); /* SIC! */
-            wordp = polish2(mem, code->LEFT, wordp);
+            wordp = polish2(mem, jumps, code->RIGHT, wordp); /* SIC! */
+            wordp = polish2(mem, jumps, code->LEFT, wordp);
             if(wordp == 0)
                 return 0; /* Something wrong happened. */
             wordp->action = Pow;
             wordp->offset = 0;
+            mustpop = epop;
             return ++wordp;
         case LOG:
-            wordp = polish2(mem, code->LEFT, wordp);
-            wordp = polish2(mem, code->RIGHT, wordp);
+            wordp = polish2(mem, jumps, code->LEFT, wordp);
+            wordp = polish2(mem, jumps, code->RIGHT, wordp);
             if(wordp == 0)
                 return 0; /* Something wrong happened. */
             wordp->action = Log;
             wordp->offset = 0;
+            mustpop = epop;
             return ++wordp;
         case AND:
             {
@@ -2894,37 +2739,48 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
             */
             forthword* saveword;
             saveword = wordp;
-            wordp = polish2(mem, code->LEFT, wordp);
+            forthword* lhs = wordp + sizeof(jumpblock) / sizeof(forthword);
+            jumpblock* j5 = (jumpblock*)wordp;
+            wordp = polish2(mem, j5, code->LEFT, lhs);
             if(wordp == 0)
-                return 0; /* Something wrong happened. */
-            if(wordp == saveword)
                 {
-                wordp = polish2(mem, code->RIGHT, wordp);
+                mustpop = enopop;
+                return 0; /* Something wrong happened. */
+                }
+            else if(wordp == lhs) /* LHS is function definition. Ignore this & operator. */
+                {
+                wordp = polish2(mem, jumps, code->RIGHT, saveword);
+                return wordp;
                 }
             else
                 {
-                forthword* prevwordp = wordp - 1;
+                wordp->action = UncondBranch;
+                wordp->u.logic = fand;
+                wordp->offset = (j5->j + ((mustpop == epop) ? epopS : eS)) - mem->word;
+                ++wordp;
+                j5->j[estart].offset = ((j5->j + estart) + sizeof(jumpblock) / sizeof(forthword)) - mem->word;
+                j5->j[estart].action = UncondBranch;
+                j5->j[estart].u.logic = fand;
+                j5->j[epopS].offset = 1;
+                j5->j[epopS].action = Pop;
+                j5->j[epopS].u.logic = fand;
+                j5->j[eS].offset = wordp - mem->word;
+                j5->j[eS].action = UncondBranch;
+                j5->j[eS].u.logic = fand;
+                j5->j[epopF].offset = 1;
+                j5->j[epopF].action = Pop;
+                j5->j[epopF].u.logic = fand;
+                j5->j[eF].offset = (jumps->j + eF) - mem->word;
+                j5->j[eF].action = UncondBranch;
+                j5->j[eF].u.logic = fand;
                 saveword = wordp;
-                if(popReq(prevwordp))
-                    {
-                    saveword->action = Pop;
-                    saveword->u.logic = fand;
-                    wordp = polish2(mem, code->RIGHT, ++wordp);
-                    if(wordp == 0)
-                        return 0; /* Something wrong happened. */
-                    saveword->offset = (unsigned int)(wordp - mem->word);
-                    }
-                else
-                    {
-                    saveword->action = NoOp;
-                    saveword->u.logic = fand;
-                    wordp = polish2(mem, code->RIGHT, ++wordp);
-                    if(wordp == 0)
-                        return 0; /* Something wrong happened. */
-                    if(prevwordp->u.logic != fwhl)
-                        prevwordp->offset = 1 + (unsigned int)(wordp - mem->word);
-                    }
+                wordp = polish2(mem, jumps, code->RIGHT, wordp);
+                wordp->action = UncondBranch;
+                wordp->u.logic = fand;
+                wordp->offset = (jumps->j + ((mustpop == epop) ? epopS : eS)) - mem->word;
+                ++wordp;
                 }
+            mustpop = enopop;
             return wordp;
             }
         case OR: /* jump if true, continue if false */
@@ -2940,227 +2796,211 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
 
             */
             forthword* saveword;
-            wordp = polish2(mem, code->LEFT, wordp);
+            forthword* lhs = wordp + sizeof(jumpblock) / sizeof(forthword);
+            jumpblock* j5 = (jumpblock*)wordp;
+            wordp = polish2(mem, j5, code->LEFT, lhs);
             if(wordp == 0)
+                {
+                mustpop = enopop;
                 return 0; /* Something wrong happened. */
-            saveword = wordp;
-            forthword* prevwordp = wordp - 1;
-            if(popReq(prevwordp))
-                saveword->action = PopUncondBranch;
+                }
+            else if(wordp == lhs) /* LHS is function definition. Ignore this & operator. */
+                {
+                wordp = polish2(mem, jumps, code->RIGHT, saveword);
+                return wordp;
+                }
             else
                 {
-                saveword->action = UncondBranch;
-                if(prevwordp->u.logic != fwhl)
-                    prevwordp->offset = 1 + (unsigned int)(ULONG)(wordp - mem->word);
-                }
-            saveword->u.logic = fOr;
-            wordp = polish2(mem, code->RIGHT, ++wordp);
-            if(wordp == 0)
-                return 0; /* Something wrong happened. */
-            prevwordp = wordp - 1;
-            if(popReq(prevwordp))
-                {
-                wordp->action = Pop;
+                wordp->action = UncondBranch;
                 wordp->u.logic = fOr;
-                (++wordp)->action = UncondBranch;
+                wordp->offset = (j5->j + ((mustpop == epop) ? epopS : eS)) - mem->word;
+                ++wordp;
+                j5->j[estart].offset = ((j5->j + estart) + sizeof(jumpblock) / sizeof(forthword)) - mem->word;
+                j5->j[estart].action = UncondBranch;
+                j5->j[estart].u.logic = fOr;
+                j5->j[epopS].offset = 1;
+                j5->j[epopS].action = Pop;
+                j5->j[epopS].u.logic = fOr;
+                j5->j[eS].offset = &(jumps->j[eS]) - mem->word;
+                j5->j[eS].action = UncondBranch;
+                j5->j[eS].u.logic = fOr;
+                j5->j[epopF].offset = 1;
+                j5->j[epopF].action = Pop;
+                j5->j[epopF].u.logic = fOr;
+                j5->j[eF].offset = wordp - mem->word;
+                j5->j[eF].action = UncondBranch;
+                j5->j[eF].u.logic = fOr;
+                saveword = wordp;
+                wordp = polish2(mem, jumps, code->RIGHT, wordp);
+                wordp->action = UncondBranch;
                 wordp->u.logic = fOr;
+                wordp->offset = (jumps->j + ((mustpop == epop) ? epopS : eS)) - mem->word;
+                ++wordp;
                 }
-            saveword->offset = (unsigned int)(ULONG)(wordp - mem->word); /* the address of the word after the 'if false' branch.*/
+            mustpop = enopop;
             return wordp;
             }
         case MATCH:
             {
-            wordp = polish2(mem, code->LEFT, wordp);
-            wordp = polish2(mem, code->RIGHT, wordp);
+            wordp = polish2(mem, jumps, code->LEFT, wordp);
+            wordp = polish2(mem, jumps, code->RIGHT, wordp);
             if(wordp == 0)
+                {
+                mustpop = enopop;
                 return 0; /* Something wrong happened. */
+                }
             if(!(code->RIGHT->v.fl & UNIFY) & !is_op(code->RIGHT))
                 {
                 if(FLESS(code->RIGHT))
                     {
                     wordp->action = Fless;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(FLESS_EQUAL(code->RIGHT))
                     {
                     wordp->action = Fless_equal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(FMORE_EQUAL(code->RIGHT))
                     {
                     wordp->action = Fmore_equal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(FMORE(code->RIGHT))
                     {
                     wordp->action = Fmore;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(FUNEQUAL(code->RIGHT))
                     {
                     wordp->action = Funequal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(FLESSORMORE(code->RIGHT))
                     {
                     wordp->action = Funequal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(FEQUAL(code->RIGHT))
                     {
                     wordp->action = Fequal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(FNOTLESSORMORE(code->RIGHT))
                     {
                     wordp->action = Fequal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(VLESS(code->RIGHT))
                     {
                     wordp->action = Fless;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(VLESS_EQUAL(code->RIGHT))
                     {
                     wordp->action = Fless_equal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(VMORE_EQUAL(code->RIGHT))
                     {
                     wordp->action = Fmore_equal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(VMORE(code->RIGHT))
                     {
                     wordp->action = Fmore;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(VUNEQUAL(code->RIGHT))
                     {
                     wordp->action = Funequal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(VLESSORMORE(code->RIGHT))
                     {
                     wordp->action = Funequal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(VEQUAL(code->RIGHT))
                     {
                     wordp->action = Fequal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(VNOTLESSORMORE(code->RIGHT))
                     {
                     wordp->action = Fequal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(ILESS(code->RIGHT))
                     {
                     wordp->action = Fless;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(ILESS_EQUAL(code->RIGHT))
                     {
                     wordp->action = Fless_equal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(IMORE_EQUAL(code->RIGHT))
                     {
                     wordp->action = Fmore_equal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(IMORE(code->RIGHT))
                     {
                     wordp->action = Fmore;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(IUNEQUAL(code->RIGHT))
                     {
                     wordp->action = Funequal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(ILESSORMORE(code->RIGHT))
                     {
                     wordp->action = Funequal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(IEQUAL(code->RIGHT))
                     {
                     wordp->action = Fequal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
                 else if(INOTLESSORMORE(code->RIGHT))
                     {
                     wordp->action = Fequal;
-                    wordp->offset = 0;
-                    return ++wordp;
                     }
+                else
+                    return wordp;
+                wordp->offset = &(jumps->j[epopF]) - mem->word;
+                mustpop = epop;
+                return ++wordp;
                 }
             return wordp;
             }
         case FUU: /* whl'(blbla) */
             {
-            unsigned int here = (unsigned int)(ULONG)(wordp - mem->word); /* start of loop */
-            char* name = &code->LEFT->u.sobj;
-            if(strcmp(name, "whl"))
+            forthword* saveword = wordp;
+            forthword* loop = wordp + sizeof(jumpblock) / sizeof(forthword);
+            jumpblock* j5 = (jumpblock*)wordp;
+            wordp = polish2(mem, j5, code->RIGHT, loop);
+            if(wordp == 0)
                 {
-                fprintf(stderr, "\"whl\" expected as left hand side of ' operator (apostrophe). Found \"%s\"\n", name);
+                mustpop = enopop;
                 return 0; /* Something wrong happened. */
                 }
-            wordp = polish2(mem, code->RIGHT, wordp);
-            if(wordp == 0)
-                return 0; /* Something wrong happened. */
-            forthword* prevwordp = wordp - 1;
-            if(popReq(prevwordp))
+            else if(wordp == loop) /* Loop body is function definition. Ignore this ' operator. */
                 {
-                wordp->action = PopUncondBranch;
-                wordp->offset = here; /* If all good, jump back to start of loop */
+                mustpop = enopop;
+                return saveword;
                 }
             else
                 {
                 wordp->action = UncondBranch;
-                if(prevwordp->u.logic != fwhl)
-                    prevwordp->offset = 1 + (unsigned int)(ULONG)(wordp - mem->word);
-                wordp->offset = here;
-                prevwordp = wordp - 1;
-                if(prevwordp->action == PopUncondBranch && prevwordp->offset == 0)
-                    prevwordp->offset = here;
-                /* If all good, jump back to start of loop */
+                wordp->u.logic = fwhl;
+                wordp->offset = (j5->j + ((mustpop == epop) ? epopS : eS)) - mem->word; /* If all good, jump back to start of loop */
+
+                ++wordp;
+
+                j5->j[estart].offset = ((j5->j + estart) + sizeof(jumpblock) / sizeof(forthword)) - mem->word;
+                j5->j[estart].action = UncondBranch;
+                j5->j[estart].u.logic = fwhl;
+                j5->j[epopS].offset = 1;
+                j5->j[epopS].action = Pop;
+                j5->j[epopS].u.logic = fwhl;
+                j5->j[eS].offset = j5->j[estart].offset;
+                j5->j[eS].action = UncondBranch;
+                j5->j[eS].u.logic = fwhl;
+                j5->j[epopF].offset = 1;
+                j5->j[epopF].action = Pop;
+                j5->j[epopF].u.logic = fwhl;
+                j5->j[eF].offset = &(jumps->j[eS]) - mem->word; /* whl loop terminates when one of the steps in the loop failed */
+                j5->j[eF].action = UncondBranch;
+                j5->j[eF].u.logic = fwhl;
+                mustpop = enopop;
+                return wordp;
                 }
-            wordp->u.logic = fwhl;
-            return ++wordp;;
             }
         case FUN:
             {
             Etriple* ep = etriples;
-#if CFUNC
-            Cpair* p = pairs;
-#endif
             char* name = &code->LEFT->u.sobj;
             psk rhs = code->RIGHT;
             if(!strcmp(name, "idx") || !strcmp(name, "tbl"))
@@ -3263,39 +3103,42 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                 if(funcs)
                     {
                     parameter* parms;
-                    for(parms = funcs->parameters + funcs->nparameters; --parms >= funcs->parameters;)
+                    if(funcs->nparameters > 0)
                         {
-                        if(!is_op(rhs) && parms > funcs->parameters)
+                        for(parms = funcs->parameters + funcs->nparameters; --parms >= funcs->parameters;)
                             {
-                            fprintf(stderr, "Too few parameters.\n");
-                            //    return 0;
-                            }
-                        psk parm;
-                        if(Op(rhs) == COMMA)
-                            parm = rhs->LEFT;
-                        else
-                            parm = rhs;
-                        if(parms->scalar_or_array == Array)
-                            {
-                            if(is_op(parm))
+                            if(!is_op(rhs) && parms > funcs->parameters)
                                 {
-                                fprintf(stderr, "Array name expected.\n");
-                                return 0;
+                                fprintf(stderr, "Too few parameters.\n");
+                                //    return 0;
                                 }
+                            psk parm;
+                            if(Op(rhs) == COMMA)
+                                parm = rhs->LEFT;
                             else
+                                parm = rhs;
+                            if(parms->scalar_or_array == Array)
                                 {
-                                if(HAS_VISIBLE_FLAGS_OR_MINUS(parm))
+                                if(is_op(parm))
                                     {
-                                    fprintf(stderr, "When passing an array to a function, the array name must be free of any prefixes.\n");
+                                    fprintf(stderr, "Array name expected.\n");
                                     return 0;
                                     }
+                                else
+                                    {
+                                    if(HAS_VISIBLE_FLAGS_OR_MINUS(parm))
+                                        {
+                                        fprintf(stderr, "When passing an array to a function, the array name must be free of any prefixes.\n");
+                                        return 0;
+                                        }
+                                    }
                                 }
-                            }
-                        if(is_op(rhs))
-                            rhs = rhs->RIGHT;
-                        else
-                            {
-                            assert(parms == funcs->parameters);
+                            if(is_op(rhs))
+                                rhs = rhs->RIGHT;
+                            else
+                                {
+                                assert(parms == funcs->parameters);
+                                }
                             }
                         }
                     }
@@ -3314,7 +3157,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                         }
                     }
                 }
-            wordp = polish2(mem, code->RIGHT, wordp);
+            wordp = polish2(mem, jumps, code->RIGHT, wordp);
             if(wordp == 0)
                 return 0; /* Something wrong happened. */
             wordp->offset = 0;
@@ -3327,6 +3170,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                         wordp->action = ep->action;
                         if(wordp->action == EIdx)
                             if(!setArity(wordp, code, ep->arity)) return 0;
+                        mustpop = epop;
                         return ++wordp;
                         }
                     }
@@ -3340,6 +3184,7 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                         wordp->action = ep->action;
                         if(wordp->action == QIdx)
                             if(!setArity(wordp, code, ep->arity)) return 0;
+                        mustpop = epop;
                         return ++wordp;
                         }
                     }
@@ -3357,22 +3202,13 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                             fprintf(stderr, "Argument error in call to \"%s\".\n", name);
                             return 0;
                             }
+                        mustpop = enopop;
                         return ++wordp;
                         }
                     }
                 }
 
             wordp->action = Afunction;
-#if CFUNC
-            for(; p->name != 0; ++p)
-                {
-                if(!strcmp(p->name, name))
-                    {
-                    wordp->u.funcp = p->Cfun;
-                    return ++wordp;
-        }
-    }
-#endif
             for(forthMemory* fm = mem->functions; fm; fm = fm->nextFnc)
                 {
                 if(!strcmp(fm->name, name))
@@ -3380,17 +3216,20 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                     setArity(wordp, code, (unsigned int)fm->nparameters);
                     wordp->action = Afunction;
                     wordp->u.that = fm;
+                    mustpop = epop;
                     return ++wordp;
                     }
                 }
             fprintf(stderr, "Function named \"%s\" not found.\n", name);
             return 0; /* Something wrong happened. */
-    }
+            }
         default:
-            if(is_op(code))
+            {
+            if(is_op(code)) /* e.g. COMMA */
                 {
-                wordp = polish2(mem, code->LEFT, wordp);
-                wordp = polish2(mem, code->RIGHT, wordp);
+                wordp = polish2(mem, jumps, code->LEFT, wordp);
+                wordp = polish2(mem, jumps, code->RIGHT, wordp);
+                mustpop = enopop;
                 return wordp;
                 }
             else
@@ -3489,342 +3328,135 @@ static forthword* polish2(forthMemory* mem, psk code, forthword* wordp)
                             }
                         else
                             {
+                            mustpop = enopop;
+                            return wordp;
+                            }
+#if 0
+                        else
+                            {
                             wordp->action = Push;
                             /* We can get here if an expression is empty, e.g.
                             in a case like
                                 whl'(!n+1:<10:?n&(!n:>3&dosomething$|))*/
                             }
+#endif
                         }
                     wordp->offset = 0;
                     }
                 ++wordp;
+                mustpop = epop;
                 return wordp;
-                };
+                }
+            }
+        }
     }
-        }
 
-static Boolean setparm(size_t Ndecl, forthMemory* forthstuff, psk declaration, Boolean in_function)
-    {
-    parameter* npar;
-    if(is_op(declaration->LEFT))
+    static Boolean setparm(size_t Ndecl, forthMemory* forthstuff, psk declaration, Boolean in_function)
         {
-        fprintf(stderr, "Parameter declaration requires 's' or 'a'.\n");
-        return FALSE;
-        }
-
-    if(declaration->LEFT->u.sobj == 's') // scalar
-        {
-        if(is_op(declaration->RIGHT))
+        parameter* npar;
+        if(is_op(declaration->LEFT))
             {
-            fprintf(stderr, "Scalar parameter declaration doesn't take range.\n");
+            fprintf(stderr, "Parameter declaration requires 's' or 'a'.\n");
             return FALSE;
             }
-        forthvariable* var = getVariablePointer(forthstuff->var, &(declaration->RIGHT->u.sobj));
 
-        if(!var)
+        if(declaration->LEFT->u.sobj == 's') // scalar
             {
-            var = createVariablePointer(&(forthstuff->var), &(declaration->RIGHT->u.sobj));
-            }
-
-        if(var)
-            {
-            npar = forthstuff->parameters + Ndecl;
-            npar->scalar_or_array = Scalar;
-            npar->u.v = var;
-            }
-        }
-    else // array
-        {
-        fortharray* a = haveArray(forthstuff, declaration->RIGHT, in_function);
-        if(a)
-            {
-            npar = forthstuff->parameters + Ndecl;
-            if(npar)
+            if(is_op(declaration->RIGHT))
                 {
-                npar->scalar_or_array = Array;
-                npar->u.a = a;
+                fprintf(stderr, "Scalar parameter declaration doesn't take range.\n");
+                return FALSE;
+                }
+            forthvariable* var = getVariablePointer(forthstuff->var, &(declaration->RIGHT->u.sobj));
+
+            if(!var)
+                {
+                var = createVariablePointer(&(forthstuff->var), &(declaration->RIGHT->u.sobj));
+                }
+
+            if(var)
+                {
+                npar = forthstuff->parameters + Ndecl;
+                npar->scalar_or_array = Scalar;
+                npar->u.v = var;
                 }
             }
-        else
+        else // array
+            {
+            fortharray* a = haveArray(forthstuff, declaration->RIGHT, in_function);
+            if(a)
+                {
+                npar = forthstuff->parameters + Ndecl;
+                if(npar)
+                    {
+                    npar->scalar_or_array = Array;
+                    npar->u.a = a;
+                    }
+                }
+            else
+                return FALSE;
+            }
+        return TRUE;
+        }
+
+    static Boolean calcdie(forthMemory* mem);
+
+    static Boolean functiondie(forthMemory* mem)
+        {
+        if(!mem)
+            {
+            fprintf(stderr, "calculation.functiondie does not deallocate, member \"mem\" is zero.\n");
             return FALSE;
-        }
-    return TRUE;
-    }
-
-static Boolean calcdie(forthMemory* mem);
-
-static Boolean functiondie(forthMemory* mem)
-    {
-    if(!mem)
-        {
-        fprintf(stderr, "calculation.functiondie does not deallocate, member \"mem\" is zero.\n");
-        return FALSE;
-        }
-    forthvariable* curvarp = mem->var;
-    fortharray* curarr = mem->arr;
-    forthMemory* functions = mem->functions;
-    parameter* parameters = mem->parameters;
-    while(curvarp)
-        {
-        forthvariable* nextvarp = curvarp->next;
-        if(curvarp->name)
-            {
-            bfree(curvarp->name);
-            curvarp->name = 0;
-            }
-        bfree(curvarp);
-        curvarp = nextvarp;
-        }
-    while(curarr)
-        {
-        fortharray* nextarrp = curarr->next;
-        if(curarr->name)
-            {
-            /* range and pval are not allocated when function is called.
-               Instead, pointers are set to caller's pointers. */
-            parameter* pars = 0;
-            for(pars = parameters; pars < parameters + mem->nparameters; ++pars)
-                {
-                if(pars->scalar_or_array == Array)
-                    {
-                    if(!strcmp(pars->u.a->name, curarr->name))
-                        break;
-                    }
-                }
-
-            if(pars == parameters + mem->nparameters)
-                { /* This array is not a function parameter. So the function owns the data and should delete them. */
-                if(curarr->range)
-                    {
-                    bfree(curarr->range);
-                    curarr->range = 0;
-                    }
-                if(curarr->pval)
-                    {
-                    bfree(curarr->pval);
-                    curarr->pval = 0;
-                    }
-                }
-            bfree(curarr->name);
-            curarr->name = 0;
-            }
-
-        bfree(curarr);
-        curarr = nextarrp;
-        }
-    mem->arr = 0;
-    if(mem->parameters)
-        {
-        bfree(mem->parameters);
-        mem->parameters = 0;
-        }
-    for(; functions;)
-        {
-        forthMemory* nextfunc = functions->nextFnc;
-        functiondie(functions);
-        functions = nextfunc;
-        }
-    mem->functions = 0;
-    if(mem->name)
-        {
-        bfree(mem->name);
-        mem->name = 0;
-        }
-    if(mem->word)
-        {
-        bfree(mem->word);
-        mem->word = 0;
-        }
-    bfree(mem);
-    return TRUE;
-    }
-
-static forthMemory* calcnew(psk arg, Boolean in_function)
-    {
-    int newval = 0;
-    psk code, fullcode;
-    psk declarations = 0;
-    code = getValue(arg, &newval);
-    fullcode = code;
-    if(is_op(code) && Op(code) == DOT)
-        {
-        declarations = code->LEFT;
-        code = code->RIGHT;
-        }
-    if(code)
-        {
-        char* name;
-        forthword* lastword;
-        forthMemory* forthstuff;
-        int length;
-        length = polish1(code);
-        if(length < 0)
-            {
-            fprintf(stderr, "polish1 returns length < 0 [%d]\n", length);
-            return 0; /* Something wrong happened. */
-            }
-        forthstuff = (forthMemory*)bmalloc(__LINE__, sizeof(forthMemory));
-        if(forthstuff)
-            {
-            memset(forthstuff, 0, sizeof(forthMemory));
-            forthstuff->name = 0;
-            if(is_op(arg) && !is_op(arg->LEFT))
-                {
-                name = &(arg->LEFT->u.sobj);
-                if(*name)
-                    {
-                    assert(forthstuff->name == 0);
-                    forthstuff->name = (char*)bmalloc(__LINE__, strlen(name) + 1);
-                    if(forthstuff->name)
-                        {
-                        strcpy(forthstuff->name, name);
-                        }
-                    }
-                }
-            forthstuff->functions = 0;
-            forthstuff->nextFnc = 0;
-            forthstuff->var = 0;
-            forthstuff->arr = 0;
-            assert(forthstuff->word == 0);
-            forthstuff->word = bmalloc(__LINE__, length * sizeof(forthword) + 1);
-            if(forthstuff->word)
-                {
-                memset(forthstuff->word, 0, length * sizeof(forthword) + 1);
-                forthstuff->wordp = forthstuff->word;
-                forthstuff->sp = forthstuff->stack;
-                forthstuff->parameters = 0;
-                if(declarations)
-                    {
-                    psk decl;
-                    size_t Ndecl = 0;
-                    for(decl = declarations; decl && is_op(decl); decl = decl->RIGHT)
-                        {
-                        ++Ndecl;
-                        if(Op(decl) == DOT) /*Just one parameter that is an array*/
-                            break;
-                        }
-
-                    forthstuff->nparameters = Ndecl;
-                    if(Ndecl > 0)
-                        {
-                        forthstuff->parameters = bmalloc(__LINE__, Ndecl * sizeof(parameter));
-                        if(forthstuff->parameters != 0)
-                            {
-                            for(decl = declarations; Ndecl-- > 0 && decl && is_op(decl); decl = decl->RIGHT)
-                                {
-                                if(Op(decl) == DOT)
-                                    {
-                                    if(!setparm(Ndecl, forthstuff, decl, in_function))
-                                        {
-                                        fprintf(stderr, "Error in parameter declaration.\n");
-                                        return 0; /* Something wrong happened. */
-                                        }
-                                    break;
-                                    }
-                                else
-                                    {
-                                    if(is_op(decl->LEFT) && Op(decl->LEFT) == DOT)
-                                        if(!setparm(Ndecl, forthstuff, decl->LEFT, in_function))
-                                            {
-                                            fprintf(stderr, "Error in parameter declaration.\n");
-                                            return 0; /* Something wrong happened. */
-                                            }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                lastword = polish2(forthstuff, code, forthstuff->wordp);
-                if(lastword != 0)
-                    {
-                    lastword->action = TheEnd;
-                    if(newval)
-                        wipe(fullcode);
-                    /*
-                    printf("Not optimized:\n");
-                    printmem(forthstuff);
-                    //*/
-
-                    /*/
-                    optimizeJumps(forthstuff);
-                    //*
-                    printf("Optimized jumps:\n");
-                    printmem(forthstuff);
-                    //*/
-
-                    /*/
-                    combineTestsAndJumps(forthstuff);
-                    //*
-                    printf("Combined testst and jumps:\n");
-                    printmem(forthstuff);
-                    //*/
-
-                    /*/
-                    compaction(forthstuff);
-                    //*
-                    printf("Compacted:\n");
-                    printmem(forthstuff);
-                    //*/
-                    return forthstuff;
-                    }
-                }
-            }
-        calcdie(forthstuff);
-        }
-    wipe(fullcode);
-    fprintf(stderr, "Compilation of calculation object failed.\n");
-    return 0; /* Something wrong happened. */
-    }
-
-static Boolean calculationnew(struct typedObjectnode* This, ppsk arg)
-    {
-    if(is_op(*arg))
-        {
-        forthMemory* forthstuff = calcnew((*arg)->RIGHT, FALSE);
-        if(forthstuff)
-            {
-            This->voiddata = forthstuff;
-            return TRUE;
-            }
-        }
-    return FALSE;
-    }
-
-static Boolean calcdie(forthMemory* mem)
-    {
-    if(mem != 0)
-        {
-        if(mem->word)
-            {
-            bfree(mem->word);
-            mem->word = 0;
             }
         forthvariable* curvarp = mem->var;
         fortharray* curarr = mem->arr;
         forthMemory* functions = mem->functions;
+        parameter* parameters = mem->parameters;
         while(curvarp)
             {
             forthvariable* nextvarp = curvarp->next;
-            bfree(curvarp->name);
-            curvarp->name = 0;
+            if(curvarp->name)
+                {
+                bfree(curvarp->name);
+                curvarp->name = 0;
+                }
             bfree(curvarp);
             curvarp = nextvarp;
             }
         while(curarr)
             {
             fortharray* nextarrp = curarr->next;
-            bfree(curarr->name);
-            curarr->name = 0;
-            if(curarr->range)
+            if(curarr->name)
                 {
-                bfree(curarr->range);
-                curarr->range = 0;
+                /* range and pval are not allocated when function is called.
+                   Instead, pointers are set to caller's pointers. */
+                parameter* pars = 0;
+                for(pars = parameters; pars < parameters + mem->nparameters; ++pars)
+                    {
+                    if(pars->scalar_or_array == Array)
+                        {
+                        if(!strcmp(pars->u.a->name, curarr->name))
+                            break;
+                        }
+                    }
+
+                if(pars == parameters + mem->nparameters)
+                    { /* This array is not a function parameter. So the function owns the data and should delete them. */
+                    if(curarr->range)
+                        {
+                        bfree(curarr->range);
+                        curarr->range = 0;
+                        }
+                    if(curarr->pval)
+                        {
+                        bfree(curarr->pval);
+                        curarr->pval = 0;
+                        }
+                    }
+                bfree(curarr->name);
+                curarr->name = 0;
                 }
-            if(curarr->pval)
-                {
-                bfree(curarr->pval);
-                curarr->pval = 0;
-                }
+
             bfree(curarr);
             curarr = nextarrp;
             }
@@ -3846,53 +3478,293 @@ static Boolean calcdie(forthMemory* mem)
             bfree(mem->name);
             mem->name = 0;
             }
+        if(mem->word)
+            {
+            bfree(mem->word);
+            mem->word = 0;
+            }
         bfree(mem);
+        return TRUE;
         }
-    return TRUE;
-    }
 
-static Boolean calculationdie(struct typedObjectnode* This, ppsk arg)
-    {
-    return calcdie((forthMemory*)(This->voiddata));
-    }
+    static forthMemory* calcnew(psk arg, Boolean in_function)
+        {
+        int newval = 0;
+        psk code, fullcode;
+        psk declarations = 0;
+        code = getValue(arg, &newval);
+        fullcode = code;
+        if(is_op(code) && Op(code) == DOT)
+            {
+            declarations = code->LEFT;
+            code = code->RIGHT;
+            }
+        if(code)
+            {
+            char* name;
+            forthword* lastword;
+            forthMemory* forthstuff;
+            int length;
+            length = polish1(code) + sizeof(jumpblock) / sizeof(forthword) + 1; /* 1 for TheEnd */
+            if(length < 1)
+                {
+                fprintf(stderr, "polish1 returns length < 0 [%d]\n", length);
+                return 0; /* Something wrong happened. */
+                }
+            forthstuff = (forthMemory*)bmalloc(__LINE__, sizeof(forthMemory));
+            if(forthstuff)
+                {
+                memset(forthstuff, 0, sizeof(forthMemory));
+                forthstuff->name = 0;
+                if(is_op(arg) && !is_op(arg->LEFT))
+                    {
+                    name = &(arg->LEFT->u.sobj);
+                    if(*name)
+                        {
+                        assert(forthstuff->name == 0);
+                        forthstuff->name = (char*)bmalloc(__LINE__, strlen(name) + 1);
+                        if(forthstuff->name)
+                            {
+                            strcpy(forthstuff->name, name);
+                            }
+                        }
+                    }
+                forthstuff->functions = 0;
+                forthstuff->nextFnc = 0;
+                forthstuff->var = 0;
+                forthstuff->arr = 0;
+                assert(forthstuff->word == 0);
+                forthstuff->word = bmalloc(__LINE__, length * sizeof(forthword));
+                if(forthstuff->word)
+                    {
+                    memset(forthstuff->word, 0, length * sizeof(forthword));
+                    forthstuff->wordp = forthstuff->word;
+                    forthstuff->sp = forthstuff->stack;
+                    forthstuff->parameters = 0;
+                    if(declarations)
+                        {
+                        psk decl;
+                        size_t Ndecl = 0;
+                        for(decl = declarations; decl && is_op(decl); decl = decl->RIGHT)
+                            {
+                            ++Ndecl;
+                            if(Op(decl) == DOT) /*Just one parameter that is an array*/
+                                break;
+                            }
 
-method calculation[] = {
-    {"calculate",calculate},
-    {"trc",trc},
-    {"print",print},
-    {"export",eksport},
-    {"New",calculationnew},
-    {"Die",calculationdie},
-    {NULL,NULL} };
-/*
-Standard methods are 'New' and 'Die'.
-A user defined 'die' can be added after creation of the object and will be invoked just before 'Die'.
+                        forthstuff->nparameters = Ndecl;
+                        if(Ndecl > 0)
+                            {
+                            forthstuff->parameters = bmalloc(__LINE__, Ndecl * sizeof(parameter));
+                            if(forthstuff->parameters != 0)
+                                {
+                                for(decl = declarations; Ndecl-- > 0 && decl && is_op(decl); decl = decl->RIGHT)
+                                    {
+                                    if(Op(decl) == DOT)
+                                        {
+                                        if(!setparm(Ndecl, forthstuff, decl, in_function))
+                                            {
+                                            fprintf(stderr, "Error in parameter declaration.\n");
+                                            return 0; /* Something wrong happened. */
+                                            }
+                                        break;
+                                        }
+                                    else
+                                        {
+                                        if(is_op(decl->LEFT) && Op(decl->LEFT) == DOT)
+                                            if(!setparm(Ndecl, forthstuff, decl->LEFT, in_function))
+                                                {
+                                                fprintf(stderr, "Error in parameter declaration.\n");
+                                                return 0; /* Something wrong happened. */
+                                                }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    jumpblock* j5 = (jumpblock*)(forthstuff->word);
+                    j5->j[estart].offset = (&(j5->j[0]) + sizeof(jumpblock) / sizeof(forthword)) - forthstuff->word;
+                    j5->j[estart].action = UncondBranch;
+                    //j5->j[epopS].offset = 1;
+                    //j5->j[epopS].action = Pop;
+                    //j5->j[eS].offset = 0;
+                    //j5->j[eS].action = TheEnd;
+                    j5->j[epopF].offset = 1;
+                    j5->j[epopF].action = Pop;
+                    //j5->j[eF].offset = 0;
+                    //j5->j[eF].action = TheEnd;
 
-Example:
+                    mustpop = enopop;
 
-new$hash:?h;
+                    lastword = polish2(forthstuff, j5, code, forthstuff->word + sizeof(jumpblock) / sizeof(forthword));
+                    unsigned int theend = lastword - forthstuff->word;
+                    j5->j[epopS].offset = theend;
+                    j5->j[epopS].action = UncondBranch; /* Leave last value on the stack. (If there is one.) */
+                    j5->j[eS].offset = theend;
+                    j5->j[eS].action = UncondBranch;
+                    j5->j[eF].offset = theend;
+                    j5->j[eF].action = UncondBranch;
+
+                    assert(theend + 1 == length);
+
+                    if(lastword != 0)
+                        {
+                        lastword->action = TheEnd;
+                        if(newval)
+                            wipe(fullcode);
+                        /*
+                        printf("Not optimized:\n");
+                        printmem(forthstuff);
+                        //*/
+
+                        /*/
+                        optimizeJumps(forthstuff);
+                        //*
+                        printf("Optimized jumps:\n");
+                        printmem(forthstuff);
+                        //*/
+
+                        /*/
+                        combineTestsAndJumps(forthstuff);
+                        //*
+                        printf("Combined testst and jumps:\n");
+                        printmem(forthstuff);
+                        //*/
+
+                        /*/
+                        compaction(forthstuff);
+                        //*
+                        printf("Compacted:\n");
+                        printmem(forthstuff);
+                        //*/
+                        return forthstuff;
+                        }
+                    }
+                }
+            calcdie(forthstuff);
+            }
+        wipe(fullcode);
+        fprintf(stderr, "Compilation of calculation object failed.\n");
+        return 0; /* Something wrong happened. */
+        }
+
+    static Boolean calculationnew(struct typedObjectnode* This, ppsk arg)
+        {
+        if(is_op(*arg))
+            {
+            forthMemory* forthstuff = calcnew((*arg)->RIGHT, FALSE);
+            if(forthstuff)
+                {
+                This->voiddata = forthstuff;
+                return TRUE;
+                }
+            }
+        return FALSE;
+        }
+
+    static Boolean calcdie(forthMemory* mem)
+        {
+        if(mem != 0)
+            {
+            if(mem->word)
+                {
+                bfree(mem->word);
+                mem->word = 0;
+                }
+            forthvariable* curvarp = mem->var;
+            fortharray* curarr = mem->arr;
+            forthMemory* functions = mem->functions;
+            while(curvarp)
+                {
+                forthvariable* nextvarp = curvarp->next;
+                bfree(curvarp->name);
+                curvarp->name = 0;
+                bfree(curvarp);
+                curvarp = nextvarp;
+                }
+            while(curarr)
+                {
+                fortharray* nextarrp = curarr->next;
+                bfree(curarr->name);
+                curarr->name = 0;
+                if(curarr->range)
+                    {
+                    bfree(curarr->range);
+                    curarr->range = 0;
+                    }
+                if(curarr->pval)
+                    {
+                    bfree(curarr->pval);
+                    curarr->pval = 0;
+                    }
+                bfree(curarr);
+                curarr = nextarrp;
+                }
+            mem->arr = 0;
+            if(mem->parameters)
+                {
+                bfree(mem->parameters);
+                mem->parameters = 0;
+                }
+            for(; functions;)
+                {
+                forthMemory* nextfunc = functions->nextFnc;
+                functiondie(functions);
+                functions = nextfunc;
+                }
+            mem->functions = 0;
+            if(mem->name)
+                {
+                bfree(mem->name);
+                mem->name = 0;
+                }
+            bfree(mem);
+            }
+        return TRUE;
+        }
+
+    static Boolean calculationdie(struct typedObjectnode* This, ppsk arg)
+        {
+        return calcdie((forthMemory*)(This->voiddata));
+        }
+
+    method calculation[] = {
+        {"calculate",calculate},
+        {"trc",trc},
+        {"print",print},
+        {"export",eksport},
+        {"New",calculationnew},
+        {"Die",calculationdie},
+        {NULL,NULL} };
+    /*
+    Standard methods are 'New' and 'Die'.
+    A user defined 'die' can be added after creation of the object and will be invoked just before 'Die'.
+
+    Example:
+
+    new$hash:?h;
+
+            (=(Insert=.out$Insert & lst$its & lst$Its & (Its..insert)$!arg)
+            (die = .out$"Oh dear")
+        ):(=?(h.));
+
+        (h..Insert)$(X.x);
+
+        :?h;
+
+
 
         (=(Insert=.out$Insert & lst$its & lst$Its & (Its..insert)$!arg)
-        (die = .out$"Oh dear")
-    ):(=?(h.));
+            (die = .out$"The end.")
+        ):(=?(new$hash:?k));
 
-    (h..Insert)$(X.x);
+        (k..Insert)$(Y.y);
 
-    :?h;
+        :?k;
 
+    A little problem is that in the last example, the '?' ends up as a flag on the '=' node.
 
+    Bart 20010222
 
-    (=(Insert=.out$Insert & lst$its & lst$Its & (Its..insert)$!arg)
-        (die = .out$"The end.")
-    ):(=?(new$hash:?k));
-
-    (k..Insert)$(Y.y);
-
-    :?k;
-
-A little problem is that in the last example, the '?' ends up as a flag on the '=' node.
-
-Bart 20010222
-
-*/
+    */
 
