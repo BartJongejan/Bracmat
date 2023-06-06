@@ -120,6 +120,7 @@ typedef   signed long  INT32_T;
 #define ULONG unsigned long
 #define LONGU "%lu"
 #define LONGD "%ld"
+#define LONGnD "%*ld"
 #define LONG0D "%0ld"
 #define LONG0nD "%0*ld"
 #define LONGX "%lX"
