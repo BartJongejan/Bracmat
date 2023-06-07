@@ -25,6 +25,7 @@ typedef enum
     , var2stack // copy variable to stack w/o incrementing stack
     , var2stackBranch // same, then jump
     , stack2var // copy stack to variable w/o decrementing stack
+    , stack2varBranch // same, then jump
     , ArrElmValPush // push value of array alement
     , stack2ArrElm
     , val2stack // copy value to stack w/o incrementing stack
@@ -96,6 +97,7 @@ static char* ActionAsWord[] =
     ,"var2stack"
     ,"var2stackBranch"
     ,"stack2var"
+    ,"stack2varBranch"
     ,"ArrElmValPush"
     ,"stack2ArrElm"
     ,"val2stack"
@@ -900,6 +902,13 @@ static stackvalue* calculateBody(forthMemory* mem)
                 *(wordp++->u.valp) = sp->val;
                 break;
                 }
+            case stack2varBranch:
+                {
+                assert(sp >= mem->stack);
+                *(wordp->u.valp) = sp->val;
+                wordp = word + wordp->offset;
+                break;
+                }
             case ArrElmValPush:
                 {
                 (++sp)->val = (wordp->u.arrp->pval)[wordp->u.arrp->index];
@@ -1281,6 +1290,14 @@ static stackvalue* trcBody(forthMemory* mem)
                 *(wordp->u.valp) = sp->val;
                 printf("%s %.2f <-- stack", getVarName(mem, wordp->u.valp), sp->val.floating);
                 ++wordp;
+                break;
+                }
+            case stack2varBranch:
+                {
+                assert(sp >= mem->stack);
+                printf("%s %.2f <-- stack unconditional jump to %u", getVarName(mem, (wordp->u.valp)), (*(wordp->u.valp)).floating, wordp->offset);
+                *(wordp->u.valp) = sp->val;
+                wordp = word + wordp->offset;
                 break;
                 }
             case ArrElmValPush:
@@ -1861,6 +1878,10 @@ static Boolean printmem(forthMemory* mem)
             case stack2var:
                 printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, "stack2var", getVarName(mem, (wordp->u.valp)));
                 break;
+            case stack2varBranch:
+                printf(INDNT); printf(LONGnD " %-24s " LONGnD "   %s\n", 5, wordp - mem->word, "stack2varBranch", 5, (LONG)(wordp->offset), getVarName(mem, (wordp->u.valp)));
+                ++In;
+                break;
             case ArrElmValPush:
                 printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, "ArrElmValPush", wordp->u.arrp->name);
                 break;
@@ -2236,10 +2257,10 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
     return TRUE;
     }
 
-static void shortcutJumpChains(forthword* wordp)
+static Boolean shortcutJumpChains(forthword* wordp)
     {
     forthword* start = wordp;
-
+    Boolean res = FALSE;
     for(; wordp->action != TheEnd; ++wordp)
         {
         if(wordp->action == Branch)
@@ -2248,14 +2269,18 @@ static void shortcutJumpChains(forthword* wordp)
             while(label->action == Branch)
                 {
                 label = start + label->offset;
+                res = TRUE;
                 }
             wordp->offset = label - start;
             }
         }
+    if(res) printf("shortcutJumpChains\n");
+    return res;
     }
 
-static void combinePopBranch(forthword* wordp)
+static Boolean combinePopBranch(forthword* wordp)
     {
+    Boolean res = FALSE;
     for(; wordp->action != TheEnd; ++wordp)
         {
         if(wordp->action == Pop)
@@ -2264,13 +2289,17 @@ static void combinePopBranch(forthword* wordp)
                 {
                 wordp->action = PopBranch;
                 wordp->offset = wordp[1].offset;
+                res = TRUE;
                 }
             }
         }
+    if(res) printf("combinePopBranch\n");
+    return res;
     }
 
-static void combineBranchPopBranch(forthword* start)
+static Boolean combineBranchPopBranch(forthword* start)
     {
+    Boolean res = FALSE;
     forthword* wordp = start;
     for(; wordp->action != TheEnd; ++wordp)
         {
@@ -2282,12 +2311,15 @@ static void combineBranchPopBranch(forthword* start)
                 wordp->action = PopBranch;
                 wordp->offset = label->offset;
                 wordp->u.logic = label->u.logic;
+                res = TRUE;
                 }
             }
         }
+    if(res) printf("combineBranchPopBranch\n");
+    return res;
     }
 
-void markReachable(forthword* wordp, forthword* start, char* marks)
+static void markReachable(forthword* wordp, forthword* start, char* marks)
     {
     if(marks[wordp - start] == 1)
         return; /* Already visited! */
@@ -2298,6 +2330,7 @@ void markReachable(forthword* wordp, forthword* start, char* marks)
         switch(wordp->action)
             {
             case var2stackBranch:
+            case stack2varBranch:
             case Branch:
             case PopBranch:
             case valPushBranch:
@@ -2324,30 +2357,32 @@ void markReachable(forthword* wordp, forthword* start, char* marks)
         }
     }
 
-void markUnReachable(forthword* start, int length)
+static Boolean markUnReachable(forthword* start, char* marks)
     {
-    char* marks = calloc(length, sizeof(char));
-    if(marks)
+    Boolean res = FALSE;
+    markReachable(start, start, marks);
+    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
         {
-        memset(marks, 0, length * sizeof(char));
-        markReachable(start, start, marks);
-        for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+        if(wordp->action != NoOp && marks[wordp - start] != 1)
             {
-            if(marks[wordp - start] != 1)
-                wordp->action = NoOp;
+            wordp->action = NoOp;
+            res = TRUE;
             }
-        free(marks);
         }
+    if(res) printf("markUnReachable\n");
+    return res;
     }
 
-void moveBranchesTowardsEndOverNoOp(forthword* start)
+static Boolean moveBranchesTowardsEndOverNoOp(forthword* start)
     {
+    Boolean res = FALSE;
     for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
         {
         if(wordp[1].action == NoOp)
             switch(wordp->action)
                 {
                 case var2stackBranch:
+                case stack2varBranch:
                 case Branch:
                 case PopBranch:
                 case valPushBranch:
@@ -2367,16 +2402,20 @@ void moveBranchesTowardsEndOverNoOp(forthword* start)
                     {
                     wordp[1] = *wordp;
                     wordp->action = NoOp;
+                    res = TRUE;
                     break;
                     }
                 default:
                     ;
                 }
         }
+    if(res) printf("moveBranchesTowardsEndOverNoOp\n");
+    return res;
     }
 
-void dissolveNextWordBranches(forthword* start)
+static Boolean dissolveNextWordBranches(forthword* start)
     {
+    Boolean res = FALSE;
     for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
         {
         switch(wordp->action)
@@ -2385,12 +2424,21 @@ void dissolveNextWordBranches(forthword* start)
                 if(start + wordp->offset == wordp + 1)
                     {
                     wordp->action = var2stack;
+                    res = TRUE;
+                    }
+                break;
+            case stack2varBranch:
+                if(start + wordp->offset == wordp + 1)
+                    {
+                    wordp->action = stack2var;
+                    res = TRUE;
                     }
                 break;
             case Branch:
                 if(start + wordp->offset == wordp + 1)
                     {
                     wordp->action = NoOp;
+                    res = TRUE;
                     }
                 break;
             case PopBranch:
@@ -2398,6 +2446,7 @@ void dissolveNextWordBranches(forthword* start)
                 if(wordp->offset == (wordp + 1) - start)
                     {
                     wordp->action = Pop;
+                    res = TRUE;
                     }
                 break;
                 }
@@ -2406,6 +2455,7 @@ void dissolveNextWordBranches(forthword* start)
                 if(wordp->offset == (wordp + 1) - start)
                     {
                     wordp->action = valPush;
+                    res = TRUE;
                     }
                 break;
                 }
@@ -2414,6 +2464,7 @@ void dissolveNextWordBranches(forthword* start)
                 if(wordp->offset == (wordp + 1) - start)
                     {
                     wordp->action = val2stack;
+                    res = TRUE;
                     }
                 break;
                 }
@@ -2421,10 +2472,13 @@ void dissolveNextWordBranches(forthword* start)
                 ;
             }
         }
+    if(res) printf("dissolveNextWordBranches\n");
+    return res;
     }
 
-void combineUnconditionalBranchTovalPush(forthword* start)
+static Boolean combineUnconditionalBranchTovalPush(forthword* start)
     {
+    Boolean res = FALSE;
     for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
         {
         switch(wordp->action)
@@ -2437,6 +2491,7 @@ void combineUnconditionalBranchTovalPush(forthword* start)
                     wordp->action = valPushBranch;
                     wordp->u.val = label->u.val;
                     wordp->offset += 1;
+                    res = TRUE;
                     }
                 break;
                 }
@@ -2448,6 +2503,7 @@ void combineUnconditionalBranchTovalPush(forthword* start)
                     wordp->action = val2stackBranch;
                     wordp->u.val = label->u.val;
                     wordp->offset += 1;
+                    res = TRUE;
                     }
                 break;
                 }
@@ -2455,15 +2511,118 @@ void combineUnconditionalBranchTovalPush(forthword* start)
                 ;
             }
         }
+    if(res) printf("combineUnconditionalBranchTovalPush\n");
+    return res;
     }
 
-void markLabels(forthword* start, char* marks)
+static Boolean stack2var_var2stack(forthword* start)
+    {
+    Boolean res = FALSE;
+    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+        {
+        switch(wordp->action)
+            {
+            case stack2var:
+                {
+                switch(wordp[1].action)
+                    {
+                    case var2stackBranch:
+                        {
+                        if(wordp->u.valp == wordp[1].u.valp)
+                            {
+                            *wordp = wordp[1];
+                            wordp->action = stack2varBranch;
+                            res = TRUE;
+                            }
+                        break;
+                        }
+                    default:
+                        ;
+                    }
+                break;
+                }
+            default:
+                ;
+            }
+        }
+    if(res) printf("stack2var_var2stack\n");
+    return res;
+    }
+
+static Boolean removeIdempotentActions(forthword* start)
+    {
+    Boolean res = FALSE;
+    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+        {
+        switch(wordp->action)
+            {
+            case stack2var:
+                {
+                switch(wordp[1].action)
+                    {
+                    case stack2var:
+                    case stack2varBranch:
+                        if(wordp->u.valp == wordp[1].u.valp)
+                            {
+                            wordp->action = NoOp;
+                            res = TRUE;
+                            }
+                        break;
+                    default:
+                        ;
+                    }
+                break;
+                }
+            case val2stack:
+                {
+                switch(wordp[1].action)
+                    {
+                    case val2stack:
+                    case val2stackBranch:
+                        if(wordp->u.val.floating == wordp[1].u.val.floating)
+                            {
+                            wordp->action = NoOp;
+                            res = TRUE;
+                            }
+                        break;
+                    default:
+                        ;
+                    }
+                break;
+                }
+            case var2stack:
+                {
+                switch(wordp[1].action)
+                    {
+                    case var2stack:
+                    case var2stackBranch:
+                        if(wordp->u.valp == wordp[1].u.valp)
+                            {
+                            wordp->action = NoOp;
+                            res = TRUE;
+                            }
+                        break;
+                    default:
+                        ;
+                    }
+                break;
+                }
+            default:
+                ;
+            }
+        }
+    if(res) printf("removeIdempotentActions\n");
+    return res;
+    }
+
+static void markLabels(forthword* start, char* marks)
     {
     for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
         {
         switch(wordp->action)
             {
             case var2stackBranch:
+            case stack2varBranch:
             case Branch:
             case PopBranch:
             case valPushBranch:
@@ -2488,65 +2647,48 @@ void markLabels(forthword* start, char* marks)
         }
     }
 
-static void combineval2stack(forthword* start, int length)
+static Boolean combineval2stack(forthword* start, char* marks)
     {
-    char* marks = calloc(length, sizeof(char));
-    if(marks)
+    Boolean res = FALSE;
+    markLabels(start, marks);
+    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
         {
-        memset(marks, 0, length * sizeof(char));
-        markLabels(start, marks);
-        for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+        switch(wordp->action)
             {
-            switch(wordp->action)
+            case Pop:
                 {
-                case Pop:
+                if(marks[1 + (wordp - start)] != 1)
                     {
-                    if(marks[1 + (wordp - start)] != 1)
+                    switch(wordp[1].action)
                         {
-                        switch(wordp[1].action)
+                        case valPush:
                             {
-                            case valPush:
-                                {
-                                wordp->action = NoOp;
-                                wordp[1].action = val2stack;
-                                break;
-                                }
-                            case varPush:
-                                {
-                                wordp->action = NoOp;
-                                wordp[1].action = var2stack;
-                                break;
-                                }
-                            default:
-                                ;
+                            wordp->action = NoOp;
+                            wordp[1].action = val2stack;
+                            res = TRUE;
+                            break;
                             }
-                        }
-                    else
-                        {
-                        switch(wordp[1].action)
+                        case varPush:
                             {
-                            case varPush:
-                                {
-                                *wordp = wordp[1];
-                                wordp->action = var2stackBranch;
-                                wordp->offset = (wordp + 2) - start;
-                                break;
-                                }
-                            default:
-                                ;
+                            wordp->action = NoOp;
+                            wordp[1].action = var2stack;
+                            res = TRUE;
+                            break;
                             }
+                        default:
+                            ;
                         }
                     }
-                case PopBranch:
+                else
                     {
-                    forthword* label = start + wordp->offset;
-                    switch(label->action)
+                    switch(wordp[1].action)
                         {
                         case varPush:
                             {
-                            *wordp = *label;
+                            *wordp = wordp[1];
                             wordp->action = var2stackBranch;
-                            wordp->offset = (label + 1) - start;
+                            wordp->offset = (wordp + 2) - start;
+                            res = TRUE;
                             break;
                             }
                         default:
@@ -2554,11 +2696,107 @@ static void combineval2stack(forthword* start, int length)
                         }
                     }
                 }
+            case PopBranch:
+                {
+                forthword* label = start + wordp->offset;
+                switch(label->action)
+                    {
+                    case varPush:
+                        {
+                        *wordp = *label;
+                        wordp->action = var2stackBranch;
+                        wordp->offset = (label + 1) - start;
+                        res = TRUE;
+                        break;
+                        }
+                    default:
+                        ;
+                    }
+                }
+            default:
+                ;
             }
         }
+    if(res) printf("combineval2stack\n");
+    return res;
     }
 
-static void eliminateBranch(forthword* start, int length)
+static Boolean UnconditionalBranch(actionType action)
+    {
+    switch(action)
+        {
+        case var2stackBranch:
+        case stack2varBranch:
+        case Branch:
+        case PopBranch:
+        case valPushBranch:
+        case val2stackBranch:
+            return TRUE;
+        default:
+            return FALSE;
+        }
+    }
+static Boolean IdemPotent(forthword* maybebranch, forthword* notbranch)
+    {
+    switch(notbranch->action)
+        {
+        case stack2var:
+            {
+            switch(maybebranch->action)
+                {
+                case stack2var:
+                case stack2varBranch:
+                    if(notbranch->u.valp == maybebranch->u.valp)
+                        {
+                        return TRUE;
+                        }
+                    break;
+                default:
+                    ;
+                }
+            break;
+            }
+        case val2stack:
+            {
+            switch(maybebranch->action)
+                {
+                case val2stack:
+                case val2stackBranch:
+                    if(notbranch->u.val.floating == maybebranch->u.val.floating)
+                        {
+                        return TRUE;
+                        }
+                    break;
+                default:
+                    ;
+                }
+            break;
+            }
+        case var2stack:
+            {
+            switch(maybebranch->action)
+                {
+                case var2stack:
+                case var2stackBranch:
+                    if(notbranch->u.valp == maybebranch->u.valp)
+                        {
+                        return TRUE;
+                        }
+                    break;
+                default:
+                    ;
+                }
+            break;
+            }
+        default:
+            ;
+        }
+    return FALSE;
+    }
+
+
+
+static Boolean eliminateBranch(forthword* start)
 /*
     118 Branch                     120   fand
     119 val2stackBranch            129   0.000000
@@ -2570,7 +2808,7 @@ static void eliminateBranch(forthword* start, int length)
     125 Pop times
     126 floor
     127 stack2ArrElm                     T
-    128 var2stackBranch            131   j
+    128 var2stackBranch            131   j           // This must be some unconditional branch
     129 stack2ArrElm                     T
 
     118 NoOp                             fand        // Branch -> NoOp
@@ -2590,105 +2828,128 @@ Label 119 replaced by (label of 119)
 Labels [119 - 129) decremented by 1
 */
     {
-    char* marks = calloc(length, sizeof(char));
-    if(marks)
+    Boolean res = FALSE;
+    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
         {
-        memset(marks, 0, length * sizeof(char));
-        markLabels(start, marks);
-        for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+        if(UnconditionalBranch(wordp->action))
             {
-            switch(wordp->action)
+            if(wordp->offset + start == wordp + 2)
                 {
-                case Branch:
+                unsigned int lo = (wordp + 1) - start;
+                forthword tmp = wordp[1];
+                if(UnconditionalBranch(tmp.action))
                     {
-                    if(wordp->offset == (wordp + 2) - start)
+                    unsigned int hi = tmp.offset - 1;
+                    if(hi > lo)
                         {
-                        unsigned int lo = (wordp + 1) - start;
-                        forthword tmp = wordp[1];
-                        switch(tmp.action)
+                        forthword* high = start + hi;
+                        if(UnconditionalBranch(high->action) || IdemPotent(wordp + 1, high))
                             {
-                            case var2stackBranch:
-                            case Branch:
-                            case PopBranch:
-                            case valPushBranch:
-                            case val2stackBranch:
+                            switch(tmp.action)
                                 {
-                                switch(tmp.action)
+                                case var2stackBranch:
+                                    {
+                                    tmp.action = var2stack;
+                                    break;
+                                    }
+                                case stack2varBranch:
+                                    {
+                                    tmp.action = stack2var;
+                                    break;
+                                    }
+                                case Branch:
+                                    {
+                                    tmp.action = NoOp;
+                                    break;
+                                    }
+                                case PopBranch:
+                                    {
+                                    tmp.action = Pop;
+                                    break;
+                                    }
+                                case valPushBranch:
+                                    {
+                                    tmp.action = valPush;
+                                    break;
+                                    }
+                                case val2stackBranch:
+                                    {
+                                    tmp.action = val2stack;
+                                    break;
+                                    }
+                                default:
+                                    ;
+                                }
+
+                            forthword* w;
+                            for(w = wordp + 1; w < high; ++w)
+                                {
+                                *w = w[1];
+                                }
+                            *w = tmp;
+                            switch(wordp->action)
+                                {
+                                case var2stackBranch:
+                                    wordp->action = var2stack;
+                                    break;
+                                case stack2varBranch:
+                                    wordp->action = stack2var;
+                                    break;
+                                case Branch:
+                                    wordp->action = NoOp;
+                                    break;
+                                case PopBranch:
+                                    wordp->action = Pop;
+                                    break;
+                                case valPushBranch:
+                                    wordp->action = valPush;
+                                    break;
+                                case val2stackBranch:
+                                    wordp->action = val2stack;
+                                    break;
+                                default:
+                                    ;
+                                }
+                            for(w = start; w->action != TheEnd; ++w)
+                                {
+                                switch(w->action)
                                     {
                                     case var2stackBranch:
-                                        {
-                                        tmp.action = var2stack;
-                                        break;
-                                        }
+                                    case stack2varBranch:
                                     case Branch:
-                                        {
-                                        tmp.action = NoOp;
-                                        break;
-                                        }
                                     case PopBranch:
-                                        {
-                                        tmp.action = Pop;
-                                        break;
-                                        }
                                     case valPushBranch:
-                                        {
-                                        tmp.action = valPush;
-                                        break;
-                                        }
                                     case val2stackBranch:
-                                        {
-                                        tmp.action = val2stack;
+                                    case Fless:
+                                    case Fless_equal:
+                                    case Fmore_equal:
+                                    case Fmore:
+                                    case Funequal:
+                                    case Fequal:
+                                    case FlessP:
+                                    case Fless_equalP:
+                                    case Fmore_equalP:
+                                    case FmoreP:
+                                    case FunequalP:
+                                    case FequalP:
+                                        if(w->offset == lo)
+                                            w->offset = hi;
+                                        else if(w->offset > lo && w->offset <= hi)
+                                            --(w->offset);
                                         break;
-                                        }
-                                    }
-                                unsigned int hi = tmp.offset - 1;
-                                forthword* high = start + hi;
-                                forthword* w;
-                                for(w = wordp + 1; w < high; ++w)
-                                    {
-                                    *w = w[1];
-                                    }
-                                *w = tmp;
-                                wordp->action = NoOp;
-                                for(w = start; w->action != TheEnd; ++w)
-                                    {
-                                    switch(w->action)
-                                        {
-                                        case var2stackBranch:
-                                        case Branch:
-                                        case PopBranch:
-                                        case valPushBranch:
-                                        case val2stackBranch:
-                                        case Fless:
-                                        case Fless_equal:
-                                        case Fmore_equal:
-                                        case Fmore:
-                                        case Funequal:
-                                        case Fequal:
-                                        case FlessP:
-                                        case Fless_equalP:
-                                        case Fmore_equalP:
-                                        case FmoreP:
-                                        case FunequalP:
-                                        case FequalP:
-                                            if(w->offset == lo)
-                                                w->offset = hi;
-                                            else if(w->offset > lo && w->offset <= hi)
-                                                --(w->offset);
-                                            break;
-                                        default:
-                                            ;
-                                        }
+                                    default:
+                                        ;
                                     }
                                 }
+                            res = TRUE;
                             }
                         }
                     }
-                default:
-                    ;
                 }
             }
         }
+    if(res) printf("eliminateBranch\n");
+    return res;
     }
 
 
@@ -2714,6 +2975,7 @@ static int removeNoOp(forthMemory* mem, int length)
             switch(wordp->action)
                 {
                 case var2stackBranch:
+                case stack2varBranch:
                 case Branch:
                 case PopBranch:
                 case valPushBranch:
@@ -2751,102 +3013,110 @@ static int removeNoOp(forthMemory* mem, int length)
             *newword = *wordp;
             bfree(start);
             }
+        free(deltaoffset);
         }
     return newlength;
     }
 
-static void combinePopThenPop(forthword* start, int length)
+static Boolean combinePopThenPop(forthword* start, char* marks)
     {
-    char* marks = calloc(length, sizeof(char));
-    if(marks)
+    Boolean res = FALSE;
+    markLabels(start, marks);
+    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
         {
-        memset(marks, 0, length * sizeof(char));
-        markLabels(start, marks);
-        for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+        forthword* label;
+        if(marks[(wordp + 1) - start] != 1) // Nobody is jumping to the next word
             {
-            forthword* label;
-            if(marks[(wordp + 1) - start] != 1) // Nobody is jumping to the next word
+            switch(wordp->action)
                 {
-                switch(wordp->action)
-                    {
-                    case Fless:
-                    case Fless_equal:
-                    case Fmore_equal:
-                    case Fmore:
-                    case Funequal:
-                    case Fequal:
-                        label = start + wordp->offset;
-                        switch(wordp[1].action)
+                case Fless:
+                case Fless_equal:
+                case Fmore_equal:
+                case Fmore:
+                case Funequal:
+                case Fequal:
+                    label = start + wordp->offset;
+                    switch(wordp[1].action)
+                        {
+                        case Pop:
                             {
-                            case Pop:
+                            if(label->action == PopBranch)
                                 {
-                                if(label->action == PopBranch)
-                                    {
-                                    wordp->action = extraPopped(wordp->action, extraPop);
-                                    wordp->offset = label->offset;
-                                    wordp[1].action = NoOp;
-                                    }
-                                else if(label->action == val2stackBranch)
-                                    {
-                                    wordp->action = extraPopped(wordp->action, extraPop);
-                                    label->action = valPushBranch;
-                                    wordp[1].action = NoOp;
-                                    }
-                                break;
+                                wordp->action = extraPopped(wordp->action, extraPop);
+                                wordp->offset = label->offset;
+                                wordp[1].action = NoOp;
+                                res = TRUE;
                                 }
-                            case val2stack:
+                            else if(label->action == val2stackBranch)
                                 {
-                                if(label->action == PopBranch)
-                                    {
-                                    wordp->action = extraPopped(wordp->action, extraPop);
-                                    wordp->offset = label->offset;
-                                    wordp[1].action = valPush;
-                                    }
-                                break;
+                                wordp->action = extraPopped(wordp->action, extraPop);
+                                label->action = valPushBranch;
+                                wordp[1].action = NoOp;
+                                res = TRUE;
                                 }
-                            case PopBranch:
-                                {
-                                if(label->action == PopBranch)
-                                    { /* see if backwards branch can be converted to branch to wordp+2 */
-                                    if(label->offset == (wordp + 2) - start)
-                                        {
-                                        wordp->action = extraPopped(wordp->action, negations);
-                                        wordp->offset = wordp[1].offset;
-                                        wordp[1].action = NoOp;
-                                        }
-                                    else /* We can still eliminate the backward branch */
-                                        {
-                                        wordp->action = extraPopped(wordp->action, extraPop);
-                                        wordp->offset = label->offset;
-                                        wordp[1].action = Branch;
-                                        }
-                                    }
-                                else if(label->action == val2stackBranch)
-                                    {
-                                    wordp->offset = wordp[1].offset;
-                                    wordp->action = extraPopped(wordp->action, negations);
-                                    wordp[1] = *label;
-                                    wordp[1].action = valPushBranch;
-                                    }
-                                break;
-                                }
-                            case val2stackBranch:
-                                {
-                                if(label->action == PopBranch)
-                                    {
-                                    wordp->action = extraPopped(wordp->action, extraPop);
-                                    wordp->offset = label->offset;
-                                    wordp[1].action = valPushBranch;
-                                    }
-                                break;
-                                }
+                            break;
                             }
-                    default:
-                        ;
-                    }
+                        case val2stack:
+                            {
+                            if(label->action == PopBranch)
+                                {
+                                wordp->action = extraPopped(wordp->action, extraPop);
+                                wordp->offset = label->offset;
+                                wordp[1].action = valPush;
+                                res = TRUE;
+                                }
+                            break;
+                            }
+                        case PopBranch:
+                            {
+                            if(label->action == PopBranch)
+                                { /* see if backwards branch can be converted to branch to wordp+2 */
+                                if(label->offset == (wordp + 2) - start)
+                                    {
+                                    wordp->action = extraPopped(wordp->action, negations);
+                                    wordp->offset = wordp[1].offset;
+                                    wordp[1].action = NoOp;
+                                    res = TRUE;
+                                    }
+                                else /* We can still eliminate the backward branch */
+                                    {
+                                    wordp->action = extraPopped(wordp->action, extraPop);
+                                    wordp->offset = label->offset;
+                                    wordp[1].action = Branch;
+                                    res = TRUE;
+                                    }
+                                }
+                            else if(label->action == val2stackBranch)
+                                {
+                                wordp->offset = wordp[1].offset;
+                                wordp->action = extraPopped(wordp->action, negations);
+                                wordp[1] = *label;
+                                wordp[1].action = valPushBranch;
+                                res = TRUE;
+                                }
+                            break;
+                            }
+                        case val2stackBranch:
+                            {
+                            if(label->action == PopBranch)
+                                {
+                                wordp->action = extraPopped(wordp->action, extraPop);
+                                wordp->offset = label->offset;
+                                wordp[1].action = valPushBranch;
+                                res = TRUE;
+                                }
+                            break;
+                            }
+                        default:
+                            ;
+                        }
+                default:
+                    ;
                 }
             }
         }
+    if(res) printf("combinePopThenPop\n");
+    return res;
     }
 
 #define VARCOMP (NOT|GREATER_THAN|SMALLER_THAN|INDIRECT)
@@ -3996,89 +4266,40 @@ static forthMemory* calcnew(psk arg, Boolean in_function)
                     lastword->action = TheEnd;
                     if(newval)
                         wipe(fullcode);
-                    /*
-                    printf("Not optimized:\n");
-                    printmem(forthstuff);
-                    //*/
-                    //*/
-                    shortcutJumpChains(forthstuff->word);
-                    //*
-                    //printf("shortcutJumpChains:\n");
-                    //printmem(forthstuff);
-                    //*/
+                    char* marks = calloc(length, sizeof(char));
+                    if(marks)
+                        {
+                        int loop = 0;
+                        for(;;)
+                            {
+                            printf("\nOptimization loop %d\n", ++loop);
+                            Boolean somethingdone = FALSE;
 
-                    //*/
-                    combinePopBranch(forthstuff->word);
-                    //*
-                    //printf("combinePopBranch:\n");
-                    //printmem(forthstuff);
-                    //*/
+                            somethingdone |= shortcutJumpChains(forthstuff->word);
+                            somethingdone |= combinePopBranch(forthstuff->word);
+                            somethingdone |= combineBranchPopBranch(forthstuff->word);
+                            memset(marks, 0, length * sizeof(char));
+                            somethingdone |= markUnReachable(forthstuff->word, marks);
+                            somethingdone |= moveBranchesTowardsEndOverNoOp(forthstuff->word);
+                            somethingdone |= dissolveNextWordBranches(forthstuff->word);
+                            somethingdone |= combineUnconditionalBranchTovalPush(forthstuff->word);
+                            memset(marks, 0, length * sizeof(char));
+                            somethingdone |= combineval2stack(forthstuff->word, marks);
+                            memset(marks, 0, length * sizeof(char));
+                            somethingdone |= combinePopThenPop(forthstuff->word, marks);
+                            somethingdone |= eliminateBranch(forthstuff->word);
+                            somethingdone |= stack2var_var2stack(forthstuff->word);
+                            somethingdone |= removeIdempotentActions(forthstuff->word);
 
-                    //*/
-                    combineBranchPopBranch(forthstuff->word);
-                    //*
-                    //printf("combineBranchPopBranch:\n");
-                    //printmem(forthstuff);
-                    //*/
-
-                    //*/
-                    markUnReachable(forthstuff->word, length);
-                    //*
-                    //printf("markUnreachable:\n");
-                    //printmem(forthstuff);
-                    //*/
-
-                    //*/
-                    moveBranchesTowardsEndOverNoOp(forthstuff->word);
-                    //*
-                    //printf("moveBranchesTowardsEndOverNoOp:\n");
-                    //printmem(forthstuff);
-                    //*/
-
-                    //*/
-                    dissolveNextWordBranches(forthstuff->word);
-                    //*
-                    //printf("dissolveNextWordBranches:\n");
-                    //printmem(forthstuff);
-                    //*/
-
-                    //*/
-                    combineUnconditionalBranchTovalPush(forthstuff->word);
-                    //*
-                    //printf("combineUnconditionalBranchTovalPush:\n");
-                    //printmem(forthstuff);
-                    //*/
-
-                    //*/
-                    combineval2stack(forthstuff->word, length);
-                    //*
-                    //printf("combineval2stack:\n");
-                    //printmem(forthstuff);
-                    //*/
-
-                    //*/
-                    length = removeNoOp(forthstuff, length);
-                    //*
-                    //printf("removeNoOp:\n");
-                    //printmem(forthstuff);
-                    //*/
-
-                    //*/
-                    combinePopThenPop(forthstuff->word, length);
-                    //*
-                    //printf("combinePopThenPop:\n");
-                    //printmem(forthstuff);
-                    //*/
-                    markUnReachable(forthstuff->word, length);
-                    moveBranchesTowardsEndOverNoOp(forthstuff->word);
-                    dissolveNextWordBranches(forthstuff->word);
-                    combineUnconditionalBranchTovalPush(forthstuff->word);
-                    combineval2stack(forthstuff->word, length);
-                    length = removeNoOp(forthstuff, length);
-                    combineval2stack(forthstuff->word, length);
-                    eliminateBranch(forthstuff->word, length);
-                    length = removeNoOp(forthstuff, length);
-                    combineval2stack(forthstuff->word, length);
+                            if(somethingdone)
+                                {
+                                length = removeNoOp(forthstuff, length);
+                                continue;
+                                }
+                            break;
+                            }
+                        free(marks);
+                        }
                     /*
                     */
                     return forthstuff;
