@@ -72,7 +72,7 @@ Mandelbrot=
             )
         : ?calcule
       & new$(calculation,!calcule):?compiledCalcule
-      & ( ~
+      & ( 
         |   lst$calc
           & out$"ITER DEFINED"
           & (compiledCalcule..print)$
@@ -132,7 +132,9 @@ Mandelbrot=
         |       (compiledCalcule..calculate)
               $ (!xpixels,!ypixels,!X,!Y,!R)
             : ?Result
-          & out$(Result !Result)
+          &   (NoProfiling|compiledCalcule..print)
+            $ 
+          & (|out$(Result !Result))
         | out$"Calculation did not return a value."
         )
       & out$(div$(clk$+-1*!t0,1) S)
