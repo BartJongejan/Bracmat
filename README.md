@@ -184,6 +184,25 @@ Bracmat is a good choice for tasks that require dynamic programming.
 
       The initial version of potu is functionally not different from bracmat.
       
+      While "vanilla" bracmat restricts numerical computations to computation
+      with bignums, potu is now (spring 2023) also able to perform floating point
+      computations using C's 64 bit "double" data type. These computations
+      are handled by so called "calculation" objects.
+      The motivation for implementing the "calculation" object is the whish to be able to
+      create illustrations in e.g. SVG or PGM format.
+      
+      Initial tests (generating
+      graphic depictions of parts of the Mandelbrot set) indicate that potu's
+      computations are about six times slower than the same algorithm implemented in C,
+      almost four times slower than Java, and almost four times faster than Python, 
+      C being twenty times faster than Python.
+            
+      A full documentation of how to do floating point computations in potu will be made
+      when the feature set is more stable. The following characterization will probably be true
+      when that time has come: 64-bit as the only data type (no integers!), support for 
+      multidimensional arrays, no recursion allowed, no pattern matching, 
+      arrays passed by reference, functions only returning scalar values, or nothing at all.
+           
 * safe
 
     * bracmatso.c
