@@ -49,7 +49,11 @@ typedef enum
     , FunequalP
     , FequalP
     , Plus
+    , varPlus
+    , valPlus
     , Times
+    , varTimes
+    , valTimes
     , Acos
     , Acosh
     , Asin
@@ -78,7 +82,11 @@ typedef enum
     , Hypot
     , Pow
     , Subtract
+    , varSubtract
+    , valSubtract
     , Divide
+    , varDivide
+    , valDivide
     , Drand
     , Tbl
     , Out
@@ -121,7 +129,11 @@ static char* ActionAsWord[] =
     ,"F!=P"
     ,"F==P"
     ,"Plus"
+    ,"varPlus"
+    ,"valPlus"
     ,"Times"
+    ,"varTimes"
+    ,"valTimes"
     ,"Acos"
     ,"Acosh"
     ,"Asin"
@@ -150,7 +162,11 @@ static char* ActionAsWord[] =
     ,"Hypot"
     ,"Pow"
     ,"Subtract"
+    ,"varSubtract"
+    ,"valSubtract"
     ,"Divide"
+    ,"varDivide"
+    ,"valDivide"
     ,"Drand"
     ,"tbl"
     ,"out"
@@ -765,7 +781,11 @@ static Etriple etriples[] =
         {"_unequalP"     ,FunequalP     ,2},
         {"_equalP"       ,FequalP       ,2},
         {"plus",  Plus,1},
+        {"varPlus", varPlus,0},
+        {"valPlus", valPlus,0},
         {"times", Times,1},
+        {"varTimes",varTimes,0},
+        {"valTimes",valTimes},
         {"acos",  Acos,1},
         {"acosh", Acosh,1},
         {"asin",  Asin,1},
@@ -794,7 +814,11 @@ static Etriple etriples[] =
         {"hypot", Hypot,2},
         {"pow",   Pow,2},
         {"subtract",    Subtract,2},
+        {"varsubtract",    varSubtract,1},
+        {"valsubtract",    valSubtract,1},
         {"divide",Divide,2},
+        {"varDivide",varDivide,1},
+        {"valDivide",valDivide,1},
         {"rand",  Drand,1},
         {"tbl",   Tbl,0},
         {"out",   Out,1},
@@ -843,7 +867,6 @@ static stackvalue* setArray(stackvalue* sp, forthword* wordp)
 
 static stackvalue* getArrayIndex(stackvalue* sp, forthword* wordp)
     {
-    /*size_t rank = (size_t)((sp--)->val).floating;*/
     size_t rank = wordp->offset - 1;
     fortharray* arrp = (sp - rank)->arrp;
     size_t i;
@@ -1024,8 +1047,16 @@ static stackvalue* calculateBody(forthMemory* mem)
                 b = ((sp--)->val).floating; if(((sp--)->val).floating != b) wordp = word + wordp->offset; else ++wordp; break;
             case Plus:
                 a = ((sp--)->val).floating; sp->val.floating += a; ++wordp; break;
+            case varPlus:
+                sp->val.floating += wordp++->u.valp->floating; break;
+            case valPlus:
+                sp->val.floating += wordp++->u.val.floating; break;
             case Times:
                 a = ((sp--)->val).floating; sp->val.floating *= a; ++wordp; break;
+            case varTimes:
+                sp->val.floating *= wordp++->u.valp->floating; break;
+            case valTimes:
+                sp->val.floating *= wordp++->u.val.floating; break;
             case Acos:
                 sp->val.floating = acos((sp->val).floating); ++wordp; break;
             case Acosh:
@@ -1082,8 +1113,16 @@ static stackvalue* calculateBody(forthMemory* mem)
                 a = ((sp--)->val).floating; sp->val.floating = pow(a, (sp->val).floating); ++wordp; break;
             case Subtract:
                 a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating - a; ++wordp; break;
+            case varSubtract:
+                sp->val.floating -= wordp++->u.valp->floating; break;
+            case valSubtract:
+                sp->val.floating -= wordp++->u.val.floating; break;
             case Divide:
                 a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating / a; ++wordp; break;
+            case varDivide:
+                sp->val.floating /= wordp++->u.valp->floating; break;
+            case valDivide:
+                sp->val.floating /= wordp++->u.val.floating; break;
             case Drand:
                 sp->val.floating = drand((sp->val).floating); ++wordp; break;
             case Tbl:
@@ -1448,9 +1487,21 @@ static stackvalue* trcBody(forthMemory* mem)
             case Plus:
                 printf("Pop plus  ");
                 a = ((sp--)->val).floating; sp->val.floating += a; ++wordp; break;
+            case varPlus:
+                printf("varPlus  ");
+                sp->val.floating += wordp++->u.valp->floating; break;
+            case valPlus:
+                printf("valPlus  ");
+                sp->val.floating += wordp++->u.val.floating; break;
             case Times:
                 printf("Pop times ");
                 a = ((sp--)->val).floating; sp->val.floating *= a; ++wordp; break;
+            case varTimes:
+                printf("varTimes ");
+                sp->val.floating *= wordp++->u.valp->floating; break;
+            case valTimes:
+                printf("valTimes ");
+                sp->val.floating *= wordp++->u.val.floating; break;
             case Acos:
                 printf("acos  ");
                 sp->val.floating = acos((sp->val).floating); ++wordp; break;
@@ -1535,9 +1586,21 @@ static stackvalue* trcBody(forthMemory* mem)
             case Subtract:
                 printf("Pop subtract");
                 a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating - a; ++wordp; break;
+            case varSubtract:
+                printf("varSubtract");
+                sp->val.floating -= wordp++->u.valp->floating; break;
+            case valSubtract:
+                printf("valSubtract");
+                sp->val.floating -= wordp++->u.val.floating; break;
             case Divide:
                 printf("Pop divide");
                 a = ((sp--)->val).floating; sp->val.floating = (sp->val).floating / a; ++wordp; break;
+            case varDivide:
+                printf("varDivide");
+                sp->val.floating /= wordp++->u.valp->floating; break;
+            case valDivide:
+                printf("valDivide");
+                sp->val.floating /= wordp++->u.val.floating; break;
             case Drand:
                 printf("Pop rand");
                 sp->val.floating = drand((sp->val).floating); ++wordp; break;
@@ -2018,8 +2081,11 @@ static Boolean printmem(forthMemory* mem)
             case FequalP: printf(INDNT); printf(LONGnD " %-24s " LONGnD "\n", 5, wordp - mem->word, "PopPop ==", 5, (LONG)(wordp->offset)); --In; --In; break;
 
             case Plus:  printf(INDNT); printf(LONGnD     " Pop plus\n", 5, wordp - mem->word); --In; break;
+            case varPlus:  printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, "varPlus", getVarName(mem, (wordp->u.valp))); break;
+            case valPlus:  printf(INDNT); printf(LONGnD " %-32s %f\n", 5, wordp - mem->word, "valPlus", wordp->u.val.floating); break;
             case Times:  printf(INDNT); printf(LONGnD    " Pop times\n", 5, wordp - mem->word); --In; break;
-
+            case varTimes:  printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, "varTimes", getVarName(mem, (wordp->u.valp))); break;
+            case valTimes:  printf(INDNT); printf(LONGnD " %-32s %f\n", 5, wordp - mem->word, "valTimes", wordp->u.val.floating); break;
             case Acos:  printf(INDNT); printf(LONGnD     " acos\n", 5, wordp - mem->word); break;
             case Acosh:  printf(INDNT); printf(LONGnD    " acosh\n", 5, wordp - mem->word); break;
             case Asin:  printf(INDNT); printf(LONGnD     " asin\n", 5, wordp - mem->word); break;
@@ -2051,7 +2117,11 @@ static Boolean printmem(forthMemory* mem)
             case Hypot:  printf(INDNT); printf(LONGnD    " Pop hypot\n", 5, wordp - mem->word); --In; break;
             case Pow:  printf(INDNT); printf(LONGnD      " Pop pow\n", 5, wordp - mem->word); --In; break;
             case Subtract:  printf(INDNT); printf(LONGnD " Pop subtract\n", 5, wordp - mem->word); --In; break;
+            case varSubtract:  printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, "varSubtract", getVarName(mem, (wordp->u.valp))); break;
+            case valSubtract:  printf(INDNT); printf(LONGnD " %-32s %f\n", 5, wordp - mem->word, "valSubtract", wordp->u.val.floating); break;
             case Divide:  printf(INDNT); printf(LONGnD   " Pop divide\n", 5, wordp - mem->word); --In; break;
+            case varDivide:  printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, "varDivide", getVarName(mem, (wordp->u.valp))); break;
+            case valDivide:  printf(INDNT); printf(LONGnD " %-32s %f\n", 5, wordp - mem->word, "valDivide", wordp->u.val.floating); break;
             case Drand:  printf(INDNT); printf(LONGnD    " Pop rand\n", 5, wordp - mem->word); --In; break;
             case Tbl:  printf(INDNT); printf(LONGnD      " Pop tbl\n", 5, wordp - mem->word); --In; break;
             case Out:  printf(INDNT); printf(LONGnD      " Pop out\n", 5, wordp - mem->word); --In; break;
@@ -2336,7 +2406,7 @@ static Boolean shortcutJumpChains(forthword* wordp)
             wordp->offset = label - start;
             }
         }
-//#define SHOWOPTIMIZATIONS
+    //#define SHOWOPTIMIZATIONS
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("shortcutJumpChains\n");
 #endif
@@ -2699,6 +2769,81 @@ static Boolean removeIdempotentActions(forthword* start)
         }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("removeIdempotentActions\n");
+#endif
+    return res;
+    }
+
+static Boolean combinePushAndOperation(forthword* start)
+    {
+    Boolean res = FALSE;
+    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+        {
+        switch(wordp->action)
+            {
+            case varPush:
+                {
+                switch(wordp[1].action)
+                    {
+                    case Plus:
+                        wordp->action = varPlus;
+                        wordp[1].action = NoOp;
+                        res = TRUE;
+                        break;
+                    case Times:
+                        wordp->action = varTimes;
+                        wordp[1].action = NoOp;
+                        res = TRUE;
+                        break;
+                    case Subtract:
+                        wordp->action = varSubtract;
+                        wordp[1].action = NoOp;
+                        res = TRUE;
+                        break;
+                    case Divide:
+                        wordp->action = varDivide;
+                        wordp[1].action = NoOp;
+                        res = TRUE;
+                        break;
+                    default:
+                        ;
+                    }
+                break;
+                }
+            case valPush:
+                {
+                switch(wordp[1].action)
+                    {
+                    case Plus:
+                        wordp->action = valPlus;
+                        wordp[1].action = NoOp;
+                        res = TRUE;
+                        break;
+                    case Times:
+                        wordp->action = valTimes;
+                        wordp[1].action = NoOp;
+                        res = TRUE;
+                        break;
+                    case Subtract:
+                        wordp->action = valSubtract;
+                        wordp[1].action = NoOp;
+                        res = TRUE;
+                        break;
+                    case Divide:
+                        wordp->action = valDivide;
+                        wordp[1].action = NoOp;
+                        res = TRUE;
+                        break;
+                    default:
+                        ;
+                    }
+                break;
+                }
+            default:
+                ;
+            }
+        }
+#ifdef SHOWOPTIMIZATIONS
+    if(res) printf("combinePushAndPlus\n");
 #endif
     return res;
     }
@@ -4464,6 +4609,7 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
                             somethingdone |= eliminateBranch(forthstuff->word);
                             somethingdone |= stack2var_var2stack(forthstuff->word);
                             somethingdone |= removeIdempotentActions(forthstuff->word);
+                            somethingdone |= combinePushAndOperation(forthstuff->word);
 
                             if(somethingdone)
                                 {
