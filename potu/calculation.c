@@ -199,6 +199,7 @@ typedef struct fortharray
     size_t index;
     size_t rank;
     size_t* range;
+    size_t* stride; // Product of ranges
     } fortharray;
 
 typedef union stackvalue
@@ -419,9 +420,9 @@ static fortharray* getOrCreateArrayPointer(fortharray** arrp, char* name, size_t
         curarrp = *arrp;
         //assert(*arrp == 0);
         *arrp = (fortharray*)bmalloc(__LINE__, sizeof(fortharray));
-        memset(*arrp, 0, sizeof(fortharray));
         if(*arrp)
             {
+            memset(*arrp, 0, sizeof(fortharray));
             (*arrp)->next = curarrp;
             curarrp = *arrp;
             assert(curarrp->name == 0);
@@ -429,11 +430,13 @@ static fortharray* getOrCreateArrayPointer(fortharray** arrp, char* name, size_t
             if(curarrp->name)
                 {
                 strcpy(curarrp->name, name);
+                /* already done by memset()
                 curarrp->rank = 0;
                 curarrp->range = 0;
                 curarrp->index = 0;
                 curarrp->size = 0;
                 curarrp->pval = 0;
+                */
                 }
             else
                 {
@@ -483,24 +486,28 @@ static fortharray* getOrCreateArrayPointerButNoArray(fortharray** arrp, char* na
         {
         curarrp = curarrp->next;
         }
+
     if(curarrp == 0)
         {
-        curarrp = *arrp;
         if(*arrp == 0)
             {
             *arrp = (fortharray*)bmalloc(__LINE__, sizeof(fortharray));
             if(*arrp)
                 {
-                (*arrp)->name = bmalloc(__LINE__, strlen(name) + 1);
-                if((*arrp)->name)
+                curarrp = *arrp;
+                memset(curarrp, 0, sizeof(fortharray));
+                curarrp->name = bmalloc(__LINE__, strlen(name) + 1);
+                if(curarrp->name)
                     {
-                    strcpy((*arrp)->name, name);
-                    (*arrp)->next = curarrp;
-                    (*arrp)->pval = 0;
-                    (*arrp)->size = 0;
-                    (*arrp)->index = 0;
-                    (*arrp)->rank = 0;
-                    (*arrp)->range = 0;
+                    strcpy(curarrp->name, name);
+                    curarrp->next = curarrp;
+                    /*
+                    curarrp->pval = 0;
+                    curarrp->size = 0;
+                    curarrp->index = 0;
+                    curarrp->rank = 0;
+                    curarrp->range = 0;
+                    */
                     curarrp = *arrp;
                     }
                 }
@@ -579,6 +586,7 @@ static stackvalue* fsetArgs(stackvalue* sp, int arity, forthMemory* thatmem)
             arrp->index = arr->index;
             arrp->rank = arr->rank;
             arrp->range = arr->range;
+            arrp->stride = arr->stride;
             }
         --sp;
         }
@@ -676,10 +684,10 @@ static long setArgs(forthMemory* mem, size_t Nparm, psk args)
             { /* args is an array */
             /* find rank and ranges */
             size_t rank = find_rank(args);
-            size_t* range = (size_t*)bmalloc(__LINE__, rank * sizeof(size_t));
+            size_t* range = (size_t*)bmalloc(__LINE__, 2 * rank * sizeof(size_t)); /* twice: both ranges and strides */
             if(range != 0)
                 {
-                memset(range, 0, rank * sizeof(size_t));
+                memset(range, 0, 2 * rank * sizeof(size_t));/* twice: both ranges and strides */
                 set_range(range + rank - 1, args);
                 size_t totsize = 1;
                 for(size_t k = 0; k < rank; ++k)
@@ -838,26 +846,17 @@ static char* getLogiName(dumbl logi)
     }
 
 static stackvalue* setArray(stackvalue* sp, forthword* wordp)
+/* 'runtime' function, creation of array with ranges that were unknown during compilation */
     {
     size_t rank = wordp->offset - 1;
     fortharray* arrp = (sp - rank)->arrp;
     size_t i;
     i = (size_t)((sp--)->val).floating;
-    if(arrp->range != 0)
+    if(arrp->stride != 0)
         {
-        size_t arank = arrp->rank;
-        size_t stride = arrp->range[0];
-        size_t range_index = 1;
-        for(; arank > rank; --arank)
+        for(size_t range_index = arrp->rank - rank; range_index < rank - 1; ++range_index)
             {
-            stride *= arrp->range[range_index++];
-            }
-
-        for(; range_index < rank;)
-            {
-            size_t k = (size_t)((sp--)->val).floating;
-            i += k * stride;
-            stride *= arrp->range[range_index++];
+            i += (size_t)((sp--)->val).floating * arrp->stride[range_index];
             }
         }
     /* else linear array passed as argument to calculation, a0, a1, ... */
@@ -866,26 +865,17 @@ static stackvalue* setArray(stackvalue* sp, forthword* wordp)
     }
 
 static stackvalue* getArrayIndex(stackvalue* sp, forthword* wordp)
+/* Called from 'Idx' function at runtime. */
     {
     size_t rank = wordp->offset - 1;
     fortharray* arrp = (sp - rank)->arrp;
     size_t i;
     i = (size_t)((sp--)->val).floating;
-    if(arrp->range != 0)
+    if(arrp->stride != 0)
         {
-        size_t arank = arrp->rank;
-        size_t stride = arrp->range[0];
-        size_t range_index = 1;
-        for(; arank > rank; --arank)
+        for(size_t range_index = arrp->rank - rank; range_index < rank - 1; ++range_index)
             {
-            stride *= arrp->range[range_index++];
-            }
-
-        for(; range_index < rank;)
-            {
-            size_t k = (size_t)((sp--)->val).floating;
-            i += k * stride;
-            stride *= arrp->range[range_index++];
+            i += (size_t)((sp--)->val).floating * arrp->stride[range_index];
             }
         }
     /* else linear array passed as argument to calculation, a0, a1, ... */
@@ -910,6 +900,71 @@ static stackvalue* getArrayRange(stackvalue* sp)
 static stackvalue* getArrayRank(stackvalue* sp)
     {
     sp->val.floating = (double)(sp->arrp->rank);
+    return sp;
+    }
+
+static stackvalue* doTbl(stackvalue* sp, forthword* wordp, fortharray** parr)
+    {
+    stackvalue* sph = setArray(sp, wordp);
+    if(sph == 0)
+        return 0;
+    fortharray* arr = sph->arrp;
+
+    if(parr)
+        *parr = arr;
+
+    if(arr == 0)
+        {
+        sp = sph - 1;
+        return 0;
+        }
+    size_t rank = arr->rank;
+    size_t size = 1;
+
+    size_t* range = arr->range;
+    if(range == 0)
+        {
+        range = (size_t*)bmalloc(__LINE__, 2 * rank * sizeof(size_t));/* twice: both ranges and strides */
+        arr->range = range;
+        }
+    if(range != 0)
+        {
+        arr->stride = range + rank;
+        for(size_t j = 0; j < rank; ++j)
+            {
+            if(range[j] == 0)
+                range[j] = (size_t)(sp->val).floating; /* range[0] = range of last index*/
+            else if(range[j] != (size_t)(sp->val).floating)
+                {
+                fprintf(stderr, "tbl: attempting to change fixed range from %zu to %zu.\n", range[j], (size_t)(sp->val).floating);
+                --sp;
+                --sp;
+                return 0;
+                }
+            --sp;
+            size *= range[j];
+            }
+
+        arr->stride[0] = arr->range[0];
+        for(size_t range_index = 1; range_index < rank;)
+            {
+            arr->stride[range_index] = arr->stride[range_index - 1] * arr->range[range_index];
+            ++range_index;
+            }
+
+        arr = sp->arrp;
+        arr->size = size;
+        arr->index = 0;
+        assert(arr->pval == 0);
+        arr->pval = (forthvalue*)bmalloc(__LINE__, size * sizeof(forthvalue));
+        if(arr->pval)
+            {
+            memset(arr->pval, 0, size * sizeof(forthvalue));
+            }
+        arr->rank = rank;
+        //                    arr->range = range;
+
+        }
     return sp;
     }
 
@@ -1127,45 +1182,9 @@ static stackvalue* calculateBody(forthMemory* mem)
                 sp->val.floating = drand((sp->val).floating); ++wordp; break;
             case Tbl:
                 {
-                stackvalue* sph = setArray(sp, wordp);
-                if(sph == 0)
+                sp = doTbl(sp, wordp, 0);
+                if(!sp)
                     return 0;
-                fortharray* arr = sph->arrp;
-                if(arr == 0)
-                    return 0;
-                size_t rank = arr->rank;
-                size_t size = 1;
-                size_t* range = arr->range;
-                if(range == 0)
-                    {
-                    range = (size_t*)bmalloc(__LINE__, rank * sizeof(size_t));
-                    arr->range = range;
-                    }
-                if(range != 0)
-                    {
-                    for(size_t j = 0; j < rank; ++j)
-                        {
-                        if(range[j] == 0)
-                            range[j] = (size_t)((sp--)->val).floating; /* range[0] = range of last index*/
-                        else if(range[j] != (size_t)((sp--)->val).floating)
-                            {
-                            fprintf(stderr, "tbl: attempting to change fixed range from %zu to %zu.\n", range[j], (size_t)((sp--)->val).floating);
-                            return 0;
-                            }
-                        size *= range[j];
-                        }
-                    arr = sp->arrp;
-                    arr->size = size;
-                    arr->index = 0;
-                    assert(arr->pval == 0);
-                    arr->pval = (forthvalue*)bmalloc(__LINE__, size * sizeof(forthvalue));
-                    if(arr->pval)
-                        {
-                        memset(arr->pval, 0, size * sizeof(forthvalue));
-                        }
-                    arr->rank = rank;
-                    arr->range = range;
-                    }
                 ++wordp;
                 break;
                 }
@@ -1324,7 +1343,7 @@ static stackvalue* trcBody(forthMemory* mem)
         double b;
         size_t i;
         //        forthvariable* v;
-        fortharray* arr;
+        //fortharray* arr;
         //      stackvalue* svp;
         char* naam;
         assert(sp + 1 >= mem->stack);
@@ -1606,54 +1625,13 @@ static stackvalue* trcBody(forthMemory* mem)
                 sp->val.floating = drand((sp->val).floating); ++wordp; break;
             case Tbl:
                 {
-                stackvalue* sph = setArray(sp, wordp);
-                if(sph == 0)
+                fortharray* arr = 0;
+                sp = doTbl(sp, wordp, &arr);
+                if(!sp)
                     return 0;
-                arr = sph->arrp;
-                if(arr == 0)
-                    {
-                    sp = sph - 1;
-                    return 0;
-                    }
-                size_t rank = arr->rank;
-                size_t size = 1;
-                printf("Pop tbl   ");
-                size_t* range = arr->range;
-                if(range == 0)
-                    {
-                    range = (size_t*)bmalloc(__LINE__, rank * sizeof(size_t));
-                    arr->range = range;
-                    }
-                if(range != 0)
-                    {
-                    for(size_t j = 0; j < rank; ++j)
-                        {
-                        if(range[j] == 0)
-                            range[j] = (size_t)(sp->val).floating; /* range[0] = range of last index*/
-                        else if(range[j] != (size_t)(sp->val).floating)
-                            {
-                            fprintf(stderr, "tbl: attempting to change fixed range from %zu to %zu.\n", range[j], (size_t)(sp->val).floating);
-                            --sp;
-                            --sp;
-                            return 0;
-                            }
-                        --sp;
-                        size *= range[j];
-                        }
-                    arr = sp->arrp;
-                    arr->size = size;
-                    arr->index = 0;
-                    assert(arr->pval == 0);
-                    arr->pval = (forthvalue*)bmalloc(__LINE__, size * sizeof(forthvalue));
-                    if(arr->pval)
-                        {
-                        memset(arr->pval, 0, size * sizeof(forthvalue));
-                        }
-                    arr->rank = rank;
-                    arr->range = range;
-                    printf("%p size %zu index %zu", (void*)arr, arr->size, arr->index);
-                    }
-                --sp;
+                printf("Pop tbl   %p size %zu index %zu", (void*)arr, arr->size, arr->index);
+                ++wordp;
+                break;
                 ++wordp;
                 break;
                 }
@@ -3430,45 +3408,57 @@ static fortharray* haveArray(forthMemory* forthstuff, psk declaration, Boolean i
 
         a->rank = rank;
         assert(a->range == 0);
-        a->range = (size_t*)bmalloc(__LINE__, rank * sizeof(size_t));
-        size_t* prange;
-        size_t totsize = 1;
-        for(kn = ranges, prange = a->range + rank - 1;; )
+        a->range = (size_t*)bmalloc(__LINE__, 2 * rank * sizeof(size_t));/* twice: both ranges and strides */
+        if(a->range)
             {
-            psk H;
-
-            if(is_op(kn))
-                H = kn->LEFT;
-            else
-                H = kn;
-
-            if(INTEGER_POS(H))
-                *prange = strtol(&(H->u.sobj), 0, 10);
-            else if((H->v.fl & VISIBLE_FLAGS) == INDIRECT)
-                *prange = 0; /* range still unknown. */
-            else
+            a->stride = a->range + rank;
+            size_t* prange;
+            size_t totsize = 1;
+            for(kn = ranges, prange = a->range + rank - 1;; )
                 {
-                fprintf(stderr, "Range specification of array \"%s\" invalid. It must be a positive number or a variable name prefixed with '!'\n", a->name);
-                return 0;
+                psk H;
+
+                if(is_op(kn))
+                    H = kn->LEFT;
+                else
+                    H = kn;
+
+                if(INTEGER_POS(H))
+                    *prange = strtol(&(H->u.sobj), 0, 10);
+                else if((H->v.fl & VISIBLE_FLAGS) == INDIRECT)
+                    *prange = 0; /* range still unknown. */
+                else
+                    {
+                    fprintf(stderr, "Range specification of array \"%s\" invalid. It must be a positive number or a variable name prefixed with '!'\n", a->name);
+                    return 0;
+                    }
+
+                totsize *= *prange;
+                if(!is_op(kn))
+                    break;
+                kn = kn->RIGHT;
+                --prange;
+                }
+            a->stride[0] = a->range[0];
+            for(size_t range_index = 1; range_index < rank;)
+                {
+                a->stride[range_index] = a->stride[range_index - 1] * a->range[range_index];
+                ++range_index;
                 }
 
-            totsize *= *prange;
-            if(!is_op(kn))
-                break;
-            kn = kn->RIGHT;
-            --prange;
-            }
-        if(totsize > 0)
-            {
-            if(!initialise(a, totsize))
+            if(totsize > 0)
                 {
-                bfree(a->range);
-                a->range = 0;
-                return 0;
+                if(!initialise(a, totsize))
+                    {
+                    bfree(a->range);
+                    a->range = 0;
+                    a->stride = 0;
+                    return 0;
+                    }
                 }
+            else
+                a->size = 0;
             }
-        else
-            a->size = 0;
         }
     return a;
     }
@@ -4287,7 +4277,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                 /* We can get here if an expression is empty, e.g.
                 in a case like
                     whl'(!n+1:<10:?n&(!n:>3&dosomething$|))*/
-                }
+                            }
 #endif
                         }
                     wordp->offset = 0;
@@ -4401,6 +4391,7 @@ static Boolean functiondie(forthMemory* mem)
                     {
                     bfree(curarr->range);
                     curarr->range = 0;
+                    curarr->stride = 0;
                     }
                 if(curarr->pval)
                     {
@@ -4682,6 +4673,7 @@ static Boolean calcdie(forthMemory* mem)
                 {
                 bfree(curarr->range);
                 curarr->range = 0;
+                curarr->stride = 0;
                 }
             if(curarr->pval)
                 {
