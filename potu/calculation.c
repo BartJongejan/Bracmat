@@ -69,6 +69,7 @@ typedef enum
     , Floor
     , Log
     , Log10
+    , Sign
     , Sin
     , Sinh
     , Sqrt
@@ -149,6 +150,7 @@ static char* ActionAsWord[] =
     ,"Floor"
     ,"Log"
     ,"Log10"
+    ,"Sign"
     ,"Sin"
     ,"Sinh"
     ,"Sqrt"
@@ -809,6 +811,7 @@ static Etriple etriples[] =
         {"floor", Floor,1},
         {"log",   Log,1},
         {"log10", Log10,1},
+        {"sign",  Sign,1},
         {"sin",   Sin,1},
         {"sinh",  Sinh,1},
         {"sqrt",  Sqrt,1},
@@ -1142,6 +1145,8 @@ static stackvalue* calculateBody(forthMemory* mem)
                 sp->val.floating = log((sp->val).floating); ++wordp; break;
             case Log10:
                 sp->val.floating = log10((sp->val).floating); ++wordp; break;
+            case Sign:
+                b = (sp->val).floating; if(b != 0.0) { if(b > 0) sp->val.floating = 1.0; else if(b < 0) sp->val.floating = -1.0; } ++wordp; break;
             case Sin:
                 sp->val.floating = sin((sp->val).floating); ++wordp; break;
             case Sinh:
@@ -1566,6 +1571,9 @@ static stackvalue* trcBody(forthMemory* mem)
             case Log10:
                 printf("log10 ");
                 sp->val.floating = log10((sp->val).floating); ++wordp; break;
+            case Sign:
+                printf("sign  ");
+                b = (sp->val).floating; if(b != 0.0) { if(b > 0) sp->val.floating = 1.0; else if(b < 0) sp->val.floating = -1.0; } ++wordp; break;
             case Sin:
                 printf("sin   ");
                 sp->val.floating = sin((sp->val).floating); ++wordp; break;
@@ -2082,6 +2090,7 @@ static Boolean printmem(forthMemory* mem)
             case Floor:  printf(INDNT); printf(LONGnD    " floor\n", 5, wordp - mem->word); break;
             case Log:  printf(INDNT); printf(LONGnD      " log\n", 5, wordp - mem->word); break;
             case Log10:  printf(INDNT); printf(LONGnD    " log10\n", 5, wordp - mem->word); break;
+            case Sign:   printf(INDNT); printf(LONGnD    " sign\n", 5, wordp - mem->word); break;
             case Sin:  printf(INDNT); printf(LONGnD      " sin\n", 5, wordp - mem->word); break;
             case Sinh:  printf(INDNT); printf(LONGnD     " sinh\n", 5, wordp - mem->word); break;
             case Sqrt:  printf(INDNT); printf(LONGnD     " sqrt\n", 5, wordp - mem->word); break;
@@ -2382,14 +2391,14 @@ static Boolean shortcutJumpChains(forthword* wordp)
                 res = TRUE;
                 }
             wordp->offset = label - start;
+                }
             }
-        }
     //#define SHOWOPTIMIZATIONS
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("shortcutJumpChains\n");
 #endif
     return res;
-    }
+        }
 
 static Boolean combinePopBranch(forthword* wordp)
     {
@@ -2484,8 +2493,8 @@ static Boolean markUnReachable(forthword* start, char* marks)
             {
             wordp->action = NoOp;
             res = TRUE;
-            }
         }
+    }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("markUnReachable\n");
 #endif
@@ -2598,13 +2607,13 @@ static Boolean dissolveNextWordBranches(forthword* start)
                 }
             default:
                 ;
+                }
             }
-        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("dissolveNextWordBranches\n");
 #endif
     return res;
-    }
+        }
 
 static Boolean combineUnconditionalBranchTovalPush(forthword* start)
     {
@@ -2639,13 +2648,13 @@ static Boolean combineUnconditionalBranchTovalPush(forthword* start)
                 }
             default:
                 ;
+                }
             }
-        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("combineUnconditionalBranchTovalPush\n");
 #endif
     return res;
-    }
+        }
 
 static Boolean stack2var_var2stack(forthword* start)
     {
@@ -2675,13 +2684,13 @@ static Boolean stack2var_var2stack(forthword* start)
                 }
             default:
                 ;
+                }
             }
-        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("stack2var_var2stack\n");
 #endif
     return res;
-    }
+        }
 
 static Boolean removeIdempotentActions(forthword* start)
     {
@@ -2743,13 +2752,13 @@ static Boolean removeIdempotentActions(forthword* start)
                 }
             default:
                 ;
+                }
             }
-        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("removeIdempotentActions\n");
 #endif
     return res;
-    }
+        }
 
 static Boolean combinePushAndOperation(forthword* start)
     {
@@ -2818,13 +2827,13 @@ static Boolean combinePushAndOperation(forthword* start)
                 }
             default:
                 ;
+                }
             }
-        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("combinePushAndPlus\n");
 #endif
     return res;
-    }
+        }
 
 static void markLabels(forthword* start, char* marks)
     {
@@ -2906,6 +2915,7 @@ static Boolean combineval2stack(forthword* start, char* marks)
                             ;
                         }
                     }
+                break;
                 }
             case PopBranch:
                 {
@@ -2926,13 +2936,13 @@ static Boolean combineval2stack(forthword* start, char* marks)
                 }
             default:
                 ;
+                }
             }
-        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("combineval2stack\n");
 #endif
     return res;
-    }
+        }
 
 static Boolean UnconditionalBranch(actionType action)
     {
@@ -3158,14 +3168,14 @@ Labels [119 - 129) decremented by 1
                             }
                         }
                     }
+                        }
+                    }
                 }
-            }
-        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("eliminateBranch\n");
 #endif
     return res;
-    }
+            }
 
 
 static int removeNoOp(forthMemory* mem, int length)
@@ -4594,14 +4604,13 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
                             somethingdone |= dissolveNextWordBranches(forthstuff->word);
                             somethingdone |= combineUnconditionalBranchTovalPush(forthstuff->word);
                             memset(marks, 0, length * sizeof(char));
-                            somethingdone |= combineval2stack(forthstuff->word, marks);
+                            somethingdone |= combineval2stack(forthstuff->word, marks); // FAULTY!
                             memset(marks, 0, length * sizeof(char));
                             somethingdone |= combinePopThenPop(forthstuff->word, marks);
                             somethingdone |= eliminateBranch(forthstuff->word);
                             somethingdone |= stack2var_var2stack(forthstuff->word);
                             somethingdone |= removeIdempotentActions(forthstuff->word);
                             somethingdone |= combinePushAndOperation(forthstuff->word);
-
                             if(somethingdone)
                                 {
                                 length = removeNoOp(forthstuff, length);
