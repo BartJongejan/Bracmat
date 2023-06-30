@@ -1,0 +1,883 @@
+{wf.bra
+𝕌𝕋𝔽-𝟠
+
+have some points move under influence of wf
+
+
+0 ∵
+1 RTFreader →
+2 plain to TEI:2 →
+3 Sentence extractor+[2 →
+4 Token extractor:4] ⇒
+5 TEI-segmenter:5+4 ⇒
+6 CSTner+5+4 ⇛
+7 Brill tagger+4 ⇒
+8 CSTlemma+[5+4 ⇒
+9 udpipe:9 →
+10 Anno-splitter]+[9 →
+11 Anno-splitter]+[5+4 ⇒
+12 daner]+[5+4 ⇒
+13 OpenNLP Tagger]+5+4+2 ⭆
+14 TEI annotator →
+15 TEI to CoNLL-U →
+16 dependency2tree
+17 ∴
+}
+
+Diagram=
+  ( do
+  =     L M Q SVG U a b calc code
+      , dimensions dimpla g iterations
+      , pla planets pointsT pointsa0 pointsa1 pointsa2
+      , times x y z
+    .   18:?planets
+      & 2:?dimensions
+      & 1500:?iterations
+      & -1+!iterations:?maxn
+      & 300:?Q2
+      & 600:?svgX:?svgY
+      & !planets^-2:?M/planets2
+      & "F elasticity"
+      & -1/3000:?F
+      & "W friction"
+      & 299/300:?W
+      & 1/5:?U
+      & 8:?shortLine
+      & "shortLine: repulsion between line and a vertex is as from a superelipse with lenght/width=linelength/shortLine=K."
+      & 8:?q
+      & "q = 2, 4, 6, ...  Even, so we don't need to compute absolute values. If 2, normal coulomb repulsion."
+      & -1*(1+!q^-1):?qexp
+      & !q+-1:?q-1
+      & 2:?G
+      & "Unit of acceleration due to 'PietHein' repulsion between vertex and edge."
+      & !dimensions*!planets:?dimpla
+      &     (,0 1)
+            (,1 2)
+            (,2 3)
+            (,2 4)
+            (,3 4)
+            (,3 5)
+            (,4 5)
+            (,4 6)
+            (,5 6)
+            (,4 7)
+            (,5 7)
+            (,6 7)
+            (,4 8)
+            (,7 8)
+            (,4 9)
+            (,5 9)
+            (,8 9)
+            (,9 10)
+            (,9 11)
+            (,4 12)
+            (,5 12)
+            (,11 12)
+            (,4 13)
+            (,5 13)
+            (,12 13)
+            (,2 14)
+            (,4 14)
+            (,5 14)
+            (,8 14)
+            (,10 14)
+            (,11 14)
+            (,12 14)
+            (,13 14)
+            (,14 15)
+            (,15 16)
+            (,16 17)
+        : ?links
+      & ( 
+        |       (,0 1)
+                (,0 2)
+                (,0 3)
+                (,0 4)
+                (,0 5)
+                (,1 2)
+                (|(,1 3))
+                (|(,1 4))
+                (,1 5)
+                (,2 3)
+                (,2 4)
+                (,2 5)
+                (,3 4)
+                (,3 5)
+                (,4 5)
+            : ?links
+          & 6:?planets
+        )
+      & !links:? [?nlinks
+      & 0:?degreeSum
+      &   map
+        $ ( ( 
+            =   
+              .   !arg:(,%?a %?b)
+                & (.!a)+(.!b)+!degreeSum:?degreeSum
+            )
+          . !links
+          )
+      &     mop
+          $ ( ( 
+              =   
+                .   !arg:?n*(.?vertex)
+                  & (,!vertex !n)
+              )
+            . !degreeSum
+            . (=+)
+            )
+        : ?degrees
+      &     
+          ' (   (a.links,$nlinks,2)
+                (a.degrees,$planets,2)
+            .     tbl
+                $ (Diff,$planets,$planets,$dimensions)
+              & tbl$(dist2,$planets,$planets)
+              & tbl$(position,$planets,$dimensions)
+              & tbl$(velocity,$planets,$dimensions)
+              & tbl$(acceleration,$planets,$dimensions)
+              & ( init
+                =   (a.matrix) (s.rang)
+                  .   range$(matrix,0):?rng
+                    &   whl
+                      ' ( !rng:>0
+                        & -1+!rng:?rng
+                        & $dimensions:?D
+                        &   whl
+                          ' ( !D:>0
+                            & -1+!D:?D
+                            &   rand$!rang
+                              : ?(idx$(matrix,!rng,!D))
+                            )
+                        )
+                    & 0
+                )
+              & ( btween
+                =   (s.a) (s.m) (s.z)
+                  .   (   (   !a:<!z
+                            & !a:<!m
+                            & !m:<!z
+                          |   !a:>!z
+                            & !a:>!m
+                            & !m:>!z
+                          )
+                        & 1:?R
+                      | 0:?R
+                      )
+                    & !R
+                )
+              & ( gradient
+                =     (s.a)
+                      (s.b)
+                      (s.c)
+                      (s.d)
+                  .   divide
+                    $ (subtract$(!a,!b),subtract$(!c,!d))
+                )
+              & ( cross
+                =     (s.x0)
+                      (s.y0)
+                      (s.x1)
+                      (s.y1)
+                      (s.x2)
+                      (s.y2)
+                      (s.x3)
+                      (s.y3)
+                  .   ( gradient$(!y0,!y1,!x0,!x1):?H01
+                      & gradient$(!y2,!y3,!x2,!x3):?H23
+                      &     divide
+                          $ (   subtract$(!y2,!y0)
+                              + subtract$(!H01*!x0,!H23*!x2)
+                            , subtract$(!H01,!H23)
+                            )
+                        : ?x
+                      & (   btween$(!x0,!x,!x1):1
+                          & btween$(!x2,!x,!x3):1
+                          & 1:?R
+                        | 0:?R
+                        )
+                      )
+                    & !R
+                )
+              & ( norm
+                =   (a.vector)
+                  .   0:?len
+                    & $dimensions:?d
+                    &   whl
+                      ' ( !d:>0
+                        & -1+!d:?d
+                        & !(idx$(vector,!d)):?df
+                        & !df*!df+!len:?len
+                        )
+                    & sqrt$!len
+                )
+              & ( point
+                =     (a.position)
+                      (s.p)
+                      (a.pnt)
+                  .   $dimensions:?d
+                    &   whl
+                      ' ( !d:>0
+                        & -1+!d:?d
+                        &   !(idx$(position,!p,!d))
+                          : ?(idx$(pnt,!d))
+                        )
+                    & 0
+                )
+              & ( midpoint
+                =     (a.pointA)
+                      (a.pointZ)
+                      (a.pointM)
+                  .   $dimensions:?d
+                    &   whl
+                      ' ( !d:>0
+                        & -1+!d:?d
+                        &     divide
+                            $ (   !(idx$(pointA,!d))
+                                + !(idx$(pointZ,!d))
+                              , 2
+                              )
+                          : ?(idx$(pointM,!d))
+                        )
+                    & 1
+                )
+              & ( inproduct
+                =   (a.vectorA) (a.vectorB)
+                  .   0:?inn
+                    & $dimensions:?d
+                    &   whl
+                      ' ( !d:>0
+                        & -1+!d:?d
+                        &       !(idx$(vectorA,!d))
+                              * !(idx$(vectorB,!d))
+                            + !inn
+                          : ?inn
+                        )
+                    & !inn
+                )
+              & ( ScalarTimesVector
+                =     (s.scalar)
+                      (a.vector)
+                      (a.product)
+                  .   $dimensions:?d
+                    &   whl
+                      ' ( !d:>0
+                        & -1+!d:?d
+                        &   !scalar*!(idx$(vector,!d))
+                          : ?(idx$(product,!d))
+                        )
+                )
+              & ( Unit
+                =   (a.vector)
+                  .   norm$vector^-1:?neL
+                    & $dimensions:?d
+                    &   whl
+                      ' ( !d:>0
+                        & -1+!d:?d
+                        & !(idx$(vector,!d))*!neL:?vector
+                        )
+                )
+              & ( vectorSum
+                =     (a.vectorA)
+                      (a.vectorB)
+                      (a.sumvector)
+                  .   $dimensions:?d
+                    &   whl
+                      ' ( !d:>0
+                        & -1+!d:?d
+                        &     !(idx$(vectorA,!d))
+                            + !(idx$(vectorB,!d))
+                          : ?(idx$(sumvector,!d))
+                        )
+                )
+              & ( vector
+                =     (a.pointA)
+                      (a.pointB)
+                      (a.vectorAB)
+                  .   $dimensions:?d
+                    &   whl
+                      ' ( !d:>0
+                        & -1+!d:?d
+                        &     subtract
+                            $ ( !(idx$(pointB,!d))
+                              , !(idx$(pointA,!d))
+                              )
+                          : ?(idx$(vectorAB,!d))
+                        )
+                )
+              & ( perpendicular
+                =     (a.unitX)
+                      (a.mt)
+                      (a.unitY)
+                  .   tbl$(vectorProjection,$dimensions)
+                    & inproduct$(unitX,mt):?impr
+                    &   ScalarTimesVector
+                      $ (!impr,unitX,vectorProjection)
+                    & vector$(vectorProjection,mt,unitY)
+                    & Unit$unitY
+                )
+              & ( PietHeinForce
+                =     (a.acceleration)
+                      (s.pK)
+                      (s.qK)
+                      (a.pointqK)
+                      (a.pointMiddleK)
+                      (s.pt)
+                      (a.pointT)
+                      (s.done)
+                  .   !pK:!pt
+                    | !qK:!pt
+                    |   tbl$(unitX,$dimensions)
+                      & tbl$(unitY,$dimensions)
+                      & tbl$(mq,$dimensions)
+                      & tbl$(mt,$dimensions)
+                      & vector$(pointMiddleK,pointqK,mq)
+                      & vector$(pointMiddleK,pointT,mt)
+                      & norm$mq:?MQ
+                      & norm$mt:?MT
+                      &   ScalarTimesVector
+                        $ ( sign$(inproduct$(mq,mt))*!MQ^-1
+                          , mq
+                          , unitX
+                          )
+                      & perpendicular$(unitX,mt,unitY)
+                      &   !MT^-1*inproduct$(unitX,mt)
+                        : ?cosa
+                      & !MT*!cosa:?X
+                      & sqrt$(!MT^2+-1*!X^2):?Y
+                      & !MQ^-1*$shortLine:?K
+                      & !K*!X:?KX
+                      & !Y^$q+!KX^$q:?Rq
+                      & $G*!Rq^$qexp:?ERqqexp
+                      &   !K^$q*!ERqqexp*!X^$q-1
+                        : ?FX
+                      & !ERqqexp*!Y^$q-1:?FY
+                      & tbl$(accX,$dimensions)
+                      & tbl$(accY,$dimensions)
+                      & tbl$(PietAcc,$dimensions)
+                      & !done^2:?WW
+                      & ScalarTimesVector$(!WW*!FX,unitX,accX)
+                      & ScalarTimesVector$(!WW*!FY,unitY,accY)
+                      & vectorSum$(accX,accY,PietAcc)
+                      & !FX*!FY^-1:?FX/FY
+                      & ( fabs$!FX/FY:>1000
+                        |   subtract$(!X,!Y*!FX/FY):?Xs
+                          & !MQ+!MQ:?PQ
+                          & (   -1*!Xs:>!MQ
+                              &   divide$(!Xs+-1*!MQ,!PQ)
+                                : ?weightP
+                              &   -1*divide$(!Xs+!MQ,!PQ)
+                                : ?weightQ
+                            |   !Xs:>!MQ
+                              &   divide$(-1*(!MQ+!Xs),!PQ)
+                                : ?weightQ
+                              &   divide$(subtract$(!Xs,!MQ),!PQ)
+                                : ?weightP
+                            |     -1*divide$(!Xs+!MQ,!PQ)
+                                : ?weightQ
+                              &   divide$(subtract$(!Xs,!MQ),!PQ)
+                                : ?weightP
+                            )
+                          & 0:?d
+                          &   whl
+                            ' ( !d:<($dimensions)
+                              &     !(idx$(acceleration,!pt,!d))
+                                  + !(idx$(PietAcc,!d))
+                                : ?acceleration
+                              &     !(idx$(acceleration,!pK,!d))
+                                  + !weightP*!(idx$(accY,!d))
+                                  + -1/2*!(idx$(accX,!d))
+                                : ?acceleration
+                              &     !(idx$(acceleration,!qK,!d))
+                                  + !weightQ*!accY
+                                  + -1/2*!accX
+                                : ?acceleration
+                              & 1+!d:?d
+                              )
+                        )
+                )
+              & ( addForceBetweenLines
+                =     (a.position)
+                      (a.acceleration)
+                      (s.pK)
+                      (s.qK)
+                      (s.pM)
+                      (s.qM)
+                      (s.done)
+                  .   tbl$(pointpK,$dimensions)
+                    & tbl$(pointqK,$dimensions)
+                    & tbl$(pointpM,$dimensions)
+                    & tbl$(pointqM,$dimensions)
+                    & point$(position,!pK,pointpK)
+                    & point$(position,!qK,pointqK)
+                    & point$(position,!pM,pointpM)
+                    & point$(position,!qM,pointqM)
+                    & tbl$(pointMiddleM,$dimensions)
+                    & tbl$(pointMiddleK,$dimensions)
+                    & midpoint$(pointpM,pointqM,pointMiddleM)
+                    & midpoint$(pointpK,pointqK,pointMiddleK)
+                    &   PietHeinForce
+                      $ ( acceleration
+                        , !pK
+                        , !qK
+                        , pointqK
+                        , pointMiddleK
+                        , !pM
+                        , pointpM
+                        , !done
+                        )
+                    &   PietHeinForce
+                      $ ( acceleration
+                        , !pK
+                        , !qK
+                        , pointqK
+                        , pointMiddleK
+                        , !qM
+                        , pointqM
+                        , !done
+                        )
+                    &   PietHeinForce
+                      $ ( acceleration
+                        , !pM
+                        , !qM
+                        , pointqM
+                        , pointMiddleM
+                        , !pK
+                        , pointpK
+                        , !done
+                        )
+                    &   PietHeinForce
+                      $ ( acceleration
+                        , !pM
+                        , !qM
+                        , pointqM
+                        , pointMiddleM
+                        , !qK
+                        , pointqK
+                        , !done
+                        )
+                )
+              & init$(position,200)
+              & init$(velocity,1/1000)
+              & init$(acceleration,1/1000)
+              & range$(links,0):?Nlinks
+              &   tbl
+                $ (T,$iterations,$planets,$dimensions)
+              & rank$T:?DD
+              & 0:?b
+              &   whl
+                ' ( !b:<!DD
+                  & range$(T,!b):?R
+                  & 1+!b:?b
+                  )
+              & -1:?n
+              &   whl
+                ' ( 1+!n:?n:<($iterations)
+                  & divide$(!n,$maxn):?done
+                  & $planets:?p
+                  &   whl
+                    ' ( !p:>0
+                      & -1+!p:?p
+                      & $dimensions:?d
+                      &   whl
+                        ' ( !d:>0
+                          & -1+!d:?d
+                          & 0:?(idx$(acceleration,!p,!d))
+                          )
+                      )
+                  & $planets:?p
+                  &   whl
+                    ' ( !p:>0
+                      & -1+!p:?p
+                      & $planets:?q
+                      &   whl
+                        ' ( !q:>0
+                          & -1+!q:?q
+                          & ( !q:!p
+                            |   0:?(idx$(dist2,!p,!q))
+                              & 0:?d
+                              &   whl
+                                ' ( !d:<($dimensions)
+                                  &     subtract
+                                      $ ( !(idx$(position,!p,!d))
+                                        , !(idx$(position,!q,!d))
+                                        )
+                                    : ?(idx$(Diff,!p,!q,!d))
+                                  & !Diff^2+!dist2:?dist2
+                                  & 1+!d:?d
+                                  )
+                            )
+                          )
+                      )
+                  & $planets:?p
+                  &   whl
+                    ' ( !p:>0
+                      & -1+!p:?p
+                      & (   !(idx$(degrees,!p,1)):2
+                          & 1:?Qp
+                        |   subtract$($planets,!degrees)
+                          : ?Qp
+                        )
+                      & $planets:?q
+                      &   whl
+                        ' ( !q:>0
+                          & -1+!q:?q
+                          & ( !q:!p
+                            | !(idx$(dist2,!p,!q)):0
+                            |   (     !(idx$(degrees,!q,1))
+                                    : 2
+                                  & 1:?Qq
+                                |   subtract$($planets,!degrees)
+                                  : ?Qq
+                                )
+                              & sqrt$!dist2:?dist
+                              & !dist^-1:?tsid1
+                              &   divide$($Q2,!dist2)
+                                : ?coulomb
+                              & 0:?d
+                              &   whl
+                                ' ( !d:<($dimensions)
+                                  &       !(idx$(Diff,!p,!q,!d))
+                                        * !tsid1
+                                        * !coulomb
+                                        * $M/planets2
+                                        * !Qp
+                                        * !Qq
+                                      + !(idx$(acceleration,!p,!d))
+                                    : ?acceleration
+                                  & 1+!d:?d
+                                  )
+                            )
+                          )
+                      )
+                  & !Nlinks:?K
+                  &   whl
+                    ' ( !K:>0
+                      & -1+!K:?K
+                      & !(idx$(links,!K,0)):?p
+                      & !(idx$(links,!K,1)):?q
+                      & ( !q:!p
+                        | !(idx$(dist2,!p,!q)):0
+                        |   sqrt$!dist2:?dist
+                          & !dist^-1:?tsid1
+                          &     divide
+                              $ ( $F*!dist
+                                , subtract$(!p,!q)^2
+                                )
+                            : ?elastiek
+                          & 0:?d
+                          &   whl
+                            ' ( !d:<($dimensions)
+                              &     !(idx$(Diff,!p,!q,!d))
+                                  * !tsid1
+                                  * !elastiek
+                                : ?delta
+                              &     !delta
+                                  + !(idx$(acceleration,!p,!d))
+                                : ?acceleration
+                              &     -1*!delta
+                                  + !(idx$(acceleration,!q,!d))
+                                : ?acceleration
+                              & 1+!d:?d
+                              )
+                        )
+                      )
+                  & ( !done:<8/10
+                    |   0:?crosses
+                      & !Nlinks:?K
+                      &   whl
+                        ' ( !K:>0
+                          & -1+!K:?K
+                          & !(idx$(links,!K,0)):?pK
+                          & !(idx$(links,!K,1)):?qK
+                          & ( !qK:!pK
+                            |   -1+!K:?M
+                              &   whl
+                                ' ( !M:>0
+                                  & -1+!M:?M
+                                  & !(idx$(links,!M,0)):?pM
+                                  & ( !pK:!pM
+                                    | !qK:!pM
+                                    |     !(idx$(links,!M,1))
+                                        : ?qM
+                                      & !qM:!pM
+                                    | !pK:!qM
+                                    | !qK:!qM
+                                    |   (   !n:$maxn
+                                          &   !(idx$(position,!pK,0))
+                                            : ?x0
+                                          &   !(idx$(position,!pK,1))
+                                            : ?y0
+                                          &   !(idx$(position,!qK,0))
+                                            : ?x1
+                                          &   !(idx$(position,!qK,1))
+                                            : ?y1
+                                          &   !(idx$(position,!pM,0))
+                                            : ?x2
+                                          &   !(idx$(position,!pM,1))
+                                            : ?y2
+                                          &   !(idx$(position,!qM,0))
+                                            : ?x3
+                                          &   !(idx$(position,!qM,1))
+                                            : ?y3
+                                          &     cross
+                                              $ ( !x0
+                                                , !y0
+                                                , !x1
+                                                , !y1
+                                                , !x2
+                                                , !y2
+                                                , !x3
+                                                , !y3
+                                                )
+                                            : ?CROSS
+                                          &   !CROSS+!crosses
+                                            : ?crosses
+                                        | 
+                                        )
+                                      &   addForceBetweenLines
+                                        $ ( position
+                                          , acceleration
+                                          , !pK
+                                          , !qK
+                                          , !pM
+                                          , !qM
+                                          , !done
+                                          )
+                                    )
+                                  )
+                            )
+                          )
+                    )
+                  & 0:?p
+                  &   whl
+                    ' ( !p:<($planets)
+                      & 1+!J:?J
+                      & 0:?d
+                      &   whl
+                        ' ( !d:<($dimensions)
+                          &   !(idx$(position,!p,!d))
+                            : ?(idx$(T,!n,!p,!d))
+                          &     !(idx$(acceleration,!p,!d))
+                              + $W*!(idx$(velocity,!p,!d))
+                            : ?velocity
+                          &     divide$(-5/4+!done,-3)*!velocity
+                              + !position
+                            : ?position
+                          & 1+!d:?d
+                          )
+                      & 1+!p:?p
+                      )
+                  )
+              & !n
+            )
+        : ?code
+      & new$(calculation,!code):?calc
+      & (     (calc..calculate)
+            $ ((,!links) (,!degrees))
+          & (|(calc..print)$)
+          & out$executed
+          & (calc..export)$(N,T):?pointsT
+          & (calc..export)$(R,position):?pointsa0
+          & (calc..export)$(R,velocity):?pointsa1
+          &   (calc..export)$(R,acceleration)
+            : ?pointsa2
+          & (calc..export)$(N,crosses):?crosses
+          & !pointsT:(,?times)
+          &     map
+              $ ( ( 
+                  =   
+                    .   !arg:(,?pla)
+                      &   map
+                        $ ( ( 
+                            =   
+                              .   !arg:(,%@?x %@?y ?z)
+                                & (!x.!y)
+                            )
+                          . !pla
+                          )
+                  )
+                . !times
+                )
+            : ?L
+          & lst$(L,LLL,NEW)
+          & ( last
+            =   K L e
+              .   !arg:(?K.?n)
+                & :?L
+                &   whl
+                  ' ( !K:%?e ?K
+                    & !e !L:?L
+                    )
+                & ( !('(!L:?L [($n) ?))
+                  | 
+                  )
+                &   whl
+                  ' ( !L:%?e ?L
+                    & !e !K:?K
+                    )
+                & !K
+            )
+          & last$(!L.!planets):?L
+          & !L:? [?NN
+          & !NN^-1:?MM
+          & 0:?nn
+          & !pointsT:(,? (,?positions))
+          & lst$positions
+          & lst$links
+          &     map
+              $ ( ( 
+                  =   p q
+                    .   !arg:(,%?p %?q)
+                      &   !positions
+                        : ? [!p (,%?x1 %?y1 ?) ?
+                      &   !positions
+                        : ? [!q (,%?x2 %?y2 ?) ?
+                      & ( line
+                        .     (x1.!svgX+!x1)
+                              (y1.!svgX+!y1)
+                              (x2.!svgX+!x2)
+                              (y2.!svgX+!y2)
+                              (stroke.green)
+                              (marker-end."url(#arrow)")
+                          , 
+                        )
+                  )
+                . !links
+                )
+            : ?lines
+          & lst$(lines,lines,NEW)
+          &     ("!DOCTYPE html".)
+                ( html
+                .   
+                  ,   ( head
+                      .   
+                        ,   (title.,Gravitation)
+                            ( meta
+                            .     (http-equiv.content-type)
+                                  (content."text/html; charset=UTF-8")
+                              , 
+                            )
+                      )
+                      ( body
+                      .   
+                        , ( svg
+                          .     (height.1500)
+                                (width.1500)
+                                (viewBox."0 0 1500 1500")
+                            ,   ( ~
+                                | ("!--"."A marker to be used as an arrowhead")
+                                )
+                                ( defs
+                                .   
+                                  , ( marker
+                                    .     (id.arrow)
+                                          (viewBox."0 0 20 10")
+                                          (refX.30)
+                                          (refY.5)
+                                          (markerWidth.16)
+                                          (markerHeight.16)
+                                          (orient.auto-start-reverse)
+                                      , ( path
+                                        .   (d."M 0 0 L 20 5 L 0 10 z")
+                                          , 
+                                        )
+                                    )
+                                )
+                                !lines
+                                  map
+                                $ ( ( 
+                                    =   
+                                      .   !arg:(?a.?b)
+                                        & 1+!nn:?nn
+                                        &     255
+                                            +   -1
+                                              *   div
+                                                $ (255*!nn*!MM,1)
+                                          : ?col
+                                        &   ( circle
+                                            .     (cx.!a+!svgX)
+                                                  (cy.!b+!svgX)
+                                                  (r.12)
+                                                  ( stroke
+                                                  .   str
+                                                    $ ( "rgb("
+                                                        !col
+                                                        ","
+                                                        !col
+                                                        ","
+                                                        !col
+                                                        ")"
+                                                      )
+                                                  )
+                                                  (fill.red)
+                                              , 
+                                            )
+                                            ( text
+                                            .     (x.!a+!svgX)
+                                                  (y.!b+!svgX)
+                                                  (text-anchor.middle)
+                                                  (stroke.green)
+                                                  (stroke-width.1px)
+                                                  (dominant-baseline.middle)
+                                              , !nn
+                                            )
+                                    )
+                                  . !L
+                                  )
+                          )
+                      )
+                )
+            : ?SVG
+          & put$(toML$!SVG,"svg.html",NEW)
+        | out$"something wrogn"
+        )
+      & out$"Reset calc"
+      & :?calc
+      & out$"Calc reset"
+  )
+  (new=.~|(its.do)$);
+
+r=
+  get'("wf.bra",TXT)
+& rmv$(str$(wf ".bak"))
+& ren$("wf.bra".str$(wf ".bak"))
+&   put
+  $ ( "{wf.bra
+𝕌𝕋𝔽-𝟠
+
+have some points move under influence of wf
+
+
+0 ∵
+1 RTFreader →
+2 plain to TEI:2 →
+3 Sentence extractor+[2 →
+4 Token extractor:4] ⇒
+5 TEI-segmenter:5+4 ⇒
+6 CSTner+5+4 ⇛
+7 Brill tagger+4 ⇒
+8 CSTlemma+[5+4 ⇒
+9 udpipe:9 →
+10 Anno-splitter]+[9 →
+11 Anno-splitter]+[5+4 ⇒
+12 daner]+[5+4 ⇒
+13 OpenNLP Tagger]+5+4+2 ⭆
+14 TEI annotator →
+15 TEI to CoNLL-U →
+16 dependency2tree
+17 ∴
+}
+
+"
+    , "wf.bra"
+    , NEW
+    , BIN
+    )
+& lst'(Diagram,"wf.bra",APP)
+& put'(\n,"wf.bra",APP,BIN)
+& lst'(r,"wf.bra",APP)
+& put$(str$("\nnew'" Diagram ";\n"),"wf.bra",APP,BIN)
+& ;
+
+new'Diagram;
