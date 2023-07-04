@@ -4280,15 +4280,6 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                                 return 0;
                             return wordp;
                             }
-#if 0
-            else
-                {
-                wordp->action = valPush;
-                /* We can get here if an expression is empty, e.g.
-                in a case like
-                    whl'(!n+1:<10:?n&(!n:>3&dosomething$|))*/
-                            }
-#endif
                         }
                     wordp->offset = 0;
                     }
