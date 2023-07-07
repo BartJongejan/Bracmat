@@ -72,6 +72,8 @@ typedef enum
     , Sign
     , Sin
     , Sinh
+    , Cube
+    , Sqr
     , Sqrt
     , Tan
     , Tanh
@@ -153,6 +155,8 @@ static char* ActionAsWord[] =
     ,"Sign"
     ,"Sin"
     ,"Sinh"
+    ,"Cube"
+    ,"Sqr"
     ,"Sqrt"
     ,"Tan"
     ,"Tanh"
@@ -814,6 +818,8 @@ static Etriple etriples[] =
         {"sign",  Sign,1},
         {"sin",   Sin,1},
         {"sinh",  Sinh,1},
+        {"cube",  Cube,1},
+        {"sqr",   Sqr,1},
         {"sqrt",  Sqrt,1},
         {"tan",   Tan,1},
         {"tanh",  Tanh,1},
@@ -1151,6 +1157,10 @@ static stackvalue* calculateBody(forthMemory* mem)
                 sp->val.floating = sin((sp->val).floating); ++wordp; break;
             case Sinh:
                 sp->val.floating = sinh((sp->val).floating); ++wordp; break;
+            case Cube:
+                sp->val.floating *= sp->val.floating * sp->val.floating; ++wordp; break;
+            case Sqr:
+                sp->val.floating *= sp->val.floating; ++wordp; break;
             case Sqrt:
                 sp->val.floating = sqrt((sp->val).floating); ++wordp; break;
             case Tan:
@@ -1326,10 +1336,7 @@ static stackvalue* fcalculate(stackvalue* sp, forthword* wordp, double* ret)
         if(sp2 && sp2 >= thatmem->stack)
             {
             *ret = thatmem->stack->val.floating;
-            //return sp;
             }
-        /*        else
-                    return 0;*/
         }
     return sp;
     }
@@ -1580,6 +1587,12 @@ static stackvalue* trcBody(forthMemory* mem)
             case Sinh:
                 printf("sinh  ");
                 sp->val.floating = sinh((sp->val).floating); ++wordp; break;
+            case Cube:
+                printf("cube  ");
+                sp->val.floating *= sp->val.floating * sp->val.floating; ++wordp; break;
+            case Sqr:
+                printf("sqr   ");
+                sp->val.floating *= sp->val.floating; ++wordp; break;
             case Sqrt:
                 printf("sqrt  ");
                 sp->val.floating = sqrt((sp->val).floating); ++wordp; break;
@@ -1791,10 +1804,7 @@ static stackvalue* ftrc(stackvalue* sp, forthword* wordp, double* ret)
         if(sp2 && sp2 >= thatmem->stack)
             {
             *ret = thatmem->stack->val.floating;
-            //return sp;
             }
-        /*        else
-                    return 0;*/
         }
     return sp;
     }
@@ -1837,7 +1847,7 @@ static Boolean StaticArray(psk declaration)
     return FALSE;
     }
 
-static int polish1(psk code)
+static int polish1(psk code, Boolean commentsAllowed)
     {
     int C;
     int R;
@@ -1850,20 +1860,20 @@ static int polish1(psk code)
         case EXP:
         case LOG:
             {
-            R = polish1(code->LEFT);
+            R = polish1(code->LEFT, FALSE);
             if(R == -1)
                 return -1;
-            C = polish1(code->RIGHT);
+            C = polish1(code->RIGHT, FALSE);
             if(C == -1)
                 return -1;
             return 1 + R + C;
             }
         case AND:
             {
-            R = polish1(code->LEFT);
+            R = polish1(code->LEFT, TRUE);
             if(R == -1)
                 return -1;
-            C = polish1(code->RIGHT);
+            C = polish1(code->RIGHT, TRUE);
             if(C == -1)
                 return -1;
             if(C == 0) // This results in a NoOp
@@ -1876,12 +1886,12 @@ static int polish1(psk code)
             }
         case OR:
             {
-            R = polish1(code->LEFT);
+            R = polish1(code->LEFT, TRUE);
             if(R == -1)
                 return -1;
             if(R == 0)
                 return 0; /* (|...) means: ignore ..., do nothing. */
-            C = polish1(code->RIGHT);
+            C = polish1(code->RIGHT, TRUE);
             if(C == -1)
                 return -1;
             return 7 + R + C;
@@ -1890,10 +1900,10 @@ static int polish1(psk code)
             }
         case MATCH:
             {
-            R = polish1(code->LEFT);
+            R = polish1(code->LEFT, FALSE);
             if(R == -1)
                 return -1;
-            C = polish1(code->RIGHT);
+            C = polish1(code->RIGHT, FALSE);
             if(C == -1)
                 return -1;
             if(Op(code->RIGHT) == MATCH || code->RIGHT->v.fl & UNIFY)
@@ -1913,7 +1923,7 @@ static int polish1(psk code)
                 return 0;
                 }
 
-            C = polish1(code->RIGHT);
+            C = polish1(code->RIGHT, FALSE);
             if(C == 1 && code->RIGHT->u.sobj == '\0') /* No parameters at all. */
                 C = 0;
             if(C == -1)
@@ -1925,7 +1935,7 @@ static int polish1(psk code)
                 fprintf(stderr, "calculation: lhs of ' is operator\n");
                 return -1;
                 }
-            C = polish1(code->RIGHT);
+            C = polish1(code->RIGHT, FALSE);
             if(C == -1)
                 return -1;
             return 6 + C;
@@ -1934,10 +1944,10 @@ static int polish1(psk code)
         default:
             if(is_op(code))
                 {
-                R = polish1(code->LEFT);
+                R = polish1(code->LEFT, FALSE);
                 if(R == -1)
                     return -1;
-                C = polish1(code->RIGHT);
+                C = polish1(code->RIGHT, FALSE);
                 if(C == -1)
                     return -1;
                 return R + C; /* Do not reserve room for operator! */
@@ -1948,7 +1958,7 @@ static int polish1(psk code)
                     return 1;
                 else if(code->v.fl & (UNIFY | INDIRECT))
                     return 1; /* variable */
-                else if(code->u.sobj == '\0')
+                else if(/*code->u.sobj == '\0' ||*/ commentsAllowed)
                     return 0;
                 else
                     {
@@ -1972,81 +1982,79 @@ static Boolean printmem(forthMemory* mem)
     printf("print %s\n", mem->name == 0 ? "(main)" : mem->name);
     for(; wordp->action != TheEnd; ++wordp)
         {
-        switch(wordp->action)
+        actionType act = wordp->action;
+        char* Act = ActionAsWord[act];
+        switch(act)
             {
             case varPush:
-                printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, "varPush", getVarName(mem, (wordp->u.valp)));
+                printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, Act, getVarName(mem, (wordp->u.valp)));
                 ++In;
                 break;
             case var2stack:
-                printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, "var2stack", getVarName(mem, (wordp->u.valp)));
+                printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, Act, getVarName(mem, (wordp->u.valp)));
                 ++In;
                 break;
             case var2stackBranch:
-                printf(INDNT); printf(LONGnD " %-24s " LONGnD "   %s\n", 5, wordp - mem->word, "var2stackBranch", 5, (LONG)(wordp->offset), getVarName(mem, (wordp->u.valp)));
+                printf(INDNT); printf(LONGnD " %-24s " LONGnD "   %s\n", 5, wordp - mem->word, Act, 5, (LONG)(wordp->offset), getVarName(mem, (wordp->u.valp)));
                 ++In;
                 break;
             case stack2var:
-                printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, "stack2var", getVarName(mem, (wordp->u.valp)));
+                printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, Act, getVarName(mem, (wordp->u.valp)));
                 break;
             case stack2varBranch:
-                printf(INDNT); printf(LONGnD " %-24s " LONGnD "   %s\n", 5, wordp - mem->word, "stack2varBranch", 5, (LONG)(wordp->offset), getVarName(mem, (wordp->u.valp)));
+                printf(INDNT); printf(LONGnD " %-24s " LONGnD "   %s\n", 5, wordp - mem->word, Act, 5, (LONG)(wordp->offset), getVarName(mem, (wordp->u.valp)));
                 ++In;
                 break;
             case ArrElmValPush:
-                printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, "ArrElmValPush", wordp->u.arrp->name);
+                printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, Act, wordp->u.arrp->name);
                 break;
             case stack2ArrElm:
-                printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, "stack2ArrElm", wordp->u.arrp->name);
+                printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, Act, wordp->u.arrp->name);
                 break;
             case val2stack:
                 {
                 forthvalue val = wordp->u.val;
-                // printf(INDNT); printf(LONGnD " val2stack                %f or @%p\n", 5, wordp - mem->word, val.floating, (void*)wordp->u.arrp);
-                printf(INDNT); printf(LONGnD " %-32s %f\n", 5, wordp - mem->word, "val2stack", val.floating);
+                printf(INDNT); printf(LONGnD " %-32s %f\n", 5, wordp - mem->word, Act, val.floating);
                 ++In;
                 break;
                 }
             case valPush:
                 {
                 forthvalue val = wordp->u.val;
-                //printf(INDNT); printf(LONGnD " valPush                       %f or @%p\n", 5, wordp - mem->word, val.floating, (void*)wordp->u.arrp);
-                printf(INDNT); printf(LONGnD " %-32s %f\n", 5, wordp - mem->word, "valPush", val.floating);
+                printf(INDNT); printf(LONGnD " %-32s %f\n", 5, wordp - mem->word, Act, val.floating);
                 ++In;
                 break;
                 }
             case Afunction:
                 naam = wordp->u.that->name;
-                printf(INDNT); printf(LONGnD " Afunction \"%-12s\" " LONGnD "\n", 5, wordp - mem->word, naam, 5, (LONG)(wordp->offset));
+                printf(INDNT); printf(LONGnD " %s \"%-12s\" " LONGnD "\n", 5, wordp - mem->word, Act, naam, 5, (LONG)(wordp->offset));
                 break;
             case Pop:
                 naam = getLogiName(wordp->u.logic);
-                printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, "Pop", naam);
+                printf(INDNT); printf(LONGnD " %-32s %s\n", 5, wordp - mem->word, Act, naam);
                 --In;
                 break;
             case Branch:
                 naam = getLogiName(wordp->u.logic);
-                printf(INDNT); printf(LONGnD " %-24s " LONGnD "   %s\n", 5, wordp - mem->word, "Branch", 5, (LONG)(wordp->offset), naam);
+                printf(INDNT); printf(LONGnD " %-24s " LONGnD "   %s\n", 5, wordp - mem->word, Act, 5, (LONG)(wordp->offset), naam);
                 break;
             case PopBranch:
                 naam = getLogiName(wordp->u.logic);
-                printf(INDNT); printf(LONGnD " %-24s " LONGnD "   %s\n", 5, wordp - mem->word, "PopBranch", 5, (LONG)(wordp->offset), naam);
+                printf(INDNT); printf(LONGnD " %-24s " LONGnD "   %s\n", 5, wordp - mem->word, Act, 5, (LONG)(wordp->offset), naam);
                 --In;
                 break;
             case valPushBranch:
                 {
                 forthvalue val = wordp->u.val;
-                //                printf(INDNT); printf(LONGnD " %-24s " LONGnD "   %f or @%p\n", 5, wordp - mem->word, "valPushBranch", 5, (LONG)(wordp->offset), val.floating, (void*)wordp->u.arrp);
-                printf(INDNT); printf(LONGnD " %-24s " LONGnD "   %f\n", 5, wordp - mem->word, "valPushBranch", 5, (LONG)(wordp->offset), val.floating);
+                printf(INDNT); printf(LONGnD " %-24s " LONGnD "   %f\n", 5, wordp - mem->word, Act, 5, (LONG)(wordp->offset), val.floating);
                 ++In;
                 break;
                 }
             case val2stackBranch:
                 {
                 forthvalue val = wordp->u.val;
-                //printf(INDNT); printf(LONGnD  LONGnD "     %f or @%p\n", 5, wordp - mem->word, 5, "val2stackBranch", (LONG)(wordp->offset), val.floating, (void*)wordp->u.arrp);
                 printf(INDNT);
-                printf(LONGnD " %-24s " LONGnD "   %f\n", 5, wordp - mem->word, "val2stackBranch", 5, (LONG)(wordp->offset), val.floating);
+                printf(LONGnD " %-24s " LONGnD "   %f\n", 5, wordp - mem->word, Act, 5, (LONG)(wordp->offset), val.floating);
                 ++In;
                 break;
                 }
@@ -2093,6 +2101,8 @@ static Boolean printmem(forthMemory* mem)
             case Sign:   printf(INDNT); printf(LONGnD    " sign\n", 5, wordp - mem->word); break;
             case Sin:  printf(INDNT); printf(LONGnD      " sin\n", 5, wordp - mem->word); break;
             case Sinh:  printf(INDNT); printf(LONGnD     " sinh\n", 5, wordp - mem->word); break;
+            case Cube:  printf(INDNT); printf(LONGnD     " cube\n", 5, wordp - mem->word); break;
+            case Sqr:  printf(INDNT); printf(LONGnD     " sqr\n", 5, wordp - mem->word); break;
             case Sqrt:  printf(INDNT); printf(LONGnD     " sqrt\n", 5, wordp - mem->word); break;
             case Tan:  printf(INDNT); printf(LONGnD      " tan\n", 5, wordp - mem->word); break;
             case Tanh:  printf(INDNT); printf(LONGnD     " tanh\n", 5, wordp - mem->word); break;
@@ -2391,14 +2401,14 @@ static Boolean shortcutJumpChains(forthword* wordp)
                 res = TRUE;
                 }
             wordp->offset = label - start;
-                }
             }
+        }
     //#define SHOWOPTIMIZATIONS
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("shortcutJumpChains\n");
 #endif
     return res;
-        }
+    }
 
 static Boolean combinePopBranch(forthword* wordp)
     {
@@ -2493,62 +2503,13 @@ static Boolean markUnReachable(forthword* start, char* marks)
             {
             wordp->action = NoOp;
             res = TRUE;
+            }
         }
-    }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("markUnReachable\n");
 #endif
     return res;
     }
-
-/*
-Faulty code. Branch offsets should be checked and if needed incremented for each branch instruction that is moved by one step.
-Instead, we just remove all NoOp.
-
-static Boolean moveBranchesTowardsEndOverNoOp(forthword* start)
-    {
-    Boolean res = FALSE;
-    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
-        {
-        if(wordp[1].action == NoOp)
-            switch(wordp->action)
-                {
-                case var2stackBranch:
-                case stack2varBranch:
-                case Branch:
-                case PopBranch:
-                case valPushBranch:
-                case val2stackBranch:
-                case Fless:
-                case Fless_equal:
-                case Fmore_equal:
-                case Fmore:
-                case Funequal:
-                case Fequal:
-                case FlessP:
-                case Fless_equalP:
-                case Fmore_equalP:
-                case FmoreP:
-                case FunequalP:
-                case FequalP:
-                    {
-                    wordp[1] = *wordp;
-                    wordp->action = NoOp;
-                    if(wordp[1].offset = wordp + 1 - start)
-                        ++(wordp[1].offset);
-                    res = TRUE;
-                    break;
-                    }
-                default:
-                    ;
-                }
-        }
-#ifdef SHOWOPTIMIZATIONS
-    if(res) printf("moveBranchesTowardsEndOverNoOp\n");
-#endif
-    return res;
-    }
-*/
 
 static Boolean dissolveNextWordBranches(forthword* start)
     {
@@ -2607,13 +2568,13 @@ static Boolean dissolveNextWordBranches(forthword* start)
                 }
             default:
                 ;
-                }
             }
+        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("dissolveNextWordBranches\n");
 #endif
     return res;
-        }
+    }
 
 static Boolean combineUnconditionalBranchTovalPush(forthword* start)
     {
@@ -2648,13 +2609,13 @@ static Boolean combineUnconditionalBranchTovalPush(forthword* start)
                 }
             default:
                 ;
-                }
             }
+        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("combineUnconditionalBranchTovalPush\n");
 #endif
     return res;
-        }
+    }
 
 static Boolean stack2var_var2stack(forthword* start)
     {
@@ -2684,13 +2645,13 @@ static Boolean stack2var_var2stack(forthword* start)
                 }
             default:
                 ;
-                }
             }
+        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("stack2var_var2stack\n");
 #endif
     return res;
-        }
+    }
 
 static Boolean removeIdempotentActions(forthword* start)
     {
@@ -2752,13 +2713,13 @@ static Boolean removeIdempotentActions(forthword* start)
                 }
             default:
                 ;
-                }
             }
+        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("removeIdempotentActions\n");
 #endif
     return res;
-        }
+    }
 
 static Boolean combinePushAndOperation(forthword* start)
     {
@@ -2827,13 +2788,13 @@ static Boolean combinePushAndOperation(forthword* start)
                 }
             default:
                 ;
-                }
             }
+        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("combinePushAndPlus\n");
 #endif
     return res;
-        }
+    }
 
 static void markLabels(forthword* start, char* marks)
     {
@@ -2936,13 +2897,13 @@ static Boolean combineval2stack(forthword* start, char* marks)
                 }
             default:
                 ;
-                }
             }
+        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("combineval2stack\n");
 #endif
     return res;
-        }
+    }
 
 static Boolean UnconditionalBranch(actionType action)
     {
@@ -3168,14 +3129,14 @@ Labels [119 - 129) decremented by 1
                             }
                         }
                     }
-                        }
-                    }
                 }
+            }
+        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("eliminateBranch\n");
 #endif
     return res;
-            }
+    }
 
 
 static int removeNoOp(forthMemory* mem, int length)
@@ -3568,7 +3529,7 @@ static fortharray* namedArray(char* name, forthMemory* mem, psk node)
         }
     }
 
-static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthword* wordp)
+static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthword* wordp, Boolean commentsAllowed)
 /* jumps points to 5 words as explained for AND and OR */
     {
     if(wordp == 0)
@@ -3585,8 +3546,8 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
             return wordp;
             }
         case PLUS:
-            wordp = polish2(mem, jumps, code->LEFT, wordp);
-            wordp = polish2(mem, jumps, code->RIGHT, wordp);
+            wordp = polish2(mem, jumps, code->LEFT, wordp, FALSE);
+            wordp = polish2(mem, jumps, code->RIGHT, wordp, FALSE);
             if(wordp == 0)
                 return 0; /* Something wrong happened. */
             wordp->action = Plus;
@@ -3594,8 +3555,8 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
             mustpop = epop;
             return ++wordp;
         case TIMES:
-            wordp = polish2(mem, jumps, code->LEFT, wordp);
-            wordp = polish2(mem, jumps, code->RIGHT, wordp);
+            wordp = polish2(mem, jumps, code->LEFT, wordp, FALSE);
+            wordp = polish2(mem, jumps, code->RIGHT, wordp, FALSE);
             if(wordp == 0)
                 return 0; /* Something wrong happened. */
             wordp->action = Times;
@@ -3603,8 +3564,8 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
             mustpop = epop;
             return ++wordp;
         case EXP:
-            wordp = polish2(mem, jumps, code->RIGHT, wordp); /* SIC! */
-            wordp = polish2(mem, jumps, code->LEFT, wordp);
+            wordp = polish2(mem, jumps, code->RIGHT, wordp, FALSE); /* SIC! */
+            wordp = polish2(mem, jumps, code->LEFT, wordp, FALSE);
             if(wordp == 0)
                 return 0; /* Something wrong happened. */
             wordp->action = Pow;
@@ -3612,8 +3573,8 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
             mustpop = epop;
             return ++wordp;
         case LOG:
-            wordp = polish2(mem, jumps, code->LEFT, wordp);
-            wordp = polish2(mem, jumps, code->RIGHT, wordp);
+            wordp = polish2(mem, jumps, code->LEFT, wordp, FALSE);
+            wordp = polish2(mem, jumps, code->RIGHT, wordp, FALSE);
             if(wordp == 0)
                 return 0; /* Something wrong happened. */
             wordp->action = Log;
@@ -3636,7 +3597,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
             saveword = wordp;
             forthword* lhs = wordp + sizeof(jumpblock) / sizeof(forthword);
             jumpblock* j5 = (jumpblock*)wordp;
-            wordp = polish2(mem, j5, code->LEFT, lhs);
+            wordp = polish2(mem, j5, code->LEFT, lhs, TRUE);
             if(wordp == 0)
                 {
                 mustpop = enopop;
@@ -3644,7 +3605,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                 }
             else if(wordp == lhs) /* LHS is function definition or another empty statement. Ignore this & operator. */
                 {
-                wordp = polish2(mem, jumps, code->RIGHT, saveword);
+                wordp = polish2(mem, jumps, code->RIGHT, saveword, TRUE);
                 return wordp;
                 }
             else
@@ -3669,7 +3630,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                 j5->j[eF].action = Branch;
                 j5->j[eF].u.logic = fand;
                 saveword = wordp;
-                wordp = polish2(mem, jumps, code->RIGHT, wordp);
+                wordp = polish2(mem, jumps, code->RIGHT, wordp, TRUE);
                 if(!wordp)
                     {
                     //showProblematicNode("wordp==0", code->RIGHT);
@@ -3706,7 +3667,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
             forthword* saveword = wordp;
             forthword* lhs = wordp + sizeof(jumpblock) / sizeof(forthword);
             jumpblock* j5 = (jumpblock*)wordp;
-            wordp = polish2(mem, j5, code->LEFT, lhs);
+            wordp = polish2(mem, j5, code->LEFT, lhs, TRUE);
             if(wordp == 0)
                 {
                 mustpop = enopop;
@@ -3738,7 +3699,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                 j5->j[eF].action = Branch;
                 j5->j[eF].u.logic = fOr;
                 saveword = wordp;
-                wordp = polish2(mem, jumps, code->RIGHT, wordp);
+                wordp = polish2(mem, jumps, code->RIGHT, wordp, TRUE);
                 if(wordp == 0)
                     {
                     return 0;
@@ -3753,8 +3714,8 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
             }
         case MATCH:
             {
-            wordp = polish2(mem, jumps, code->LEFT, wordp);
-            wordp = polish2(mem, jumps, code->RIGHT, wordp);
+            wordp = polish2(mem, jumps, code->LEFT, wordp, FALSE);
+            wordp = polish2(mem, jumps, code->RIGHT, wordp, FALSE);
             if(wordp == 0)
                 {
                 mustpop = enopop;
@@ -3871,7 +3832,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
             forthword* saveword = wordp;
             forthword* loop = wordp + sizeof(jumpblock) / sizeof(forthword);
             jumpblock* j5 = (jumpblock*)wordp;
-            wordp = polish2(mem, j5, code->RIGHT, loop);
+            wordp = polish2(mem, j5, code->RIGHT, loop, FALSE);
             if(wordp == 0)
                 {
                 mustpop = enopop;
@@ -4091,7 +4052,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                         }
                     }
                 }
-            wordp = polish2(mem, jumps, code->RIGHT, wordp);
+            wordp = polish2(mem, jumps, code->RIGHT, wordp, FALSE);
             if(wordp == 0)
                 return 0; /* Something wrong happened. */
             wordp->offset = 0;
@@ -4103,7 +4064,8 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                         {
                         wordp->action = ep->action;
                         if(wordp->action == EIdx)
-                            if(!setArity(wordp, code, ep->arity)) return 0;
+                            if(!setArity(wordp, code, ep->arity))
+                                return 0;
                         mustpop = epop;
                         return ++wordp;
                         }
@@ -4117,7 +4079,8 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                         {
                         wordp->action = ep->action;
                         if(wordp->action == QIdx)
-                            if(!setArity(wordp, code, ep->arity)) return 0;
+                            if(!setArity(wordp, code, ep->arity))
+                                return 0;
                         mustpop = epop;
                         return ++wordp;
                         }
@@ -4170,8 +4133,8 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
             {
             if(is_op(code)) /* e.g. COMMA */
                 {
-                wordp = polish2(mem, jumps, code->LEFT, wordp);
-                wordp = polish2(mem, jumps, code->RIGHT, wordp);
+                wordp = polish2(mem, jumps, code->LEFT, wordp, FALSE);
+                wordp = polish2(mem, jumps, code->RIGHT, wordp, FALSE);
                 mustpop = enopop;
                 return wordp;
                 }
@@ -4257,7 +4220,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                             */
                             }
                         }
-                    else if(code->u.sobj == '\0')
+                    else if(/*code->u.sobj == '\0' || */ commentsAllowed)
                         {
                         return wordp;
                         }
@@ -4452,7 +4415,7 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
         forthword* lastword;
         forthMemory* forthstuff;
         int length;
-        length = polish1(code) + sizeof(jumpblock) / sizeof(forthword) + 1; /* 1 for TheEnd */
+        length = polish1(code, FALSE) + sizeof(jumpblock) / sizeof(forthword) + 1; /* 1 for TheEnd */
         if(length < 1)
             {
             fprintf(stderr, "polish1 returns length < 0 [%d]\n", length);
@@ -4553,7 +4516,7 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
 
                 mustpop = enopop;
 
-                lastword = polish2(forthstuff, j5, code, forthstuff->word + sizeof(jumpblock) / sizeof(forthword));
+                lastword = polish2(forthstuff, j5, code, forthstuff->word + sizeof(jumpblock) / sizeof(forthword), FALSE);
                 if(lastword != 0)
                     {
                     unsigned int theend = (unsigned int)(lastword - forthstuff->word);
