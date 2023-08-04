@@ -8,7 +8,7 @@ help=
   . inbltmenu,alctxt,aligntxt,asctxt,utftxt,chrtxt,charset
   . chutxt,dbgtxt,dentxt,escappattxt,lambda,morexmlps,jsntxt
   . divtxt,fretxt,funtxt1,funtxt3,beztxt,moptxt,lettxt,ugctxt
-  . lsttxt1,difftxt,pattxt2,methodtxt,predvartxt
+  . lsttxt1,difftxt,pattxt2,methodtxt,predvartxt,calctxt
   . lsttxt2,lsttxt3,memtxt,modtxt,peetxt,poktxt,Bracmat-name
   . puttxt1,puttxt2,puttxt3,rentxt,revtxt,seltxt,simtxt,strtxt
   . switxt,systxt,tbltxt,filtxt,flgtxt,glftxt,predefmenu,flttxt
@@ -20,6 +20,7 @@ help=
   . rewriting,jsntranstxt,transformtxt,MLencodingtxt,nestMLtxt
   . gentlepat recurpat closetxt filesettxt interaction usecases
   . fixdtxt modetxt positiontxt readtxt varitxt writetxt nonlinpat
+  . CalcFunctxt,Calculatetxt,CalcTrctxt,CalcPrinttxt,CalcExporttxt,CalcNewtxt,CalcDietxt
   )
 .   ( lusmenu
     =   M
@@ -37,8 +38,9 @@ help=
 10 data structures
 11 objects
 12 hash tables
-13 character set
-14 predefined variables
+13 floating point calculations
+14 character set
+15 predefined variables
 html transform this file to HTML
 htmltable transform this file to HTML, put excercises in tables, not blockquotes
 save reformat and save this file
@@ -56,8 +58,9 @@ lex lexical analysis of help file"
           (10,contxt)
           (11,objecttxt methodtxt)
           (12,hashtxt)
-          (13,charset utftxt chutxt lowtxt upptxt)
-          (14,predvartxt)
+          (13,calctxt)
+          (14,charset utftxt chutxt lowtxt upptxt)
+          (15,predvartxt)
           (html,)
           (htmltable,)
           (lex,)
@@ -108,17 +111,11 @@ lex lexical analysis of help file"
 2  pattern matching
 3  prefixes combined with expressions
 4  unary operators"
-      ,   (1,unstuurtxt)
-          (2,unpattxt)
-          (3,unpattxt)
-          (4,unops)
+      , (1,unstuurtxt) (2,unpattxt) (3,unpattxt) (4,unops)
     )
   & ( varsmenu
-    =   M
-      , Symbols
-      , "1  literals
-2  variables"
-      , (1,varmattxt) (2,varprotxt)
+    = M,Symbols,"1  literals
+2  variables",(1,varmattxt) (2,varprotxt)
     )
   & ( progsmenu
     =   M
@@ -291,70 +288,76 @@ This chapter may give you an impression of what Bracmat can do for you.
     =   T
       , "What is Bracmat?"
       , "Bracmat is a computer programming language designed for analysis and
-manipulation of complex data, be it evaluation of algebraic expressions,
-parsing natural language, validation of HTML or automatic chaining
-of multifaceted webservices into a workflow. In several projects, Bracmat has
-been combined with other programming languages to take care of high level
-activities that otherwise would be time-consuming to implement.
+manipulation of complex data, be it evaluation of algebraic
+expressions, parsing natural language, validation of HTML or automatic
+chaining of multifaceted webservices into a workflow. In several
+projects, Bracmat has been combined with other programming languages
+to take care of high level activities that otherwise would be
+time-consuming to implement.
 
-Bracmat was originally developed as a calculator for symbolic algebra. Like a
-table calculator, Bracmat ran a Read Eval Print Loop (REPL). It added,
-multiplied, took powers and logarithms and differentiated algebraic
-expressions.
+Bracmat was originally developed as a calculator for symbolic
+algebra. Like a table calculator, Bracmat ran a Read Eval Print
+Loop (REPL). It added, multiplied, took powers and logarithms and
+differentiated algebraic expressions.
 
-Later additions transformed the calculator into a programming language.
-The subject matter, algebraic expressions, had often to be dismantled
-and recombined differently, e.g. to find terms with like factors
-and recombining these into a group of new terms with a common factor.
-What was needed was advanced pattern matching with a notation that requires
-little more than your intuition to understand, because the algebraic
-transformations to be implemented were already hard enough to grasp.
-Envisioning that pattern matching also would be useful in natural language
-related problems, the subject domain was extended to cover almost any kind of
-data.
+Later additions transformed the calculator into a programming
+language. The subject matter, algebraic expressions, had often to be
+dismantled and recombined differently, e.g. to find terms
+with like factors and recombining these into a group of new terms with
+a common factor. What was needed was advanced pattern matching with a
+notation that requires little more than your intuition to understand,
+because the algebraic transformations to be implemented were already
+hard enough to grasp. Envisioning that pattern matching also would be
+useful in natural language related problems, the subject domain
+was extended to cover almost any kind of data.
 
-True to its roots, Bracmat still has an important feature in common with
-calculators: as long as the input data are simple enough, the user does (and
-can) not specify how these data have to be processed. Calculators handle basic
-calculations in a predictable, unchangeable way, e.g. 4+7 will always result in
-|_11_|, and not in, say, |_10_| or |_23-12_|. That is because the manufacturer
-had good reasons to think that |_11_| is what the user expects and nothing
-else.
+True to its roots, Bracmat still has an important feature in common
+with calculators: as long as the input data are simple enough, the
+user does (and can) not specify how these data have to be
+processed. Calculators handle basic calculations in a predictable,
+unchangeable way, e.g. 4+7 will always result in |_11_|,
+and not in, say, |_10_| or |_23-12_|. That is because the
+manufacturer had good reasons to think that |_11_| is what the user
+expects and nothing else.
 
-In the same way, Bracmat handles basic \"calculations\" with a much wider
-variety of data: rational numbers, symbols, words and collections thereof. For
-example, a+b+a becomes 2*a+b and not, say, |_x.a_| or |_b+2*a_|. Again, Bracmat
-takes decisions that you can't easily circumvent. However, the more complex the
-data are, the better are the chances that not all results, although defensible,
-have an appearance that suits you. It is here that programming comes in:
-Bracmat leaves certain kinds of data unchanged, but opens the possibility to
-dissect data, to perform calculations on the parts, and to assemble an answer
-from the resulting subanswers.
+In the same way, Bracmat handles basic \"calculations\" with a much
+wider variety of data: rational numbers, symbols, words and
+collections thereof. For example, a+b+a becomes 2*a+b
+and not, say, |_x.a_| or |_b+2*a_|. Again, Bracmat takes
+decisions that you can't easily circumvent. However, the more complex
+the data are, the better are the chances that not all results,
+although defensible, have an appearance that suits you. It is here
+that programming comes in: Bracmat leaves certain kinds of data
+unchanged, but opens the possibility to dissect data, to perform
+calculations on the parts, and to assemble an answer from the
+resulting subanswers.
 
-Bracmat makes no distinction between data and instructions. There are only
-expressions. Some expressions stay the same upon evaluation, other expressions
-change radically, and then there are expressions that contain some parts that
-are stable upon evaluation and other parts that change. The advantage of having
-the same syntax for data and instructions is not that you
-could deconstruct and recombine program code (generally not a good idea), but
-that you can embed code in a data structure that adds more data upon
-evaluation. Such code can function as growing tips in list or tree structures,
-as variable fields in a standard letter, or as places of particular interest
-inside a pattern, to name some examples.
+Bracmat makes no distinction between data and instructions. There
+are only expressions. Some expressions stay the same upon evaluation,
+other expressions change radically, and then there are expressions
+that contain some parts that are stable upon evaluation and other
+parts that change. The advantage of having the same syntax for data
+and instructions is not that you could deconstruct
+and recombine program code (generally not a good idea), but that you
+can embed code in a data structure that adds more data upon
+evaluation. Such code can function as growing tips in list or tree
+structures, as variable fields in a standard letter, or as places of
+particular interest inside a pattern, to name some examples.
 
-Another advantage of not having to distinguish between code and data is that
-reading a program and reading data from a file are no different. And saving a
-program is the same as saving data to a file. Which brings us to yet another
-enormous advantage: a Bracmat expression is virtually undecipherable if it
-doesn't obey the canonical layout rules, which are ... canonical. Whereas
-layout doesn't matter to Bracmat, it does to you, and therefore Bracmat, when
-asked to save an expression to file, imposes the canonical lay-out rules on
-the output, unless you insist on wanting to have it all in one line, no
-superfluous spaces allowed.
+Another advantage of not having to distinguish between code and data
+is that reading a program and reading data from a file are no
+different. And saving a program is the same as saving data to a
+file. Which brings us to yet another enormous advantage: a Bracmat
+expression is virtually undecipherable if it doesn't obey the
+canonical layout rules, which are ... canonical. Whereas layout
+doesn't matter to Bracmat, it does to you, and therefore Bracmat, when
+asked to save an expression to file, imposes the canonical layout
+rules on the output, unless you insist on wanting to have it all in
+one line, no superfluous spaces allowed.
 
 Bracmat expressions have a simple syntax: a mix of parentheses, binary
-operators, and operands along with prefixes preceding those operands or parentheses.
-When programmability was added to Bracmat, no new syntax was invented. To the
+operators, and operands along with prefixes preceding those operands
+or parentheses. When programmability was added to Bracmat, no new syntax was invented. To the
 operators for addition, multiplication, etc. were added only a few prefixes and binary 
 operators dedicated to assignment, function calling, pattern matching and program flow."
     )
@@ -544,8 +547,8 @@ must be separated by semicolons.
 
 You may freely surround binary operators with whitespace characters (e.g.
 space, tab, line feed). Take care not to put spaces between the characters
-that make up a fraction or negative number, |_- 1234 / 5678_| is different from
- |_-1234/5678_|."
+that make up a fraction or negative number, |_- 1234 / 5678_| is different
+from |_-1234/5678_|."
           "Bracmat can open and read a text file and execute the instructions as they are
 read. After the last instruction has been executed, the file is closed. For
 example, the program that produces the text you are reading just now, is read
@@ -1212,7 +1215,6 @@ The characters 'A'-'Z' are converted to 'a'-'z'. Other characters are handled
 as UTF-8 encoded Unicode characters, but default to ISO 8859 (Latin 1) if
 the argument is not valid UTF-8."
     )
-
   & ( ugctxt
     =   T
       , "ugc$(<atom-or-nil>)"
@@ -1365,7 +1367,7 @@ of the matrix at hand, and may even be indifferent to the number of indices."
     )
   & ( binovztxt
     =   M
-      , "=.,|&: +*^\\L\\D'$_"
+      , "= . , | & : whitespace + * ^ \\L \\D ' $ _"
       , "These are the 15 binary Bracmat operators. The higher in the list, the lower
 in the order of operations. Use parentheses to overrule the ordering of 
 precedence and force an operator to a higher position in the order of
@@ -1840,9 +1842,7 @@ but defaults to ASCII and the upper 128 characters in the ISO8859-1 (Latin 1)
 character set if the characters are not UTF-8 encoded."
     )
   & ( casesensitivetxt
-    =   T
-      , "(myhash..casesensitive)$"
-      , "Make all key access case sensitive. This the default."
+    = T,"(myhash..casesensitive)$","Make all key access case sensitive. This the default."
     )
   & ( foralltxt
     =   T
@@ -1872,6 +1872,114 @@ Example:
     )
 "
     )
+  & ( calctxt
+    =   M
+      , "Floating point calculations"
+      , "Bracmat is mainly meant for symbolic processing. Floating point computations do not
+fit well in this environment. However, sometimes you may want to be able to do
+floating point calculations, for example when you want to create vector 
+drawing of a graph. Whereas the graph is purely symbolic in nature, the drawing
+requires coordinates. Moreover, to compute the coordinates you may want to use
+'gravity', 'Coulomb forces' or 'elastic forces'.
+
+A calculation object contains Bracmat code, but because it is inside this
+object it behaves very different from what we are used to:
+
+* When a calculation object is created with |_new$_|, the passed Bracmat code
+  is parsed and compiled to a bytecode. Bytecode can be listed using the
+  |_print_| method. Compilation is fast, as is executing the resulting 
+  bytecode.  
+* There is no pattern matching. The |_:_| operator is only for assignment and
+  for simple comparisons of two numbers.
+* There are two data types: floating point numbers (|_s_| for 'scalar')
+  and arrays (|_a_|) of floating point numbers, which can have any rank.
+* You need to declare the parameters that your home-brewn function needs.
+* But you should not declare the variables that are not parameters.
+* All values are C-doubles. There are no strings and no rational or integer
+  numbers.
+* The semantics of the |_|_| operator is very similar to that of |_if_|
+  in other languages in that it does not return a value.
+* Variables have function scope and are not visible in nested functions.
+
+You create a calculation object as follows
+
+{?} new$(calculation,(=.1+2)):?myCalculation
+{?} (myCalculation..calculate)$
+{!} 1.3940221304312031E+01
+
+Or, with parameters:
+
+{?} new$(calculation,(=(s.a) (s.b).pow$(1/3,!a^3+!b^3))):?myCalculation
+{?} (myCalculation..calculate)$(13,8)
+{!} 1.3940221304312031E+01
+
+Hereafter, |_myCalculation_| refers to a hash table and is treated in the same way as
+a user defined object.
+
+The following methods are defined for calculation objects:
+1 |_calculate_|
+    Perform a floating point calculation.
+2 |_trc_|
+    Perform a floating point calculation, showing the details of each step.
+3 |_print_|
+    Show a listing of the instructions contained in the calculation object. 
+4 |_export_|
+    Export the value of a variable contained in a calculation object.
+5 |_New_|
+    Creates a calculation object, cannot be called programmatically
+6 |_Die_|
+    Cleans up a calculation object, cannot be called programmatically
+7 Listing of built-in functions and function-like constructs in calculation objects.
+"
+      ,   (1,Calculatetxt)
+          (2,CalcTrctxt)
+          (3,CalcPrinttxt)
+          (4,CalcExporttxt)
+          (5,CalcNewtxt)
+          (6,CalcDietxt)
+          (7,CalcFunctxt)
+    )
+  & ( CalcFunctxt
+    =   T
+      , "Listing of built-in functions and function-like constructs in calculation objects"
+      , "Bracmat maps all floating point functions that are available as standard C functions to Bracmat functions.
+For a description, see the documentation of the math.h C header file.
+
+In addition:
+
+|_sign$<number>_| returns -1, 0 or 1, depending on whether the number is negative, zero or positive.
+
+|_cube$<number>_| returns the third power of the number.
+
+|_sqr$<number>_| returns the second power of the number.
+
+|_subtract$(<number1>,<number2>)_| returns number1-number2. (Remember that Bracmat has no operator for subtraction!) 
+
+|_divide$(<number1>,<number2>)_| returns number1/number2. (Remember that Bracmat has no operator for division!) 
+
+|_out$<number>_| writes a number to the console.
+
+|_outln$<number>_| writes a number, followed by a new line to the console.
+
+|_tbl$(<name>,<whole number>, ...)_| creates an array with the first argument as name. Each whole number adds a (sub)range. The number of whole numbers defines the rank of the array. The array is destroyed when the calculation object is destroyed or when another array by the same name is created. 
+
+|_rank$<name>_| returns the rank of the array named <name>.
+
+|_range$(<name>,<whole number>)_| returns a range of the array named <name>. The number must be non-negative and smaller than the rank of the array.
+
+|_idx$(<name>,<whole number>, ...)_| Sets the pointer of array <name> to the indicated index (or indices, if the rank is > 1). 
+
+|_whl'(<code>)_| Implements a loop. 
+"
+    )
+  & (Calculatetxt=T,"(myCalculation..calculate)$<Parameters>",TBD)
+  & (CalcTrctxt=T,"(myCalculation..trc)$<Parameters>",TBD)
+  & (CalcPrinttxt=T,"(myCalculation..print)$",TBD)
+  & ( CalcExporttxt
+    = T,"(myCalculation..export)$(<format>,<name of variable of calculation object>)",TBD
+    )
+  & (CalcNewtxt=T,"Program flow",TBD)
+  & (CalcDietxt=T,"Program flow",TBD)
   & ( prostutxt1
     =   T
       , "Program flow"
@@ -2132,7 +2240,7 @@ RHS expression of a $ operator with empty LHS is headed by the |___| operator,
 then the |___| operator is evaluated to its current value, analogous to what
 happens if the RHS were the name of a variable. So we add an extra $ operator.
 
-When the |___| operator is evaluated to its current  value, the LHS and the RHS are
+When the |___| operator is evaluated to its current value, the LHS and the RHS are
 also evaluated.
 
 {?} a^b:?_?
@@ -2947,9 +3055,9 @@ The third argument denotes the number of terms, including vanishing terms.
     )
   & ( nestMLtxt
     =   T
-      , 
+      
       ,   "nestML$<internal-expression-of-XML-or-HTML-data>"
-          "After reading XML or HTML data, all text and tags are in a flat list.
+      ,    "After reading XML or HTML data, all text and tags are in a flat list.
 The function |_nestML_| attempts to match opening and closing tags and creates
 a tree structure. This works best for XML data"
     )
@@ -3738,7 +3846,7 @@ separated by the space operator.
   & ( moptxt
     =   T
       , "mop$(<fnc>.<expression>.(=<non-leaf expression>))"
-      ,   "mop$ traverses a list-like expression element by element and outputs a space
+      , "mop$ traverses a list-like expression element by element and outputs a space
 operator separated list. For that to work, mop$ needs an extra argument that
 tells which operator to use. That argument is always headed by |_=_|, the
 right hand side of which is a non-leaf expression. The top operator of that
@@ -4396,10 +4504,7 @@ This returns the current version number and build date of Bracmat.
                             & put$!arg
                             & get'
                       )
-                    &   whl
-                      ' ( @(!t:?s \n ?t)
-                        & wr$(detag$!s)
-                        )
+                    & whl'(@(!t:?s \n ?t)&wr$(detag$!s))
                     & wr$(detag$!t)
                     & putout$!arg
                   | 
@@ -4411,9 +4516,7 @@ This returns the current version number and build date of Bracmat.
                 & !pag
               )
             & ( tit
-              =   put$\n\n
-                & out$!titel
-                & streep$!titel
+              = put$\n\n&out$!titel&streep$!titel
               )
             & ( experiment
               =     I:?expr
@@ -4428,8 +4531,7 @@ This returns the current version number and build date of Bracmat.
                         )
                     |     put
                         $ (   '$expr:(=?_?)
-                            &   str$('$_)
-                              : ("=$"|"='")
+                            & str$('$_):("=$"|"='")
                             & '$expr
                           | !expr
                           )
@@ -4442,9 +4544,7 @@ This returns the current version number and build date of Bracmat.
             &   whl
               ' ( !arg:%@?ptxt ?arg
                 &   !!ptxt
-                  : (   (T,?titel,?txt)
-                      & !tit
-                      & ~!pag
+                  : ( (T,?titel,?txt)&!tit&~!pag
                     |   (M,?titel,?men,?sel)
                       &   whl
                         ' ( !tit
@@ -4495,8 +4595,7 @@ Topic:")
           & ( codes
             =   e a cds code codev A K L Z
               .   ( code
-                  =     a e z ZA AA
-                      , az zz S seps P n A
+                  =   a e z ZA AA,az zz S seps P n A
                     .     @( str$!arg
                            :   ?a
                                %@( ( "$"
@@ -4578,7 +4677,7 @@ Topic:")
                                    & (!seps:% ?seps|)
                                    & (   !seps:
                                        & !az !S:?az
-                                     | !seps:%?S ?seps&~
+                                     | !seps:%?S ?&~
                                      )
                                    )
                                | :?zz
@@ -4613,7 +4712,7 @@ Topic:")
                                      )
                                    ( ?zz
                                    & ( !seps:
-                                     | !seps:%?S ?seps&~
+                                     | !seps:%?S ?&~
                                      )
                                    )
                                | :?zz
@@ -4626,8 +4725,7 @@ Topic:")
                   )
                 & code$!arg:?cds
                 &   whl
-                  ' (   !cds
-                      : ?A (code.?,?K) (code.?,?L) ?Z
+                  ' ( !cds:?A (code.?,?K) (code.?,?L) ?Z
                     & !A (code.,str$(!K !L)) !Z:?cds
                     )
                 &   map
@@ -4654,9 +4752,7 @@ Topic:")
                 & ( doamp
                   =   x y
                     .     @(!arg:?x ";" ?y)
-                        & (   @( get$(str$("&" !x ";"),HT,ML,MEM)
-                               : "&" !x ";"
-                               )
+                        & (   @(get$(str$("&" !x ";"),HT,ML,MEM):"&" !x ";")
                             & amp
                           | !y:?arg&!x
                           )
@@ -4714,8 +4810,7 @@ Topic:")
                   )
                 & ( entn
                   =   A
-                    .     !arg:%?A ?arg
-                        & toML$!A entn$!arg
+                    .   !arg:%?A ?arg&toML$!A entn$!arg
                       | !arg
                   )
                 & ( atts
@@ -4744,46 +4839,27 @@ Topic:")
                                     | 
                                     )
                                   & (   !C:
-                                      &   fil
-                                        $ ( 
-                                          , 
-                                          , 
-                                          , str$("<" !A atts$!att " />")
-                                          )
-                                    |     fil
-                                        $ ( 
-                                          , 
-                                          , 
-                                          , str$("<" !A atts$!att ">")
-                                          )
+                                      & fil$(,,,str$("<" !A atts$!att " />"))
+                                    |   fil$(,,,str$("<" !A atts$!att ">"))
                                       & write$!C
                                       & fil$(,,,str$("</" !A ">"))
                                     )
                                 |   !A
                                   : (   
                                       & !B:(?B.)
-                                      &   fil
-                                        $ (,,,str$("</" ent$!B ">"))
+                                      & fil$(,,,str$("</" ent$!B ">"))
                                     |   "!"
                                       & fil$(,,,str$("<!" !B ">"))
                                     |   "!--"
-                                      &   fil
-                                        $ (,,,str$("<!--" !B "-->"))
+                                      & fil$(,,,str$("<!--" !B "-->"))
                                     |   "?"
                                       & fil$(,,,str$("<?" !B "?>"))
                                     |   "![CDATA["
-                                      &   fil
-                                        $ (,,,str$("<![CDATA[" !B "]]>"))
+                                      & fil$(,,,str$("<![CDATA[" !B "]]>"))
                                     |   "!DOCTYPE"
-                                      &   fil
-                                        $ (,,,str$("<!DOCTYPE" !B ">"))
+                                      & fil$(,,,str$("<!DOCTYPE" !B ">"))
                                     |   ?
-                                      &   fil
-                                        $ ( 
-                                          , 
-                                          , 
-                                          , str$("<" !A atts$!B ">")
-                                          )
+                                      & fil$(,,,str$("<" !A atts$!B ">"))
                                     )
                                 )
                             | fil$(,,,str$(entn$!car))
@@ -4836,8 +4912,7 @@ Topic:")
                             . back
                             .   (span.(class.arrow),entCP$"&lArr;")
                                 ( a
-                                .     (href."#" !backtoref)
-                                      (style."line-height:12pt")
+                                .   (href."#" !backtoref) (style."line-height:12pt")
                                   ,   !!backtoref:(?,?titl,?)
                                     & inline1$!titl
                                 )
@@ -4848,12 +4923,9 @@ Topic:")
                           &   addContent2paragraphs
                             $ ( !ptxt
                               . more
-                              .   ( span
-                                  . (class.arrow),entCP$"&rArr;"
-                                  )
+                              .   (span.(class.arrow),entCP$"&rArr;")
                                   ( a
-                                  .     (href."#" !next)
-                                        (style."line-height:12pt")
+                                  .   (href."#" !next) (style."line-height:12pt")
                                     ,   !!next:(?,?titl,?)
                                       & inline1$!titl
                                   )
@@ -4871,9 +4943,7 @@ Topic:")
                                 & (   !f:? !content ?
                                     & !paragraphs
                                   |   !a
-                                      ( !par
-                                      . !e (!section.!f !content) !g
-                                      )
+                                      (!par.!e (!section.!f !content) !g)
                                       !c
                                   )
                               | !a (!par.!b (!section.!content)) !c
@@ -4906,8 +4976,7 @@ Topic:")
                                ?b
                            )
                         & "<expression> : ?<variable>"
-                        &   asCode2$("<" indented2$!id ">")
-                            asCode2$(indented2$!b)
+                        & asCode2$("<" indented2$!id ">") asCode2$(indented2$!b)
                       | inline1$!arg
                   )
                 & ( subul
@@ -4918,9 +4987,7 @@ Topic:")
                           )
                         &   !a
                             (   @( !c
-                                 :   ?d
-                                     \n
-                                     ((%@:~" ":~"*") ?:?e)
+                                 : ?d \n ((%@:~" ":~"*") ?:?e)
                                  )
                               &   (ul.,ul2$("  -"."  -" !b \n "  -" !d))
                                   chunk2$!e
@@ -4934,8 +5001,7 @@ Topic:")
                            :   #%?n
                                `%?s
                                ?t
-                               (   \n
-                                   ((=.!n+1)$() !s ?:?arg)
+                               ( \n ((=.!n+1)$() !s ?:?arg)
                                | :?arg
                                )
                            )
@@ -5023,13 +5089,10 @@ Topic:")
                         & !arg:?all
                         &   whl
                           ' ( @( !all
-                               :   " "
-                                   ?line
-                                   (\n ?all|:?all)
+                               : " " ?line (\n ?all|:?all)
                                )
                             & !lines !line:?lines
-                            &     (!ret:|!ret \n)
-                                  !line
+                            &   (!ret:|!ret \n) !line
                               : ?ret
                             )
                         & !all:
@@ -5067,19 +5130,13 @@ Topic:")
                            )
                          )
                       &     !dl
-                            ( dd
-                            . ,(!dds:|!dds \n) !dd
-                            )
+                            (dd.,(!dds:|!dds \n) !dd)
                         : ?dl
                       &     map
                           $ ( ( 
                               =   
                                 .     !arg:(dd.?,?arg)
-                                    & ( dd
-                                      .   
-                                        ,   blocklevel
-                                          $ (unindent$(str$!arg))
-                                      )
+                                    & (dd.,blocklevel$(unindent$(str$!arg)))
                                   | !arg
                               )
                             . !dl
@@ -5121,8 +5178,7 @@ Topic:")
                       & !arg
                   )
                 & ( commentOut
-                  =     lines comments code com edoc p A Z
-                      , nls bal
+                  =   lines comments code com edoc p A Z,nls bal
                     .   :?lines:?comments
                       & ( nls
                         =   
@@ -5145,19 +5201,13 @@ Topic:")
                                )
                             | ~( 
                                & @( !arg
-                                  : ( ? "{" ?
-                                    | !arg:? "}" ?
-                                    )
+                                  : (? "{" ?|!arg:? "}" ?)
                                   )
                                )
                         )
                       &   whl
                         ' ( @( !arg
-                             :   ?code
-                                 "{"
-                                 ?com
-                                 ("}"&bal$!com)
-                                 ?arg
+                             : ?code "{" ?com ("}"&bal$!com) ?arg
                              )
                           & (   !com:"?"
                               & str$(!code "{?}"):?code
@@ -5169,16 +5219,13 @@ Topic:")
                               & ( @(!edoc:? \n [?p ?)
                                 | @(!edoc:? [?p)
                                 )
-                              &   str$(!A \n trimn$(!Z.!p+1))
-                                : ?com
+                              & str$(!A \n trimn$(!Z.!p+1)):?com
                             | trimn$(!com.1):?com
                             )
                           & !comments nls$!code !com:?comments
                           & !lines !code nls$!com:?lines
                           )
-                      & ( str$(!lines !arg)
-                        . trim1$(str$(!comments nls$!arg))
-                        )
+                      & (str$(!lines !arg).trim1$(str$(!comments nls$!arg)))
                   )
                 & ( exinput
                   =   code comment
@@ -5191,11 +5238,13 @@ Topic:")
                 & ( pre
                   =   a b
                     .     @(!arg:"{?}" ?)
-                        & (   @(!arg:"{?}" ?a \n ("{!}" ?:?b))
+                        & (   @(!arg:"{?}" ?a \n  (?c "{!}" ?:?b))
+                        & (@(!c:~(? \n ?)))
                             & exinput$("{?}" !a) pre$!b
                           | exinput$!arg
                           )
-                      |   @(!arg:"{!}" ?)
+                      |   @(!arg:?c "{!}" ?)
+                        & (@(!c:~(? \n ?)))
                         & (   @(!arg:"{!}" ?a ("{?}" ?:?b))
                             &   (pre.(class.exoutput),"{!}" !a)
                                 pre$!b
@@ -5207,9 +5256,7 @@ Topic:")
                     .     @(!arg:?a \n1 `%?s ?b \n2 !s ?c)
                         &   break2$!a
                             (   @( !c
-                                 :   ?d
-                                     \n
-                                     ((%@:~" ":~#) ?:?ee)
+                                 : ?d \n ((%@:~" ":~#) ?:?ee)
                                  )
                               &   (ol.,ol2$(1 !s !b \n 2 !s !d))
                                   (p.,chunk2$!ee)
@@ -5222,42 +5269,38 @@ Topic:")
                           )
                         &   !a
                             (   @( !c
-                                 :   ?d
-                                     \n
-                                     ((%@:~" ":~"*") ?:?ee)
+                                 : ?d \n ((%@:~" ":~"*") ?:?ee)
                                  )
                               &   (ul.,ul2$("*"."*" !b \n "*" !d))
                                   chunk2$!ee
                             | (ul.,ul2$("*"."*" !b \n "*" !c))
                             )
                       |   @(!arg:"{?}" ?)
-                        & (   @(!arg:"{?}" ?a \n ("{!}" ?:?b))
+                        & (   @(!arg:"{?}" ?a \n (?c "{!}" ?:?b))
+                        & (@(!c:~(? \n ?)))
                             & (blockquote.,exinput$("{?}" !a) pre$!b)
                           | (blockquote.,exinput$!arg)
                           )
-                      |   @(!arg:"{!}" ?)
-                        & (   @(!arg:"{!}" ?a ("{?}" ?:?b))
+                      |   @(!arg:?c "{!}" ?)
+                        & @(!c:~(? \n ?))
+                        & (   @(!arg:?c "{!}" ?a ("{?}" ?:?b))
                             & ( blockquote
                               .   
-                                ,   (pre.(class.exoutput),"{!}" !a)
+                                ,   (pre.(class.exoutput),!c "{!}" !a)
                                     pre$!b
                               )
-                          | ( blockquote
-                            . ,(pre.(class.exoutput),!arg)
-                            )
+                          | (blockquote.,(pre.(class.exoutput),!arg))
                           )
                       | definitionList$!arg
                       |   @(!arg:?a "\n " ?b)
                         &   blocklevel$!a
                             (   @(!b:?b \n ?c)
-                              &   (blockquote.,(pre.,!b))
-                                  blocklevel$!c
+                              & (blockquote.,(pre.,!b)) blocklevel$!c
                             | (blockquote.,(pre.,!b))
                             )
                       |   @(!arg:" " ?b)
                         & (   @(!b:?b \n ?c)
-                            &   (blockquote.,(pre.,!b))
-                                blocklevel$!c
+                            & (blockquote.,(pre.,!b)) blocklevel$!c
                           | (blockquote.,(pre.,!b))
                           )
                       |   @( !arg
@@ -5273,9 +5316,7 @@ Topic:")
                                           & ( @( !f
                                                :   ?f
                                                    \n
-                                                   ( ( \n ?
-                                                     | ~(? \n ?)
-                                                     )
+                                                   ( (\n ?|~(? \n ?))
                                                    : ?g
                                                    )
                                                )
@@ -5312,17 +5353,12 @@ Topic:")
                     .   !arg:(?ptxt.?titel)
                       & put$\n\n
                       &   addContent2paragraphs
-                        $ ( !ptxt
-                          . titel
-                          . h1
-                          . ,(a.(name.!ptxt),inline1$!titel)
-                          )
+                        $ (!ptxt.titel.h1.,(a.(name.!ptxt),inline1$!titel))
                       & streep$!titel
                   )
                 & ( spaced
                   =   a
-                    .     !arg:%?a %?arg
-                        & !a " " spaced$!arg
+                    .   !arg:%?a %?arg&!a " " spaced$!arg
                       | !arg
                   )
                 & ( first
@@ -5345,9 +5381,7 @@ Topic:")
                       & ( ddlines
                         =   line
                           .     @(!arg:?line \n ?arg)
-                              &   inline1$!line
-                                  (br.,)
-                                  ddlines$!arg
+                              & inline1$!line (br.,) ddlines$!arg
                             | inline1$!arg
                         )
                       &     map
@@ -5356,15 +5390,13 @@ Topic:")
                                 .   !arg:(?antw,?keuze)
                                   & out$(listmenuitem !antw !keuze)
                                   & (   @( !men
-                                         :   (   !antw
-                                               & :?a
+                                         :   ( !antw&:?a
                                              | ?a \n !antw
                                              )
                                              " "
                                              ( ?tekst
                                              & ( !antw:#
-                                               |   str$(!antw " " !tekst)
-                                                 : ?tekst
+                                               | str$(!antw " " !tekst):?tekst
                                                )
                                              )
                                              ( ( \n (%@:~" ") ?
@@ -5435,8 +5467,7 @@ Topic:")
                           & ( !keuze:&out$NOKEUZE
                             |   !menutekst:%?menutitel ?menutekst
                               & out$(!titel !menutitel !keuze)
-                              &   writeHTML
-                                $ ((!titel.!ptxt).!menutitel.!keuze)
+                              & writeHTML$((!titel.!ptxt).!menutitel.!keuze)
                               & out$(DONE !titel !menutitel !keuze)
                             )
                           )
@@ -5453,16 +5484,12 @@ Topic:")
                       : (   (T,?titel,?txt)
                           & Tit$(!ptxt.!titel)
                           & pag2$(!ptxt.!txt)
-                          &   refs
-                            $ (!ptxt.!overviewtitref.!backtotitref.!arg)
+                          & refs$(!ptxt.!overviewtitref.!backtotitref.!arg)
                         |   (M,?titel,?men,?sel)
                           & Tit$(!ptxt.!titel)
-                          &   listmenu2$(!men.!sel)
-                            : (?txt.?menu.?menutekst)
-                          &   addContent2paragraphs
-                            $ (!ptxt.text.chunk2$!txt (dl.,!menu))
-                          &   refs
-                            $ (!ptxt.!overviewtitref.!backtotitref.!arg)
+                          & listmenu2$(!men.!sel):(?txt.?menu.?menutekst)
+                          & addContent2paragraphs$(!ptxt.text.chunk2$!txt (dl.,!menu))
+                          & refs$(!ptxt.!overviewtitref.!backtotitref.!arg)
                           & doMenuItems$(!sel.!menutekst)
                         )
                     & (!topictitel.!ptxt):?backtotitref
@@ -5501,13 +5528,10 @@ Topic:")
                                        : ?arg
                                        )
                                    )
-                                & @( rev$!m
-                                   : ?Z (%@?L:!lastchar) ?M
-                                   )
+                                & @(rev$!m:?Z (%@?L:!lastchar) ?M)
                                 & http rev$(str$(!L !M)):?m
                                 & str$(rev$!Z !arg):?arg
-                                &   !R !a (a.(href.!m),!m)
-                                  : ?R
+                                & !R !a (a.(href.!m),!m):?R
                                 )
                             & !R !arg
                           |   !arg:(?E.?A,?arg)
@@ -5527,8 +5551,7 @@ Topic:")
                           $ ( ( 
                               =   content
                                 .   !arg:(?.%?content)
-                                  &   map
-                                    $ ((=.anchors$!arg).!content)
+                                  & map$((=.anchors$!arg).!content)
                               )
                             . !parcontent
                             )
@@ -5543,8 +5566,7 @@ Topic:")
                   $ ( ( 
                       =   M e a
                         .     !arg:(?e.?a,?M)
-                            &   (!e.!a,removeEmpty$(!M.!es):?M)
-                              : ?arg
+                            & (!e.!a,removeEmpty$(!M.!es):?M):?arg
                             & (   !M:
                                 & !es:? !e ?
                                 & 
@@ -5598,9 +5620,7 @@ Topic:")
                 & 0:?Tits
                 &   whl
                   ' (   !body
-                      :   ?
-                          (?.,(a.(name.?nam),?tit))
-                          ?body
+                      : ? (?.,(a.(name.?nam),?tit)) ?body
                     & (!nam.!tit)+!Tits:?Tits
                     )
                 &   whl
@@ -5611,10 +5631,7 @@ Topic:")
                           &   whl
                             ' ( !L:? (dt.?,?b) ?L
                               & (   !b:(a.?h,?a)
-                                  &     ( unspace$(str$(flatten$!a))
-                                        . !h,!a
-                                        )
-                                      + !Anchors
+                                  &   (unspace$(str$(flatten$!a)).!h,!a)+!Anchors
                                     : ?Anchors
                                 |   !b:?a
                                   &     ( unspace$(str$(flatten$!a))
@@ -5634,16 +5651,11 @@ Topic:")
                   : ?lasttit
                   : ?lasth
                 &   whl
-                  ' (   !Anchors
-                      : #*(?thisdt.(href."#" ?h),?a)+?Anchors
+                  ' ( !Anchors:#*(?thisdt.(href."#" ?h),?a)+?Anchors
                     & !Tits:?+#*(!h.?tit)+?
                     & ( !tit:!lasttit
-                      |   :!lasttit
-                        & !tit:?lasttit
-                      |       !dts
-                              ( dd
-                              . ,(a.(href."#" !lasth),!lasttit)
-                              )
+                      | :!lasttit&!tit:?lasttit
+                      |     !dts (dd.,(a.(href."#" !lasth),!lasttit))
                           : ?dts
                         & !tit:?lasttit
                         & !h:?lasth
@@ -5653,8 +5665,7 @@ Topic:")
                         & !dts (dt.,!a):?dts
                       )
                     )
-                &   !dts (dd.,(a.(href."#" !h),!tit))
-                  : ?dts
+                & !dts (dd.,(a.(href."#" !h),!tit)):?dts
                 & (dl.,!dts)
             )
           & ( removeEmptyP
@@ -5671,8 +5682,7 @@ Topic:")
             )
           & ( removeBreaks
             =   A E x a z
-              .       !arg
-                    : ?A (?E.?x,?a (br.,) ?z) ?arg
+              .     !arg:?A (?E.?x,?a (br.,) ?z) ?arg
                   &   removeBr$!A
                       (!a:|(!E.!x,removeBreaks$!a))
                       ( !z:
@@ -5722,10 +5732,19 @@ Topic:")
                             (blockquote.?x,(pre.,?A))
                             (blockquote.!x,(pre.,?B))
                             ?z
-                      &     !a
-                            (blockquote.!x,(pre.,!A \n !B))
-                            !z
-                        : ?Z
+                      & !a (blockquote.!x,(pre.,!A \r\n !B)) !z:?Z
+                      )
+                  &   whl
+                    ' (   !Z
+                        :   ?a
+                            ( blockquote
+  . ,(pre.(class.?e),?)
+  :?A)
+  (br.,)
+  (br.,)
+  (blockquote.,(pre.(class.~!e),?):?B)
+                            ?z
+                      & !a (blockquote.,!A \n !B) !z:?Z
                       )
                   &   whl
                     ' (   !Z
@@ -5807,8 +5826,7 @@ Topic:")
                           & (!Anc1,!N):?anc
                           & :?Menutje
                           &   whl
-                            ' (   !Menus
-                                : ?A (?n.?l.? !anc ?) ?B
+                            ' ( !Menus:?A (?n.?l.? !anc ?) ?B
                               & !Menutje (!n.!l.!anc):?Menutje
                               & !A !B:?Menus
                               )
@@ -5842,10 +5860,7 @@ Topic:")
                                 .   !arg:(?T.?L.?t.?S)
                                   &   ( dt
                                       .   
-                                        , ( a
-                                          .   (href.str$("#" !T))
-                                            , inline1$!t
-                                          )
+                                        , (a.(href.str$("#" !T)),inline1$!t)
                                       )
                                       ( !S:
                                       | (dd.,todl$!S)
@@ -5864,17 +5879,14 @@ Topic:")
                 & ( trv
                   =   name lev tit subs sub
                     .   !arg:(?name.?lev.?tit.?subs)
-                      &   !menlist (1+!NN:?NN.!name.!lev)
-                        : ?menlist
-                      &   whl
-                        ' (!subs:%?sub ?subs&trv$!sub)
+                      & !menlist (1+!NN:?NN.!name.!lev):?menlist
+                      & whl'(!subs:%?sub ?subs&trv$!sub)
                   )
                 & trv$!arg
                 & !menlist
             )
           & ( reorderParagraphs
-            =     menlist paragraphs pars
-                , NN name lev A B C D
+            =   menlist paragraphs pars,NN name lev A B C D
               .   !arg:(?menlist.?pars)
                 &   map
                   $ ( ( 
@@ -5882,13 +5894,9 @@ Topic:")
                         .   !arg:(?NN.?name.?lev)
                           & out$(!NN !name)
                           &   !pars
-                            :   ?A
-                                (!name.(titel.?.?B) ?C)
-                                ?D
+                            : ?A (!name.(titel.?.?B) ?C) ?D
                           & !A !D:?pars
-                          & ( !name
-                            . (titel.str$(h !lev+1).!B) !C
-                            )
+                          & (!name.(titel.str$(h !lev+1).!B) !C)
                       )
                     . !menlist
                     )
@@ -5898,9 +5906,7 @@ Topic:")
               .   str
                 $ (     vap
                       $ ( ( 
-                          =   
-                            .   whl'@(!arg:?arg " ")
-                              & !arg \n
+                          = .whl'@(!arg:?arg " ")&!arg \n
                           )
                         . str$!arg
                         . \n
@@ -5928,8 +5934,7 @@ Topic:")
                   )
             )
           & ( convertBlockQuoteToTable
-            =     A Z prows ret rows row
-                , input comment output
+            =   A Z prows ret rows row,input comment output
               .   :?ret
                 &   whl
                   ' (   !arg
@@ -5954,26 +5959,17 @@ Topic:")
                       ' ( !prows
                         :   (   (pre.(class.exinput),?input)
                               &     !rows
-                                    ( !row:
-                                    | (tr.,!row)
-                                    )
+                                    (!row:|(tr.,!row))
                                 : ?rows
                               & :?comment:?output
-                              &   ( td
-                                  .   (class.exinput)
-                                    , !input chu$160
-                                  )
+                              &   (td.(class.exinput),!input chu$160)
                                 : ?row
                             |   (pre.(class.excomment),?comment)
                               &     !row
-                                    ( td
-                                    .   (class.excomment)
-                                      , !comment chu$160
-                                    )
+                                    (td.(class.excomment),!comment chu$160)
                                 : ?row
                             |   (pre.(class.exoutput),?output)
-                              &     !row
-                                    (td.(class.exoutput),!output)
+                              &   !row (td.(class.exoutput),!output)
                                 : ?row
                             )
                             ?prows
@@ -6017,9 +6013,7 @@ Topic:")
                                     &     !nback
                                           (span.(class.arrow),⇐)
                                           ( a
-                                          .     !aa
-                                                (href."#" !href)
-                                                !za
+                                          .   !aa (href."#" !href) !za
                                             , !txt
                                           )
                                           (br.,)
@@ -6034,9 +6028,7 @@ Topic:")
                                     : ?nmore
                                   )
                                 )
-                            & ( !name
-                              . !inh (more.!nmore) (back.!nback)
-                              )
+                            & (!name.!inh (more.!nmore) (back.!nback))
                           | !arg
                       )
                     . !arg
@@ -6051,13 +6043,12 @@ Topic:")
           & fixArrows$!paragraphs:?paragraphs
           & fputall$!paragraphs:?helpbody
           & removeEmpty$(!helpbody.code i):?helpbody
+& lst$(helpbody,helpbody,NEW,BIN)
           & compactBlockquotes$!helpbody:?helpbody
           & flattenBlockLevel$(p.,!helpbody):?helpbody
           & removeEmptyP$(removeBreaks$!helpbody):?helpbody
           & rightTrimPre$!helpbody:?helpbody
-          & ( !tablestuff:
-            | !tablestuff$!helpbody:?helpbody
-            )
+          & (!tablestuff:|!tablestuff$!helpbody:?helpbody)
           & createIndex$!helpbody:?Index
           &     ( "!DOCTYPE"
                 . " html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\""
@@ -6080,11 +6071,7 @@ dl a {text-decoration:none;}
                                   (content."text/html; charset=UTF-8")
                               , 
                             )
-                            ( meta
-                            .     (name.robots)
-                                  (content."all, index")
-                              , 
-                            )
+                            (meta.(name.robots) (content."all, index"),)
                             (title.,"Bracmat Help")
                       )
                       ( body
@@ -6097,60 +6084,23 @@ dl a {text-decoration:none;}
 accompanies Bracmat, using Bracmat to do the conversion."
                                 )
                             )
-                            ( h1
-                            .   
-                              , (a.(href.str$("#" INDEX)),INDEX)
-                            )
-                            ( h1
-                            .   
-                              , ( a
-                                .   (href.str$("#" CONTENTS))
-                                  , Contents
-                                )
-                            )
+                            (h1.,(a.(href.str$("#" INDEX)),INDEX))
+                            (h1.,(a.(href.str$("#" CONTENTS)),Contents))
                             (hr.,)
                             !helpbody
                             (h1.,(a.(name.INDEX),INDEX))
-                            ( p
-                            .   
-                              , ( i
-                                .   
-                                  , ( a
-                                    . (href."#" lusmenu),"main menu"
-                                    )
-                                )
-                            )
+                            (p.,(i.,(a.(href."#" lusmenu),"main menu")))
                             !Index
                             (h1.,(a.(name.CONTENTS),CONTENTS))
-                            ( p
-                            .   
-                              , ( i
-                                .   
-                                  , ( a
-                                    . (href."#" lusmenu),"main menu"
-                                    )
-                                )
-                            )
+                            (p.,(i.,(a.(href."#" lusmenu),"main menu")))
                             !Contents
-                            ( p
-                            .   
-                              , ( i
-                                .   
-                                  , ( a
-                                    . (href."#" lusmenu),"main menu"
-                                    )
-                                )
-                            )
+                            (p.,(i.,(a.(href."#" lusmenu),"main menu")))
                             ( p
                             .   
                               , ( a
-                                .   ( href
-                                    . "http://validator.w3.org/check?uri=referer"
-                                    )
+                                .   (href."http://validator.w3.org/check?uri=referer")
                                   , ( img
-                                    .     ( src
-                                          . "http://www.w3.org/Icons/valid-xhtml10-blue"
-                                          )
+                                    .     (src."http://www.w3.org/Icons/valid-xhtml10-blue")
                                           (alt."Valid XHTML 1.0 Strict")
                                           (height.31)
                                           (width.88)
@@ -6171,15 +6121,13 @@ accompanies Bracmat, using Bracmat to do the conversion."
 * If the {?} prompt appears without a menu, you can enter expressions that
   Bracmat will evaluate. Only pressing <return> pages through the information."
   &   verwerk$lusmenu
-    : (   html
-        & out$HTML
-        & doHTML$("bracmat.html".)
+    : ( html&out$HTML&doHTML$("bracmat.html".)
       |   htmltable
         & out$"HTML with excercises in tables"
         & doHTML$("bracmat.html".convertBlockQuoteToTable)
       | lex&get$"lex.bra"&lex$help
       |   save
-        & lst$(help,"help.bra",NEW)
+        & lst$(help,"help.bra",NEW,WYD)
         &   put
           $ ( "      
   help$()
