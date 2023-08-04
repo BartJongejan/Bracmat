@@ -1,0 +1,736 @@
+{html2tex.bra
+𝕌𝕋𝔽-𝟠
+
+Convert bracmat.html to help.tex}
+
+X=
+  (input="bracmat.html")
+  (output="help.tex")
+  ( texhead
+  = "\\documentclass[12pt]{article}
+
+\\usepackage[utf8]{inputenc}
+%\\usepackage{times}
+\\usepackage{fancyvrb}
+\\usepackage[x11names]{xcolor}
+\\usepackage[a4paper,margin=2.54cm]{geometry}
+\\usepackage{makeidx}
+\\usepackage{booktabs}
+\\usepackage[pdftex,colorlinks,linkcolor={blue!40!black},bookmarks]{hyperref}
+\\usepackage{tocloft}
+
+\\makeindex
+
+\\DefineVerbatimEnvironment
+  {ex}
+  {Verbatim}
+  {baselinestretch=1.2,formatcom=\\color{blue},vspace=0ex,xleftmargin=2em,commandchars=_\\[\\]}
+\\DefineVerbatimEnvironment
+  {v}
+  {Verbatim}
+  {baselinestretch=1.2,vspace=0ex,xleftmargin=2em,commandchars=_\\[\\]}
+\\definecolor{comcolor}{HTML}{2D4D0E}
+\\newcommand{\\com}[1]{\\textcolor{comcolor}{\\textrm{\\{ #1 \\}}}}
+\\newcommand{\\coma}[1]{\\textcolor{comcolor}{\\textrm{\\{ #1}}}
+\\newcommand{\\comb}[1]{\\textcolor{comcolor}{\\textrm{\\phantom{\\{ }#1}}}
+\\newcommand{\\comc}[1]{\\textcolor{comcolor}{\\textrm{\\phantom{\\{ }#1 \\}}}}
+\\newcommand{\\oct}{\\color{Firebrick3}}
+\\newcommand{\\dollar}{\\$}
+\\newcommand{\\bfun}[1]{\\subsubsection*{\\normalfont{#1}}}
+\\newcommand{\\bc}[1]{\\texttt{#1}}
+\\newcommand{\\bi}[1]{\\textit{#1}}
+\\renewcommand{\\d}{\\$}
+
+\\parindent=0cm
+\\parskip=1ex
+\\frenchspacing
+
+\\begin{document}
+
+\\title{Bracmat}
+\\author{Bart Jongejan}
+
+\\maketitle
+
+\\newpage
+
+\\tableofcontents
+
+\\newpage
+
+\\newcommand{\\caret}{\\char`\\^}
+
+"
+  )
+  ( texepilog
+  = "\\section{Acknowledgements}
+G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this document. He has meticulously tried out all examples and reported the inconsistencies that he found. He also noticed that a few subjects were nowhere described. Following his advice, I have added the missing sections and improved some existing sections. Gérard also corrected spelling errors and improved wording in some places. 
+
+\\printindex
+
+\\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
+"
+  )
+  ( doit
+  =   
+    .     nestML$(get$(!(its.input),HT ML))
+        : ?html
+      &   !html
+        :   ?
+            (html.?,? (body.?,?body) ?)
+            ?
+      & lst$(html,html,NEW)
+      &   !body
+        :   ?
+            (   ( h2
+                .   
+                  ,   (a.(name.intro),?Introduction)
+                      ?
+                )
+                ?
+            : ?body
+            )
+      & lst$(body,body,NEW)
+      & ( ldots
+        =   
+          .     !arg:?A "." "." "." ?arg
+              & !A "\\" ldots ldots$!arg
+            | !arg
+        )
+      & ( ldotss
+        =   
+          .     @(!arg:?A "..." ?arg)
+              & !A "\\" ldots ldotss$!arg
+            | !arg
+        )
+      & ( LD
+        =   A B
+          .     !arg:?A "\\" %@?B ?arg
+              & ldots$!A "\\char`\\\\" !B LD$!arg
+            | ldots$!arg
+        )
+      & ( bfun
+        =   
+          .   map
+            $ ( ( 
+                =   
+                  .     !arg:@
+                      & 2:?dollar
+                      &   "\\bc{"
+                            LD
+                          $ ( vap
+                            $ ( ( 
+                                =   
+                                  .     !arg:"$"
+                                      & 1:?dollar
+                                      & "\\$"
+                                    | !arg:"&"&"\\&"
+                                    | !arg:"%"&"\\%"
+                                    | !arg:"#"&"\\#"
+                                    |   !arg:"^"
+                                      & "\\caret{}"
+                                    |   !arg:"_"
+                                      & "\\char`\\_"
+                                    | !arg:"{"&"\\{"
+                                    | !arg:"}"&"\\}"
+                                    |   !dollar:1
+                                      & 2:?dollar
+                                      & ( !arg:" "
+                                        | "{}" !arg
+                                        )
+                                    | !arg
+                                )
+                              . trim$!arg
+                              )
+                            )
+                          "}"
+                    |   !arg:(i.,?value)
+                      & "\\bi{" !value "}"
+                    | out$(bfun !arg)&UUU8\n
+                )
+              . !arg
+              )
+        )
+      & ( indexed
+        =   
+          .   map
+            $ ( (=."\\index{" !arg "@\\bc{" !arg "}}\n")
+              . !arg
+              )
+        )
+      & ( neat
+        =   
+          .   trim
+            $ ( str
+              $ ( map
+                $ ( ( 
+                    =   
+                      .     !arg:@
+                          & (   @(!arg:? "$" ?)
+                              & bfun$!arg
+                            |   " "
+                                  ldotss
+                                $ ( str
+                                  $ ( vap
+                                    $ ((=.!arg).!arg.\r)
+                                    )
+                                  )
+                                " "
+                            )
+                        |   !arg:(code.,?arg)
+                          & add2index$!arg
+                          & bfun$!arg:?arg
+                        |   !arg:(i.,?arg)
+                          & "\\bi{" trim$!arg "}"
+                        |   !arg:(a.(href.?arg),?)
+                          & @(!arg:?http "//" ?arg)
+                          &   "\\allowbreak{}\\texttt{"
+                              !http
+                              "//"
+                                vap
+                              $ ( (=."/\\allowbreak{}" !arg)
+                                . !arg
+                                . "/"
+                                )
+                              "}"
+                        |   out$(!sub sectiontitle !arg)
+                          & UUU7
+                    )
+                  . !arg
+                  )
+                )
+              )
+        )
+      & ( dosectiontitle
+        =   sub code indices
+          .   !arg:(?sub.?arg)
+            & :?indices
+            &   (   !arg:@
+                  &   (   @(!arg:? "$" ?)
+                        & bfun$!arg
+                      | "\\" !sub "section{" trim$!arg "}"
+                      )
+                      \n\n
+                |   !arg:(code.,?code)
+                  & add2index$!code
+                  & "\\bfun{" bfun$!code "}"
+                | "\\" !sub "section{" neat$!arg "}"
+                )
+                \n
+                indexed$!indices
+        )
+      & ( toindex
+        =   
+          .       !arg
+                :   ( %@
+                    : @(?:?arg ("$("|"$"))
+                    )
+                    ?
+              & "\\index{" !arg "@\\bc{" !arg "}}\n"
+            | 
+        )
+      & ( getTxt
+        =   A
+          .     !arg:(?.?,?A) ?arg
+              & getTxt$!A getTxt$!arg
+            | !arg
+        )
+      & ( commandchars
+        =   macro begin end all has lack A Z
+          .   !arg:?txt
+            & getTxt$!txt:?txt
+            &     map
+                $ ( ( 
+                    =   
+                      .       !txt
+                            :   ?
+                                (%@:@(?:? !arg ?))
+                                ?
+                          & !arg
+                        | 
+                    )
+                  . "_" "[" "]"
+                  )
+              : ?has
+            &     vap
+                $ ( ( 
+                    =   
+                      .       !txt
+                            :   ?
+                                %@( @(?:? !arg ?)
+                                  & 
+                                  )
+                                ?
+                          & 
+                        | !arg
+                    )
+                  . "{}()<>/;`'{$^#~,.!?@%+-:\"|=\\*&"
+                  )
+              : ?lack
+            & ("_"."["."]"):(?macro.?begin.?end)
+            &     ("{"."}")
+                  ("["."]")
+                  ("("|")")
+                  ("(".")")
+              : ?pairs
+            & (   ( !has:~(? "[" ?)
+                  |     !lack
+                      :   ?A
+                          %@?begin
+                          %@?end
+                          ( ?Z
+                          & (   !pairs
+                              : ? (!begin.!end) ?
+                            | !pairs:~(? (?.!begin) ?)
+                            )
+                          )
+                    & !A !Z:?lack
+                    & (   !has:?A "]" ?Z
+                        & !A !Z:?has
+                      | 
+                      )
+                  | out$CANNOTBEGINEND&~
+                  )
+                & ( !has:~(? "]" ?)
+                  |   !lack
+                    :   ?
+                        %@?begin
+                        %@?end
+                        (   ?lack
+                          & !pairs:? (!begin.!end) ?
+                        | !pairs:~(? (?.!begin) ?)
+                        )
+                  )
+                & ( !has:~(? "_" ?)
+                  | !lack:?lack %@?macro
+                  )
+              | out$("CANNOT DEFINE ALTCOMMANDCHARS!" !txt)
+              )
+            & (!macro.!begin.!end)
+        )
+      & ( q
+        =   
+          .   ( @("{}\\[]":? !arg ?)&"\\"
+              | 
+              )
+              !arg
+        )
+      & 0:?count
+      & ( trim
+        =   
+          .   ( ltrim
+              =   
+                .   @(!arg:? ((%@:~" ") ?:?arg))
+                  & !arg
+              )
+            & (rtrim=.rev$(ltrim$(rev$!arg)))
+            & ltrim$(rtrim$!arg)
+        )
+      & (com=.!macro com !begin trim$!arg !end)
+      & ( coma
+        =   H
+          .   @(!arg:?H ((%@:~" ") ?:?arg))
+            & !H !macro coma !begin trim$!arg !end
+        )
+      & ( comb
+        =   H
+          .   @(!arg:?H ((%@:~" ") ?:?arg))
+            & !H !macro comb !begin trim$!arg !end
+        )
+      & ( comc
+        =   H
+          .   @(!arg:?H ((%@:~" ") ?:?arg))
+            & !H !macro comc !begin trim$!arg !end
+        )
+      & ( add2index
+        =   
+          .     !arg:@(?:?cand "$" ?) ?
+              & ( @( !cand
+                   :   ?
+                       ( "+"
+                       | "*"
+                       | "^"
+                       | "|"
+                       | "'"
+                       )
+                       ?
+                   )
+                |   trim$!cand:?cand
+                  & ( !indices:? !cand ?
+                    | !indices !cand:?indices
+                    )
+                )
+            | 
+        )
+      & ( delimiter
+        =   
+          .   @( "/;`'{$^#~,.!?@%+-:\"|=\\*&"
+               :   ?
+                   ( %@
+                   : [%( @(!arg:~(? !sjt ?))
+                       & !sjt:?arg
+                       )
+                   )
+                   ?
+               )
+            & !arg
+        )
+      & ( coding
+        =   
+          .   add2index$!arg
+            &   " "
+                  map
+                $ ( ( 
+                    =   
+                      .     !arg:@
+                          & (   @(!arg:? "..." ?)
+                              & "\\bfun{" bfun$!arg "}"
+                            |   delimiter$!arg:?dlmt
+                              & "\\verb" !dlmt trim$!arg !dlmt
+                            )
+                        |   !arg:(i.,?arg)
+                          & (   !arg:@
+                              & (   @(!arg:? "..." ?)
+                                  & bfun$!arg
+                                | "\\emph{" trim$!arg "}"
+                                )
+                            | CURSIVE
+                            )
+                    )
+                  . !arg
+                  )
+                " "
+        )
+      & ( codify
+        =   
+          .   map
+            $ ( ( 
+                =   
+                  .     !arg:@
+                      & vap$((=.!arg).!arg.\r)
+                    |   !arg:(code.,?arg)
+                      & coding$!arg
+                    |   !arg:(i.,?arg)
+                      & "\\emph{" !arg "}"
+                    |   !arg:(ol.,?arg)
+                      &   "\\begin{enumerate}"
+                          \n
+                          items$!arg
+                          "\\end{enumerate}"
+                    |   !arg:(ul.,?arg)
+                      &   "\\begin{itemize}"
+                          \n
+                          items$!arg
+                          "\\end{itemize}"
+                    |   !arg:(?element.,?arg)
+                      & ELEMENT !element
+                )
+              . !arg
+              )
+        )
+      & ( items
+        =   
+          .   map
+            $ ( ( 
+                =   
+                  .     !arg:(li.?,?arg)
+                      & "\\item " codify$!arg \n
+                    | 
+                )
+              . !arg
+              )
+        )
+      & ( defterm
+        =   
+          .   map
+            $ ( ( 
+                =   
+                  .     !arg:(dt.?,?arg)
+                      & (!arg:(a.?,?arg)|)
+                      & "\\item " codify$!arg
+                    |   !arg:(dd.?,?arg)
+                      & (!arg:(a.?,?arg)|)
+                      & "\\par\n  " codify$!arg \n
+                    | 
+                )
+              . !arg
+              )
+        )
+      & ( comments
+        =   fun A Z M oct
+          .   !arg:(?fun.?arg)
+            & :?oct
+            &     map
+                $ ( ( 
+                    =   
+                      .     !fun:(com|)
+                          & (   !arg:"   F"
+                              & !macro "oct   F"
+                            |   @(!arg:?A "..." ?Z)
+                              & !A !macro ldots !begin !end
+                            |   @( !arg
+                                 : ?A ("{" ?M "}") ?Z
+                                 )
+                              &   (   !M:"?"
+                                    & :?oct
+                                    & !A "{?}"
+                                  |   !M:"!"
+                                    & oct:?oct
+                                    & !A !macro oct "{!}"
+                                  |   ( !oct:
+                                      | !macro oct
+                                      )
+                                      !A
+                                      com$!M
+                                  )
+                                  (   !Z:~
+                                    &   comments$(com.!Z)
+                                      : (?fun.?Z)
+                                    & !Z
+                                  | \n
+                                  )
+                            |   @(!arg:?A "{" ?M)
+                              & comb:?fun
+                              &   ( !oct:
+                                  | !macro oct
+                                  )
+                                  !A
+                                  coma$!M
+                                  \n
+                            |   ( !oct:
+                                | !macro oct
+                                )
+                                !arg
+                                \n
+                            )
+                        |   !fun:comb
+                          & (   @(!arg:?M "}" ?Z)
+                              & com:?fun
+                              &   comc$!M
+                                  (   !Z:~
+                                    &   comments$(com.!Z)
+                                      : (?fun.?Z)
+                                    & !Z
+                                  | \n
+                                  )
+                            |   !arg:"   F"
+                              & !macro "oct   F"
+                            | comb$!arg \n
+                            )
+                        |   (!oct:|!macro oct)
+                            !arg
+                            \n
+                    )
+                  . vap$((=.!arg).!arg.\n)
+                  )
+              : ?arg
+            & (!fun.!arg)
+        )
+      &     !(its.texhead)
+              map
+            $ ( ( 
+                =   
+                  .   !arg:(h1.,?h1)&
+                    |   !arg:(h2.,?h2)
+                      & (     !h2
+                            : ( a
+                              . (name.?sectionname),?sectiontitle
+                              )
+                          & dosectiontitle$(.!sectiontitle)
+                        | out$(h2 !h2)&UUU5\n
+                        )
+                    |   !arg:(h3.,?h3)
+                      & (     !h3
+                            :   ?
+                                ( a
+                                .   (name.?subsectionname)
+                                  , ?subsectiontitle
+                                )
+                                ?
+                          & dosectiontitle$(sub.!subsectiontitle)
+                        | out$(h3 !h3)&UUU4\n
+                        )
+                    |   !arg:(h4.,?h4)
+                      & (     !h4
+                            : ( a
+                              .   (name|href.?bfunname)
+                                , ?code
+                              )
+                          &   dosectiontitle$(.!code)
+                              toindex$!code
+                        | lst$h4&UUU3\n
+                        )
+                    |   !arg:(h5.,?h5)
+                      & (     !h4
+                            : ( a
+                              .   (name|href.?bfunname)
+                                , ?code
+                              )
+                          &   dosectiontitle$(.!code)
+                              toindex$!code
+                        | out$(h5 !h5)&UUU2\n
+                        )
+                    |   !arg:(p.,?par)
+                      & (     !par
+                            :   (span.(class.arrow),?)
+                                (a.?,?)
+                          & 
+                        |     !par
+                            : (   ?
+                                  ( a
+                                  .     ?
+                                        ( href
+                                        . @( ?
+                                           : ( "#" ?
+                                             | ? "validator.w3.org" ?
+                                             )
+                                           )
+                                        )
+                                        ?
+                                    , ?
+                                  )
+                                  ?
+                              | ( i
+                                .   
+                                  ,   ?
+                                      ( a
+                                      .     ?
+                                            ( href
+                                            . @( ?
+                                               : ( "#" ?
+                                                 | ? "validator.w3.org" ?
+                                                 )
+                                               )
+                                            )
+                                            ?
+                                        , ?
+                                      )
+                                      ?
+                                )
+                              )
+                          & 
+                        | neat$!par \n\n
+                        )
+                    |   !arg:(blockquote.,?blockquote)
+                      &   commandchars$!blockquote
+                        : (?macro.?begin.?end)
+                      & com:?fun
+                      &   \n
+                          "\\begin{ex}"
+                          (     (!macro.!begin.!end)
+                              : ("_"."["."]")
+                            & 
+                          |   "[commandchars="
+                              q$!macro
+                              q$!begin
+                              q$!end
+                              "]"
+                          )
+                          \n
+                          ( 1+!count:?count:>1000
+                          |   map
+                            $ ( ( 
+                                =   chars
+                                  .   ( !arg:(pre.?,?arg)
+                                      | 
+                                      )
+                                    &     comments
+                                        $ ( !fun
+                                          .   str
+                                            $ ( vap
+                                              $ ( ( 
+                                                  =   
+                                                    .     !arg:\r
+                                                        & 
+                                                      |   !arg:λ
+                                                        &   !macro
+                                                            ensuremath
+                                                            !begin
+                                                            !macro
+                                                            lambda
+                                                            !end
+                                                      | !arg
+                                                  )
+                                                . !arg
+                                                )
+                                              )
+                                          )
+                                      : (?fun.?arg)
+                                    & !arg
+                                )
+                              . !blockquote
+                              )
+                          )
+                          "\\end{ex}\n"
+                    |   !arg:(\r\n|\n)
+                      & 
+                    |   !arg:(dl.,?itemlist)
+                      & (     !itemlist
+                            :   ?
+                                ( dt
+                                .   
+                                  ,   ?
+                                      (a.(~href.?),@)
+                                      ?
+                                )
+                                ?
+                          & UUU9
+                        |   "\\begin{quote}"
+                            \n
+                            "\\begin{description}"
+                            \n
+                            defterm$!itemlist
+                            "\\end{description}"
+                            \n
+                            "\\end{quote}"
+                            \n
+                        )
+                    |   !arg:(ol.,?itemlist)
+                      &   "\\begin{enumerate}"
+                          \n
+                          items$!itemlist
+                          "\\end{enumerate}"
+                    |   !arg:(ul.,?itemlist)
+                      &   "\\begin{itemize}"
+                          \n
+                          items$!itemlist
+                          "\\end{itemize}"
+                    |   out$(str$("[" !arg "]"))
+                      & str$("[" !arg "]UUU1\n")
+                )
+              . !body
+              )
+            !(its.texepilog)
+        : ?texstuff
+      & put$(str$!texstuff,!(its.output),NEW,BIN)
+      & out$(done !count)
+  )
+  (new=.~|(its.doit)$);
+
+r=
+  get'("html2tex.bra",TXT)
+& rmv$(str$(html2tex ".bak"))
+& ren$("html2tex.bra".str$(html2tex ".bak"))
+&   put
+  $ ( "{html2tex.bra
+𝕌𝕋𝔽-𝟠
+
+Convert bracmat.html to help.tex}
+
+"
+    , "html2tex.bra"
+    , NEW
+    , BIN
+    )
+& lst'(X,"html2tex.bra",APP)
+& put'(\n,"html2tex.bra",APP,BIN)
+& lst'(r,"html2tex.bra",APP)
+& put$(str$("\nnew'" X ";\n"),"html2tex.bra",APP,BIN)
+& ;
+
+new'X;
