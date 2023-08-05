@@ -484,7 +484,7 @@ for example) provided that the number (if it is an integer) or the numerator
 and the denominator (if the number is a fraction) are less than 2^32 (or 2^64,
 if Bracmat is compiled for a 64-bit platform).
 
-A pre-defined function, flt$, represents rational numbers in a
+A predefined function, flt$, represents rational numbers in a
 scientific floating point notation, but Bracmat cannot do calculations with
 these floating point numbers, unless you write a function to convert them back
 to rational numbers."
@@ -561,7 +561,7 @@ functions.
 
 The result of the last executed instruction in a file is written to the screen.
 For better control over screen output one may use the built-in function |_put_|,
-which writes from the current cursor position to the right, or the pre-defined
+which writes from the current cursor position to the right, or the predefined
 (but changeable) function |_out_|, which writes an extra line feed after its
 argument has been written to the screen.
 
@@ -582,11 +582,11 @@ held in memory, by the built-in |_lst_| function. This function takes several
 optional parameters that tell the system whether the instruction has to be
 written in a compact and barely readable form, or in a more pretty form, with
 lots of indentations. Comments are never written, as they are ignored at input
-time. As an example, you can write the definition of the pre-defined
+time. As an example, you can write the definition of the predefined
 factorisation function |_fct_| to a file |_factorise_| by entering the following
 instruction:
 
-{?} lst$(fct,factorise,NEW) {NEW:replace old file with same name}
+{?} lst$(fct,factorise,NEW) {NEW: replace old file with same name}
 {!} fct"
           "At first sight, a Bracmat program doesn't look like programs written in other
 languages. This may even become a permanent impression. So here are some
@@ -645,7 +645,7 @@ This is what happened. The left-hand side of the match operator |_:_| is the sub
 and the right-hand side of the match operator is the pattern.
 If the match operation is to succeed, the pattern must be like the
 subject. This is the case here, because the question marks behave like
-a wild card (like the Joker in some card plays) and the \"b\" is like
+a wild card (like the Joker in some card plays) and the \"b\" is similar to
 itself. By the way, when a pattern match operation succeeds, the resulting
 expression is the subject. The second example shows a pattern match operation
 that fails:
@@ -657,7 +657,7 @@ The \"q\" in the pattern is not like anything in the subject 20+a+b+c
 and thus the pattern match operation must fail.
 
 The following examples are the same as the introductory example, merely
-replacing the |_+_| operator by the |_*_| and the blank operators:
+replacing the |_+_| operator by the |_*_| and the whitespace operators:
 
 {?} 20*a*b*c:?*b*?  { Is there a factor \"b\" in the product (20*a*b*c) ?}
 {!} 20*a*b*c
@@ -669,7 +669,7 @@ replacing the |_+_| operator by the |_*_| and the blank operators:
 
 In the following example, the pattern applies to the characters in the string,
 rather than to nodes in a list of terms, factors or words. The |_@_| that is
-prefixed to the match expression, indicates to the match operator that this is
+prefixed to the match expression indicates to the match operator that this is
 not the normal match operation, but a string match operation. 
 
 {?} @(20abc:? b ?)  { Is there a character \"b\" in the string \"20abc\" ?}
@@ -677,7 +677,7 @@ not the normal match operation, but a string match operation.
     S   0,00 sec
 
 The patterns in string match operations are like patterns in normal match
-operations that have sentences (words separated by blank operators) as the
+operations that have sentences (words separated by whitespace operators) as the
 subject."
     )
   & ( rewriting
@@ -862,8 +862,8 @@ objects. (2) needs the additional remark that the reference counter for objects
 is made so big (counting to more than 1000000000000 before overflowing), that
 overflow is practically ruled out. Restriction (1) is still true, which means
 that the Bracmat programmer must take care of the deletion of some pathological
-structures (to be precise: circular structures, which were non-existent in the
-object-less Bracmat)."
+structures. (To be precise: circular structures, which were non-existent in the
+object-less Bracmat.)"
           "How can a programming language that is created for handling data structures
 do without named fields? If I only can create and destroy data, how can I let
 data evolve gradually, piecemeal? The answer lies in the well-developed
@@ -873,12 +873,12 @@ that you want to keep. The second step is building the new data from the
 retrieved parts, together with new pieces. Creation of complex data structures
 from parts is straightforward in Bracmat. For example, the variable Row is a
 list of three words. We want to change the second word into the word |_cat_|:
-{?} the dog runs:?Row     {initial creation}
-{?} !Row:%?one % %?three  {step 1: retrieval of 1st and 3rd word}
-{?} !one cat !three:?Row  {step 2: reconstruction}
+{?} the dog runs:?Row       {initial creation}
+{?} !Row:%?one % %?three    {step 1: retrieval of 1st and 3rd word}
+{?} !one cat !three:?Row    {step 2: reconstruction}
 {!} the cat runs
 This may seem complicated and cumbersome, but look at this:
-{?} 123:?a                  {create three variables a,b and c}
+{?} 123:?a                  {create three variables a, b and c}
 {?} a sentence:?b
 {?} (a.silly,data*structure):?c
 {?} (!a.!b.!c):(?b.?c.?a)   {permutation of 3 values in just 1 \"statement\"}"
@@ -971,13 +971,13 @@ solved in numerous programming languages."
 <prefix>          ::= [ ~ / # < > % @ ` ? ! !!
 <whitespace>     ::= spaces, tabs, new line and form feed characters"
           "Whitespace (operator/cosmetic measure) almost never leads to confusion. It
-does in (some) cases where a <nil> leaf without prefixes is adjacent to the white
-space operator. For example : |_get' out$now_|. Bracmat interprets this as :
+does in (some) cases where a <nil> leaf without prefixes is adjacent to the whitespace
+operator. For example : |_get' out$now_|. Bracmat interprets this as :
 |_get'(out$now)_|. |_\"\"_| or |_()_| fixes the problem : |_get'() out$now_|.
 Quotation marks are not part of the string they surround. They should be used
 if necessary, e.g. |_in this case_| or |_he{this is not a comment}re_|.
 Comments can be written everywhere, except in the middle of a string in
-Quotation marks. Comments are enclosed in {} and may be nested."
+quotation marks. Comments are enclosed in {} and may be nested."
     )
   & ( charset
     =   T
@@ -1134,9 +1134,9 @@ options :
     first zero byte! (Only |_fil$_| can read binary files.)
 |_BIN_|
     <present>
-    File is read in binary mode
+    File is read in binary mode.
     <not present>
-    File is still read in binary mode
+    File is still read in binary mode.
 |_JSN_|
     <present>
     The input is parsed as JSON.
@@ -1380,34 +1380,34 @@ operations, as in:
     assignment: (x=7) (square=.!arg^2)
     object member definition: (myobject=(place=Copenhagen) (setPlace=.!arg:?(its.place)))
 2 .
-    fixed data structure:|_(Palme.Olof.Sweden)_|
+    fixed data structure: |_(Palme.Olof.Sweden)_|
     object member referencing: (myhash..insert)$(xxx.998743)
 3 ,
-    automatically flattens sublists:|_(ham,(bread,butter),jam):(ham,bread,butter,jam)_|
+    automatically flattens sublists: |_(ham,(bread,butter),jam):(ham,bread,butter,jam)_|
 4 |
     or else: |_get$myfile | out$\"Cannot read myfile\"_|
 5 &
-    and then:|_out$\"alomost done\" & Done_|
+    and then: |_out$\"almost done\" & Done_|
 6 :
-    match subject with pattern:|_Meeting at 4 in room 24:? ?#hour ? ?#room ?_|
-7 [blank]
-    sentence, neutral element |_Oh well this can go on and on:?a Oh ?z & !a:_|
+    match subject with pattern: |_Meeting at 4 in room 24:? ?#hour ? ?#room ?_|
+7 [whitespace]
+    sentence, neutral element: |_Oh well this can go on and on:?a Oh ?z & !a:_|
 8 +
     add, neutral term 0:|_(a+6+b+a+10)_|,|_(a+b:?x+a+?y & !x:0)_|
 9 *
-    multiply, neutral factor 1:|_(46546*647547564)_|,|_(a*b:?x*a*?y & !x:1)_|
+    multiply, neutral factor 1: |_(46546*647547564)_|,|_(a*b:?x*a*?y & !x:1)_|
 10 ^
-    raise to a power, neutral exponent 1:|_(9975^332)_|,|_(45:?n^?exp & !exp:1)_|
+    raise to a power, neutral exponent 1: |_(9975^332)_|,|_(45:?n^?exp & !exp:1)_|
 11 \\L
     take logarithm: 10\\L1050
 12 \\D
     differentiate: x\\D(x^10)
 13 '
-    function evaluation (does not evaluate RHS):|_str'(b+a):\"b+a\"_|
-    macro:|_()'(my name is ()$name)_|
+    function evaluation (does not evaluate RHS): |_str'(b+a):\"b+a\"_|
+    macro: |_()'(my name is ()$name)_|
 14 $
-    function evaluation (evaluates RHS): str$(b+a):\"a+b\"
-    variable in macro:|_()'(my name is ()$name)_|
+    function evaluation (evaluates RHS): |_str$(b+a):\"a+b\"_|
+    variable in macro: |_()'(my name is ()$name)_|
 15 _
     dummy:   |_!expr:?lhs_?rhs & (do$!lhs)_(do$!rhs)_|  "
       ,   (1,savtxt objecttxt asstxt)
@@ -1498,7 +1498,7 @@ In the example below an object named |_John_| is created with the members
 {?} John = (length=180),(age=30),(name=(first=John) (family=Bull))
 
 There is no prescribed way in which the members should be glued together to
-form an object. Here, the comma operator and blank operator are used, but any
+form an object. Here, the comma operator and whitespace operator are used, but any
 operator except the = operator can be used to separate field names.
 
 John's length can be changed to 185 in the following ways:
@@ -1712,7 +1712,7 @@ subsumed in situations like the above ones."
   & ( hashtxt
     =   M
       , "Hash tables"
-      , "If you need to manage a large data set it may be a good idea to use a hash-
+      , "If you need to manage a large data set it may be a good idea to use a hash
 table instead of a list. Storing, retrieving and deleting are costly processes
 in lists, but cheap in hash tables. Handling hash tables in Bracmat is very
 simple. You create a hash table as follows
@@ -1759,7 +1759,7 @@ The following methods are defined for hash tables:
   & ( findtxt
     =   T
       , "(myhash..find)$key:(?Key.?Value) ?OtherKeyValuePairs"
-      , "Returns a blank-separated list of key-value pairs, all with the same key."
+      , "Returns a whitespace-separated list of key-value pairs, all with the same key."
     )
   & ( inserttxt
     =   T
@@ -1770,7 +1770,7 @@ possible and the same value can be inserted more than once for the same key."
   & ( removetxt
     =   T
       , "(myhash..remove)$key:?KeyValuePairs"
-      , "Removes the key with all its values and returns a blank-separated list of
+      , "Removes the key with all its values and returns a whitespace-separated list of
 key-value pairs."
     )
   & ( Newtxt
@@ -1783,7 +1783,7 @@ evaluates new$hash. It cannot be called from user code."
     =   T
       , Die
       , "This method is called when a hash object is deleted. It is not directly
-called from user code. (Compare with a C++ destructor). You can add your own
+called from user code. (Compare with a C++ destructor.) You can add your own
 clean up code by writing a |_die_| method and adding it to a hash object once it
 is created. Example:
 
@@ -1852,7 +1852,7 @@ by its name or by its function body. The forall method finishes when all
 elements are traversed or before that if the function fails. The behaviour of
 forall is undefined if the hash table is changed or deleted during the
 traversal, although this can be done safely. For example, some members may be
-missed and others be processed more than once.
+missed and others may be processed more than once.
 
 Example:
 
@@ -2087,45 +2087,17 @@ function, the passed argument is bound to a local variable that is always
 called arg.
 
 Most often, the left operand of the $ and the ' operator evaluates to an
-alfanumeric name. There are a few special function names:
+alphanumeric name. There are a few special function names:
 * No name at all. Here, the $ and the ' operator have decidedly different and
   complementary roles. (Forced evaluation of subexpressions in otherwise
   unevaluated expressions, such as patterns)
 * An integral number. (Array indexing.)
-* Only prefixes. (Prefix pasting or influencing success and failure of non-
-  atomic expressions.)
+* Only prefixes. (Prefix pasting or influencing success and failure of 
+  non-atomic expressions.)
 
 Function calls are even effective in patterns, as it is fair to assume
 that the $ and ' operators seldom occur in subjects and so need not to be
-matched (the same is, a fortiori, true for the & and | operators). In patterns,
-the return value of a function is part of the pattern. A function may be
-called several times during one evaluation of a matching expression, due to
-backtracking and retrying."
-    )
-  & ( funmactxt
-    =   T
-      , "function evaluation"
-      , "The binary operators $ and ' are similar in most respects. In general, the
-left operand evaluates to the name of a built-in or defined function, whereas
-the right operand is an expression that is passed as an argument to the
-function. The $ evaluates the right operand before it is passed over, the '
-doesn't. Parameter passing is by value, although the implementation postpones
-and limits copying of data as much as possible. In the code of the called
-function, the passed argument is bound to a local variable that is always
-called arg.
-
-Most often, the left operand of the $ and the ' operator evaluates to an
-alfanumeric name. There are a few special function names:
-* No name at all. Here, the $ and the ' operator have decidedly different and
-  complementary roles. (Forced evaluation of subexpressions in otherwise
-  unevaluated expressions, such as patterns)
-* An integral number. (Array indexing.)
-* Only prefixes. (Prefix pasting or influencing success and failure of non-
-  atomic expressions.)
-
-Function calls are even effective in patterns, as it is fair to assume
-that the $ and ' operators seldom occur in subjects and so need not to be
-matched (the same is, a fortiori, true for the & and | operators). In patterns,
+matched. (The same is, a fortiori, true for the & and | operators.) In patterns,
 the return value of a function is part of the pattern. A function may be
 called several times during one evaluation of a matching expression, due to
 backtracking and retrying."
@@ -2613,7 +2585,7 @@ However, if an operand fails to evaluate then the algebraic expression fails
 too and if the failing operand is the left hand side of the expression, then
 the right hand side is not evaluated. In this sense algebraic operators behave
 like the logical & operator."
-          "Bracmat gives the user practically NO control over the format of evaluated
+          "Bracmat gives the user practically no control over the format of evaluated
 algebraic expressions, such as the order of terms or factors. Bracmat tries to
 present algebraic objects in a unique (canonical) form. This is in many cases
 an unattainable goal : the forms
@@ -2680,7 +2652,7 @@ addition, |_0_| is also a trivial element in products. Lists and sums do not hav
     (string match).
 |_%_|
     causes the match to succeed only with one or more non-trivial elements of
-    the subject-list. (Exception: in combination with |_[_| prefix).
+    the subject-list. (Exception: in combination with |_[_| prefix.)
 |_<_|
     unifies only with atoms that are less than the atom following the |_<_| 
     prefix.
@@ -2825,7 +2797,7 @@ normal way.
                                                                              
 {?} (=(vowel')$456) : (=$(($(vowel'))$(#:?m)))    { This succeeds, because
                                      the ' in the pattern expression $(vowel')
-                                     is escaped. So the pattern $(vowel')
+                                     is escaped; so the pattern $(vowel')
                                      matches the subject vowel' }
 {!} =(vowel')$456
                                      
@@ -2921,7 +2893,7 @@ abs$<expression> is defined as |_sgn$<expression>*<expression>_|.
 names that are not in the first parameter and/or to exclude names that are in
 the second parameter. The optional third parameter adds information about array
 size and current index value, e.g. (arg,5,5). If the first parameter is
-missing, this is taken to mean that NO names are excluded (unless by virtue of
+missing, this is taken to mean that no names are excluded (unless by virtue of
 the second parameter). You can use cat$ to save the state of the variable space
 for later use, e.g. removing all variables that have been created since.
 
@@ -3055,9 +3027,8 @@ The third argument denotes the number of terms, including vanishing terms.
     )
   & ( nestMLtxt
     =   T
-      
-      ,   "nestML$<internal-expression-of-XML-or-HTML-data>"
-      ,    "After reading XML or HTML data, all text and tags are in a flat list.
+      , "nestML$<internal-expression-of-XML-or-HTML-data>"
+      , "After reading XML or HTML data, all text and tags are in a flat list.
 The function |_nestML_| attempts to match opening and closing tags and creates
 a tree structure. This works best for XML data"
     )
@@ -3092,7 +3063,7 @@ in an atom!"
     S
     
 {?} @(a b:a ?)        {illegal, LHS of string match operator must be atomic}
-    (Bracmat exits)
+                      {Bracmat exits}
 
 {?} ~@(a:b)           {fails, pattern matching}
 
@@ -3202,7 +3173,7 @@ true for some other operators (|_:_|, |_|_|, |___|, and |_=_|). These operators,
 special meaning within patterns. All other binary operators occurring in a
 pattern are searched for in the subject expression as part of the pattern
 matching."
-          "Especially the & | and : operators are helpful in formulating complex
+          "Especially the |_&_|, |_|_| and |_:_| operators are helpful in formulating complex
 patterns with alternatives, conjunctions and side effects in the form of
 actions. In the following examples, !s stands for the subject expression,
 the expressions in parentheses are patterns and |_!p_|, |_!pa_|, |_!pb_|,
@@ -3293,12 +3264,16 @@ a pattern.
 
 {?} 2+3:?four     { bind 5 to \"four\" }
 {?} !four         { evaluation has already taken place when four is expanded }
+{!} 5
 
 {?} 5=2+!four     { numbers are legal names. 5 is bound to 2 + !four}
 {?} !5            { evaluation takes place immediately after expansion }
+{!} 7
 
 {?} sum=%+%       { define pattern \"sum\" }
-{?} a+b+c:!sum    { is a+b+c a sum? After expansion, %+% is not evaluated }"
+{?} a+b+c:!sum    { is a+b+c a sum? After expansion, %+% is not evaluated }
+{!} a+b+c
+"
           "The !! prefix is not used as often as the single !, but comes in handy if you
 want to pass a variable by name instead of by value.
 
@@ -3310,8 +3285,12 @@ want to pass a variable by name instead of by value.
     )
 {?} is-greater-than = !one:>!two
 {?} is-divisor-of = (div$(!two,!one)*!one):!two
+
 {?} check$(3,is-greater-than,15)  { pass by name }
+{!} FALSE
+
 {?} check$(3,is-divisor-of,15)
+{!} TRUE
 
 Passing by name is used here to postpone the evaluation of the second argument
 until it has arrived in the function check and the local variables |_one_| and
@@ -3347,9 +3326,9 @@ same debugging protocol applies as with other programming languages :
   - Forget that Bracmat may see neutral elements (0 terms, 1 factors, zero
     length words) at places where this is not what you intend. Are all
     % ` and @ prefixes in place?
-  - Forget the grouping of operators.
-    |_a b c : ?%x ?%y_|  is grouped as |_(a b c):(?%x ?%y)_| , but
-    |_a,b,c : ?%x,?%y_|  is grouped as |_a,b,(c:?%x),?%y_|
+  - Forget the grouping of operators. For example,
+    |_a b c : ?%x ?%y_|  is grouped as |_(a b c):(?%x ?%y)_| , but on the other hand,
+    |_a,b,c : ?%x,?%y_|  is grouped as |_a,b,(c:?%x),?%y_|.
     Remember that |_=_| and |_._| have very low priorities, often making a pair of
     parentheses necessary.
   - A misconceived idea about the Bracmat's backtracking mechanism. Unlike
@@ -3450,7 +3429,7 @@ to use its symbol as a literal, the two uses live peacefully together.
   & ( varprotxt
     =   T
       , Variables
-      , "Variables are represented by <atom>'s, but not all <atom>'s are variables.
+      , "Variables are represented by <atom>s, but not all <atom>s are variables.
 The context of a symbol determines whether it is a variable or not :
 1 the left operand of the = operator, unless this operand has zero length.
 2 the atom following the ! and !! prefixes
@@ -3762,11 +3741,10 @@ Expressions headed by the |_=_| operator can be used instead of
 variable names. In that case no semicolon is appended. The listing starts 
 with  |_(=_| and ends with |_)_|, followed by a newline.
 
-With the |_RAW_| option only the expression right of the |_=_| operator is
+With the |_RAW_| option, only the expression right of the |_=_| operator is
 listed.
 
-The LIN option suppresses most newlines and all other unneeded white
-space characters.
+The LIN option suppresses most newlines and all other unneeded whitespace characters.
 
 The WYD option makes lines wider. That is especially useful if your code is
 deeply nested. This option has no effect if the LIN option is provided as well.
@@ -4012,7 +3990,8 @@ whereas str$ suppresses the space operator, put$ transfers every character,
 including space operators, to the atom.
 
 {?} put$(this is not Lotus 1 1+1 1+1+1,MEM):?proposition &
-{?} put$!proposition
+{?} !proposition
+{!} this is not Lotus 1 2 3
 "
     )
   & ( puttxt3
@@ -4051,7 +4030,7 @@ The chosen index remains in force until a new indexing function is evaluated.
 {?} array = another-value      { array[2] := another-value }
 {?} !array : -1 $ ?array       { array[3] := another-value }
 {?} 45 : 1$?array              { array[1] := 45 }
-{?} 2'!array : 3'!array        { are array[2] and array[3] equal?
+{?} 2'!array : 3'!array       { are array[2] and array[3] equal?
                                  Notice use of ' instead of $. }"
     )
   & ( strtxt
@@ -4139,6 +4118,8 @@ error at the operating system level, one of the following codes is returned:
 |_ENOENT_|
     Indicates that the filename or path was not found or that the path
     specifies a directory.
+|_EINVAL_|
+    Name contains invalid characters.
 
 If the command succeeds at the operating system level, the value 0 is returned."
     )
@@ -4267,7 +4248,7 @@ Use macro evaluation if the expression to be split is the value of a variable.
 3 |_fil$([<file-name>],STR[,<stop>])_|
     Prepare for reading or writing variable sized record    
 4 |_fil$(<file-name>,TEL)_|
-    Telling position inside file    
+    Tell position inside file    
 5 |_fil$(<file-name>,<whence>,<offset>)_|
     Go to file position    
 6 |_fil$([<file-name>][,,<number>])_|
@@ -4297,25 +4278,25 @@ Option <mode> is one of the following:
 |_w_|
     create text file for writing, or truncate to zero length
 |_a_|
-    append; open text file or create for writing at eof
+    append; open text file or create for writing at EOF
 |_rb_|
     open binary file for reading
 |_wb_|
     create binary file for writing, or truncate to zero length
 |_ab_|
-    append; open binary file or create for writing at eof
+    append; open binary file or create for writing at EOF
 |_\"r+\"_|
     open text file for update (reading and writing)
 |_\"w+\"_|
     create text file for update, or truncate to zero length
 |_\"a+\"_|
-    append; open text file or create for update, writing at eof
+    append; open text file or create for update, writing at EOF
 |_\"r+b\"_| or |_\"rb+\"_|
     open binary file for update (reading and writing)
 |_\"w+b\"_| or |_\"wb+\"_|
     create binary file for update, or truncate to zero length
 |_\"a+b\"_| or |_\"ab+\"_|
-    append; open binary file or create for update, writing at eof
+    append; open binary file or create for update, writing at EOF
 "
     )
   & ( fixdtxt
@@ -4353,7 +4334,7 @@ or the end of the string (writing)."
   & ( positiontxt
     =   T
       , "  fil$(<file-name>,TEL)  "
-      , "Telling the position inside the file.
+      , "Tell the position inside the file.
 
 Returns the current value of the file position indicator."
     )
@@ -4373,7 +4354,7 @@ Option <whence> is one of the following:
     current file position
 |_END_|
     end of file. 
-    (In some implementations, binary files may not handle END).
+    (In some implementations, binary files may not handle END.)
 
 For a text file, <offset> must be 0, or the value returned from a call to
 fil$(<file-name>,TEL), in which case <whence> must be SET."
@@ -4403,7 +4384,7 @@ contain the stop character).
   & ( writetxt
     =   T
       , "  fil$([<file-name>],,<number>,<value>)  "
-      , "Writing to a file
+      , "Write to a file
 
 writes (if <mode> permitting) <number> chunks of <size> bytes from <value>.
 If <type> is |_DEC_|, <number>*<size> must be 1,2,3 or 4. <value> must be an
@@ -4419,7 +4400,7 @@ must be the empty string"
   & ( closetxt
     =   T
       , "  fil$([<file-name>],SET,-1)  "
-      , "Closing a file.
+      , "Close a file.
 
 An open file is closed by specifying an impossible file position."
     )
@@ -4631,7 +4612,12 @@ Topic:")
                                    )
                                  : ?e
                                  )
-                               ?z
+                               ( ?z
+                               & ( !e:~"`"
+                                 |   @(!z:~("`" ?))
+                                   & @(!a:~(? "`"))
+                                 )
+                               )
                            )
                         & (S=" "|\n)
                         & " ":?seps
@@ -4684,7 +4670,16 @@ Topic:")
                                )
                            )
                         &   codev$(str$(rev$!P rev$!AA))
-                            (code.,str$(rev$!ZA !e !az))
+                            (   str$(rev$!ZA !e !az):?e
+                              &   !e
+                                : ( ","
+                                  | ", "
+                                  | ". "
+                                  | "."
+                                  )
+                              & !e
+                            | (code.,!e)
+                            )
                             code$(str$(!zz !n))
                       | codev$!arg
                   )
@@ -4741,7 +4736,14 @@ Topic:")
           & ( inline1
             =   a m
               .     @(!arg:?a "|_" ?m "_|" ?arg)
-                  &   codes$!a
+                  &   (   !a
+                        : ( ", "
+                          | ". "
+                          | "! "
+                          | "? "
+                          )
+                      | codes$!a
+                      )
                       (!m:|(code.,angbrack$!m))
                       inline1$!arg
                 | codes$!arg
@@ -5238,13 +5240,13 @@ Topic:")
                 & ( pre
                   =   a b
                     .     @(!arg:"{?}" ?)
-                        & (   @(!arg:"{?}" ?a \n  (?c "{!}" ?:?b))
-                        & (@(!c:~(? \n ?)))
+                        & (   @(!arg:"{?}" ?a \n (?c "{!}" ?:?b))
+                            & @(!c:~(? \n ?))
                             & exinput$("{?}" !a) pre$!b
                           | exinput$!arg
                           )
                       |   @(!arg:?c "{!}" ?)
-                        & (@(!c:~(? \n ?)))
+                        & @(!c:~(? \n ?))
                         & (   @(!arg:"{!}" ?a ("{?}" ?:?b))
                             &   (pre.(class.exoutput),"{!}" !a)
                                 pre$!b
@@ -5277,7 +5279,7 @@ Topic:")
                             )
                       |   @(!arg:"{?}" ?)
                         & (   @(!arg:"{?}" ?a \n (?c "{!}" ?:?b))
-                        & (@(!c:~(? \n ?)))
+                            & @(!c:~(? \n ?))
                             & (blockquote.,exinput$("{?}" !a) pre$!b)
                           | (blockquote.,exinput$!arg)
                           )
@@ -5737,12 +5739,10 @@ Topic:")
                   &   whl
                     ' (   !Z
                         :   ?a
-                            ( blockquote
-  . ,(pre.(class.?e),?)
-  :?A)
-  (br.,)
-  (br.,)
-  (blockquote.,(pre.(class.~!e),?):?B)
+                            (blockquote.,(pre.(class.?e),?):?A)
+                            (br.,)
+                            (br.,)
+                            (blockquote.,(pre.(class.~!e),?):?B)
                             ?z
                       & !a (blockquote.,!A \n !B) !z:?Z
                       )
@@ -6043,7 +6043,7 @@ Topic:")
           & fixArrows$!paragraphs:?paragraphs
           & fputall$!paragraphs:?helpbody
           & removeEmpty$(!helpbody.code i):?helpbody
-& lst$(helpbody,helpbody,NEW,BIN)
+          & lst$(helpbody,helpbody,NEW,BIN)
           & compactBlockquotes$!helpbody:?helpbody
           & flattenBlockLevel$(p.,!helpbody):?helpbody
           & removeEmptyP$(removeBreaks$!helpbody):?helpbody

@@ -96,17 +96,49 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
             : ?body
             )
       & lst$(body,body,NEW)
+      & ( commentquotes
+        =   A M
+          .     !arg:?A \" ?M \" ?arg
+              &   !A
+                  !macro
+                  bc
+                  !begin
+                  !M
+                  !end
+                  commentquotes$!arg
+            | !arg
+        )
       & ( ldots
-        =   
+        =   A
           .     !arg:?A "." "." "." ?arg
               & !A "\\" ldots ldots$!arg
             | !arg
         )
-      & ( ldotss
-        =   
-          .     @(!arg:?A "..." ?arg)
-              & !A "\\" ldots ldotss$!arg
+      & ( lt
+        =   A
+          .     @(!arg:?A "<" ?arg)
+              &   !A
+                  ( @(!arg:"=" ?arg)&"$\\le$"
+                  | "$<$"
+                  )
+                  lt$!arg
             | !arg
+        )
+      & ( gtlt
+        =   A
+          .     @(!arg:?A ">" ?arg)
+              &   lt$!A
+                  ( @(!arg:"=" ?arg)&"$\\ge$"
+                  | "$>$"
+                  )
+                  gtlt$!arg
+            | lt$!arg
+        )
+      & ( ldotss
+        =   A
+          .     @(!arg:?A "..." ?arg)
+              & gtlt$!A "\\" ldots ldotss$!arg
+            | gtlt$!arg
         )
       & ( LD
         =   A B
@@ -118,7 +150,7 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
         =   
           .   map
             $ ( ( 
-                =   
+                =   value dollar
                   .     !arg:@
                       & 2:?dollar
                       &   "\\bc{"
@@ -132,6 +164,7 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
                                     | !arg:"&"&"\\&"
                                     | !arg:"%"&"\\%"
                                     | !arg:"#"&"\\#"
+                                    | !arg:"~"&"\\~"
                                     |   !arg:"^"
                                       & "\\caret{}"
                                     |   !arg:"_"
@@ -156,6 +189,54 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
               . !arg
               )
         )
+      & ( commentbc
+        =   macro begin end
+          .   !arg:(?arg.?macro.?begin.?end)
+            &   trim
+              $ ( str
+                $ ( map
+                  $ ( ( 
+                      =   dollar
+                        .   !arg:@
+                          & 2:?dollar
+                          &   LD
+                            $ ( commentquotes
+                              $ ( vap
+                                $ ( ( 
+                                    =   
+                                      .     !arg:"$"
+                                          & 1:?dollar
+                                          & "$"
+                                        |     !arg
+                                            : ( "&"
+                                              | "%"
+                                              | "#"
+                                              | "~"
+                                              | "^"
+                                              | "_"
+                                              | "{"
+                                              | "}"
+                                              | "["
+                                              | "]"
+                                              )
+                                          & !macro bc !arg
+                                        |   !dollar:1
+                                          & 2:?dollar
+                                          & ( !arg:" "
+                                            | !begin !end !arg
+                                            )
+                                        | !arg
+                                    )
+                                  . trim$!arg
+                                  )
+                                )
+                              )
+                      )
+                    . !arg
+                    )
+                  )
+                )
+        )
       & ( indexed
         =   
           .   map
@@ -163,48 +244,101 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
               . !arg
               )
         )
-      & ( neat
-        =   
-          .   trim
-            $ ( str
-              $ ( map
-                $ ( ( 
-                    =   
-                      .     !arg:@
-                          & (   @(!arg:? "$" ?)
-                              & bfun$!arg
-                            |   " "
-                                  ldotss
-                                $ ( str
-                                  $ ( vap
-                                    $ ((=.!arg).!arg.\r)
-                                    )
-                                  )
-                                " "
+      & ( quotes
+        =   A M a z f l
+          .     @(!arg:?A \" ?M \" ?arg)
+              &   (   @(!A:(:?a|? @?a))
+                    & @(!arg:(:?z|%@?z ?))
+                    & ( !a:"("&!z:")"
+                      |     !a
+                          : (" "|\n|)
+                        &   !z
+                          : ( 
+                            | " "
+                            | ","
+                            | "."
+                            | "!"
+                            | "?"
+                            | \n
                             )
-                        |   !arg:(code.,?arg)
-                          & add2index$!arg
-                          & bfun$!arg:?arg
-                        |   !arg:(i.,?arg)
-                          & "\\bi{" trim$!arg "}"
-                        |   !arg:(a.(href.?arg),?)
-                          & @(!arg:?http "//" ?arg)
-                          &   "\\allowbreak{}\\texttt{"
-                              !http
-                              "//"
-                                vap
-                              $ ( (=."/\\allowbreak{}" !arg)
-                                . !arg
-                                . "/"
+                      )
+                    & ( @(!M:%@?f ? %@?l)
+                      | !M:?f:?l
+                      )
+                    & @(ugc$!f:L ?)
+                    & ( !l:"."
+                      | @(ugc$!l:L ?)
+                      )
+                    & !A "``" !M "''"
+                  | !A \" !M \"
+                  )
+                  quotes$!arg
+            | !arg
+        )
+      & ( neat
+        =   Y sub
+          .   !arg:(?sub.?arg)
+            &   quotes
+              $ ( trim
+                $ ( str
+                  $ ( map
+                    $ ( ( 
+                        =   http
+                          .     !arg:@
+                              & (   @(!arg:? "$" ?)
+                                  & bfun$!arg
+                                |       ldotss
+                                      $ ( str
+                                        $ ( vap
+                                          $ ( (=.!arg)
+                                            . !arg
+                                            . \r
+                                            )
+                                          )
+                                        )
+                                    : ?Y
+                                  &   (     !Y
+                                          :   ( %@
+                                              : @( ?
+                                                 :   ( ","
+                                                     | "."
+                                                     | "!"
+                                                     )
+                                                     ?
+                                                 )
+                                              )
+                                              ?
+                                        & 
+                                      | " "
+                                      )
+                                      !Y
+                                      " "
                                 )
-                              "}"
-                        |   out$(!sub sectiontitle !arg)
-                          & UUU7
+                            |   !arg:(code.,?arg)
+                              & add2index$!arg
+                              & bfun$!arg:?arg
+                            |   !arg:(i.,?arg)
+                              & "\\bi{" trim$!arg "}"
+                            |     !arg
+                                : (a.(href.?arg),?)
+                              & @(!arg:?http "//" ?arg)
+                              &   "\\allowbreak{}\\texttt{"
+                                  !http
+                                  "/"
+                                    vap
+                                  $ ( (=."/\\allowbreak{}" !arg)
+                                    . !arg
+                                    . "/"
+                                    )
+                                  "}"
+                            |   out$(!sub sectiontitle !arg)
+                              & UUU7
+                        )
+                      . !arg
+                      )
                     )
-                  . !arg
                   )
                 )
-              )
         )
       & ( dosectiontitle
         =   sub code indices
@@ -213,13 +347,17 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
             &   (   !arg:@
                   &   (   @(!arg:? "$" ?)
                         & bfun$!arg
-                      | "\\" !sub "section{" trim$!arg "}"
+                      |   "\\"
+                          !sub
+                          "section{"
+                          trim$(str$(quotes$!arg))
+                          "}"
                       )
                       \n\n
                 |   !arg:(code.,?code)
                   & add2index$!code
                   & "\\bfun{" bfun$!code "}"
-                | "\\" !sub "section{" neat$!arg "}"
+                | "\\" !sub "section{" neat$(!sub.!arg) "}"
                 )
                 \n
                 indexed$!indices
@@ -241,7 +379,15 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
             | !arg
         )
       & ( commandchars
-        =   macro begin end all has lack A Z
+        =     macro
+              begin
+              end
+              has
+              lack
+              A
+              Z
+              pairs
+              txt
           .   !arg:?txt
             & getTxt$!txt:?txt
             &     map
@@ -269,7 +415,7 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
                           & 
                         | !arg
                     )
-                  . "{}()<>/;`'{$^#~,.!?@%+-:\"|=\\*&"
+                  . "{}()/;<>`'{$^#~,.!?@%+-:\"|=\\*&"
                   )
               : ?lack
             & ("_"."["."]"):(?macro.?begin.?end)
@@ -331,24 +477,46 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
             & (rtrim=.rev$(ltrim$(rev$!arg)))
             & ltrim$(rtrim$!arg)
         )
-      & (com=.!macro com !begin trim$!arg !end)
+      & ( com
+        =   
+          .   !macro
+              com
+              !begin
+              commentbc$(!arg.!macro.!begin.!end)
+              !end
+        )
       & ( coma
         =   H
           .   @(!arg:?H ((%@:~" ") ?:?arg))
-            & !H !macro coma !begin trim$!arg !end
+            &   !H
+                !macro
+                coma
+                !begin
+                commentbc$(!arg.!macro.!begin.!end)
+                !end
         )
       & ( comb
         =   H
           .   @(!arg:?H ((%@:~" ") ?:?arg))
-            & !H !macro comb !begin trim$!arg !end
+            &   !H
+                !macro
+                comb
+                !begin
+                commentbc$(!arg.!macro.!begin.!end)
+                !end
         )
       & ( comc
         =   H
           .   @(!arg:?H ((%@:~" ") ?:?arg))
-            & !H !macro comc !begin trim$!arg !end
+            &   !H
+                !macro
+                comc
+                !begin
+                commentbc$(!arg.!macro.!begin.!end)
+                !end
         )
       & ( add2index
-        =   
+        =   cand
           .     !arg:@(?:?cand "$" ?) ?
               & ( @( !cand
                    :   ?
@@ -386,7 +554,7 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
             &   " "
                   map
                 $ ( ( 
-                    =   
+                    =   dlmt
                       .     !arg:@
                           & (   @(!arg:? "..." ?)
                               & "\\bfun{" bfun$!arg "}"
@@ -412,7 +580,13 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
             $ ( ( 
                 =   
                   .     !arg:@
-                      & vap$((=.!arg).!arg.\r)
+                      &   map
+                        $ ( ( 
+                            =   
+                              . vap$((=.!arg).!arg.\r)
+                            )
+                          . quotes$!arg
+                          )
                     |   !arg:(code.,?arg)
                       & coding$!arg
                     |   !arg:(i.,?arg)
@@ -427,8 +601,7 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
                           \n
                           items$!arg
                           "\\end{itemize}"
-                    |   !arg:(?element.,?arg)
-                      & ELEMENT !element
+                    | !arg:(?.,?arg)&
                 )
               . !arg
               )
@@ -461,6 +634,22 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
               . !arg
               )
         )
+      & ( bal
+        =   L
+          .   0:?L
+            &   vap
+              $ ( ( 
+                  =   
+                    .     !arg:"{"
+                        & 1+!L:?L
+                      |   !arg:"}"
+                        & -1+!L:?L
+                      | 
+                  )
+                . !arg
+                )
+            & !L:0
+        )
       & ( comments
         =   fun A Z M oct
           .   !arg:(?fun.?arg)
@@ -474,7 +663,12 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
                             |   @(!arg:?A "..." ?Z)
                               & !A !macro ldots !begin !end
                             |   @( !arg
-                                 : ?A ("{" ?M "}") ?Z
+                                 :   ?A
+                                     ( "{"
+                                       ?M
+                                       ("}"&bal$!M)
+                                     )
+                                     ?Z
                                  )
                               &   (   !M:"?"
                                     & :?oct
@@ -566,7 +760,7 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
                         | lst$h4&UUU3\n
                         )
                     |   !arg:(h5.,?h5)
-                      & (     !h4
+                      & (     !h5
                             : ( a
                               .   (name|href.?bfunname)
                                 , ?code
@@ -614,7 +808,7 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
                                 )
                               )
                           & 
-                        | neat$!par \n\n
+                        | neat$(.!par) \n\n
                         )
                     |   !arg:(blockquote.,?blockquote)
                       &   commandchars$!blockquote
@@ -632,10 +826,10 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
                               "]"
                           )
                           \n
-                          ( 1+!count:?count:>1000
+                          ( 1+!count:?count:>1000000
                           |   map
                             $ ( ( 
-                                =   chars
+                                =   
                                   .   ( !arg:(pre.?,?arg)
                                       | 
                                       )
