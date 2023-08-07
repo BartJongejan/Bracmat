@@ -5,7 +5,7 @@ help=
   . unops,naamloos,algtxt,unpattxt,binmenu,pattxttxt,maptxt
   . pattxt,asstxt,unopsmenu,unstuurtxt,varsmenu,funcmenu,vaptxt
   . varmattxt,varprotxt,progsmenu,debugtxt,debugtxt2,debugtxt3
-  . inbltmenu,alctxt,aligntxt,asctxt,utftxt,chrtxt,charset
+  . inbltmenu,alctxt,aligntxt,asctxt,utftxt,chrtxt,charsettxt
   . chutxt,dbgtxt,dentxt,escappattxt,lambda,morexmlps,jsntxt
   . divtxt,fretxt,funtxt1,funtxt3,beztxt,moptxt,lettxt,ugctxt
   . lsttxt1,difftxt,pattxt2,methodtxt,predvartxt,calctxt
@@ -16,7 +16,7 @@ help=
   . outtxt,taytxt,newtxt,newobjecttxt,humtxt,objecttxt,hashtxt
   . paragraphs,fname,findtxt,inserttxt,removetxt,Newtxt,Dietxt
   . ISOtxt,casesensitivetxt,foralltxt,doHTML,clktxt,limitations
-  . lowtxt,upptxt,DOSopttxt,whltxt,argtxt,d2xtxt,x2dtxt,toMLtxt
+  . lowtxt,upptxt,whltxt,argtxt,d2xtxt,x2dtxt,toMLtxt
   . rewriting,jsntranstxt,transformtxt,MLencodingtxt,nestMLtxt
   . gentlepat recurpat closetxt filesettxt interaction usecases
   . fixdtxt modetxt positiontxt readtxt varitxt writetxt nonlinpat
@@ -55,11 +55,11 @@ lex lexical analysis of help file"
           (7,evaltxt)
           (8,progsmenu)
           (9,funcmenu)
-          (10,contxt)
+          (10,contxt jsntranstxt)
           (11,objecttxt methodtxt)
           (12,hashtxt)
           (13,calctxt)
-          (14,charset utftxt chutxt lowtxt upptxt)
+          (14,charsettxt)
           (15,predvartxt)
           (html,)
           (htmltable,)
@@ -68,7 +68,7 @@ lex lexical analysis of help file"
     )
   & ( funcmenu
     =   M
-      , functions
+      , Functions
       , "1  function evaluation
 2  defining functions
 3  nameless functions
@@ -93,16 +93,18 @@ lex lexical analysis of help file"
 3  pattern matching
 4  data structures
 5  assignment
-6  functions and macros
-7  the dummy operator"
+6  differentiation
+7  functions and macros
+8  the dummy operator"
       ,   (0,binovztxt)
           (1,algtxt)
           (2,binprotxt prostutxt2)
           (3,pattxt pattxttxt pattxt2 escappattxt)
           (4,contxt)
-          (5,asstxt)
-          (6,funmactxt naamloos macrotxt transformtxt)
-          (7,dumtxt funtxt3)
+          (5,savtxt asstxt)
+          (6,difftxt)
+          (7,funmactxt naamloos macrotxt transformtxt)
+          (8,dumtxt funtxt3)
     )
   & ( unopsmenu
     =   M
@@ -232,7 +234,7 @@ lex lexical analysis of help file"
           (15,glftxt)
           (16,fretxt)
           (17,gettxt)
-          (18,lowtxt DOSopttxt)
+          (18,lowtxt)
           (19,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt)
           (20,maptxt)
           (21,memtxt)
@@ -251,7 +253,7 @@ lex lexical analysis of help file"
           (34,systxt)
           (35,tbltxt)
           (36,ugctxt)
-          (37,upptxt DOSopttxt)
+          (37,upptxt)
           (38,utftxt)
           (39,vaptxt)
           (40,whltxt)
@@ -979,7 +981,7 @@ if necessary, e.g. |_in this case_| or |_he{this is not a comment}re_|.
 Comments can be written everywhere, except in the middle of a string in
 quotation marks. Comments are enclosed in {} and may be nested."
     )
-  & ( charset
+  & ( charsettxt
     =   T
       , "Character set"
       , "Bracmat supports UTF-8 as well as ISO 8859-1 encoded source code. Usually
@@ -988,11 +990,14 @@ sequences of non-zero bytes. Only a few functions explicitly handle UTF-8
 encoded characters. When lower- or uppercasing text, Bracmat assumes that the
 argument is UTF-8 encoded, but graciously falls back to regarding the argument
 as ISO 8859-1 encoded if parsing the argument as UTF-8 fails. UTF-16 and UTF-32
-is not supported, because those encodings use zero-bytes."
+is not supported, because those encodings use zero-bytes.
+
+As of July 2009 Codepage 850 is not supported, unless Bracmat is compiled with
+#define CODEPAGE850 1."
     )
   & ( atotxt
     =   T
-      , "strings or atoms"
+      , "Strings or atoms"
       ,   "A string in Bracmat is the same as an \"atom\". If you envisage a Bracmat
 expression as a tree like structure, atoms or strings are to be found in the
 leafs. In Bracmat terminology, an empty leaf is syntactically represented
@@ -1275,7 +1280,7 @@ until it fails. |_whl'_| always succeeds. Notice that |_whl'_| is faster than lo
     )
   & ( contxt
     =   T
-      , "Construction of data structures"
+      , "Data structures"
       ,   "In Bracmat, linear lists can be made by separating the elements with comma,
 plus sign, asterisk, space and dot. The first four operators create linear
 structures (right descending lists), moving nodes as necessary, whereas the
@@ -1421,7 +1426,7 @@ operations, as in:
           (9,algtxt)
           (10,algtxt)
           (11,algtxt)
-          (12,difftxt algtxt)
+          (12,difftxt)
           (13,funmactxt macrotxt transformtxt)
           (14,funmactxt escappattxt)
           (15,dumtxt funtxt3)
@@ -1827,12 +1832,6 @@ is created. Example:
 {?} (myhash..remove)$Z:?values;
 {?} :?myhash;                             { Get rid of the hash table. }"
     )
-  & ( DOSopttxt
-    =   T
-      , "Codepage 850 support"
-      , "As of July 2009 Codepage 850 is not supported, unless Bracmat is compiled with
-#define CODEPAGE850 1."
-    )
   & ( ISOtxt
     =   T
       , "(myhash..ISO)$"
@@ -2076,7 +2075,7 @@ v := b(x,y,z);
     )
   & ( funmactxt
     =   T
-      , "function evaluation"
+      , "Function evaluation"
       , "The binary operators $ and ' are similar in most respects. In general, the
 left operand evaluates to the name of a built-in or defined function, whereas
 the right operand is an expression that is passed as an argument to the
@@ -2104,7 +2103,7 @@ backtracking and retrying."
     )
   & ( macrotxt
     =   T
-      , "macro evaluation"
+      , "Macro evaluation"
       , "The ' operator with empty LHS is the macro evaluator. The macro evaluator
 returns the RHS unchanged, except where $ operators with empty LHS occur.
 
@@ -2358,7 +2357,7 @@ special roles inside patterns, such as the |_!_| prefix and the |_ _ _| operator
     )
   & ( unops
     =   T
-      , "minus sign"
+      , "Minus sign"
       , "The minus sign |_-_| has only its normal arithmetic meaning when used as an
 unary operator in front of a rational number or the imaginary number |_i_|.
 
@@ -2571,8 +2570,6 @@ exponentiation
     <base> ^ <exponent>
 logarithm
     <base> \\L <expr>
-differentiation
-    <variable> \\D <expr>
 
 Subtraction and division are treated as special forms of addition and
 multiplication. Therefore there are no binary operators for subtraction and
@@ -2581,7 +2578,7 @@ division. (The minus sign |_-_| and the slash |_/_| can be used in numbers, howe
 If one operand of an algebraic operator is evaluated then the other one is
 normally evaluated as well, even if this may seem unnecessary (multiplication
 by 0). This is done to ensure that all side effects take place as intended.
-However, if an operand fails to evaluate then the algebraic expression fails
+However, if an operand fails to evaluate, then the algebraic expression fails
 too and if the failing operand is the left hand side of the expression, then
 the right hand side is not evaluated. In this sense algebraic operators behave
 like the logical & operator."
@@ -2854,7 +2851,7 @@ visible functions are predefined:
           (2,gontxt)
           (3,factxt)
           (4,flttxt)
-          (5,jsntxt jsntranstxt)
+          (5,jsntxt)
           (6,lettxt)
           (7,MLencodingtxt)
           (8,nestMLtxt)
@@ -3338,7 +3335,7 @@ same debugging protocol applies as with other programming languages :
     )
   & ( debugtxt2
     =   T
-      , "using out$ as debugging aid"
+      , "Using out$ as debugging aid"
       ,   "The best aid in finding out what a program does, is using the out$ function.
 The following code is part of a function that computes n! .
 
@@ -3386,7 +3383,7 @@ avoids multi-word assignments and forces immediate backtracking.
     )
   & ( debugtxt3
     =   T
-      , "using dbg' as debugging aid"
+      , "Using dbg' as debugging aid"
       , "Some programming errors may be found with the built-in |_dbg_| function. The
 argument of the |_dbg_| function is evaluated with an internal debugging flag set.
 With this flag set, suspicious code is warned against.
@@ -5353,10 +5350,8 @@ Topic:")
                 & ( Tit
                   =   titel ptxt
                     .   !arg:(?ptxt.?titel)
-                      & put$\n\n
                       &   addContent2paragraphs
                         $ (!ptxt.titel.h1.,(a.(name.!ptxt),inline1$!titel))
-                      & streep$!titel
                   )
                 & ( spaced
                   =   a
@@ -5390,7 +5385,6 @@ Topic:")
                           $ ( ( 
                               =   
                                 .   !arg:(?antw,?keuze)
-                                  & out$(listmenuitem !antw !keuze)
                                   & (   @( !men
                                          :   ( !antw&:?a
                                              | ?a \n !antw
@@ -5465,21 +5459,14 @@ Topic:")
                     .   !arg:(?sel.?menutekst)
                       &   whl
                         ' ( !sel:(?antw,?keuze) ?sel
-                          & out$(doMenuItem !antw en !keuze)
-                          & ( !keuze:&out$NOKEUZE
+                          & ( !keuze:
                             |   !menutekst:%?menutitel ?menutekst
-                              & out$(!titel !menutitel !keuze)
                               & writeHTML$((!titel.!ptxt).!menutitel.!keuze)
-                              & out$(DONE !titel !menutitel !keuze)
                             )
                           )
-                      & out$(doMenuItems done)
                   )
                 & (.):?backtotitref
                 & !arg:(?overviewtitref.?topictitel.?arg)
-                & out$(overviewtitref !overviewtitref)
-                & out$(topictitel !topictitel)
-                & out$(arg !arg)
                 &   whl
                   ' ( !arg:%@?ptxt ?arg
                     &   !!ptxt
@@ -5496,10 +5483,6 @@ Topic:")
                         )
                     & (!topictitel.!ptxt):?backtotitref
                     )
-                & put$\nexit
-                & put$" \""
-                & put$!titel
-                & out$\"
             )
           & ( anchors
             =   R a m Z M L lastchar E A
@@ -5783,7 +5766,6 @@ Topic:")
                     =     level anc men LA a b A B
                         , Anc T x m s S
                       .     !arg:(?men.?level.?anc)
-                          & out$!arg
                           &   (   !menus:?a (!men.?LA) ?b
                                 &   !a
                                     ( !men
@@ -5892,7 +5874,6 @@ Topic:")
                   $ ( ( 
                       =   
                         .   !arg:(?NN.?name.?lev)
-                          & out$(!NN !name)
                           &   !pars
                             : ?A (!name.(titel.?.?B) ?C) ?D
                           & !A !D:?pars
