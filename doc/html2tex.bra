@@ -276,76 +276,83 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
             | !arg
         )
       & ( neat
-        =   Y sub
-          .   !arg:(?sub.?arg)
-            &   quotes
-              $ ( trim
-                $ ( str
-                  $ ( map
-                    $ ( ( 
-                        =   http
-                          .     !arg:@
-                              & (   @(!arg:? "$" ?)
-                                  & bfun$!arg
-                                |       ldotss
-                                      $ ( str
-                                        $ ( vap
-                                          $ ( (=.!arg)
-                                            . !arg
-                                            . \r
+        =   Y sub indices
+          .   !arg:(?indices.?sub.?arg)
+            & (   quotes
+                $ ( trim
+                  $ ( str
+                    $ ( map
+                      $ ( ( 
+                          =   http
+                            .     !arg:@
+                                & (   @(!arg:? "$" ?)
+                                    & bfun$!arg
+                                  |       ldotss
+                                        $ ( str
+                                          $ ( vap
+                                            $ ( (=.!arg)
+                                              . !arg
+                                              . \r
+                                              )
                                             )
                                           )
+                                      : ?Y
+                                    &   (     !Y
+                                            :   ( %@
+                                                : @( ?
+                                                   :   ( ","
+                                                       | "."
+                                                       | "!"
+                                                       )
+                                                       ?
+                                                   )
+                                                )
+                                                ?
+                                          & 
+                                        | " "
                                         )
-                                    : ?Y
-                                  &   (     !Y
-                                          :   ( %@
-                                              : @( ?
-                                                 :   ( ","
-                                                     | "."
-                                                     | "!"
-                                                     )
-                                                     ?
-                                                 )
-                                              )
-                                              ?
-                                        & 
-                                      | " "
+                                        !Y
+                                        " "
+                                  )
+                              |   !arg:(code.,?arg)
+                                &   add2index$(!indices.!arg)
+                                  : ?indices
+                                & bfun$!arg:?arg
+                              |   !arg:(i.,?arg)
+                                & "\\bi{" trim$!arg "}"
+                              |     !arg
+                                  : (a.(href.?arg),?)
+                                & @(!arg:?http "//" ?arg)
+                                &   "\\allowbreak{}\\texttt{"
+                                    !http
+                                    "/"
+                                      vap
+                                    $ ( ( 
+                                        = ."/\\allowbreak{}" !arg
+                                        )
+                                      . !arg
+                                      . "/"
                                       )
-                                      !Y
-                                      " "
-                                )
-                            |   !arg:(code.,?arg)
-                              & add2index$!arg
-                              & bfun$!arg:?arg
-                            |   !arg:(i.,?arg)
-                              & "\\bi{" trim$!arg "}"
-                            |     !arg
-                                : (a.(href.?arg),?)
-                              & @(!arg:?http "//" ?arg)
-                              &   "\\allowbreak{}\\texttt{"
-                                  !http
-                                  "/"
-                                    vap
-                                  $ ( (=."/\\allowbreak{}" !arg)
-                                    . !arg
-                                    . "/"
-                                    )
-                                  "}"
-                            |   out$(!sub sectiontitle !arg)
-                              & UUU7
+                                    "}"
+                              |   out$(!sub sectiontitle !arg)
+                                & UUU7
+                          )
+                        . !arg
                         )
-                      . !arg
                       )
                     )
                   )
-                )
+              . !indices
+              )
         )
       & ( dosectiontitle
         =   sub code indices
           .   !arg:(?sub.?arg)
             & :?indices
             &   (   !arg:@
-                  &   (   @(!arg:? "$" ?)
+                  &   (   @( !arg
+                           : (? "$" ?|? "'" ?)
+                           )
                         & bfun$!arg
                       |   "\\"
                           !sub
@@ -354,23 +361,42 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
                           "}"
                       )
                       \n\n
-                |   !arg:(code.,?code)
-                  & add2index$!code
-                  & "\\bfun{" bfun$!code "}"
-                | "\\" !sub "section{" neat$(!sub.!arg) "}"
+                |   !arg:? (code.,?) ?
+                  &   "\\bfun{"
+                      (   neat$(!indices..!arg)
+                        : (?arg.?indices)
+                      & !arg
+                      )
+                      "}"
+                |   "\\"
+                    !sub
+                    "section{"
+                    ( neat$(.!sub.!arg):(?arg.?)
+                    & !arg
+                    )
+                    "}"
                 )
                 \n
-                indexed$!indices
+                indexed$(toindex$(!indices.!arg))
         )
       & ( toindex
-        =   
-          .       !arg
+        =   indices
+          .     !arg:(?indices.?arg)
+              & (!arg:(code.,?arg)|)
+              &   !arg
                 :   ( %@
-                    : @(?:?arg ("$("|"$"))
+                    : @( ?
+                       :   ?arg
+                           ( "$("
+                           | "$"
+                           |   "'"
+                             & @(!arg:~(? "'" ? "'" ?))
+                           )
+                       )
                     )
                     ?
-              & "\\index{" !arg "@\\bc{" !arg "}}\n"
-            | 
+              & add2index$(!indices.!arg)
+            | !indices
         )
       & ( getTxt
         =   A
@@ -516,24 +542,27 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
                 !end
         )
       & ( add2index
-        =   cand
-          .     !arg:@(?:?cand "$" ?) ?
-              & ( @( !cand
-                   :   ?
-                       ( "+"
-                       | "*"
-                       | "^"
-                       | "|"
-                       | "'"
-                       )
-                       ?
-                   )
-                |   trim$!cand:?cand
-                  & ( !indices:? !cand ?
-                    | !indices !cand:?indices
-                    )
-                )
-            | 
+        =   cand indices
+          .   !arg:(?indices.?arg)
+            & (   !arg:@(?:?cand "$" ?) ?
+                & ( @( !cand
+                     :   ?
+                         ( "+"
+                         | "*"
+                         | "^"
+                         | "|"
+                         | "'"
+                         )
+                         ?
+                     )
+                  |   trim$!cand:?cand
+                    & ( !indices:? !cand ?
+                      | !indices !cand:?indices
+                      )
+                  )
+              | 
+              )
+            & !indices
         )
       & ( delimiter
         =   
@@ -550,7 +579,7 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
         )
       & ( coding
         =   
-          .   add2index$!arg
+          .   add2index$(.!arg)
             &   " "
                   map
                 $ ( ( 
@@ -601,6 +630,7 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
                           \n
                           items$!arg
                           "\\end{itemize}"
+                          \n
                     | !arg:(?.,?arg)&
                 )
               . !arg
@@ -725,6 +755,26 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
               : ?arg
             & (!fun.!arg)
         )
+      & ( makeItemList
+        =   
+          .       !itemlist
+                :   ?
+                    ( dt
+                    . ,? (a.(~href.?),@) ?
+                    )
+                    ?
+              & UUU9
+            |   "\\begin{quote}"
+                \n
+                "\\begin{description}"
+                \n
+                defterm$!arg
+                "\\end{description}"
+                \n
+                "\\end{quote}"
+                \n
+        )
+      & 0:?skipdl
       &     !(its.texhead)
               map
             $ ( ( 
@@ -755,8 +805,7 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
                               .   (name|href.?bfunname)
                                 , ?code
                               )
-                          &   dosectiontitle$(.!code)
-                              toindex$!code
+                          & dosectiontitle$(subsub.!code)
                         | lst$h4&UUU3\n
                         )
                     |   !arg:(h5.,?h5)
@@ -765,10 +814,21 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
                               .   (name|href.?bfunname)
                                 , ?code
                               )
-                          &   dosectiontitle$(.!code)
-                              toindex$!code
+                          & dosectiontitle$(.!code)
                         | out$(h5 !h5)&UUU2\n
                         )
+                    |     !arg
+                        : ( p
+                          .   
+                            , ( i
+                              .   
+                                , ( a
+                                  . (href."#lusmenu"),"main menu"
+                                  )
+                              )
+                          )
+                      & 1:?skipdl
+                      & 
                     |   !arg:(p.,?par)
                       & (     !par
                             :   (span.(class.arrow),?)
@@ -808,7 +868,10 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
                                 )
                               )
                           & 
-                        | neat$(.!par) \n\n
+                        |   ( neat$(..!par):(?par.?)
+                            & !par
+                            )
+                            \n\n
                         )
                     |   !arg:(blockquote.,?blockquote)
                       &   commandchars$!blockquote
@@ -864,25 +927,31 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
                     |   !arg:(\r\n|\n)
                       & 
                     |   !arg:(dl.,?itemlist)
-                      & (     !itemlist
+                      & (   !skipdl:1
+                          & 0:?skipdl
+                          & 
+                        |     !itemlist
                             :   ?
                                 ( dt
                                 .   
                                   ,   ?
-                                      (a.(~href.?),@)
+                                      ( a
+                                      .   (href.@(?:"#" ?))
+                                        , ?arg
+                                      )
                                       ?
                                 )
                                 ?
-                          & UUU9
-                        |   "\\begin{quote}"
-                            \n
-                            "\\begin{description}"
-                            \n
-                            defterm$!itemlist
-                            "\\end{description}"
-                            \n
-                            "\\end{quote}"
-                            \n
+                          & (     !itemlist
+                                :   ?
+                                    ( dd
+                                    . ?,~(? (dl.?,?) ?)
+                                    )
+                                    ?
+                              & makeItemList$!itemlist
+                            | 
+                            )
+                        | makeItemList$!itemlist
                         )
                     |   !arg:(ol.,?itemlist)
                       &   "\\begin{enumerate}"
