@@ -14,13 +14,14 @@ help=
   . switxt,systxt,tbltxt,filtxt,flgtxt,glftxt,predefmenu,flttxt
   . sgntxt,cattxt,gontxt,factxt,subtxt1,show,rmvtxt,macrotxt
   . outtxt,taytxt,newtxt,newobjecttxt,humtxt,objecttxt,hashtxt
-  . paragraphs,fname,findtxt,inserttxt,removetxt,Newtxt,Dietxt
+  . paragraphs,fname,findtxt,inserttxt,removetxt,Dietxt
   . ISOtxt,casesensitivetxt,foralltxt,doHTML,clktxt,limitations
   . lowtxt,upptxt,whltxt,argtxt,d2xtxt,x2dtxt,toMLtxt
   . rewriting,jsntranstxt,transformtxt,MLencodingtxt,nestMLtxt
   . gentlepat recurpat closetxt filesettxt interaction usecases
   . fixdtxt modetxt positiontxt readtxt varitxt writetxt nonlinpat
-  . CalcFunctxt,Calculatetxt,CalcTrctxt,CalcPrinttxt,CalcExporttxt,CalcNewtxt,CalcDietxt
+  . CalcFunctxt,Calculatetxt,CalcTrctxt,CalcPrinttxt,CalcExporttxt
+  . CalcParmtxt,CalcVartxt,CalcArraytxt,CaltItertxt,CalcMethodtxt
   )
 .   ( lusmenu
     =   M
@@ -1747,31 +1748,121 @@ can suggest the size of the table to Bracmat, but this is not necessary:
 
 This tells Bracmat to start off with a million bins.
 
-The following methods are defined for hash tables:
+You can add user defined methods and member variables to a built-in Bracmat
+object, but first you have to create the object. In the following example we
+add a method called |_Insert_| to an hash table. This |_Insert_| method is to
+give a warning when you add a value for a key that is already present in the
+hash table.
+
+{?} ( new$hash:?myhash               { Create a hash table myhash. }
+    &   (
+        = Insert                    { Add a method \"Insert\" to myhash
+        =   K,V                      that only allows one value per key. }
+          .     !arg:(?K.?V)
+              & (Its..find)$!K:(?.?v)
+              &   out
+                $ ( Key
+                    !K
+                    already
+                    present
+                    with
+                    ( !V:!v&same
+                    | different
+                    )
+                    value
+                    !v
+                  )
+            | (Its..insert)$!arg
+        )
+      : (=?(myhash.))
+    )
+
+{?} (myhash..Insert)$(X.12);         { Insert the value 12 for key X. }
+{?} (myhash..Insert)$(X.12);         { Try to do it one more time. }
+|_Key X already present with same value 12_|
+
+{?} (myhash..Insert)$(X.10);        { Try to insert another
+                                     value for the same key.}
+|_Key X already present with different value 12_|
+
+{?} (myhash..insert)$(Z.1);          { Use the built-in insert method.}
+{?} (myhash..insert)$(Z.1);          { Insert same value again. }
+{?} (myhash..insert)$(Z.2);          { Also insert a different value. }
+{?} (myhash..find)$X                 { Show all key-value pairs of X. }
+{!} X.12
+
+{?} (myhash..find)$Z                 { Show all key-value pairs of Z. }
+{!} (Z.2) (Z.1) (Z.1)
+
+{?} (myhash..remove)$Z:?values;
+
+If you need to `finalize' an object just before it dies, you can add a user
+method called |_die_| that takes no arguments. If the object is a hash table,
+you could serialize and save the contents of the hash table to a file, or
+you could write a message to the screen, as in this example, where we add
+another member function, |_die_| to the already existing member functions in
+the object |_myhash_|: 
+
+{?} !myhash:(=?mymyhashmethods)
+{?} '( (die=.out$\"Who ordered th\") 
+       ()$mymyhashmethods
+     ) : (=?(myhash.))
+
+Let us check that we now have two user defined member functions in
+the |_myhash_| object, namely |_die_| and |_Insert_|:
+
+{?} lst$myhash
+
+    (myhash=
+
+    =   (die=.out$\"Who ordered th\")
+        ( Insert
+        =   K,V
+          .     !arg:(?K.?V)
+              & (Its..find)$!K:(?.?v)
+              &   out
+                $ ( Key
+                    !K
+                    already
+                    present
+                    with
+                    ( !V:!v&same
+                    | different
+                    )
+                    value
+                    !v
+                  )
+            | (Its..insert)$!arg
+        )
+    )
+
+And here is what happens when we delete the hash object:
+
+{?} :?myhash
+
+    Who ordered th
+
+In the examples above we have already seen some built-in hash
+methods in use. Here is the complete list:
+
 1 |_find_|
     find all values for a given key
 2 |_insert_|
     insert a value for a key
 3 |_remove_|
     remove a key and all its values
-4 |_New_|
-    creates a hash table, cannot be called programmatically
-5 |_Die_|
-    cleans up a hash table, cannot be called programmatically
-6 |_ISO_|
+4 |_ISO_|
     make all key access case-insensitive
-7 |_casesensitive_|
+5 |_casesensitive_|
     make all key access case sensitive. (Default)
-8 |_forall_|
+6 |_forall_|
     apply a function to all key-value pairs"
       ,   (1,findtxt)
           (2,inserttxt)
           (3,removetxt)
-          (4,Newtxt)
-          (5,Dietxt)
-          (6,ISOtxt)
-          (7,casesensitivetxt)
-          (8,foralltxt)
+          (4,ISOtxt)
+          (5,casesensitivetxt)
+          (6,foralltxt)
     )
   & ( findtxt
     =   T
@@ -1789,60 +1880,6 @@ possible and the same value can be inserted more than once for the same key."
       , "(myhash..remove)$key:?KeyValuePairs"
       , "Removes the key with all its values and returns a whitespace-separated list of
 key-value pairs."
-    )
-  & ( Newtxt
-    =   T
-      , New
-      , "This is a method of the hash class that is called by the system when it
-evaluates new$hash. It cannot be called from user code."
-    )
-  & ( Dietxt
-    =   T
-      , Die
-      , "This method is called when a hash object is deleted. It is not directly
-called from user code. (Compare with a C++ destructor.) You can add your own
-clean up code by writing a |_die_| method and adding it to a hash object once it
-is created. Example:
-
-{?} new$hash:?myhash;                  { Create a hash table myhash. }
-{?} ((
-    =   ( Insert                       { Add a method 'Insert' to myhash that
-                                        only allows one value per key. }
-        =   K,V
-          .     !arg:(?K.?V)
-              & (Its..find)$!K:(?.?v)
-              &   out
-                $ ( str
-                  $ ( \"Key \"
-                      !K
-                      \" already present\"
-                      ( !V:!v&\" with same\"
-                      | \", but with different\"
-                      )
-                      \" value \"
-                      !v
-                    )
-                  )
-            | (Its..insert)$!arg
-        )
-        (die=.out$\"Who ordered th\") { This method is called just before
-                                       the object is deleted. }
-    )
-  : (=?(myhash.)))
-
-
-{?} (myhash..Insert)$(X.12);          { Insert the value 12 for key X. }
-{?} (myhash..Insert)$(X.12);          { Try to do it one more time. }
-{?} (myhash..Insert)$(X.10);         { Try to insert another value
-                                      for the same key.}
-{?} (myhash..insert)$(Z.1);           { Use the built-in insert method.}
-{?} (myhash..insert)$(Z.1);           { Insert same value again. }
-{?} (myhash..insert)$(Z.2);           { Also insert a different value. }
-{?} (myhash..find)$X;                { Show all key-value pairs of X.
-                                                      (only 1) }
-{?} (myhash..find)$Z;                 { Show all key-value pairs of Z.(3)}
-{?} (myhash..remove)$Z:?values;
-{?} :?myhash;                         { Get rid of the hash table. }"
     )
   & ( ISOtxt
     =   T
@@ -1881,17 +1918,24 @@ Example:
           & ~!loop
       )
     )
+
+  Key=X Value=12
+  Key=Z Value=1
 "
     )
   & ( calctxt
     =   M
       , "Floating point calculations"
-      , "Bracmat is mainly meant for symbolic processing. Floating point computations do not
-fit well in this environment. However, sometimes you may want to be able to do
-floating point calculations, for example when you want to create vector 
-drawing of a graph. Whereas the graph is purely symbolic in nature, the drawing
-requires coordinates. Moreover, to compute the coordinates you may want to use
-'gravity', 'Coulomb forces' or 'elastic forces'.
+      , "Bracmat is best at symbolic processing. However, sometimes you may
+want to do floating point calculations, for example to a create a graphic
+illustration of the result of some symbolic processing, such as a complex
+graph. Whereas the graph is purely symbolic in nature, the drawing
+requires coordinates. For the computation of those coordinates you may want
+to model the vertices as charged particles and the edges as elastic strings
+connecting the particles. To let this physical model evolve under the influence
+of elastic and Coulolmb forces, the computer must iterate many times over
+the same set of arithmetic instructions. For purposes like these, Bracmat has
+a |_calculation_| objects.
 
 A |_calculation_| object contains Bracmat code, but because it is inside this
 object it behaves very different from what we are used to:
@@ -1924,9 +1968,41 @@ Or, with parameters:
 {?} (myCalculation..calculate)$(13,8)
 {!} 1.3940221304312031E+01
 
-Hereafter, |_myCalculation_| refers to a hash table and is treated in the same way as
-a user defined object.
+Hereafter, |_myCalculation_| refers to a calculation object and is treated
+in the same way as a user defined object.
 
+Before you can get started with calculation objects you need to learn
+about the calculation object API, parameters, variables, arrays, loops,
+built-in functions and user defined functions.
+
+1 Member functions of calculation objects
+    Member functions are the API: they constitute the communication
+    channels between the Bracmat code outside and the Bracmat code inside
+    the calculation object.
+2 Built-in calculation functions
+    These functions can be used in the code that runs inside a calculation
+    object.
+3 Parameters
+    How are parameters passed from outside to inside calculation objects?
+    And how are they passed to built-in and user defined functions?
+4 Variables
+    When to declare variables and how.
+5 Arrays
+    Declaring rank and ranges of arrays, indexing and accessing arrays.
+6 Iterations
+    How to escape a loop.
+"
+      ,   (1,CalcMethodtxt)
+          (2,CalcFunctxt)
+          (3,CalcParmtxt)
+          (4,CalcVartxt)
+          (5,CalcArraytxt)
+          (6,CaltItertxt)
+    )
+  & ( CalcMethodtxt
+    =   M
+      , "Listing of calculation object methods"
+      , "
 The following methods are defined for |_calculation_| objects:
 1 |_calculate_|
     Perform a floating point calculation.
@@ -1936,23 +2012,15 @@ The following methods are defined for |_calculation_| objects:
     Show a listing of the instructions contained in the |_calculation_| object. 
 4 |_export_|
     Export the value of a variable contained in a |_calculation_| object.
-5 |_New_|
-    Creates a |_calculation_| object, cannot be called programmatically
-6 |_Die_|
-    Cleans up a |_calculation_| object, cannot be called programmatically
-7 Listing of built-in functions and function-like constructs in |_calculation_| objects.
 "
       ,   (1,Calculatetxt)
           (2,CalcTrctxt)
           (3,CalcPrinttxt)
           (4,CalcExporttxt)
-          (5,CalcNewtxt)
-          (6,CalcDietxt)
-          (7,CalcFunctxt)
     )
   & ( CalcFunctxt
     =   T
-      , "Listing of built-in functions and function-like constructs in |_calculation_| objects"
+      , "Listing of built-in functions and function-like constructs in calculation objects"
       , "Bracmat maps all floating point functions that are available as standard C functions to Bracmat functions.
 For a description, see the documentation of the math.h C header file.
 
@@ -1983,14 +2051,16 @@ In addition:
 |_whl'(<code>)_| Implements a loop. 
 "
     )
+  & (CalcParmtxt=T,"Calculation parameters"," TBD.")
+  & (CalcVartxt=T,"Calculation variables"," TBD.")
+  & (CalcArraytxt=T,"Calculation arrays"," TBD.")
+  & (CaltItertxt=T,"Calculation iterations"," TBD.")
   & (Calculatetxt=T,"(myCalculation..calculate)$<Parameters>",TBD)
   & (CalcTrctxt=T,"(myCalculation..trc)$<Parameters>",TBD)
   & (CalcPrinttxt=T,"(myCalculation..print)$",TBD)
   & ( CalcExporttxt
     = T,"(myCalculation..export)$(<format>,<name of variable of |_calculation_| object>)",TBD
     )
-  & (CalcNewtxt=T,"Construction of |_calculation_| object",TBD)
-  & (CalcDietxt=T,"Destruction of |_calculation_| object",TBD)
   & ( prostutxt1
     =   T
       , "Program flow"
@@ -4130,7 +4200,6 @@ not UTF-8 encoded.
 
 {?} div$(sim$(\"similarity rounded\",\"and in procents\")+1/200,1/100)
 {!} 30"
-
     )
   & ( seltxt
     =   T
@@ -4712,7 +4781,8 @@ Topic:")
                                    | "^"
                                    | "*"
                                    | "+"
-                                   | "="
+                                   |   "="
+                                     & @(!a:~(? ("<"|">")))
                                    | "_"
                                    |   ( "."
                                        | ","
@@ -6315,7 +6385,6 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
         & ( lt
           =   A
             .     @(!arg:?A "<" ?arg)
-                & out$(lt !arg)
                 &   !A
                     ( @(!arg:"=" ?arg)&"$\\le$"
                     | "$<$"
@@ -6326,7 +6395,6 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
         & ( gtlt
           =   A
             .     @(!arg:?A ">" ?arg)
-                & out$(gtlt !arg)
                 &   lt$!A
                     ( @(!arg:"=" ?arg)&"$\\ge$"
                     | "$>$"
