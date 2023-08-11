@@ -464,7 +464,8 @@ variable is receiving and a later in the pattern giving, than the pattern is
 said to be non-linear. Such patterns can for example be used to find things
 that occur more than once in the subject. For example, find two inventions of the
 same age in a list of name/year pairs:</p>
-<blockquote><pre class="exinput">{?} (   (teabag.1904) (sonar.1906) (computer.1941) (triode.1906) (zeppelin.1900)
+<blockquote><pre class="exinput">{?} (   (teabag.1903) (sonar.1906) (computer.1941)
+        (triode.1906) (zeppelin.1900) ("coffee filter".1782)
       : ? (?invention1.?year) ? (?invention2.!year) ?
     &amp; !invention1 !invention2
     )
@@ -486,14 +487,16 @@ patterns and that checks whether an input is valid, according to this grammar.</
 {!} 0 0 0 1 1 1</pre></blockquote>
 <p>The following example could be the basis for a journey planner. We use a
 recursive pattern to find out whether two continents are connected over land.</p>
-<blockquote><pre class="exinput">{?} connected=("South America"."North America") (Africa.Asia) (Asia.Europe);
+<blockquote><pre class="exinput">{?} connected=(("South America"."North America") (Africa.Asia)
+               (Asia.Europe));
 {?} (reachable = a b f
     .     !arg:(?a.?b.?f)
         &amp; !f:? ((!a.!b)|(!b.!a)) ?
       |   !f:?A ((!a.?c)|(?c.!a)) ?Z
         &amp; reachable$(!c.!b.!A !Z)
     ); {Remove used fact from fact base.}
-{?} (   Antarctic Europe Australia Africa Asia "North America" "South America"
+{?} (   Antarctic Europe Australia Africa Asia "North America"
+        "South America"
     :   ?
         %@?x  {Pick a continent.}
         ?
@@ -564,25 +567,25 @@ number.
 You have to take care with minuses: the patterns<code> %"-20/5" </code>and<code> %-20/5 </code>are
 different. In<code> %"-20/5", </code>the<code> % </code>is superfluous and the pattern matches
 characterwise. In<code> %-20/5, </code>the pattern matches <code>20/5</code> and the minus is ignored!</p>
-<blockquote><pre class="exinput">{?} @(abcd40/10efgh:?a    20/5  ?z)    {succeeds, because 4 = 20/5 = 4}</pre><pre class="exoutput">{!} abcd40/10efgh
+<blockquote><pre class="exinput">{?} @(abcd40/10efgh:?a    20/5  ?z) {succeeds, because 4 = 20/5 = 4}</pre><pre class="exoutput">{!} abcd40/10efgh
     S   0,00 sec
 </pre><pre class="exinput">{?} !a !z</pre><pre class="exoutput">{!} abcd 0/10efgh
     S   0,00 sec</pre></blockquote>
-<blockquote><pre class="exinput">{?} @(abcd52/13efgh:?a    20/5  ?z)    {succeeds, because 52/13 = 20/5 = 4}</pre><pre class="exoutput">{!} abcd52/13efgh
+<blockquote><pre class="exinput">{?} @(abcd52/13efgh:?a    20/5  ?z) {succeeds, because 52/13 = 20/5 = 4}</pre><pre class="exoutput">{!} abcd52/13efgh
     S   0,00 sec
 </pre><pre class="exinput">{?} !a !z</pre><pre class="exoutput">{!} abcd efgh
     S   0,00 sec</pre></blockquote>
-<blockquote><pre class="exinput">{?} @(abcd40/10efgh:?a   %20/5  ?z)    {fails}</pre></blockquote>
+<blockquote><pre class="exinput">{?} @(abcd40/10efgh:?a   %20/5  ?z) {fails}</pre></blockquote>
 <blockquote><pre>   F</pre></blockquote>
-<blockquote><pre class="exinput">{?} @(abcd-20/5efgh:?a %"-20/5" ?z)    {succeeds}</pre><pre class="exoutput">{!} abcd-20/5efgh
+<blockquote><pre class="exinput">{?} @(abcd-20/5efgh:?a %"-20/5" ?z){succeeds}</pre><pre class="exoutput">{!} abcd-20/5efgh
     S   0,00 sec
 </pre><pre class="exinput">{?} !a !z</pre><pre class="exoutput">{!} abcd efgh
     S   0,00 sec</pre></blockquote>
-<blockquote><pre class="exinput">{?} @(abcd-20/5efgh:?a  %-20/5  ?z)    {succeeds, a = abcd-}</pre><pre class="exoutput">{!} abcd-20/5efgh
+<blockquote><pre class="exinput">{?} @(abcd-20/5efgh:?a  %-20/5  ?z) {succeeds, a = abcd-}</pre><pre class="exoutput">{!} abcd-20/5efgh
     S   0,00 sec
 </pre><pre class="exinput">{?} !a !z</pre><pre class="exoutput">{!} abcd- efgh
     S   0,00 sec</pre></blockquote>
-<blockquote><pre class="exinput">{?} @(abcd-20/5efgh:?a   -20/5  ?z)    {succeeds, a = abcd }</pre><pre class="exoutput">{!} abcd-20/5efgh
+<blockquote><pre class="exinput">{?} @(abcd-20/5efgh:?a   -20/5  ?z) {succeeds, a = abcd }</pre><pre class="exoutput">{!} abcd-20/5efgh
     S   0,00 sec
 </pre><pre class="exinput">{?} !a !z</pre><pre class="exoutput">{!} abcd efgh
     S   0,00 sec</pre></blockquote>
@@ -655,25 +658,24 @@ evaluator if they are escaped with a<code> $ </code>node with an empty LHS.</p>
 <p>The escape operator only affects the top node of the escape operator's RHS.
 The LHS and RHS of the affected node are matched against the subject in the
 normal way.</p>
-<blockquote><pre class="exinput">{?} vowel=.!sjt:(a|e|i|o|u|y)      { Function to be used in a pattern to check
-                                     that the subject is a single vowel. }</pre></blockquote>
-<blockquote><pre class="exinput">{?} (=a$123):(=$((vowel')$(#:?n))) { Only the "$" between ")" and "(" is escaped,
-                                     because that is the top node of
-                                        "(vowel')$(#:?n)"
-                                     So the pattern expressions "vowel'" and "#:?n"
-                                     are evaluated as normal. }
+<blockquote><pre class="exinput">{?} vowel=.!sjt:(a|e|i|o|u|y)  { Function to be used in a pattern to
+                            check that the subject is a single vowel. }</pre></blockquote>
+<blockquote><pre class="exinput">{?} (=a$123):(=$((vowel')$(#:?n))) { Only the "$" between ")" and "("
+                            is escaped, because that is the top node of
+                               "(vowel')$(#:?n)"
+                            So the pattern expressions "vowel'" and "#:?n"
+                            are evaluated as normal. }
 {!} =a$123</pre></blockquote>
-<blockquote><pre class="exinput">{?} !n</pre><pre class="exoutput">{!} 123                            { This proves that the RHS of the top "$"
-                                     was evaluated. }</pre></blockquote>
+<blockquote><pre class="exinput">{?} !n</pre><pre class="exoutput">{!} 123                    { This proves that the RHS of the top "$"
+                            was evaluated. }</pre></blockquote>
 <blockquote><pre class="exinput">{?} (=b$456):(=$((vowel')$(#:?m))) { This fails, proving that the pattern
-                                     expression "vowel'" doesn't recognise
-                                     the "b" in the subject as a vowel.
-                                     No assignment to variable "?m" takes
-                                     place. }</pre></blockquote>
-<blockquote><pre class="exinput">{?} (=(vowel')$456) : (=$(($(vowel'))$(#:?m)))   { This succeeds, because
-                                     the "'" in the pattern expression "$(vowel')"
-                                     is escaped; so the pattern "$(vowel')"
-                                     matches the subject "vowel'" }
+                            expression "vowel'" doesn't recognise the "b"
+                            in the subject as a vowel. No assignment
+                            to variable "?m" takes place. }</pre></blockquote>
+<blockquote><pre class="exinput">{?} (=(vowel')$456) : (=$(($(vowel'))$(#:?m))) { This succeeds,
+                            because the "'" in the pattern expression
+                            "$(vowel')" is escaped; so the pattern
+                            "$(vowel')" matches the subject "vowel'" }
 {!} =(vowel')$456</pre></blockquote>
 <blockquote><pre class="exinput">{?} !m</pre><pre class="exoutput">{!} 456</pre></blockquote>
 <p>The escape operator functions with all Bracmat operators, but the
@@ -715,16 +717,16 @@ Comments can be written everywhere, except in the middle of a string in
 quotation marks. Comments are enclosed in<code> {} </code>and may be nested.</p>
 <p><span class="arrow">&#8657;</span><a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a></p>
 <h2><a name="binmenu">Binary operators</a></h2>
-<dl><dt><a href="#binovztxt"> binary operators - overview </a></dt><dt><a href="#algtxt"> algebraic operations</a></dt><dt><a href="#binprotxt"> program flow</a></dt><dt><a href="#pattxt"> pattern matching</a></dt><dt><a href="#contxt"> data structures</a></dt><dt><a href="#savtxt"> assignment</a></dt><dt><a href="#difftxt"> differentiation</a></dt><dt><a href="#funmactxt"> functions and macros</a></dt><dt><a href="#dumtxt"> the dummy operator</a></dt></dl>
+<dl><dt><a href="#binovztxt"> binary operators - overview</a></dt><dt><a href="#algtxt"> algebraic operations</a></dt><dt><a href="#binprotxt"> program flow</a></dt><dt><a href="#pattxt"> pattern matching</a></dt><dt><a href="#contxt"> data structures</a></dt><dt><a href="#savtxt"> assignment</a></dt><dt><a href="#difftxt"> differentiation</a></dt><dt><a href="#funmactxt"> functions and macros</a></dt><dt><a href="#dumtxt"> the dummy operator</a></dt></dl>
 <p><span class="arrow">&#8657;</span><a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a></p>
 <h3><a name="binovztxt"><code>= </code>. , <code>| &amp; : </code>whitespace<code> + * ^ \L \D ' $ _</code></a></h3>
 <p>These are the 15 binary Bracmat operators. The higher in the list, the lower
-in the order of operations. Use parentheses to overrule the ordering of 
+in the order of operations. Use parentheses to overrule the ordering of
 precedence and force an operator to a higher position in the order of
 operations, as in:</p>
 <blockquote><pre class="exinput">{?} (a+b)*(a+c)+a^(-1*d^2+(d+1)*(d+-1))</pre><pre class="exoutput">{!} a^-1+a^2+a*b+a*c+b*c
 </pre></blockquote>
-<dl><dt><a href="#savtxt"><code>=</code></a></dt><dd>    assignment:<code> (x=7) (square=.!arg^2)</code></dd><dd>    object member definition:<code> (myobject=(place=Copenhagen) (setPlace=.!arg:?(its.place)))</code></dd><dt><a href="#contxt">.</a></dt><dd>    fixed data structure: <code>(Palme.Olof.Sweden)</code></dd><dd>    object member referencing:<code> (myhash..insert)$(xxx.998743)</code></dd><dt><a href="#contxt">,</a></dt><dd>    automatically flattens sublists: <code>(ham,(bread,butter),jam):(ham,bread,butter,jam)</code></dd><dt><a href="#binprotxt"><code>|</code></a></dt><dd>    or else: <code>get$myfile | out$"Cannot read myfile"</code></dd><dt><a href="#binprotxt"><code>&amp;</code></a></dt><dd>    and then: <code>out$"almost done" &amp; Done</code></dd><dt><a href="#asstxt"><code>:</code></a></dt><dd>    match subject with pattern: <code>Meeting at 4 in room 24:? ?#hour ? ?#room ?</code></dd><dt><a href="#contxt"><code>[whitespace]</code></a></dt><dd>    sentence, neutral element: <code>Oh well this can go on and on:?a Oh ?z &amp; !a:</code></dd><dt><a href="#algtxt"><code>+</code></a></dt><dd>    add, neutral term 0:<code>(a+6+b+a+10)</code>,<code>(a+b:?x+a+?y &amp; !x:0)</code></dd><dt><a href="#algtxt"><code>*</code></a></dt><dd>    multiply, neutral factor 1: <code>(46546*647547564)</code>,<code>(a*b:?x*a*?y &amp; !x:1)</code></dd><dt><a href="#algtxt"><code>^</code></a></dt><dd>    raise to a power, neutral exponent 1: <code>(9975^332)</code>,<code>(45:?n^?exp &amp; !exp:1)</code></dd><dt><a href="#algtxt"><code>\L</code></a></dt><dd>    take logarithm:<code> 10\L1050</code></dd><dt><a href="#difftxt"><code>\D</code></a></dt><dd>    differentiate:<code> x\D(x^10)</code></dd><dt><a href="#funmactxt"><code>'</code></a></dt><dd>    function evaluation (does not evaluate RHS): <code>str'(b+a):"b+a"</code></dd><dd>    macro: <code>()'(my name is ()$name)</code></dd><dt><a href="#funmactxt"><code>$</code></a></dt><dd>    function evaluation (evaluates RHS): <code>str$(b+a):"a+b"</code></dd><dd>    variable in macro: <code>()'(my name is ()$name)</code></dd><dt><a href="#dumtxt"><code>_</code></a></dt><dd>    dummy:   <code>!expr:?lhs_?rhs &amp; (do$!lhs)_(do$!rhs)</code>  </dd></dl>
+<dl><dt><a href="#savtxt"><code>=</code></a></dt><dd>    assignment:<code> (x=7) (square=.!arg^2)</code></dd><dd>    object member definition:</dd><dd>   <code> (myobject=(place=Copenhagen) (setPlace=.!arg:?(its.place)))</code></dd><dt><a href="#contxt">.</a></dt><dd>    fixed data structure: <code>(Palme.Olof.Sweden)</code></dd><dd>    object member referencing:<code> (myhash..insert)$(xxx.998743)</code></dd><dt><a href="#contxt">,</a></dt><dd>    automatically flattens sublists:</dd><dd>    <code>(ham,(bread,butter),jam):(ham,bread,butter,jam)</code></dd><dt><a href="#binprotxt"><code>|</code></a></dt><dd>    or else: <code>get$myfile | out$"Cannot read myfile"</code></dd><dt><a href="#binprotxt"><code>&amp;</code></a></dt><dd>    and then: <code>out$"almost done" &amp; Done</code></dd><dt><a href="#asstxt"><code>:</code></a></dt><dd>    match subject with pattern:</dd><dd>    <code>Meeting at 4 in room 24:? ?#hour ? ?#room ?</code></dd><dt><a href="#contxt"><code>[whitespace]</code></a></dt><dd>    sentence, neutral element:</dd><dd>    <code>Oh well this can go on and on:?a Oh ?z &amp; !a:</code></dd><dt><a href="#algtxt"><code>+</code></a></dt><dd>    add, neutral term 0:<code>(a+6+b+a+10)</code>,<code>(a+b:?x+a+?y &amp; !x:0)</code></dd><dt><a href="#algtxt"><code>*</code></a></dt><dd>    multiply, neutral factor 1: <code>(46546*647547564)</code>,<code>(a*b:?x*a*?y &amp; !x:1)</code></dd><dt><a href="#algtxt"><code>^</code></a></dt><dd>    raise to a power, neutral exponent 1: <code>(9975^332)</code>,<code>(45:?n^?exp &amp; !exp:1)</code></dd><dt><a href="#algtxt"><code>\L</code></a></dt><dd>    take logarithm:<code> 10\L1050</code></dd><dt><a href="#difftxt"><code>\D</code></a></dt><dd>    differentiate:<code> x\D(x^10)</code></dd><dt><a href="#funmactxt"><code>'</code></a></dt><dd>    function evaluation (does not evaluate RHS): <code>str'(b+a):"b+a"</code></dd><dd>    macro: <code>()'(my name is ()$name)</code></dd><dt><a href="#funmactxt"><code>$</code></a></dt><dd>    function evaluation (evaluates RHS): <code>str$(b+a):"a+b"</code></dd><dd>    variable in macro: <code>()'(my name is ()$name)</code></dd><dt><a href="#dumtxt"><code>_</code></a></dt><dd>    dummy:   <code>!expr:?lhs_?rhs &amp; (do$!lhs)_(do$!rhs)</code>  </dd></dl>
 <p><span class="arrow">&#8657;</span><a href="#binmenu" style="line-height:12pt">Binary operators</a></p>
 <h3><a name="savtxt">The<code> = </code>operator</a></h3>
 <p>This operator ensures that the right hand operator stays unevaluated. It is
@@ -1191,23 +1193,23 @@ substitution, but the resulting code is harder to understand:</p>
       :   ?
           %?`A
           ?
-          ( %?`B                            {Each number pair [A,B]}
-          &amp; !A+!B:?C                        {is added only once, giving C. }
+          ( %?`B                        {Each number pair [A,B]}
+          &amp; !A+!B:?C                    {is added only once, giving C. }
           &amp;   '(? ()$(!count+1:?count&amp;C) ?)
-            : (=?rem)                       {C's value is hard-coded into rem}
+            : (=?rem)                   {C's value is hard-coded into rem}
           )
-          !rem                              {which is the remaining pattern. }
+          !rem                          {which is the remaining pattern. }
     &amp; out$(after !count "trials:" !A "+" !B "=" !C )
     )</pre></blockquote>
 <p>after 16 trials: 5<code> + </code>7<code> = </code>12</p>
 <p>In the same way, function code can be pieced together before it is ever
 executed.</p>
 <blockquote><pre class="exinput">{?} power=three
-{?} ((!power : two &amp; (=!arg^2)) | (=!arg^3)) : (=?abc)      {If power="two",
-    "abc" is bound to "!arg^2" (unevaluated). Otherwise, "abc" is bound to "!arg^3".}
+{?} ((!power : two &amp; (=!arg^2)) | (=!arg^3)) : (=?abc)  {If power="two",
+   "abc" is bound to "!arg^2" (unevaluated). Otherwise, "abc" is bound to "!arg^3".}
 {?} '(.!arg + -1*$abc + 2) : (=?poly) {"poly" is the name of a new function
-    that will return a value that depends on the current value of arg
-    and on the value of power at the time when abc got its binding.}
+        that will return a value that depends on the current value of arg
+        and on the value of power at the time when abc got its binding.}
 {?} lst$poly { show poly's definition }
 {?} poly$4
 {!} -58</pre></blockquote>
@@ -1401,19 +1403,19 @@ tracking mechanism.</p>
 two or more categories (odd, even, prime). The findings are to be
 printed to the screen.</p>
 <blockquote><pre class="exinput">{?} ( !M
-    :   ?                                   { skip 0 or more rows ---               }
-        (?c1,?row)                          { ---fetch (number type, number row)--- }
-        ?                                   { ---skip 0 or more rows ---            }
-        ( ?c2                               { ---fetch another number type,         }
-        ,   ?                               {    skip 0 or more numbers,            }
-            ( %?`el                         {    fetch a number                     }
-            &amp; !row:? !el ?                  { does number occur in earlier row ?    }
-            &amp; out$(!el is both !c1 and !c2) { yes?  show result                     }
-            &amp; ~                             { not satisfied yet: fail and backtrack }
+    :   ?                           { skip 0 or more rows --- }
+        (?c1,?row)                  { ---fetch (number type, number row)--- }
+        ?                           { ---skip 0 or more rows --- }
+        ( ?c2                       { ---fetch another number type, }
+        ,   ?                       {    skip 0 or more numbers, }
+            ( %?`el                 {    fetch a number }
+            &amp; !row:? !el ?          { does number occur in earlier row ? }
+            &amp; out$(!el is both !c1 and !c2) { yes?  show result }
+            &amp; ~                     { not satisfied yet: fail and backtrack }
             )
-            ?                               {    skip rest of numbers---            }
+            ?                       {    skip rest of numbers--- }
         )
-        ?                                   { ---skip rest of rows                  }
+        ?                           { ---skip rest of rows }
     )</pre></blockquote>
 <p>This prints</p>
 <blockquote><pre>   3 is both odd and prime
@@ -1524,7 +1526,7 @@ operator) has the empty string as neutral element. In sums, <code>0</code> (zero
 neutral element. In products, <code>1</code> is the neutral element. So the empty string,
 <code>0</code> and <code>1</code> are trivial elements in lists, sums and products, respectively. In
 addition, <code>0</code> is also a trivial element in products. Lists and sums do not have
-<code>'zeros'.</code></p>
+`zeros'.</p>
 <dl><dt><code>!</code> and <code>!!</code></dt><dd>in front of an non-nil atom or an expression denoting a member of an
 object causes expansion of the atom or the member to its direct or
 indirect binding. This binding is matched with the subject.</dd><dt><code>`</code></dt><dd>causes backtracking if the pattern did not successfully unify with a
@@ -1678,7 +1680,7 @@ encoded Unicode characters can be used in strings. Some special characters
 have to be preceded by a backslash:</p>
 <dl><dt><code>\a</code></dt><dd>attention (bell)</dd><dt><code>\b</code></dt><dd>backspace</dd><dt><code>\t</code></dt><dd>tab</dd><dt><code>\n</code></dt><dd>new line</dd><dt><code>\v</code></dt><dd>vertical tab</dd><dt><code>\f</code></dt><dd>form feed</dd><dt><code>\r</code></dt><dd>carriage return</dd><dt><code>\\</code></dt><dd>backslash</dd><dt><code>\"</code></dt><dd>double quote</dd></dl>
 <p>If you precede a string with the prefix<code> @, </code>then backslashes are treated as
-normal characters. E.g.<code> sys$@"C:\dos\edit".</code>
+normal characters. E.g.<code> sys$@"C:\gitprojects\Bracmat\Windows\bracmat.exe".</code>
 Instead of the tab and new line characters above, you may enter tabs and
 new lines by pressing the tab and the return key, respectively.</p>
 <p>Examples:</p>
@@ -1688,10 +1690,11 @@ new lines by pressing the tab and the return key, respectively.</p>
 {?} "this" has 4 characters and "" (nil) none
 {?} "this is an \"atom\" with 36 characters"
 {?} "this string\nno verb"
-{?} "this string</pre></blockquote>
-<p><code>no verb either"</code></p>
-<blockquote><pre class="exinput">{?} "if zero equals one, someone divided by zero" = "1:0&amp;get$(\")y\",MEM)"
-{?} get$(!"if zero equals one, someone divided by zero",MEM)</pre></blockquote>
+{?} "this string
+    no verb either"
+{?} "This string has a value" = "a value"
+{?} get$(!"This string has a value",MEM)
+{!} a value</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a></p>
 <h2><a name="varsmenu">Symbols</a></h2>
 <dl><dt><a href="#varmattxt"> literals</a></dt><dt><a href="#varprotxt"> variables</a></dt></dl>
@@ -1748,9 +1751,9 @@ relevant operator or prefixes. If the change of evaluator only applies to the
 left (right) operand of the cross link operator, the symbol `l' (`r') is used.
 If the transition depends on the left operand being <i>nil</i>, the symbol `n' is
 used.</p>
-<blockquote><pre>            expression       match            macro            archivist
-expression                   :r               n'r              =r 'r
-match       &amp;r $ 'l ?! !!                     n'r              =r 'r
+<blockquote><pre>            expression     match          macro          archivist
+expression                 :r             n'r            =r 'r
+match       &amp;r $ 'l ?! !!                 n'r            =r 'r
 macro       $r
 archivist</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a></p>
@@ -1788,10 +1791,12 @@ The following code is part of a function that computes n!<code> .</code></p>
 inspect a variable that has just been assigned a new value, you use the<code> &amp;</code>
 operator to temporarily escape into the non-pattern world. If you want to add
 extra text to the output, remember that the atgument to<code> out$ </code>is returned.</p>
-<blockquote><pre>(loop = out$!k+1 : (?k &amp; out$(k is !k)) {show k before and after increment}
+<blockquote><pre>(loop = out$!k+1 : (?k &amp; out$(k is !k)) {show k before and after
+                                         increment}
                  : &lt;!n                  {but before comparison with n}
       &amp; out$("new fac is:" (!fac*!k:?fac)) {show fac after computation}
-      &amp; out$(still need !n+-1*!k loops) {you don't always need quotation marks}
+      &amp; out$(still need !n+-1*!k loops) {you don't always need quotation
+                                         marks}
       &amp; !loop)</pre></blockquote>
 <p>Now an example that is faulty. The purpose is to find two equal words in a
 sentence with a non-linear pattern.
@@ -1919,7 +1924,7 @@ the value <code>aap</code> is bound in <code>($x)</code>, but never assigned to 
 <blockquote><pre>   aap aap</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#funcmenu" style="line-height:12pt">Functions</a></p>
 <h3><a name="inbltmenu">Built-in functions</a></h3>
-<dl><dt><a href="#seltxt"><i>N</i></a></dt><dd>    access array element:<code> !(12$a):?(11$a)</code></dd><dt><a href="#alctxt"><code>alc</code></a></dt><dd>    allocate memory (low level):<code> alc$100</code></dd><dt><a href="#argtxt"><code>arg</code></a></dt><dd>    return program (command line) argument:<code> (arg$0:?programName) ((arg$:?o1)&amp;(arg$:?o2))</code></dd><dt><a href="#asctxt"><code>asc</code></a></dt><dd>    convert character to internal representation:<code> asc$y:121</code></dd><dt><a href="#beztxt"><code>bez</code></a></dt><dd>    show number of allocations and max. number of allocations </dd><dt><a href="#chrtxt"><code>chr</code></a></dt><dd>    convert internal representation to character:<code> chr$121:y</code></dd><dt><a href="#chutxt"><code>chu</code></a></dt><dd>    convert Unicode codepoint to UTF-8 character:<code> chu$2000</code></dd><dt><a href="#clktxt"><code>clk</code></a></dt><dd>    CPU seconds since start of session:<code> clk$:?t0</code></dd><dt><a href="#d2xtxt"><code>d2x</code></a></dt><dd>    convert decimal number to hexadecimal number:<code> d2x$73083734:45B2B56</code></dd><dt><a href="#dbgtxt"><code>dbg</code></a></dt><dd>    debugging aid: <code>dbg'(a b c:? b ?)</code></dd><dt><a href="#dentxt"><code>den</code></a></dt><dd>    denominator:<code> den$22/7:7</code></dd><dt><a href="#divtxt"><code>div</code></a></dt><dd>    quotient:<code> div$(22.7):1</code></dd><dt><a href="#filtxt"><code>fil</code></a></dt><dd>    file I/O (low-level)</dd><dt><a href="#flgtxt"><code>flg</code></a></dt><dd>    splits expression in prefixes and expression without prefixes</dd><dt><a href="#glftxt"><code>glf</code></a></dt><dd>    opposite of flg: combines prefixes and expression</dd><dt><a href="#fretxt"><code>fre</code></a></dt><dd>    return allocated memory (low level)</dd><dt><a href="#gettxt"><code>get</code></a></dt><dd>    get input (from file,keyboard or memory)</dd><dt><a href="#lowtxt"><code>low</code></a></dt><dd>    convert to lower case</dd><dt><a href="#lsttxt1"><code>lst</code></a></dt><dd>    list un-evaluated expression(s) or value(s) of variable(s)</dd><dt><a href="#maptxt"><code>map</code></a></dt><dd>    apply function to each member of a list</dd><dt><a href="#memtxt"><code>mem</code></a></dt><dd>    list existing variable names</dd><dt><a href="#modtxt"><code>mod</code></a></dt><dd>    remainder</dd><dt><a href="#moptxt"><code>mop</code></a></dt><dd>    map expression to space separated list</dd><dt><a href="#newobjecttxt"><code>new</code></a></dt><dd>    create new object as a copy of another object</dd><dt><a href="#peetxt"><code>pee</code></a></dt><dd>    get value from address (peek) (low level)</dd><dt><a href="#poktxt"><code>pok</code></a></dt><dd>    put value at address (poke) (low level)</dd><dt><a href="#puttxt1"><code>put</code></a></dt><dd>    write output</dd><dt><a href="#rentxt"><code>ren</code></a></dt><dd>    rename file or directory or move file</dd><dt><a href="#rmvtxt"><code>rev</code></a></dt><dd>    string reverse</dd><dt><a href="#revtxt"><code>rmv</code></a></dt><dd>    remove file</dd><dt><a href="#simtxt"><code>sim</code></a></dt><dd>    similarity between two atoms</dd><dt><a href="#strtxt"><code>str</code></a></dt><dd>    stringize expression into atom</dd><dt><a href="#switxt"><code>swi</code></a></dt><dd>    software interrupt (low level)</dd><dt><a href="#systxt"><code>sys</code></a></dt><dd>    command line shell</dd><dt><a href="#tbltxt"><code>tbl</code></a></dt><dd>    create array, remove array/variable</dd><dt><a href="#ugctxt"><code>ugc</code></a></dt><dd>    determine the Unicode General Category of a character</dd><dt><a href="#upptxt"><code>upp</code></a></dt><dd>    convert to upper case</dd><dt><a href="#utftxt"><code>utf</code></a></dt><dd>    convert UTF-8 character to Unicode codepoint</dd><dt><a href="#vaptxt"><code>vap</code></a></dt><dd>    deconstruct a string character-wise or according to specified separator</dd><dt><a href="#whltxt"><code>whl</code></a></dt><dd>    while loop</dd><dt><a href="#x2dtxt"><code>x2d</code></a></dt><dd>    convert hexadecimal number to decimal number<code> x2d$BABEFACE:3133078222</code></dd></dl>
+<dl><dt><a href="#seltxt"><i>N</i></a></dt><dd>    access array element:<code> !(12$a):?(11$a)</code></dd><dt><a href="#alctxt"><code>alc</code></a></dt><dd>    allocate memory (low level):<code> alc$100</code></dd><dt><a href="#argtxt"><code>arg</code></a></dt><dd>    return program (command line) argument:</dd><dd>   <code> (arg$0:?programName) ((arg$:?o1)&amp;(arg$:?o2))</code></dd><dt><a href="#asctxt"><code>asc</code></a></dt><dd>    convert character to internal representation:<code> asc$y:121</code></dd><dt><a href="#beztxt"><code>bez</code></a></dt><dd>    show number of allocations and max. number of allocations</dd><dt><a href="#chrtxt"><code>chr</code></a></dt><dd>    convert internal representation to character:<code> chr$121:y</code></dd><dt><a href="#chutxt"><code>chu</code></a></dt><dd>    convert Unicode codepoint to UTF-8 character:<code> chu$2000</code></dd><dt><a href="#clktxt"><code>clk</code></a></dt><dd>    CPU seconds since start of session:<code> clk$:?t0</code></dd><dt><a href="#d2xtxt"><code>d2x</code></a></dt><dd>    convert decimal number to hexadecimal number:<code> d2x$73083734:45B2B56</code></dd><dt><a href="#dbgtxt"><code>dbg</code></a></dt><dd>    debugging aid: <code>dbg'(a b c:? b ?)</code></dd><dt><a href="#dentxt"><code>den</code></a></dt><dd>    denominator:<code> den$22/7:7</code></dd><dt><a href="#divtxt"><code>div</code></a></dt><dd>    quotient:<code> div$(22.7):1</code></dd><dt><a href="#filtxt"><code>fil</code></a></dt><dd>    file I/O (low-level)</dd><dt><a href="#flgtxt"><code>flg</code></a></dt><dd>    splits expression in prefixes and expression without prefixes</dd><dt><a href="#glftxt"><code>glf</code></a></dt><dd>    opposite of flg: combines prefixes and expression</dd><dt><a href="#fretxt"><code>fre</code></a></dt><dd>    return allocated memory (low level)</dd><dt><a href="#gettxt"><code>get</code></a></dt><dd>    get input (from file,keyboard or memory)</dd><dt><a href="#lowtxt"><code>low</code></a></dt><dd>    convert to lower case</dd><dt><a href="#lsttxt1"><code>lst</code></a></dt><dd>    list un-evaluated expression(s) or value(s) of variable(s)</dd><dt><a href="#maptxt"><code>map</code></a></dt><dd>    apply function to each member of a list</dd><dt><a href="#memtxt"><code>mem</code></a></dt><dd>    list existing variable names</dd><dt><a href="#modtxt"><code>mod</code></a></dt><dd>    remainder</dd><dt><a href="#moptxt"><code>mop</code></a></dt><dd>    map expression to space separated list</dd><dt><a href="#newobjecttxt"><code>new</code></a></dt><dd>    create new object as a copy of another object</dd><dt><a href="#peetxt"><code>pee</code></a></dt><dd>    get value from address (peek) (low level)</dd><dt><a href="#poktxt"><code>pok</code></a></dt><dd>    put value at address (poke) (low level)</dd><dt><a href="#puttxt1"><code>put</code></a></dt><dd>    write output</dd><dt><a href="#rentxt"><code>ren</code></a></dt><dd>    rename file or directory or move file</dd><dt><a href="#rmvtxt"><code>rev</code></a></dt><dd>    string reverse</dd><dt><a href="#revtxt"><code>rmv</code></a></dt><dd>    remove file</dd><dt><a href="#simtxt"><code>sim</code></a></dt><dd>    similarity between two atoms</dd><dt><a href="#strtxt"><code>str</code></a></dt><dd>    stringize expression into atom</dd><dt><a href="#switxt"><code>swi</code></a></dt><dd>    software interrupt (low level)</dd><dt><a href="#systxt"><code>sys</code></a></dt><dd>    command line shell</dd><dt><a href="#tbltxt"><code>tbl</code></a></dt><dd>    create array, remove array/variable</dd><dt><a href="#ugctxt"><code>ugc</code></a></dt><dd>    determine the Unicode General Category of a character</dd><dt><a href="#upptxt"><code>upp</code></a></dt><dd>    convert to upper case</dd><dt><a href="#utftxt"><code>utf</code></a></dt><dd>    convert UTF-8 character to Unicode codepoint</dd><dt><a href="#vaptxt"><code>vap</code></a></dt><dd>    deconstruct a string character-wise or according to specified separator</dd><dt><a href="#whltxt"><code>whl</code></a></dt><dd>    while loop</dd><dt><a href="#x2dtxt"><code>x2d</code></a></dt><dd>    convert hexadecimal number to decimal number<code> x2d$BABEFACE:3133078222</code></dd></dl>
 <p><span class="arrow">&#8657;</span><a href="#funcmenu" style="line-height:12pt">Functions</a></p>
 <h4><a name="seltxt"><code><i>index</i>$<i>array-name</i></code></a></h4>
 <p>Both <i>array-name</i> and <i>index</i> should evaluate to atoms. <i>array-name</i> may be
@@ -2011,8 +2016,8 @@ in `bracmat.c' before compilation.</p>
 <p>In interactive mode, with TELMAX set to one, Bracmat shows
 (1) whether the evaluation was successful or not, (2) the amount of CPU time
 and (3) the result of calling<code> bez$ </code>after each non-empty evaluation result.</p>
-<blockquote><pre class="exinput">{?} 2^10000+-1*3^100000*5^-10000</pre><pre class="exoutput">{!} -13349714142304014694589143904897822922452485076062773553456279939841274146</pre></blockquote>
-<p><code>...2182755869676383936027544370832840538165786625768305384553968906402587890625</code></p>
+<blockquote><pre class="exinput">{?} 2^10000+-1*3^100000*5^-10000</pre><pre class="exoutput">{!} -13349714142304014694589143904897822922452485076062773553456279939</pre></blockquote>
+<p><code>...55869676383936027544370832840538165786625768305384553968906402587890625</code></p>
 <blockquote><pre>   S   0,28 sec</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
 <h4><a name="chrtxt"><code>chr$<i>value</i></code></a></h4>
@@ -2071,7 +2076,7 @@ numerator extractor function.</p>
 <h4><a name="filtxt"><code>fil$([[<i>file-name</i>][,<i>option</i>[,<i>number</i>[,<i>value-to-output</i>]]]])</code></a></h4>
 <p><code>fil$ </code>is a multi-purpose low level I/O function.
 </p>
-<dl><dt><a href="#modetxt"><code>fil$([<i>file-name</i>],<i>mode</i>)</code></a></dt><dd>    Set file mode, open a file in a file mode</dd><dt><a href="#fixdtxt"><code>fil$([<i>file-name</i>],<i>type</i>,<i>size</i>[,<i>number</i>])</code></a></dt><dd>    Prepare for reading or writing fixed sized records</dd><dt><a href="#varitxt"><code>fil$([<i>file-name</i>],STR[,<i>stop</i>])</code></a></dt><dd>    Prepare for reading or writing variable sized record    </dd><dt><a href="#positiontxt"><code>fil$(<i>file-name</i>,TEL)</code></a></dt><dd>    Tell position inside file    </dd><dt><a href="#filesettxt"><code>fil$(<i>file-name</i>,<i>whence</i>,<i>offset</i>)</code></a></dt><dd>    Go to file position    </dd><dt><a href="#readtxt"><code>fil$([<i>file-name</i>][,,<i>number</i>])</code></a></dt><dd>    Read from file    </dd><dt><a href="#writetxt"><code>fil$([<i>file-name</i>],,<i>number</i>,<i>value</i>)</code></a></dt><dd>    Write to file    </dd><dt><a href="#closetxt"><code>fil$([<i>file-name</i>],SET,-1)</code></a></dt><dd>    Close  a file</dd></dl>
+<dl><dt><a href="#modetxt"><code>fil$([<i>file-name</i>],<i>mode</i>)</code></a></dt><dd>    Set file mode, open a file in a file mode</dd><dt><a href="#fixdtxt"><code>fil$([<i>file-name</i>],<i>type</i>,<i>size</i>[,<i>number</i>])</code></a></dt><dd>    Prepare for reading or writing fixed sized records</dd><dt><a href="#varitxt"><code>fil$([<i>file-name</i>],STR[,<i>stop</i>])</code></a></dt><dd>    Prepare for reading or writing variable sized record</dd><dt><a href="#positiontxt"><code>fil$(<i>file-name</i>,TEL)</code></a></dt><dd>    Tell position inside file</dd><dt><a href="#filesettxt"><code>fil$(<i>file-name</i>,<i>whence</i>,<i>offset</i>)</code></a></dt><dd>    Go to file position</dd><dt><a href="#readtxt"><code>fil$([<i>file-name</i>][,,<i>number</i>])</code></a></dt><dd>    Read from file</dd><dt><a href="#writetxt"><code>fil$([<i>file-name</i>],,<i>number</i>,<i>value</i>)</code></a></dt><dd>    Write to file</dd><dt><a href="#closetxt"><code>fil$([<i>file-name</i>],SET,-1)</code></a></dt><dd>    Close  a file</dd></dl>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
 <h5><a name="modetxt"> <code> fil$([<i>file-name</i>],<i>mode</i>) </code> </a></h5>
 <p>Set file mode, open file in file mode.</p>
@@ -2119,16 +2124,16 @@ on the value of <i>whence</i>.</p>
 When reading variable sized records (<code>STR</code>),<code> fil$ </code>returns a dot-separated list
 of two elements: the found stop character and the read string (which does not
 contain the stop character).</p>
-<blockquote><pre class="exinput">{?} fil$("mytext.txt","rb")               { Open for reading in binary mode. }
-{?} fil$(,STR)                   { Prepare for reading until the next 0-byte.}
-{?} fil$:(?line.?stop)                         { Read until the next 0-byte. }
-{?} fil$(,SET,-1)                                          { Close the file. }</pre></blockquote>
-<blockquote><pre class="exinput">{?} fil$("mytext.txt","rb")               { Open for reading in binary mode. }
+<blockquote><pre class="exinput">{?} fil$("mytext.txt","rb") { Open for reading in binary mode. }
+{?} fil$(,STR)              { Prepare for reading until the next 0-byte.}
+{?} fil$:(?line.?stop)      { Read until the next 0-byte. }
+{?} fil$(,SET,-1)           { Close the file. }</pre></blockquote>
+<blockquote><pre class="exinput">{?} fil$("mytext.txt","rb") { Open for reading in binary mode. }
 {?} fil$(,STR,"\n \t\r")    { Prepare for reading until the next whitespace.}
-{?} :?words             { In a moment, accumulate all words in this variable }
-{?} whl'(fil$:(?word.?stop)&amp;!word !words:?words)&amp;          { Read all words. }
-{?} fil$(,SET,-1)                                          { Close the file. }
-{?} !words                              { Show all words, in reversed order. }</pre></blockquote>
+{?} :?words                 { Accumulate all words in this variable }
+{?} whl'(fil$:(?word.?stop)&amp;!word !words:?words)&amp;   { Read all words. }
+{?} fil$(,SET,-1)           { Close the file. }
+{?} !words                  { Show all words, in reversed order. }</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#filtxt" style="line-height:12pt"><code>fil$([[<i>file-name</i>][,<i>option</i>[,<i>number</i>[,<i>value-to-output</i>]]]])</code></a></p>
 <h5><a name="writetxt"> <code> fil$([<i>file-name</i>],,<i>number</i>,<i>value</i>) </code> </a></h5>
 <p>Write to a file</p>
@@ -2178,7 +2183,7 @@ behaviour of the program.</p>
 <blockquote><pre class="exinput">{?} alc$1000:?p {allocate chunk of 1000 bytes from the memory pool}
 {?} fre$!p      {return this chunk to the memory pool}</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
-<h4><a name="gettxt"><code>get$(<i>atom-or-nil</i>[,MEM][,ECH][,VAP][,STR][,TXT|BIN][,JSN]|[[,X]|[,HT],ML[,TRM]])</code></a></h4>
+<h4><a name="gettxt"><code>get$(<i>atom-or-nil</i> [MEM][ECH][VAP][STR][TXT|BIN][JSN]|[[X]|[HT]ML[TRM]])</code></a></h4>
 <p><code>get$ </code>reads and interprets characters in a string (internal memory) or file
 (external memory or keyboard).</p>
 <p>options<code> :</code></p>
@@ -2508,38 +2513,49 @@ output string. Main use<code> : </code>pasting of two or more atoms.</p>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
 <h4><a name="switxt"><code>swi$(<i>interrupt-number</i>.<i>input-value</i>,[<i>input-value</i>,...])</code></a></h4>
 <p>This function is the most operating-system-dependent function in Bracmat.
-Currently, it is implemented for RISC-OS (Archimedes) and 16-bit MS-DOS
-versions of Bracmat. All arguments must be integer values. The list of input
-values (registers r0 and upwards) need not be complete. Missing values are
-assumed to be zero. Blocks of memory should be passed by allocating memory
-with<code> alc$ </code>and passing the returned value.
-The returned value has the form</p>
+It was implemented for RISC-OS (Archimedes) and 16-bit MS-DOS versions.
+All arguments must be integer values. The list of input values (registers
+r0 and upwards) need not be complete. Missing values are assumed to be zero.
+Blocks of memory should be passed by allocating memory with <code>alc$</code> and
+passing the returned value. The returned value has the form</p>
 <p>(<i>error code</i>.<i>output-value</i>,<i>output-value</i>,...)</p>
 <p>An error code of 0 means that no error is reported.
 In the MS-DOS version, the input registers are AX,BX,CX,DX,BP,SI,DI,DS,ES and
 FLAGS, respectively.</p>
-<blockquote><pre class="exinput">{?} {RISC-OS only}
-{?} putstr=(loop,c,buf,ret.        { goal:copy argument to memoryblock }
-      alc$(den$sim$(!arg,)+1):?buf:?ret { allocate block for string to fit }
-    &amp; get$(!arg,MEM,VAP):?arg      { argument -&gt; single characters }
-    &amp; (loop = !arg:%?c ?arg &amp; pok$(!buf.asc$!c.1) &amp; !buf+1:?buf &amp; !loop)
-    &amp; ~!loop                       { poke each character into memory block }
-    &amp; pok$(!buf.0.1)               { poke string-delimiting zero }
-    &amp; !ret)                         { return pointer to block }
+<p>RISC-OS only:</p>
+<blockquote><pre class="exinput">{?} ( putstr                    { goal:copy argument to memoryblock }
+    =   ( loop,c,buf,ret
+        .     alc$(den$(sim$(!arg,))+1) { allocate block for string to fit }
+            : ?buf
+            : ?ret
+          &amp; get$(!arg,MEM,VAP):?arg { argument -&gt; single characters }
+          &amp; ( loop
+            =   !arg:%?c ?arg
+              &amp; pok$(!buf.asc$!c.1)
+              &amp; !buf+1:?buf
+              &amp; !loop
+            )
+          &amp; ~!loop              { poke each character into memory block }
+          &amp; pok$(!buf.0.1)      { poke string-delimiting zero }
+          &amp; !ret                { return pointer to block }
+        )
 {?} putstr$"OS_EvaluateExpression":?inbuf { create pointer to string }
-{?} 57:?"OS_SWINumberFromString"   { From manual }
-{?} swi$(!"OS_SWINumberFromString".0,!inbuf):(?error.?nummer,?) { find
-     interrupt number corresponding with the string "OS_EvaluateExpression"}
-{?} fre$!inbuf { deallocate block containing copy of input string }</pre></blockquote>
-<blockquote><pre class="exinput">{?} {MS-DOS only}
-{?} gotoxy = (VIDEO,setCursorPosition,videoPage0.
-{?}   16:?VIDEO                 { interrupt number 10H }
-{?} &amp; 2*256:?setCursorPosition  { AH }
-{?} &amp; 0*256:?videoPage0         { BH }
-{?} &amp; !arg:(?x,?y)              { DL and DH }
-{?} &amp; swi$(!VIDEO.!setCursorPosition,!videoPage0,0,!x+256*!y)
-{?} )
-{?} gotoxy$(0,0) &amp; put$(top left corner)</pre></blockquote>
+{?} 57:?"OS_SWINumberFromString" { From manual }
+{?} swi$(!"OS_SWINumberFromString".0,!inbuf): (?error.?nummer,?)
+                                { find interrupt number corresponding
+                                 to the string "OS_EvaluateExpression"}
+{?} fre$!inbuf                  { deallocate block containing copy
+                                 of input string }</pre></blockquote>
+<p>MS-DOS only:</p>
+<blockquote><pre class="exinput">{?} ( gotoxy
+    =   VIDEO,setCursorPosition,videoPage0
+      .   16:?VIDEO                 { interrupt number 10H }
+        &amp; 2*256:?setCursorPosition  { AH }
+        &amp; 0*256:?videoPage0         { BH }
+        &amp; !arg:(?x,?y)              { DL and DH }
+        &amp;   swi
+          $ (!VIDEO.!setCursorPosition,!videoPage0,0,!x+256*!y)
+    )</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
 <h4><a name="systxt"><code>sys$<i>command-line-command</i></code></a></h4>
 <p>In most environments,<code> sys$ </code>passes its argument to the command line
@@ -2581,43 +2597,50 @@ local variables onto and from a stack.</p>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
 <h4><a name="ugctxt"><code>ugc$(<i>atom-or-nil</i>)</code></a></h4>
 <p><code>ugc$ </code>determines the Unicode General Category of a character.</p>
-<blockquote><pre>Lu   Uppercase_Letter        an uppercase letter
-Ll   Lowercase_Letter        a lowercase letter
-Lt   Titlecase_Letter        a digraphic character, with first part uppercase
-LC   Cased_Letter            Lu | Ll | Lt
-Lm   Modifier_Letter         a modifier letter
-Lo   Other_Letter            other letters, including syllables and ideographs
-L    Letter                  Lu | Ll | Lt | Lm | Lo
-Mn   Nonspacing_Mark         a nonspacing combining mark (zero advance width)
-Mc   Spacing_Mark            a spacing combining mark (positive advance width)
-Me   Enclosing_Mark          an enclosing combining mark
-M    Mark                    Mn | Mc | Me
-Nd   Decimal_Number          a decimal digit
-Nl   Letter_Number           a letterlike numeric character
-No   Other_Number            a numeric character of other type
-N    Number                  Nd | Nl | No
-Pc   Connector_Punctuation   a connecting punctuation mark, like a tie
-Pd   Dash_Punctuation        a dash or hyphen punctuation mark
-Ps   Open_Punctuation        an opening punctuation mark (of a pair)
-Pe   Close_Punctuation       a closing punctuation mark (of a pair)
-Pi   Initial_Punctuation     an initial quotation mark
-Pf   Final_Punctuation       a final quotation mark
-Po   Other_Punctuation       a punctuation mark of other type
-P    Punctuation             Pc | Pd | Ps | Pe | Pi | Pf | Po
-Sm   Math_Symbol             a symbol of mathematical use
-Sc   Currency_Symbol         a currency sign
-Sk   Modifier_Symbol         a non-letterlike modifier symbol
-So   Other_Symbol            a symbol of other type
-S    Symbol                  Sm | Sc | Sk | So
-Zs   Space_Separator         a space character (of various non-zero widths)
-Zl   Line_Separator          U+2028 LINE SEPARATOR only
-Zp   Paragraph_Separator     U+2029 PARAGRAPH SEPARATOR only
-Z    Separator               Zs | Zl | Zp
-Cc   Control                 a C0 or C1 control code
-Cf   Format                  a format control character
-Cs   Surrogate               a surrogate code point
-Co   Private_Use             a private-use character
-Cn   Unassigned              a reserved unassigned code point or a noncharacter
+<blockquote><pre>Lu   Uppercase_Letter        an uppercase letter
+Ll   Lowercase_Letter        a lowercase letter
+Lt   Titlecase_Letter        a digraphic character, with first part
+                             uppercase
+LC   Cased_Letter            Lu | Ll | Lt
+Lm   Modifier_Letter         a modifier letter
+Lo   Other_Letter            other letters, including syllables and
+                             ideographs
+L    Letter                  Lu | Ll | Lt | Lm | Lo
+Mn   Nonspacing_Mark         a nonspacing combining mark (zero
+                             advance width)
+Mc   Spacing_Mark            a spacing combining mark (positive
+                             advance width)
+Me   Enclosing_Mark          an enclosing combining mark
+M    Mark                    Mn | Mc | Me
+Nd   Decimal_Number          a decimal digit
+Nl   Letter_Number           a letterlike numeric character
+No   Other_Number            a numeric character of other type
+N    Number                  Nd | Nl | No
+Pc   Connector_Punctuation   a connecting punctuation mark, like a
+                             tie
+Pd   Dash_Punctuation        a dash or hyphen punctuation mark
+Ps   Open_Punctuation        an opening punctuation mark (of a pair)
+Pe   Close_Punctuation       a closing punctuation mark (of a pair)
+Pi   Initial_Punctuation     an initial quotation mark
+Pf   Final_Punctuation       a final quotation mark
+Po   Other_Punctuation       a punctuation mark of other type
+P    Punctuation             Pc | Pd | Ps | Pe | Pi | Pf | Po
+Sm   Math_Symbol             a symbol of mathematical use
+Sc   Currency_Symbol         a currency sign
+Sk   Modifier_Symbol         a non-letterlike modifier symbol
+So   Other_Symbol            a symbol of other type
+S    Symbol                  Sm | Sc | Sk | So
+Zs   Space_Separator         a space character (of various non-zero
+                             widths)
+Zl   Line_Separator          U+2028 LINE SEPARATOR only
+Zp   Paragraph_Separator     U+2029 PARAGRAPH SEPARATOR only
+Z    Separator               Zs | Zl | Zp
+Cc   Control                 a C0 or C1 control code
+Cf   Format                  a format control character
+Cs   Surrogate               a surrogate code point
+Co   Private_Use             a private-use character
+Cn   Unassigned              a reserved unassigned code point or a
+                             noncharacter
 C    Other                   Cc | Cf | Cs | Co | Cn</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
 <h4><a name="upptxt"><code>upp$(<i>atom-or-nil</i>)</code></a></h4>
@@ -2672,7 +2695,7 @@ been drilled to leave these names out when the user asks for a list of variable
 names<code> (lst$ </code>or<code> mem$), </code>so you will not notice their existence. The following
 visible functions are predefined:
 </p>
-<dl><dt><a href="#sgntxt"><code>abs</code></a></dt><dd>    absolute value</dd><dt><a href="#cattxt"><code>cat</code></a></dt><dd>    list existing variable names selectively</dd><dt><a href="#gontxt"><code>cos</code></a></dt><dd>    cosine formula</dd><dt><a href="#factxt"><code>fct</code></a></dt><dd>    factorisation</dd><dt><a href="#flttxt"><code>flt</code></a></dt><dd>    floating point notation of numbers</dd><dt><a href="#jsntxt"><code>jsn</code></a></dt><dd>    serialize data to JSON format</dd><dt><a href="#lettxt"><code>let</code></a></dt><dd>    decide whether a uncode character is a<code> 'letter'/'mark' </code>or something else </dd><dt><a href="#MLencodingtxt"><code>MLencoding</code></a></dt><dd>    detect the encoding used in XML or HTML data</dd><dt><a href="#nestMLtxt"><code>nestML</code>    </a></dt><dd>    nest the internal representation of XML or HTML data</dd><dt><a href="#outtxt"><code>out</code></a></dt><dd>    output to screen, then new line</dd><dt><a href="#sgntxt"><code>sgn</code></a></dt><dd>    sign</dd><dt><a href="#gontxt"><code>sin</code></a></dt><dd>    sine formula</dd><dt><a href="#subtxt1"><code>sub</code></a></dt><dd>    substitution</dd><dt><a href="#taytxt"><code>tay</code></a></dt><dd>    Taylor series development    </dd><dt><a href="#toMLtxt"><code>toML</code>    </a></dt><dd>    convert an internal representation of XML or HTML to XML resp. HTML</dd></dl>
+<dl><dt><a href="#sgntxt"><code>abs</code></a></dt><dd>    absolute value</dd><dt><a href="#cattxt"><code>cat</code></a></dt><dd>    list existing variable names selectively</dd><dt><a href="#gontxt"><code>cos</code></a></dt><dd>    cosine formula</dd><dt><a href="#factxt"><code>fct</code></a></dt><dd>    factorisation</dd><dt><a href="#flttxt"><code>flt</code></a></dt><dd>    floating point notation of numbers</dd><dt><a href="#jsntxt"><code>jsn</code></a></dt><dd>    serialize data to JSON format</dd><dt><a href="#lettxt"><code>let</code></a></dt><dd>    decide whether a uncode character is a<code> 'letter'/'mark' </code>or something else</dd><dt><a href="#MLencodingtxt"><code>MLencoding</code></a></dt><dd>    detect the encoding used in XML or HTML data</dd><dt><a href="#nestMLtxt"><code>nestML</code></a></dt><dd>    nest the internal representation of XML or HTML data</dd><dt><a href="#outtxt"><code>out</code></a></dt><dd>    output to screen, then new line</dd><dt><a href="#sgntxt"><code>sgn</code></a></dt><dd>    sign</dd><dt><a href="#gontxt"><code>sin</code></a></dt><dd>    sine formula</dd><dt><a href="#subtxt1"><code>sub</code></a></dt><dd>    substitution</dd><dt><a href="#taytxt"><code>tay</code></a></dt><dd>    Taylor series development</dd><dt><a href="#toMLtxt"><code>toML</code></a></dt><dd>    convert an internal representation of XML or HTML to XML resp. HTML</dd></dl>
 <p><span class="arrow">&#8657;</span><a href="#funcmenu" style="line-height:12pt">Functions</a></p>
 <h4><a name="sgntxt"><code>abs$<i>expression</i> </code>and<code> sgn$<i>expression</i></code></a></h4>
 <p><code>sgn$ </code>determines the sign of the numerical factor of <i>expression</i>. If the sign
@@ -2739,7 +2762,8 @@ floating point numbers itself.</p>
 <p>Finally, serialize the new data to JSON</p>
 <blockquote><pre class="exinput">{?} jsn$!mars:?jsonSerialized
 {?} out$!jsonSerialized</pre></blockquote>
-<p><code>{"Eccentricity":0.0934,"moons":["Deimos","Phobos"],"planet":"Mars","ratio":0.378403181401040073417}</code></p>
+<p><code>{"Eccentricity":0.0934,"moons":["Deimos","Phobos"],"planet":"Mars",</code></p>
+<blockquote><pre>                                   "ratio":0.378403181401040073417}</pre></blockquote>
 <p>A full circle update of the JSON file <code>mars.json</code> with an extra <code>ratio</code>
 field as a single Bracmat expression:</p>
 <blockquote><pre class="exinput">{?} (  get$("mars.json",JSN):(?name-value-pairs,)
@@ -2862,8 +2886,8 @@ give a warning when you add a value for a key that is already present in the
 hash table.</p>
 <blockquote><pre class="exinput">{?} ( new$hash:?myhash               { Create a hash table myhash. }
     &amp;   (
-        = Insert                    { Add a method "Insert" to myhash
-        =   K,V                      that only allows one value per key. }
+        = Insert                    { Add a method "Insert" to myhash   }
+        =   K,V                     { that only allows one value per key. }
           .     !arg:(?K.?V)
               &amp; (Its..find)$!K:(?.?v)
               &amp;   out
@@ -2900,7 +2924,7 @@ method called <code>die</code> that takes no arguments. If the object is a hash 
 you could serialize and save the contents of the hash table to a file, or
 you could write a message to the screen, as in this example, where we add
 another member function, <code>die</code> to the already existing member functions in
-the object <code>myhash</code><code>: </code></p>
+the object <code>myhash</code><code>:</code></p>
 <blockquote><pre class="exinput">{?} !myhash:(=?mymyhashmethods)
 {?} '( (die=.out$"Who ordered th")
        ()$mymyhashmethods
@@ -2964,10 +2988,10 @@ forall is undefined if the hash table is changed or deleted during the
 traversal, although this can be done safely. For example, some members may be
 missed and others may be processed more than once.</p>
 <p>Example:</p>
-<blockquote><pre class="exinput">{?} new$hash:?myhash; { create a hash table myhash }
-{?} (myhash..insert)$(X.12);                { Insert the value 12 for key X. }
-{?} (myhash..insert)$(Z.1);                 { Use the built-in insert method.}
-{?} ( (myhash..forall)                      { Output all key-value pairs. }
+<blockquote><pre class="exinput">{?} new$hash:?myhash;           { create a hash table myhash }
+{?} (myhash..insert)$(X.12);    { Insert the value 12 for key X. }
+{?} (myhash..insert)$(Z.1);     { Use the built-in insert method.}
+{?} ( (myhash..forall)          { Output all key-value pairs. }
     $ (
       =   Key,Value,loop
         .   ( loop
@@ -2989,17 +3013,19 @@ graph. Whereas the graph is purely symbolic in nature, the drawing
 requires coordinates. For the computation of those coordinates you may want
 to model the vertices as charged particles and the edges as elastic strings
 connecting the particles. To let this physical model evolve under the influence
-of elastic and Coulolmb forces, the computer must iterate many times over
+of elastic and Coulomb forces, the computer must iterate many times over
 the same set of arithmetic instructions. For purposes like these, Bracmat has
-a <code>calculation</code> objects.</p>
-<p>A <code>calculation</code> object contains Bracmat code, but because it is inside this
-object it behaves very different from what we are used to:</p>
+an object type called <code>calculation</code>.</p>
+<p>A <code>calculation</code> object contains <code>calculation</code> code that is syntactically
+the same as Bracmat code, but semantically different. Source code inside a
+<code>calculation</code> object behaves very different from what we are used to:</p>
 <ul><li> When a <code>calculation</code> object is created with <code>new$</code>, the passed Bracmat code
   is parsed and compiled to a bytecode. Bytecode can be listed using the
-  <code>print</code> method. Compilation is fast, as is executing the resulting 
-  bytecode.  </li><li> There is no pattern matching. The <code>:</code> operator is only for assignment and
-  for simple comparisons of two numbers.</li><li> There are two data types: floating point numbers (<code>s</code> for<code> 'scalar')</code>
-  and arrays (<code>a</code>) of floating point numbers, which can have any rank.</li><li> You need to declare the parameters that your home-brewn function needs.</li><li> But you should not declare the variables that are not parameters.</li><li> All values are C-doubles. There are no strings and no rational or integer
+  <code>print</code> method. Compilation is fast, as is executing the resulting
+  bytecode.</li><li> There is no pattern matching. The <code>:</code> operator is only for assignment and
+  for simple comparisons of two numbers.</li><li> There are two data types: floating point numbers (scalars) and arrays of
+  floating point numbers. An array can have a rank higher than 1 -
+  multidimensional arrays.</li><li> You need to declare the parameters that your home-brewn function needs.</li><li> But you should not declare the variables that are not parameters.</li><li> All values are C-doubles. There are no strings and no rational or integer
   numbers.</li><li> The semantics of the <code>|</code> operator is very similar to that of <code>if</code>
   in other languages in that it does not return a value.</li><li> Variables have function scope and are not visible in nested functions.</li></ul>
 <p>You create a <code>calculation</code> object as follows</p>
@@ -3013,26 +3039,57 @@ object it behaves very different from what we are used to:</p>
 <p>Hereafter, <code>myCalculation</code> refers to a calculation object and is treated
 in the same way as a user defined object.</p>
 <p>Before you can get started with calculation objects you need to learn
-about the calculation object API, parameters, variables, arrays, loops,
-built-in functions and user defined functions.
+about the calculation object API, parameters, variables, constants, arrays,
+loops, built-in functions and user defined functions.
 </p>
-<dl><dt><a href="#CalcMethodtxt">Member functions of calculation objects</a></dt><dd>    Member functions are the API: they constitute the communication</dd><dd>    channels between the Bracmat code outside and the Bracmat code inside</dd><dd>    the calculation object.</dd><dt><a href="#CalcFunctxt">Built-in calculation functions</a></dt><dd>    These functions can be used in the code that runs inside a calculation</dd><dd>    object.</dd><dt><a href="#CalcParmtxt">Parameters</a></dt><dd>    How are parameters passed from outside to inside calculation objects?</dd><dd>    And how are they passed to built-in and user defined functions?</dd><dt><a href="#CalcVartxt">Variables</a></dt><dd>    When to declare variables and how.</dd><dt><a href="#CalcArraytxt">Arrays</a></dt><dd>    Declaring rank and ranges of arrays, indexing and accessing arrays.</dd><dt><a href="#CaltItertxt">Iterations</a></dt><dd>    How to escape a loop.</dd></dl>
+<dl><dt><a href="#CalcMethodtxt">Member functions of calculation objects</a></dt><dd>    Member functions are the API: they constitute the communication</dd><dd>    channels between the Bracmat code outside and the Bracmat code inside</dd><dd>    the calculation object.</dd><dt><a href="#CalcFunctxt">Built-in calculation functions</a></dt><dd>    These functions can be used in the code that runs inside a calculation</dd><dd>    object.</dd><dt><a href="#CalcParmtxt">Parameters</a></dt><dd>    How are parameters passed from outside to inside calculation objects?</dd><dd>    And how are they passed to built-in and user defined functions?</dd><dt><a href="#CalcVartxt">Variables</a></dt><dd>    When to declare variables and how.</dd><dt><a href="#CalcConsttxt">Constants</a></dt><dd>    There are two ways to write constant values into calculation source code.</dd><dt><a href="#CalcArraytxt">Arrays</a></dt><dd>    Declaring rank and ranges of arrays, indexing and accessing arrays.</dd><dt><a href="#CaltItertxt">Iterations</a></dt><dd>    How to escape a loop.</dd></dl>
 <p><span class="arrow">&#8657;</span><a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a></p>
 <h3><a name="CalcMethodtxt">Listing of calculation object methods</a></h3>
 <p>The following methods are defined for <code>calculation</code> objects:</p>
-<dl><dt><a href="#Calculatetxt"><code>calculate</code></a></dt><dd>    Perform a floating point calculation.</dd><dt><a href="#CalcTrctxt"><code>trc</code></a></dt><dd>    Perform a floating point calculation, showing the details of each step.</dd><dt><a href="#CalcPrinttxt"><code>print</code></a></dt><dd>    Show a listing of the instructions contained in the <code>calculation</code> object. </dd><dt><a href="#CalcExporttxt"><code>export</code></a></dt><dd>    Export the value of a variable contained in a <code>calculation</code> object.</dd></dl>
+<dl><dt><a href="#Calculatetxt"><code>calculate</code></a></dt><dd>    Perform a floating point calculation.</dd><dt><a href="#CalcTrctxt"><code>trc</code></a></dt><dd>    Perform a floating point calculation, showing the details of each step.</dd><dt><a href="#CalcPrinttxt"><code>print</code></a></dt><dd>    Show a listing of the instructions contained in the <code>calculation</code> object.</dd><dt><a href="#CalcExporttxt"><code>export</code></a></dt><dd>    Export the value of a variable contained in a <code>calculation</code> object.</dd></dl>
 <p><span class="arrow">&#8657;</span><a href="#calctxt" style="line-height:12pt">Floating point calculations</a></p>
 <h4><a name="Calculatetxt"><code>(myCalculation..calculate)$<i>Parameters</i></code></a></h4>
-<p>TBD</p>
+<p>Once a calculation object is created, it can be executed using the
+<code>calculate</code> method. This method expects zero or more parameters, as specified
+by the parameter declarations in the calculation object's source code.</p>
 <p><span class="arrow">&#8657;</span><a href="#CalcMethodtxt" style="line-height:12pt">Listing of calculation object methods</a></p>
 <h4><a name="CalcTrctxt"><code>(myCalculation..trc)$<i>Parameters</i></code></a></h4>
-<p>TBD</p>
+<p>The <code>trc</code> method is equivalent to the <code>calculate</code> method, except that it
+prints the details of each step it takes during execution of the source code.
+The only use for <code>trc</code> is while debugging and optimizing the C-source code
+`calculation.c'.</p>
 <p><span class="arrow">&#8657;</span><a href="#CalcMethodtxt" style="line-height:12pt">Listing of calculation object methods</a></p>
 <h4><a name="CalcPrinttxt"><code>(myCalculation..print)$</code></a></h4>
-<p>TBD</p>
+<p>The <code>print</code> method writes a listing of the result of the compilation of
+the calculation source code. The only use for <code>print</code> is while debugging and
+optimizing the C-source code `calculation.c'.</p>
 <p><span class="arrow">&#8657;</span><a href="#CalcMethodtxt" style="line-height:12pt">Listing of calculation object methods</a></p>
 <h4><a name="CalcExporttxt"><code>(myCalculation..export)$(<i>format</i>,&lt;name of variable of </code><code>calculation</code> object&gt;)</a></h4>
-<p>TBD</p>
+<p>After executing a calculation object, the results of the calculations are
+still hidden in the calculation object. To make further use of the results,
+they must be exported as native Bracmat expressions. The <code>export</code> method
+can export one variable at a time. Only variables in the main source code
+can be exported, variables in user defined functions cannot be exported.
+Also the variables that are declared as the parameters of the calculation
+object can be exported.</p>
+<blockquote><pre class="exinput">{?} ( new$(calculation,(=(s.a) (s.b).!a+!b:?b&amp;2*!b:?c)):?calc
+    &amp; (calc..calculate)$(10,11):?Y
+    &amp; out$(Y !Y)
+    &amp; (calc..export)$(N,b):?b
+    &amp; out$(b !b)
+    &amp; (calc..export)$(N,c):?c
+    &amp; out$(c !c)
+    )</pre></blockquote>
+<blockquote><pre>   Y 4.2000000000000000E+01
+   b 21
+   c 42</pre></blockquote>
+<p>The first argument to the <code>export</code> method tells wich notation is expected in the output:</p>
+<dl><dt>N</dt><dd>An integer is expected. Only digits are allowed, the first digit not being
+a <code>0</code>. The digits can be preceded by a <code>-</code> to indicate that the number
+is negative.</dd><dt>R</dt><dd>A floating point expression is expected: a signed value that has the form
+<code><i>[-]d.dddddde[+|-]dd[d]</i>, </code>where <i>d</i> is one decimal digit, <i>dddddd</i> is six
+decimal digits, and<code> <i>dd[d]</i> </code>is two or three decimal digits.</dd><dt>Q</dt><dd>A rational number is expected. Similar to <code>N</code>, but a single slash <code>/</code>
+is allowed between to digits, the digit following the <code>/</code> not being a <code>0</code>.</dd><dt><code>"%a"</code></dt><dd>A hexadecimal notation. This notation preserves all bits of a <code>double</code>.</dd></dl>
 <p><span class="arrow">&#8657;</span><a href="#CalcMethodtxt" style="line-height:12pt">Listing of calculation object methods</a></p>
 <h3><a name="CalcFunctxt">Listing of built-in functions and function-like constructs in calculation objects</a></h3>
 <p>Bracmat maps all floating point functions that are available as standard C functions to Bracmat functions.
@@ -3052,16 +3109,80 @@ For a description, see the documentation of the math.h C header file.</p>
 <p><code>whl'(<i>code</i>)</code> Implements a loop.</p>
 <p><span class="arrow">&#8657;</span><a href="#calctxt" style="line-height:12pt">Floating point calculations</a></p>
 <h3><a name="CalcParmtxt">Calculation parameters</a></h3>
-<blockquote><pre>TBD.</pre></blockquote>
+<p>Since calculation objects only handle numbers and arrays of numbers, all
+parameters passed to a calculation object must be numbers or arrays of
+numbers. Numbers can be represented in Bracmat's native format or in any
+of the formats recognized by the C <code>strtod()</code> function.</p>
+<p>In the source code of the calculation, each parameter must be explicitly
+and completely declared. Single values (scalars) are declared as
+<code>(s.<i>parameterName</i>)</code>, while arrays must be declared as
+<code>(a.<i>parameterName</i>.<i>range</i>)</code> (1-dimensional arrays) or</p>
+<p><code>(a.<i>parameterName</i>.<i>range</i>.<i>range</i>. ...)</code> (multidimensional arrays).</p>
+<p>In the calculation source code the same rules apply on the calling side, but
+in user defined functions declarations are slightly simpler: you cannot
+specify the ranges on arrays. (These are inferred during compilation.) So
+scalars are declared as <code>(s.<i>parameterName</i>)</code>, while arrays must be
+declared as <code>(a.<i>parameterName</i>)</code>.</p>
+<p>Scalar parameters are passed by value, while arrays are passed by reference.
+That means that a function, as a side effect, can change an array that is
+passed as a parameter. This is especially practical, because return values
+of functions are always scalar values.</p>
 <p><span class="arrow">&#8657;</span><a href="#calctxt" style="line-height:12pt">Floating point calculations</a></p>
 <h3><a name="CalcVartxt">Calculation variables</a></h3>
-<blockquote><pre>TBD.</pre></blockquote>
+<p>Scalar calculation variables are not explicitly declared. Arrays are declared
+when they are created.</p>
+<p>Variables have a restricted scope. The main code and each user defined function
+has its own scope. Variables in functions are not visible outside that
+function and variables outside a function are not visible inside that function.</p>
+<p><span class="arrow">&#8657;</span><a href="#calctxt" style="line-height:12pt">Floating point calculations</a></p>
+<h3><a name="CalcConsttxt">Calculation constants</a></h3>
+<p>There are two ways to introduce constant values in calculation source code
+The most obvious one is writing a numerical value. Such values can be written
+by using the native Bracmat format (rational numbers that can contain a <code>/</code>)
+or by using one of the formats recognized by <code>strtod()</code>.
+The other way to write constants into calculation source code is by means of
+macro expressions, similar to how one uses <code>#define</code> in C.</p>
 <p><span class="arrow">&#8657;</span><a href="#calctxt" style="line-height:12pt">Floating point calculations</a></p>
 <h3><a name="CalcArraytxt">Calculation arrays</a></h3>
-<blockquote><pre>TBD.</pre></blockquote>
+<p>Arrays are allocated by the built-in <code>tbl$</code> function. This function takes
+a number of parameters. The first parameter is the name of the array. The
+next parameter is the range of the array. Each following parameter adds another
+range and increments the rank by one. To create an array for the coordinates of
+all nine planets of the solar system, one would as follows:</p>
+<blockquote><pre class="exinput">{?} ( 9:?nrOfPlanets
+    &amp; 3:?spaceDimensions
+    &amp;     new
+        $ ( calculation
+          ,
+            ' (.tbl$(planets,$nrOfPlanets,$spaceDimensions))
+          )
+      : ?calculationObject
+    );</pre></blockquote>
+<p>The <code>idx</code> function selects an array element. This function has the same
+signature as the <code>tbl</code> function. The first parameter is the name of the array
+while the following parameters are index values, one for each array dimension.</p>
+<p>For each dimension, the lowest index value is <code>0</code> and the highest value is
+the the value of the range of that dimension, minus one.</p>
+<p>Each array has a position variable. The position variable is set by the <code>idx</code>
+function and keeps its value until it is changed by another call to <code>idx</code>.
+As long as there is no need to change the position variable, the `current' array
+element can be accessed by treating the array as a scalar variable.</p>
+<blockquote><pre>     idx$(planets,3,2)
+   &amp; "200.3":?planets</pre></blockquote>
+<p>The above could also be written as</p>
+<blockquote><pre>   "200.3":?(idx$(planets,3,2))</pre></blockquote>
+<p>To change an array element by adding some amount, one can write</p>
+<blockquote><pre>   1+!(idx$(planets,7,1)):?planets</pre></blockquote>
+<p>To copy a value from one element to another, one can write</p>
+<blockquote><pre>   !(idx$(planets,8,5)):?(idx$(planets,1,6))</pre></blockquote>
+<p>Arrays are allocated as a contiguous C array of <code>double</code>. The size of this
+array is the product of all the ranges with which the array is created. The
+position variable is just an index pointing into this C array.</p>
 <p><span class="arrow">&#8657;</span><a href="#calctxt" style="line-height:12pt">Floating point calculations</a></p>
 <h3><a name="CaltItertxt">Calculation iterations</a></h3>
-<blockquote><pre>TBD.</pre></blockquote>
+<p>There is just one way to implement a loop in a calculation object: using
+<code>whl'(<i>body of loop</i>)</code>. In order to exit from the loop, the body of the
+loop must have at least one comparison expression.</p>
 <p><span class="arrow">&#8657;</span><a href="#calctxt" style="line-height:12pt">Floating point calculations</a></p>
 <h2><a name="charsettxt">Character set</a></h2>
 <p>Bracmat supports UTF-8 as well as ISO 8859-1 encoded source code. Usually
@@ -3086,7 +3207,7 @@ by Bracmat.</p>
 <p><span class="arrow">&#8657;</span><a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a></p>
 <h1><a name="INDEX">INDEX</a></h1>
 <p><i><a href="#lusmenu">main menu</a></i></p>
-<dl><dt><code>!</code> and <code>!!</code></dt><dd><a href="#">Prefixes and pattern matching</a></dd><dt><code>!!Y</code></dt><dd><a href="#prostutxt1">Program flow</a></dd><dt><code>!!<i>atom</i></code></dt><dd><a href="#unstuurtxt">Prefixes and program flow</a></dd><dt><code>!X</code></dt><dt><code>!a &amp; !b</code></dt><dt><code>!a | !b</code></dt><dt><code>!a:!p &amp; `!b | !c</code></dt><dd><a href="#prostutxt1">Program flow</a></dd><dt><code>!<i>atom</i></code></dt><dd><a href="#unstuurtxt">Prefixes and program flow</a></dd><dt><code>!s:(!p&amp;!a)</code></dt><dt><code>!s:(!pa|!pb)</code></dt><dd><a href="#pattxt">Binary operators in pattern matching</a></dd><dt><code>!subject : !pattern</code></dt><dd><a href="#prostutxt1">Program flow</a></dd><dt><code>"a+"</code></dt><dt><code>"a+b"</code> or <code>"ab+"</code></dt><dt><code>"r+"</code></dt><dt><code>"r+b"</code> or <code>"rb+"</code></dt><dt><code>"w+"</code></dt><dt><code>"w+b"</code> or <code>"wb+"</code></dt><dd><a href="#modetxt"> <code> fil$([<i>file-name</i>],<i>mode</i>) </code> </a></dd><dt><code>#</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>$</code></dt><dd><a href="#funmactxt">Function evaluation</a></dd><dt><code>%</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>&amp;</code></dt><dd><a href="#binprotxt">Binary operators in program flow</a></dd><dt><code>'</code></dt><dd><a href="#funmactxt">Function evaluation</a></dd><dt><code>(!s:!p)&amp;!e </code>or<code> !s:!p&amp;!e</code></dt><dt><code>(!s:!p)|!e </code>or<code> !s:!p|!e</code></dt><dd><a href="#pattxt">Binary operators in pattern matching</a></dd><dt><code>*</code></dt><dt><code>+</code></dt><dd><a href="#algtxt">Algebraic operations</a></dd><dt>,</dt><dt>.</dt><dd><a href="#contxt">Data structures</a></dd><dt><code>/</code></dt><dt><code>/&lt;&gt;5/6</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>:</code></dt><dd><a href="#asstxt">Assignment to variables</a></dd><dt><code>&lt;</code></dt><dt><code>&lt;&gt;</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>=</code></dt><dd><a href="#savtxt">The<code> = </code>operator</a></dd><dt><code>&gt;</code></dt><dt><code>?</code></dt><dt><code>?!</code></dt><dt><code>?!!</code></dt><dt><code>@</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>APP</code></dt><dd><a href="#newtxt">options <code>NEW</code>, <code>APP</code>, <code>TXT</code> and <code>BIN</code></a></dd><dt>Arrays</dt><dd><a href="#CalcArraytxt">Calculation arrays</a></dd><dt><code>BIN</code></dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i>[,MEM][,ECH][,VAP][,STR][,TXT|BIN][,JSN]|[[,X]|[,HT],ML[,TRM]])</code></a></dd><dd><a href="#newtxt">options <code>NEW</code>, <code>APP</code>, <code>TXT</code> and <code>BIN</code></a></dd><dt>Built-in calculation functions</dt><dd><a href="#CalcFunctxt">Listing of built-in functions and function-like constructs in calculation objects</a></dd><dt>C</dt><dd><a href="#filosofie">How Bracmat evolved</a></dd><dt>CALL a;</dt><dt>CALL b(x,y,z);</dt><dd><a href="#prostutxt2">Some often used control structures</a></dd><dt><code>CHR</code></dt><dd><a href="#fixdtxt"> <code> fil$([<i>file-name</i>],<i>type</i>,<i>size</i>[,<i>number</i>]) </code> </a></dd><dt><code>CUR</code></dt><dd><a href="#filesettxt"> <code> fil$(<i>file-name</i>,<i>whence</i>,<i>offset</i>) </code> </a></dd><dt><code>DEC</code></dt><dd><a href="#fixdtxt"> <code> fil$([<i>file-name</i>],<i>type</i>,<i>size</i>[,<i>number</i>]) </code> </a></dd><dt>DO b UNTIL a;</dt><dt>DO b WHILE a;</dt><dd><a href="#prostutxt2">Some often used control structures</a></dd><dt><code>E2BIG</code></dt><dd><a href="#systxt"><code>sys$<i>command-line-command</i></code></a></dd><dt><code>EACCES</code></dt><dd><a href="#rentxt"><code>ren$(<i>oldname</i>.<i>newname</i>)</code></a></dd><dd><a href="#rmvtxt"><code>rmv$<i>file-name</i></code></a></dd><dt><code>ECH</code></dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i>[,MEM][,ECH][,VAP][,STR][,TXT|BIN][,JSN]|[[,X]|[,HT],ML[,TRM]])</code></a></dd><dt><code>EINVAL</code></dt><dd><a href="#rentxt"><code>ren$(<i>oldname</i>.<i>newname</i>)</code></a></dd><dd><a href="#rmvtxt"><code>rmv$<i>file-name</i></code></a></dd><dt><code>END</code></dt><dd><a href="#filesettxt"> <code> fil$(<i>file-name</i>,<i>whence</i>,<i>offset</i>) </code> </a></dd><dt><code>ENOENT</code></dt><dd><a href="#rentxt"><code>ren$(<i>oldname</i>.<i>newname</i>)</code></a></dd><dd><a href="#rmvtxt"><code>rmv$<i>file-name</i></code></a></dd><dt><code>ENOEXEC</code></dt><dt><code>ENOMEM</code></dt><dd><a href="#systxt"><code>sys$<i>command-line-command</i></code></a></dd><dt>FOR i<code> := </code>m TO n DO b;</dt><dd><a href="#prostutxt2">Some often used control structures</a></dd><dt>Gentle introduction</dt><dd><a href="#gentlepat">Gentle introduction to pattern matching</a></dd><dt><code>HT</code> (together with ML)</dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i>[,MEM][,ECH][,VAP][,STR][,TXT|BIN][,JSN]|[[,X]|[,HT],ML[,TRM]])</code></a></dd><dt>How did Bracmat evolve?</dt><dd><a href="#filosofie">How Bracmat evolved</a></dd><dt>How does Bracmat work?</dt><dd><a href="#interaction">User Interaction with Bracmat</a></dd><dt>How to obtain Bracmat</dt><dd><a href="#colofon">How to obtain Bracmat</a></dd><dt>IF a THEN b ELSE c;</dt><dd><a href="#prostutxt2">Some often used control structures</a></dd><dt><code>ISO</code></dt><dd><a href="#ISOtxt"><code>(myhash..ISO)$</code></a></dd><dt>Iterations</dt><dd><a href="#CaltItertxt">Calculation iterations</a></dd><dt><code>JSN</code></dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i>[,MEM][,ECH][,VAP][,STR][,TXT|BIN][,JSN]|[[,X]|[,HT],ML[,TRM]])</code></a></dd><dt>Lisp</dt><dt>Logo</dt><dd><a href="#filosofie">How Bracmat evolved</a></dd><dt><code>MEM</code></dt><dt><code>ML</code></dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i>[,MEM][,ECH][,VAP][,STR][,TXT|BIN][,JSN]|[[,X]|[,HT],ML[,TRM]])</code></a></dd><dt><code>MLencoding</code></dt><dd><a href="#MLencodingtxt"><code>MLencoding$<i>internal-expression-of-XML-or-HTML-data</i></code></a></dd><dt>Member functions of calculation objects</dt><dd><a href="#CalcMethodtxt">Listing of calculation object methods</a></dd><dt><i>N</i></dt><dd><a href="#seltxt"><code><i>index</i>$<i>array-name</i></code></a></dd><dt><code>NEW</code></dt><dd><a href="#newtxt">options <code>NEW</code>, <code>APP</code>, <code>TXT</code> and <code>BIN</code></a></dd><dt>Non-linear patterns</dt><dd><a href="#nonlinpat">Non-linear patterns</a></dd><dt>Parameters</dt><dd><a href="#CalcParmtxt">Calculation parameters</a></dd><dt>Pascal</dt><dd><a href="#filosofie">How Bracmat evolved</a></dd><dt>Pattern matching in character strings</dt><dd><a href="#pattxttxt">Pattern matching in strings</a></dd><dt>Pattern matching in tree structures</dt><dd><a href="#pattxt">Binary operators in pattern matching</a></dd><dt>Recursive patterns</dt><dd><a href="#recurpat">Pattern matching with recursive patterns</a></dd><dt>Rewriting data using pattern matching</dt><dd><a href="#rewriting">Rewriting data using pattern matching</a></dd><dt>SELECT  a WHEN  c1<code> : </code>b1 WHEN  c2<code> : </code>b2 OTHERWISE  bx;</dt><dd><a href="#prostutxt2">Some often used control structures</a></dd><dt><code>SET</code></dt><dd><a href="#filesettxt"> <code> fil$(<i>file-name</i>,<i>whence</i>,<i>offset</i>) </code> </a></dd><dt><code>STR</code></dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i>[,MEM][,ECH][,VAP][,STR][,TXT|BIN][,JSN]|[[,X]|[,HT],ML[,TRM]])</code></a></dd><dt>Snobol, Icon</dt><dd><a href="#filosofie">How Bracmat evolved</a></dd><dt><code>TRM</code> (together with ML)</dt><dt><code>TXT</code></dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i>[,MEM][,ECH][,VAP][,STR][,TXT|BIN][,JSN]|[[,X]|[,HT],ML[,TRM]])</code></a></dd><dd><a href="#newtxt">options <code>NEW</code>, <code>APP</code>, <code>TXT</code> and <code>BIN</code></a></dd><dt><code>VAP</code></dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i>[,MEM][,ECH][,VAP][,STR][,TXT|BIN][,JSN]|[[,X]|[,HT],ML[,TRM]])</code></a></dd><dt>Variables</dt><dd><a href="#CalcVartxt">Calculation variables</a></dd><dt>WHILE a DO b;</dt><dd><a href="#prostutxt2">Some often used control structures</a></dd><dt>What are Bracmat's limitations?</dt><dd><a href="#limitations">Limitations</a></dd><dt>What is Bracmat?</dt><dd><a href="#whatIsBracmat">What is Bracmat?</a></dd><dt>Where to find example code on the internet</dt><dd><a href="#morexmlps">Where to find example code on the internet</a></dd><dt>Why the name `Bracmat'?</dt><dd><a href="#Bracmat-name">Why the name `Bracmat'?</a></dd><dt>Why use Bracmat?</dt><dd><a href="#usecases">Why use Bracmat?</a></dd><dt><code>X</code> (together with ML)</dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i>[,MEM][,ECH][,VAP][,STR][,TXT|BIN][,JSN]|[[,X]|[,HT],ML[,TRM]])</code></a></dd><dt><code>[</code></dt><dt><code>[%</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>[whitespace]</code></dt><dd><a href="#contxt">Data structures</a></dd><dt><code>\"</code></dt><dd><a href="#atotxt">Strings or atoms</a></dd><dt><code>\D</code></dt><dd><a href="#difftxt">Differentiation</a></dd><dt><code>\L</code></dt><dd><a href="#algtxt">Algebraic operations</a></dd><dt><code>\\</code></dt><dt><code>\a</code></dt><dt><code>\b</code></dt><dt><code>\f</code></dt><dt><code>\n</code></dt><dt><code>\r</code></dt><dt><code>\t</code></dt><dt><code>\v</code></dt><dd><a href="#atotxt">Strings or atoms</a></dd><dt><code>^</code></dt><dd><a href="#algtxt">Algebraic operations</a></dd><dt><code>_</code></dt><dd><a href="#dumtxt">The dummy operator<code> _</code></a></dd><dt><code>`</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>`!p &amp; !q</code></dt><dd><a href="#prostutxt1">Program flow</a></dd><dt><code>a</code></dt><dt><code>ab</code></dt><dd><a href="#modetxt"> <code> fil$([<i>file-name</i>],<i>mode</i>) </code> </a></dd><dt><code>abs</code></dt><dd><a href="#sgntxt"><code>abs$<i>expression</i> </code>and<code> sgn$<i>expression</i></code></a></dd><dt>addition</dt><dd><a href="#algtxt">Algebraic operations</a></dd><dt><code>alc</code></dt><dd><a href="#alctxt"><code>alc$<i>number-of-bytes</i></code></a></dd><dt> algebraic operations</dt><dd><a href="#algtxt">Algebraic operations</a></dd><dt><code>arg</code></dt><dd><a href="#argtxt"><code>arg$ </code>or<code> arg$<i>number</i></code></a></dd><dt><code>asc</code></dt><dd><a href="#asctxt"><code>asc$<i>character</i></code></a></dd><dt> assignment</dt><dd><a href="#savtxt">The<code> = </code>operator</a></dd><dt><code>bez</code></dt><dd><a href="#beztxt"><code>bez$</code></a></dd><dt> binary operators</dt><dd><a href="#binmenu">Binary operators</a></dd><dt> binary operators - overview </dt><dd><a href="#binovztxt"><code>= </code>. , <code>| &amp; : </code>whitespace<code> + * ^ \L \D ' $ _</code></a></dd><dt> built-in functions</dt><dd><a href="#inbltmenu">Built-in functions</a></dd><dt><code>calculate</code></dt><dd><a href="#Calculatetxt"><code>(myCalculation..calculate)$<i>Parameters</i></code></a></dd><dt><code>casesensitive</code></dt><dd><a href="#casesensitivetxt"><code>(myhash..casesensitive)$</code></a></dd><dt><code>cat</code></dt><dd><a href="#cattxt"><code>cat$([<i>include-list</i>][,[<i>exclude-list</i>][,EXT]])</code></a></dd><dt>character set</dt><dd><a href="#charsettxt">Character set</a></dd><dt><code>chr</code></dt><dd><a href="#chrtxt"><code>chr$<i>value</i></code></a></dd><dt><code>chu</code></dt><dd><a href="#chutxt"><code>chu$<i>value</i></code></a></dd><dt><code>clk</code></dt><dd><a href="#clktxt"><code>clk$</code></a></dd><dt><code>cos</code></dt><dd><a href="#gontxt"><code>cos$<i>expression</i> </code>and<code> sin$<i>expression</i></code></a></dd><dt> currying</dt><dd><a href="#lambda">Lambda calculus, currying</a></dd><dt><code>d2x</code></dt><dd><a href="#d2xtxt"><code>d2x$<i>decimal-value</i></code></a></dd><dt> data structures</dt><dd><a href="#contxt">Data structures</a></dd><dt><code>dbg</code></dt><dd><a href="#dbgtxt"><code>dbg'<i>expression</i></code></a></dd><dt> debugging</dt><dd><a href="#debugtxt">Debugging</a></dd><dt> defining functions</dt><dd><a href="#funtxt1">Definition of a function</a></dd><dt><code>den</code></dt><dd><a href="#dentxt"><code>den$<i>rational-number</i></code></a></dd><dt> differentiation</dt><dd><a href="#difftxt">Differentiation</a></dd><dt><code>div</code></dt><dd><a href="#divtxt"><code>div$(<i>rational-number</i>,<i>rational-number</i>)</code></a></dd><dt>exponentiation</dt><dd><a href="#algtxt">Algebraic operations</a></dd><dt><code>export</code></dt><dd><a href="#CalcExporttxt"><code>(myCalculation..export)$(<i>format</i>,&lt;name of variable of </code><code>calculation</code> object&gt;)</a></dd><dt><i>exprA</i><code> &amp; </code><i>exprB</i></dt><dt><i>exprA</i><code> | </code><i>exprB</i></dt><dd><a href="#binprotxt">Binary operators in program flow</a></dd><dt><i>expression</i><code> : ?<i>variable</i></code></dt><dd><a href="#asstxt">Assignment to variables</a></dd><dt><code>fct</code></dt><dd><a href="#factxt"><code>fct$<i>expression</i></code></a></dd><dt><code>fil</code></dt><dd><a href="#filtxt"><code>fil$([[<i>file-name</i>][,<i>option</i>[,<i>number</i>[,<i>value-to-output</i>]]]])</code></a></dd><dt><code>fil$([<i>file-name</i>],,<i>number</i>,<i>value</i>)</code></dt><dd><a href="#writetxt"> <code> fil$([<i>file-name</i>],,<i>number</i>,<i>value</i>) </code> </a></dd><dt><code>fil$([<i>file-name</i>],SET,-1)</code></dt><dd><a href="#closetxt"> <code> fil$([<i>file-name</i>],SET,-1) </code> </a></dd><dt><code>fil$([<i>file-name</i>],STR[,<i>stop</i>])</code></dt><dd><a href="#varitxt"> <code> fil$([<i>file-name</i>],STR[,<i>stop</i>]) </code> </a></dd><dt><code>fil$([<i>file-name</i>],<i>mode</i>)</code></dt><dd><a href="#modetxt"> <code> fil$([<i>file-name</i>],<i>mode</i>) </code> </a></dd><dt><code>fil$([<i>file-name</i>],<i>type</i>,<i>size</i>[,<i>number</i>])</code></dt><dd><a href="#fixdtxt"> <code> fil$([<i>file-name</i>],<i>type</i>,<i>size</i>[,<i>number</i>]) </code> </a></dd><dt><code>fil$([<i>file-name</i>][,,<i>number</i>])</code></dt><dd><a href="#readtxt"> <code> fil$([<i>file-name</i>][,,<i>number</i>]) </code> </a></dd><dt><code>fil$(<i>file-name</i>,TEL)</code></dt><dd><a href="#positiontxt"> <code> fil$(<i>file-name</i>,TEL) </code> </a></dd><dt><code>fil$(<i>file-name</i>,<i>whence</i>,<i>offset</i>)</code></dt><dd><a href="#filesettxt"> <code> fil$(<i>file-name</i>,<i>whence</i>,<i>offset</i>) </code> </a></dd><dt><code>find</code></dt><dd><a href="#findtxt"><code>(myhash..find)$key:(?Key.?Value) ?OtherKeyValuePairs</code></a></dd><dt><code>flg</code></dt><dd><a href="#flgtxt"><code>flg$(=<i>expression</i>)</code></a></dd><dt>floating point calculations</dt><dd><a href="#calctxt">Floating point calculations</a></dd><dt><code>flt</code></dt><dd><a href="#flttxt"><code>flt$(<i>rational-number</i>,<i>number-of-decimals</i>)</code></a></dd><dt><code>forall</code></dt><dd><a href="#foralltxt"><code>(myhash..forall)$<i>Function</i></code></a></dd><dt><code>fre</code></dt><dd><a href="#fretxt"><code>fre$<i>memory-address</i></code></a></dd><dt> function evaluation</dt><dd><a href="#funmactxt">Function evaluation</a></dd><dt> functions</dt><dd><a href="#funcmenu">Functions</a></dd><dt> functions and macros</dt><dd><a href="#funmactxt">Function evaluation</a></dd><dt><code>get</code></dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i>[,MEM][,ECH][,VAP][,STR][,TXT|BIN][,JSN]|[[,X]|[,HT],ML[,TRM]])</code></a></dd><dt><code>glf</code></dt><dd><a href="#glftxt"><code>glf$(=<i>prefixes</i>.<i>expression</i>)</code></a></dd><dt> grammar</dt><dd><a href="#syntax">The grammar of Bracmat</a></dd><dt>hash tables</dt><dd><a href="#hashtxt">Hash tables</a></dd><dt><code>insert</code></dt><dd><a href="#inserttxt"><code>(myhash..insert)$(Key.Value)</code></a></dd><dt> introduction</dt><dd><a href="#intro">Introduction</a></dd><dt><code>jsn</code></dt><dd><a href="#jsntxt"><code>jsn$<i>expression</i></code></a></dd><dt> lambda abstractions</dt><dd><a href="#lambda">Lambda calculus, currying</a></dd><dt><code>let</code></dt><dd><a href="#lettxt"><code>let$(<i>atom-or-nil</i>)</code></a></dd><dt> literals</dt><dd><a href="#varmattxt">Literals</a></dd><dt>logarithm</dt><dd><a href="#algtxt">Algebraic operations</a></dd><dt><code>low</code></dt><dd><a href="#lowtxt"><code>low$(<i>atom-or-nil</i>)</code></a></dd><dt><code>lst</code></dt><dd><a href="#lsttxt1"><code>lst$(<i>(=expression) or variable</i>*[,LIN][,RAW][,WYD])</code></a></dd><dt><code>map</code></dt><dd><a href="#maptxt"><code>map$(<i>fnc</i>.<i>list</i>)</code></a></dd><dt><code>mem</code></dt><dd><a href="#memtxt"><code>mem$[EXT]</code></a></dd><dt><code>mod</code></dt><dd><a href="#modtxt"><code>mod$(<i>number</i>,<i>divisor</i>)</code></a></dd><dt><code>mop</code></dt><dd><a href="#moptxt"><code>mop$(<i>fnc</i>.<i>expression</i>.(=<i>non-leaf expression</i>))</code></a></dd><dt>multiplication</dt><dd><a href="#algtxt">Algebraic operations</a></dd><dt> nameless functions</dt><dd><a href="#naamloos">The nameless functions<code> $<i>expression</i> </code>and <code>'<i>expression</i></code></a></dd><dt><code>nestML</code>    </dt><dd><a href="#nestMLtxt"><code>nestML$<i>internal-expression-of-XML-or-HTML-data</i></code></a></dd><dt><code>new</code></dt><dd><a href="#newobjecttxt"><code>new$<i>object</i> </code>or<code> new$(<i>object</i>,<i>args</i>)</code></a></dd><dt>objects</dt><dd><a href="#objecttxt">Objects</a></dd><dt><code>out</code></dt><dd><a href="#outtxt"><code>out$<i>expression</i></code></a></dd><dt> pattern matching</dt><dd><a href="#patternm">Pattern matching</a></dd><dd><a href="#pattxt">Binary operators in pattern matching</a></dd><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>pee</code></dt><dd><a href="#peetxt"><code>pee$(<i>address</i> [,<i>size</i>])</code></a></dd><dt><code>pok</code></dt><dd><a href="#poktxt"><code>pok$(<i>address</i>,<i>value</i> [,<i>size</i>])</code></a></dd><dt>predefined variables</dt><dd><a href="#predvartxt">Predefined variables</a></dd><dt> predefined, changeable functions</dt><dd><a href="#predefmenu">Predefined functions</a></dd><dt> prefixes combined with expressions</dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt> prefixes/unary operators</dt><dd><a href="#unopsmenu">Prefixes</a></dd><dt><code>print</code></dt><dd><a href="#CalcPrinttxt"><code>(myCalculation..print)$</code></a></dd><dt> program flow</dt><dd><a href="#binprotxt">Binary operators in program flow</a></dd><dd><a href="#prostutxt1">Program flow</a></dd><dd><a href="#unstuurtxt">Prefixes and program flow</a></dd><dt> programming in Bracmat</dt><dd><a href="#progsmenu">Programming advice</a></dd><dt><code>put</code></dt><dd><a href="#puttxt1"><code>put$(<i>expression</i>[,LIN][,WYD])</code></a></dd><dt><code>r</code></dt><dt><code>rb</code></dt><dd><a href="#modetxt"> <code> fil$([<i>file-name</i>],<i>mode</i>) </code> </a></dd><dt><code>remove</code></dt><dd><a href="#removetxt"><code>(myhash..remove)$key:?KeyValuePairs</code></a></dd><dt><code>ren</code></dt><dd><a href="#rentxt"><code>ren$(<i>oldname</i>.<i>newname</i>)</code></a></dd><dt><code>rev</code></dt><dd><a href="#rmvtxt"><code>rmv$<i>file-name</i></code></a></dd><dt><code>rmv</code></dt><dd><a href="#revtxt"><code>rev$<i>atom</i></code></a></dd><dt><code>sgn</code></dt><dd><a href="#sgntxt"><code>abs$<i>expression</i> </code>and<code> sgn$<i>expression</i></code></a></dd><dt><code>sim</code></dt><dd><a href="#simtxt"><code>sim$(<i>atom-or-nil</i>,<i>atom-or-nil</i>)</code></a></dd><dt><code>sin</code></dt><dd><a href="#gontxt"><code>cos$<i>expression</i> </code>and<code> sin$<i>expression</i></code></a></dd><dt><code>str</code></dt><dd><a href="#strtxt"><code>str$<i>expression</i></code></a></dd><dt> strings or atoms</dt><dd><a href="#atotxt">Strings or atoms</a></dd><dt><code>sub</code></dt><dd><a href="#subtxt1"><code>sub$(<i>expression</i>.<i>pattern</i>.<i>replacement</i>)</code></a></dd><dt><code>swi</code></dt><dd><a href="#switxt"><code>swi$(<i>interrupt-number</i>.<i>input-value</i>,[<i>input-value</i>,...])</code></a></dd><dt> symbols</dt><dd><a href="#varsmenu">Symbols</a></dd><dt><code>sys</code></dt><dd><a href="#systxt"><code>sys$<i>command-line-command</i></code></a></dd><dt><code>tay</code></dt><dd><a href="#taytxt"><code>tay$(<i>expression</i>,<i>variable</i>,<i>number-of-terms</i>)</code></a></dd><dt><code>tbl</code></dt><dd><a href="#tbltxt"><code>tbl$(<i>variable</i>,<i>array-size</i>)</code></a></dd><dt> the dummy operator</dt><dd><a href="#dumtxt">The dummy operator<code> _</code></a></dd><dt> the four evaluation contexts</dt><dd><a href="#evaltxt">The four evaluators</a></dd><dt><code>toML</code>    </dt><dd><a href="#toMLtxt"><code>toML$<i>internal-expression-of-XML-or-HTML-data</i></code></a></dd><dt><code>trc</code></dt><dd><a href="#CalcTrctxt"><code>(myCalculation..trc)$<i>Parameters</i></code></a></dd><dt><code>ugc</code></dt><dd><a href="#ugctxt"><code>ugc$(<i>atom-or-nil</i>)</code></a></dd><dt> unary operators</dt><dd><a href="#unops">Minus sign</a></dd><dt><code>upp</code></dt><dd><a href="#upptxt"><code>upp$(<i>atom-or-nil</i>)</code></a></dd><dt><code>utf</code></dt><dd><a href="#utftxt"><code>utf$<i>UTF-8-character</i></code></a></dd><dt>v<code> := </code>IF a THEN b ELSE c;</dt><dt>v<code> := </code>b(x,y,z);</dt><dd><a href="#prostutxt2">Some often used control structures</a></dd><dt><code>vap</code></dt><dd><a href="#vaptxt"><code>vap$(<i>fnc</i>.<i>string</i>) </code>or<code> vap$(<i>fnc</i>.<i>string</i>.<i>separator</i>)</code></a></dd><dt><i>variable</i><code> = </code><i>expression</i></dt><dd><a href="#asstxt">Assignment to variables</a></dd><dt> variables</dt><dd><a href="#varprotxt">Variables</a></dd><dt><code>w</code></dt><dt><code>wb</code></dt><dd><a href="#modetxt"> <code> fil$([<i>file-name</i>],<i>mode</i>) </code> </a></dd><dt><code>whl</code></dt><dd><a href="#whltxt"><code>whl'(<i>expression</i>)</code></a></dd><dt><code>x2d</code></dt><dd><a href="#x2dtxt"><code>x2d$<i>hexadecimal-value</i></code></a></dd><dt><code>|</code></dt><dd><a href="#binprotxt">Binary operators in program flow</a></dd><dt><code>~</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>~!a</code></dt><dd><a href="#prostutxt1">Program flow</a></dd><dt><code>~#</code></dt><dt><code>~/</code></dt><dt><code>~/#</code></dt><dt><code>~/#&lt;9</code></dt><dt><code>~/#&lt;&gt;0</code></dt><dt><code>~&lt;</code></dt><dt><code>~&lt;&gt;</code></dt><dt><code>~&gt;</code></dt><dt><code>~@</code></dt><dt><code>~`</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd></dl>
+<dl><dt><code>!</code> and <code>!!</code></dt><dd><a href="#">Prefixes and pattern matching</a></dd><dt><code>!!Y</code></dt><dd><a href="#prostutxt1">Program flow</a></dd><dt><code>!!<i>atom</i></code></dt><dd><a href="#unstuurtxt">Prefixes and program flow</a></dd><dt><code>!X</code></dt><dt><code>!a &amp; !b</code></dt><dt><code>!a | !b</code></dt><dt><code>!a:!p &amp; `!b | !c</code></dt><dd><a href="#prostutxt1">Program flow</a></dd><dt><code>!<i>atom</i></code></dt><dd><a href="#unstuurtxt">Prefixes and program flow</a></dd><dt><code>!s:(!p&amp;!a)</code></dt><dt><code>!s:(!pa|!pb)</code></dt><dd><a href="#pattxt">Binary operators in pattern matching</a></dd><dt><code>!subject : !pattern</code></dt><dd><a href="#prostutxt1">Program flow</a></dd><dt><code>"%a"</code></dt><dd><a href="#CalcExporttxt"><code>(myCalculation..export)$(<i>format</i>,&lt;name of variable of </code><code>calculation</code> object&gt;)</a></dd><dt><code>"a+"</code></dt><dt><code>"a+b"</code> or <code>"ab+"</code></dt><dt><code>"r+"</code></dt><dt><code>"r+b"</code> or <code>"rb+"</code></dt><dt><code>"w+"</code></dt><dt><code>"w+b"</code> or <code>"wb+"</code></dt><dd><a href="#modetxt"> <code> fil$([<i>file-name</i>],<i>mode</i>) </code> </a></dd><dt><code>#</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>$</code></dt><dd><a href="#funmactxt">Function evaluation</a></dd><dt><code>%</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>&amp;</code></dt><dd><a href="#binprotxt">Binary operators in program flow</a></dd><dt><code>'</code></dt><dd><a href="#funmactxt">Function evaluation</a></dd><dt><code>(!s:!p)&amp;!e </code>or<code> !s:!p&amp;!e</code></dt><dt><code>(!s:!p)|!e </code>or<code> !s:!p|!e</code></dt><dd><a href="#pattxt">Binary operators in pattern matching</a></dd><dt><code>*</code></dt><dt><code>+</code></dt><dd><a href="#algtxt">Algebraic operations</a></dd><dt>,</dt><dt>.</dt><dd><a href="#contxt">Data structures</a></dd><dt><code>/</code></dt><dt><code>/&lt;&gt;5/6</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>:</code></dt><dd><a href="#asstxt">Assignment to variables</a></dd><dt><code>&lt;</code></dt><dt><code>&lt;&gt;</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>=</code></dt><dd><a href="#savtxt">The<code> = </code>operator</a></dd><dt><code>&gt;</code></dt><dt><code>?</code></dt><dt><code>?!</code></dt><dt><code>?!!</code></dt><dt><code>@</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>APP</code></dt><dd><a href="#newtxt">options <code>NEW</code>, <code>APP</code>, <code>TXT</code> and <code>BIN</code></a></dd><dt>Arrays</dt><dd><a href="#CalcArraytxt">Calculation arrays</a></dd><dt><code>BIN</code></dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i> [MEM][ECH][VAP][STR][TXT|BIN][JSN]|[[X]|[HT]ML[TRM]])</code></a></dd><dd><a href="#newtxt">options <code>NEW</code>, <code>APP</code>, <code>TXT</code> and <code>BIN</code></a></dd><dt>Built-in calculation functions</dt><dd><a href="#CalcFunctxt">Listing of built-in functions and function-like constructs in calculation objects</a></dd><dt>C</dt><dd><a href="#filosofie">How Bracmat evolved</a></dd><dt>CALL a;</dt><dt>CALL b(x,y,z);</dt><dd><a href="#prostutxt2">Some often used control structures</a></dd><dt><code>CHR</code></dt><dd><a href="#fixdtxt"> <code> fil$([<i>file-name</i>],<i>type</i>,<i>size</i>[,<i>number</i>]) </code> </a></dd><dt><code>CUR</code></dt><dd><a href="#filesettxt"> <code> fil$(<i>file-name</i>,<i>whence</i>,<i>offset</i>) </code> </a></dd><dt>Constants</dt><dd><a href="#CalcConsttxt">Calculation constants</a></dd><dt><code>DEC</code></dt><dd><a href="#fixdtxt"> <code> fil$([<i>file-name</i>],<i>type</i>,<i>size</i>[,<i>number</i>]) </code> </a></dd><dt>DO b UNTIL a;</dt><dt>DO b WHILE a;</dt><dd><a href="#prostutxt2">Some often used control structures</a></dd><dt><code>E2BIG</code></dt><dd><a href="#systxt"><code>sys$<i>command-line-command</i></code></a></dd><dt><code>EACCES</code></dt><dd><a href="#rentxt"><code>ren$(<i>oldname</i>.<i>newname</i>)</code></a></dd><dd><a href="#rmvtxt"><code>rmv$<i>file-name</i></code></a></dd><dt><code>ECH</code></dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i> [MEM][ECH][VAP][STR][TXT|BIN][JSN]|[[X]|[HT]ML[TRM]])</code></a></dd><dt><code>EINVAL</code></dt><dd><a href="#rentxt"><code>ren$(<i>oldname</i>.<i>newname</i>)</code></a></dd><dd><a href="#rmvtxt"><code>rmv$<i>file-name</i></code></a></dd><dt><code>END</code></dt><dd><a href="#filesettxt"> <code> fil$(<i>file-name</i>,<i>whence</i>,<i>offset</i>) </code> </a></dd><dt><code>ENOENT</code></dt><dd><a href="#rentxt"><code>ren$(<i>oldname</i>.<i>newname</i>)</code></a></dd><dd><a href="#rmvtxt"><code>rmv$<i>file-name</i></code></a></dd><dt><code>ENOEXEC</code></dt><dt><code>ENOMEM</code></dt><dd><a href="#systxt"><code>sys$<i>command-line-command</i></code></a></dd><dt>FOR i<code> := </code>m TO n DO b;</dt><dd><a href="#prostutxt2">Some often used control structures</a></dd><dt>Gentle introduction</dt><dd><a href="#gentlepat">Gentle introduction to pattern matching</a></dd><dt><code>HT</code> (together with ML)</dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i> [MEM][ECH][VAP][STR][TXT|BIN][JSN]|[[X]|[HT]ML[TRM]])</code></a></dd><dt>How did Bracmat evolve?</dt><dd><a href="#filosofie">How Bracmat evolved</a></dd><dt>How does Bracmat work?</dt><dd><a href="#interaction">User Interaction with Bracmat</a></dd><dt>How to obtain Bracmat</dt><dd><a href="#colofon">How to obtain Bracmat</a></dd><dt>IF a THEN b ELSE c;</dt><dd><a href="#prostutxt2">Some often used control structures</a></dd><dt><code>ISO</code></dt><dd><a href="#ISOtxt"><code>(myhash..ISO)$</code></a></dd><dt>Iterations</dt><dd><a href="#CaltItertxt">Calculation iterations</a></dd><dt><code>JSN</code></dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i> [MEM][ECH][VAP][STR][TXT|BIN][JSN]|[[X]|[HT]ML[TRM]])</code></a></dd><dt>Lisp</dt><dt>Logo</dt><dd><a href="#filosofie">How Bracmat evolved</a></dd><dt><code>MEM</code></dt><dt><code>ML</code></dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i> [MEM][ECH][VAP][STR][TXT|BIN][JSN]|[[X]|[HT]ML[TRM]])</code></a></dd><dt><code>MLencoding</code></dt><dd><a href="#MLencodingtxt"><code>MLencoding$<i>internal-expression-of-XML-or-HTML-data</i></code></a></dd><dt>Member functions of calculation objects</dt><dd><a href="#CalcMethodtxt">Listing of calculation object methods</a></dd><dt>N</dt><dd><a href="#CalcExporttxt"><code>(myCalculation..export)$(<i>format</i>,&lt;name of variable of </code><code>calculation</code> object&gt;)</a></dd><dd><a href="#seltxt"><code><i>index</i>$<i>array-name</i></code></a></dd><dt><code>NEW</code></dt><dd><a href="#newtxt">options <code>NEW</code>, <code>APP</code>, <code>TXT</code> and <code>BIN</code></a></dd><dt>Non-linear patterns</dt><dd><a href="#nonlinpat">Non-linear patterns</a></dd><dt>Parameters</dt><dd><a href="#CalcParmtxt">Calculation parameters</a></dd><dt>Pascal</dt><dd><a href="#filosofie">How Bracmat evolved</a></dd><dt>Pattern matching in character strings</dt><dd><a href="#pattxttxt">Pattern matching in strings</a></dd><dt>Pattern matching in tree structures</dt><dd><a href="#pattxt">Binary operators in pattern matching</a></dd><dt>Q</dt><dt>R</dt><dd><a href="#CalcExporttxt"><code>(myCalculation..export)$(<i>format</i>,&lt;name of variable of </code><code>calculation</code> object&gt;)</a></dd><dt>Recursive patterns</dt><dd><a href="#recurpat">Pattern matching with recursive patterns</a></dd><dt>Rewriting data using pattern matching</dt><dd><a href="#rewriting">Rewriting data using pattern matching</a></dd><dt>SELECT  a WHEN  c1<code> : </code>b1 WHEN  c2<code> : </code>b2 OTHERWISE  bx;</dt><dd><a href="#prostutxt2">Some often used control structures</a></dd><dt><code>SET</code></dt><dd><a href="#filesettxt"> <code> fil$(<i>file-name</i>,<i>whence</i>,<i>offset</i>) </code> </a></dd><dt><code>STR</code></dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i> [MEM][ECH][VAP][STR][TXT|BIN][JSN]|[[X]|[HT]ML[TRM]])</code></a></dd><dt>Snobol, Icon</dt><dd><a href="#filosofie">How Bracmat evolved</a></dd><dt><code>TRM</code> (together with ML)</dt><dt><code>TXT</code></dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i> [MEM][ECH][VAP][STR][TXT|BIN][JSN]|[[X]|[HT]ML[TRM]])</code></a></dd><dd><a href="#newtxt">options <code>NEW</code>, <code>APP</code>, <code>TXT</code> and <code>BIN</code></a></dd><dt><code>VAP</code></dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i> [MEM][ECH][VAP][STR][TXT|BIN][JSN]|[[X]|[HT]ML[TRM]])</code></a></dd><dt>Variables</dt><dd><a href="#CalcVartxt">Calculation variables</a></dd><dt>WHILE a DO b;</dt><dd><a href="#prostutxt2">Some often used control structures</a></dd><dt>What are Bracmat's limitations?</dt><dd><a href="#limitations">Limitations</a></dd><dt>What is Bracmat?</dt><dd><a href="#whatIsBracmat">What is Bracmat?</a></dd><dt>Where to find example code on the internet</dt><dd><a href="#morexmlps">Where to find example code on the internet</a></dd><dt>Why the name `Bracmat'?</dt><dd><a href="#Bracmat-name">Why the name `Bracmat'?</a></dd><dt>Why use Bracmat?</dt><dd><a href="#usecases">Why use Bracmat?</a></dd><dt><code>X</code> (together with ML)</dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i> [MEM][ECH][VAP][STR][TXT|BIN][JSN]|[[X]|[HT]ML[TRM]])</code></a></dd><dt><code>[</code></dt><dt><code>[%</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>[whitespace]</code></dt><dd><a href="#contxt">Data structures</a></dd><dt><code>\"</code></dt><dd><a href="#atotxt">Strings or atoms</a></dd><dt><code>\D</code></dt><dd><a href="#difftxt">Differentiation</a></dd><dt><code>\L</code></dt><dd><a href="#algtxt">Algebraic operations</a></dd><dt><code>\\</code></dt><dt><code>\a</code></dt><dt><code>\b</code></dt><dt><code>\f</code></dt><dt><code>\n</code></dt><dt><code>\r</code></dt><dt><code>\t</code></dt><dt><code>\v</code></dt><dd><a href="#atotxt">Strings or atoms</a></dd><dt><code>^</code></dt><dd><a href="#algtxt">Algebraic operations</a></dd><dt><code>_</code></dt><dd><a href="#dumtxt">The dummy operator<code> _</code></a></dd><dt><code>`</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>`!p &amp; !q</code></dt><dd><a href="#prostutxt1">Program flow</a></dd><dt><code>a</code></dt><dt><code>ab</code></dt><dd><a href="#modetxt"> <code> fil$([<i>file-name</i>],<i>mode</i>) </code> </a></dd><dt><code>abs</code></dt><dd><a href="#sgntxt"><code>abs$<i>expression</i> </code>and<code> sgn$<i>expression</i></code></a></dd><dt>addition</dt><dd><a href="#algtxt">Algebraic operations</a></dd><dt><code>alc</code></dt><dd><a href="#alctxt"><code>alc$<i>number-of-bytes</i></code></a></dd><dt> algebraic operations</dt><dd><a href="#algtxt">Algebraic operations</a></dd><dt><code>arg</code></dt><dd><a href="#argtxt"><code>arg$ </code>or<code> arg$<i>number</i></code></a></dd><dt><code>asc</code></dt><dd><a href="#asctxt"><code>asc$<i>character</i></code></a></dd><dt> assignment</dt><dd><a href="#savtxt">The<code> = </code>operator</a></dd><dt><code>bez</code></dt><dd><a href="#beztxt"><code>bez$</code></a></dd><dt> binary operators</dt><dd><a href="#binmenu">Binary operators</a></dd><dt> binary operators - overview</dt><dd><a href="#binovztxt"><code>= </code>. , <code>| &amp; : </code>whitespace<code> + * ^ \L \D ' $ _</code></a></dd><dt> built-in functions</dt><dd><a href="#inbltmenu">Built-in functions</a></dd><dt><code>calculate</code></dt><dd><a href="#Calculatetxt"><code>(myCalculation..calculate)$<i>Parameters</i></code></a></dd><dt><code>casesensitive</code></dt><dd><a href="#casesensitivetxt"><code>(myhash..casesensitive)$</code></a></dd><dt><code>cat</code></dt><dd><a href="#cattxt"><code>cat$([<i>include-list</i>][,[<i>exclude-list</i>][,EXT]])</code></a></dd><dt>character set</dt><dd><a href="#charsettxt">Character set</a></dd><dt><code>chr</code></dt><dd><a href="#chrtxt"><code>chr$<i>value</i></code></a></dd><dt><code>chu</code></dt><dd><a href="#chutxt"><code>chu$<i>value</i></code></a></dd><dt><code>clk</code></dt><dd><a href="#clktxt"><code>clk$</code></a></dd><dt><code>cos</code></dt><dd><a href="#gontxt"><code>cos$<i>expression</i> </code>and<code> sin$<i>expression</i></code></a></dd><dt> currying</dt><dd><a href="#lambda">Lambda calculus, currying</a></dd><dt><code>d2x</code></dt><dd><a href="#d2xtxt"><code>d2x$<i>decimal-value</i></code></a></dd><dt> data structures</dt><dd><a href="#contxt">Data structures</a></dd><dt><code>dbg</code></dt><dd><a href="#dbgtxt"><code>dbg'<i>expression</i></code></a></dd><dt> debugging</dt><dd><a href="#debugtxt">Debugging</a></dd><dt> defining functions</dt><dd><a href="#funtxt1">Definition of a function</a></dd><dt><code>den</code></dt><dd><a href="#dentxt"><code>den$<i>rational-number</i></code></a></dd><dt> differentiation</dt><dd><a href="#difftxt">Differentiation</a></dd><dt><code>div</code></dt><dd><a href="#divtxt"><code>div$(<i>rational-number</i>,<i>rational-number</i>)</code></a></dd><dt>exponentiation</dt><dd><a href="#algtxt">Algebraic operations</a></dd><dt><code>export</code></dt><dd><a href="#CalcExporttxt"><code>(myCalculation..export)$(<i>format</i>,&lt;name of variable of </code><code>calculation</code> object&gt;)</a></dd><dt><i>exprA</i><code> &amp; </code><i>exprB</i></dt><dt><i>exprA</i><code> | </code><i>exprB</i></dt><dd><a href="#binprotxt">Binary operators in program flow</a></dd><dt><i>expression</i><code> : ?<i>variable</i></code></dt><dd><a href="#asstxt">Assignment to variables</a></dd><dt><code>fct</code></dt><dd><a href="#factxt"><code>fct$<i>expression</i></code></a></dd><dt><code>fil</code></dt><dd><a href="#filtxt"><code>fil$([[<i>file-name</i>][,<i>option</i>[,<i>number</i>[,<i>value-to-output</i>]]]])</code></a></dd><dt><code>fil$([<i>file-name</i>],,<i>number</i>,<i>value</i>)</code></dt><dd><a href="#writetxt"> <code> fil$([<i>file-name</i>],,<i>number</i>,<i>value</i>) </code> </a></dd><dt><code>fil$([<i>file-name</i>],SET,-1)</code></dt><dd><a href="#closetxt"> <code> fil$([<i>file-name</i>],SET,-1) </code> </a></dd><dt><code>fil$([<i>file-name</i>],STR[,<i>stop</i>])</code></dt><dd><a href="#varitxt"> <code> fil$([<i>file-name</i>],STR[,<i>stop</i>]) </code> </a></dd><dt><code>fil$([<i>file-name</i>],<i>mode</i>)</code></dt><dd><a href="#modetxt"> <code> fil$([<i>file-name</i>],<i>mode</i>) </code> </a></dd><dt><code>fil$([<i>file-name</i>],<i>type</i>,<i>size</i>[,<i>number</i>])</code></dt><dd><a href="#fixdtxt"> <code> fil$([<i>file-name</i>],<i>type</i>,<i>size</i>[,<i>number</i>]) </code> </a></dd><dt><code>fil$([<i>file-name</i>][,,<i>number</i>])</code></dt><dd><a href="#readtxt"> <code> fil$([<i>file-name</i>][,,<i>number</i>]) </code> </a></dd><dt><code>fil$(<i>file-name</i>,TEL)</code></dt><dd><a href="#positiontxt"> <code> fil$(<i>file-name</i>,TEL) </code> </a></dd><dt><code>fil$(<i>file-name</i>,<i>whence</i>,<i>offset</i>)</code></dt><dd><a href="#filesettxt"> <code> fil$(<i>file-name</i>,<i>whence</i>,<i>offset</i>) </code> </a></dd><dt><code>find</code></dt><dd><a href="#findtxt"><code>(myhash..find)$key:(?Key.?Value) ?OtherKeyValuePairs</code></a></dd><dt><code>flg</code></dt><dd><a href="#flgtxt"><code>flg$(=<i>expression</i>)</code></a></dd><dt>floating point calculations</dt><dd><a href="#calctxt">Floating point calculations</a></dd><dt><code>flt</code></dt><dd><a href="#flttxt"><code>flt$(<i>rational-number</i>,<i>number-of-decimals</i>)</code></a></dd><dt><code>forall</code></dt><dd><a href="#foralltxt"><code>(myhash..forall)$<i>Function</i></code></a></dd><dt><code>fre</code></dt><dd><a href="#fretxt"><code>fre$<i>memory-address</i></code></a></dd><dt> function evaluation</dt><dd><a href="#funmactxt">Function evaluation</a></dd><dt> functions</dt><dd><a href="#funcmenu">Functions</a></dd><dt> functions and macros</dt><dd><a href="#funmactxt">Function evaluation</a></dd><dt><code>get</code></dt><dd><a href="#gettxt"><code>get$(<i>atom-or-nil</i> [MEM][ECH][VAP][STR][TXT|BIN][JSN]|[[X]|[HT]ML[TRM]])</code></a></dd><dt><code>glf</code></dt><dd><a href="#glftxt"><code>glf$(=<i>prefixes</i>.<i>expression</i>)</code></a></dd><dt> grammar</dt><dd><a href="#syntax">The grammar of Bracmat</a></dd><dt>hash tables</dt><dd><a href="#hashtxt">Hash tables</a></dd><dt><code>insert</code></dt><dd><a href="#inserttxt"><code>(myhash..insert)$(Key.Value)</code></a></dd><dt> introduction</dt><dd><a href="#intro">Introduction</a></dd><dt><code>jsn</code></dt><dd><a href="#jsntxt"><code>jsn$<i>expression</i></code></a></dd><dt> lambda abstractions</dt><dd><a href="#lambda">Lambda calculus, currying</a></dd><dt><code>let</code></dt><dd><a href="#lettxt"><code>let$(<i>atom-or-nil</i>)</code></a></dd><dt> literals</dt><dd><a href="#varmattxt">Literals</a></dd><dt>logarithm</dt><dd><a href="#algtxt">Algebraic operations</a></dd><dt><code>low</code></dt><dd><a href="#lowtxt"><code>low$(<i>atom-or-nil</i>)</code></a></dd><dt><code>lst</code></dt><dd><a href="#lsttxt1"><code>lst$(<i>(=expression) or variable</i>*[,LIN][,RAW][,WYD])</code></a></dd><dt><code>map</code></dt><dd><a href="#maptxt"><code>map$(<i>fnc</i>.<i>list</i>)</code></a></dd><dt><code>mem</code></dt><dd><a href="#memtxt"><code>mem$[EXT]</code></a></dd><dt><code>mod</code></dt><dd><a href="#modtxt"><code>mod$(<i>number</i>,<i>divisor</i>)</code></a></dd><dt><code>mop</code></dt><dd><a href="#moptxt"><code>mop$(<i>fnc</i>.<i>expression</i>.(=<i>non-leaf expression</i>))</code></a></dd><dt>multiplication</dt><dd><a href="#algtxt">Algebraic operations</a></dd><dt> nameless functions</dt><dd><a href="#naamloos">The nameless functions<code> $<i>expression</i> </code>and <code>'<i>expression</i></code></a></dd><dt><code>nestML</code></dt><dd><a href="#nestMLtxt"><code>nestML$<i>internal-expression-of-XML-or-HTML-data</i></code></a></dd><dt><code>new</code></dt><dd><a href="#newobjecttxt"><code>new$<i>object</i> </code>or<code> new$(<i>object</i>,<i>args</i>)</code></a></dd><dt>objects</dt><dd><a href="#objecttxt">Objects</a></dd><dt><code>out</code></dt><dd><a href="#outtxt"><code>out$<i>expression</i></code></a></dd><dt> pattern matching</dt><dd><a href="#patternm">Pattern matching</a></dd><dd><a href="#pattxt">Binary operators in pattern matching</a></dd><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>pee</code></dt><dd><a href="#peetxt"><code>pee$(<i>address</i> [,<i>size</i>])</code></a></dd><dt><code>pok</code></dt><dd><a href="#poktxt"><code>pok$(<i>address</i>,<i>value</i> [,<i>size</i>])</code></a></dd><dt>predefined variables</dt><dd><a href="#predvartxt">Predefined variables</a></dd><dt> predefined, changeable functions</dt><dd><a href="#predefmenu">Predefined functions</a></dd><dt> prefixes combined with expressions</dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt> prefixes/unary operators</dt><dd><a href="#unopsmenu">Prefixes</a></dd><dt><code>print</code></dt><dd><a href="#CalcPrinttxt"><code>(myCalculation..print)$</code></a></dd><dt> program flow</dt><dd><a href="#binprotxt">Binary operators in program flow</a></dd><dd><a href="#prostutxt1">Program flow</a></dd><dd><a href="#unstuurtxt">Prefixes and program flow</a></dd><dt> programming in Bracmat</dt><dd><a href="#progsmenu">Programming advice</a></dd><dt><code>put</code></dt><dd><a href="#puttxt1"><code>put$(<i>expression</i>[,LIN][,WYD])</code></a></dd><dt><code>r</code></dt><dt><code>rb</code></dt><dd><a href="#modetxt"> <code> fil$([<i>file-name</i>],<i>mode</i>) </code> </a></dd><dt><code>remove</code></dt><dd><a href="#removetxt"><code>(myhash..remove)$key:?KeyValuePairs</code></a></dd><dt><code>ren</code></dt><dd><a href="#rentxt"><code>ren$(<i>oldname</i>.<i>newname</i>)</code></a></dd><dt><code>rev</code></dt><dd><a href="#rmvtxt"><code>rmv$<i>file-name</i></code></a></dd><dt><code>rmv</code></dt><dd><a href="#revtxt"><code>rev$<i>atom</i></code></a></dd><dt><code>sgn</code></dt><dd><a href="#sgntxt"><code>abs$<i>expression</i> </code>and<code> sgn$<i>expression</i></code></a></dd><dt><code>sim</code></dt><dd><a href="#simtxt"><code>sim$(<i>atom-or-nil</i>,<i>atom-or-nil</i>)</code></a></dd><dt><code>sin</code></dt><dd><a href="#gontxt"><code>cos$<i>expression</i> </code>and<code> sin$<i>expression</i></code></a></dd><dt><code>str</code></dt><dd><a href="#strtxt"><code>str$<i>expression</i></code></a></dd><dt> strings or atoms</dt><dd><a href="#atotxt">Strings or atoms</a></dd><dt><code>sub</code></dt><dd><a href="#subtxt1"><code>sub$(<i>expression</i>.<i>pattern</i>.<i>replacement</i>)</code></a></dd><dt><code>swi</code></dt><dd><a href="#switxt"><code>swi$(<i>interrupt-number</i>.<i>input-value</i>,[<i>input-value</i>,...])</code></a></dd><dt> symbols</dt><dd><a href="#varsmenu">Symbols</a></dd><dt><code>sys</code></dt><dd><a href="#systxt"><code>sys$<i>command-line-command</i></code></a></dd><dt><code>tay</code></dt><dd><a href="#taytxt"><code>tay$(<i>expression</i>,<i>variable</i>,<i>number-of-terms</i>)</code></a></dd><dt><code>tbl</code></dt><dd><a href="#tbltxt"><code>tbl$(<i>variable</i>,<i>array-size</i>)</code></a></dd><dt> the dummy operator</dt><dd><a href="#dumtxt">The dummy operator<code> _</code></a></dd><dt> the four evaluation contexts</dt><dd><a href="#evaltxt">The four evaluators</a></dd><dt><code>toML</code></dt><dd><a href="#toMLtxt"><code>toML$<i>internal-expression-of-XML-or-HTML-data</i></code></a></dd><dt><code>trc</code></dt><dd><a href="#CalcTrctxt"><code>(myCalculation..trc)$<i>Parameters</i></code></a></dd><dt><code>ugc</code></dt><dd><a href="#ugctxt"><code>ugc$(<i>atom-or-nil</i>)</code></a></dd><dt> unary operators</dt><dd><a href="#unops">Minus sign</a></dd><dt><code>upp</code></dt><dd><a href="#upptxt"><code>upp$(<i>atom-or-nil</i>)</code></a></dd><dt><code>utf</code></dt><dd><a href="#utftxt"><code>utf$<i>UTF-8-character</i></code></a></dd><dt>v<code> := </code>IF a THEN b ELSE c;</dt><dt>v<code> := </code>b(x,y,z);</dt><dd><a href="#prostutxt2">Some often used control structures</a></dd><dt><code>vap</code></dt><dd><a href="#vaptxt"><code>vap$(<i>fnc</i>.<i>string</i>) </code>or<code> vap$(<i>fnc</i>.<i>string</i>.<i>separator</i>)</code></a></dd><dt><i>variable</i><code> = </code><i>expression</i></dt><dd><a href="#asstxt">Assignment to variables</a></dd><dt> variables</dt><dd><a href="#varprotxt">Variables</a></dd><dt><code>w</code></dt><dt><code>wb</code></dt><dd><a href="#modetxt"> <code> fil$([<i>file-name</i>],<i>mode</i>) </code> </a></dd><dt><code>whl</code></dt><dd><a href="#whltxt"><code>whl'(<i>expression</i>)</code></a></dd><dt><code>x2d</code></dt><dd><a href="#x2dtxt"><code>x2d$<i>hexadecimal-value</i></code></a></dd><dt><code>|</code></dt><dd><a href="#binprotxt">Binary operators in program flow</a></dd><dt><code>~</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd><dt><code>~!a</code></dt><dd><a href="#prostutxt1">Program flow</a></dd><dt><code>~#</code></dt><dt><code>~/</code></dt><dt><code>~/#</code></dt><dt><code>~/#&lt;9</code></dt><dt><code>~/#&lt;&gt;0</code></dt><dt><code>~&lt;</code></dt><dt><code>~&lt;&gt;</code></dt><dt><code>~&gt;</code></dt><dt><code>~@</code></dt><dt><code>~`</code></dt><dd><a href="#unpattxt">Prefixes and pattern matching</a></dd></dl>
 <h1><a name="CONTENTS">CONTENTS</a></h1>
 <p><i><a href="#lusmenu">main menu</a></i></p>
 <dl><dt><a href="#lusmenu">                       BRACMAT                       </a></dt><dd>
@@ -3100,10 +3221,10 @@ by Bracmat.</p>
 <dl><dt><a href="#debugtxt">Debugging</a></dt><dt><a href="#debugtxt2">Using<code> out$ </code>as debugging aid</a></dt><dt><a href="#debugtxt3">Using dbg' as debugging aid</a></dt></dl></dd><dt><a href="#funcmenu">Functions</a></dt><dd>
 <dl><dt><a href="#funtxt1">Definition of a function</a></dt><dt><a href="#lambda">Lambda calculus, currying</a></dt><dt><a href="#inbltmenu">Built-in functions</a></dt><dd>
 <dl><dt><a href="#seltxt"><code><i>index</i>$<i>array-name</i></code></a></dt><dt><a href="#alctxt"><code>alc$<i>number-of-bytes</i></code></a></dt><dt><a href="#argtxt"><code>arg$ </code>or<code> arg$<i>number</i></code></a></dt><dt><a href="#asctxt"><code>asc$<i>character</i></code></a></dt><dt><a href="#beztxt"><code>bez$</code></a></dt><dt><a href="#chrtxt"><code>chr$<i>value</i></code></a></dt><dt><a href="#chutxt"><code>chu$<i>value</i></code></a></dt><dt><a href="#clktxt"><code>clk$</code></a></dt><dt><a href="#d2xtxt"><code>d2x$<i>decimal-value</i></code></a></dt><dt><a href="#dbgtxt"><code>dbg'<i>expression</i></code></a></dt><dt><a href="#dentxt"><code>den$<i>rational-number</i></code></a></dt><dt><a href="#divtxt"><code>div$(<i>rational-number</i>,<i>rational-number</i>)</code></a></dt><dt><a href="#filtxt"><code>fil$([[<i>file-name</i>][,<i>option</i>[,<i>number</i>[,<i>value-to-output</i>]]]])</code></a></dt><dd>
-<dl><dt><a href="#modetxt"> <code> fil$([<i>file-name</i>],<i>mode</i>) </code> </a></dt><dt><a href="#fixdtxt"> <code> fil$([<i>file-name</i>],<i>type</i>,<i>size</i>[,<i>number</i>]) </code> </a></dt><dt><a href="#varitxt"> <code> fil$([<i>file-name</i>],STR[,<i>stop</i>]) </code> </a></dt><dt><a href="#positiontxt"> <code> fil$(<i>file-name</i>,TEL) </code> </a></dt><dt><a href="#filesettxt"> <code> fil$(<i>file-name</i>,<i>whence</i>,<i>offset</i>) </code> </a></dt><dt><a href="#readtxt"> <code> fil$([<i>file-name</i>][,,<i>number</i>]) </code> </a></dt><dt><a href="#writetxt"> <code> fil$([<i>file-name</i>],,<i>number</i>,<i>value</i>) </code> </a></dt><dt><a href="#closetxt"> <code> fil$([<i>file-name</i>],SET,-1) </code> </a></dt></dl></dd><dt><a href="#flgtxt"><code>flg$(=<i>expression</i>)</code></a></dt><dt><a href="#glftxt"><code>glf$(=<i>prefixes</i>.<i>expression</i>)</code></a></dt><dt><a href="#fretxt"><code>fre$<i>memory-address</i></code></a></dt><dt><a href="#gettxt"><code>get$(<i>atom-or-nil</i>[,MEM][,ECH][,VAP][,STR][,TXT|BIN][,JSN]|[[,X]|[,HT],ML[,TRM]])</code></a></dt><dt><a href="#lowtxt"><code>low$(<i>atom-or-nil</i>)</code></a></dt><dt><a href="#lsttxt1"><code>lst$(<i>(=expression) or variable</i>*[,LIN][,RAW][,WYD])</code></a></dt><dt><a href="#humtxt">option <code>LIN</code></a></dt><dt><a href="#lsttxt2"><code>lst$(<i>(=expression) or variable</i>*,MEM [,LIN][,RAW][,WYD])</code></a></dt><dt><a href="#lsttxt3"><code>lst$(<i>(=expression) or variable</i>*,<i>file-name</i>,NEW | APP [,LIN][,TXT][,BIN][,WYD])</code></a></dt><dt><a href="#newtxt">options <code>NEW</code>, <code>APP</code>, <code>TXT</code> and <code>BIN</code></a></dt><dt><a href="#maptxt"><code>map$(<i>fnc</i>.<i>list</i>)</code></a></dt><dt><a href="#memtxt"><code>mem$[EXT]</code></a></dt><dt><a href="#modtxt"><code>mod$(<i>number</i>,<i>divisor</i>)</code></a></dt><dt><a href="#moptxt"><code>mop$(<i>fnc</i>.<i>expression</i>.(=<i>non-leaf expression</i>))</code></a></dt><dt><a href="#newobjecttxt"><code>new$<i>object</i> </code>or<code> new$(<i>object</i>,<i>args</i>)</code></a></dt><dt><a href="#peetxt"><code>pee$(<i>address</i> [,<i>size</i>])</code></a></dt><dt><a href="#poktxt"><code>pok$(<i>address</i>,<i>value</i> [,<i>size</i>])</code></a></dt><dt><a href="#puttxt1"><code>put$(<i>expression</i>[,LIN][,WYD])</code></a></dt><dt><a href="#puttxt2"><code>put$(<i>expression</i>,MEM [,LIN][,WYD])</code></a></dt><dt><a href="#puttxt3"><code>put$(<i>expression</i>,<i>file-name</i>,NEW | APP [,LIN][,WYD])</code></a></dt><dt><a href="#rentxt"><code>ren$(<i>oldname</i>.<i>newname</i>)</code></a></dt><dt><a href="#rmvtxt"><code>rmv$<i>file-name</i></code></a></dt><dt><a href="#revtxt"><code>rev$<i>atom</i></code></a></dt><dt><a href="#simtxt"><code>sim$(<i>atom-or-nil</i>,<i>atom-or-nil</i>)</code></a></dt><dt><a href="#strtxt"><code>str$<i>expression</i></code></a></dt><dt><a href="#switxt"><code>swi$(<i>interrupt-number</i>.<i>input-value</i>,[<i>input-value</i>,...])</code></a></dt><dt><a href="#systxt"><code>sys$<i>command-line-command</i></code></a></dt><dt><a href="#tbltxt"><code>tbl$(<i>variable</i>,<i>array-size</i>)</code></a></dt><dt><a href="#ugctxt"><code>ugc$(<i>atom-or-nil</i>)</code></a></dt><dt><a href="#upptxt"><code>upp$(<i>atom-or-nil</i>)</code></a></dt><dt><a href="#utftxt"><code>utf$<i>UTF-8-character</i></code></a></dt><dt><a href="#vaptxt"><code>vap$(<i>fnc</i>.<i>string</i>) </code>or<code> vap$(<i>fnc</i>.<i>string</i>.<i>separator</i>)</code></a></dt><dt><a href="#whltxt"><code>whl'(<i>expression</i>)</code></a></dt><dt><a href="#x2dtxt"><code>x2d$<i>hexadecimal-value</i></code></a></dt></dl></dd><dt><a href="#predefmenu">Predefined functions</a></dt><dd>
+<dl><dt><a href="#modetxt"> <code> fil$([<i>file-name</i>],<i>mode</i>) </code> </a></dt><dt><a href="#fixdtxt"> <code> fil$([<i>file-name</i>],<i>type</i>,<i>size</i>[,<i>number</i>]) </code> </a></dt><dt><a href="#varitxt"> <code> fil$([<i>file-name</i>],STR[,<i>stop</i>]) </code> </a></dt><dt><a href="#positiontxt"> <code> fil$(<i>file-name</i>,TEL) </code> </a></dt><dt><a href="#filesettxt"> <code> fil$(<i>file-name</i>,<i>whence</i>,<i>offset</i>) </code> </a></dt><dt><a href="#readtxt"> <code> fil$([<i>file-name</i>][,,<i>number</i>]) </code> </a></dt><dt><a href="#writetxt"> <code> fil$([<i>file-name</i>],,<i>number</i>,<i>value</i>) </code> </a></dt><dt><a href="#closetxt"> <code> fil$([<i>file-name</i>],SET,-1) </code> </a></dt></dl></dd><dt><a href="#flgtxt"><code>flg$(=<i>expression</i>)</code></a></dt><dt><a href="#glftxt"><code>glf$(=<i>prefixes</i>.<i>expression</i>)</code></a></dt><dt><a href="#fretxt"><code>fre$<i>memory-address</i></code></a></dt><dt><a href="#gettxt"><code>get$(<i>atom-or-nil</i> [MEM][ECH][VAP][STR][TXT|BIN][JSN]|[[X]|[HT]ML[TRM]])</code></a></dt><dt><a href="#lowtxt"><code>low$(<i>atom-or-nil</i>)</code></a></dt><dt><a href="#lsttxt1"><code>lst$(<i>(=expression) or variable</i>*[,LIN][,RAW][,WYD])</code></a></dt><dt><a href="#humtxt">option <code>LIN</code></a></dt><dt><a href="#lsttxt2"><code>lst$(<i>(=expression) or variable</i>*,MEM [,LIN][,RAW][,WYD])</code></a></dt><dt><a href="#lsttxt3"><code>lst$(<i>(=expression) or variable</i>*,<i>file-name</i>,NEW | APP [,LIN][,TXT][,BIN][,WYD])</code></a></dt><dt><a href="#newtxt">options <code>NEW</code>, <code>APP</code>, <code>TXT</code> and <code>BIN</code></a></dt><dt><a href="#maptxt"><code>map$(<i>fnc</i>.<i>list</i>)</code></a></dt><dt><a href="#memtxt"><code>mem$[EXT]</code></a></dt><dt><a href="#modtxt"><code>mod$(<i>number</i>,<i>divisor</i>)</code></a></dt><dt><a href="#moptxt"><code>mop$(<i>fnc</i>.<i>expression</i>.(=<i>non-leaf expression</i>))</code></a></dt><dt><a href="#newobjecttxt"><code>new$<i>object</i> </code>or<code> new$(<i>object</i>,<i>args</i>)</code></a></dt><dt><a href="#peetxt"><code>pee$(<i>address</i> [,<i>size</i>])</code></a></dt><dt><a href="#poktxt"><code>pok$(<i>address</i>,<i>value</i> [,<i>size</i>])</code></a></dt><dt><a href="#puttxt1"><code>put$(<i>expression</i>[,LIN][,WYD])</code></a></dt><dt><a href="#puttxt2"><code>put$(<i>expression</i>,MEM [,LIN][,WYD])</code></a></dt><dt><a href="#puttxt3"><code>put$(<i>expression</i>,<i>file-name</i>,NEW | APP [,LIN][,WYD])</code></a></dt><dt><a href="#rentxt"><code>ren$(<i>oldname</i>.<i>newname</i>)</code></a></dt><dt><a href="#rmvtxt"><code>rmv$<i>file-name</i></code></a></dt><dt><a href="#revtxt"><code>rev$<i>atom</i></code></a></dt><dt><a href="#simtxt"><code>sim$(<i>atom-or-nil</i>,<i>atom-or-nil</i>)</code></a></dt><dt><a href="#strtxt"><code>str$<i>expression</i></code></a></dt><dt><a href="#switxt"><code>swi$(<i>interrupt-number</i>.<i>input-value</i>,[<i>input-value</i>,...])</code></a></dt><dt><a href="#systxt"><code>sys$<i>command-line-command</i></code></a></dt><dt><a href="#tbltxt"><code>tbl$(<i>variable</i>,<i>array-size</i>)</code></a></dt><dt><a href="#ugctxt"><code>ugc$(<i>atom-or-nil</i>)</code></a></dt><dt><a href="#upptxt"><code>upp$(<i>atom-or-nil</i>)</code></a></dt><dt><a href="#utftxt"><code>utf$<i>UTF-8-character</i></code></a></dt><dt><a href="#vaptxt"><code>vap$(<i>fnc</i>.<i>string</i>) </code>or<code> vap$(<i>fnc</i>.<i>string</i>.<i>separator</i>)</code></a></dt><dt><a href="#whltxt"><code>whl'(<i>expression</i>)</code></a></dt><dt><a href="#x2dtxt"><code>x2d$<i>hexadecimal-value</i></code></a></dt></dl></dd><dt><a href="#predefmenu">Predefined functions</a></dt><dd>
 <dl><dt><a href="#sgntxt"><code>abs$<i>expression</i> </code>and<code> sgn$<i>expression</i></code></a></dt><dt><a href="#cattxt"><code>cat$([<i>include-list</i>][,[<i>exclude-list</i>][,EXT]])</code></a></dt><dt><a href="#gontxt"><code>cos$<i>expression</i> </code>and<code> sin$<i>expression</i></code></a></dt><dt><a href="#factxt"><code>fct$<i>expression</i></code></a></dt><dt><a href="#flttxt"><code>flt$(<i>rational-number</i>,<i>number-of-decimals</i>)</code></a></dt><dt><a href="#jsntxt"><code>jsn$<i>expression</i></code></a></dt><dt><a href="#lettxt"><code>let$(<i>atom-or-nil</i>)</code></a></dt><dt><a href="#MLencodingtxt"><code>MLencoding$<i>internal-expression-of-XML-or-HTML-data</i></code></a></dt><dt><a href="#nestMLtxt"><code>nestML$<i>internal-expression-of-XML-or-HTML-data</i></code></a></dt><dt><a href="#outtxt"><code>out$<i>expression</i></code></a></dt><dt><a href="#subtxt1"><code>sub$(<i>expression</i>.<i>pattern</i>.<i>replacement</i>)</code></a></dt><dt><a href="#taytxt"><code>tay$(<i>expression</i>,<i>variable</i>,<i>number-of-terms</i>)</code></a></dt><dt><a href="#toMLtxt"><code>toML$<i>internal-expression-of-XML-or-HTML-data</i></code></a></dt></dl></dd></dl></dd><dt><a href="#jsntranstxt">Mapping between JSON and Bracmat expressions</a></dt><dt><a href="#methodtxt">Methods</a></dt><dt><a href="#hashtxt">Hash tables</a></dt><dd>
 <dl><dt><a href="#findtxt"><code>(myhash..find)$key:(?Key.?Value) ?OtherKeyValuePairs</code></a></dt><dt><a href="#inserttxt"><code>(myhash..insert)$(Key.Value)</code></a></dt><dt><a href="#removetxt"><code>(myhash..remove)$key:?KeyValuePairs</code></a></dt><dt><a href="#ISOtxt"><code>(myhash..ISO)$</code></a></dt><dt><a href="#casesensitivetxt"><code>(myhash..casesensitive)$</code></a></dt><dt><a href="#foralltxt"><code>(myhash..forall)$<i>Function</i></code></a></dt></dl></dd><dt><a href="#calctxt">Floating point calculations</a></dt><dd>
 <dl><dt><a href="#CalcMethodtxt">Listing of calculation object methods</a></dt><dd>
-<dl><dt><a href="#Calculatetxt"><code>(myCalculation..calculate)$<i>Parameters</i></code></a></dt><dt><a href="#CalcTrctxt"><code>(myCalculation..trc)$<i>Parameters</i></code></a></dt><dt><a href="#CalcPrinttxt"><code>(myCalculation..print)$</code></a></dt><dt><a href="#CalcExporttxt"><code>(myCalculation..export)$(<i>format</i>,&lt;name of variable of </code><code>calculation</code> object&gt;)</a></dt></dl></dd><dt><a href="#CalcFunctxt">Listing of built-in functions and function-like constructs in calculation objects</a></dt><dt><a href="#CalcParmtxt">Calculation parameters</a></dt><dt><a href="#CalcVartxt">Calculation variables</a></dt><dt><a href="#CalcArraytxt">Calculation arrays</a></dt><dt><a href="#CaltItertxt">Calculation iterations</a></dt></dl></dd><dt><a href="#charsettxt">Character set</a></dt><dt><a href="#predvartxt">Predefined variables</a></dt></dl></dd></dl>
+<dl><dt><a href="#Calculatetxt"><code>(myCalculation..calculate)$<i>Parameters</i></code></a></dt><dt><a href="#CalcTrctxt"><code>(myCalculation..trc)$<i>Parameters</i></code></a></dt><dt><a href="#CalcPrinttxt"><code>(myCalculation..print)$</code></a></dt><dt><a href="#CalcExporttxt"><code>(myCalculation..export)$(<i>format</i>,&lt;name of variable of </code><code>calculation</code> object&gt;)</a></dt></dl></dd><dt><a href="#CalcFunctxt">Listing of built-in functions and function-like constructs in calculation objects</a></dt><dt><a href="#CalcParmtxt">Calculation parameters</a></dt><dt><a href="#CalcVartxt">Calculation variables</a></dt><dt><a href="#CalcConsttxt">Calculation constants</a></dt><dt><a href="#CalcArraytxt">Calculation arrays</a></dt><dt><a href="#CaltItertxt">Calculation iterations</a></dt></dl></dd><dt><a href="#charsettxt">Character set</a></dt><dt><a href="#predvartxt">Predefined variables</a></dt></dl></dd></dl>
 <p><i><a href="#lusmenu">main menu</a></i></p>
 <p><a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10-blue" alt="Valid XHTML 1.0 Strict" height="31" width="88" /></a></p></body></html>
