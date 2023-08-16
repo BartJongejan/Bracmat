@@ -68,7 +68,48 @@ Test coverage:
     gcov json.c
 
 */
+/* How to compile
+   (with a ANSI-C compiler or newer)
 
+Archimedes ANSI-C release 3:
+*up
+*del. :0.$.c.clog
+*spool :0.$.c.clog
+*cc bracmat
+*spool
+
+With RISC_OS functions:
+
+cc bracmat
+
+file cc (in directory c):
+
+| >cc
+up
+delete $.c.clog
+spool $.c.clog
+cc -c %0 -IRAM:$.RISC_OSLib
+if Sys$ReturnCode = 0 then run c.li %0 else spool
+
+file li (in directory c):
+
+| >li
+link -o %0 o.%0 RAM:$.RISC_OSLib.o.RISC_OSLib RAM:$.Clib.o.Stubs
+||G
+spool
+if Sys$ReturnCode = 0 then squeeze %0 else echo |G
+
+Microsoft QUICKC (MS-DOS) (compact and large model both possible)
+qcl /Ox /AC /F D000 bracmat.c
+Microsoft optimizing compiler V5.1
+cl /Ox /AC /F D000 bracmat.c
+
+Borland TURBOC (MS-DOS) V2.0
+tcc -w -f- -r- -mc -K- bracmat
+
+Atari : define -DATARI because of BIGENDIAN and extern int _stksize = -1;
+               and -DW32   but only if (int)==(long)
+*/
 /*
 NOTES
 =====
@@ -123,9 +164,32 @@ TODO list:
    20010821 a () () was evaluated to a (). Removed last ().
    20010903 (a.) () was evaluated to a
 */
-#include "unicaseconv.h"
-#include "unichartypes.h"
-#define DEBUGBRACMAT 1 /* Implement dbg'(expression), see DBGSRC macro */
+/*
+About reference counting.
+Most nodes can be shared by no more than 1024 referers. Copies must be made as needed.
+Objects (nodes with = ('EQUALS') are objects and can be shared by almost 2^40 referers.
+
+small refcounter       large refcounter              comment
+(9 bits, all nodes)   (30 bits, only objects)
+0                      0                             not shared, no test of large refcounter needed.
+1                      0                             shared with one, so totalling two
+2                      0                             shared with two
+..                     ..
+1022                   0
+1023                   0                             totalling 1024, *** max for normal nodes ***
+1                      1                             totalling 1025
+2                      1
+..                     ..
+m                      1
+..                     ..                            totalling 1024+(1-1)*1023+m
+1023                   1                             totalling 1024+1*1023
+..                     ..
+m                      n                             totalling 1024+(n-1)*1023+m or 1+n*1023+m
+1023                   2^30-1                        totalling 1024+(2^30-2)*1023+1023=1 098 437 885 953
+                                                         (or   1+2^30*1023)
+*/
+
+#define DEBUGBRACMAT 0 /* Implement dbg'(expression), see DBGSRC macro */
 #define REFCOUNTSTRESSTEST 0
 #define DOSUMCHECK 0
 #define CHECKALLOCBOUNDS 0 /* only if NDEBUG is false */
@@ -135,7 +199,7 @@ TODO list:
 #define CODEPAGE850 0
 #define MAXSTACK 0 /* 1: Show max stack depth (eval function only)*/
 #define CUTOFFSUGGEST 1
-#define READMARKUPFAMILY 1 /* Read SGML, HTML and XML files. 
+#define READMARKUPFAMILY 1 /* Read SGML, HTML and XML files.
                              (include xml.c in your project!) */
 #define READJSON 1 /* Read JSON files. (Include json.c in your project!) */
 #define SHOWMEMBLOCKS 0
@@ -162,121 +226,21 @@ of setting the bit turns out to outweigh the advantage: programs become a
 little bit slower, not faster.
 */
 
-/*
-About reference counting.
-Most nodes can be shared by no more than 1024 referers. Copies must be made as needed.
-Objects (nodes with = ('EQUALS') are objects and can be shared by almost 2^40 referers.
-
-small refcounter       large refcounter              comment
-(9 bits, all nodes)   (30 bits, only objects)
-0                      0                             not shared, no test of large refcounter needed.
-1                      0                             shared with one, so totalling two
-2                      0                             shared with two
-..                     ..
-1022                   0
-1023                   0                             totalling 1024, *** max for normal nodes ***
-1                      1                             totalling 1025
-2                      1
-..                     ..
-m                      1
-..                     ..                            totalling 1024+(1-1)*1023+m
-1023                   1                             totalling 1024+1*1023
-..                     ..
-m                      n                             totalling 1024+(n-1)*1023+m or 1+n*1023+m
-1023                   2^30-1                        totalling 1024+(2^30-2)*1023+1023=1 098 437 885 953
-                                                         (or   1+2^30*1023)
-*/
-
-#if DEBUGBRACMAT
-#define DBGSRC(code)    if(debug){code}
-#else
-#define DBGSRC(code)
-#endif
-
-#if MAXSTACK
-static int maxstack = 0;
-static int stack = 0;
-#define ASTACK {++stack;if(stack > maxstack) maxstack = stack;}{
-#define ZSTACK }{--stack;}
-#else
-#define ASTACK
-#define ZSTACK
-#endif
-
-#include <assert.h>
-
-/*#define ARM */ /* assume it isn't an Acorn */
-
-
-#if (defined __TURBOC__ && !defined __WIN32__) || (defined ARM && !defined __SYMBIAN32__)
-#define O_S 1 /* 1 = with operating system interface swi$ (RISC_OS or TURBO-C), 0 = without  */
-#else
-#define O_S 0
-#endif
-
-/* How to compile
-   (with a ANSI-C compiler or newer)
-
-Archimedes ANSI-C release 3:
-*up
-*del. :0.$.c.clog
-*spool :0.$.c.clog
-*cc bracmat
-*spool
-
-With RISC_OS functions:
-
-cc bracmat
-
-file cc (in directory c):
-
-| >cc
-up
-delete $.c.clog
-spool $.c.clog
-cc -c %0 -IRAM:$.RISC_OSLib
-if Sys$ReturnCode = 0 then run c.li %0 else spool
-
-file li (in directory c):
-
-| >li
-link -o %0 o.%0 RAM:$.RISC_OSLib.o.RISC_OSLib RAM:$.Clib.o.Stubs
-||G
-spool
-if Sys$ReturnCode = 0 then squeeze %0 else echo |G
-
-Microsoft QUICKC (MS-DOS) (compact and large model both possible)
-qcl /Ox /AC /F D000 bracmat.c
-Microsoft optimizing compiler V5.1
-cl /Ox /AC /F D000 bracmat.c
-
-Borland TURBOC (MS-DOS) V2.0
-tcc -w -f- -r- -mc -K- bracmat
-
-Atari : define -DATARI because of BIGENDIAN and extern int _stksize = -1;
-               and -DW32   but only if (int)==(long)
-*/
+#define INTSCMP 0   /* dangerous way of comparing strings */
+#define ICPY 0      /* copy word by word instead of byte by byte */
 
 /* Optional #defines for debugging and adaptation to machine */
 
 #define TELMAX  1 /* Show the maximum number of allocated nodes. */
 #define TELLING 0 /* Same, plus current number of allocated nodes, in groups of
                        4,8,12 and >12 bytes */
-#if TELLING
-#if TELMAX == 0
-#undef TELMAX
-#define TELMAX 1
-#endif
-#ifndef TELMAX
-#define TELMAX 1
-#endif
-#endif
 
-                       /*#define reslt parenthesised_result */ /* to show ALL parentheses (one pair for each operator)*/
-#define INTSCMP 0   /* dangerous way of comparing strings */
-#define ICPY 0      /* copy word by word instead of byte by byte */
+#define EXPAND 0
 
-/* There are no optional #defines below this line. */
+
+
+
+                       /* There are no optional #defines below this line. */
 #if defined __BYTE_ORDER && defined __LITTLE_ENDIAN /* gcc on linux defines these */
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 #define BIGENDIAN 0
@@ -296,6 +260,7 @@ Atari : define -DATARI because of BIGENDIAN and extern int _stksize = -1;
 #ifndef BIGENDIAN
 #define BIGENDIAN     0
 #endif
+
 
 #if defined BRACMATEMBEDDED
 #define _BRACMATEMBEDDED 1
@@ -356,6 +321,7 @@ typedef   signed __int32  INT32_T; /* pre VS2010 has no int32_t */
 #define ULONG unsigned long long
 #define LONGU "%llu"
 #define LONGD "%lld"
+#define LONGnD "%*lld"
 #define LONG0D "%0lld"
 #define LONG0nD "%0*lld"
 #define LONGX "%llX"
@@ -391,6 +357,7 @@ typedef   signed long  INT32_T;
 #define ULONG unsigned long
 #define LONGU "%lu"
 #define LONGD "%ld"
+#define LONGnD "%*ld"
 #define LONG0D "%0ld"
 #define LONG0nD "%0*ld"
 #define LONGX "%lX"
@@ -400,6 +367,19 @@ typedef   signed long  INT32_T;
 #define FTELL ftell
 #endif
 
+#if BIGENDIAN
+#define iobj lobj
+#define O(a,b,c) (a*0x1000000L+b*0x10000L+c*0x100)
+#define notO 0xFF
+#else
+#if !WORD32
+#define iobj lobj
+#endif
+#define O(a,b,c) (a+b*0x100+c*0x10000L)
+#define notO 0xFF000000
+#endif
+
+#define not_built_in(pn) (((pn)->v.fl & IS_OPERATOR) || (((pn)->u.lobj) & (notO)))
 
 #if defined __TURBOC__ || defined __MSDOS__ || defined _WIN32 || defined __GNUC__
 #define DELAY_DUE_TO_INPUT
@@ -416,124 +396,16 @@ typedef   signed long  INT32_T;
 #endif
 #endif
 
-#define READBIN   "rb" /* BIN is default for get$, overrule with option TXT */
-#define READTXT   "r"
-#define WRITEBIN  "wb" /* BIN is default for lst$, overrule with option TXT */
-#define APPENDBIN "ab" 
-#define WRITETXT  "w"  /* TXT is default for put$, overrule with option BIN */
-#define APPENDTXT "a"
-
-#define LOGWORDLENGTH 2
-/* flags (prefixes) in node */
-#define NOT              1      /* ~ */
-     /* Keep definition of NOT like this because of mixing of logical and bit
-        operators && || | ^ & */
-#define SUCCESS         (1<< 1)
-#define READY           (1<< 2)
-#define POSITION        (1<< 3) /* [ */
-#define INDIRECT        (1<< 4) /* ! */
-#define DOUBLY_INDIRECT (1<< 5) /* !! */
-#define FENCE           (1<< 6) /* `   (within same byte as ATOM and NOT) */
-#define ATOM            (1<< 7) /* @ */
-#define NONIDENT        (1<< 8) /* % */
-#define GREATER_THAN    (1<< 9) /* > */
-#define SMALLER_THAN    (1<<10) /* < */
-#define NUMBER          (1<<11) /* # */
-#define FRACTION        (1<<12) /* / */
-#define UNIFY           (1<<13) /* ? */
-#define IDENT           (1<<14)
-#define IMPLIEDFENCE    (1<<15) /* 20070222 */
-        /* 1<<16 test whether operator
-           1<<17 operator
-           1<<18 operator
-           1<<19 operator
-           1<<20 operator
-           1<<21 latebind
-        */
-#if DATAMATCHESITSELF
-#define SELFMATCHING    (1<<22) /* 20210801 */
-#define BITWISE_OR_SELFMATCHING |SELFMATCHING
-#else
-#define BITWISE_OR_SELFMATCHING 
-#endif
-
-#if WORD32
-#else
-#if DATAMATCHESITSELF
-#define BUILT_IN        (1<<23) /* 20210801 only used for objects (operator =) */
-#define CREATEDWITHNEW  (1<<24) /* 20210801 only used for objects (operator =) */
-#else
-#define BUILT_IN        (1<<22) /* 20210801 only used for objects (operator =) */
-#define CREATEDWITHNEW  (1<<23) /* 20210801 only used for objects (operator =) */
-#endif
-#endif
-
-#define VISIBLE_FLAGS_WEAK      (INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)
-#define VISIBLE_FLAGS_NON_COMP  (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|FRACTION|UNIFY) /* allows < > ~< and ~> as flags on numbers */
-#define VISIBLE_FLAGS_POS0      (INDIRECT|DOUBLY_INDIRECT|NONIDENT|QFRACTION|UNIFY|QNUMBER)
-#define VISIBLE_FLAGS_POS       (INDIRECT|DOUBLY_INDIRECT|NONIDENT|QFRACTION|UNIFY|QNUMBER|NOT|GREATER_THAN|SMALLER_THAN)
-#define VISIBLE_FLAGS           (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|FRACTION|UNIFY|NOT|GREATER_THAN|SMALLER_THAN|FENCE|POSITION)
-
-#define HAS_VISIBLE_FLAGS_OR_MINUS(psk) ((psk)->v.fl & (VISIBLE_FLAGS|MINUS))
-#define RATIONAL(psk)      (((psk)->v.fl & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS)) == QNUMBER)
-#define RATIONAL_COMP(psk) (((psk)->v.fl & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
-#define RATIONAL_COMP_NOT_NUL(psk) (((psk)->v.fl & (QNUMBER|QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
-#define RATIONAL_WEAK(psk) (((psk)->v.fl & (QNUMBER|IS_OPERATOR|INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)) == QNUMBER)/* allows < > ~< and ~> as flags on numbers */
-#define       LESS(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN))
-#define LESS_EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|GREATER_THAN))
-#define MORE_EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN))
-#define       MORE(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|GREATER_THAN))
-#define    UNEQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT))
-#define LESSORMORE(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN|GREATER_THAN))
-#define      EQUAL(psk)    (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == QNUMBER)
-#define NOTLESSORMORE(psk) (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN|GREATER_THAN))
-
-#define INTEGER(pn)               (((pn)->v.fl & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                      == QNUMBER)
-#define INTEGER_COMP(pn)          (((pn)->v.fl & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))             == QNUMBER)
-
-#define INTEGER_NOT_NEG(pn)       (((pn)->v.fl & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                == QNUMBER)
-#define INTEGER_NOT_NEG_COMP(pn)  (((pn)->v.fl & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))       == QNUMBER)
-
-#define INTEGER_POS(pn)           (((pn)->v.fl & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))           == QNUMBER)
-#define INTEGER_POS_COMP(pn)      (((pn)->v.fl & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))  == QNUMBER)
-
-#define INTEGER_NOT_NUL_COMP(pn) (((pn)->v.fl & (QNUMBER|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))        == QNUMBER)
-#define HAS_MINUS_SIGN(pn)         (((pn)->v.fl & (MINUS|IS_OPERATOR)) == MINUS)
-
-#define RAT_NUL(pn) (((pn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS)) == QNUL)
-#define RAT_NUL_COMP(pn) (((pn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUL)
-#define RAT_NEG(pn) (((pn)->v.fl & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS)) \
-                                == (QNUMBER|MINUS))
-#define RAT_NEG_COMP(pn) (((pn)->v.fl & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) \
-                                == (QNUMBER|MINUS))
-
-#define RAT_RAT(pn) (((pn)->v.fl & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))\
-                                == (QNUMBER|QFRACTION))
-
-#define RAT_RAT_COMP(pn) (((pn)->v.fl & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))\
-                                == (QNUMBER|QFRACTION))
-#define IS_ONE(pn) ((pn)->u.lobj == ONE && !((pn)->v.fl & (MINUS | VISIBLE_FLAGS)))
-#define IS_NIL(pn) ((pn)->u.lobj == 0   && !((pn)->v.fl & (MINUS | VISIBLE_FLAGS)))
-
-
-#include <string.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <errno.h>
-
-#if INTSCMP
-#define STRCMP(a,b) intscmp((LONG*)(a),(LONG*)(b))
-#else
-#define STRCMP(a,b) strcmp((char *)(a),(char *)(b))
-#endif
-#if ICPY
-#define MEMCPY(a,b,n) icpy((LONG*)(a),(LONG*)(b),n)
-#else
-#define MEMCPY(a,b,n) memcpy((char *)(a),(char *)(b),n)
-#endif
-
 #ifdef ATARI
 extern int _stksize = -1;
+#endif
+
+/*#define ARM */ /* assume it isn't an Acorn */
+
+#if (defined __TURBOC__ && !defined __WIN32__) || (defined ARM && !defined __SYMBIAN32__)
+#define O_S 1 /* 1 = with operating system interface swi$ (RISC_OS or TURBO-C), 0 = without  */
+#else
+#define O_S 0
 #endif
 
 #if defined ARM
@@ -555,37 +427,78 @@ typedef struct
 #endif
 #endif
 
-#define RIGHT u.p.right
-#define LEFT  u.p.left
-#define TRUE 1
-#define FALSE 0
-#define PRISTINE (1<<2) /* Used to initialise matchstate variables. */
-#define ONCE (1<<3)
-#define POSITION_ONCE (1<<4)
-#define POSITION_MAX_REACHED (1<<5)
-#define OBJ(p) &((p).u.obj)
-#define LOBJ(p) ((p).u.lobj)
-#define POBJ(p) &((p)->u.obj)
-#define SPOBJ(p) &((p)->u.sobj)
-/*#define PIOBJ(p) ((p)->u.iobj)*/ /* Added. Bart 20031110 */
-#define PLOBJ(p) ((p)->u.lobj)
-
-#define QOBJ(p) &(p)
-#define QPOBJ(p) p
-
-#if BIGENDIAN
-#define iobj lobj
-#define O(a,b,c) (a*0x1000000L+b*0x10000L+c*0x100)
-#define notO 0xFF
+#if WORD32
+#define RADIX 10000L
+#define TEN_LOG_RADIX 4L
+#define HEADROOM 20L
 #else
-#if !WORD32
-#define iobj lobj
+#if defined _WIN64
+#define RADIX 100000000LL
+#define HEADROOM 800LL
+#else
+#define RADIX 100000000L
+#define HEADROOM 800L
 #endif
-#define O(a,b,c) (a+b*0x100+c*0x10000L)
-#define notO 0xFF000000
+#define TEN_LOG_RADIX 8L
 #endif
 
-#define not_built_in(pn) (((pn)->v.fl & IS_OPERATOR) || (((pn)->u.lobj) & (notO)))
+#if ICPY
+#define MEMCPY(a,b,n) icpy((LONG*)(a),(LONG*)(b),n)
+#else
+#define MEMCPY(a,b,n) memcpy((char *)(a),(char *)(b),n)
+#endif
+#if defined EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
+#define __EMSCRIPTEN__
+#endif
+#endif
+#if defined __EMSCRIPTEN__ /* This is set if compiling with __EMSCRIPTEN__. */
+#define EMSCRIPTEN_HTML 1 /* set to 1 if using __EMSCRIPTEN__ to convert this file to HTML*/
+#define GLOBALARGPTR 0
+
+#define NO_C_INTERFACE
+#define NO_FILE_RENAME
+#define NO_FILE_REMOVE
+#define NO_SYSTEM_CALL
+#define NO_LOW_LEVEL_FILE_HANDLING
+#define NO_FOPEN
+#define NO_EXIT_ON_NON_SEVERE_ERRORS
+
+#else
+#define EMSCRIPTEN_HTML 0 /* Normally this should be 0 */
+#define GLOBALARGPTR 1 /* Normally this should be 1 */
+#endif
+
+#if EMSCRIPTEN_HTML
+/* must be 0: compiling with emcc (__EMSCRIPTEN__ C to JavaScript compiler) */
+#else
+#define GLOBALARGPTR 1 /* 0 if compiling with emcc (__EMSCRIPTEN__ C to JavaScript compiler) */
+#endif
+
+#if DEBUGBRACMAT
+#define DBGSRC(code)    if(debug){code}
+#else
+#define DBGSRC(code)
+#endif
+
+#if INTSCMP
+#define STRCMP(a,b) intscmp((LONG*)(a),(LONG*)(b))
+#else
+#define STRCMP(a,b) strcmp((char *)(a),(char *)(b))
+#endif
+
+
+
+
+#include <string.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <errno.h>
+
+
+
+
+
 
 #if TELMAX
 #define BEZ O('b','e','z')
@@ -698,37 +611,108 @@ typedef struct
 #define XX  O('e', 0 , 0 )
 
 
-#define SHIFT_STR 0
-#define SHIFT_VAP 1
-#define SHIFT_MEM 2
-#define SHIFT_ECH 3
-#define SHIFT_ML  4
-#define SHIFT_TRM 5
-#define SHIFT_HT  6
-#define SHIFT_X   7
-#define SHIFT_JSN 8
-#define SHIFT_TXT 9  /* "r" "w" "a" */
-#define SHIFT_BIN 10 /* "rb" "wb" "ab" */
-
-#define OPT_STR (1 << SHIFT_STR)
-#define OPT_VAP (1 << SHIFT_VAP)
-#define OPT_MEM (1 << SHIFT_MEM)
-#define OPT_ECH (1 << SHIFT_ECH)
-#define OPT_TXT (1 << SHIFT_TXT)
-#define OPT_BIN (1 << SHIFT_BIN)
-
-#if READMARKUPFAMILY
-#define OPT_ML  (1 << SHIFT_ML)
-#define OPT_TRM (1 << SHIFT_TRM)
-#define OPT_HT  (1 << SHIFT_HT)
-#define OPT_X   (1 << SHIFT_X)
-extern void XMLtext(FILE* fpi, unsigned char* source, int trim, int html, int xml);
+#if GLOBALARGPTR
+static va_list argptr;
+#define VOIDORARGPTR void
+#else
+#define VOIDORARGPTR va_list * pargptr
 #endif
 
-#if READJSON
-#define OPT_JSON (1 << SHIFT_JSN)
-extern int JSONtext(FILE* fpi, char* source);
+#if !DEBUGBRACMAT
+#define match(IND,SUB,PAT,SNIJAF,POS,LENGTH,OP) match(SUB,PAT,SNIJAF,POS,LENGTH,OP)
+#if CUTOFFSUGGEST
+#define stringmatch(IND,WH,SUB,SNIJAF,PAT,PKN,POS,LENGTH,SUGGESTEDCUTOFF,MAYMOVESTARTOFSUBJECT) stringmatch(SUB,SNIJAF,PAT,PKN,POS,LENGTH,SUGGESTEDCUTOFF,MAYMOVESTARTOFSUBJECT)
+#else
+#define stringmatch(IND,WH,SUB,SNIJAF,PAT,PKN,POS,LENGTH) stringmatch(SUB,SNIJAF,PAT,PKN,POS,LENGTH)
 #endif
+#endif
+
+#define NARROWLINELENGTH 80
+#define WIDELINELENGTH 120
+
+
+
+
+/* flags (prefixes) in node */
+#define NOT              1      /* ~ */
+     /* Keep definition of NOT like this because of mixing of logical and bit
+        operators && || | ^ & */
+#define SUCCESS         (1<< 1)
+#define READY           (1<< 2)
+#define POSITION        (1<< 3) /* [ */
+#define INDIRECT        (1<< 4) /* ! */
+#define DOUBLY_INDIRECT (1<< 5) /* !! */
+#define FENCE           (1<< 6) /* `   (within same byte as ATOM and NOT) */
+#define ATOM            (1<< 7) /* @ */
+#define NONIDENT        (1<< 8) /* % */
+#define GREATER_THAN    (1<< 9) /* > */
+#define SMALLER_THAN    (1<<10) /* < */
+#define NUMBER          (1<<11) /* # */
+#define FRACTION        (1<<12) /* / */
+#define UNIFY           (1<<13) /* ? */
+#define IDENT           (1<<14)
+#define IMPLIEDFENCE    (1<<15) /* 20070222 */
+        /* 1<<16 test whether operator
+           1<<17 operator
+           1<<18 operator
+           1<<19 operator
+           1<<20 operator
+           1<<21 latebind
+        */
+#if DATAMATCHESITSELF
+#define SELFMATCHING    (1<<22) /* 20210801 */
+#define BITWISE_OR_SELFMATCHING |SELFMATCHING
+#else
+#define BITWISE_OR_SELFMATCHING
+#endif
+
+#if WORD32
+#else
+#if DATAMATCHESITSELF
+#define BUILT_IN        (1<<23) /* 20210801 only used for objects (operator =) */
+#define CREATEDWITHNEW  (1<<24) /* 20210801 only used for objects (operator =) */
+#else
+#define BUILT_IN        (1<<22) /* 20210801 only used for objects (operator =) */
+#define CREATEDWITHNEW  (1<<23) /* 20210801 only used for objects (operator =) */
+#endif
+#endif
+
+        /*          operator              leaf                optab       comment
+        Flgs 0                   NOT
+             1                  SUCCESS
+             2                  READY
+             3                  POSITION
+             4                 INDIRECT
+             5              DOUBLY_INDIRECT
+             6                  FENCE
+             7                  ATOM
+             8                 NONIDENT
+             9                GREATER_THAN
+            10                SMALLER_THAN
+            11                  NUMBER
+            12                  FRACTION
+            13                  UNIFY
+            14                  IDENT
+            15               IMPLIEDFENCE
+            16               IS_OPERATOR                                  SHL
+            17      (operators 0-14)      QNUMBER
+            18          "                 MINUS
+            19          "                 QNUL
+            20          "                 QFRACTION
+            21                LATEBIND                        NOOP
+            22               SELFMATCHING                                Toggles with DATAMATCHESITSELF
+            23                 BUILT_IN                                  ONLY for 64 bit platform
+            24              CREATEDWITHNEW                               ONLY for 64 bit platform
+            25             (reference count)                             NON_REF_COUNT_BITS 25 or 23
+            26                    "
+            27                    "
+            28                    "
+            29                    "
+            30                    "
+            31                    "
+
+        Reference count starts with 0, not 1
+        */
 
 #if DATAMATCHESITSELF
 #if WORD32
@@ -756,32 +740,94 @@ extern int JSONtext(FILE* fpi, char* source);
 #endif
 #endif
 
-#define FILTERS     (FRACTION | NUMBER | SMALLER_THAN | GREATER_THAN | ATOM | NONIDENT)
-#define ATOMFILTERS (FRACTION | NUMBER | SMALLER_THAN | GREATER_THAN | ATOM | FENCE | IDENT)
-#define SATOMFILTERS (/*ATOM | */FENCE | IDENT)
+#define SHL 16
+#define REF 23
+#define OPSH (SHL+1)
+#define IS_OPERATOR (1 << SHL)
+#define EQUALS     (( 0<<OPSH) + IS_OPERATOR)
+#define DOT        (( 1<<OPSH) + IS_OPERATOR)
+#define COMMA      (( 2<<OPSH) + IS_OPERATOR)
+#define OR         (( 3<<OPSH) + IS_OPERATOR)
+#define AND        (( 4<<OPSH) + IS_OPERATOR)
+#define MATCH      (( 5<<OPSH) + IS_OPERATOR)
+#define WHITE      (( 6<<OPSH) + IS_OPERATOR)
+#define PLUS       (( 7<<OPSH) + IS_OPERATOR)
+#define TIMES      (( 8<<OPSH) + IS_OPERATOR)
+#define EXP        (( 9<<OPSH) + IS_OPERATOR)
+#define LOG        ((10<<OPSH) + IS_OPERATOR)
+#define DIF        ((11<<OPSH) + IS_OPERATOR)
+#define FUU        ((12<<OPSH) + IS_OPERATOR)
+#define FUN        ((13<<OPSH) + IS_OPERATOR)
+#define UNDERSCORE ((14<<OPSH) + IS_OPERATOR) /* dummy */
 
-#define FLGS (FILTERS | FENCE | DOUBLY_INDIRECT | INDIRECT | POSITION)
+#define NOOP                (OPERATOR+1)
+#define QNUMBER             (1 << (SHL+1))
+#define MINUS               (1 << (SHL+2))
+#define QNUL                (1 << (SHL+3))
+#define QFRACTION           (1 << (SHL+4))
+#define LATEBIND            (1 << (SHL+5))
+#define DEFINITELYNONUMBER  (1 << (SHL+6)) /* this is not stored in a node! */
+#define ONEREF   (ULONG)(1 << NON_REF_COUNT_BITS)
 
-#define NEGATION(Flgs,flag)  ((Flgs & NOT ) && \
-                             (Flgs & FILTERS) >= (flag) && \
-                             (Flgs & FILTERS) < ((flag) << 1))
-#define ANYNEGATION(Flgs)  ((Flgs & NOT ) && (Flgs & FILTERS))
-#define ASSERTIVE(Flgs,flag) ((Flgs & flag) && !NEGATION(Flgs,flag))
-#define FAIL (pat->v.fl & NOT)
-#define NOTHING(p) (((p)->v.fl & NOT) && !((p)->v.fl & FILTERS))
-#define NOTHINGF(Flgs) ((Flgs & NOT) && !(Flgs & FILTERS))
-#define BEQUEST (FILTERS | FENCE | UNIFY)
-#define UNOPS (UNIFY | FLGS | NOT | MINUS)
-#define HAS_UNOPS(a) ((a)->v.fl & UNOPS)
-#define HAS__UNOPS(a) (is_op(a) && (a)->v.fl & (UNIFY | FLGS | NOT))
-#define IS_VARIABLE(a) ((a)->v.fl & (UNIFY | INDIRECT | DOUBLY_INDIRECT))
-#define IS_BANG_VARIABLE(a) ((a)->v.fl & (INDIRECT | DOUBLY_INDIRECT))
+#define ALL_REFCOUNT_BITS_SET \
+       ((((ULONG)(~0)) >> NON_REF_COUNT_BITS) << NON_REF_COUNT_BITS)
+#if WORD32
+#define COPYFILTER ~ALL_REFCOUNT_BITS_SET
+#else
+#define COPYFILTER ~(ALL_REFCOUNT_BITS_SET | BUILT_IN | CREATEDWITHNEW)
+#endif
 
-/*#define SUBJECTNOTNIL(sub,pat) (is_op(sub) || HAS_UNOPS(sub) || (PIOBJ(sub) != PIOBJ(nil(pat))))*/
+#define VISIBLE_FLAGS_WEAK              (INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)
+#define VISIBLE_FLAGS_NON_COMP          (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|FRACTION|UNIFY) /* allows < > ~< and ~> as flags on numbers */
+#define VISIBLE_FLAGS_POS0              (INDIRECT|DOUBLY_INDIRECT|NONIDENT|QFRACTION|UNIFY|QNUMBER)
+#define VISIBLE_FLAGS_POS               (INDIRECT|DOUBLY_INDIRECT|NONIDENT|QFRACTION|UNIFY|QNUMBER|NOT|GREATER_THAN|SMALLER_THAN)
+#define VISIBLE_FLAGS                   (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|FRACTION|UNIFY|NOT|GREATER_THAN|SMALLER_THAN|FENCE|POSITION)
+
+#define HAS_VISIBLE_FLAGS_OR_MINUS(psk) ((psk)->v.fl & (VISIBLE_FLAGS|MINUS))
+#define RATIONAL_COMP(psk)              (((psk)->v.fl & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
+#define RATIONAL(psk)                   (((psk)->v.fl & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS)) == QNUMBER)
+#define RATIONAL_COMP_NOT_NUL(psk)      (((psk)->v.fl & (QNUMBER|QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
+#define RATIONAL_WEAK(psk)              (((psk)->v.fl & (QNUMBER|IS_OPERATOR|INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)) == QNUMBER)/* allows < > ~< and ~> as flags on numbers */
+#define       LESS(psk)                 (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN))
+#define LESS_EQUAL(psk)                 (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|GREATER_THAN))
+#define MORE_EQUAL(psk)                 (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN))
+#define       MORE(psk)                 (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|GREATER_THAN))
+#define    UNEQUAL(psk)                 (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT))
+#define LESSORMORE(psk)                 (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN|GREATER_THAN))
+#define      EQUAL(psk)                 (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == QNUMBER)
+#define NOTLESSORMORE(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN|GREATER_THAN))
+
+#define INTEGER(pn)                     (((pn)->v.fl & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                      == QNUMBER)
+#define INTEGER_COMP(pn)                (((pn)->v.fl & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))             == QNUMBER)
+
+#define INTEGER_NOT_NEG(pn)             (((pn)->v.fl & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                == QNUMBER)
+#define INTEGER_NOT_NEG_COMP(pn)        (((pn)->v.fl & (QNUMBER|MINUS|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))       == QNUMBER)
+
+#define INTEGER_POS(pn)                 (((pn)->v.fl & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))           == QNUMBER)
+#define INTEGER_POS_COMP(pn)            (((pn)->v.fl & (QNUMBER|MINUS|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))  == QNUMBER)
+
+#define INTEGER_NOT_NUL_COMP(pn)        (((pn)->v.fl & (QNUMBER|QNUL|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))        == QNUMBER)
+#define HAS_MINUS_SIGN(pn)              (((pn)->v.fl & (MINUS|IS_OPERATOR)) == MINUS)
+
+#define RAT_NUL(pn)                     (((pn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS)) == QNUL)
+#define RAT_NUL_COMP(pn)                (((pn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUL)
+#define RAT_NEG(pn)                     (((pn)->v.fl & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS)) == (QNUMBER|MINUS))
+#define RAT_NEG_COMP(pn)                (((pn)->v.fl & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == (QNUMBER|MINUS))
+
+#define RAT_RAT(pn)                     (((pn)->v.fl & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS)) == (QNUMBER|QFRACTION))
+
+#define RAT_RAT_COMP(pn)                (((pn)->v.fl & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == (QNUMBER|QFRACTION))
+#define IS_ONE(pn)                      ((pn)->u.lobj == ONE && !((pn)->v.fl & (MINUS | VISIBLE_FLAGS)))
+#define IS_NIL(pn)                      ((pn)->u.lobj == 0   && !((pn)->v.fl & (MINUS | VISIBLE_FLAGS)))
+
+#define functionFail(x) ((x)->v.fl ^= SUCCESS,(x))
+#define functionOk(x) (x)
+
+
+        /*#define SUBJECTNOTNIL(sub,pat) (is_op(sub) || HAS_UNOPS(sub) || (PIOBJ(sub) != PIOBJ(nil(pat))))*/
 #define SUBJECTNOTNIL(sub,pat) (is_op(sub) || HAS_UNOPS(sub) || (PLOBJ(sub) != PLOBJ(nil(pat))))
 
 
-typedef int Boolean;
 
 typedef union
     {
@@ -878,126 +924,228 @@ typedef struct sk
         } u;
     } sk;
 
-static sk nilNode, nilNodeNotNeutral,
-zeroNode, zeroNodeNotNeutral,
-oneNode, oneNodeNotNeutral,
-argNode, selfNode, SelfNode, minusTwoNode, minusOneNode, twoNode, minusFourNode, fourNode, sjtNode;
-
-#if !defined NO_FOPEN
-static char* targetPath = NULL; /* Path that can be prepended to filenames. */
-#endif
-
 typedef  sk* psk;
 typedef psk* ppsk;
 
-static psk addr[7], m0 = NULL, m1 = NULL, f0 = NULL, f1 = NULL, f4 = NULL, f5 = NULL;
-#if 0 
-/* UNSAFE */
-/* The next two variables are used to cache the address of the most recently called user function.
-These values must be reset each time stringEval() is called.
-(When Bracmat is embedded in a Java program as a JNI, data addresses are not stable, it seems.) */
-static psk oldlnode = 0;
-static psk lastEvaluatedFunction = 0;
-#endif
-/*
-0:?n&whl'(1+!n:<100000:?n&57265978465924376578234566767834625978465923745729775787627876873875436743934786450097*53645235643259824350824580457283955438957043287250857432895703498700987123454567897656:?T)&!T
-NEWMULT
-{!} 3072046909146355923036506564192345471346475055611123765430367260576556764424411699428134904701221896786418686608674094452972067252677279867454597742488128986716908647272632
-    S   3,41 sec  (1437.1457.2)
-!NEWMULT
-{!} 3072046909146355923036506564192345471346475055611123765430367260576556764424411699428134904701221896786418686608674094452972067252677279867454597742488128986716908647272632
-    S   26,60 sec  (1437.1453.2)
+typedef struct knode
+    {
+    tFlags v;
+    psk left, right;
+    } knode;
 
-0:?n&whl'(1+!n:<1000000:?n&57265978465627876873875436743934786450097*53645235643259824350824987123454567897656:?T)&!T
-NEWMULT
-{!} 3072046909130450126528027450054726559442406960607487886384944156986716908647272632
-    S   18,53 sec  (1437.1457.2)!NEWMULT
-{!} 3072046909130450126528027450054726559442406960607487886384944156986716908647272632
-    S   67,78 sec  (1437.1456.2)
 
-0:?n&whl'(1+!n:<1000000:?n&75436743934786450097*53645235643259824350:?T)&!T
-NEWMULT
-{!} 4046821904541870443295997539156260461950
-    S   10,52 sec  (1437.1457.2)
-!NEWMULT
-{!} 4046821904541870443295997539156260461950
-    S   17,06 sec  (1437.1453.2)
+typedef struct stringrefnode
+    {
+    tFlags v;
+    psk pnode;
+    char* str;
+    size_t length;
+    } stringrefnode;
 
-0:?n&whl'(1+!n:<1000000:?n&4350*2073384975284367439375369802:?T)&!T
-NEWMULT
-{!} 9019224642486998361282858638700
-    S   8,93 sec  (1437.1456.2)
-!NEWMULT
-{!} 9019224642486998361282858638700
-    S   5,59 sec  (1437.1456.2)
+typedef psk function_return_type;
 
-0:?n&whl'(1+!n:<1000000:?n&43500273*384975284367439375369802:?T)&!T
-NEWMULT
-{!} 16746529968236245139535862955946
-    S   9,51 sec  (1437.1456.2)
-!NEWMULT
-{!} 16746529968236245139535862955946
-    S   8,53 sec  (1437.1456.2)
 
-0:?n&whl'(1+!n:<1000000:?n&384975284367439375369802*43500273:?T)&!T
-NEWMULT
-{!} 16746529968236245139535862955946
-    S   9,12 sec  (1437.1456.2)
-!NEWMULT
-{!} 16746529968236245139535862955946
-    S   8,10 sec  (1437.1456.2)
 
-0:?n&whl'(1+!n:<1000000:?n&38497528436743937536*980243500273:?T)&!T
-NEWMULT
-{!} 37736952026693231197301110947328
-    S   9,38 sec  (1437.1456.2)
-!NEWMULT
-{!} 37736952026693231197301110947328
-    S   8,80 sec  (1437.1454.2)
-    S   9,95 sec  (1437.1456.2)
-    S   9,58 sec  (1437.1453.2)
 
-0:?n&whl'(1+!n:<1000000:?n&3849752843674393*7536980243500273:?T)&!T
-NEWMULT
-{!} 29015511125132894970381018609289
-    S   9,60 sec  (1437.1454.2)
-!NEWMULT
-{!} 29015511125132894970381018609289
-    S   10,86 sec  (1437.1453.2)
+#define RIGHT u.p.right
+#define LEFT  u.p.left
+#define OBJ(p) &((p).u.obj)
+#define LOBJ(p) ((p).u.lobj)
+#define POBJ(p) &((p)->u.obj)
+#define SPOBJ(p) &((p)->u.sobj)
+/*#define PIOBJ(p) ((p)->u.iobj)*/ /* Added. Bart 20031110 */
+#define PLOBJ(p) ((p)->u.lobj)
 
-0:?n&whl'(1+!n:<10000000:?n&752843674393*753698024350:?T)&!T
-NEWMULT
-{!} 567416790034398785469550
-    S   71,22 sec  (1437.1457.2)
-!NEWMULT
-{!} 567416790034398785469550
-    S   66,63 sec  (1437.1453.2)
+#define Qnumber psk
 
-0:?n&whl'(1+!n:<10000000:?n&7543674393*5369824350:?T)&!T
-NEWMULT
-{!} 40508206444002869550
-    S   62,38 sec  (1437.1456.2)
-!NEWMULT
-{!} 40508206444002869550
-    S   51,77 sec  (1437.1463.2)
+#define QOBJ(p) &(p)
+#define QPOBJ(p) p
 
-*/
-#if WORD32
-#define RADIX 10000L
-#define TEN_LOG_RADIX 4L
-#define HEADROOM 20L
-#else
-#if defined _WIN64
-#define RADIX 100000000LL
-#define HEADROOM 800LL
-#else
-#define RADIX 100000000L
-#define HEADROOM 800L
-#endif
-#define TEN_LOG_RADIX 8L
-#endif
+#define FILTERS     (FRACTION | NUMBER | SMALLER_THAN | GREATER_THAN | ATOM | NONIDENT)
+#define ATOMFILTERS (FRACTION | NUMBER | SMALLER_THAN | GREATER_THAN | ATOM | FENCE | IDENT)
+#define SATOMFILTERS (/*ATOM | */FENCE | IDENT)
 
+#define FLGS (FILTERS | FENCE | DOUBLY_INDIRECT | INDIRECT | POSITION)
+
+#define NEGATION(Flgs,flag)  ((Flgs & NOT ) && \
+                             (Flgs & FILTERS) >= (flag) && \
+                             (Flgs & FILTERS) < ((flag) << 1))
+#define ANYNEGATION(Flgs)  ((Flgs & NOT ) && (Flgs & FILTERS))
+#define ASSERTIVE(Flgs,flag) ((Flgs & flag) && !NEGATION(Flgs,flag))
+#define FAIL (pat->v.fl & NOT)
+#define NOTHING(p) (((p)->v.fl & NOT) && !((p)->v.fl & FILTERS))
+#define NOTHINGF(Flgs) ((Flgs & NOT) && !(Flgs & FILTERS))
+#define BEQUEST (FILTERS | FENCE | UNIFY)
+#define UNOPS (UNIFY | FLGS | NOT | MINUS)
+#define HAS_UNOPS(a) ((a)->v.fl & UNOPS)
+#define HAS__UNOPS(a) (is_op(a) && (a)->v.fl & (UNIFY | FLGS | NOT))
+#define IS_VARIABLE(a) ((a)->v.fl & (UNIFY | INDIRECT | DOUBLY_INDIRECT))
+#define IS_BANG_VARIABLE(a) ((a)->v.fl & (INDIRECT | DOUBLY_INDIRECT))
+
+#define OPERATOR ((0xF<<OPSH) + IS_OPERATOR)
+
+#define Op(pn) ((pn)->v.fl & OPERATOR)
+#define kopo(pn) ((pn).v.fl & OPERATOR)
+#define is_op(pn) ((pn)->v.fl & IS_OPERATOR)
+#define is_object(pn) (((pn)->v.fl & OPERATOR) == EQUALS)
+#define klopcode(pn) (Op(pn) >> OPSH)
+
+#define nil(p) knil[klopcode(p)]
+
+
+
+#define shared(pn) ((pn)->v.fl & ALL_REFCOUNT_BITS_SET)
+#define currRefCount(pn) (((pn)->v.fl & ALL_REFCOUNT_BITS_SET) >> NON_REF_COUNT_BITS)
+
+typedef int Boolean;
+#define TRUE 1
+#define FALSE 0
 #define RADIX2 (RADIX * RADIX)
+
+#define READBIN   "rb" /* BIN is default for get$, overrule with option TXT */
+#define READTXT   "r"
+#define WRITEBIN  "wb" /* BIN is default for lst$, overrule with option TXT */
+#define APPENDBIN "ab"
+#define WRITETXT  "w"  /* TXT is default for put$, overrule with option BIN */
+#define APPENDTXT "a"
+
+#define PRISTINE (1<<2) /* Used to initialise matchstate variables. */
+#define ONCE (1<<3)
+#define POSITION_ONCE (1<<4)
+#define POSITION_MAX_REACHED (1<<5)
+
+#define SHIFT_LMR 8
+#define SHIFT_RMR 16
+
+#ifndef UNREFERENCED_PARAMETER
+#if defined _MSC_VER
+#define UNREFERENCED_PARAMETER(P) (P)
+#else
+#define UNREFERENCED_PARAMETER(P)
+#endif
+#endif
+#define SHIFT_STR 0
+#define SHIFT_VAP 1
+#define SHIFT_MEM 2
+#define SHIFT_ECH 3
+#define SHIFT_ML  4
+#define SHIFT_TRM 5
+#define SHIFT_HT  6
+#define SHIFT_X   7
+#define SHIFT_JSN 8
+#define SHIFT_TXT 9  /* "r" "w" "a" */
+#define SHIFT_BIN 10 /* "rb" "wb" "ab" */
+
+#define OPT_STR (1 << SHIFT_STR)
+#define OPT_VAP (1 << SHIFT_VAP)
+#define OPT_MEM (1 << SHIFT_MEM)
+#define OPT_ECH (1 << SHIFT_ECH)
+#define OPT_TXT (1 << SHIFT_TXT)
+#define OPT_BIN (1 << SHIFT_BIN)
+
+/* FUNCTIONS */
+
+#define isSUCCESS(x) ((x)->v.fl & SUCCESS)
+#define isFENCE(x) (((x)->v.fl & (SUCCESS|FENCE)) == FENCE)
+#define isSUCCESSorFENCE(x) ((x)->v.fl & (SUCCESS|FENCE))
+#define isFailed(x) (((x)->v.fl & (SUCCESS|FENCE)) == 0)
+
+
+
+
+struct typedObjectnode;
+typedef Boolean(*method_pnt)(struct typedObjectnode* This, ppsk arg);
+
+typedef struct method
+    {
+    char* name;
+    method_pnt func;
+    } method;
+
+#if WORD32
+typedef struct typedObjectnode /* createdWithNew == 1 */
+    {
+    tFlags v;
+    psk left, right; /* left == nil, right == data (if vtab == NULL)
+            or name of object type, e.g. [set], [hash], [file], [float] (if vtab != NULL)*/
+    union
+        {
+        struct
+            {
+            unsigned int refcount : 30;
+            unsigned int built_in : 1;
+            unsigned int createdWithNew : 1;
+            } s;
+        int Int : 32;
+        } u;
+    struct Hash* voiddata;
+#define HASH(x) (Hash*)x->voiddata
+#define VOID(x) x->voiddata
+#define PHASH(x) (Hash**)&(x->voiddata)
+    method* vtab; /* The last element n of the array must have vtab[n].name == NULL */
+    } typedObjectnode;
+#else
+typedef struct typedObjectnode /* createdWithNew == 1 */
+    {
+    tFlags v;
+    psk left, right; /* left == nil, right == data (if vtab == NULL)
+            or name of object type, e.g. [set], [hash], [file], [float] (if vtab != NULL)*/
+    struct Hash* voiddata;
+#define HASH(x) (Hash*)x->voiddata
+#define VOID(x) x->voiddata
+#define PHASH(x) (Hash**)&(x->voiddata)
+    method* vtab; /* The last element n of the array must have vtab[n].name == NULL */
+    } typedObjectnode;
+#endif
+
+typedef struct
+    {
+    psk self;
+    psk object;
+    method_pnt theMethod;
+    } objectStuff;
+
+
+#if WORD32
+#define BUILTIN (1 << 30)
+typedef struct objectnode /* createdWithNew == 0 */
+    {
+    tFlags v;
+    psk left, right;
+    union
+        {
+        struct
+            {
+            unsigned int refcount : 30;
+            unsigned int built_in : 1;
+            unsigned int createdWithNew : 1;
+            } s;
+        int Int : 32;
+        } u;
+    } objectnode;
+#else
+typedef struct objectnode /* createdWithNew == 0 */
+    {
+    tFlags v;
+    psk left, right;
+    } objectnode;
+#endif
+
+#if WORD32
+#define INCREFCOUNT(a) { ((objectnode*)a)->u.s.refcount++;(a)->v.fl &= ((~ALL_REFCOUNT_BITS_SET)|ONEREF); }
+#define DECREFCOUNT(a) { ((objectnode*)a)->u.s.refcount--;(a)->v.fl |= ALL_REFCOUNT_BITS_SET; }
+#define REFCOUNTNONZERO(a) ((a)->u.s.refcount)
+#define ISBUILTIN(a) ((a)->u.s.built_in)
+#define ISCREATEDWITHNEW(a) ((a)->u.s.createdWithNew)
+#define SETCREATEDWITHNEW(a) (a)->u.s.createdWithNew = 1
+#else
+#define ISBUILTIN(a) ((a)->v.fl & BUILT_IN)
+#define ISCREATEDWITHNEW(a) ((a)->v.fl & CREATEDWITHNEW)
+#define SETCREATEDWITHNEW(a) (a)->v.fl |= CREATEDWITHNEW
+#endif
+
+
+
 
 typedef struct nnumber
     {
@@ -1012,9 +1160,141 @@ typedef struct nnumber
     int sign; /* 0: positive, QNUL: zero, MINUS: negative number */
     } nnumber;
 
+typedef struct classdef
+    {
+    char* name;
+    method* vtab;
+    } classdef;
+
+typedef struct pskRecord
+    {
+    psk entry;
+    struct pskRecord* next;
+    } pskRecord;
+
+typedef int(*cmpfuncTp)(const char* s, const char* p);
+typedef LONG(*hashfuncTp)(const char* s);
+
+typedef struct Hash
+    {
+    pskRecord** hash_table;
+    ULONG hash_size;
+    ULONG elements;     /* elements >= record_count */
+    ULONG record_count; /* record_count >= size - unoccupied */
+    ULONG unoccupied;
+    cmpfuncTp cmpfunc;
+    hashfuncTp hashfunc;
+    } Hash;
+
+
+#include "unicaseconv.h"
+
+typedef union matchstate
+    {
+#ifndef NDEBUG
+    struct
+        {
+        unsigned int bsave : 8;
+
+        unsigned int blmr_true : 1;
+        unsigned int blmr_success : 1; /* SUCCESS */
+        unsigned int blmr_pristine : 1;
+        unsigned int blmr_once : 1;
+        unsigned int blmr_position_once : 1;
+        unsigned int blmr_position_max_reached : 1;
+        unsigned int blmr_fence : 1; /* FENCE */
+        unsigned int blmr_unused_15 : 1;
+
+        unsigned int brmr_true : 1;
+        unsigned int brmr_success : 1; /* SUCCESS */
+        unsigned int brmr_pristine : 1;
+        unsigned int brmr_once : 1;
+        unsigned int brmr_position_once : 1;
+        unsigned int brmr_position_max_reached : 1;
+        unsigned int brmr_fence : 1; /* FENCE */
+        unsigned int brmr_unused_23 : 1;
+
+        unsigned int unused_24_26 : 3;
+        unsigned int bonce : 1;
+        unsigned int unused_28_31 : 4;
+        } b;
+#endif
+    struct
+        {
+        char sav;
+        char lmr;
+        char rmr;
+        unsigned char once;
+        } c;
+    unsigned int i;
+    } matchstate;
+
+
+#ifdef __SYMBIAN32__
+/* #define DEFAULT_INPUT_BUFFER_SIZE 0x100*/ /* If too high you get __chkstk error. Stack = 8K only! */
+/* #define DEFAULT_INPUT_BUFFER_SIZE 0x7F00*/
+#define DEFAULT_INPUT_BUFFER_SIZE 0x2000
+#else
+#ifdef _MSC_VER
+#define DEFAULT_INPUT_BUFFER_SIZE 0x7F00 /* Microsoft C allows 32k automatic data */
+
+#else
+#ifdef __BORLANDC__
+#if __BORLANDC__ >= 0x500
+#define DEFAULT_INPUT_BUFFER_SIZE 0x7000
+#else
+#define DEFAULT_INPUT_BUFFER_SIZE 0x7FFC
+#endif
+#else
+#define DEFAULT_INPUT_BUFFER_SIZE 0x7FFC
+#endif
+#endif
+#endif
+
+typedef struct inputBuffer
+    {
+    unsigned char* buffer;
+    unsigned int cutoff : 8;    /* Set to true if very long string does not fit in buffer of size DEFAULT_INPUT_BUFFER_SIZE */
+    unsigned int mallocallocated : 8; /* True if allocated with malloc. Otherwise on stack (except EPOC). */
+    } inputBuffer;
+
+
+#if READMARKUPFAMILY
+#define OPT_ML  (1 << SHIFT_ML)
+#define OPT_TRM (1 << SHIFT_TRM)
+#define OPT_HT  (1 << SHIFT_HT)
+#define OPT_X   (1 << SHIFT_X)
+extern void XMLtext(FILE* fpi, unsigned char* source, int trim, int html, int xml);
+#endif
+
+#if READJSON
+#define OPT_JSON (1 << SHIFT_JSN)
+extern int JSONtext(FILE* fpi, char* source);
+#endif
+
+
+static sk nilNode, nilNodeNotNeutral,
+zeroNode, zeroNodeNotNeutral,
+oneNode, oneNodeNotNeutral,
+argNode, selfNode, SelfNode, minusOneNode, twoNode, fourNode, sjtNode;
+
+#if !defined NO_FOPEN
+static char* targetPath = NULL; /* Path that can be prepended to filenames. */
+#endif
+
+
+static psk addr[7], m0 = NULL, m1 = NULL, f0 = NULL, f1 = NULL, f4 = NULL, f5 = NULL;
+#if 0
+/* UNSAFE */
+/* The next two variables are used to cache the address of the most recently called user function.
+These values must be reset each time stringEval() is called.
+(When Bracmat is embedded in a Java program as a JNI, data addresses are not stable, it seems.) */
+static psk oldlnode = 0;
+static psk lastEvaluatedFunction = 0;
+#endif
+
 #define NNUMBERIS1(x) ((x)->sign == 0 && (x)->length == 1 && ((char*)((x)->number))[0] == '1')
 
-#define Qnumber psk
 
 typedef struct varia
     {
@@ -1047,109 +1327,8 @@ static vars* variables[256];
 static int ARGC = 0;
 static char** ARGV = NULL;
 
-typedef struct knode
-    {
-    tFlags v;
-    psk left, right;
-    } knode;
-
-#if WORD32
-#define BUILTIN (1 << 30)
-typedef struct objectnode /* createdWithNew == 0 */
-    {
-    tFlags v;
-    psk left, right;
-    union
-        {
-        struct
-            {
-            unsigned int refcount : 30;
-            unsigned int built_in : 1;
-            unsigned int createdWithNew : 1;
-            } s;
-        int Int : 32;
-        } u;
-    } objectnode;
-#else
-typedef struct objectnode /* createdWithNew == 0 */
-    {
-    tFlags v;
-    psk left, right;
-    } objectnode;
-#endif
-
-typedef struct stringrefnode
-    {
-    tFlags v;
-    psk pnode;
-    char* str;
-    size_t length;
-    } stringrefnode;
-
-typedef psk function_return_type;
-
-#define functionFail(x) ((x)->v.fl ^= SUCCESS,(x))
-#define functionOk(x) (x)
-
-struct typedObjectnode;
-typedef Boolean(*method_pnt)(struct typedObjectnode* This, ppsk arg);
-
-typedef struct method
-    {
-    char* name;
-    method_pnt func;
-    } method;
-
 struct Hash;
 
-#if WORD32
-typedef struct typedObjectnode /* createdWithNew == 1 */
-    {
-    tFlags v;
-    psk left, right; /* left == nil, right == data (if vtab == NULL)
-            or name of object type, e.g. [set], [hash], [file], [float] (if vtab != NULL)*/
-    union
-        {
-        struct
-            {
-            unsigned int refcount : 30;
-            unsigned int built_in : 1;
-            unsigned int createdWithNew : 1;
-            } s;
-        int Int : 32;
-        } u;
-    struct Hash* voiddata;
-#define HASH(x) (Hash*)x->voiddata
-#define VOID(x) x->voiddata
-#define PHASH(x) (Hash**)&(x->voiddata)
-    method* vtab; /* The last element n of the array must have vtab[n].name == NULL */
-    } typedObjectnode;
-#else
-typedef struct typedObjectnode /* createdWithNew == 1 */
-    {
-    tFlags v;
-    psk left, right; /* left == nil, right == data (if vtab == NULL)
-            or name of object type, e.g. [set], [hash], [file], [float] (if vtab != NULL)*/
-    struct Hash* voiddata;
-#define HASH(x) (Hash*)x->voiddata
-#define VOID(x) x->voiddata
-#define PHASH(x) (Hash**)&(x->voiddata)
-    method* vtab; /* The last element n of the array must have vtab[n].name == NULL */
-    } typedObjectnode;
-#endif
-
-#if WORD32
-#define INCREFCOUNT(a) { ((objectnode*)a)->u.s.refcount++;(a)->v.fl &= ((~ALL_REFCOUNT_BITS_SET)|ONEREF); }
-#define DECREFCOUNT(a) { ((objectnode*)a)->u.s.refcount--;(a)->v.fl |= ALL_REFCOUNT_BITS_SET; }
-#define REFCOUNTNONZERO(a) ((a)->u.s.refcount)
-#define ISBUILTIN(a) ((a)->u.s.built_in)
-#define ISCREATEDWITHNEW(a) ((a)->u.s.createdWithNew)
-#define SETCREATEDWITHNEW(a) (a)->u.s.createdWithNew = 1
-#else
-#define ISBUILTIN(a) ((a)->v.fl & BUILT_IN)
-#define ISCREATEDWITHNEW(a) ((a)->v.fl & CREATEDWITHNEW)
-#define SETCREATEDWITHNEW(a) (a)->v.fl |= CREATEDWITHNEW
-#endif
 
 /*#if !_BRACMATEMBEDDED*/
 #if !defined NO_FOPEN
@@ -1157,31 +1336,6 @@ static char* errorFileName = NULL;
 #endif
 static FILE* errorStream = NULL;
 /*#endif*/
-
-#if !defined NO_FOPEN
-enum { NoPending, Writing, Reading };
-typedef struct fileStatus
-    {
-    char* fname;
-    FILE* fp;
-    struct fileStatus* next;
-#if !defined NO_LOW_LEVEL_FILE_HANDLING
-    Boolean dontcloseme;
-    LONG filepos; /* Normally -1. If >= 0, then the file is closed.
-                When reopening, filepos is used to find the position
-                before the file was closed. */
-    LONG mode;
-    LONG type;
-    LONG size;
-    LONG number;
-    LONG time;
-    int rwstatus;
-    char* stop; /* contains characters to stop reading at, default NULL */
-#endif
-    } fileStatus;
-
-static fileStatus* fs0 = NULL;
-#endif
 
 typedef LONG refCountType;
 
@@ -1215,62 +1369,7 @@ typedef struct freeStoreType
     LONG size;
     } freeStoreType;
 
-/*          operator              leaf                optab       comment
-Flgs 0                   NOT
-     1                  SUCCESS
-     2                  READY
-     3                  POSITION
-     4                 INDIRECT
-     5              DOUBLY_INDIRECT
-     6                  FENCE
-     7                  ATOM
-     8                 NONIDENT
-     9                GREATER_THAN
-    10                SMALLER_THAN
-    11                  NUMBER
-    12                  FRACTION
-    13                  UNIFY
-    14                  IDENT
-    15               IMPLIEDFENCE
-    16               IS_OPERATOR                                  SHL
-    17      (operators 0-14)      QNUMBER
-    18          "                 MINUS
-    19          "                 QNUL
-    20          "                 QFRACTION
-    21                LATEBIND                        NOOP
-    22               SELFMATCHING                                Toggles with DATAMATCHESITSELF
-    23                 BUILT_IN                                  ONLY for 64 bit platform
-    24              CREATEDWITHNEW                               ONLY for 64 bit platform
-    25             (reference count)                             NON_REF_COUNT_BITS 25 or 23
-    26                    "
-    27                    "
-    28                    "
-    29                    "
-    30                    "
-    31                    "
 
-Reference count starts with 0, not 1
-*/
-
-#define SHL 16
-#define REF 23
-#define OPSH (SHL+1)
-#define IS_OPERATOR (1 << SHL)
-#define EQUALS     (( 0<<OPSH) + IS_OPERATOR)
-#define DOT        (( 1<<OPSH) + IS_OPERATOR)
-#define COMMA      (( 2<<OPSH) + IS_OPERATOR)
-#define OR         (( 3<<OPSH) + IS_OPERATOR)
-#define AND        (( 4<<OPSH) + IS_OPERATOR)
-#define MATCH      (( 5<<OPSH) + IS_OPERATOR)
-#define WHITE      (( 6<<OPSH) + IS_OPERATOR)
-#define PLUS       (( 7<<OPSH) + IS_OPERATOR)
-#define TIMES      (( 8<<OPSH) + IS_OPERATOR)
-#define EXP        (( 9<<OPSH) + IS_OPERATOR)
-#define LOG        ((10<<OPSH) + IS_OPERATOR)
-#define DIF        ((11<<OPSH) + IS_OPERATOR)
-#define FUU        ((12<<OPSH) + IS_OPERATOR)
-#define FUN        ((13<<OPSH) + IS_OPERATOR)
-#define UNDERSCORE ((14<<OPSH) + IS_OPERATOR) /* dummy */
 
 static const psk knil[16] =
     { NULL,NULL,NULL,NULL,NULL,NULL,&nilNode,&zeroNode,
@@ -1279,85 +1378,9 @@ static const psk knil[16] =
 static const char opchar[16] =
     { '=','.',',','|','&',':',' ','+','*','^','\016','\017','\'','$','_','?' };
 
-#define OPERATOR ((0xF<<OPSH) + IS_OPERATOR)
-
-#define Op(pn) ((pn)->v.fl & OPERATOR)
-#define kopo(pn) ((pn).v.fl & OPERATOR)
-#define is_op(pn) ((pn)->v.fl & IS_OPERATOR)
-#define is_object(pn) (((pn)->v.fl & OPERATOR) == EQUALS)
-#define klopcode(pn) (Op(pn) >> OPSH)
-
-#define nil(p) knil[klopcode(p)]
 
 
-#define NOOP                (OPERATOR+1)
-#define QNUMBER             (1 << (SHL+1))
-#define MINUS               (1 << (SHL+2))
-#define QNUL                (1 << (SHL+3))
-#define QFRACTION           (1 << (SHL+4))
-#define LATEBIND            (1 << (SHL+5))
-#define DEFINITELYNONUMBER  (1 << (SHL+6)) /* this is not stored in a node! */
-#define ONEREF   (ULONG)(1 << NON_REF_COUNT_BITS)
 
-#define ALL_REFCOUNT_BITS_SET \
-       ((((ULONG)(~0)) >> NON_REF_COUNT_BITS) << NON_REF_COUNT_BITS)
-#if WORD32
-#define COPYFILTER ~ALL_REFCOUNT_BITS_SET
-#else
-#define COPYFILTER ~(ALL_REFCOUNT_BITS_SET | BUILT_IN | CREATEDWITHNEW)
-#endif
-
-#define shared(pn) ((pn)->v.fl & ALL_REFCOUNT_BITS_SET)
-#define currRefCount(pn) (((pn)->v.fl & ALL_REFCOUNT_BITS_SET) >> NON_REF_COUNT_BITS)
-
-static int all_refcount_bits_set(psk pnode)
-    {
-    return (shared(pnode) == ALL_REFCOUNT_BITS_SET) && !is_object(pnode);
-    }
-
-static void dec_refcount(psk pnode)
-    {
-    assert(pnode->v.fl & ALL_REFCOUNT_BITS_SET);
-    pnode->v.fl -= ONEREF;
-#if WORD32
-    if((pnode->v.fl & (OPERATOR | ALL_REFCOUNT_BITS_SET)) == EQUALS)
-        {
-        if(REFCOUNTNONZERO((objectnode*)pnode))
-            {
-            DECREFCOUNT(pnode);
-            }
-        }
-#endif
-    }
-
-#if TELMAX
-#if TELLING
-void initcnts(void)
-    {
-    for(int tel = 0; tel < sizeof(cnts) / sizeof(cnts[0]); ++tel)
-        cnts[tel] = 0;
-    }
-#endif
-
-static size_t globalloc = 0, maxgloballoc = 0;
-
-void Bez(char draft[22])
-    {
-#if MAXSTACK
-#if defined _WIN32 || defined __VMS
-    sprintf(draft, "%lu.%lu.%d", (unsigned long)globalloc, (unsigned long)maxgloballoc, maxstack);
-#else
-    sprintf(draft, "%zu.%zu.%d", globalloc, maxgloballoc, maxstack);
-#endif
-#else
-#if defined _WIN32 || defined __VMS
-    sprintf(draft, "%lu.%lu", (unsigned long)globalloc, (unsigned long)maxgloballoc);
-#else
-    sprintf(draft, "%zu.%zu", globalloc, maxgloballoc);
-#endif
-#endif
-    }
-#endif
 
 
 #define STRING    1
@@ -1367,110 +1390,16 @@ void Bez(char draft[22])
 
 #include <stdarg.h>
 
-#if defined __EMSCRIPTEN__ /* This is set if compiling with __EMSCRIPTEN__. */
-#define EMSCRIPTEN_HTML 1 /* set to 1 if using __EMSCRIPTEN__ to convert this file to HTML*/
-#define GLOBALARGPTR 0
 
-#define NO_C_INTERFACE
-#define NO_FILE_RENAME
-#define NO_FILE_REMOVE
-#define NO_SYSTEM_CALL
-#define NO_LOW_LEVEL_FILE_HANDLING
-#define NO_FOPEN
-#define NO_EXIT_ON_NON_SEVERE_ERRORS
 
-#else
-#define EMSCRIPTEN_HTML 0 /* Normally this should be 0 */
-#define GLOBALARGPTR 1 /* Normally this should be 1 */
-#endif
-
-#if EMSCRIPTEN_HTML
-/* must be 0: compiling with emcc (__EMSCRIPTEN__ C to JavaScript compiler) */
-#else
-#define GLOBALARGPTR 1 /* 0 if compiling with emcc (__EMSCRIPTEN__ C to JavaScript compiler) */
-#endif
-
-#if GLOBALARGPTR
-static va_list argptr;
-#define VOIDORARGPTR void
-#else
-#define VOIDORARGPTR va_list * pargptr
-#endif
 static unsigned char* startPos;
 
 static const char
-hash5[] = "\5",
-hash6[] = "\6",
 unbalanced[] =
-"unbalanced",
-
-fct[] = "(fct=f G T P C V I B W H J O.(T=m Z a p r R Q.!arg:(?m.?Z)&0:?R:?Q&"
-"whl'(!Z:?a+?p*!m*?r+?Z&!R+!a:?R&!Q+!p*!r:?Q)&(!Q.!R+!Z))&(P=M E.!arg:(?M.?E)&"
-"whl'(!E:?*(!M|!M^((#%:~<1)+?))*?+?E)&!E:0)&(G=f e r a.!arg:(?e.?f)&0:?r&whl'("
-"!e:%?a+?e&!a*!f:?a&!a+!r:?r)&!r)&(C=f r A Z M.!arg:%+%:(?+?*(?M^((#<%0:?f)+?r"
-")&!M^!f:?M)*?+?|?+?*(?M^(#>%1+?)&P$(!M.!arg))*?+?|%?f+?r&!f:?A*~#%?`M*(?Z&P$("
-"!M.!r)))&!M*C$(G$(!arg.!M^-1))|!arg)&(W=n A Z M s.C$!arg:?arg:?A*((~-1:#%?n)*"
-"?+?:?M)*?Z&(!n:<0&-1|1):?s&!s*!n*!A*(1+!s*!n^-1*!M+-1)*!Z|!arg)&(V=n A Z M.C$"
-"!arg:?arg:?A*(#%?n*?+?:?M)*?Z&!n*!A*(1+!n^-1*!M+-1)*!Z|!arg)&(I=f v l r.!arg:"
-"(?f.?v)&!v:?l_?r&I$(!f.!l)&I$(!f.!r)|!v:#|!v\017!f:0)&(O=a f e.!arg:?a*?f^(%*"
-"%:?e)*?arg&!a*!f^J$(1+!e+-1)*O$!arg|!arg)&(J=t.!arg:%?t+%?arg&O$!t+(!arg:%+%&"
-"J|O)$!arg|!arg)&(f=L R A Z a m z S Q r q t F h N D.(D=R Q S t x r X ax zx M."
-"!arg:(?R.?Q)&!Q:?+%`(?*(~#%?`M&T$(!M.!Q):(?x.?r)&I$(!r.!M))*?)+?&N$!x:?x&sub$"
-"(!R.!M.(VAR+-1*!r)*!x^-1):?S&(!x:?ax*(%+%:?X)*?zx&T$(!X^-1.!S):(?t.?S)&1+!ax*"
-"!zx*(!S*!X+!t)+-1:?S|1:?x)&T$(VAR.!S):(?t.0)&N$!t*!x^-1)&!arg:(?arg.(=?N))&N$"
-"!arg:?arg&(!arg:%?L*%?R&f$(!L.'$N)*f$(!R.'$N)|!arg:%?L^%?R&f$(!L.!R:~/#&'$V|'"
-"$W)^J$(1+!R+-1)|J$!arg:?arg:#?+~#%?A+%?Z&!A:?a*~#%?`m*?z&T$(!m.!Z):(~0:?Q.?)&"
-"!a*!z+!Q:?t:?r&!arg:?S&1:?Q&1:?F&whl'(!r:%?q*?r&N$!q:?h*(%+%:?q)&D$(!S.!q):?S"
-"&!h*!F:?F&!Q*!q:?Q)&!Q+-1*!F^-1*!t:0&f$(!Q.'$N)*f$(!S.'$N)|!arg))&(B=A E M Z "
-"a b e m n y z.!arg:?A*%?`M^?E*(?Z&!A*!Z:?a*%?`m^?e*(?z&!a*!z:?b*?n^!e*?y&!M+"
-"!m:0))&B$(!b*(1+-1*!n+-1)^!e*!y*!M^(!E+!e))|!arg)&(H=A Z a b e z w x n m o."
-"!arg:?A*(%?b+%?z:?m)*(?Z&!b:?*?a^%?e*(?&!z:?w&whl'(!w:?*!a^?*?+?w)&!w:0&!e:?+"
-"#?n*(~#%@*?:?x)+(?&!z:?w&whl'(!w:?*!a^(?+#?o*(!x&(!o:<!n:?n|))+?)*?+?w)&!w:0)"
-"))&fct$(!A*!a^(!n*!x)*(1+!a^(-1*!n*!x)*!m+-1)*!Z)|!arg)&H$(B$(f$(!arg.'$V))))";
+"unbalanced";
 
 static size_t telling = 0;
 
-#if TELLING
-static size_t cnts[256], alloc_cnt = 0, totcnt = 0;
-#endif
-
-/*
-After running valid.bra  on 32 bit platform
-1     8           32
-2 16384       131072
-3 32696       392352
-4  1024        16384
-5  256          5120
-6 2048         49152
-              ------+
-total bytes = 594112
-*/
-#if WORD32
-#define MEM1SIZE 8
-#define MEM2SIZE 16384
-#define MEM3SIZE 32696
-#define MEM4SIZE 1024
-#define MEM5SIZE 256
-#define MEM6SIZE 2048
-#else
-/*
-After running valid.bra  on 64 bit platform
-1     8            64
-2 16384        262144
-3 32768        786432
-4  1024         32768
-5  2048         81920
-6    64          3072
-              -------+
-total bytes = 1166400
-*/
-#define MEM1SIZE 8
-#define MEM2SIZE 16384
-#define MEM3SIZE 32768
-#define MEM4SIZE 1024
-#define MEM5SIZE 2048
-#define MEM6SIZE 64
-#endif
 
 static int hum = 1;
 static int listWithName = 1;
@@ -1542,98 +1471,7 @@ static const unsigned char upperEquivalent[256] =
         208, 209, 210, 211, 212, 213, 214, 247, 216, 217, 218, 219, 220, 221, 222, 255 /* ij */
     };
 #endif
-#if CODEPAGE850
-static unsigned char ISO8859toCodePage850(unsigned char kar)
-
-    {
-    static unsigned char translationTable[] =
-        {
-        0xBA,0xCD,0xC9,0xBB,0xC8,0xBC,0xCC,0xB9,0xCB,0xCA,0xCE,0xDF,0xDC,0xDB,0xFE,0xF2,
-        0xB3,0xC4,0xDA,0xBF,0xC0,0xD9,0xC3,0xB4,0xC2,0xC1,0xC5,0xB0,0xB1,0xB2,0xD5,0x9F,
-        0xFF,0xAD,0xBD,0x9C,0xCF,0xBE,0xDD,0xF5,0xF9,0xB8,0xA6,0xAE,0xAA,0xF0,0xA9,0xEE,
-        0xF8,0xF1,0xFD,0xFC,0xEF,0xE6,0xF4,0xFA,0xF7,0xFB,0xA7,0xAF,0xAC,0xAB,0xF3,0xA8,
-        0xB7,0xB5,0xB6,0xC7,0x8E,0x8F,0x92,0x80,0xD4,0x90,0xD2,0xD3,0xDE,0xD6,0xD7,0xD8,
-        0xD1,0xA5,0xE3,0xE0,0xE2,0xE5,0x99,0x9E,0x9D,0xEB,0xE9,0xEA,0x9A,0xED,0xE8,0xE1,
-        0x85,0xA0,0x83,0xC6,0x84,0x86,0x91,0x87,0x8A,0x82,0x88,0x89,0x8D,0xA1,0x8C,0x8B,
-        0xD0,0xA4,0x95,0xA2,0x93,0xE4,0x94,0xF6,0x9B,0x97,0xA3,0x96,0x81,0xEC,0xE7,0x98
-        };
-
-    if(kar & 0x80)
-        return translationTable[kar & 0x7F];
-    else
-        return kar;
-    /*    return kar & 0x80 ? (unsigned char)translationTable[kar & 0x7F] : kar;*/
-    }
-
-static unsigned char CodePage850toISO8859(unsigned char kar)
-    {
-    static unsigned char translationTable[] =
-        {
-        0xC7,0xFC,0xE9,0xE2,0xE4,0xE0,0xE5,0xE7,0xEA,0xEB,0xE8,0xEF,0xEE,0xEC,0xC4,0xC5,
-        0xC9,0xE6,0xC6,0xF4,0xF6,0xF2,0xFB,0xF9,0xFF,0xD6,0xDC,0xF8,0xA3,0xD8,0xD7,0x9F,
-        0xE1,0xED,0xF3,0xFA,0xF1,0xD1,0xAA,0xBA,0xBF,0xAE,0xAC,0xBD,0xBC,0xA1,0xAB,0xBB,
-        0x9B,0x9C,0x9D,0x90,0x97,0xC1,0xC2,0xC0,0xA9,0x87,0x80,0x83,0x85,0xA2,0xA5,0x93,
-        0x94,0x99,0x98,0x96,0x91,0x9A,0xE3,0xC3,0x84,0x82,0x89,0x88,0x86,0x81,0x8A,0xA4,
-        0xF0,0xD0,0xCA,0xCB,0xC8,0x9E,0xCD,0xCE,0xCF,0x95,0x92,0x8D,0x8C,0xA6,0xCC,0x8B,
-        0xD3,0xDF,0xD4,0xD2,0xF5,0xD5,0xB5,0xFE,0xDE,0xDA,0xDB,0xD9,0xFD,0xDD,0xAF,0xB4,
-        0xAD,0xB1,0x8F,0xBE,0xB6,0xA7,0xF7,0xB8,0xB0,0xA8,0xB7,0xB9,0xB3,0xB2,0x8E,0xA0,
-        };
-
-    /* 0x7F = 127, 0xFF = 255 */
-    /* delete bit-7 before search in tabel (0-6 is unchanged) */
-    /* delete bit 15-8 */
-
-    if(kar & 0x80)
-        return translationTable[kar & 0x7F];
-    else
-        return kar;
-    /*    return kar & 0x80 ? (unsigned char)translationTable[kar & 0x7F] : kar;*/
-    }
-#endif
-
-
-
-#ifdef DELAY_DUE_TO_INPUT
-static clock_t delayDueToInput = 0;
-#endif
-
-#ifdef __SYMBIAN32__
-/* #define DEFAULT_INPUT_BUFFER_SIZE 0x100*/ /* If too high you get __chkstk error. Stack = 8K only! */
-/* #define DEFAULT_INPUT_BUFFER_SIZE 0x7F00*/
-#define DEFAULT_INPUT_BUFFER_SIZE 0x2000
-#else
-#ifdef _MSC_VER
-#define DEFAULT_INPUT_BUFFER_SIZE 0x7F00 /* Microsoft C allows 32k automatic data */
-
-#else
-#ifdef __BORLANDC__
-#if __BORLANDC__ >= 0x500
-#define DEFAULT_INPUT_BUFFER_SIZE 0x7000
-#else
-#define DEFAULT_INPUT_BUFFER_SIZE 0x7FFC
-#endif
-#else
-#define DEFAULT_INPUT_BUFFER_SIZE 0x7FFC
-#endif
-#endif
-#endif
-
-#ifndef UNREFERENCED_PARAMETER
-#if defined _MSC_VER
-#define UNREFERENCED_PARAMETER(P) (P)
-#else
-#define UNREFERENCED_PARAMETER(P)
-#endif
-#endif
-
 static psk global_anchor;
-
-typedef struct inputBuffer
-    {
-    unsigned char* buffer;
-    unsigned int cutoff : 8;    /* Set to true if very long string does not fit in buffer of size DEFAULT_INPUT_BUFFER_SIZE */
-    unsigned int mallocallocated : 8; /* True if allocated with malloc. Otherwise on stack (except EPOC). */
-    } inputBuffer;
 
 static inputBuffer* InputArray;
 static inputBuffer* InputElement; /* Points to member of InputArray */
@@ -1643,7 +1481,6 @@ static unsigned char* maxInputBufferPointer; /* inputBufferPointer <= maxInputBu
                             if inputBufferPointer == maxInputBufferPointer, don't assign to *inputBufferPointer */
 
 
-                            /* FUNCTIONS */
 
 static void parenthesised_result(psk Root, int level, int ind, int space);
 #if DEBUGBRACMAT
@@ -1658,11 +1495,6 @@ static psk eval(psk Pnode);
    ? TRUE\
    : ((x)->v.fl & FENCE)\
 )
-
-#define isSUCCESS(x) ((x)->v.fl & SUCCESS)
-#define isFENCE(x) (((x)->v.fl & (SUCCESS|FENCE)) == FENCE)
-#define isSUCCESSorFENCE(x) ((x)->v.fl & (SUCCESS|FENCE))
-#define isFailed(x) (((x)->v.fl & (SUCCESS|FENCE)) == 0)
 
 static psk subtreecopy(psk src);
 
@@ -1806,6 +1638,176 @@ int errorprintf(const char* fmt, ...)
     return ret;
     }
 
+static int lineTooLong(unsigned char* strng)
+    {
+    if(hum
+       && strlen((const char*)strng) > 10 /*LineLength*/
+       /* very short strings are allowed to keep \n and \t */
+       )
+        return TRUE;
+    return FALSE;
+    }
+static int numbercheck(const char* begin)
+    {
+    int op_or_0, check;
+    int needNonZeroDigit = FALSE;
+    if(!*begin)
+        return 0;
+    check = QNUMBER;
+    op_or_0 = *begin;
+
+    if(op_or_0 >= '0' && op_or_0 <= '9')
+        {
+        if(op_or_0 == '0')
+            check |= QNUL;
+        while(optab[op_or_0 = *++begin] != -1)
+            {
+            if(op_or_0 == '/')
+                {
+                /* check &= ~QNUL;*/
+                if(check & QFRACTION)
+                    {
+                    check = DEFINITELYNONUMBER;
+                    break;
+                    }
+                else
+                    {
+                    needNonZeroDigit = TRUE;
+                    check |= QFRACTION;
+                    }
+                }
+            else if(op_or_0 < '0' || op_or_0 > '9')
+                {
+                check = DEFINITELYNONUMBER;
+                break;
+                }
+            else
+                {
+                /* initial zero followed by
+                                 0 <= k <= 9 makes no number */
+                if((check & (QNUL | QFRACTION)) == QNUL)
+                    {
+                    check = DEFINITELYNONUMBER;
+                    break;
+                    }
+                else if(op_or_0 != '0')
+                    {
+                    needNonZeroDigit = FALSE;
+                    /*check &= ~QNUL;*/
+                    }
+                else if(needNonZeroDigit) /* '/' followed by '0' */
+                    {
+                    check = DEFINITELYNONUMBER;
+                    break;
+                    }
+                }
+            }
+        /* Trailing closing parentheses were accepted on equal footing with '\0' bytes. */
+        if(op_or_0 == ')') /* "2)"+3       @("-23/4)))))":-23/4)  */
+            {
+            check = DEFINITELYNONUMBER;
+            }
+        }
+    else
+        {
+        check = DEFINITELYNONUMBER;
+        }
+    if(check && needNonZeroDigit)
+        {
+        check = 0;
+        }
+    return check;
+    }
+
+static int fullnumbercheck(const char* begin)
+    {
+    if(*begin == '-')
+        {
+        int ret = numbercheck(begin + 1);
+        if(ret & ~DEFINITELYNONUMBER)
+            return ret | MINUS;
+        else
+            return ret;
+        }
+    else
+        return numbercheck(begin);
+    }
+
+static int sfullnumbercheck(char* begin, char* cutoff)
+    {
+    unsigned char sav = *cutoff;
+    int ret;
+    *cutoff = '\0';
+    ret = fullnumbercheck(begin);
+    *cutoff = sav;
+    return ret;
+    }
+
+static int quote(unsigned char* strng)
+    {
+    unsigned char* pstring;
+    if(needsquotes[*strng] & 1)
+        return TRUE;
+    for(pstring = strng; *pstring; pstring++)
+        if(needsquotes[*pstring] & 2)
+            return TRUE;
+        else if(needsquotes[*pstring] & 4
+                && lineTooLong(strng)
+                )
+            return TRUE;
+    return FALSE;
+    }
+
+#include <assert.h>
+
+
+/*
+After running valid.bra  on 32 bit platform
+1     8           32
+2 16384       131072
+3 32696       392352
+4  1024        16384
+5  256          5120
+6 2048         49152
+              ------+
+total bytes = 594112
+*/
+#if WORD32
+#define MEM1SIZE 8
+#define MEM2SIZE 16384
+#define MEM3SIZE 32696
+#define MEM4SIZE 1024
+#define MEM5SIZE 256
+#define MEM6SIZE 2048
+#else
+/*
+After running valid.bra  on 64 bit platform
+1     8            64
+2 16384        262144
+3 32768        786432
+4  1024         32768
+5  2048         81920
+6    64          3072
+              -------+
+total bytes = 1166400
+*/
+#define MEM1SIZE 8
+#define MEM2SIZE 16384
+#define MEM3SIZE 32768
+#define MEM4SIZE 1024
+#define MEM5SIZE 2048
+#define MEM6SIZE 64
+#endif
+
+
+#if TELMAX
+static size_t globalloc = 0, maxgloballoc = 0;
+#endif
+
+#if TELLING
+static size_t cnts[256], alloc_cnt = 0, totcnt = 0;
+#endif
+
 struct memblock
     {
     struct memoryElement* lowestAddress;
@@ -1900,229 +1902,6 @@ static void checksum(int line)
 #define checksum(a)
 #endif
 
-#if CHECKALLOCBOUNDS
-static int isFree(void* p)
-    {
-    LONG* q;
-    int i;
-    struct memoryElement* I;
-    q = (LONG*)p - 2;
-    I = (struct memoryElement*)q;
-    for(i = 0; i < NumberOfMemBlocks; ++i)
-        {
-        struct memoryElement* me;
-        struct memblock* mb = pMemBlocks[i];
-        me = (struct memoryElement*)mb->firstFreeElementBetweenAddresses;
-        while(me)
-            {
-            if(I == me)
-                return 1;
-            me = (struct memoryElement*)me->next;
-            }
-        }
-    return 0;
-    }
-
-static void result(psk Root);
-static int rfree(psk p)
-    {
-    int r = 0;
-    if(isFree(p))
-        {
-        printf(" [");
-        result(p);
-        printf("] ");
-        r = 1;
-        }
-    if(is_op(p))
-        {
-        r |= rfree(p->LEFT);
-        r |= rfree(p->RIGHT);
-        }
-    return r;
-    }
-
-static int POINT = 0;
-
-static int areFree(char* t, psk p)
-    {
-    if(rfree(p))
-        {
-        POINT = 1;
-        printf("%s:areFree(", t);
-        result(p);
-        POINT = 0;
-        printf("\n");
-        return 1;
-        }
-    return 0;
-    }
-
-static void checkMem(void* p)
-    {
-    LONG* q;
-    q = (LONG*)p - 2;
-    if(q[0] == ('s' << 24) + ('t' << 16) + ('a' << 8) + ('r')
-       && q[q[1]] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d')
-       )
-        {
-        ;
-        }
-    else
-        {
-        char* s = (char*)q;
-        printf("s:[");
-        for(; s < (char*)(q + q[1] + 1); ++s)
-            {
-            if((((int)s) % 4) == 0)
-                printf("|");
-            if(' ' <= *s && *s <= 127)
-                printf(" %c", *s);
-            else
-                printf("%.2x", (int)((unsigned char)*s));
-            }
-        printf("] %p\n", p);
-        }
-    assert(q[0] == ('s' << 24) + ('t' << 16) + ('a' << 8) + ('r'));
-    assert(q[q[1]] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d'));
-    }
-
-
-static void checkBounds(void* p)
-    {
-    struct memblock** q;
-    LONG* lp = (LONG*)p;
-    assert(p != 0);
-    checkMem(p);
-    lp = lp - 2;
-    p = lp;
-    assert(lp[0] == ('s' << 24) + ('t' << 16) + ('a' << 8) + ('r'));
-    assert(lp[lp[1]] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d'));
-    for(q = pMemBlocks + NumberOfMemBlocks; --q >= pMemBlocks;)
-        {
-        size_t stepSize = (*q)->sizeOfElement / sizeof(struct memoryElement);
-        if((*q)->lowestAddress <= (struct memoryElement*)p && (struct memoryElement*)p < (*q)->highestAddress)
-            {
-            assert(lp[stepSize - 1] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d'));
-            return;
-            }
-        }
-    }
-
-static void checkAllBounds()
-    {
-    struct memblock** q;
-    for(q = pMemBlocks + NumberOfMemBlocks; --q >= pMemBlocks;)
-        {
-        size_t stepSize = (*q)->sizeOfElement / sizeof(struct memoryElement);
-
-        struct memoryElement* p = (struct memoryElement*)(*q)->lowestAddress;
-        struct memoryElement* e = (struct memoryElement*)(*q)->highestAddress;
-        size_t L = (*q)->sizeOfElement - 1;
-        struct memoryElement* x;
-        for(x = p; x < e; x += stepSize)
-            {
-            struct memoryElement* a = ((struct memoryElement*)x)->next;
-            if(a == 0 || (p <= a && a < e))
-                ;
-            else
-                {
-                if((((LONG*)x)[0] == ('s' << 24) + ('t' << 16) + ('a' << 8) + ('r'))
-                   && (((LONG*)x)[stepSize - 1] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d')))
-                    ;
-                else
-                    {
-                    char* s = (char*)x;
-                    printf("s:[");
-                    for(; s <= (char*)x + L; ++s)
-                        if(' ' <= *s && *s <= 127)
-                            printf("%c", *s);
-                        else if(*s == 0)
-                            printf("NIL");
-                        else
-                            printf("-%c", *s);
-                    printf("] %p\n", x);
-                    }
-                assert(((LONG*)x)[0] == ('s' << 24) + ('t' << 16) + ('a' << 8) + ('r'));
-                assert(((LONG*)x)[stepSize - 1] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d'));
-                }
-            }
-        }
-    }
-#endif
-
-static void bfree(void* p)
-    {
-    struct memblock** q;
-#if CHECKALLOCBOUNDS
-    LONG* lp = (LONG*)p;
-#endif
-    assert(p != 0);
-    checksum(__LINE__);
-#if CHECKALLOCBOUNDS
-    checkBounds(p);
-    lp = lp - 2;
-    p = lp;
-#endif
-#if TELMAX
-    globalloc--;
-#endif
-    for(q = pMemBlocks + NumberOfMemBlocks; --q >= pMemBlocks;)
-        {
-        if((*q)->lowestAddress <= (struct memoryElement*)p && (struct memoryElement*)p < (*q)->highestAddress)
-            {
-#if TELMAX
-            ++((*q)->numberOfFreeElementsBetweenAddresses);
-#endif
-            ((struct memoryElement*)p)->next = (*q)->firstFreeElementBetweenAddresses;
-            (*q)->firstFreeElementBetweenAddresses = (struct memoryElement*)p;
-            setChecksum(LineNo, globN);
-            return;
-            }
-        }
-    free(p);
-#if TELMAX
-    --malloced;
-#endif
-    setChecksum(LineNo, globN);
-    }
-
-#if TELLING
-static void bezetting(void)
-    {
-    struct memblock* mb = 0;
-    size_t words = 0;
-    int i;
-    Printf("\noccupied (promilles)\n");
-    for(i = 0; i < NumberOfMemBlocks; ++i)
-        {
-        mb = pMemBlocks[i];
-#if WORD32 || defined __VMS
-        Printf("%zd word : %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->numberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
-#else
-        Printf("%zd word : %zu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->numberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
-#endif
-        }
-    Printf("\nmax occupied (promilles)\n");
-    for(i = 0; i < NumberOfMemBlocks; ++i)
-        {
-        mb = pMemBlocks[i];
-#if WORD32 || defined __VMS
-        Printf("%zd word : %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->minimumNumberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
-#else
-        Printf("%zd word : %zu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->minimumNumberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
-#endif
-        }
-    Printf("\noccupied (absolute)\n");
-    for(i = 0; i < NumberOfMemBlocks; ++i)
-        {
-        mb = pMemBlocks[i];
-        words = mb->sizeOfElement / sizeof(struct memoryElement);
-        Printf("%zd word : %zu\n", words, (mb->numberOfElementsBetweenAddresses - mb->numberOfFreeElementsBetweenAddresses));
-        }
-    Printf("more than %zd words : %u\n", words, malloced);
-    }
-#endif
 
 static struct memblock* initializeMemBlock(size_t elementSize, size_t numberOfElements)
     {
@@ -2175,45 +1954,6 @@ static struct memblock* initializeMemBlock(size_t elementSize, size_t numberOfEl
         exit(-1);
 #endif
     }
-
-#if SHOWMEMBLOCKS
-static void showMemBlocks()
-    {
-    int totalbytes;
-    int i;
-    for(i = 0; i < NumberOfMemBlocks; ++i)
-        {
-#if defined __VMS
-        printf("%p %d %p <= %p <= %p [%p] %lu\n"
-#else
-        printf("%p %d %p <= %p <= %p [%p] %zu\n"
-#endif
-               , pMemBlocks[i]
-               , i
-               , pMemBlocks[i]->lowestAddress
-               , pMemBlocks[i]->firstFreeElementBetweenAddresses
-               , pMemBlocks[i]->highestAddress
-               , pMemBlocks[i]->previousOfSameLength
-               , pMemBlocks[i]->sizeOfElement
-        );
-        }
-    totalbytes = 0;
-    for(i = 0; i < global_nallocations; ++i)
-        {
-#if defined __VMS
-        printf("%d %d %lu\n"
-#else
-        printf("%d %d %zu\n"
-#endif
-               , i + 1
-               , global_allocations[i].numberOfElements
-               , global_allocations[i].numberOfElements * (i + 1) * sizeof(struct memoryElement)
-        );
-        totalbytes += global_allocations[i].numberOfElements * (i + 1) * sizeof(struct memoryElement);
-        }
-    printf("total bytes = %d\n", totalbytes);
-    }
-#endif
 
 /* The newMemBlocks function is introduced because the same code,
 if in-line in bmalloc, and if compiled with -O3, doesn't run. */
@@ -2383,6 +2123,270 @@ static void* bmalloc(int lineno, size_t n)
 #endif
     }
 
+#if CHECKALLOCBOUNDS
+static int isFree(void* p)
+    {
+    LONG* q;
+    int i;
+    struct memoryElement* I;
+    q = (LONG*)p - 2;
+    I = (struct memoryElement*)q;
+    for(i = 0; i < NumberOfMemBlocks; ++i)
+        {
+        struct memoryElement* me;
+        struct memblock* mb = pMemBlocks[i];
+        me = (struct memoryElement*)mb->firstFreeElementBetweenAddresses;
+        while(me)
+            {
+            if(I == me)
+                return 1;
+            me = (struct memoryElement*)me->next;
+            }
+        }
+    return 0;
+    }
+
+static void result(psk Root);
+static int rfree(psk p)
+    {
+    int r = 0;
+    if(isFree(p))
+        {
+        printf(" [");
+        result(p);
+        printf("] ");
+        r = 1;
+        }
+    if(is_op(p))
+        {
+        r |= rfree(p->LEFT);
+        r |= rfree(p->RIGHT);
+    }
+    return r;
+}
+
+static int POINT = 0;
+
+static int areFree(char* t, psk p)
+    {
+    if(rfree(p))
+        {
+        POINT = 1;
+        printf("%s:areFree(", t);
+        result(p);
+        POINT = 0;
+        printf("\n");
+        return 1;
+        }
+    return 0;
+    }
+
+static void checkMem(void* p)
+    {
+    LONG* q;
+    q = (LONG*)p - 2;
+    if(q[0] == ('s' << 24) + ('t' << 16) + ('a' << 8) + ('r')
+        && q[q[1]] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d')
+        )
+        {
+        ;
+        }
+    else
+        {
+        char* s = (char*)q;
+        printf("s:[");
+        for(; s < (char*)(q + q[1] + 1); ++s)
+            {
+            if((((int)s) % 4) == 0)
+                printf("|");
+            if(' ' <= *s && *s <= 127)
+                printf(" %c", *s);
+            else
+                printf("%.2x", (int)((unsigned char)*s));
+            }
+        printf("] %p\n", p);
+        }
+    assert(q[0] == ('s' << 24) + ('t' << 16) + ('a' << 8) + ('r'));
+    assert(q[q[1]] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d'));
+    }
+
+
+static void checkBounds(void* p)
+    {
+    struct memblock** q;
+    LONG* lp = (LONG*)p;
+    assert(p != 0);
+    checkMem(p);
+    lp = lp - 2;
+    p = lp;
+    assert(lp[0] == ('s' << 24) + ('t' << 16) + ('a' << 8) + ('r'));
+    assert(lp[lp[1]] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d'));
+    for(q = pMemBlocks + NumberOfMemBlocks; --q >= pMemBlocks;)
+        {
+        size_t stepSize = (*q)->sizeOfElement / sizeof(struct memoryElement);
+        if((*q)->lowestAddress <= (struct memoryElement*)p && (struct memoryElement*)p < (*q)->highestAddress)
+            {
+            assert(lp[stepSize - 1] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d'));
+            return;
+            }
+        }
+    }
+
+static void checkAllBounds()
+    {
+    struct memblock** q;
+    for(q = pMemBlocks + NumberOfMemBlocks; --q >= pMemBlocks;)
+        {
+        size_t stepSize = (*q)->sizeOfElement / sizeof(struct memoryElement);
+
+        struct memoryElement* p = (struct memoryElement*)(*q)->lowestAddress;
+        struct memoryElement* e = (struct memoryElement*)(*q)->highestAddress;
+        size_t L = (*q)->sizeOfElement - 1;
+        struct memoryElement* x;
+        for(x = p; x < e; x += stepSize)
+            {
+            struct memoryElement* a = ((struct memoryElement*)x)->next;
+            if(a == 0 || (p <= a && a < e))
+                ;
+            else
+                {
+                if((((LONG*)x)[0] == ('s' << 24) + ('t' << 16) + ('a' << 8) + ('r'))
+                    && (((LONG*)x)[stepSize - 1] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d')))
+                    ;
+                else
+                    {
+                    char* s = (char*)x;
+                    printf("s:[");
+                    for(; s <= (char*)x + L; ++s)
+                        if(' ' <= *s && *s <= 127)
+                            printf("%c", *s);
+                        else if(*s == 0)
+                            printf("NIL");
+                        else
+                            printf("-%c", *s);
+                    printf("] %p\n", x);
+                    }
+                assert(((LONG*)x)[0] == ('s' << 24) + ('t' << 16) + ('a' << 8) + ('r'));
+                assert(((LONG*)x)[stepSize - 1] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d'));
+                }
+            }
+        }
+    }
+#endif
+
+static void bfree(void* p)
+    {
+    struct memblock** q;
+#if CHECKALLOCBOUNDS
+    LONG* lp = (LONG*)p;
+#endif
+    assert(p != 0);
+    checksum(__LINE__);
+#if CHECKALLOCBOUNDS
+    checkBounds(p);
+    lp = lp - 2;
+    p = lp;
+#endif
+#if TELMAX
+    globalloc--;
+#endif
+    for(q = pMemBlocks + NumberOfMemBlocks; --q >= pMemBlocks;)
+        {
+        if((*q)->lowestAddress <= (struct memoryElement*)p && (struct memoryElement*)p < (*q)->highestAddress)
+            {
+#if TELMAX
+            ++((*q)->numberOfFreeElementsBetweenAddresses);
+#endif
+            ((struct memoryElement*)p)->next = (*q)->firstFreeElementBetweenAddresses;
+            (*q)->firstFreeElementBetweenAddresses = (struct memoryElement*)p;
+            setChecksum(LineNo, globN);
+            return;
+            }
+        }
+    free(p);
+#if TELMAX
+    --malloced;
+#endif
+    setChecksum(LineNo, globN);
+    }
+
+#if TELLING
+static void bezetting(void)
+    {
+    struct memblock* mb = 0;
+    size_t words = 0;
+    int i;
+    Printf("\noccupied (promilles)\n");
+    for(i = 0; i < NumberOfMemBlocks; ++i)
+        {
+        mb = pMemBlocks[i];
+#if WORD32 || defined __VMS
+        Printf("%zd word : %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->numberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
+#else
+        Printf("%zd word : %zu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->numberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
+#endif
+        }
+    Printf("\nmax occupied (promilles)\n");
+    for(i = 0; i < NumberOfMemBlocks; ++i)
+        {
+        mb = pMemBlocks[i];
+#if WORD32 || defined __VMS
+        Printf("%zd word : %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->minimumNumberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
+#else
+        Printf("%zd word : %zu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->minimumNumberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
+#endif
+        }
+    Printf("\noccupied (absolute)\n");
+    for(i = 0; i < NumberOfMemBlocks; ++i)
+        {
+        mb = pMemBlocks[i];
+        words = mb->sizeOfElement / sizeof(struct memoryElement);
+        Printf("%zd word : %zu\n", words, (mb->numberOfElementsBetweenAddresses - mb->numberOfFreeElementsBetweenAddresses));
+        }
+    Printf("more than %zd words : %u\n", words, malloced);
+    }
+#endif
+
+#if SHOWMEMBLOCKS
+static void showMemBlocks()
+    {
+    int totalbytes;
+    int i;
+    for(i = 0; i < NumberOfMemBlocks; ++i)
+        {
+#if defined __VMS
+        printf("%p %d %p <= %p <= %p [%p] %lu\n"
+#else
+        printf("%p %d %p <= %p <= %p [%p] %zu\n"
+#endif
+               , pMemBlocks[i]
+               , i
+               , pMemBlocks[i]->lowestAddress
+               , pMemBlocks[i]->firstFreeElementBetweenAddresses
+               , pMemBlocks[i]->highestAddress
+               , pMemBlocks[i]->previousOfSameLength
+               , pMemBlocks[i]->sizeOfElement
+        );
+        }
+    totalbytes = 0;
+    for(i = 0; i < global_nallocations; ++i)
+        {
+#if defined __VMS
+        printf("%d %d %lu\n"
+#else
+        printf("%d %d %zu\n"
+#endif
+               , i + 1
+               , global_allocations[i].numberOfElements
+               , global_allocations[i].numberOfElements * (i + 1) * sizeof(struct memoryElement)
+        );
+        totalbytes += global_allocations[i].numberOfElements * (i + 1) * sizeof(struct memoryElement);
+        }
+    printf("total bytes = %d\n", totalbytes);
+    }
+#endif
+
+
 int addAllocation(size_t size, int number, int nallocations, struct allocation* allocations)
     {
     int i;
@@ -2466,9 +2470,81 @@ static void pskfree(psk p)
     bfree(p);
     }
 
+static int all_refcount_bits_set(psk pnode)
+    {
+    return (shared(pnode) == ALL_REFCOUNT_BITS_SET) && !is_object(pnode);
+    }
+
+static void dec_refcount(psk pnode)
+    {
+    assert(pnode->v.fl & ALL_REFCOUNT_BITS_SET);
+    pnode->v.fl -= ONEREF;
+#if WORD32
+    if((pnode->v.fl & (OPERATOR | ALL_REFCOUNT_BITS_SET)) == EQUALS)
+        {
+        if(REFCOUNTNONZERO((objectnode*)pnode))
+            {
+            DECREFCOUNT(pnode);
+            }
+        }
+#endif
+    }
+
 #if defined DEBUGBRACMAT
 static void result(psk Root);
 #endif
+#if TELMAX
+#if TELLING
+void initcnts(void)
+    {
+    for(int tel = 0; tel < sizeof(cnts) / sizeof(cnts[0]); ++tel)
+        cnts[tel] = 0;
+    }
+#endif
+
+void Bez(char draft[22])
+    {
+#if MAXSTACK
+#if defined _WIN32 || defined __VMS
+    sprintf(draft, "%lu.%lu.%d", (unsigned long)globalloc, (unsigned long)maxgloballoc, maxstack);
+#else
+    sprintf(draft, "%zu.%zu.%d", globalloc, maxgloballoc, maxstack);
+#endif
+#else
+#if defined _WIN32 || defined __VMS
+    sprintf(draft, "%lu.%lu", (unsigned long)globalloc, (unsigned long)maxgloballoc);
+#else
+    sprintf(draft, "%zu.%zu", globalloc, maxgloballoc);
+#endif
+#endif
+    }
+#endif
+
+static psk iCopyOf(psk pnode)
+    {
+    /* REQUIREMENTS : After the string delimiting 0 all remaining bytes in the
+    current computer word must be 0 as well.
+    Argument must start on a word boundary. */
+    psk ret;
+    size_t len;
+    len = sizeof(ULONG) + strlen((char*)POBJ(pnode));
+    ret = (psk)bmalloc(__LINE__, len + 1);
+#if ICPY
+    MEMCPY(ret, pnode, (len >> LOGWORDLENGTH) + 1);
+#else
+    MEMCPY(ret, pnode, ((len / sizeof(LONG)) + 1) * sizeof(LONG));
+#endif
+    ret->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+    return ret;
+    }
+
+static psk copyof(psk pnode)
+    {
+    psk res;
+    res = iCopyOf(pnode);
+    res->v.fl &= ~IDENT;
+    return res;
+    }
 
 static psk new_operator_like(psk pnode)
     {
@@ -2488,200 +2564,216 @@ static psk new_operator_like(psk pnode)
         return (psk)bmalloc(__LINE__, sizeof(knode));
     }
 
-static unsigned char* shift_nw(VOIDORARGPTR)
-/* Used from starttree_w and build_up */
+static psk scopy(const char* str)
     {
-    if(startPos)
-        {
-#if GLOBALARGPTR
-        startPos = va_arg(argptr, unsigned char*);
-#else
-        startPos = va_arg(*pargptr, unsigned char*);
-#endif
-        if(startPos)
-            start = startPos;
-        }
-    return start;
-    }
-
-static void combineInputBuffers(void)
-/*
-Only to be called if the current input buffer is too small to contain
-a complete string (atom) and the content continues in one or more of
-the next buffers. These buffers are combined into one big buffer.
-*/
-    {
-    inputBuffer* nextInputElement = InputElement + 1;
-    inputBuffer* next2;
-    unsigned char* bigBuffer;
-    size_t len;
-    while(nextInputElement->cutoff)
-        ++nextInputElement;
-
-    len = (nextInputElement - InputElement) * (DEFAULT_INPUT_BUFFER_SIZE - 1) + 1;
-
-    if(nextInputElement->buffer)
-        {
-        len += strlen((const char*)nextInputElement->buffer);
-        }
-
-    bigBuffer = (unsigned char*)bmalloc(__LINE__, len);
-
-    nextInputElement = InputElement;
-
-    while(nextInputElement->cutoff)
-        {
-        strncpy((char*)bigBuffer + (nextInputElement - InputElement) * (DEFAULT_INPUT_BUFFER_SIZE - 1), (char*)nextInputElement->buffer, DEFAULT_INPUT_BUFFER_SIZE - 1);
-        bfree(nextInputElement->buffer);
-        ++nextInputElement;
-        }
-
-    if(nextInputElement->buffer)
-        {
-        strcpy((char*)bigBuffer + (nextInputElement - InputElement) * (DEFAULT_INPUT_BUFFER_SIZE - 1), (char*)nextInputElement->buffer);
-        if(nextInputElement->mallocallocated)
-            {
-            bfree(nextInputElement->buffer);
-            }
-        ++nextInputElement;
+    int nr = fullnumbercheck(str) & ~DEFINITELYNONUMBER;
+    psk pnode;
+    if(nr & MINUS)
+        { /* bracmat out$arg$() -123 */
+        pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + strlen((const char*)str));
+        strcpy((char*)(pnode)+sizeof(ULONG), str + 1);
         }
     else
-        bigBuffer[(nextInputElement - InputElement) * (DEFAULT_INPUT_BUFFER_SIZE - 1)] = '\0';
-
-    InputElement->buffer = bigBuffer;
-    InputElement->cutoff = FALSE;
-    InputElement->mallocallocated = TRUE;
-
-    for(next2 = InputElement + 1; nextInputElement->buffer; ++next2, ++nextInputElement)
         {
-        next2->buffer = nextInputElement->buffer;
-        next2->cutoff = nextInputElement->cutoff;
-        next2->mallocallocated = nextInputElement->mallocallocated;
+        pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + strlen((const char*)str));
+        strcpy((char*)(pnode)+sizeof(ULONG), str);
         }
-
-    next2->buffer = NULL;
-    next2->cutoff = FALSE;
-    next2->mallocallocated = FALSE;
+    pnode->v.fl = READY | SUCCESS | nr;
+    return pnode;
     }
 
-static unsigned char* vshift_w(VOIDORARGPTR)
-/* used from buildtree_w, which receives a list of bmalloc-allocated string
-   pointers. The last string pointer must not be deallocated here */
+static psk same_as_w(psk pnode)
     {
-    if(InputElement->buffer && (++InputElement)->buffer)
+    if(shared(pnode) != ALL_REFCOUNT_BITS_SET)
         {
-        if(InputElement->cutoff)
+        (pnode)->v.fl += ONEREF;
+        return pnode;
+        }
+#if WORD32
+    else if(is_object(pnode))
+        {
+        INCREFCOUNT(pnode);
+        return pnode;
+        }
+#endif
+    else
+        {
+        return subtreecopy(pnode);
+        }
+    }
+
+static psk same_as_w_2(ppsk PPnode)
+    {
+    psk pnode = *PPnode;
+    if(shared(pnode) != ALL_REFCOUNT_BITS_SET)
+        {
+        pnode->v.fl += ONEREF;
+        return pnode;
+        }
+#if WORD32
+    else if(is_object(pnode))
+        {
+        INCREFCOUNT(pnode);
+        return pnode;
+        }
+#endif
+    else
+        {
+        /*
+        0:?n&:?L&whl'(!n+1:?n:<10000&out$!n&XXX !L:?L)
+        0:?n&:?L&whl'(!n+1:?n:<10000&out$!n&!L XXX:?L) This is not improved!
+        */
+        *PPnode = subtreecopy(pnode);
+        return pnode;
+        }
+    }
+
+static psk _copyop(psk Pnode)
+    {
+    psk apnode;
+    apnode = new_operator_like(Pnode);
+    apnode->v.fl = Pnode->v.fl & COPYFILTER;/* (ALL_REFCOUNT_BITS_SET | CREATEDWITHNEW);*/
+    apnode->LEFT = same_as_w_2(&Pnode->LEFT);
+    apnode->RIGHT = same_as_w(Pnode->RIGHT);
+    return apnode;
+    }
+
+static psk subtreecopy(psk src)
+    {
+    if(is_op(src))
+        return _copyop(src);
+    else
+        return iCopyOf(src);
+    }
+
+static psk isolated(psk Pnode)
+    {
+    if(shared(Pnode))
+        {
+        dec_refcount(Pnode);
+        return subtreecopy(Pnode);
+        }
+    return Pnode;
+    }
+
+static psk setflgs(psk pokn, ULONG Flgs)
+    {
+    if((Flgs & BEQUEST) || !(Flgs & SUCCESS))
+        {
+        pokn = isolated(pokn);
+        pokn->v.fl ^= ((Flgs & SUCCESS) ^ SUCCESS);
+        pokn->v.fl |= (Flgs & BEQUEST);
+        if(ANYNEGATION(Flgs))
+            pokn->v.fl |= NOT;
+        }
+    return pokn;
+    }
+
+#if ICPY
+static void icpy(LONG* d, LONG* b, int words)
+    {
+    while(words--)
+        *d++ = *b++;
+    }
+#endif
+
+static psk copyop(psk Pnode)
+    {
+    dec_refcount(Pnode);
+    return _copyop(Pnode);
+    }
+
+static psk charcopy(const char* strt, const char* until)
+    {
+    int  nr = 0;
+    psk pnode;
+    if('0' <= *strt && *strt <= '9')
+        {
+        nr = QNUMBER BITWISE_OR_SELFMATCHING;
+        if(*strt == '0')
+            nr |= QNUL;
+        }
+    pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + (until - strt));
+    strncpy((char*)(pnode)+sizeof(ULONG), strt, until - strt);
+    pnode->v.fl = READY | SUCCESS | nr;
+    return pnode;
+    }
+
+static void wipe(psk top);
+
+static void copyToCutoff(psk* ppnode, psk pnode, psk cutoff)
+    {
+    for(;;)
+        {
+        if(is_op(pnode))
             {
-            combineInputBuffers();
+            if(pnode->RIGHT == cutoff)
+                {
+                *ppnode = same_as_w(pnode->LEFT);
+                break;
+                }
+            else
+                {
+                psk p = new_operator_like(pnode);
+                p->v.fl = pnode->v.fl & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+                p->LEFT = same_as_w(pnode->LEFT);
+                *ppnode = p;
+                ppnode = &(p->RIGHT);
+                pnode = pnode->RIGHT;
+                }
             }
-        assert(InputElement[-1].mallocallocated);
-        bfree(InputElement[-1].buffer);
-        InputElement[-1].mallocallocated = FALSE;
-        start = InputElement->buffer;
-        }
-    return start;
-    }
-
-static unsigned char* vshift_nw(VOIDORARGPTR)
-/* Used from vbuildup */
-    {
-    if(*pstart && *++pstart)
-        start = *pstart;
-    return start;
-    }
-
-static unsigned char* (*shift)(VOIDORARGPTR) = shift_nw;
-
-static void tel(int c)
-    {
-    UNREFERENCED_PARAMETER(c);
-    telling++;
-    }
-
-static void tstr(int c)
-    {
-    static int esc = FALSE, str = FALSE;
-    if(esc)
-        {
-        esc = FALSE;
-        telling++;
-        }
-    else if(c == '\\')
-        esc = TRUE;
-    else if(str)
-        {
-        if(c == '"')
-            str = FALSE;
         else
-            telling++;
-        }
-    else if(c == '"')
-        str = TRUE;
-    else if(c != ' ')
-        telling++;
-    }
-
-static void pstr(int c)
-    {
-    static int esc = FALSE, str = FALSE;
-    if(esc)
-        {
-        esc = FALSE;
-        switch(c)
             {
-            case 'n':
-                c = '\n';
-                break;
-            case 'f':
-                c = '\f';
-                break;
-            case 'r':
-                c = '\r';
-                break;
-            case 'b':
-                c = '\b';
-                break;
-            case 'a':
-                c = ALERT;
-                break;
-            case 'v':
-                c = '\v';
-                break;
-            case 't':
-                c = '\t';
-                break;
-            case 'L':
-                c = 016;
-                break;
-            case 'D':
-                c = 017;
-                break;
+            *ppnode = iCopyOf(pnode);
+            break;
             }
-        *source++ = (char)c;
         }
-    else if(c == '\\')
-        esc = TRUE;
-    else if(str)
-        {
-        if(c == '"')
-            str = FALSE;
-        else
-            *source++ = (char)c;
-        }
-    else if(c == '"')
-        str = TRUE;
-    else if(c != ' ')
-        *source++ = (char)c;
     }
 
-static void glue(int c)
+static psk Head(psk pnode)
     {
-    *source++ = (char)c;
+    if(pnode->v.fl & LATEBIND)
+        {
+        assert(!shared(pnode));
+        if(is_op(pnode))
+            {
+            psk root = pnode;
+            copyToCutoff(&pnode, root->LEFT, root->RIGHT);
+            wipe(root);
+            }
+        else
+            {
+            stringrefnode* ps = (stringrefnode*)pnode;
+            pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + ps->length);
+            pnode->v.fl = (ps->v.fl & COPYFILTER /*~ALL_REFCOUNT_BITS_SET*/ & ~LATEBIND);
+            strncpy((char*)(pnode)+sizeof(ULONG), (char*)ps->str, ps->length);
+            wipe(ps->pnode);
+            bfree(ps);
+            }
+        }
+    return pnode;
     }
 
-#define NARROWLINELENGTH 80
-#define WIDELINELENGTH 120
+static method_pnt findBuiltInMethodByName(typedObjectnode* object, const char* name)
+    {
+    method* methods = object->vtab;
+    if(methods)
+        {
+        for(; methods->name && strcmp(methods->name, name); ++methods)
+            ;
+        return methods->func;
+        }
+    return NULL;
+    }
 
+static method_pnt findBuiltInMethod(typedObjectnode* object, psk methodName)
+    {
+    if(!is_op(methodName))
+        {
+        return findBuiltInMethodByName(object, (const char*)POBJ(methodName));
+        }
+    return NULL;
+    }
 #define COMPLEX_MAX 80
 int LineLength = NARROWLINELENGTH;
 
@@ -2779,31 +2871,6 @@ static void do_something(int c)
         }
     else
         (*process)(c);
-    }
-
-static int lineToLong(unsigned char* strng)
-    {
-    if(hum
-       && strlen((const char*)strng) > 10 /*LineLength*/
-       /* very short strings are allowed to keep \n and \t */
-       )
-        return TRUE;
-    return FALSE;
-    }
-
-static int quote(unsigned char* strng)
-    {
-    unsigned char* pstring;
-    if(needsquotes[*strng] & 1)
-        return TRUE;
-    for(pstring = strng; *pstring; pstring++)
-        if(needsquotes[*pstring] & 2)
-            return TRUE;
-        else if(needsquotes[*pstring] & 4
-                && lineToLong(strng)
-                )
-            return TRUE;
-    return FALSE;
     }
 
 static int printflags(psk Root)
@@ -2919,7 +2986,7 @@ static void endnode(psk Root, int space)
             switch(ikar)
                 {
                 case '\n':
-                    if(longline || lineToLong(POBJ(Root)))
+                    if(longline || lineTooLong(POBJ(Root)))
                         /* We need to call this, even though quote returned TRUE,
                         because quote may have returned before reaching this character.
                         */
@@ -2946,7 +3013,7 @@ static void endnode(psk Root, int space)
                     ikar = 'v';
                     break;
                 case '\t':
-                    if(longline || lineToLong(POBJ(Root)))
+                    if(longline || lineTooLong(POBJ(Root)))
                         /* We need to call this, even though quote returned TRUE,
                         because quote may have returned before reaching this character.
                         */
@@ -2976,133 +3043,6 @@ static void endnode(psk Root, int space)
         if(q)
             (*process)('"');
         }
-    }
-
-static psk same_as_w(psk pnode)
-    {
-    if(shared(pnode) != ALL_REFCOUNT_BITS_SET)
-        {
-        (pnode)->v.fl += ONEREF;
-        return pnode;
-        }
-#if WORD32
-    else if(is_object(pnode))
-        {
-        INCREFCOUNT(pnode);
-        return pnode;
-        }
-#endif
-    else
-        {
-        return subtreecopy(pnode);
-        }
-    }
-
-static psk same_as_w_2(ppsk PPnode)
-    {
-    psk pnode = *PPnode;
-    if(shared(pnode) != ALL_REFCOUNT_BITS_SET)
-        {
-        pnode->v.fl += ONEREF;
-        return pnode;
-        }
-#if WORD32
-    else if(is_object(pnode))
-        {
-        INCREFCOUNT(pnode);
-        return pnode;
-        }
-#endif
-    else
-        {
-        /*
-        0:?n&:?L&whl'(!n+1:?n:<10000&out$!n&XXX !L:?L)
-        0:?n&:?L&whl'(!n+1:?n:<10000&out$!n&!L XXX:?L) This is not improved!
-        */
-        *PPnode = subtreecopy(pnode);
-        return pnode;
-        }
-    }
-
-#if ICPY
-static void icpy(LONG* d, LONG* b, int words)
-    {
-    while(words--)
-        *d++ = *b++;
-    }
-#endif
-
-static psk iCopyOf(psk pnode)
-    {
-    /* REQUIREMENTS : After the string delimiting 0 all remaining bytes in the
-    current computer word must be 0 as well.
-    Argument must start on a word boundary. */
-    psk ret;
-    size_t len;
-    len = sizeof(ULONG) + strlen((char*)POBJ(pnode));
-    ret = (psk)bmalloc(__LINE__, len + 1);
-#if ICPY
-    MEMCPY(ret, pnode, (len >> LOGWORDLENGTH) + 1);
-#else
-    MEMCPY(ret, pnode, ((len / sizeof(LONG)) + 1) * sizeof(LONG));
-#endif
-    ret->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
-    return ret;
-    }
-
-static void wipe(psk top);
-
-static void copyToCutoff(psk* ppnode, psk pnode, psk cutoff)
-    {
-    for(;;)
-        {
-        if(is_op(pnode))
-            {
-            if(pnode->RIGHT == cutoff)
-                {
-                *ppnode = same_as_w(pnode->LEFT);
-                break;
-                }
-            else
-                {
-                psk p = new_operator_like(pnode);
-                p->v.fl = pnode->v.fl & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
-                p->LEFT = same_as_w(pnode->LEFT);
-                *ppnode = p;
-                ppnode = &(p->RIGHT);
-                pnode = pnode->RIGHT;
-                }
-            }
-        else
-            {
-            *ppnode = iCopyOf(pnode);
-            break;
-            }
-        }
-    }
-
-static psk Head(psk pnode)
-    {
-    if(pnode->v.fl & LATEBIND)
-        {
-        assert(!shared(pnode));
-        if(is_op(pnode))
-            {
-            psk root = pnode;
-            copyToCutoff(&pnode, root->LEFT, root->RIGHT);
-            wipe(root);
-            }
-        else
-            {
-            stringrefnode* ps = (stringrefnode*)pnode;
-            pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + ps->length);
-            pnode->v.fl = (ps->v.fl & COPYFILTER /*~ALL_REFCOUNT_BITS_SET*/ & ~LATEBIND);
-            strncpy((char*)(pnode)+sizeof(ULONG), (char*)ps->str, ps->length);
-            wipe(ps->pnode);
-            bfree(ps);
-            }
-        }
-    return pnode;
     }
 
 #define RSP (Parent == WHITE ? RHS : 0)
@@ -3263,21 +3203,8 @@ static void parenthesised_result(psk Root, int level, int ind, int space)
         }
     }
 
-static void result(psk Root)
-    {
-    if(Root)
-        {
-        if(HAS__UNOPS(Root))
-            {
-            parenthesised_result(Root, 0, FALSE, 0);
-            }
-        else
-            reslt(Root, 0, FALSE, 0);
-        }
-    }
-
 #if 1
-#define testMul(a,b,c,d) 
+#define testMul(a,b,c,d)
 #else
 #if CHECKALLOCBOUNDS
 static int testMul(char* txt, psk variabele, psk pbinding, int doit)
@@ -3301,7 +3228,7 @@ static int testMul(char* txt, psk variabele, psk pbinding, int doit)
     return 0;
     }
 #else
-#define testMul(a,b,c,d) 
+#define testMul(a,b,c,d)
 #endif
 #endif
 
@@ -3367,110 +3294,744 @@ static void results(psk Root, psk cutoff)
     }
 #endif
 
-static LONG toLong(psk pnode)
+
+static void result(psk Root)
     {
-    LONG res;
-    res = (LONG)STRTOUL((char*)POBJ(pnode), (char**)NULL, 10);
-    if(pnode->v.fl & MINUS)
-        res = -res;
-    return res;
+    if(Root)
+        {
+        if(HAS__UNOPS(Root))
+            {
+            parenthesised_result(Root, 0, FALSE, 0);
+            }
+        else
+            reslt(Root, 0, FALSE, 0);
+        }
     }
 
-static int numbercheck(const char* begin)
-    {
-    int op_or_0, check;
-    int needNonZeroDigit = FALSE;
-    if(!*begin)
-        return 0;
-    check = QNUMBER;
-    op_or_0 = *begin;
 
-    if(op_or_0 >= '0' && op_or_0 <= '9')
+
+static void lput(int c)
+    {
+    if(inputBufferPointer >= maxInputBufferPointer)
         {
-        if(op_or_0 == '0')
-            check |= QNUL;
-        while(optab[op_or_0 = *++begin] != -1)
+        inputBuffer* newInputArray;
+        unsigned char* input_buffer;
+        unsigned char* dest;
+        int len;
+        size_t L;
+
+        for(len = 0; InputArray[++len].buffer;)
+            ;
+        /* len = index of last element in InputArray array */
+
+        input_buffer = InputArray[len - 1].buffer;
+        /* The last string (probably on the stack, not on the heap) */
+
+        while(inputBufferPointer > input_buffer && optab[*--inputBufferPointer] == NOOP)
+            ;
+        /* inputBufferPointer points at last operator (where string can be split) or at
+           the start of the string. */
+
+        newInputArray = (inputBuffer*)bmalloc(__LINE__, (2 + len) * sizeof(inputBuffer));
+        /* allocate new array one element bigger than the previous. */
+
+        newInputArray[len + 1].buffer = NULL;
+        newInputArray[len + 1].cutoff = FALSE;
+        newInputArray[len + 1].mallocallocated = FALSE;
+        newInputArray[len].buffer = input_buffer;
+        /*The buffer pointers with lower index are copied further down.*/
+
+            /*Printf("input_buffer %p\n",input_buffer);*/
+
+        newInputArray[len].cutoff = FALSE;
+        newInputArray[len].mallocallocated = FALSE;
+        /*The active buffer is still the one declared in input(),
+          so on the stack (except under EPOC).*/
+        --len; /* point at the second last element, the one that got filled up. */
+        if(inputBufferPointer == input_buffer)
             {
-            if(op_or_0 == '/')
+            /* copy the full content of input_buffer to the second last element */
+            dest = newInputArray[len].buffer = (unsigned char*)bmalloc(__LINE__, DEFAULT_INPUT_BUFFER_SIZE);
+            strncpy((char*)dest, (char*)input_buffer, DEFAULT_INPUT_BUFFER_SIZE - 1);
+            dest[DEFAULT_INPUT_BUFFER_SIZE - 1] = '\0';
+            /* Make a notice that the element's string is cut-off */
+            newInputArray[len].cutoff = TRUE;
+            newInputArray[len].mallocallocated = TRUE;
+            }
+        else
+            {
+            ++inputBufferPointer; /* inputBufferPointer points at first character after the operator */
+            /* maxInputBufferPointer - inputBufferPointer >= 0 */
+            L = (size_t)(inputBufferPointer - input_buffer);
+            dest = newInputArray[len].buffer = (unsigned char*)bmalloc(__LINE__, L + 1);
+            strncpy((char*)dest, (char*)input_buffer, L);
+            dest[L] = '\0';
+            newInputArray[len].cutoff = FALSE;
+            newInputArray[len].mallocallocated = TRUE;
+
+            /* Now remove the substring up to inputBufferPointer from input_buffer */
+            L = (size_t)(maxInputBufferPointer - inputBufferPointer);
+            strncpy((char*)input_buffer, (char*)inputBufferPointer, L);
+            input_buffer[L] = '\0';
+            inputBufferPointer = input_buffer + L;
+            }
+
+        /* Copy previous element's fields */
+        while(len)
+            {
+            --len;
+            newInputArray[len].buffer = InputArray[len].buffer;
+            newInputArray[len].cutoff = InputArray[len].cutoff;
+            newInputArray[len].mallocallocated = InputArray[len].mallocallocated;
+            }
+        bfree(InputArray);
+        InputArray = newInputArray;
+        }
+    assert(inputBufferPointer <= maxInputBufferPointer);
+    *inputBufferPointer++ = (unsigned char)c;
+    }
+
+/* referenced from xml.c json.c */
+void putOperatorChar(int c)
+/* c == parenthesis, operator of flag */
+    {
+    lput(c);
+    }
+
+/* referenced from xml.c json.c */
+void putLeafChar(int c)
+/* c == any character that should end as part of an atom (string) */
+    {
+    if(c & 0x80)
+        lput(0x7F);
+    lput(c | 0x80);
+    }
+#if CODEPAGE850
+static unsigned char ISO8859toCodePage850(unsigned char kar)
+
+    {
+    static unsigned char translationTable[] =
+        {
+        0xBA,0xCD,0xC9,0xBB,0xC8,0xBC,0xCC,0xB9,0xCB,0xCA,0xCE,0xDF,0xDC,0xDB,0xFE,0xF2,
+        0xB3,0xC4,0xDA,0xBF,0xC0,0xD9,0xC3,0xB4,0xC2,0xC1,0xC5,0xB0,0xB1,0xB2,0xD5,0x9F,
+        0xFF,0xAD,0xBD,0x9C,0xCF,0xBE,0xDD,0xF5,0xF9,0xB8,0xA6,0xAE,0xAA,0xF0,0xA9,0xEE,
+        0xF8,0xF1,0xFD,0xFC,0xEF,0xE6,0xF4,0xFA,0xF7,0xFB,0xA7,0xAF,0xAC,0xAB,0xF3,0xA8,
+        0xB7,0xB5,0xB6,0xC7,0x8E,0x8F,0x92,0x80,0xD4,0x90,0xD2,0xD3,0xDE,0xD6,0xD7,0xD8,
+        0xD1,0xA5,0xE3,0xE0,0xE2,0xE5,0x99,0x9E,0x9D,0xEB,0xE9,0xEA,0x9A,0xED,0xE8,0xE1,
+        0x85,0xA0,0x83,0xC6,0x84,0x86,0x91,0x87,0x8A,0x82,0x88,0x89,0x8D,0xA1,0x8C,0x8B,
+        0xD0,0xA4,0x95,0xA2,0x93,0xE4,0x94,0xF6,0x9B,0x97,0xA3,0x96,0x81,0xEC,0xE7,0x98
+        };
+
+    if(kar & 0x80)
+        return translationTable[kar & 0x7F];
+    else
+        return kar;
+    /*    return kar & 0x80 ? (unsigned char)translationTable[kar & 0x7F] : kar;*/
+    }
+
+static unsigned char CodePage850toISO8859(unsigned char kar)
+    {
+    static unsigned char translationTable[] =
+        {
+        0xC7,0xFC,0xE9,0xE2,0xE4,0xE0,0xE5,0xE7,0xEA,0xEB,0xE8,0xEF,0xEE,0xEC,0xC4,0xC5,
+        0xC9,0xE6,0xC6,0xF4,0xF6,0xF2,0xFB,0xF9,0xFF,0xD6,0xDC,0xF8,0xA3,0xD8,0xD7,0x9F,
+        0xE1,0xED,0xF3,0xFA,0xF1,0xD1,0xAA,0xBA,0xBF,0xAE,0xAC,0xBD,0xBC,0xA1,0xAB,0xBB,
+        0x9B,0x9C,0x9D,0x90,0x97,0xC1,0xC2,0xC0,0xA9,0x87,0x80,0x83,0x85,0xA2,0xA5,0x93,
+        0x94,0x99,0x98,0x96,0x91,0x9A,0xE3,0xC3,0x84,0x82,0x89,0x88,0x86,0x81,0x8A,0xA4,
+        0xF0,0xD0,0xCA,0xCB,0xC8,0x9E,0xCD,0xCE,0xCF,0x95,0x92,0x8D,0x8C,0xA6,0xCC,0x8B,
+        0xD3,0xDF,0xD4,0xD2,0xF5,0xD5,0xB5,0xFE,0xDE,0xDA,0xDB,0xD9,0xFD,0xDD,0xAF,0xB4,
+        0xAD,0xB1,0x8F,0xBE,0xB6,0xA7,0xF7,0xB8,0xB0,0xA8,0xB7,0xB9,0xB3,0xB2,0x8E,0xA0,
+        };
+
+    /* 0x7F = 127, 0xFF = 255 */
+    /* delete bit-7 before search in tabel (0-6 is unchanged) */
+    /* delete bit 15-8 */
+
+    if(kar & 0x80)
+        return translationTable[kar & 0x7F];
+    else
+        return kar;
+    /*    return kar & 0x80 ? (unsigned char)translationTable[kar & 0x7F] : kar;*/
+    }
+#endif
+
+
+/* extern, is called from xml.c json.c */
+char* putCodePoint(ULONG val, char* s)
+    {
+    /* Converts Unicode character w to 1,2,3 or 4 bytes of UTF8 in s. */
+    if(val < 0x80)
+        {
+        *s++ = (char)val;
+        }
+    else
+        {
+        if(val < 0x0800) /* 7FF = 1 1111 111111 */
+            {
+            *s++ = (char)(0xc0 | (val >> 6));
+            }
+        else
+            {
+            if(val < 0x10000) /* FFFF = 1111 111111 111111 */
                 {
-                /* check &= ~QNUL;*/
-                if(check & QFRACTION)
-                    {
-                    check = DEFINITELYNONUMBER;
-                    break;
-                    }
-                else
-                    {
-                    needNonZeroDigit = TRUE;
-                    check |= QFRACTION;
-                    }
-                }
-            else if(op_or_0 < '0' || op_or_0 > '9')
-                {
-                check = DEFINITELYNONUMBER;
-                break;
+                *s++ = (char)(0xe0 | (val >> 12));
                 }
             else
                 {
-                /* initial zero followed by
-                                 0 <= k <= 9 makes no number */
-                if((check & (QNUL | QFRACTION)) == QNUL)
-                    {
-                    check = DEFINITELYNONUMBER;
-                    break;
+                if(val < 0x200000)
+                    { /* 10000 = 010000 000000 000000, 10ffff = 100 001111 111111 111111 */
+                    *s++ = (char)(0xf0 | (val >> 18));
                     }
-                else if(op_or_0 != '0')
+                else
                     {
-                    needNonZeroDigit = FALSE;
-                    /*check &= ~QNUL;*/
+                    if(val < 0x4000000)
+                        {
+                        *s++ = (char)(0xf8 | (val >> 24));
+                        }
+                    else
+                        {
+                        if(val < 0x80000000)
+                            {
+                            *s++ = (char)(0xfc | (val >> 30));
+                            *s++ = (char)(0x80 | ((val >> 24) & 0x3f));
+                            }
+                        else
+                            return NULL;
+                        }
+                    *s++ = (char)(0x80 | ((val >> 18) & 0x3f));
                     }
-                else if(needNonZeroDigit) /* '/' followed by '0' */
+                *s++ = (char)(0x80 | ((val >> 12) & 0x3f));
+                }
+            *s++ = (char)(0x80 | ((val >> 6) & 0x3f));
+            }
+        *s++ = (char)(0x80 | (val & 0x3f));
+        }
+    *s = (char)0;
+    return s;
+    }
+
+static int utf8bytes(ULONG val)
+    {
+    if(val < 0x80)
+        {
+        return 1;
+        }
+    else if(val < 0x0800) /* 7FF = 1 1111 111111 */
+        {
+        return 2;
+        }
+    else if(val < 0x10000) /* FFFF = 1111 111111 111111 */
+        {
+        return 3;
+        }
+    else if(val < 0x200000)
+        { /* 10000 = 010000 000000 000000, 10ffff = 100 001111 111111 111111 */
+        return 4;
+        }
+    else if(val < 0x4000000)
+        {
+        return 5;
+        }
+    else
+        {
+        return 6;
+        }
+    }
+
+int getCodePoint(const char** ps)
+    {
+    /*
+    return values:
+    > 0:    code point
+    -1:     no UTF-8
+    -2:     too short for being UTF-8
+    */
+    int K;
+    const char* s = *ps;
+    if((K = (const unsigned char)*s++) != 0)
+        {
+        if((K & 0xc0) == 0xc0) /* 11bbbbbb */
+            {
+            int k[6];
+            int i;
+            int I;
+            if((K & 0xfe) == 0xfe) /* 11111110 */
+                {
+                return -1;
+                }
+            /* Start of multibyte */
+
+            k[0] = K;
+            for(i = 1; (K << i) & 0x80; ++i)
+                {
+                k[i] = (const unsigned char)*s++;
+                if((k[i] & 0xc0) != 0x80) /* 10bbbbbb */
                     {
-                    check = DEFINITELYNONUMBER;
-                    break;
+                    if(k[i])
+                        {
+                        return -1;
+                        }
+                    return -2;
+                    }
+                }
+            K = ((k[0] << i) & 0xff) << (5 * i - 6);
+            I = --i;
+            while(i > 0)
+                {
+                K |= (k[i] & 0x3f) << ((I - i) * 6);
+                --i;
+                }
+            if(K <= 0x7F) /* ASCII, must be a single byte */
+                {
+                return -1;
+                }
+            }
+        else if((K & 0xc0) == 0x80) /* 10bbbbbb, wrong first byte */
+            {
+            return -1;
+            }
+        }
+    *ps = s; /* next character */
+    return K;
+    }
+
+static int getCodePoint2(const char** ps, int* isutf)
+    {
+    int ks = *isutf ? getCodePoint(ps) : (const unsigned char)*(*ps)++;
+    if(ks < 0)
+        {
+        *isutf = 0;
+        ks = (const unsigned char)*(*ps)++;
+        }
+    assert(ks >= 0);
+    return ks;
+    }
+
+static psk changeCase(psk Pnode
+#if CODEPAGE850
+                      , int dos
+#endif
+                      , int low)
+    {
+#if !CODEPAGE850
+    const
+#endif
+        char* s;
+    psk pnode;
+    size_t len;
+    pnode = same_as_w(Pnode);
+    s = SPOBJ(Pnode);
+    len = strlen((const char*)s);
+    if(len > 0)
+        {
+        char* d;
+        char* dwarn;
+        char* buf = NULL;
+        char* obuf;
+        pnode = isolated(pnode);
+        d = SPOBJ(pnode);
+        obuf = d;
+        dwarn = obuf + strlen((const char*)obuf) - 6;
+#if CODEPAGE850
+        if(dos)
+            {
+            if(low)
+                {
+                for(; *s; ++s)
+                    {
+                    *s = ISO8859toCodePage850(lowerEquivalent[(int)(const unsigned char)*s]);
+                    }
+                }
+            else
+                {
+                for(; *s; ++s)
+                    {
+                    *s = ISO8859toCodePage850(upperEquivalent[(int)(const unsigned char)*s]);
                     }
                 }
             }
-        /* Trailing closing parentheses were accepted on equal footing with '\0' bytes. */
-        if(op_or_0 == ')') /* "2)"+3       @("-23/4)))))":-23/4)  */
+        else
+#endif
             {
-            check = DEFINITELYNONUMBER;
+            int isutf = 1;
+            struct ccaseconv* t = low ? u2l : l2u;
+            for(; *s;)
+                {
+                int S = getCodePoint2(&s, &isutf);
+                int D = convertLetter(S, t);
+                if(isutf)
+                    {
+                    if(d >= dwarn)
+                        {
+                        int nb = utf8bytes(D);
+                        if(d + nb >= dwarn + 6)
+                            {
+                            /* overrun */
+                            buf = (char*)bmalloc(__LINE__, 2 * ((dwarn + 6) - obuf));
+                            dwarn = buf + 2 * ((dwarn + 6) - obuf) - 6;
+                            memcpy(buf, obuf, d - obuf);
+                            d = buf + (d - obuf);
+                            if(obuf != SPOBJ(pnode))
+                                bfree(obuf);
+                            obuf = buf;
+                            }
+                        }
+                    d = putCodePoint(D, d);
+                    }
+                else
+                    *d++ = (unsigned char)D;
+                }
+            *d = 0;
+            if(buf)
+                {
+                wipe(pnode);
+                pnode = scopy(buf);
+                bfree(buf);
+                }
             }
         }
-    else
-        {
-        check = DEFINITELYNONUMBER;
-        }
-    if(check && needNonZeroDigit)
-        {
-        check = 0;
-        }
-    return check;
+    return pnode;
     }
 
-static int fullnumbercheck(const char* begin)
-    {
-    if(*begin == '-')
-        {
-        int ret = numbercheck(begin + 1);
-        if(ret & ~DEFINITELYNONUMBER)
-            return ret | MINUS;
-        else
-            return ret;
-        }
-    else
-        return numbercheck(begin);
-    }
-
-static int sfullnumbercheck(char* begin, char* cutoff)
-    {
-    unsigned char sav = *cutoff;
+static int hasUTF8MultiByteCharacters(const char* s)
+    { /* returns 0 if s is not valid UTF-8 or if s is pure 7-bit ASCII */
     int ret;
-    *cutoff = '\0';
-    ret = fullnumbercheck(begin);
-    *cutoff = sav;
-    return ret;
+    int multiByteCharSeen = 0;
+    for(; (ret = getCodePoint(&s)) > 0;)
+        if(ret > 0x7F)
+            ++multiByteCharSeen;
+    return ret == 0 ? multiByteCharSeen : 0;
     }
+
+static int strcasecompu(char** S, char** P, char* cutoff)
+/* Additional argument cutoff */
+    {
+    int sutf = 1;
+    int putf = 1;
+    char* s = *S;
+    char* p = *P;
+    while(s < cutoff && *s && *p)
+        {
+        int diff;
+        char* ns = s;
+        char* np = p;
+        int ks = getCodePoint2((const char**)&ns, &sutf);
+        int kp = getCodePoint2((const char**)&np, &putf);
+        assert(ks >= 0 && kp >= 0);
+        diff = toLowerUnicode(ks) - toLowerUnicode(kp);
+        if(diff)
+            {
+            *S = s;
+            *P = p;
+            return diff;
+            }
+        s = ns;
+        p = np;
+        }
+    *S = s;
+    *P = p;
+    return (s < cutoff ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*p;
+    }
+
+
+static int strcasecomp(const char* s, const char* p)
+    {
+    int sutf = 1; /* assume UTF-8, becomes 0 if it is not */
+    int putf = 1;
+    while(*s && *p)
+        {
+        int ks = getCodePoint2((const char**)&s, &sutf);
+        int kp = getCodePoint2((const char**)&p, &putf);
+        int diff = toLowerUnicode(ks) - toLowerUnicode(kp);
+        if(diff)
+            {
+            return diff;
+            }
+        }
+    return (int)(const unsigned char)*s - (int)(const unsigned char)*p;
+    }
+
+#if CODEPAGE850
+static int strcasecmpDOS(const char* s, const char* p)
+    {
+    while(*s && *p)
+        {
+        int diff = (int)ISO8859toCodePage850(lowerEquivalent[CodePage850toISO8859((unsigned char)*s)]) - (int)ISO8859toCodePage850(lowerEquivalent[CodePage850toISO8859((unsigned char)*p)]);
+        if(diff)
+            return diff;
+        ++s;
+        ++p;
+        }
+    return (int)*s - (int)*p;
+    }
+#endif
+
+void writeError(psk Pnode)
+    {
+    FILE* saveFpo;
+    int saveNice;
+    saveNice = beNice;
+    beNice = FALSE;
+    saveFpo = global_fpo;
+    global_fpo = errorStream;
+#if !defined NO_FOPEN
+    if(global_fpo == NULL && errorFileName != NULL)
+        global_fpo = fopen(errorFileName, APPENDBIN);
+#endif
+    if(global_fpo)
+        {
+        result(Pnode);
+        myputc('\n');
+        /*#if !_BRACMATEMBEDDED*/
+#if !defined NO_FOPEN
+        if(errorStream == NULL && global_fpo != stderr && global_fpo != stdout)
+            {
+            fclose(global_fpo);
+            }
+#endif
+        }
+    /*#endif*/
+    global_fpo = saveFpo;
+    beNice = saveNice;
+    }
+
+/*#if !_BRACMATEMBEDDED*/
+static int redirectError(char* name)
+    {
+#if !defined NO_FOPEN
+    if(errorFileName)
+        {
+        free(errorFileName);
+        errorFileName = NULL;
+        }
+#endif
+    if(!strcmp(name, "stdout"))
+        {
+        errorStream = stdout;
+        return TRUE;
+        }
+    else if(!strcmp(name, "stderr"))
+        {
+        errorStream = stderr;
+        return TRUE;
+        }
+    else
+        {
+#if !defined NO_FOPEN
+        errorStream = fopen(name, APPENDTXT);
+        if(errorStream)
+            {
+            fclose(errorStream);
+            errorStream = NULL;
+            errorFileName = (char*)malloc(strlen(name) + 1);
+            if(errorFileName)
+                {
+                strcpy(errorFileName, name);
+                return TRUE;
+                }
+            else
+                return FALSE;
+            }
+#endif
+        errorStream = stderr;
+        }
+    return FALSE;
+    }
+/*#endif*/
+
+
+static unsigned char* shift_nw(VOIDORARGPTR)
+/* Used from starttree_w and build_up */
+    {
+    if(startPos)
+        {
+#if GLOBALARGPTR
+        startPos = va_arg(argptr, unsigned char*);
+#else
+        startPos = va_arg(*pargptr, unsigned char*);
+#endif
+        if(startPos)
+            start = startPos;
+        }
+    return start;
+    }
+
+static void combineInputBuffers(void)
+/*
+Only to be called if the current input buffer is too small to contain
+a complete string (atom) and the content continues in one or more of
+the next buffers. These buffers are combined into one big buffer.
+*/
+    {
+    inputBuffer* nextInputElement = InputElement + 1;
+    inputBuffer* next2;
+    unsigned char* bigBuffer;
+    size_t len;
+    while(nextInputElement->cutoff)
+        ++nextInputElement;
+
+    len = (nextInputElement - InputElement) * (DEFAULT_INPUT_BUFFER_SIZE - 1) + 1;
+
+    if(nextInputElement->buffer)
+        {
+        len += strlen((const char*)nextInputElement->buffer);
+        }
+
+    bigBuffer = (unsigned char*)bmalloc(__LINE__, len);
+
+    nextInputElement = InputElement;
+
+    while(nextInputElement->cutoff)
+        {
+        strncpy((char*)bigBuffer + (nextInputElement - InputElement) * (DEFAULT_INPUT_BUFFER_SIZE - 1), (char*)nextInputElement->buffer, DEFAULT_INPUT_BUFFER_SIZE - 1);
+        bfree(nextInputElement->buffer);
+        ++nextInputElement;
+        }
+
+    if(nextInputElement->buffer)
+        {
+        strcpy((char*)bigBuffer + (nextInputElement - InputElement) * (DEFAULT_INPUT_BUFFER_SIZE - 1), (char*)nextInputElement->buffer);
+        if(nextInputElement->mallocallocated)
+            {
+            bfree(nextInputElement->buffer);
+            }
+        ++nextInputElement;
+        }
+    else
+        bigBuffer[(nextInputElement - InputElement) * (DEFAULT_INPUT_BUFFER_SIZE - 1)] = '\0';
+
+    InputElement->buffer = bigBuffer;
+    InputElement->cutoff = FALSE;
+    InputElement->mallocallocated = TRUE;
+
+    for(next2 = InputElement + 1; nextInputElement->buffer; ++next2, ++nextInputElement)
+        {
+        next2->buffer = nextInputElement->buffer;
+        next2->cutoff = nextInputElement->cutoff;
+        next2->mallocallocated = nextInputElement->mallocallocated;
+        }
+
+    next2->buffer = NULL;
+    next2->cutoff = FALSE;
+    next2->mallocallocated = FALSE;
+    }
+
+static unsigned char* vshift_w(VOIDORARGPTR)
+/* used from buildtree_w, which receives a list of bmalloc-allocated string
+   pointers. The last string pointer must not be deallocated here */
+    {
+    if(InputElement->buffer && (++InputElement)->buffer)
+        {
+        if(InputElement->cutoff)
+            {
+            combineInputBuffers();
+            }
+        assert(InputElement[-1].mallocallocated);
+        bfree(InputElement[-1].buffer);
+        InputElement[-1].mallocallocated = FALSE;
+        start = InputElement->buffer;
+        }
+    return start;
+    }
+
+static unsigned char* vshift_nw(VOIDORARGPTR)
+/* Used from vbuildup */
+    {
+    if(*pstart && *++pstart)
+        start = *pstart;
+    return start;
+    }
+
+static unsigned char* (*shift)(VOIDORARGPTR) = shift_nw;
+
+static void tel(int c)
+    {
+    UNREFERENCED_PARAMETER(c);
+    telling++;
+    }
+
+static void tstr(int c)
+    {
+    static int esc = FALSE, str = FALSE;
+    if(esc)
+        {
+        esc = FALSE;
+        telling++;
+        }
+    else if(c == '\\')
+        esc = TRUE;
+    else if(str)
+        {
+        if(c == '"')
+            str = FALSE;
+        else
+            telling++;
+        }
+    else if(c == '"')
+        str = TRUE;
+    else if(c != ' ')
+        telling++;
+    }
+
+
+static void pstr(int c)
+    {
+    static int esc = FALSE, str = FALSE;
+    if(esc)
+        {
+        esc = FALSE;
+        switch(c)
+            {
+            case 'n':
+                c = '\n';
+                break;
+            case 'f':
+                c = '\f';
+                break;
+            case 'r':
+                c = '\r';
+                break;
+            case 'b':
+                c = '\b';
+                break;
+            case 'a':
+                c = ALERT;
+                break;
+            case 'v':
+                c = '\v';
+                break;
+            case 't':
+                c = '\t';
+                break;
+            case 'L':
+                c = 016;
+                break;
+            case 'D':
+                c = 017;
+                break;
+            }
+        *source++ = (char)c;
+        }
+    else if(c == '\\')
+        esc = TRUE;
+    else if(str)
+        {
+        if(c == '"')
+            str = FALSE;
+        else
+            *source++ = (char)c;
+        }
+    else if(c == '"')
+        str = TRUE;
+    else if(c != ' ')
+        *source++ = (char)c;
+    }
+
+static void glue(int c)
+    {
+    *source++ = (char)c;
+    }
+
 
 static int flags(void)
     {
@@ -3833,176 +4394,6 @@ static psk buildtree_w(psk Pnode)
     bfree(InputArray);
     return Pnode;
     }
-
-static void lput(int c)
-    {
-    if(inputBufferPointer >= maxInputBufferPointer)
-        {
-        inputBuffer* newInputArray;
-        unsigned char* input_buffer;
-        unsigned char* dest;
-        int len;
-        size_t L;
-
-        for(len = 0; InputArray[++len].buffer;)
-            ;
-        /* len = index of last element in InputArray array */
-
-        input_buffer = InputArray[len - 1].buffer;
-        /* The last string (probably on the stack, not on the heap) */
-
-        while(inputBufferPointer > input_buffer && optab[*--inputBufferPointer] == NOOP)
-            ;
-        /* inputBufferPointer points at last operator (where string can be split) or at
-           the start of the string. */
-
-        newInputArray = (inputBuffer*)bmalloc(__LINE__, (2 + len) * sizeof(inputBuffer));
-        /* allocate new array one element bigger than the previous. */
-
-        newInputArray[len + 1].buffer = NULL;
-        newInputArray[len + 1].cutoff = FALSE;
-        newInputArray[len + 1].mallocallocated = FALSE;
-        newInputArray[len].buffer = input_buffer;
-        /*The buffer pointers with lower index are copied further down.*/
-
-            /*Printf("input_buffer %p\n",input_buffer);*/
-
-        newInputArray[len].cutoff = FALSE;
-        newInputArray[len].mallocallocated = FALSE;
-        /*The active buffer is still the one declared in input(),
-          so on the stack (except under EPOC).*/
-        --len; /* point at the second last element, the one that got filled up. */
-        if(inputBufferPointer == input_buffer)
-            {
-            /* copy the full content of input_buffer to the second last element */
-            dest = newInputArray[len].buffer = (unsigned char*)bmalloc(__LINE__, DEFAULT_INPUT_BUFFER_SIZE);
-            strncpy((char*)dest, (char*)input_buffer, DEFAULT_INPUT_BUFFER_SIZE - 1);
-            dest[DEFAULT_INPUT_BUFFER_SIZE - 1] = '\0';
-            /* Make a notice that the element's string is cut-off */
-            newInputArray[len].cutoff = TRUE;
-            newInputArray[len].mallocallocated = TRUE;
-            }
-        else
-            {
-            ++inputBufferPointer; /* inputBufferPointer points at first character after the operator */
-            /* maxInputBufferPointer - inputBufferPointer >= 0 */
-            L = (size_t)(inputBufferPointer - input_buffer);
-            dest = newInputArray[len].buffer = (unsigned char*)bmalloc(__LINE__, L + 1);
-            strncpy((char*)dest, (char*)input_buffer, L);
-            dest[L] = '\0';
-            newInputArray[len].cutoff = FALSE;
-            newInputArray[len].mallocallocated = TRUE;
-
-            /* Now remove the substring up to inputBufferPointer from input_buffer */
-            L = (size_t)(maxInputBufferPointer - inputBufferPointer);
-            strncpy((char*)input_buffer, (char*)inputBufferPointer, L);
-            input_buffer[L] = '\0';
-            inputBufferPointer = input_buffer + L;
-            }
-
-        /* Copy previous element's fields */
-        while(len)
-            {
-            --len;
-            newInputArray[len].buffer = InputArray[len].buffer;
-            newInputArray[len].cutoff = InputArray[len].cutoff;
-            newInputArray[len].mallocallocated = InputArray[len].mallocallocated;
-            }
-        bfree(InputArray);
-        InputArray = newInputArray;
-        }
-    assert(inputBufferPointer <= maxInputBufferPointer);
-    *inputBufferPointer++ = (unsigned char)c;
-    }
-
-/* referenced from xml.c json.c */
-void putOperatorChar(int c)
-/* c == parenthesis, operator of flag */
-    {
-    lput(c);
-    }
-
-/* referenced from xml.c json.c */
-void putLeafChar(int c)
-/* c == any character that should end as part of an atom (string) */
-    {
-    if(c & 0x80)
-        lput(0x7F);
-    lput(c | 0x80);
-    }
-
-void writeError(psk Pnode)
-    {
-    FILE* saveFpo;
-    int saveNice;
-    saveNice = beNice;
-    beNice = FALSE;
-    saveFpo = global_fpo;
-    global_fpo = errorStream;
-#if !defined NO_FOPEN
-    if(global_fpo == NULL && errorFileName != NULL)
-        global_fpo = fopen(errorFileName, APPENDBIN);
-#endif
-    if(global_fpo)
-        {
-        result(Pnode);
-        myputc('\n');
-        /*#if !_BRACMATEMBEDDED*/
-#if !defined NO_FOPEN
-        if(errorStream == NULL && global_fpo != stderr && global_fpo != stdout)
-            {
-            fclose(global_fpo);
-            }
-#endif
-        }
-    /*#endif*/
-    global_fpo = saveFpo;
-    beNice = saveNice;
-    }
-
-/*#if !_BRACMATEMBEDDED*/
-static int redirectError(char* name)
-    {
-#if !defined NO_FOPEN
-    if(errorFileName)
-        {
-        free(errorFileName);
-        errorFileName = NULL;
-        }
-#endif
-    if(!strcmp(name, "stdout"))
-        {
-        errorStream = stdout;
-        return TRUE;
-        }
-    else if(!strcmp(name, "stderr"))
-        {
-        errorStream = stderr;
-        return TRUE;
-        }
-    else
-        {
-#if !defined NO_FOPEN
-        errorStream = fopen(name, APPENDTXT);
-        if(errorStream)
-            {
-            fclose(errorStream);
-            errorStream = NULL;
-            errorFileName = (char*)malloc(strlen(name) + 1);
-            if(errorFileName)
-                {
-                strcpy(errorFileName, name);
-                return TRUE;
-                }
-            else
-                return FALSE;
-            }
-#endif
-        errorStream = stderr;
-        }
-    return FALSE;
-    }
-/*#endif*/
 
 static void politelyWriteError(psk Pnode)
     {
@@ -4496,61 +4887,6 @@ void stringEval(const char* s, const char** out, int* err)
     return;
     }
 
-static psk copyof(psk pnode)
-    {
-    psk res;
-    res = iCopyOf(pnode);
-    res->v.fl &= ~IDENT;
-    return res;
-    }
-
-static psk _copyop(psk Pnode)
-    {
-    psk apnode;
-    apnode = new_operator_like(Pnode);
-    apnode->v.fl = Pnode->v.fl & COPYFILTER;/* (ALL_REFCOUNT_BITS_SET | CREATEDWITHNEW);*/
-    apnode->LEFT = same_as_w_2(&Pnode->LEFT);
-    apnode->RIGHT = same_as_w(Pnode->RIGHT);
-    return apnode;
-    }
-
-static psk copyop(psk Pnode)
-    {
-    dec_refcount(Pnode);
-    return _copyop(Pnode);
-    }
-
-static psk subtreecopy(psk src)
-    {
-    if(is_op(src))
-        return _copyop(src);
-    else
-        return iCopyOf(src);
-    }
-
-static int number_degree(psk pnode)
-    {
-    if(RATIONAL_COMP(pnode))
-        return 4;
-    switch(PLOBJ(pnode))
-        {
-        case IM: return 3;
-        case PI: return 2;
-        case XX: return 1;
-        default: return 0;
-        }
-    }
-
-static int is_constant(psk pnode)
-    {
-    while(is_op(pnode))
-        {
-        if(!is_constant(pnode->LEFT))
-            return FALSE;
-        pnode = pnode->RIGHT;
-        }
-    return number_degree(pnode);
-    }
 
 static void init_opcode(void)
     {
@@ -4582,29 +4918,6 @@ static void init_opcode(void)
             default: optab[tel] = (tel <= ' ') ? WHITE : NOOP;
             }
         }
-    }
-
-static psk isolated(psk Pnode)
-    {
-    if(shared(Pnode))
-        {
-        dec_refcount(Pnode);
-        return subtreecopy(Pnode);
-        }
-    return Pnode;
-    }
-
-static psk setflgs(psk pokn, ULONG Flgs)
-    {
-    if((Flgs & BEQUEST) || !(Flgs & SUCCESS))
-        {
-        pokn = isolated(pokn);
-        pokn->v.fl ^= ((Flgs & SUCCESS) ^ SUCCESS);
-        pokn->v.fl |= (Flgs & BEQUEST);
-        if(ANYNEGATION(Flgs))
-            pokn->v.fl |= NOT;
-        }
-    return pokn;
     }
 
 static psk starttree_w(psk Pnode, ...)
@@ -4680,18 +4993,6 @@ static psk dopb(psk Pnode, psk src)
     return okn;
     }
 
-static method_pnt findBuiltInMethodByName(typedObjectnode * object, const char* name)
-    {
-    method* methods = object->vtab;
-    if(methods)
-        {
-        for(; methods->name && strcmp(methods->name, name); ++methods)
-            ;
-        return methods->func;
-        }
-    return NULL;
-    }
-
 static void wipe(psk top)
     {
     while(!shared(top)) /* tail recursion optimisation; delete deep structures*/
@@ -4731,445 +5032,8 @@ static void wipe(psk top)
         }
     dec_refcount(top);
     }
-#define POWER2
-static int power2(int n)
-/* returns MSB of n */
-    {
-    int m;
-    for(m = 1
-        ; n
-        ; n >>= 1, m <<= 1
-        )
-        ;
-    return m >> 1;
-    }
-
-static ppsk Entry(int n, int index, varia * *pv)
-    {
-    if(n == 0)
-        {
-        return (ppsk)pv;  /* no varia records are needed for 1 entry */
-        }
-    else
-        {
-#if defined POWER2
-        varia* hv;
-        int MSB = power2(n);
-        for(hv = *pv /* begin with longest varia record */
-            ; MSB > 1 && index < MSB
-            ; MSB >>= 1
-            )
-            hv = hv->prev;
-        index -= MSB;   /* if index == 0, then index becomes -1 */
-#else
-        /* This code does not make Bracmat noticeably faster*/
-        int MSB;
-        varia* hv = *pv;
-        for(MSB = 1; MSB <= index; MSB <<= 1)
-            ;
-
-        if(MSB > 1)
-            index %= (MSB >> 1);
-        else
-            {
-            index = -1;
-            MSB <<= 1;
-            }
-
-        for(; MSB <= n; MSB <<= 1)
-            hv = hv->prev;
-#endif
-        return &hv->variableValue[index];  /* variableValue[-1] == (psk)*prev */
-        }
-    }
-
-static psk Entry2(int n, int index, varia * pv)
-    {
-    if(n == 0)
-        {
-        return (psk)pv;  /* no varia records needed for 1 entry */
-        }
-    else
-        {
-        varia* hv;
-#if defined POWER2
-        int MSB = power2(n);
-        for(hv = pv /* begin with longest varia record */
-            ; MSB > 1 && index < MSB
-            ; MSB >>= 1
-            )
-            hv = hv->prev;
-        index -= MSB;   /* if index == 0, then index becomes -1 */
-#else
-        /* This code does not make Bracmat noticeably faster*/
-        int MSB;
-        hv = pv;
-        for(MSB = 1; MSB <= index; MSB <<= 1)
-            ;
-
-        if(MSB > 1)
-            index %= (MSB >> 1);
-        else
-            {
-            index = -1;
-            MSB <<= 1;
-            }
-
-        for(; MSB <= n; MSB <<= 1)
-            hv = hv->prev;
-#endif
-        return hv->variableValue[index];  /* variableValue[-1] == (psk)*prev */
-        }
-    }
-
-#if INTSCMP
-static int intscmp(LONG * s1, LONG * s2) /* this routine produces different results
-                                  depending on BIGENDIAN */
-    {
-    while(*((char*)s1 + 3))
-        {
-        if(*s1 != *s2)
-            {
-            if(*s1 < *s2)
-                return -1;
-            else
-                return 1;
-            }
-        s1++;
-        s2++;
-        }
-    if(*s1 != *s2)
-        {
-        if(*s1 < *s2)
-            return -1;
-        else
-            return 1;
-        }
-    else
-        return 0;
-    }
-#endif
 
 
-static int searchname(psk name,
-                      vars * *pprevvar,
-                      vars * *pnxtvar)
-    {
-    unsigned char* strng;
-    vars* nxtvar, * prevvar;
-    strng = POBJ(name);
-    for(prevvar = NULL, nxtvar = variables[*strng]
-        ;  nxtvar && (STRCMP(VARNAME(nxtvar), strng) < 0)
-        ; prevvar = nxtvar, nxtvar = nxtvar->next
-        )
-        ;
-    /* prevvar < strng <= nxtvar */
-    *pprevvar = prevvar;
-    *pnxtvar = nxtvar;
-    return nxtvar && !STRCMP(VARNAME(nxtvar), strng);
-    }
-
-static Qnumber qTimesMinusOne(Qnumber _qx)
-    {
-    Qnumber res;
-    size_t len;
-    len = offsetof(sk, u.obj) + 1 + strlen((char*)POBJ(_qx));
-    res = (Qnumber)bmalloc(__LINE__, len);
-    memcpy(res, _qx, len);
-    res->v.fl ^= MINUS;
-    res->v.fl &= ~ALL_REFCOUNT_BITS_SET;
-    return res;
-    }
-
-/* Create a node from a number, allocating memory for the node.
-The numbers' memory isn't deallocated. */
-
-static char* iconvert2decimal(nnumber * res, char* g)
-    {
-    LONG* ipointer;
-    g[0] = '0';
-    g[1] = 0;
-    for(ipointer = res->inumber; ipointer < res->inumber + res->ilength; ++ipointer)
-        {
-        assert(*ipointer >= 0);
-        assert(*ipointer < RADIX);
-        if(*ipointer)
-            {
-            g += sprintf(g, LONGD, *ipointer);
-            for(; ++ipointer < res->inumber + res->ilength;)
-                {
-                assert(*ipointer >= 0);
-                assert(*ipointer < RADIX);
-                g += sprintf(g,/*"%0*ld"*/LONG0nD, (int)TEN_LOG_RADIX, *ipointer);
-                }
-            break;
-            }
-        }
-    return g;
-    }
-
-static ptrdiff_t numlength(nnumber * n)
-    {
-    ptrdiff_t len;
-    LONG H;
-    assert(n->ilength >= 1);
-    len = TEN_LOG_RADIX * n->ilength;
-    H = n->inumber[0];
-    if(H < 10)
-        len -= TEN_LOG_RADIX - 1;
-    else if(H < 100)
-        len -= TEN_LOG_RADIX - 2;
-    else if(H < 1000)
-        len -= TEN_LOG_RADIX - 3;
-#if !WORD32
-    else if(H < 10000)
-        len -= TEN_LOG_RADIX - 4;
-    else if(H < 100000)
-        len -= TEN_LOG_RADIX - 5;
-    else if(H < 1000000)
-        len -= TEN_LOG_RADIX - 6;
-    else if(H < 10000000)
-        len -= TEN_LOG_RADIX - 7;
-    else if(H < 100000000)
-        len -= TEN_LOG_RADIX - 8;
-#endif
-    return len;
-    }
-
-static psk inumberNode(nnumber * g)
-    {
-    psk res;
-    size_t len;
-    len = offsetof(sk, u.obj) + numlength(g);
-    res = (psk)bmalloc(__LINE__, len + 1);
-    if(g->sign & QNUL)
-        res->u.obj = '0';
-    else
-        {
-        iconvert2decimal(g, (char*)POBJ(res));
-        }
-
-    res->v.fl = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
-    res->v.fl |= g->sign;
-    return res;
-    }
-
-/* Create a node from a number, only allocating memory for the node if the
-number hasn't the right size (== too large). If new memory is allocated,
-the number's memory is deallocated. */
-static psk numberNode2(nnumber * g)
-    {
-    psk res;
-    size_t neededlen;
-    size_t availablelen = g->allocated;
-    neededlen = offsetof(sk, u.obj) + 1 + g->length;
-    if((neededlen - 1) / sizeof(LONG) == (availablelen - 1) / sizeof(LONG))
-        {
-        res = (psk)g->alloc;
-        if(g->sign & QNUL)
-            {
-            res->u.lobj = 0;
-            res->u.obj = '0';
-            }
-        else
-            {
-            char* end = (char*)POBJ(res) + g->length;
-            char* limit = (char*)g->alloc + (1 + (availablelen - 1) / sizeof(LONG)) * sizeof(LONG);
-            memmove((void*)POBJ(res), g->number, g->length);
-            while(end < limit)
-                *end++ = '\0';
-            }
-        }
-    else
-        {
-        res = (psk)bmalloc(__LINE__, neededlen);
-        if(g->sign & QNUL)
-            res->u.obj = '0';
-        else
-            {
-            memcpy((void*)POBJ(res), g->number, g->length);
-            /*(char *)POBJ(res) + g.length = '\0'; not necessary, is done in bmalloc */
-            }
-        bfree(g->alloc);
-        }
-    res->v.fl = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
-    res->v.fl |= g->sign;
-    return res;
-    }
-
-static Qnumber not_a_number(void)
-    {
-    Qnumber res;
-    res = copyof(&zeroNode);
-    res->v.fl ^= SUCCESS;
-    return res;
-    }
-
-static void convert2binary(nnumber * x)
-    {
-    LONG* ipointer;
-    char* charpointer;
-    ptrdiff_t n;
-
-    x->ilength = x->iallocated = ((x->sign & QNUL ? 1 : x->length) + TEN_LOG_RADIX - 1) / TEN_LOG_RADIX;
-    x->inumber = x->ialloc = (LONG*)bmalloc(__LINE__, sizeof(LONG) * x->iallocated);
-
-    for(ipointer = x->inumber
-        , charpointer = x->number
-        , n = x->length
-        ; ipointer < x->inumber + x->ilength
-        ; ++ipointer
-        )
-        {
-        *ipointer = 0;
-        do
-            {
-            *ipointer = 10 * (*ipointer) + *charpointer++ - '0';
-            } while(--n % TEN_LOG_RADIX != 0);
-        }
-    assert((LONG)TEN_LOG_RADIX * x->ilength >= charpointer - x->number);
-    }
-
-static char* isplit(Qnumber _qget, nnumber * ptel, nnumber * pnoem)
-    {
-    ptel->sign = _qget->v.fl & (MINUS | QNUL);
-    pnoem->sign = 0;
-    pnoem->alloc = ptel->alloc = NULL;
-    ptel->number = (char*)POBJ(_qget);
-    if(_qget->v.fl & QFRACTION)
-        {
-        char* on = strchr(ptel->number, '/');
-        assert(on);
-        ptel->length = on - ptel->number;
-        pnoem->number = on + 1;
-        pnoem->length = strlen(on + 1);
-        convert2binary(ptel);
-        convert2binary(pnoem);
-        return on;
-        }
-    else
-        {
-        assert(!(_qget->v.fl & QFRACTION));
-        ptel->length = strlen(ptel->number);
-        pnoem->number = "1";
-        pnoem->length = 1;
-        convert2binary(ptel);
-        convert2binary(pnoem);
-        return NULL;
-        }
-    }
-
-static char* split(Qnumber _qget, nnumber * ptel, nnumber * pnoem)
-    {
-    ptel->sign = _qget->v.fl & (MINUS | QNUL);
-    pnoem->sign = 0;
-    pnoem->alloc = ptel->alloc = NULL;
-    ptel->number = (char*)POBJ(_qget);
-
-    if(_qget->v.fl & QFRACTION)
-        {
-        char* on = strchr(ptel->number, '/');
-        assert(on);
-        ptel->length = on - ptel->number;
-        pnoem->number = on + 1;
-        pnoem->length = strlen(on + 1);
-        return on;
-        }
-    else
-        {
-        assert(!(_qget->v.fl & QFRACTION));
-        ptel->length = strlen(ptel->number);
-        pnoem->number = "1";
-        pnoem->length = 1;
-        return NULL;
-        }
-    }
-
-
-static int addSubtractFinal(char* i1, char* i2, char tmp, char** pres, char* bx)
-    {
-    for(; i2 >= bx;)
-        {
-        tmp += (*i2);
-        if(tmp > '9')
-            {
-            *i1-- = tmp - 10;
-            tmp = 1;
-            }
-        else if(tmp < '0')
-            {
-            *i1-- = tmp + 10;
-            tmp = -1;
-            }
-        else
-            {
-            *i1-- = tmp;
-            tmp = 0;
-            }
-        i2--;
-        }
-    *pres = i1 + 1;
-    return tmp;
-    }
-
-
-static int increase(char** pres, char* bx, char* ex, char* by, char* ey)
-    {
-    char* i1 = *pres, * i2 = ex, * ypointer = ey;
-    char tmp = 0;
-    do
-        {
-        tmp += (*i2 + *ypointer - '0');
-        if(tmp > '9')
-            {
-            *i1-- = tmp - 10;
-            tmp = 1;
-            }
-        else
-            {
-            *i1-- = tmp;
-            tmp = 0;
-            }
-        --i2;
-        --ypointer;
-        } while(ypointer >= by);
-        return addSubtractFinal(i1, i2, tmp, pres, bx);
-    }
-
-static int decrease(char** pres, char* bx, char* ex, char* by, char* ey)
-    {
-    char* i1 = *pres, * i2 = ex, * ypointer = ey;
-    char tmp = 0;
-    do
-        {
-        tmp += (*i2 - *ypointer + '0');
-        if(tmp < '0')
-            {
-            *i1-- = tmp + 10;
-            tmp = -1;
-            }
-        else
-            {
-            *i1-- = tmp;
-            tmp = 0;
-            }
-        --i2;
-        --ypointer;
-        } while(ypointer >= by);
-        return addSubtractFinal(i1, i2, tmp, pres, bx);
-    }
-
-
-
-static void skipnullen(nnumber * nget, int Sign)
-    {
-    for(
-        ; nget->length > 0 && *(nget->number) == '0'
-        ; nget->number++, nget->length--
-        )
-        ;
-    nget->sign = nget->length ? (Sign & MINUS) : QNUL;
-    }
 /*
 multiply number with 204586 digits with itself
 New algorithm:   17,13 s
@@ -5196,24 +5060,6 @@ static void pbint(LONG * high, LONG * low)
         }
     }
 
-static void fpbint(FILE * fp, LONG * high, LONG * low)
-    {
-    for(; high <= low; ++high)
-        {
-        if(*high)
-            {
-            fprintf(fp, LONGD " ", *high);
-            break;
-            }
-        else
-            fprintf(fp, "NUL ");
-        }
-    for(; ++high <= low;)
-        {
-        fprintf(fp, LONG0nD " ", (int)TEN_LOG_RADIX, *high);
-        }
-    }
-
 static void validt(LONG * high, LONG * low)
     {
     for(; high <= low; ++high)
@@ -5229,88 +5075,32 @@ static void valid(nnumber * res)
     }
 #endif
 
-static void nTimes(nnumber * x, nnumber * y, nnumber * product)
+static ptrdiff_t numlength(nnumber* n)
     {
-    LONG* I1, * I2;
-    LONG* ipointer, * itussen;
-
-    assert(product->length == 0);
-    assert(product->ilength == 0);
-    assert(product->alloc == 0);
-    assert(product->ialloc == 0);
-    product->ilength = product->iallocated = x->ilength + y->ilength;
-    assert(product->iallocated > 0);
-    product->inumber = product->ialloc = (LONG*)bmalloc(__LINE__, sizeof(LONG) * product->iallocated);
-
-    for(ipointer = product->inumber; ipointer < product->inumber + product->ilength; *ipointer++ = 0)
-        ;
-
-    for(I1 = x->inumber + x->ilength - 1; I1 >= x->inumber; I1--)
-        {
-        itussen = --ipointer; /* pointer to result, starting from LSW. */
-        assert(itussen >= product->inumber);
-        for(I2 = y->inumber + y->ilength - 1; I2 >= y->inumber; I2--)
-            {
-            LONG prod;
-            LONG* itussen2;
-            prod = (*I1) * (*I2);
-            *itussen += prod;
-            itussen2 = itussen--;
-            while(*itussen2 >= HEADROOM * RADIX2)
-                {
-                LONG karry;
-                karry = *itussen2 / RADIX;
-                *itussen2 %= RADIX;
-                --itussen2;
-                assert(itussen2 >= product->inumber);
-                *itussen2 += karry;
-                }
-            assert(itussen2 >= product->inumber);
-            }
-        if(*ipointer >= RADIX)
-            {
-            LONG karry = *ipointer / RADIX;
-            *ipointer %= RADIX;
-            itussen = ipointer - 1;
-            assert(itussen >= product->inumber);
-            *itussen += karry;
-            while(*itussen >= HEADROOM * RADIX2/* 2000000000 */)
-                {
-                karry = *itussen / RADIX;
-                *itussen %= RADIX;
-                --itussen;
-                assert(itussen >= product->inumber);
-                *itussen += karry;
-                }
-            assert(itussen >= product->inumber);
-            }
-        }
-    while(ipointer >= product->inumber)
-        {
-        if(*ipointer >= RADIX)
-            {
-            LONG karry = *ipointer / RADIX;
-            *ipointer %= RADIX;
-            --ipointer;
-            assert(ipointer >= product->inumber);
-            *ipointer += karry;
-            }
-        else
-            --ipointer;
-        }
-
-    for(ipointer = product->inumber; product->ilength > 1 && *ipointer == 0; ++ipointer)
-        {
-        --(product->ilength);
-        ++(product->inumber);
-        }
-
-    assert(product->ilength >= 1);
-    assert(product->inumber >= (LONG*)product->ialloc);
-    assert(product->inumber < (LONG*)product->ialloc + product->iallocated);
-    assert(product->inumber + product->ilength <= (LONG*)product->ialloc + product->iallocated);
-
-    product->sign = product->inumber[0] ? ((x->sign ^ y->sign) & MINUS) : QNUL;
+    ptrdiff_t len;
+    LONG H;
+    assert(n->ilength >= 1);
+    len = TEN_LOG_RADIX * n->ilength;
+    H = n->inumber[0];
+    if(H < 10)
+        len -= TEN_LOG_RADIX - 1;
+    else if(H < 100)
+        len -= TEN_LOG_RADIX - 2;
+    else if(H < 1000)
+        len -= TEN_LOG_RADIX - 3;
+#if !WORD32
+    else if(H < 10000)
+        len -= TEN_LOG_RADIX - 4;
+    else if(H < 100000)
+        len -= TEN_LOG_RADIX - 5;
+    else if(H < 1000000)
+        len -= TEN_LOG_RADIX - 6;
+    else if(H < 10000000)
+        len -= TEN_LOG_RADIX - 7;
+    else if(H < 100000000)
+        len -= TEN_LOG_RADIX - 8;
+#endif
+    return len;
     }
 
 static LONG iAddSubtractFinal(LONG * highRemainder, LONG * lowRemainder, LONG carry)
@@ -5648,6 +5438,50 @@ static LONG nnDivide(nnumber * dividend, nnumber * divisor, nnumber * quotient, 
     return TRUE;
     }
 
+/* Create a node from a number, allocating memory for the node.
+The numbers' memory isn't deallocated. */
+
+static char* iconvert2decimal(nnumber* res, char* g)
+    {
+    LONG* ipointer;
+    g[0] = '0';
+    g[1] = 0;
+    for(ipointer = res->inumber; ipointer < res->inumber + res->ilength; ++ipointer)
+        {
+        assert(*ipointer >= 0);
+        assert(*ipointer < RADIX);
+        if(*ipointer)
+            {
+            g += sprintf(g, LONGD, *ipointer);
+            for(; ++ipointer < res->inumber + res->ilength;)
+                {
+                assert(*ipointer >= 0);
+                assert(*ipointer < RADIX);
+                g += sprintf(g,/*"%0*ld"*/LONG0nD, (int)TEN_LOG_RADIX, *ipointer);
+                }
+            break;
+            }
+        }
+    return g;
+    }
+
+static psk inumberNode(nnumber* g)
+    {
+    psk res;
+    size_t len;
+    len = offsetof(sk, u.obj) + numlength(g);
+    res = (psk)bmalloc(__LINE__, len + 1);
+    if(g->sign & QNUL)
+        res->u.obj = '0';
+    else
+        {
+        iconvert2decimal(g, (char*)POBJ(res));
+        }
+
+    res->v.fl = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
+    res->v.fl |= g->sign;
+    return res;
+    }
 
 static Qnumber nn2q(nnumber * num, nnumber * den)
     {
@@ -5677,6 +5511,14 @@ static Qnumber nn2q(nnumber * num, nnumber * den)
         res->v.fl = READY | SUCCESS | QNUMBER | QFRACTION BITWISE_OR_SELFMATCHING;
         res->v.fl |= num->sign;
         }
+    return res;
+    }
+
+static Qnumber not_a_number(void)
+    {
+    Qnumber res;
+    res = copyof(&zeroNode);
+    res->v.fl ^= SUCCESS;
     return res;
     }
 
@@ -5756,134 +5598,157 @@ static Qnumber qnDivide(nnumber * x, nnumber * y)
         return res;
     }
 
-
-static nnumber nPlus(nnumber * x, nnumber * y)
+static void nTimes(nnumber* x, nnumber* y, nnumber* product)
     {
-    nnumber res = { 0 };
-    char* hres;
-    ptrdiff_t xGreaterThany;
-    res.length = 1 + (x->length > y->length ? x->length : y->length);
-    res.allocated = (size_t)res.length + offsetof(sk, u.obj);
-    res.alloc = res.number = (char*)bmalloc(__LINE__, res.allocated);
-    *res.number = '0';
-    hres = res.number + (size_t)res.length - 1;
-    if(x->length == y->length)
-        xGreaterThany = strncmp(x->number, y->number, (size_t)res.length);
-    else
-        xGreaterThany = x->length - y->length;
-    if(xGreaterThany < 0)
-        {
-        nnumber* hget = x;
-        x = y;
-        y = hget;
-        }
-    if(x->sign == y->sign)
-        {
-        if(increase(&hres, x->number, x->number + x->length - 1, y->number, y->number + y->length - 1))
-            *--hres = '1';
-        }
-    else
-        decrease(&hres, x->number, x->number + x->length - 1, y->number, y->number + y->length - 1);
-    skipnullen(&res, x->sign);
-    return res;
-    }
+    LONG* I1, * I2;
+    LONG* ipointer, * itussen;
 
-static void nnSPlus(nnumber * x, nnumber * y, nnumber * som)
-    {
-    LONG* hres, * px, * py, * ex;
-    ptrdiff_t xGreaterThany;
+    assert(product->length == 0);
+    assert(product->ilength == 0);
+    assert(product->alloc == 0);
+    assert(product->ialloc == 0);
+    product->ilength = product->iallocated = x->ilength + y->ilength;
+    assert(product->iallocated > 0);
+    product->inumber = product->ialloc = (LONG*)bmalloc(__LINE__, sizeof(LONG) * product->iallocated);
 
-    som->ilength = 1 + (x->ilength > y->ilength ? x->ilength : y->ilength);
-    som->iallocated = som->ilength;
-    som->ialloc = som->inumber = (LONG*)bmalloc(__LINE__, sizeof(LONG) * som->iallocated);
-    *som->inumber = 0;
-    hres = som->inumber + som->ilength;
+    for(ipointer = product->inumber; ipointer < product->inumber + product->ilength; *ipointer++ = 0)
+        ;
 
-    if(x->ilength == y->ilength)
+    for(I1 = x->inumber + x->ilength - 1; I1 >= x->inumber; I1--)
         {
-        px = x->inumber;
-        ex = px + x->ilength;
-        py = y->inumber;
-        do
+        itussen = --ipointer; /* pointer to result, starting from LSW. */
+        assert(itussen >= product->inumber);
+        for(I2 = y->inumber + y->ilength - 1; I2 >= y->inumber; I2--)
             {
-            xGreaterThany = *px++ - *py++;
-            } while(!xGreaterThany && px < ex);
+            LONG prod;
+            LONG* itussen2;
+            prod = (*I1) * (*I2);
+            *itussen += prod;
+            itussen2 = itussen--;
+            while(*itussen2 >= HEADROOM * RADIX2)
+                {
+                LONG karry;
+                karry = *itussen2 / RADIX;
+                *itussen2 %= RADIX;
+                --itussen2;
+                assert(itussen2 >= product->inumber);
+                *itussen2 += karry;
+                }
+            assert(itussen2 >= product->inumber);
+            }
+        if(*ipointer >= RADIX)
+            {
+            LONG karry = *ipointer / RADIX;
+            *ipointer %= RADIX;
+            itussen = ipointer - 1;
+            assert(itussen >= product->inumber);
+            *itussen += karry;
+            while(*itussen >= HEADROOM * RADIX2/* 2000000000 */)
+                {
+                karry = *itussen / RADIX;
+                *itussen %= RADIX;
+                --itussen;
+                assert(itussen >= product->inumber);
+                *itussen += karry;
+                }
+            assert(itussen >= product->inumber);
+            }
         }
-    else
-        xGreaterThany = x->ilength - y->ilength;
-    if(xGreaterThany < 0)
+    while(ipointer >= product->inumber)
         {
-        nnumber* hget = x;
-        x = y;
-        y = hget;
+        if(*ipointer >= RADIX)
+            {
+            LONG karry = *ipointer / RADIX;
+            *ipointer %= RADIX;
+            --ipointer;
+            assert(ipointer >= product->inumber);
+            *ipointer += karry;
+            }
+        else
+            --ipointer;
         }
 
-    for(px = x->inumber + x->ilength; px > x->inumber;)
-        *--hres = *--px;
-    if(x->sign == y->sign)
+    for(ipointer = product->inumber; product->ilength > 1 && *ipointer == 0; ++ipointer)
         {
-#ifndef NDEBUG
-        LONG carry =
-#endif
-            iAdd(som->inumber, som->inumber + som->ilength - 1, y->inumber, y->inumber + y->ilength - 1);
-        assert(carry == 0);
-        }
-    else
-        {
-        iSubtract(som->inumber, som->inumber + som->ilength - 1, y->inumber, y->inumber + y->ilength - 1, 1);
-        }
-    for(hres = som->inumber; som->ilength > 1 && *hres == 0; ++hres)
-        {
-        --(som->ilength);
-        ++(som->inumber);
+        --(product->ilength);
+        ++(product->inumber);
         }
 
-    som->sign = som->inumber[0] ? (x->sign & MINUS) : QNUL;
+    assert(product->ilength >= 1);
+    assert(product->inumber >= (LONG*)product->ialloc);
+    assert(product->inumber < (LONG*)product->ialloc + product->iallocated);
+    assert(product->inumber + product->ilength <= (LONG*)product->ialloc + product->iallocated);
+
+    product->sign = product->inumber[0] ? ((x->sign ^ y->sign) & MINUS) : QNUL;
     }
 
-static Qnumber qPlus(Qnumber _qx, Qnumber _qy, int minus)
+static char* split(Qnumber _qget, nnumber* ptel, nnumber* pnoem)
     {
-    nnumber xt = { 0 }, xn = { 0 }, yt = { 0 }, yn = { 0 };
+    ptel->sign = _qget->v.fl & (MINUS | QNUL);
+    pnoem->sign = 0;
+    pnoem->alloc = ptel->alloc = NULL;
+    ptel->number = (char*)POBJ(_qget);
 
-    char* xb, * yb;
-    xb = split(_qx, &xt, &xn);
-    yb = split(_qy, &yt, &yn);
-    yt.sign ^= minus;
-
-    if(!xb && !yb)
+    if(_qget->v.fl & QFRACTION)
         {
-        nnumber g = nPlus(&xt, &yt);
-        psk res = numberNode2(&g);
-        return res;
+        char* on = strchr(ptel->number, '/');
+        assert(on);
+        ptel->length = on - ptel->number;
+        pnoem->number = on + 1;
+        pnoem->length = strlen(on + 1);
+        return on;
         }
     else
         {
-        nnumber pa = { 0 }, pb = { 0 }, som = { 0 };
-        Qnumber res;
-        convert2binary(&xt);
-        convert2binary(&xn);
-        convert2binary(&yt);
-        convert2binary(&yn);
-        nTimes(&xt, &yn, &pa);
-        nTimes(&yt, &xn, &pb);
-        nnSPlus(&pa, &pb, &som);
-        bfree(pa.ialloc);
-        bfree(pb.ialloc);
-        pa.ilength = 0;
-        pa.ialloc = 0;
-        pa.length = 0;
-        pa.alloc = 0;
-        nTimes(&xn, &yn, &pa);
-        res = qnDivide(&som, &pa);
-        if(som.ialloc)
-            bfree(som.ialloc);
-        bfree(pa.ialloc);
-        bfree(xt.ialloc);
-        bfree(xn.ialloc);
-        bfree(yt.ialloc);
-        bfree(yn.ialloc);
-        return res;
+        assert(!(_qget->v.fl & QFRACTION));
+        ptel->length = strlen(ptel->number);
+        pnoem->number = "1";
+        pnoem->length = 1;
+        return NULL;
         }
+    }
+
+/* Create a node from a number, only allocating memory for the node if the
+number hasn't the right size (== too large). If new memory is allocated,
+the number's memory is deallocated. */
+static psk numberNode2(nnumber* g)
+    {
+    psk res;
+    size_t neededlen;
+    size_t availablelen = g->allocated;
+    neededlen = offsetof(sk, u.obj) + 1 + g->length;
+    if((neededlen - 1) / sizeof(LONG) == (availablelen - 1) / sizeof(LONG))
+        {
+        res = (psk)g->alloc;
+        if(g->sign & QNUL)
+            {
+            res->u.lobj = 0;
+            res->u.obj = '0';
+            }
+        else
+            {
+            char* end = (char*)POBJ(res) + g->length;
+            char* limit = (char*)g->alloc + (1 + (availablelen - 1) / sizeof(LONG)) * sizeof(LONG);
+            memmove((void*)POBJ(res), g->number, g->length);
+            while(end < limit)
+                *end++ = '\0';
+            }
+        }
+    else
+        {
+        res = (psk)bmalloc(__LINE__, neededlen);
+        if(g->sign & QNUL)
+            res->u.obj = '0';
+        else
+            {
+            memcpy((void*)POBJ(res), g->number, g->length);
+            /*(char *)POBJ(res) + g.length = '\0'; not necessary, is done in bmalloc */
+            }
+        bfree(g->alloc);
+        }
+    res->v.fl = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
+    res->v.fl |= g->sign;
+    return res;
     }
 
 #if 1
@@ -6066,6 +5931,60 @@ static Qnumber qDivideMultiply(nnumber * x1, nnumber * x2, nnumber * y1, nnumber
     }
 #endif
 
+static void convert2binary(nnumber* x)
+    {
+    LONG* ipointer;
+    char* charpointer;
+    ptrdiff_t n;
+
+    x->ilength = x->iallocated = ((x->sign & QNUL ? 1 : x->length) + TEN_LOG_RADIX - 1) / TEN_LOG_RADIX;
+    x->inumber = x->ialloc = (LONG*)bmalloc(__LINE__, sizeof(LONG) * x->iallocated);
+
+    for(ipointer = x->inumber
+        , charpointer = x->number
+        , n = x->length
+        ; ipointer < x->inumber + x->ilength
+        ; ++ipointer
+        )
+        {
+        *ipointer = 0;
+        do
+            {
+            *ipointer = 10 * (*ipointer) + *charpointer++ - '0';
+            } while(--n % TEN_LOG_RADIX != 0);
+        }
+    assert((LONG)TEN_LOG_RADIX * x->ilength >= charpointer - x->number);
+    }
+
+static char* isplit(Qnumber _qget, nnumber* ptel, nnumber* pnoem)
+    {
+    ptel->sign = _qget->v.fl & (MINUS | QNUL);
+    pnoem->sign = 0;
+    pnoem->alloc = ptel->alloc = NULL;
+    ptel->number = (char*)POBJ(_qget);
+    if(_qget->v.fl & QFRACTION)
+        {
+        char* on = strchr(ptel->number, '/');
+        assert(on);
+        ptel->length = on - ptel->number;
+        pnoem->number = on + 1;
+        pnoem->length = strlen(on + 1);
+        convert2binary(ptel);
+        convert2binary(pnoem);
+        return on;
+        }
+    else
+        {
+        assert(!(_qget->v.fl & QFRACTION));
+        ptel->length = strlen(ptel->number);
+        pnoem->number = "1";
+        pnoem->length = 1;
+        convert2binary(ptel);
+        convert2binary(pnoem);
+        return NULL;
+        }
+    }
+
 static Qnumber qTimes(Qnumber _qx, Qnumber _qy)
     {
     Qnumber res;
@@ -6125,6 +6044,218 @@ static Qnumber qqDivide(Qnumber _qx, Qnumber _qy)
         }
     }
 
+static void skipnullen(nnumber* nget, int Sign)
+    {
+    for(
+        ; nget->length > 0 && *(nget->number) == '0'
+        ; nget->number++, nget->length--
+        )
+        ;
+    nget->sign = nget->length ? (Sign & MINUS) : QNUL;
+    }
+
+
+static int addSubtractFinal(char* i1, char* i2, char tmp, char** pres, char* bx)
+    {
+    for(; i2 >= bx;)
+        {
+        tmp += (*i2);
+        if(tmp > '9')
+            {
+            *i1-- = tmp - 10;
+            tmp = 1;
+            }
+        else if(tmp < '0')
+            {
+            *i1-- = tmp + 10;
+            tmp = -1;
+            }
+        else
+            {
+            *i1-- = tmp;
+            tmp = 0;
+            }
+        i2--;
+        }
+    *pres = i1 + 1;
+    return tmp;
+    }
+
+static int increase(char** pres, char* bx, char* ex, char* by, char* ey)
+    {
+    char* i1 = *pres, * i2 = ex, * ypointer = ey;
+    char tmp = 0;
+    do
+        {
+        tmp += (*i2 + *ypointer - '0');
+        if(tmp > '9')
+            {
+            *i1-- = tmp - 10;
+            tmp = 1;
+            }
+        else
+            {
+            *i1-- = tmp;
+            tmp = 0;
+            }
+        --i2;
+        --ypointer;
+        } while(ypointer >= by);
+        return addSubtractFinal(i1, i2, tmp, pres, bx);
+    }
+
+static int decrease(char** pres, char* bx, char* ex, char* by, char* ey)
+    {
+    char* i1 = *pres, * i2 = ex, * ypointer = ey;
+    char tmp = 0;
+    do
+        {
+        tmp += (*i2 - *ypointer + '0');
+        if(tmp < '0')
+            {
+            *i1-- = tmp + 10;
+            tmp = -1;
+            }
+        else
+            {
+            *i1-- = tmp;
+            tmp = 0;
+            }
+        --i2;
+        --ypointer;
+        } while(ypointer >= by);
+        return addSubtractFinal(i1, i2, tmp, pres, bx);
+    }
+
+
+static nnumber nPlus(nnumber* x, nnumber* y)
+    {
+    nnumber res = { 0 };
+    char* hres;
+    ptrdiff_t xGreaterThany;
+    res.length = 1 + (x->length > y->length ? x->length : y->length);
+    res.allocated = (size_t)res.length + offsetof(sk, u.obj);
+    res.alloc = res.number = (char*)bmalloc(__LINE__, res.allocated);
+    *res.number = '0';
+    hres = res.number + (size_t)res.length - 1;
+    if(x->length == y->length)
+        xGreaterThany = strncmp(x->number, y->number, (size_t)res.length);
+    else
+        xGreaterThany = x->length - y->length;
+    if(xGreaterThany < 0)
+        {
+        nnumber* hget = x;
+        x = y;
+        y = hget;
+        }
+    if(x->sign == y->sign)
+        {
+        if(increase(&hres, x->number, x->number + x->length - 1, y->number, y->number + y->length - 1))
+            *--hres = '1';
+        }
+    else
+        decrease(&hres, x->number, x->number + x->length - 1, y->number, y->number + y->length - 1);
+    skipnullen(&res, x->sign);
+    return res;
+    }
+
+static void nnSPlus(nnumber* x, nnumber* y, nnumber* som)
+    {
+    LONG* hres, * px, * py, * ex;
+    ptrdiff_t xGreaterThany;
+
+    som->ilength = 1 + (x->ilength > y->ilength ? x->ilength : y->ilength);
+    som->iallocated = som->ilength;
+    som->ialloc = som->inumber = (LONG*)bmalloc(__LINE__, sizeof(LONG) * som->iallocated);
+    *som->inumber = 0;
+    hres = som->inumber + som->ilength;
+
+    if(x->ilength == y->ilength)
+        {
+        px = x->inumber;
+        ex = px + x->ilength;
+        py = y->inumber;
+        do
+            {
+            xGreaterThany = *px++ - *py++;
+            } while(!xGreaterThany && px < ex);
+        }
+    else
+        xGreaterThany = x->ilength - y->ilength;
+    if(xGreaterThany < 0)
+        {
+        nnumber* hget = x;
+        x = y;
+        y = hget;
+        }
+
+    for(px = x->inumber + x->ilength; px > x->inumber;)
+        *--hres = *--px;
+    if(x->sign == y->sign)
+        {
+#ifndef NDEBUG
+        LONG carry =
+#endif
+            iAdd(som->inumber, som->inumber + som->ilength - 1, y->inumber, y->inumber + y->ilength - 1);
+        assert(carry == 0);
+        }
+    else
+        {
+        iSubtract(som->inumber, som->inumber + som->ilength - 1, y->inumber, y->inumber + y->ilength - 1, 1);
+        }
+    for(hres = som->inumber; som->ilength > 1 && *hres == 0; ++hres)
+        {
+        --(som->ilength);
+        ++(som->inumber);
+        }
+
+    som->sign = som->inumber[0] ? (x->sign & MINUS) : QNUL;
+    }
+
+static Qnumber qPlus(Qnumber _qx, Qnumber _qy, int minus)
+    {
+    nnumber xt = { 0 }, xn = { 0 }, yt = { 0 }, yn = { 0 };
+
+    char* xb, * yb;
+    xb = split(_qx, &xt, &xn);
+    yb = split(_qy, &yt, &yn);
+    yt.sign ^= minus;
+
+    if(!xb && !yb)
+        {
+        nnumber g = nPlus(&xt, &yt);
+        psk res = numberNode2(&g);
+        return res;
+        }
+    else
+        {
+        nnumber pa = { 0 }, pb = { 0 }, som = { 0 };
+        Qnumber res;
+        convert2binary(&xt);
+        convert2binary(&xn);
+        convert2binary(&yt);
+        convert2binary(&yn);
+        nTimes(&xt, &yn, &pa);
+        nTimes(&yt, &xn, &pb);
+        nnSPlus(&pa, &pb, &som);
+        bfree(pa.ialloc);
+        bfree(pb.ialloc);
+        pa.ilength = 0;
+        pa.ialloc = 0;
+        pa.length = 0;
+        pa.alloc = 0;
+        nTimes(&xn, &yn, &pa);
+        res = qnDivide(&som, &pa);
+        if(som.ialloc)
+            bfree(som.ialloc);
+        bfree(pa.ialloc);
+        bfree(xt.ialloc);
+        bfree(xn.ialloc);
+        bfree(yt.ialloc);
+        bfree(yn.ialloc);
+        return res;
+        }
+    }
 
 static Qnumber qIntegerDivision(Qnumber _qx, Qnumber _qy)
     {
@@ -6198,6 +6329,85 @@ static int qCompare(Qnumber _qx, Qnumber _qy)
     return res;
     }
 
+static Qnumber qTimesMinusOne(Qnumber _qx)
+    {
+    Qnumber res;
+    size_t len;
+    len = offsetof(sk, u.obj) + 1 + strlen((char*)POBJ(_qx));
+    res = (Qnumber)bmalloc(__LINE__, len);
+    memcpy(res, _qx, len);
+    res->v.fl ^= MINUS;
+    res->v.fl &= ~ALL_REFCOUNT_BITS_SET;
+    return res;
+    }
+
+static int subroot(nnumber* ag, char* conc[], int* pind)
+    {
+    int macht, i;
+    ULONG g, smalldivisor;
+    ULONG ores;
+    static int bijt[12] =
+        { 1,  2,  2,  4,    2,    4,    2,    4,    6,    2,  6 };
+    /* 2-3,3-5,5-7,7-11,11-13,13-17,17-19,19-23,23-29,29-1,1-7*/
+    ULONG bigdivisor;
+
+#ifdef ERANGE   /* ANSI C : strtoul() out of range */
+    errno = 0;
+    g = STRTOUL(ag->number, NULL, 10);
+    if(errno == ERANGE)
+        return FALSE; /*{?} 45237183544316235476^1/2 => 45237183544316235476^1/2 */
+#else  /* TURBOC, vcc */
+    if(ag.length > 10 || ag.length == 10 && strcmp(ag.number, "4294967295") > 0)
+        return FALSE;
+    g = STRTOUL(ag.number, NULL, 10);
+#endif
+    ores = 1;
+    macht = 1;
+    smalldivisor = 2;
+    i = 0;
+    while((bigdivisor = g / smalldivisor) >= smalldivisor)
+        {
+        if(bigdivisor * smalldivisor == g)
+            {
+            g = bigdivisor;
+            if(smalldivisor != ores)
+                {
+                if(ores != 1)
+                    {
+                    if(ores < 1000)
+                        {
+                        conc[(*pind)] = (char*)bmalloc(__LINE__, 12);/*{?} 327365274^1/2 => 2^1/2*3^1/2*2477^1/2*22027^1/2 */
+                        }
+                    else
+                        {
+                        conc[*pind] = (char*)bmalloc(__LINE__, 20);
+                        }
+                    sprintf(conc[(*pind)++], LONGU "^(%d*\1)*", ores, macht);
+                    }
+                macht = 1;
+                ores = smalldivisor;
+                }
+            else
+                {
+                macht++; /*{?} 80956863^1/2 => 3*13^1/2*541^1/2*1279^1/2 */
+                }
+            }
+        else
+            {
+            smalldivisor += bijt[i];
+            if(++i > 10)
+                i = 3;
+            }
+        }
+    if(ores == 1 && macht == 1)
+        return FALSE;
+    conc[*pind] = (char*)bmalloc(__LINE__, 32);
+    if((ores == g && ++macht) || ores == 1)
+        sprintf(conc[(*pind)++], LONGU "^(%d*\1)", g, macht); /*{?} 32^1/2 => 2^5/2 */
+    else
+        sprintf(conc[(*pind)++], LONGU "^(%d*\1)*" LONGU "^\1", ores, macht, g);
+    return TRUE;
+    }
 
 static int equal(psk kn1, psk kn2)
     {
@@ -6351,575 +6561,6 @@ static int cmp(psk kn1, psk kn2)
     return 0;
     }
 
-/*
-name must be atom or <atom>.<atom>.<atom>...
-*/
-static int setmember(psk name, psk tree, psk newValue)
-    {
-    while(is_op(tree))
-        {
-        if(Op(tree) == EQUALS)
-            {
-            psk nname;
-            if(Op(name) == DOT)
-                nname = name->LEFT;
-            else
-                nname = name;
-            if(equal(tree->LEFT, nname))
-                {
-                return FALSE;
-                }
-            else if(nname == name)
-                {
-                wipe(tree->RIGHT);
-                tree->RIGHT = same_as_w(newValue);
-                return TRUE;
-                }
-            else /* Found partial match for member name,
-                    recurse in both name and member */
-                {
-                name = name->RIGHT;
-                }
-            }
-        else if(setmember(name, tree->LEFT, newValue))
-            {
-            return TRUE;
-            }
-        tree = tree->RIGHT;
-        }
-    return FALSE;
-    }
-
-static int update(psk name, psk pnode) /* name = tree with DOT in root */
-/*
-    x:?(k.b)
-    x:?((=(a=) (b=)).b)
-*/
-    {
-    vars* nxtvar;
-    vars* prevvar;
-    if(is_op(name->LEFT))
-        {
-        if(Op(name->LEFT) == EQUALS)
-            /*{?} x:?((=(a=) (b=)).b) => x */
-            /*          ^              */
-            return setmember(name->RIGHT, name->LEFT->RIGHT, pnode);
-        else
-            {
-            /*{?} b:?((x.y).z) => x */
-            return FALSE;
-            }
-        }
-    if(Op(name) == EQUALS) /* {?} (=a+b)=5 ==> =5 */
-        {
-        wipe(name->RIGHT);
-        name->RIGHT = same_as_w(pnode);
-        return TRUE;
-        }
-    else if(searchname(name->LEFT,
-                       &prevvar,
-                       &nxtvar))
-        {
-        assert(nxtvar->pvaria);
-        return setmember(name->RIGHT, Entry2(nxtvar->n, nxtvar->selector, nxtvar->pvaria), pnode);
-        }
-    else
-        {
-        return FALSE; /*{?} 66:?(someUnidentifiableObject.x) */
-        }
-    }
-
-
-static int insert(psk name, psk pnode)
-    {
-    vars* nxtvar, * prevvar, * newvar;
-
-    if(is_op(name))
-        {
-        if(Op(name) == EQUALS)
-            {
-            wipe(name->RIGHT);
-            name->RIGHT = same_as_w(pnode);  /*{?} monk2:?(=monk1) => monk2 */
-            return TRUE;
-            }
-        else
-            { /* This allows, in fact, other operators than DOT, e.g. b:?(x y) */
-            return update(name, pnode); /*{?} (borfo=klot=)&bk:?(borfo klot)&!(borfo.klot):bk => bk */
-            }
-        }
-    if(searchname(name,
-                  &prevvar,
-                  &nxtvar))
-        {
-        ppsk PPnode;
-        wipe(*(PPnode = Entry(nxtvar->n, nxtvar->selector, &nxtvar->pvaria)));
-        *PPnode = same_as_w(pnode);
-        }
-    else
-        {
-        size_t len;
-        unsigned char* strng;
-        strng = POBJ(name);
-        len = strlen((char*)strng);
-#if PVNAME
-        newvar = (vars*)bmalloc(__LINE__, sizeof(vars));
-        if(*strng)
-            {
-#if ICPY
-            MEMCPY(newvar->vname = (unsigned char*)
-                   bmalloc(__LINE__, len + 1), strng, (len >> LOGWORDLENGTH) + 1);
-#else
-            MEMCPY(newvar->vname = (unsigned char*)
-                   bmalloc(__LINE__, len + 1), strng, ((len / sizeof(LONG)) + 1) * sizeof(LONG));
-#endif
-            }
-#else
-        if(len < 4)
-            newvar = (vars*)bmalloc(__LINE__, sizeof(vars));
-        else
-            newvar = (vars*)bmalloc(__LINE__, sizeof(vars) - 3 + len);
-        if(*strng)
-            {
-#if ICPY
-            MEMCPY(&newvar->u.Obj, strng, (len / sizeof(LONG)) + 1);
-#else
-            MEMCPY(&newvar->u.Obj, strng, ((len / sizeof(LONG)) + 1) * sizeof(LONG));
-#endif
-            }
-#endif
-        else
-            {
-#if PVNAME
-            newvar->vname = OBJ(nilNode);
-#else
-            newvar->u.Lobj = LOBJ(nilNode);
-#endif
-            }
-        newvar->next = nxtvar;
-        if(prevvar == NULL)
-            variables[*strng] = newvar;
-        else
-            prevvar->next = newvar;
-        newvar->n = 0;
-        newvar->selector = 0;
-        newvar->pvaria = (varia*)same_as_w(pnode);
-        }
-    return TRUE;
-    }
-
-static int copy_insert(psk name, psk pnode, psk cutoff)
-    {
-    psk PNODE;
-    int ret;
-    assert((pnode->RIGHT == 0 && cutoff == 0) || pnode->RIGHT != cutoff);
-    if((pnode->v.fl & INDIRECT)
-       && (pnode->v.fl & READY)
-       /*
-       {?} !dagj a:?dagj a
-       {!} !dagj
-       The test (pnode->v.fl & READY) does not solve stackoverflow
-       in the following examples:
-
-       {?} (=!y):(=?y)
-       {?} !y
-
-       {?} (=!y):(=?x)
-       {?} (=!x):(=?y)
-       {?} !x
-       */
-       )
-        {
-        return FALSE;
-        }
-    else if(pnode->v.fl & IDENT)
-        {
-        PNODE = copyof(pnode);
-        }
-    else if(cutoff == NULL)
-        {
-        return insert(name, pnode);
-        }
-    else
-        {
-        assert(!is_object(pnode));
-        if((shared(pnode) != ALL_REFCOUNT_BITS_SET) && !all_refcount_bits_set(cutoff))
-            {/* cutoff: either node with headroom in the small refcounter
-                or object */
-            PNODE = new_operator_like(pnode);
-            PNODE->v.fl = (pnode->v.fl & COPYFILTER/*~ALL_REFCOUNT_BITS_SET*/) | LATEBIND;
-            pnode->v.fl += ONEREF;
-#if WORD32
-            if(shared(cutoff) == ALL_REFCOUNT_BITS_SET)
-                {
-                /*
-                (T=
-                1100:?I
-                & tbl$(AA,!I)
-                & (OBJ==(=a) (=b) (=c))
-                &   !OBJ
-                : (
-                =   %
-                %
-                (?m:?n:?o:?p:?q:?r:?s) { increase refcount of (=c) to 7}
-                )
-                &   whl
-                ' ( !I+-1:~<0:?I
-                & !OBJ:(=(% %:?(!I$?AA)) ?)
-                )
-                & !I);
-                {due to late binding, the refcount of (=c) has just come above 1023, and then
-                late binding stops for the last 80 or so iterations. The left hand side of the
-                late bound node is not an object, and therefore can only count to 1024.
-                Thereafter copies must be made.}
-                */
-                INCREFCOUNT(cutoff);
-                }
-            else
-#endif
-                cutoff->v.fl += ONEREF;
-
-            PNODE->LEFT = pnode;
-            PNODE->RIGHT = cutoff;
-            }
-        else
-            {
-            copyToCutoff(&PNODE, pnode, cutoff); /*{?} a b c:(?z:?x:?y:?a:?b) c => a b c */
-            /*{?} 0:?n&a b c:?abc&whl'(!n+1:?n:<2000&str$(v !n):?v&!abc:?!v c) =>   whl
-            ' ( !n+1:?n:<2000
-            & str$(v !n):?v
-            & !abc:?!v c
-            ) */
-            }
-        }
-
-    ret = insert(name, PNODE);
-    wipe(PNODE);
-    return ret;
-    }
-
-static psk scopy(const char* str)
-    {
-    int nr = fullnumbercheck(str) & ~DEFINITELYNONUMBER;
-    psk pnode;
-    if(nr & MINUS)
-        { /* bracmat out$arg$() -123 */
-        pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + strlen((const char*)str));
-        strcpy((char*)(pnode)+sizeof(ULONG), str + 1);
-        }
-    else
-        {
-        pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + strlen((const char*)str));
-        strcpy((char*)(pnode)+sizeof(ULONG), str);
-        }
-    pnode->v.fl = READY | SUCCESS | nr;
-    return pnode;
-    }
-
-static psk charcopy(const char* strt, const char* until)
-    {
-    int  nr = 0;
-    psk pnode;
-    if('0' <= *strt && *strt <= '9')
-        {
-        nr = QNUMBER BITWISE_OR_SELFMATCHING;
-        if(*strt == '0')
-            nr |= QNUL;
-        }
-    pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + (until - strt));
-    strncpy((char*)(pnode)+sizeof(ULONG), strt, until - strt);
-    pnode->v.fl = READY | SUCCESS | nr;
-    return pnode;
-    }
-
-static int scopy_insert(psk name, const char* str)
-    {
-    int ret;
-    psk pnode;
-    pnode = scopy(str);
-    ret = insert(name, pnode);
-    wipe(pnode);
-    return ret;
-    }
-
-static int icopy_insert(psk name, LONG number)
-    {
-    char buf[22];
-    sprintf((char*)buf, LONGD, number);
-    return scopy_insert(name, buf);
-    }
-
-static int string_copy_insert(psk name, psk pnode, char* str, char* cutoff)
-    {
-    char sav = *cutoff;
-    int ret;
-    *cutoff = '\0';
-    if((pnode->v.fl & IDENT) || all_refcount_bits_set(pnode))
-        {
-        ret = scopy_insert(name, str);
-        }
-    else
-        {
-        stringrefnode* psnode;
-        int nr;
-        nr = fullnumbercheck(str) & ~DEFINITELYNONUMBER;
-        if((nr & MINUS) && !(name->v.fl & NUMBER))
-            nr = 0; /* "-1" is only converted to -1 if the # flag is present on the pattern */
-        psnode = (stringrefnode*)bmalloc(__LINE__, sizeof(stringrefnode));
-        psnode->v.fl = /*(pnode->v.fl & ~(ALL_REFCOUNT_BITS_SET|VISIBLE_FLAGS)) substring doesn't inherit flags like */
-            READY | SUCCESS | LATEBIND | nr;
-        /*psnode->v.fl |= SUCCESS;*/ /*{?} @(~`ab:%?x %?y)&!x => a */ /*{!} a */
-        psnode->pnode = same_as_w(pnode);
-        if(nr & MINUS)
-            {
-            psnode->str = str + 1;
-            psnode->length = cutoff - str - 1;
-            }
-        else
-            {
-            psnode->str = str;
-            psnode->length = cutoff - str;
-            }
-        DBGSRC(int saveNice; int redhum; saveNice = beNice; \
-               redhum = hum; beNice = FALSE; hum = FALSE; \
-               Printf("str [%s] length " LONGU "\n", psnode->str, (ULONG int)psnode->length); \
-               beNice = saveNice; hum = redhum;)
-            ret = insert(name, (psk)psnode);
-        if(ret)
-            dec_refcount((psk)psnode);
-        else
-            {
-            wipe(pnode);
-            bfree((void*)psnode);
-            }
-        }
-    *cutoff = sav;
-    return ret;
-    }
-
-int getCodePoint(const char** ps)
-    {
-    /*
-    return values:
-    > 0:    code point
-    -1:     no UTF-8
-    -2:     too short for being UTF-8
-    */
-    int K;
-    const char* s = *ps;
-    if((K = (const unsigned char)*s++) != 0)
-        {
-        if((K & 0xc0) == 0xc0) /* 11bbbbbb */
-            {
-            int k[6];
-            int i;
-            int I;
-            if((K & 0xfe) == 0xfe) /* 11111110 */
-                {
-                return -1;
-                }
-            /* Start of multibyte */
-
-            k[0] = K;
-            for(i = 1; (K << i) & 0x80; ++i)
-                {
-                k[i] = (const unsigned char)*s++;
-                if((k[i] & 0xc0) != 0x80) /* 10bbbbbb */
-                    {
-                    if(k[i])
-                        {
-                        return -1;
-                        }
-                    return -2;
-                    }
-                }
-            K = ((k[0] << i) & 0xff) << (5 * i - 6);
-            I = --i;
-            while(i > 0)
-                {
-                K |= (k[i] & 0x3f) << ((I - i) * 6);
-                --i;
-                }
-            if(K <= 0x7F) /* ASCII, must be a single byte */
-                {
-                return -1;
-                }
-            }
-        else if((K & 0xc0) == 0x80) /* 10bbbbbb, wrong first byte */
-            {
-            return -1;
-            }
-        }
-    *ps = s; /* next character */
-    return K;
-    }
-
-static int hasUTF8MultiByteCharacters(const char* s)
-    { /* returns 0 if s is not valid UTF-8 or if s is pure 7-bit ASCII */
-    int ret;
-    int multiByteCharSeen = 0;
-    for(; (ret = getCodePoint(&s)) > 0;)
-        if(ret > 0x7F)
-            ++multiByteCharSeen;
-    return ret == 0 ? multiByteCharSeen : 0;
-    }
-
-static int getCodePoint2(const char** ps, int* isutf)
-    {
-    int ks = *isutf ? getCodePoint(ps) : (const unsigned char)*(*ps)++;
-    if(ks < 0)
-        {
-        *isutf = 0;
-        ks = (const unsigned char)*(*ps)++;
-        }
-    assert(ks >= 0);
-    return ks;
-    }
-
-static int utf8bytes(ULONG val)
-    {
-    if(val < 0x80)
-        {
-        return 1;
-        }
-    else if(val < 0x0800) /* 7FF = 1 1111 111111 */
-        {
-        return 2;
-        }
-    else if(val < 0x10000) /* FFFF = 1111 111111 111111 */
-        {
-        return 3;
-        }
-    else if(val < 0x200000)
-        { /* 10000 = 010000 000000 000000, 10ffff = 100 001111 111111 111111 */
-        return 4;
-        }
-    else if(val < 0x4000000)
-        {
-        return 5;
-        }
-    else
-        {
-        return 6;
-        }
-    }
-
-/* extern, is called from xml.c json.c */
-char* putCodePoint(ULONG val, char* s)
-    {
-    /* Converts Unicode character w to 1,2,3 or 4 bytes of UTF8 in s. */
-    if(val < 0x80)
-        {
-        *s++ = (char)val;
-        }
-    else
-        {
-        if(val < 0x0800) /* 7FF = 1 1111 111111 */
-            {
-            *s++ = (char)(0xc0 | (val >> 6));
-            }
-        else
-            {
-            if(val < 0x10000) /* FFFF = 1111 111111 111111 */
-                {
-                *s++ = (char)(0xe0 | (val >> 12));
-                }
-            else
-                {
-                if(val < 0x200000)
-                    { /* 10000 = 010000 000000 000000, 10ffff = 100 001111 111111 111111 */
-                    *s++ = (char)(0xf0 | (val >> 18));
-                    }
-                else
-                    {
-                    if(val < 0x4000000)
-                        {
-                        *s++ = (char)(0xf8 | (val >> 24));
-                        }
-                    else
-                        {
-                        if(val < 0x80000000)
-                            {
-                            *s++ = (char)(0xfc | (val >> 30));
-                            *s++ = (char)(0x80 | ((val >> 24) & 0x3f));
-                            }
-                        else
-                            return NULL;
-                        }
-                    *s++ = (char)(0x80 | ((val >> 18) & 0x3f));
-                    }
-                *s++ = (char)(0x80 | ((val >> 12) & 0x3f));
-                }
-            *s++ = (char)(0x80 | ((val >> 6) & 0x3f));
-            }
-        *s++ = (char)(0x80 | (val & 0x3f));
-        }
-    *s = (char)0;
-    return s;
-    }
-
-static int strcasecompu(char** S, char** P, char* cutoff)
-/* Additional argument cutoff */
-    {
-    int sutf = 1;
-    int putf = 1;
-    char* s = *S;
-    char* p = *P;
-    while(s < cutoff && *s && *p)
-        {
-        int diff;
-        char* ns = s;
-        char* np = p;
-        int ks = getCodePoint2((const char**)&ns, &sutf);
-        int kp = getCodePoint2((const char**)&np, &putf);
-        assert(ks >= 0 && kp >= 0);
-        diff = toLowerUnicode(ks) - toLowerUnicode(kp);
-        if(diff)
-            {
-            *S = s;
-            *P = p;
-            return diff;
-            }
-        s = ns;
-        p = np;
-        }
-    *S = s;
-    *P = p;
-    return (s < cutoff ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*p;
-    }
-
-
-static int strcasecomp(const char* s, const char* p)
-    {
-    int sutf = 1; /* assume UTF-8, becomes 0 if it is not */
-    int putf = 1;
-    while(*s && *p)
-        {
-        int ks = getCodePoint2((const char**)&s, &sutf);
-        int kp = getCodePoint2((const char**)&p, &putf);
-        int diff = toLowerUnicode(ks) - toLowerUnicode(kp);
-        if(diff)
-            {
-            return diff;
-            }
-        }
-    return (int)(const unsigned char)*s - (int)(const unsigned char)*p;
-    }
-
-#if CODEPAGE850
-static int strcasecmpDOS(const char* s, const char* p)
-    {
-    while(*s && *p)
-        {
-        int diff = (int)ISO8859toCodePage850(lowerEquivalent[CodePage850toISO8859((unsigned char)*s)]) - (int)ISO8859toCodePage850(lowerEquivalent[CodePage850toISO8859((unsigned char)*p)]);
-        if(diff)
-            return diff;
-        ++s;
-        ++p;
-        }
-    return (int)*s - (int)*p;
-    }
-#endif
-
 #define PNOT ((p->v.fl & NOT) && (p->v.fl & FLGS) < NUMBER)
 #define PGRT (p->v.fl & GREATER_THAN)
 #define PSML (p->v.fl & SMALLER_THAN)
@@ -6985,6 +6626,34 @@ static int compare(psk s, psk p)
 #define scompare(wh,s,c,p,suggestedCutOff,mayMoveStartOfSubject) scompare(s,c,p,suggestedCutOff,mayMoveStartOfSubject)
 #else
 #define scompare(wh,s,c,p) scompare(s,c,p)
+#endif
+
+#if INTSCMP
+static int intscmp(LONG* s1, LONG* s2) /* this routine produces different results
+                                  depending on BIGENDIAN */
+    {
+    while(*((char*)s1 + 3))
+        {
+        if(*s1 != *s2)
+            {
+            if(*s1 < *s2)
+                return -1;
+            else
+                return 1;
+            }
+        s1++;
+        s2++;
+        }
+    if(*s1 != *s2)
+        {
+        if(*s1 < *s2)
+            return -1;
+        else
+            return 1;
+        }
+    else
+        return 0;
+    }
 #endif
 
 
@@ -7609,6 +7278,772 @@ static int scompare(char* wh, unsigned char* s, unsigned char* cutoff, psk p)
             }
         }
     }
+    static psk getmember2(psk name, psk tree)
+        {
+        while(is_op(tree))
+            {
+            if(Op(tree) == EQUALS)
+                {
+                psk nname;
+
+                if(Op(name) == DOT)
+                    nname = name->LEFT;
+                else
+                    nname = name;
+
+                if(equal(tree->LEFT, nname))
+                    return NULL;
+                else if(nname == name)
+                    {
+                    return tree->RIGHT = Head(tree->RIGHT);
+                    }
+                else
+                    {
+                    name = name->RIGHT;
+                    }
+                }
+            else
+                {
+                psk tmp;
+                if((tmp = getmember2(name, tree->LEFT)) != NULL)
+                    {
+                    return tmp;
+                    }
+                }
+            tree = tree->RIGHT;
+            }
+        return NULL;
+        }
+
+static psk getmember(psk name, psk tree, objectStuff* Object)
+    {
+    /* Returns NULL if either the method is not found or if the method is
+        built-in. In the latter case, Object->theMethod is set. */
+    while(is_op(tree))
+        {
+        if(Op(tree) == EQUALS)
+            {
+            psk nname;
+            if(ISBUILTIN((objectnode*)tree)
+                && Op(name) == DOT
+                )
+                {
+                Object->object = tree;  /* object == (=) */
+                Object->theMethod = findBuiltInMethod((typedObjectnode*)tree, name->RIGHT);
+                /* findBuiltInMethod((=),(insert)) */
+                if(Object->theMethod)
+                    {
+                    return NULL;
+                    }
+                }
+
+            if(Op(name) == DOT)
+                nname = name->LEFT;
+            else
+                nname = name;
+            if(equal(tree->LEFT, nname))
+                return NULL;
+            else if(nname == name)
+                {
+                return tree->RIGHT = Head(tree->RIGHT);
+                }
+            else
+                {
+                Object->self = tree->RIGHT;
+                name = name->RIGHT;
+                }
+            }
+        else
+            {
+            psk tmp;
+            if((tmp = getmember(name, tree->LEFT, Object)) != NULL)
+                {
+                return tmp;
+                }
+            }
+        tree = tree->RIGHT;
+        }
+    return NULL;
+    }
+
+
+static int atomtest(psk pnode)
+    {
+    return (!is_op(pnode) && !HAS_UNOPS(pnode)) ? (int)pnode->u.obj : -1;
+    }
+
+static LONG toLong(psk pnode)
+    {
+    LONG res;
+    res = (LONG)STRTOUL((char*)POBJ(pnode), (char**)NULL, 10);
+    if(pnode->v.fl & MINUS)
+        res = -res;
+    return res;
+    }
+static int number_degree(psk pnode)
+    {
+    if(RATIONAL_COMP(pnode))
+        return 4;
+    switch(PLOBJ(pnode))
+        {
+        case IM: return 3;
+        case PI: return 2;
+        case XX: return 1;
+        default: return 0;
+        }
+    }
+
+static int is_constant(psk pnode)
+    {
+    while(is_op(pnode))
+        {
+        if(!is_constant(pnode->LEFT))
+            return FALSE;
+        pnode = pnode->RIGHT;
+        }
+    return number_degree(pnode);
+    }
+
+static psk* backbone(psk arg, psk Pnode, psk* pfirst)
+    {
+    psk first = *pfirst = subtreecopy(arg);
+    psk* plast = pfirst;
+    while(arg != Pnode)
+        {
+        psk R = subtreecopy((*plast)->RIGHT);
+        wipe((*plast)->RIGHT);
+        (*plast)->RIGHT = R;
+        plast = &((*plast)->RIGHT);
+        arg = arg->RIGHT;
+        }
+    *pfirst = first;
+    return plast;
+    }
+
+static void cleanOncePattern(psk pat)
+    {
+    pat->v.fl &= ~IMPLIEDFENCE;
+    if(is_op(pat))
+        {
+        cleanOncePattern(pat->LEFT);
+        cleanOncePattern(pat->RIGHT);
+        }
+    }
+
+static psk rightoperand(psk Pnode)
+    {
+    psk temp;
+    ULONG Sign;
+    temp = (Pnode->RIGHT);
+    return((Sign = Op(Pnode)) == Op(temp) &&
+           (Sign == PLUS || Sign == TIMES || Sign == WHITE) ?
+           temp->LEFT : temp);
+    }
+
+static psk rightoperand_and_tail(psk Pnode, ppsk head, ppsk tail)
+    {
+    psk temp;
+    assert(is_op(Pnode));
+    temp = Pnode->RIGHT;
+    if(Op(Pnode) == Op(temp))
+        {
+        *head = temp->LEFT;
+        *tail = temp->RIGHT;
+        }
+    else
+        {
+        *head = temp;
+        *tail = NULL;
+        }
+    return temp;
+    }
+
+static psk leftoperand_and_tail(psk Pnode, ppsk head, ppsk tail)
+    {
+    psk temp;
+    assert(is_op(Pnode));
+    temp = Pnode->LEFT;
+    if(Op(Pnode) == Op(temp))
+        {
+        *head = temp->LEFT;
+        *tail = temp->RIGHT;
+        }
+    else
+        {
+        *head = temp;
+        *tail = NULL;
+        }
+    return temp;
+    }
+
+static void privatized(psk Pnode, psk plkn)
+    {
+    *plkn = *Pnode;
+    if(shared(plkn))
+        {
+        dec_refcount(Pnode);
+        plkn->LEFT = same_as_w(plkn->LEFT);
+        plkn->RIGHT = same_as_w(plkn->RIGHT);
+        }
+    else
+        pskfree(Pnode);
+    }
+
+static psk lambda(psk Pnode, psk name, psk Arg)
+    {
+    if(!is_op(Pnode))
+        {
+        return NULL;
+        }
+    else
+        {
+        psk arg = Pnode;
+        while(!(Pnode->v.fl & READY))
+            {
+            if(atomtest(Pnode->LEFT) != 0)
+                {
+                psk left = lambda(Pnode->LEFT, name, Arg);
+                if(left != NULL)
+                    {
+                    /* copy backbone from lambda's argument to current Pnode
+                       release lhs of copy of current and replace with 'left'
+                       assign copy to 'Pnode'
+                       lambda current, if not null, replace current
+                       return current
+                    */
+                    psk ret;
+                    psk first = NULL;
+                    psk* last = backbone(arg, Pnode, &first);
+                    wipe((*last)->LEFT);
+                    (*last)->LEFT = left;
+                    if(atomtest((*last)->LEFT) == 0 && Op((*last)) == FUN)
+                        {
+                        ret = lambda(*last, name, Arg);
+                        if(ret)
+                            {
+                            wipe(*last);
+                            *last = ret;
+                            }
+                        }
+                    else
+                        {
+                        psk right = lambda((*last)->RIGHT, name, Arg);
+                        if(right)
+                            {
+                            wipe((*last)->RIGHT);
+                            (*last)->RIGHT = right;
+                            }
+                        }
+                    return first;
+                    }
+                }
+            else if(Op(Pnode) == FUN)
+                {
+                if(Op(Pnode->RIGHT) == UNDERSCORE)
+                    {
+                    int Flgs;
+                    psk h;
+                    psk hh;
+                    psk first = NULL;
+                    psk* last;
+                    Flgs = Pnode->v.fl & (UNOPS | SUCCESS);
+                    h = subtreecopy(Pnode->RIGHT);
+                    if(dummy_op == EQUALS)
+                        {
+                        psk becomes = (psk)bmalloc(__LINE__, sizeof(objectnode));
+#if WORD32
+                        ((typedObjectnode*)becomes)->u.Int = 0;
+#else
+                        ((typedObjectnode*)becomes)->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
+#endif
+                        becomes->LEFT = same_as_w(h->LEFT);
+                        becomes->RIGHT = same_as_w(h->RIGHT);
+                        wipe(h);
+                        h = becomes;
+                        }
+                    h->v.fl = dummy_op | Flgs;
+                    hh = lambda(h->LEFT, name, Arg);
+                    if(hh)
+                        {
+                        wipe(h->LEFT);
+                        h->LEFT = hh;
+                        }
+                    hh = lambda(h->RIGHT, name, Arg);
+                    if(hh)
+                        {
+                        wipe(h->RIGHT);
+                        h->RIGHT = hh;
+                        }
+                    last = backbone(arg, Pnode, &first);
+                    wipe(*last);
+                    *last = h;
+                    return first;
+                    }
+                else if(Op(Pnode->RIGHT) == FUN
+                        && atomtest(Pnode->RIGHT->LEFT) == 0
+                        )
+                    {
+                    int Flgs;
+                    psk h;
+                    psk hh;
+                    psk first = NULL;
+                    psk* last;
+                    Flgs = Pnode->v.fl & UNOPS;
+                    h = subtreecopy(Pnode->RIGHT);
+                    h->v.fl |= Flgs;
+                    assert(atomtest(h->LEFT) == 0);
+                    hh = lambda(h->RIGHT, name, Arg);
+                    if(hh)
+                        {
+                        wipe(h->RIGHT);
+                        h->RIGHT = hh;
+                        }
+                    last = backbone(arg, Pnode, &first);
+                    wipe(*last);
+                    *last = h;
+                    return first;
+                    }
+                else if(!equal(name, Pnode->RIGHT))
+                    {
+                    psk h;
+                    psk first;
+                    psk* last;
+                    h = subtreecopy(Arg);
+                    if(h->v.fl & INDIRECT)
+                        {
+                        h->v.fl &= ~READY;
+                        }
+                    else if(is_op(h) && Op(h) == EQUALS)
+                        {
+                        h->v.fl &= ~READY;
+                        }
+
+                    last = backbone(arg, Pnode, &first);
+                    wipe(*last);
+                    *last = h;
+                    return first;
+                    }
+                }
+            else if(Op(Pnode) == FUU
+                    && (Pnode->v.fl & FRACTION)
+                    && Op(Pnode->RIGHT) == DOT
+                    && !equal(name, Pnode->RIGHT->LEFT)
+                    )
+                {
+                return NULL;
+                }
+            Pnode = Pnode->RIGHT;
+            if(!is_op(Pnode))
+                {
+                break;
+                }
+            }
+        }
+    return NULL;
+    }
+
+
+static int search_opt(psk pnode, LONG opt)
+    {
+    while(is_op(pnode))
+        {
+        if(search_opt(pnode->LEFT, opt))
+            return TRUE;
+        pnode = pnode->RIGHT;
+        }
+    return PLOBJ(pnode) == opt;
+    }
+static psk _leftbranch(psk Pnode)
+    {
+    psk lnode;
+    lnode = Pnode->LEFT;
+    if(!(Pnode->v.fl & SUCCESS))
+        {
+        lnode = isolated(lnode);
+        lnode->v.fl ^= SUCCESS;
+        }
+    if((Pnode->v.fl & FENCE) && !(lnode->v.fl & FENCE))
+        {
+        lnode = isolated(lnode);
+        lnode->v.fl |= FENCE;
+        }
+    wipe(Pnode->RIGHT);
+    return lnode;
+    }
+
+static psk leftbranch(psk Pnode)
+    {
+    psk lnode = _leftbranch(Pnode);
+    pskfree(Pnode);
+    return lnode;
+    }
+
+static psk _fleftbranch(psk Pnode)
+    {
+    psk lnode;
+    lnode = Pnode->LEFT;
+    if(Pnode->v.fl & SUCCESS)
+        {
+        lnode = isolated(lnode);
+        lnode->v.fl ^= SUCCESS;
+        }
+    if((Pnode->v.fl & FENCE) && !(lnode->v.fl & FENCE))
+        {
+        lnode = isolated(lnode);
+        lnode->v.fl |= FENCE;
+        }
+    wipe(Pnode->RIGHT);
+    return lnode;
+    }
+
+static psk fleftbranch(psk Pnode)
+    {
+    psk lnode = _fleftbranch(Pnode);
+    pskfree(Pnode);
+    return lnode;
+    }
+
+static psk _fenceleftbranch(psk Pnode)
+    {
+    psk lnode;
+    lnode = Pnode->LEFT;
+    if(!(Pnode->v.fl & SUCCESS))
+        {
+        lnode = isolated(lnode);
+        lnode->v.fl ^= SUCCESS;
+        }
+    if(Pnode->v.fl & FENCE)
+        {
+        if(!(lnode->v.fl & FENCE))
+            {
+            lnode = isolated(lnode);
+            lnode->v.fl |= FENCE;
+            }
+        }
+    else if(lnode->v.fl & FENCE)
+        {
+        lnode = isolated(lnode);
+        lnode->v.fl &= ~FENCE;
+        }
+    wipe(Pnode->RIGHT);
+    return lnode;
+    }
+
+static psk _rightbranch(psk Pnode)
+    {
+    psk rightnode;
+    rightnode = Pnode->RIGHT;
+    if(!(Pnode->v.fl & SUCCESS))
+        {
+        rightnode = isolated(rightnode);
+        rightnode->v.fl ^= SUCCESS;
+        }
+    if((Pnode->v.fl & FENCE) && !(rightnode->v.fl & FENCE))
+        {
+        rightnode = isolated(rightnode);
+        rightnode->v.fl |= FENCE;
+        }
+    wipe(Pnode->LEFT);
+    return rightnode;
+    }
+
+static psk rightbranch(psk Pnode)
+    {
+    psk rightnode = _rightbranch(Pnode);
+    pskfree(Pnode);
+    return rightnode;
+    }
+
+static psk __rightbranch(psk Pnode)
+    {
+    psk ret;
+    int success = Pnode->v.fl & SUCCESS;
+    if(shared(Pnode))
+        {
+        ret = same_as_w(Pnode->RIGHT);
+        dec_refcount(Pnode);
+        }
+    else
+        {
+        ret = Pnode->RIGHT;
+        wipe(Pnode->LEFT);
+        pskfree(Pnode);
+        }
+    if(!success)
+        {
+        ret = isolated(ret);
+        ret->v.fl ^= SUCCESS;
+        }
+    return ret;
+    }
+
+static int searchname(psk name,
+                      vars** pprevvar,
+                      vars** pnxtvar)
+    {
+    unsigned char* strng;
+    vars* nxtvar, * prevvar;
+    strng = POBJ(name);
+    for(prevvar = NULL, nxtvar = variables[*strng]
+        ;  nxtvar && (STRCMP(VARNAME(nxtvar), strng) < 0)
+        ; prevvar = nxtvar, nxtvar = nxtvar->next
+        )
+        ;
+    /* prevvar < strng <= nxtvar */
+    *pprevvar = prevvar;
+    *pnxtvar = nxtvar;
+    return nxtvar && !STRCMP(VARNAME(nxtvar), strng);
+    }
+
+/*
+name must be atom or <atom>.<atom>.<atom>...
+*/
+static int setmember(psk name, psk tree, psk newValue)
+    {
+    while(is_op(tree))
+        {
+        if(Op(tree) == EQUALS)
+            {
+            psk nname;
+            if(Op(name) == DOT)
+                nname = name->LEFT;
+            else
+                nname = name;
+            if(equal(tree->LEFT, nname))
+                {
+                return FALSE;
+                }
+            else if(nname == name)
+                {
+                wipe(tree->RIGHT);
+                tree->RIGHT = same_as_w(newValue);
+                return TRUE;
+                }
+            else /* Found partial match for member name,
+                    recurse in both name and member */
+                {
+                name = name->RIGHT;
+                }
+            }
+        else if(setmember(name, tree->LEFT, newValue))
+            {
+            return TRUE;
+            }
+        tree = tree->RIGHT;
+        }
+    return FALSE;
+    }
+
+
+#define POWER2
+static int power2(int n)
+/* returns MSB of n */
+    {
+    int m;
+    for(m = 1
+        ; n
+        ; n >>= 1, m <<= 1
+        )
+        ;
+    return m >> 1;
+    }
+
+static ppsk Entry(int n, int index, varia** pv)
+    {
+    if(n == 0)
+        {
+        return (ppsk)pv;  /* no varia records are needed for 1 entry */
+        }
+    else
+        {
+#if defined POWER2
+        varia* hv;
+        int MSB = power2(n);
+        for(hv = *pv /* begin with longest varia record */
+            ; MSB > 1 && index < MSB
+            ; MSB >>= 1
+            )
+            hv = hv->prev;
+        index -= MSB;   /* if index == 0, then index becomes -1 */
+#else
+        /* This code does not make Bracmat noticeably faster*/
+        int MSB;
+        varia* hv = *pv;
+        for(MSB = 1; MSB <= index; MSB <<= 1)
+            ;
+
+        if(MSB > 1)
+            index %= (MSB >> 1);
+        else
+            {
+            index = -1;
+            MSB <<= 1;
+            }
+
+        for(; MSB <= n; MSB <<= 1)
+            hv = hv->prev;
+#endif
+        return &hv->variableValue[index];  /* variableValue[-1] == (psk)*prev */
+        }
+    }
+
+static psk Entry2(int n, int index, varia* pv)
+    {
+    if(n == 0)
+        {
+        return (psk)pv;  /* no varia records needed for 1 entry */
+        }
+    else
+        {
+        varia* hv;
+#if defined POWER2
+        int MSB = power2(n);
+        for(hv = pv /* begin with longest varia record */
+            ; MSB > 1 && index < MSB
+            ; MSB >>= 1
+            )
+            hv = hv->prev;
+        index -= MSB;   /* if index == 0, then index becomes -1 */
+#else
+        /* This code does not make Bracmat noticeably faster*/
+        int MSB;
+        hv = pv;
+        for(MSB = 1; MSB <= index; MSB <<= 1)
+            ;
+
+        if(MSB > 1)
+            index %= (MSB >> 1);
+        else
+            {
+            index = -1;
+            MSB <<= 1;
+            }
+
+        for(; MSB <= n; MSB <<= 1)
+            hv = hv->prev;
+#endif
+        return hv->variableValue[index];  /* variableValue[-1] == (psk)*prev */
+        }
+    }
+
+
+
+static int update(psk name, psk pnode) /* name = tree with DOT in root */
+/*
+    x:?(k.b)
+    x:?((=(a=) (b=)).b)
+*/
+    {
+    vars* nxtvar;
+    vars* prevvar;
+    if(is_op(name->LEFT))
+        {
+        if(Op(name->LEFT) == EQUALS)
+            /*{?} x:?((=(a=) (b=)).b) => x */
+            /*          ^              */
+            return setmember(name->RIGHT, name->LEFT->RIGHT, pnode);
+        else
+            {
+            /*{?} b:?((x.y).z) => x */
+            return FALSE;
+            }
+        }
+    if(Op(name) == EQUALS) /* {?} (=a+b)=5 ==> =5 */
+        {
+        wipe(name->RIGHT);
+        name->RIGHT = same_as_w(pnode);
+        return TRUE;
+        }
+    else if(searchname(name->LEFT,
+                       &prevvar,
+                       &nxtvar))
+        {
+        assert(nxtvar->pvaria);
+        return setmember(name->RIGHT, Entry2(nxtvar->n, nxtvar->selector, nxtvar->pvaria), pnode);
+        }
+    else
+        {
+        return FALSE; /*{?} 66:?(someUnidentifiableObject.x) */
+        }
+    }
+
+
+static int insert(psk name, psk pnode)
+    {
+    vars* nxtvar, * prevvar, * newvar;
+
+    if(is_op(name))
+        {
+        if(Op(name) == EQUALS)
+            {
+            wipe(name->RIGHT);
+            name->RIGHT = same_as_w(pnode);  /*{?} monk2:?(=monk1) => monk2 */
+            return TRUE;
+            }
+        else
+            { /* This allows, in fact, other operators than DOT, e.g. b:?(x y) */
+            return update(name, pnode); /*{?} (borfo=klot=)&bk:?(borfo klot)&!(borfo.klot):bk => bk */
+            }
+        }
+    if(searchname(name,
+                  &prevvar,
+                  &nxtvar))
+        {
+        ppsk PPnode;
+        wipe(*(PPnode = Entry(nxtvar->n, nxtvar->selector, &nxtvar->pvaria)));
+        *PPnode = same_as_w(pnode);
+        }
+    else
+        {
+        size_t len;
+        unsigned char* strng;
+        strng = POBJ(name);
+        len = strlen((char*)strng);
+#if PVNAME
+        newvar = (vars*)bmalloc(__LINE__, sizeof(vars));
+        if(*strng)
+            {
+#if ICPY
+            MEMCPY(newvar->vname = (unsigned char*)
+                   bmalloc(__LINE__, len + 1), strng, (len >> LOGWORDLENGTH) + 1);
+#else
+            MEMCPY(newvar->vname = (unsigned char*)
+                   bmalloc(__LINE__, len + 1), strng, ((len / sizeof(LONG)) + 1) * sizeof(LONG));
+#endif
+            }
+#else
+        if(len < 4)
+            newvar = (vars*)bmalloc(__LINE__, sizeof(vars));
+        else
+            newvar = (vars*)bmalloc(__LINE__, sizeof(vars) - 3 + len);
+        if(*strng)
+            {
+#if ICPY
+            MEMCPY(&newvar->u.Obj, strng, (len / sizeof(LONG)) + 1);
+#else
+            MEMCPY(&newvar->u.Obj, strng, ((len / sizeof(LONG)) + 1) * sizeof(LONG));
+#endif
+            }
+#endif
+        else
+            {
+#if PVNAME
+            newvar->vname = OBJ(nilNode);
+#else
+            newvar->u.Lobj = LOBJ(nilNode);
+#endif
+            }
+        newvar->next = nxtvar;
+        if(prevvar == NULL)
+            variables[*strng] = newvar;
+        else
+            prevvar->next = newvar;
+        newvar->n = 0;
+        newvar->selector = 0;
+        newvar->pvaria = (varia*)same_as_w(pnode);
+        }
+    return TRUE;
+    }
 
 static int psh(psk name, psk pnode, psk dim)
     {
@@ -7717,31 +8152,777 @@ static int psh(psk name, psk pnode, psk dim)
     return TRUE;
     }
 
-typedef struct classdef
+static int deleteNode(psk name)
     {
-    char* name;
-    method* vtab;
-    } classdef;
+    vars* nxtvar, * prevvar;
+    varia* hv;
+    if(searchname(name,
+                    &prevvar,
+                    &nxtvar))
+        {
+        psk tmp;
+        assert(nxtvar->pvaria);
+        tmp = Entry2(nxtvar->n, nxtvar->n, nxtvar->pvaria);
+        wipe(tmp);
+        if(nxtvar->n)
+            {
+            if((nxtvar->n) - 1 < power2(nxtvar->n))
+                {
+                hv = nxtvar->pvaria;
+                nxtvar->pvaria = hv->prev;
+                bfree(hv);
+                }
+            nxtvar->n--;
+            if(nxtvar->n < nxtvar->selector)
+                nxtvar->selector = nxtvar->n;
+            }
+        else
+            {
+            if(prevvar)
+                prevvar->next = nxtvar->next;
+            else
+                variables[*POBJ(name)] = nxtvar->next;
+#if PVNAME
+            if(nxtvar->vname != OBJ(nilNode))
+                bfree(nxtvar->vname);
+#endif
+            bfree(nxtvar);
+            }
+        return TRUE;
+        }
+    else
+        return FALSE;
+    }
 
-typedef struct pskRecord
+static void pop(psk pnode)
     {
-    psk entry;
-    struct pskRecord* next;
-    } pskRecord;
+    while(is_op(pnode))
+        {
+        pop(pnode->LEFT);
+        pnode = pnode->RIGHT;
+        }
+    deleteNode(pnode);
+    }
 
-typedef int(*cmpfuncTp)(const char* s, const char* p);
-typedef LONG(*hashfuncTp)(const char* s);
-
-typedef struct Hash
+static psk getValueByVariableName(psk namenode)
     {
-    pskRecord** hash_table;
-    ULONG hash_size;
-    ULONG elements;     /* elements >= record_count */
-    ULONG record_count; /* record_count >= size - unoccupied */
-    ULONG unoccupied;
-    cmpfuncTp cmpfunc;
-    hashfuncTp hashfunc;
-    } Hash;
+    vars* nxtvar;
+    assert(!is_op(namenode));
+    for(nxtvar = variables[namenode->u.obj];
+        nxtvar && (STRCMP(VARNAME(nxtvar), POBJ(namenode)) < 0);
+        nxtvar = nxtvar->next)
+        ;
+    if(nxtvar && !STRCMP(VARNAME(nxtvar), POBJ(namenode))
+        && nxtvar->selector <= nxtvar->n
+        )
+        {
+        ppsk self;
+        assert(nxtvar->pvaria);
+        self = Entry(nxtvar->n, nxtvar->selector, &nxtvar->pvaria);
+        *self = Head(*self);
+        return *self;
+        }
+    else
+        {
+        return NULL;
+        }
+    }
+
+static psk getValue(psk namenode, int* newval)
+    {
+    if(is_op(namenode))
+        {
+        switch(Op(namenode))
+            {
+            case EQUALS:
+                {
+                /* namenode is /!(=b) when evaluating (a=b)&/!('$a):b */
+                *newval = TRUE;
+                namenode->RIGHT = Head(namenode->RIGHT);
+                return same_as_w(namenode->RIGHT);
+                }
+            case DOT: /*
+                        e.g.
+
+                            x  =  (a=2) (b=3)
+
+                            !(x.a)
+                        and
+                            !((=  (a=2) (b=3)).a)
+
+                        must give same result.
+                        */
+                {
+                psk tmp;
+                if(is_op(namenode->LEFT))
+                    {
+                    if(Op(namenode->LEFT) == EQUALS) /* namenode->LEFT == (=  (a=2) (b=3))   */
+                        {
+                        tmp = namenode->LEFT->RIGHT; /* tmp == ((a=2) (b=3))   */
+                        }
+                    else
+                        {
+                        return NULL; /* !(+a.a) */
+                        }
+                    }
+                else                                   /* x */
+                    {
+                    if((tmp = getValueByVariableName(namenode->LEFT)) == NULL)
+                        {
+                        return NULL; /* !(xua.gjh) if xua isn't defined */
+                        }
+                    /*
+                    tmp == ((a=2) (b=3))
+                    tmp == (=)
+                    */
+                    }
+                /* The number of '=' to reach the method name in 'tmp' must be one greater
+                    than the number of '.' that precedes the method name in 'namenode->RIGHT'
+
+                    e.g (= (say=.out$!arg)) and (.say) match
+
+                    For built-in methods (definitions of which are not visible) an invisible '=' has to be assumed.
+
+                    The function getmember resolves this.
+                */
+                tmp = getmember2(namenode->RIGHT, tmp);
+
+                if(tmp)
+                    {
+                    *newval = TRUE;
+                    return same_as_w(tmp);
+                    }
+                else
+                    {
+                    return NULL; /* !(a.c) if a=(b=4) */
+                    }
+                }
+            default:
+                {
+                *newval = FALSE;
+                return NULL; /* !(a,b) because of comma instead of dot */
+                }
+            }
+        }
+    else
+        {
+        return getValueByVariableName(namenode);
+        }
+    }
+
+static psk findMethod(psk namenode, objectStuff* Object)
+    /* Only for finding 'function' definitions. (LHS of ' or $)*/
+    /*
+    'namenode' is the expression that has to lead to a binding.
+    Conceptually, expression (or its complement) and binding are separated by a '=' operator.
+    E.g.
+
+        say            =         (.out$!arg)
+        ---            -         -----------
+        expression   '='-operator     binding
+
+        say$HELLO
+        and
+        (= (.out$!arg))$HELLO
+
+            must be equivalent. Therefore, both of 'say' and its complement '(= .out$!arg)' have the binding '(.out$!arg)'.
+
+            'find' returns returns a binding or NULL.
+            If the function returns NULL, 'theMethod' may still be bound.
+            The parameter 'self' is the rhs of the root '=' of an object. It is used for non-built-ins
+            The parameter 'object' is the root of an object, possibly having built-in methods.
+
+
+    Built in methods:
+    if
+        new$hash:?x
+    then
+        ((=).insert)$   (=) being the hash node with invisible built in method 'insert'
+    and
+        (!x.insert)$
+    and
+        (x..insert)$
+    must be equivalent
+    */
+    {
+    psk tmp;
+    assert(is_op(namenode));
+    assert(Op(namenode) == DOT);
+    /*
+    e.g.
+
+    new$hash:?y
+
+    (y..insert)$
+    (!y.insert)$
+    */
+    /* (=hash).New when evaluating new$hash:?y
+        y..insert when evaluating (y..insert)$
+    */
+    if(is_op(namenode->LEFT))
+        {
+        if(Op(namenode->LEFT) == EQUALS)
+            {
+            if(ISBUILTIN((objectnode*)(namenode->LEFT))
+                )
+                {
+                Object->theMethod = findBuiltInMethod((typedObjectnode*)(namenode->LEFT), namenode->RIGHT);
+                /* findBuiltInMethod((=),(insert)) */
+                Object->object = namenode->LEFT;  /* object == (=) */
+                if(Object->theMethod)
+                    {
+                    namenode->LEFT = same_as_w(namenode->LEFT);
+                    return namenode->LEFT; /* (=hash).New when evaluating (new$hash..insert)$(a.b) */
+                    }
+                }
+            tmp = namenode->LEFT->RIGHT;
+            /* e.g. tmp == hash
+            Or  tmp ==
+                    (name=(first=John),(last=Bull))
+                , (age=20)
+                , ( new
+                    =
+                    .   new$(its.name):(=?(its.name))
+                        &   !arg
+                        : ( ?(its.name.first)
+                            . ?(its.name.last)
+                            . ?(its.age)
+                            )
+                    )
+            */
+            }
+        else
+            {
+            return NULL;  /* ((.(did=.!arg+2)).did)$3 */
+            }
+        }
+    else                                   /* x */
+        {
+        if((tmp = getValueByVariableName(namenode->LEFT)) == NULL)
+            {
+            return NULL;   /* (y.did)$3  when y is not defined at all */
+            }
+        /*
+        tmp == ((a=2) (b=3))
+        tmp == (=)
+        */
+        }
+    Object->self = tmp; /* self == ((a=2) (b=3))   */
+    /* The number of '=' to reach the method name in 'tmp' must be one greater
+        than the number of '.' that precedes the method name in 'namenode->RIGHT'
+
+        e.g (= (say=.out$!arg)) and (.say) match
+
+        For built-in methods (definitions of which are not visible) an invisible '=' has to be assumed.
+
+        The function getmember resolves this.
+    */
+    tmp = getmember(namenode->RIGHT, tmp, Object);
+
+    if(tmp)
+        {
+        return same_as_w(tmp);
+        }
+    else
+        { /* You get here if a built-in method is called. */
+        return NULL; /* (=hash)..insert when evaluating (new$hash..insert)$(a.b) */
+        }
+    }
+
+static int copy_insert(psk name, psk pnode, psk cutoff)
+    {
+    psk PNODE;
+    int ret;
+    assert((pnode->RIGHT == 0 && cutoff == 0) || pnode->RIGHT != cutoff);
+    if((pnode->v.fl & INDIRECT)
+        && (pnode->v.fl & READY)
+        /*
+        {?} !dagj a:?dagj a
+        {!} !dagj
+        The test (pnode->v.fl & READY) does not solve stackoverflow
+        in the following examples:
+
+        {?} (=!y):(=?y)
+        {?} !y
+
+        {?} (=!y):(=?x)
+        {?} (=!x):(=?y)
+        {?} !x
+        */
+        )
+        {
+        return FALSE;
+        }
+    else if(pnode->v.fl & IDENT)
+        {
+        PNODE = copyof(pnode);
+        }
+    else if(cutoff == NULL)
+        {
+        return insert(name, pnode);
+        }
+    else
+        {
+        assert(!is_object(pnode));
+        if((shared(pnode) != ALL_REFCOUNT_BITS_SET) && !all_refcount_bits_set(cutoff))
+            {/* cutoff: either node with headroom in the small refcounter
+                or object */
+            PNODE = new_operator_like(pnode);
+            PNODE->v.fl = (pnode->v.fl & COPYFILTER/*~ALL_REFCOUNT_BITS_SET*/) | LATEBIND;
+            pnode->v.fl += ONEREF;
+#if WORD32
+            if(shared(cutoff) == ALL_REFCOUNT_BITS_SET)
+                {
+                /*
+                (T=
+                1100:?I
+                & tbl$(AA,!I)
+                & (OBJ==(=a) (=b) (=c))
+                &   !OBJ
+                : (
+                =   %
+                %
+                (?m:?n:?o:?p:?q:?r:?s) { increase refcount of (=c) to 7}
+                )
+                &   whl
+                ' ( !I+-1:~<0:?I
+                & !OBJ:(=(% %:?(!I$?AA)) ?)
+                )
+                & !I);
+                {due to late binding, the refcount of (=c) has just come above 1023, and then
+                late binding stops for the last 80 or so iterations. The left hand side of the
+                late bound node is not an object, and therefore can only count to 1024.
+                Thereafter copies must be made.}
+                */
+                INCREFCOUNT(cutoff);
+                }
+            else
+#endif
+                cutoff->v.fl += ONEREF;
+
+            PNODE->LEFT = pnode;
+            PNODE->RIGHT = cutoff;
+            }
+        else
+            {
+            copyToCutoff(&PNODE, pnode, cutoff); /*{?} a b c:(?z:?x:?y:?a:?b) c => a b c */
+            /*{?} 0:?n&a b c:?abc&whl'(!n+1:?n:<2000&str$(v !n):?v&!abc:?!v c) =>   whl
+            ' ( !n+1:?n:<2000
+            & str$(v !n):?v
+            & !abc:?!v c
+            ) */
+            }
+        }
+
+    ret = insert(name, PNODE);
+    wipe(PNODE);
+    return ret;
+    }
+
+static void mmf(ppsk PPnode)
+    {
+    psk goal;
+    ppsk pgoal;
+    vars* nxtvar;
+    int alphabet, ext;
+    char dim[22];
+    ext = search_opt(*PPnode, EXT);
+    wipe(*PPnode);
+    pgoal = PPnode;
+    for(alphabet = 0; alphabet < 256/*0x80*/; alphabet++)
+        {
+        for(nxtvar = variables[alphabet];
+            nxtvar;
+            nxtvar = nxtvar->next)
+            {
+            goal = *pgoal = (psk)bmalloc(__LINE__, sizeof(knode));
+            goal->v.fl = WHITE | SUCCESS;
+            if(ext && nxtvar->n > 0)
+                {
+                goal = goal->LEFT = (psk)bmalloc(__LINE__, sizeof(knode));
+                goal->v.fl = DOT | SUCCESS;
+                sprintf(dim, "%d.%d", nxtvar->n, nxtvar->selector);
+                goal->RIGHT = NULL;
+                goal->RIGHT = build_up(goal->RIGHT, dim, NULL);
+                }
+            goal = goal->LEFT =
+                (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + strlen((char*)VARNAME(nxtvar)));
+            goal->v.fl = (READY | SUCCESS);
+            strcpy((char*)(goal)+sizeof(ULONG), (char*)VARNAME(nxtvar));
+            pgoal = &(*pgoal)->RIGHT;
+            }
+        }
+    *pgoal = same_as_w(&nilNode);
+    }
+
+static void lstsub(psk pnode)
+    {
+    vars* nxtvar;
+    unsigned char* name;
+    int alphabet, n;
+    beNice = FALSE;
+    name = POBJ(pnode);
+    for(alphabet = 0; alphabet < 256; alphabet++)
+        {
+        for(nxtvar = variables[alphabet];
+            nxtvar;
+            nxtvar = nxtvar->next)
+            {
+            if((pnode->u.obj == 0 && alphabet < 0x80) || !STRCMP(VARNAME(nxtvar), name))
+                {
+                for(n = nxtvar->n; n >= 0; n--)
+                    {
+                    ppsk tmp;
+                    if(listWithName)
+                        {
+                        if(global_fpo == stdout)
+                            {
+                            if(nxtvar->n > 0)
+                                Printf("%c%d (", n == nxtvar->selector ? '>' : ' ', n);
+                            else
+                                Printf("(");
+                            }
+                        if(quote(VARNAME(nxtvar)))
+                            myprintf("\"", (char*)VARNAME(nxtvar), "\"=", NULL);
+                        else
+                            myprintf((char*)VARNAME(nxtvar), "=", NULL);
+                        if(hum)
+                            myprintf("\n", NULL);
+                        }
+                    assert(nxtvar->pvaria);
+                    tmp = Entry(nxtvar->n, n, &nxtvar->pvaria);
+                    result(*tmp = Head(*tmp));
+                    if(listWithName)
+                        {
+                        if(global_fpo == stdout)
+                            Printf("\n)");
+                        myprintf(";\n", NULL);
+                        }
+                    else
+                        break; /*Only list variable on top of stack if RAW*/
+                    }
+                }
+            }
+        }
+    beNice = TRUE;
+    }
+
+static void lst(psk pnode)
+    {
+    while(is_op(pnode))
+        {
+        if(Op(pnode) == EQUALS)
+            {
+            beNice = FALSE;
+            myprintf("(", NULL);
+            if(hum)
+                myprintf("\n", NULL);
+            if(listWithName)
+                {
+                result(pnode);
+                }
+            else
+                {
+                result(pnode->RIGHT);
+                }
+            if(hum)
+                myprintf("\n", NULL);
+            myprintf(")\n", NULL);
+            beNice = TRUE;
+            return;
+            }
+        else
+            {
+            lst(pnode->LEFT);
+            pnode = pnode->RIGHT;
+            }
+        }
+    lstsub(pnode);
+    }
+
+static function_return_type setIndex(psk Pnode)
+    {
+    psk lnode = Pnode->LEFT;
+    psk rightnode = Pnode->RIGHT;
+    if(INTEGER(lnode))
+        {
+        vars* nxtvar;
+        if(is_op(rightnode))
+            return functionFail(Pnode);
+        for(nxtvar = variables[rightnode->u.obj];
+            nxtvar && (STRCMP(VARNAME(nxtvar), POBJ(rightnode)) < 0);
+            nxtvar = nxtvar->next);
+        /* find first name in a row of equal names */
+        if(nxtvar && !STRCMP(VARNAME(nxtvar), POBJ(rightnode)))
+            {
+            nxtvar->selector =
+                (int)toLong(lnode)
+                % (nxtvar->n + 1);
+            if(nxtvar->selector < 0)
+                nxtvar->selector += (nxtvar->n + 1);
+            Pnode = rightbranch(Pnode);
+            return functionOk(Pnode);
+            }
+        else
+            return functionFail(Pnode);
+        }
+    return 0;
+    /*
+    if(!(rightnode->v.fl & SUCCESS))
+        return functionFail(Pnode);
+    addr[1] = NULL;
+    return execFnc(Pnode);
+    */
+    }
+
+static int scopy_insert(psk name, const char* str)
+    {
+    int ret;
+    psk pnode;
+    pnode = scopy(str);
+    ret = insert(name, pnode);
+    wipe(pnode);
+    return ret;
+    }
+
+static int icopy_insert(psk name, LONG number)
+    {
+    char buf[22];
+    sprintf((char*)buf, LONGD, number);
+    return scopy_insert(name, buf);
+    }
+
+static int string_copy_insert(psk name, psk pnode, char* str, char* cutoff)
+    {
+    char sav = *cutoff;
+    int ret;
+    *cutoff = '\0';
+    if((pnode->v.fl & IDENT) || all_refcount_bits_set(pnode))
+        {
+        ret = scopy_insert(name, str);
+        }
+    else
+        {
+        stringrefnode* psnode;
+        int nr;
+        nr = fullnumbercheck(str) & ~DEFINITELYNONUMBER;
+        if((nr & MINUS) && !(name->v.fl & NUMBER))
+            nr = 0; /* "-1" is only converted to -1 if the # flag is present on the pattern */
+        psnode = (stringrefnode*)bmalloc(__LINE__, sizeof(stringrefnode));
+        psnode->v.fl = /*(pnode->v.fl & ~(ALL_REFCOUNT_BITS_SET|VISIBLE_FLAGS)) substring doesn't inherit flags like */
+            READY | SUCCESS | LATEBIND | nr;
+        /*psnode->v.fl |= SUCCESS;*/ /*{?} @(~`ab:%?x %?y)&!x => a */ /*{!} a */
+        psnode->pnode = same_as_w(pnode);
+        if(nr & MINUS)
+            {
+            psnode->str = str + 1;
+            psnode->length = cutoff - str - 1;
+            }
+        else
+            {
+            psnode->str = str;
+            psnode->length = cutoff - str;
+            }
+        DBGSRC(int saveNice; int redhum; saveNice = beNice; \
+                redhum = hum; beNice = FALSE; hum = FALSE; \
+                Printf("str [%s] length " LONGU "\n", psnode->str, (ULONG int)psnode->length); \
+                beNice = saveNice; hum = redhum;)
+            ret = insert(name, (psk)psnode);
+        if(ret)
+            dec_refcount((psk)psnode);
+        else
+            {
+            wipe(pnode);
+            bfree((void*)psnode);
+            }
+        }
+    *cutoff = sav;
+    return ret;
+    }
+
+static psk evalmacro(psk Pnode)
+    {
+    if(!is_op(Pnode))
+        {
+        return NULL;
+        }
+    else
+        {
+        psk arg = Pnode;
+        while(!(Pnode->v.fl & READY))
+            {
+            if(atomtest(Pnode->LEFT) != 0)
+                {
+                psk left = evalmacro(Pnode->LEFT);
+                if(left != NULL)
+                    {
+                    /* copy backbone from evalmacro's argument to current Pnode
+                        release lhs of copy of current and replace with 'left'
+                        assign copy to 'Pnode'
+                        evalmacro current, if not null, replace current
+                        return current
+                    */
+                    psk ret;
+                    psk first = NULL;
+                    psk* last = backbone(arg, Pnode, &first);
+                    wipe((*last)->LEFT);
+                    (*last)->LEFT = left;
+                    if(atomtest((*last)->LEFT) == 0 && Op((*last)) == FUN)
+                        {
+                        ret = evalmacro(*last);
+                        if(ret)
+                            {
+                            wipe(*last);
+                            *last = ret;
+                            }
+                        }
+                    else
+                        {
+                        psk right = evalmacro((*last)->RIGHT);
+                        if(right)
+                            {
+                            wipe((*last)->RIGHT);
+                            (*last)->RIGHT = right;
+                            }
+                        }
+                    return first;
+                    }
+                }
+            else if(Op(Pnode) == FUN)
+                {
+                if(Op(Pnode->RIGHT) == UNDERSCORE)
+                    {
+                    int Flgs;
+                    psk h;
+                    psk hh;
+                    psk first = NULL;
+                    psk* last;
+                    Flgs = Pnode->v.fl & (UNOPS | SUCCESS);
+                    h = subtreecopy(Pnode->RIGHT);
+                    if(dummy_op == EQUALS)
+                        {
+                        psk becomes = (psk)bmalloc(__LINE__, sizeof(objectnode));
+#if WORD32
+                        ((typedObjectnode*)becomes)->u.Int = 0;
+#else
+                        ((typedObjectnode*)becomes)->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
+#endif
+                        becomes->LEFT = same_as_w(h->LEFT);
+                        becomes->RIGHT = same_as_w(h->RIGHT);
+                        wipe(h);
+                        h = becomes;
+                        }
+                    h->v.fl = dummy_op | Flgs;
+                    hh = evalmacro(h->LEFT);
+                    if(hh)
+                        {
+                        wipe(h->LEFT);
+                        h->LEFT = hh;
+                        }
+                    hh = evalmacro(h->RIGHT);
+                    if(hh)
+                        {
+                        wipe(h->RIGHT);
+                        h->RIGHT = hh;
+                        }
+                    last = backbone(arg, Pnode, &first);
+                    wipe(*last);
+                    *last = h;
+                    return first;
+                    }
+                else if(Op(Pnode->RIGHT) == FUN
+                        && atomtest(Pnode->RIGHT->LEFT) == 0
+                        )
+                    {
+                    int Flgs;
+                    psk h;
+                    psk hh;
+                    psk first = NULL;
+                    psk* last;
+                    Flgs = Pnode->v.fl & UNOPS;
+                    h = subtreecopy(Pnode->RIGHT);
+                    h->v.fl |= Flgs;
+                    assert(atomtest(h->LEFT) == 0);
+                    /* hh = evalmacro(h->LEFT);
+                    if(hh)
+                        {
+                        wipe(h->LEFT);
+                        h->LEFT = hh;
+                        }*/
+                    hh = evalmacro(h->RIGHT);
+                    if(hh)
+                        {
+                        wipe(h->RIGHT);
+                        h->RIGHT = hh;
+                        }
+                    last = backbone(arg, Pnode, &first);
+                    wipe(*last);
+                    *last = h;
+                    return first;
+                    }
+                else
+                    {
+                    int newval = 0;
+                    psk tmp = same_as_w(Pnode->RIGHT);
+                    psk h;
+                    tmp = eval(tmp);
+
+                    if((h = getValue(tmp, &newval)) != NULL)
+                        {
+                        int Flgs;
+                        psk first = NULL;
+                        psk* last;
+                        if((Op(h) == EQUALS) && ISBUILTIN((objectnode*)h))
+                            {
+                            if(!newval)
+                                h = same_as_w(h);
+                            }
+                        else
+                            {
+                            Flgs = Pnode->v.fl & (UNOPS);
+                            if(!newval)
+                                {
+                                h = subtreecopy(h);
+                                }
+                            if(Flgs)
+                                {
+                                h->v.fl |= Flgs;
+                                if(h->v.fl & INDIRECT)
+                                    h->v.fl &= ~READY;
+                                }
+                            else if(h->v.fl & INDIRECT)
+                                {
+                                h->v.fl &= ~READY;
+                                }
+                            else if(Op(h) == EQUALS)
+                                {
+                                h->v.fl &= ~READY;
+                                }
+                            }
+
+                        wipe(tmp);
+                        last = backbone(arg, Pnode, &first);
+                        wipe(*last);
+                        *last = h;
+                        return first;
+                        }
+                    else
+                        {
+                        errorprintf("\nmacro evaluation fails because rhs of $ operator is not bound to a value: "); writeError(Pnode); errorprintf("\n");
+                        wipe(tmp);
+                        return NULL;
+                        }
+                    }
+                }
+            Pnode = Pnode->RIGHT;
+            if(!is_op(Pnode))
+                {
+                break;
+                }
+            }
+        }
+    return NULL;
+    }
 
 static LONG casesensitivehash(const char* cp)
     {
@@ -8278,381 +9459,6 @@ Examples:
 
 */
 
-classdef classes[] = { {"hash",hash},{NULL,NULL} };
-
-static method_pnt findBuiltInMethod(typedObjectnode * object, psk methodName)
-    {
-    if(!is_op(methodName))
-        {
-        return findBuiltInMethodByName(object, (const char*)POBJ(methodName));
-        }
-    return NULL;
-    }
-
-typedef struct
-    {
-    psk self;
-    psk object;
-    method_pnt theMethod;
-    } objectStuff;
-
-
-static psk getmember2(psk name, psk tree)
-    {
-    while(is_op(tree))
-        {
-        if(Op(tree) == EQUALS)
-            {
-            psk nname;
-
-            if(Op(name) == DOT)
-                nname = name->LEFT;
-            else
-                nname = name;
-
-            if(equal(tree->LEFT, nname))
-                return NULL;
-            else if(nname == name)
-                {
-                return tree->RIGHT = Head(tree->RIGHT);
-                }
-            else
-                {
-                name = name->RIGHT;
-                }
-            }
-        else
-            {
-            psk tmp;
-            if((tmp = getmember2(name, tree->LEFT)) != NULL)
-                {
-                return tmp;
-                }
-            }
-        tree = tree->RIGHT;
-        }
-    return NULL;
-    }
-
-
-static psk getmember(psk name, psk tree, objectStuff * Object)
-    {
-    /* Returns NULL if either the method is not found or if the method is
-       built-in. In the latter case, Object->theMethod is set. */
-    while(is_op(tree))
-        {
-        if(Op(tree) == EQUALS)
-            {
-            psk nname;
-            if(ISBUILTIN((objectnode*)tree)
-               && Op(name) == DOT
-               )
-                {
-                Object->object = tree;  /* object == (=) */
-                Object->theMethod = findBuiltInMethod((typedObjectnode*)tree, name->RIGHT);
-                /* findBuiltInMethod((=),(insert)) */
-                if(Object->theMethod)
-                    {
-                    return NULL;
-                    }
-                }
-
-            if(Op(name) == DOT)
-                nname = name->LEFT;
-            else
-                nname = name;
-            if(equal(tree->LEFT, nname))
-                return NULL;
-            else if(nname == name)
-                {
-                return tree->RIGHT = Head(tree->RIGHT);
-                }
-            else
-                {
-                Object->self = tree->RIGHT;
-                name = name->RIGHT;
-                }
-            }
-        else
-            {
-            psk tmp;
-            if((tmp = getmember(name, tree->LEFT, Object)) != NULL)
-                {
-                return tmp;
-                }
-            }
-        tree = tree->RIGHT;
-        }
-    return NULL;
-    }
-
-static psk getValueByVariableName(psk namenode)
-    {
-    vars* nxtvar;
-    assert(!is_op(namenode));
-    for(nxtvar = variables[namenode->u.obj];
-        nxtvar && (STRCMP(VARNAME(nxtvar), POBJ(namenode)) < 0);
-        nxtvar = nxtvar->next)
-        ;
-    if(nxtvar && !STRCMP(VARNAME(nxtvar), POBJ(namenode))
-       && nxtvar->selector <= nxtvar->n
-       )
-        {
-        ppsk self;
-        assert(nxtvar->pvaria);
-        self = Entry(nxtvar->n, nxtvar->selector, &nxtvar->pvaria);
-        *self = Head(*self);
-        return *self;
-        }
-    else
-        {
-        return NULL;
-        }
-    }
-
-static psk getValue(psk namenode, int* newval)
-    {
-    if(is_op(namenode))
-        {
-        switch(Op(namenode))
-            {
-            case EQUALS:
-                {
-                /* namenode is /!(=b) when evaluating (a=b)&/!('$a):b */
-                *newval = TRUE;
-                namenode->RIGHT = Head(namenode->RIGHT);
-                return same_as_w(namenode->RIGHT);
-                }
-            case DOT: /*
-                      e.g.
-
-                            x  =  (a=2) (b=3)
-
-                            !(x.a)
-                      and
-                            !((=  (a=2) (b=3)).a)
-
-                      must give same result.
-                      */
-                {
-                psk tmp;
-                if(is_op(namenode->LEFT))
-                    {
-                    if(Op(namenode->LEFT) == EQUALS) /* namenode->LEFT == (=  (a=2) (b=3))   */
-                        {
-                        tmp = namenode->LEFT->RIGHT; /* tmp == ((a=2) (b=3))   */
-                        }
-                    else
-                        {
-                        return NULL; /* !(+a.a) */
-                        }
-                    }
-                else                                   /* x */
-                    {
-                    if((tmp = getValueByVariableName(namenode->LEFT)) == NULL)
-                        {
-                        return NULL; /* !(xua.gjh) if xua isn't defined */
-                        }
-                    /*
-                    tmp == ((a=2) (b=3))
-                    tmp == (=)
-                    */
-                    }
-                /* The number of '=' to reach the method name in 'tmp' must be one greater
-                   than the number of '.' that precedes the method name in 'namenode->RIGHT'
-
-                   e.g (= (say=.out$!arg)) and (.say) match
-
-                   For built-in methods (definitions of which are not visible) an invisible '=' has to be assumed.
-
-                   The function getmember resolves this.
-                */
-                tmp = getmember2(namenode->RIGHT, tmp);
-
-                if(tmp)
-                    {
-                    *newval = TRUE;
-                    return same_as_w(tmp);
-                    }
-                else
-                    {
-                    return NULL; /* !(a.c) if a=(b=4) */
-                    }
-                }
-            default:
-                {
-                *newval = FALSE;
-                return NULL; /* !(a,b) because of comma instead of dot */
-                }
-            }
-        }
-    else
-        {
-        return getValueByVariableName(namenode);
-        }
-    }
-
-static psk findMethod(psk namenode, objectStuff * Object)
-/* Only for finding 'function' definitions. (LHS of ' or $)*/
-/*
-'namenode' is the expression that has to lead to a binding.
-Conceptually, expression (or its complement) and binding are separated by a '=' operator.
-E.g.
-
-  say            =         (.out$!arg)
-  ---            -         -----------
-  expression   '='-operator     binding
-
-    say$HELLO
-    and
-    (= (.out$!arg))$HELLO
-
-      must be equivalent. Therefore, both of 'say' and its complement '(= .out$!arg)' have the binding '(.out$!arg)'.
-
-        'find' returns returns a binding or NULL.
-        If the function returns NULL, 'theMethod' may still be bound.
-        The parameter 'self' is the rhs of the root '=' of an object. It is used for non-built-ins
-        The parameter 'object' is the root of an object, possibly having built-in methods.
-
-
-Built in methods:
-if
-    new$hash:?x
-then
-    ((=).insert)$   (=) being the hash node with invisible built in method 'insert'
-and
-    (!x.insert)$
-and
-    (x..insert)$
-must be equivalent
-*/
-    {
-    psk tmp;
-    assert(is_op(namenode));
-    assert(Op(namenode) == DOT);
-    /*
-    e.g.
-
-    new$hash:?y
-
-    (y..insert)$
-    (!y.insert)$
-    */
-    /* (=hash).New when evaluating new$hash:?y
-        y..insert when evaluating (y..insert)$
-    */
-    if(is_op(namenode->LEFT))
-        {
-        if(Op(namenode->LEFT) == EQUALS)
-            {
-            if(ISBUILTIN((objectnode*)(namenode->LEFT))
-               )
-                {
-                Object->theMethod = findBuiltInMethod((typedObjectnode*)(namenode->LEFT), namenode->RIGHT);
-                /* findBuiltInMethod((=),(insert)) */
-                Object->object = namenode->LEFT;  /* object == (=) */
-                if(Object->theMethod)
-                    {
-                    namenode->LEFT = same_as_w(namenode->LEFT);
-                    return namenode->LEFT; /* (=hash).New when evaluating (new$hash..insert)$(a.b) */
-                    }
-                }
-            tmp = namenode->LEFT->RIGHT;
-            /* e.g. tmp == hash
-            Or  tmp ==
-                  (name=(first=John),(last=Bull))
-                , (age=20)
-                , ( new
-                  =
-                    .   new$(its.name):(=?(its.name))
-                      &   !arg
-                        : ( ?(its.name.first)
-                          . ?(its.name.last)
-                          . ?(its.age)
-                          )
-                  )
-            */
-            }
-        else
-            {
-            return NULL;  /* ((.(did=.!arg+2)).did)$3 */
-            }
-        }
-    else                                   /* x */
-        {
-        if((tmp = getValueByVariableName(namenode->LEFT)) == NULL)
-            {
-            return NULL;   /* (y.did)$3  when y is not defined at all */
-            }
-        /*
-        tmp == ((a=2) (b=3))
-        tmp == (=)
-        */
-        }
-    Object->self = tmp; /* self == ((a=2) (b=3))   */
-    /* The number of '=' to reach the method name in 'tmp' must be one greater
-        than the number of '.' that precedes the method name in 'namenode->RIGHT'
-
-        e.g (= (say=.out$!arg)) and (.say) match
-
-        For built-in methods (definitions of which are not visible) an invisible '=' has to be assumed.
-
-        The function getmember resolves this.
-    */
-    tmp = getmember(namenode->RIGHT, tmp, Object);
-
-    if(tmp)
-        {
-        return same_as_w(tmp);
-        }
-    else
-        { /* You get here if a built-in method is called. */
-        return NULL; /* (=hash)..insert when evaluating (new$hash..insert)$(a.b) */
-        }
-
-    }
-
-static int deleteNode(psk name)
-    {
-    vars* nxtvar, * prevvar;
-    varia* hv;
-    if(searchname(name,
-                  &prevvar,
-                  &nxtvar))
-        {
-        psk tmp;
-        assert(nxtvar->pvaria);
-        tmp = Entry2(nxtvar->n, nxtvar->n, nxtvar->pvaria);
-        wipe(tmp);
-        if(nxtvar->n)
-            {
-            if((nxtvar->n) - 1 < power2(nxtvar->n))
-                {
-                hv = nxtvar->pvaria;
-                nxtvar->pvaria = hv->prev;
-                bfree(hv);
-                }
-            nxtvar->n--;
-            if(nxtvar->n < nxtvar->selector)
-                nxtvar->selector = nxtvar->n;
-            }
-        else
-            {
-            if(prevvar)
-                prevvar->next = nxtvar->next;
-            else
-                variables[*POBJ(name)] = nxtvar->next;
-#if PVNAME
-            if(nxtvar->vname != OBJ(nilNode))
-                bfree(nxtvar->vname);
-#endif
-            bfree(nxtvar);
-            }
-        return TRUE;
-        }
-    else
-        return FALSE;
-    }
 
 static psk SymbolBinding(psk variabele, int* newval, int twolevelsofindirection)
     {
@@ -8798,237 +9604,8 @@ first finds (=B), which is an object that should not obtain the flags !! as in
     return pbinding;
     }
 
-#if !DEBUGBRACMAT
-#define match(IND,SUB,PAT,SNIJAF,POS,LENGTH,OP) match(SUB,PAT,SNIJAF,POS,LENGTH,OP)
-#if CUTOFFSUGGEST
-#define stringmatch(IND,WH,SUB,SNIJAF,PAT,PKN,POS,LENGTH,SUGGESTEDCUTOFF,MAYMOVESTARTOFSUBJECT) stringmatch(SUB,SNIJAF,PAT,PKN,POS,LENGTH,SUGGESTEDCUTOFF,MAYMOVESTARTOFSUBJECT)
-#else
-#define stringmatch(IND,WH,SUB,SNIJAF,PAT,PKN,POS,LENGTH) stringmatch(SUB,SNIJAF,PAT,PKN,POS,LENGTH)
-#endif
-#endif
-
-static void cleanOncePattern(psk pat)
-    {
-    pat->v.fl &= ~IMPLIEDFENCE;
-    if(is_op(pat))
-        {
-        cleanOncePattern(pat->LEFT);
-        cleanOncePattern(pat->RIGHT);
-        }
-    }
-
-
-static int stringOncePattern(psk pat)
-    {
-    /*
-    This function has a side effect: it sets a flag in all pattern nodes that
-    can be matched by at most one non-trivial list element (a nonzero term in
-    a sum, a factor in a product that is not 1, or a nonempty word in a
-    sentence. Because the function depends on ATOMFILTERS, the algorithm
-    should be slightly different for normal matches and for string matches.
-    Ideally, two flags should be reserved.
-    */
-    if(pat->v.fl & IMPLIEDFENCE)
-        {
-        return TRUE;
-        }
-    if(pat->v.fl & SATOMFILTERS)
-        {
-        pat->v.fl |= IMPLIEDFENCE;
-        return TRUE;
-        }
-    else if(pat->v.fl & ATOMFILTERS)
-        {
-        return FALSE;
-        }
-    else if(IS_VARIABLE(pat)
-            || NOTHING(pat)
-            || (pat->v.fl & NONIDENT) /* @(abc:% c) */
-            )
-        {
-        return FALSE;
-        }
-    else if(!is_op(pat))
-        {
-        if(!pat->u.obj)
-            {
-            pat->v.fl |= IMPLIEDFENCE;
-            return TRUE;
-            }
-        else
-            {
-            return FALSE;
-            }
-        }
-    else
-        {
-        switch(Op(pat))
-            {
-            case DOT:
-            case COMMA:
-            case EQUALS:
-            case EXP:
-            case LOG:
-            case DIF:
-                pat->v.fl |= IMPLIEDFENCE;
-                return TRUE;
-            case OR:
-                if(stringOncePattern(pat->LEFT) && stringOncePattern(pat->RIGHT))
-                    {
-                    pat->v.fl |= IMPLIEDFENCE;
-                    return TRUE;
-                    }
-                break;
-            case MATCH:
-                if(stringOncePattern(pat->LEFT) || stringOncePattern(pat->RIGHT))
-                    {
-                    pat->v.fl |= IMPLIEDFENCE;
-                    return TRUE;
-                    }
-                break;
-            case AND:
-                if(stringOncePattern(pat->LEFT))
-                    {
-                    pat->v.fl |= IMPLIEDFENCE;
-                    return TRUE;
-                    }
-                break;
-            default:
-                break;
-            }
-        }
-    return FALSE;
-    }
-
-
-static int oncePattern(psk pat)
-    {
-    /*
-    This function has a side effect: it sets a flag IMPLIEDFENCE in all
-    pattern nodes that can be matched by at most one non-trivial list element
-    (a nonzero term in a sum, a factor in a product that is not 1, or a
-    nonempty word in a sentence. Because the function depends on ATOMFILTERS,
-    the algorithm should be slightly different for normal matches and for
-    string matches. Ideally, two flags should be reserved.
-    */
-    if(pat->v.fl & IMPLIEDFENCE)
-        {
-        return TRUE;
-        }
-    if((pat->v.fl & ATOM) && NEGATION(pat->v.fl, ATOM))
-        {
-        return FALSE;
-        }
-    else if(pat->v.fl & ATOMFILTERS)
-        {
-        pat->v.fl |= IMPLIEDFENCE;
-        return TRUE;
-        }
-    else if(IS_VARIABLE(pat)
-            || NOTHING(pat)
-            || (pat->v.fl & NONIDENT) /*{?} a b c:% c => a b c */
-            )
-        return FALSE;
-    else if(!is_op(pat))
-        {
-        pat->v.fl |= IMPLIEDFENCE;
-        return TRUE;
-        }
-    else
-        switch(Op(pat))
-            {
-            case DOT:
-            case COMMA:
-            case EQUALS:
-            case LOG:
-            case DIF:
-                pat->v.fl |= IMPLIEDFENCE;
-                return TRUE;
-            case OR:
-                if(oncePattern(pat->LEFT) && oncePattern(pat->RIGHT))
-                    {
-                    pat->v.fl |= IMPLIEDFENCE;
-                    return TRUE;
-                    }
-                break;
-            case MATCH:
-                if(oncePattern(pat->LEFT) || oncePattern(pat->RIGHT))
-                    {
-                    pat->v.fl |= IMPLIEDFENCE;
-                    return TRUE;
-                    }
-                break;
-            case AND:
-                if(oncePattern(pat->LEFT))
-                    {
-                    pat->v.fl |= IMPLIEDFENCE;
-                    return TRUE;
-                    }
-                break;
-            default:
-                break;
-            }
-    return FALSE;
-    }
-
 #define SHIFT_SAV 0
-#define SHIFT_LMR 8
-#define SHIFT_RMR 16
 #define SHIFT_ONCE 24
-
-typedef union matchstate
-    {
-#ifndef NDEBUG
-    struct
-        {
-        unsigned int bsave : 8;
-
-        unsigned int blmr_true : 1;
-        unsigned int blmr_success : 1; /* SUCCESS */
-        unsigned int blmr_pristine : 1;
-        unsigned int blmr_once : 1;
-        unsigned int blmr_position_once : 1;
-        unsigned int blmr_position_max_reached : 1;
-        unsigned int blmr_fence : 1; /* FENCE */
-        unsigned int blmr_unused_15 : 1;
-
-        unsigned int brmr_true : 1;
-        unsigned int brmr_success : 1; /* SUCCESS */
-        unsigned int brmr_pristine : 1;
-        unsigned int brmr_once : 1;
-        unsigned int brmr_position_once : 1;
-        unsigned int brmr_position_max_reached : 1;
-        unsigned int brmr_fence : 1; /* FENCE */
-        unsigned int brmr_unused_23 : 1;
-
-        unsigned int unused_24_26 : 3;
-        unsigned int bonce : 1;
-        unsigned int unused_28_31 : 4;
-        } b;
-#endif
-    struct
-        {
-        char sav;
-        char lmr;
-        char rmr;
-        unsigned char once;
-        } c;
-    unsigned int i;
-    } matchstate;
-
-#if DEBUGBRACMAT
-#ifndef NDEBUG
-static void printMatchState(const char* msg, matchstate s, int pos, int len)
-    {
-    Printf("\n%s pos %d len %d once %d", msg, pos, len, s.b.bonce);
-    Printf("\n     t o p m f i");
-    Printf("\n lmr %d %d %d %d %d %d",
-           s.b.blmr_true, s.b.blmr_once, s.b.blmr_position_once, s.b.blmr_position_max_reached, s.b.blmr_fence, s.b.blmr_pristine);
-    Printf("\n rmr %d %d %d %d %d %d\n",
-           s.b.brmr_true, s.b.brmr_once, s.b.brmr_position_once, s.b.brmr_position_max_reached, s.b.brmr_fence, s.b.brmr_pristine);
-    }
-#endif
-#endif
 
 static LONG expressionLength(psk Pnode, unsigned int op)
     {
@@ -9261,9 +9838,86 @@ static char doPosition(matchstate s, psk pat, LONG pposition, size_t stringLengt
     return s.c.rmr;
     }
 
-static int atomtest(psk pnode)
+static int stringOncePattern(psk pat)
     {
-    return (!is_op(pnode) && !HAS_UNOPS(pnode)) ? (int)pnode->u.obj : -1;
+    /*
+    This function has a side effect: it sets a flag in all pattern nodes that
+    can be matched by at most one non-trivial list element (a nonzero term in
+    a sum, a factor in a product that is not 1, or a nonempty word in a
+    sentence. Because the function depends on ATOMFILTERS, the algorithm
+    should be slightly different for normal matches and for string matches.
+    Ideally, two flags should be reserved.
+    */
+    if(pat->v.fl & IMPLIEDFENCE)
+        {
+        return TRUE;
+        }
+    if(pat->v.fl & SATOMFILTERS)
+        {
+        pat->v.fl |= IMPLIEDFENCE;
+        return TRUE;
+        }
+    else if(pat->v.fl & ATOMFILTERS)
+        {
+        return FALSE;
+        }
+    else if(IS_VARIABLE(pat)
+            || NOTHING(pat)
+            || (pat->v.fl & NONIDENT) /* @(abc:% c) */
+            )
+        {
+        return FALSE;
+        }
+    else if(!is_op(pat))
+        {
+        if(!pat->u.obj)
+            {
+            pat->v.fl |= IMPLIEDFENCE;
+            return TRUE;
+            }
+        else
+            {
+            return FALSE;
+            }
+        }
+    else
+        {
+        switch(Op(pat))
+            {
+            case DOT:
+            case COMMA:
+            case EQUALS:
+            case EXP:
+            case LOG:
+            case DIF:
+                pat->v.fl |= IMPLIEDFENCE;
+                return TRUE;
+            case OR:
+                if(stringOncePattern(pat->LEFT) && stringOncePattern(pat->RIGHT))
+                    {
+                    pat->v.fl |= IMPLIEDFENCE;
+                    return TRUE;
+                    }
+                break;
+            case MATCH:
+                if(stringOncePattern(pat->LEFT) || stringOncePattern(pat->RIGHT))
+                    {
+                    pat->v.fl |= IMPLIEDFENCE;
+                    return TRUE;
+                    }
+                break;
+            case AND:
+                if(stringOncePattern(pat->LEFT))
+                    {
+                    pat->v.fl |= IMPLIEDFENCE;
+                    return TRUE;
+                    }
+                break;
+            default:
+                break;
+            }
+        }
+    return FALSE;
     }
 
 static char sdoEval(char* sub, char* cutoff, psk pat, psk subkn)
@@ -9285,33 +9939,6 @@ static char sdoEval(char* sub, char* cutoff, psk pat, psk subkn)
         ret = (loc->v.fl & FENCE) ? ONCE : FALSE;
         }
     wipe(loc);
-    return ret;
-    }
-
-/*
-    ( Dogs and Cats are friends: ? [%(out$(!sjt SJT)&~) (|))&
-    ( Dogs and Cats are friends: ? [%(out$(!sjt)&~) (|))&
-*/
-static char doEval(psk sub, psk cutoff, psk pat)
-    {
-    char ret;
-    psk loc;
-    psh(&sjtNode, &nilNode, NULL);
-    copy_insert(&sjtNode, sub, cutoff);
-    loc = subtreecopy(pat);
-    loc->v.fl &= ~(POSITION | NONIDENT | IMPLIEDFENCE | ONCE);
-    loc = eval(loc);
-    deleteNode(&sjtNode);
-    if(isSUCCESS(loc))
-        {
-        ret = (loc->v.fl & FENCE) ? (TRUE | ONCE) : TRUE;
-        }
-    else
-        {
-        ret = (loc->v.fl & FENCE) ? ONCE : FALSE;
-        }
-    wipe(loc);
-
     return ret;
     }
 
@@ -9919,7 +10546,102 @@ static char stringmatch
     return (char)(s.c.once | s.c.rmr);
     }
 
+/*
+    ( Dogs and Cats are friends: ? [%(out$(!sjt SJT)&~) (|))&
+    ( Dogs and Cats are friends: ? [%(out$(!sjt)&~) (|))&
+*/
+static char doEval(psk sub, psk cutoff, psk pat)
+    {
+    char ret;
+    psk loc;
+    psh(&sjtNode, &nilNode, NULL);
+    copy_insert(&sjtNode, sub, cutoff);
+    loc = subtreecopy(pat);
+    loc->v.fl &= ~(POSITION | NONIDENT | IMPLIEDFENCE | ONCE);
+    loc = eval(loc);
+    deleteNode(&sjtNode);
+    if(isSUCCESS(loc))
+        {
+        ret = (loc->v.fl & FENCE) ? (TRUE | ONCE) : TRUE;
+        }
+    else
+        {
+        ret = (loc->v.fl & FENCE) ? ONCE : FALSE;
+        }
+    wipe(loc);
 
+    return ret;
+    }
+
+static int oncePattern(psk pat)
+    {
+    /*
+    This function has a side effect: it sets a flag IMPLIEDFENCE in all
+    pattern nodes that can be matched by at most one non-trivial list element
+    (a nonzero term in a sum, a factor in a product that is not 1, or a
+    nonempty word in a sentence. Because the function depends on ATOMFILTERS,
+    the algorithm should be slightly different for normal matches and for
+    string matches. Ideally, two flags should be reserved.
+    */
+    if(pat->v.fl & IMPLIEDFENCE)
+        {
+        return TRUE;
+        }
+    if((pat->v.fl & ATOM) && NEGATION(pat->v.fl, ATOM))
+        {
+        return FALSE;
+        }
+    else if(pat->v.fl & ATOMFILTERS)
+        {
+        pat->v.fl |= IMPLIEDFENCE;
+        return TRUE;
+        }
+    else if(IS_VARIABLE(pat)
+            || NOTHING(pat)
+            || (pat->v.fl & NONIDENT) /*{?} a b c:% c => a b c */
+            )
+        return FALSE;
+    else if(!is_op(pat))
+        {
+        pat->v.fl |= IMPLIEDFENCE;
+        return TRUE;
+        }
+    else
+        switch(Op(pat))
+            {
+            case DOT:
+            case COMMA:
+            case EQUALS:
+            case LOG:
+            case DIF:
+                pat->v.fl |= IMPLIEDFENCE;
+                return TRUE;
+            case OR:
+                if(oncePattern(pat->LEFT) && oncePattern(pat->RIGHT))
+                    {
+                    pat->v.fl |= IMPLIEDFENCE;
+                    return TRUE;
+                    }
+                break;
+            case MATCH:
+                if(oncePattern(pat->LEFT) || oncePattern(pat->RIGHT))
+                    {
+                    pat->v.fl |= IMPLIEDFENCE;
+                    return TRUE;
+                    }
+                break;
+            case AND:
+                if(oncePattern(pat->LEFT))
+                    {
+                    pat->v.fl |= IMPLIEDFENCE;
+                    return TRUE;
+                    }
+                break;
+            default:
+                break;
+            }
+    return FALSE;
+    }
 
 static char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk expr, unsigned int op)
     {
@@ -10635,745 +11357,30 @@ static char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk exp
     return s.c.rmr;
     }
 
-static int subroot(nnumber * ag, char* conc[], int* pind)
+#if !defined NO_FOPEN
+enum { NoPending, Writing, Reading };
+typedef struct fileStatus
     {
-    int macht, i;
-    ULONG g, smalldivisor;
-    ULONG ores;
-    static int bijt[12] =
-        { 1,  2,  2,  4,    2,    4,    2,    4,    6,    2,  6 };
-    /* 2-3,3-5,5-7,7-11,11-13,13-17,17-19,19-23,23-29,29-1,1-7*/
-    ULONG bigdivisor;
-
-#ifdef ERANGE   /* ANSI C : strtoul() out of range */
-    errno = 0;
-    g = STRTOUL(ag->number, NULL, 10);
-    if(errno == ERANGE)
-        return FALSE; /*{?} 45237183544316235476^1/2 => 45237183544316235476^1/2 */
-#else  /* TURBOC, vcc */
-    if(ag.length > 10 || ag.length == 10 && strcmp(ag.number, "4294967295") > 0)
-        return FALSE;
-    g = STRTOUL(ag.number, NULL, 10);
+    char* fname;
+    FILE* fp;
+    struct fileStatus* next;
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
+    Boolean dontcloseme;
+    LONG filepos; /* Normally -1. If >= 0, then the file is closed.
+                When reopening, filepos is used to find the position
+                before the file was closed. */
+    LONG mode;
+    LONG type;
+    LONG size;
+    LONG number;
+    LONG time;
+    int rwstatus;
+    char* stop; /* contains characters to stop reading at, default NULL */
 #endif
-    ores = 1;
-    macht = 1;
-    smalldivisor = 2;
-    i = 0;
-    while((bigdivisor = g / smalldivisor) >= smalldivisor)
-        {
-        if(bigdivisor * smalldivisor == g)
-            {
-            g = bigdivisor;
-            if(smalldivisor != ores)
-                {
-                if(ores != 1)
-                    {
-                    if(ores < 1000)
-                        {
-                        conc[(*pind)] = (char*)bmalloc(__LINE__, 12);/*{?} 327365274^1/2 => 2^1/2*3^1/2*2477^1/2*22027^1/2 */
-                        }
-                    else
-                        {
-                        conc[*pind] = (char*)bmalloc(__LINE__, 20);
-                        }
-                    sprintf(conc[(*pind)++], LONGU "^(%d*\1)*", ores, macht);
-                    }
-                macht = 1;
-                ores = smalldivisor;
-                }
-            else
-                {
-                macht++; /*{?} 80956863^1/2 => 3*13^1/2*541^1/2*1279^1/2 */
-                }
-            }
-        else
-            {
-            smalldivisor += bijt[i];
-            if(++i > 10)
-                i = 3;
-            }
-        }
-    if(ores == 1 && macht == 1)
-        return FALSE;
-    conc[*pind] = (char*)bmalloc(__LINE__, 32);
-    if((ores == g && ++macht) || ores == 1)
-        sprintf(conc[(*pind)++], LONGU "^(%d*\1)", g, macht); /*{?} 32^1/2 => 2^5/2 */
-    else
-        sprintf(conc[(*pind)++], LONGU "^(%d*\1)*" LONGU "^\1", ores, macht, g);
-    return TRUE;
-    }
+    } fileStatus;
 
-static int absone(psk pnode)
-    {
-    char* pstring;
-    pstring = SPOBJ(pnode);
-    return(*pstring == '1' && *++pstring == 0);
-    }
-
-static psk _leftbranch(psk Pnode)
-    {
-    psk lnode;
-    lnode = Pnode->LEFT;
-    if(!(Pnode->v.fl & SUCCESS))
-        {
-        lnode = isolated(lnode);
-        lnode->v.fl ^= SUCCESS;
-        }
-    if((Pnode->v.fl & FENCE) && !(lnode->v.fl & FENCE))
-        {
-        lnode = isolated(lnode);
-        lnode->v.fl |= FENCE;
-        }
-    wipe(Pnode->RIGHT);
-    return lnode;
-    }
-
-static psk leftbranch(psk Pnode)
-    {
-    psk lnode = _leftbranch(Pnode);
-    pskfree(Pnode);
-    return lnode;
-    }
-
-static psk _fleftbranch(psk Pnode)
-    {
-    psk lnode;
-    lnode = Pnode->LEFT;
-    if(Pnode->v.fl & SUCCESS)
-        {
-        lnode = isolated(lnode);
-        lnode->v.fl ^= SUCCESS;
-        }
-    if((Pnode->v.fl & FENCE) && !(lnode->v.fl & FENCE))
-        {
-        lnode = isolated(lnode);
-        lnode->v.fl |= FENCE;
-        }
-    wipe(Pnode->RIGHT);
-    return lnode;
-    }
-
-static psk fleftbranch(psk Pnode)
-    {
-    psk lnode = _fleftbranch(Pnode);
-    pskfree(Pnode);
-    return lnode;
-    }
-
-static psk _fenceleftbranch(psk Pnode)
-    {
-    psk lnode;
-    lnode = Pnode->LEFT;
-    if(!(Pnode->v.fl & SUCCESS))
-        {
-        lnode = isolated(lnode);
-        lnode->v.fl ^= SUCCESS;
-        }
-    if(Pnode->v.fl & FENCE)
-        {
-        if(!(lnode->v.fl & FENCE))
-            {
-            lnode = isolated(lnode);
-            lnode->v.fl |= FENCE;
-            }
-        }
-    else if(lnode->v.fl & FENCE)
-        {
-        lnode = isolated(lnode);
-        lnode->v.fl &= ~FENCE;
-        }
-    wipe(Pnode->RIGHT);
-    return lnode;
-    }
-
-static psk _rightbranch(psk Pnode)
-    {
-    psk rightnode;
-    rightnode = Pnode->RIGHT;
-    if(!(Pnode->v.fl & SUCCESS))
-        {
-        rightnode = isolated(rightnode);
-        rightnode->v.fl ^= SUCCESS;
-        }
-    if((Pnode->v.fl & FENCE) && !(rightnode->v.fl & FENCE))
-        {
-        rightnode = isolated(rightnode);
-        rightnode->v.fl |= FENCE;
-        }
-    wipe(Pnode->LEFT);
-    return rightnode;
-    }
-
-static psk rightbranch(psk Pnode)
-    {
-    psk rightnode = _rightbranch(Pnode);
-    pskfree(Pnode);
-    return rightnode;
-    }
-
-static void pop(psk pnode)
-    {
-    while(is_op(pnode))
-        {
-        pop(pnode->LEFT);
-        pnode = pnode->RIGHT;
-        }
-    deleteNode(pnode);
-    }
-
-static psk tryq(psk Pnode, psk fun, Boolean * ok)
-    {
-    psk anchor;
-    psh(&argNode, Pnode, NULL);
-    Pnode->v.fl |= READY;
-
-    anchor = subtreecopy(fun->RIGHT);
-
-    psh(fun->LEFT, &zeroNode, NULL);
-    anchor = eval(anchor);
-    pop(fun->LEFT);
-    if(anchor->v.fl & SUCCESS)
-        {
-        *ok = TRUE;
-        wipe(Pnode);
-        Pnode = anchor;
-        }
-    else
-        {
-        *ok = FALSE;
-        wipe(anchor);
-        }
-    deleteNode(&argNode);
-    return Pnode;
-    }
-
-static psk* backbone(psk arg, psk Pnode, psk * pfirst)
-    {
-    psk first = *pfirst = subtreecopy(arg);
-    psk* plast = pfirst;
-    while(arg != Pnode)
-        {
-        psk R = subtreecopy((*plast)->RIGHT);
-        wipe((*plast)->RIGHT);
-        (*plast)->RIGHT = R;
-        plast = &((*plast)->RIGHT);
-        arg = arg->RIGHT;
-        }
-    *pfirst = first;
-    return plast;
-    }
-
-static psk rightoperand(psk Pnode)
-    {
-    psk temp;
-    ULONG Sign;
-    temp = (Pnode->RIGHT);
-    return((Sign = Op(Pnode)) == Op(temp) &&
-           (Sign == PLUS || Sign == TIMES || Sign == WHITE) ?
-           temp->LEFT : temp);
-    }
-
-static psk evalmacro(psk Pnode)
-    {
-    if(!is_op(Pnode))
-        {
-        return NULL;
-        }
-    else
-        {
-        psk arg = Pnode;
-        while(!(Pnode->v.fl & READY))
-            {
-            if(atomtest(Pnode->LEFT) != 0)
-                {
-                psk left = evalmacro(Pnode->LEFT);
-                if(left != NULL)
-                    {
-                    /* copy backbone from evalmacro's argument to current Pnode
-                       release lhs of copy of current and replace with 'left'
-                       assign copy to 'Pnode'
-                       evalmacro current, if not null, replace current
-                       return current
-                    */
-                    psk ret;
-                    psk first = NULL;
-                    psk* last = backbone(arg, Pnode, &first);
-                    wipe((*last)->LEFT);
-                    (*last)->LEFT = left;
-                    if(atomtest((*last)->LEFT) == 0 && Op((*last)) == FUN)
-                        {
-                        ret = evalmacro(*last);
-                        if(ret)
-                            {
-                            wipe(*last);
-                            *last = ret;
-                            }
-                        }
-                    else
-                        {
-                        psk right = evalmacro((*last)->RIGHT);
-                        if(right)
-                            {
-                            wipe((*last)->RIGHT);
-                            (*last)->RIGHT = right;
-                            }
-                        }
-                    return first;
-                    }
-                }
-            else if(Op(Pnode) == FUN)
-                {
-                if(Op(Pnode->RIGHT) == UNDERSCORE)
-                    {
-                    int Flgs;
-                    psk h;
-                    psk hh;
-                    psk first = NULL;
-                    psk* last;
-                    Flgs = Pnode->v.fl & (UNOPS | SUCCESS);
-                    h = subtreecopy(Pnode->RIGHT);
-                    if(dummy_op == EQUALS)
-                        {
-                        psk becomes = (psk)bmalloc(__LINE__, sizeof(objectnode));
-#if WORD32
-                        ((typedObjectnode*)becomes)->u.Int = 0;
-#else
-                        ((typedObjectnode*)becomes)->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
+    static fileStatus* fs0 = NULL;
 #endif
-                        becomes->LEFT = same_as_w(h->LEFT);
-                        becomes->RIGHT = same_as_w(h->RIGHT);
-                        wipe(h);
-                        h = becomes;
-                        }
-                    h->v.fl = dummy_op | Flgs;
-                    hh = evalmacro(h->LEFT);
-                    if(hh)
-                        {
-                        wipe(h->LEFT);
-                        h->LEFT = hh;
-                        }
-                    hh = evalmacro(h->RIGHT);
-                    if(hh)
-                        {
-                        wipe(h->RIGHT);
-                        h->RIGHT = hh;
-                        }
-                    last = backbone(arg, Pnode, &first);
-                    wipe(*last);
-                    *last = h;
-                    return first;
-                    }
-                else if(Op(Pnode->RIGHT) == FUN
-                        && atomtest(Pnode->RIGHT->LEFT) == 0
-                        )
-                    {
-                    int Flgs;
-                    psk h;
-                    psk hh;
-                    psk first = NULL;
-                    psk* last;
-                    Flgs = Pnode->v.fl & UNOPS;
-                    h = subtreecopy(Pnode->RIGHT);
-                    h->v.fl |= Flgs;
-                    assert(atomtest(h->LEFT) == 0);
-                    /* hh = evalmacro(h->LEFT);
-                    if(hh)
-                        {
-                        wipe(h->LEFT);
-                        h->LEFT = hh;
-                        }*/
-                    hh = evalmacro(h->RIGHT);
-                    if(hh)
-                        {
-                        wipe(h->RIGHT);
-                        h->RIGHT = hh;
-                        }
-                    last = backbone(arg, Pnode, &first);
-                    wipe(*last);
-                    *last = h;
-                    return first;
-                    }
-                else
-                    {
-                    int newval = 0;
-                    psk tmp = same_as_w(Pnode->RIGHT);
-                    psk h;
-                    tmp = eval(tmp);
-
-                    if((h = getValue(tmp, &newval)) != NULL)
-                        {
-                        int Flgs;
-                        psk first = NULL;
-                        psk* last;
-                        if((Op(h) == EQUALS) && ISBUILTIN((objectnode*)h))
-                            {
-                            if(!newval)
-                                h = same_as_w(h);
-                            }
-                        else
-                            {
-                            Flgs = Pnode->v.fl & (UNOPS);
-                            if(!newval)
-                                {
-                                h = subtreecopy(h);
-                                }
-                            if(Flgs)
-                                {
-                                h->v.fl |= Flgs;
-                                if(h->v.fl & INDIRECT)
-                                    h->v.fl &= ~READY;
-                                }
-                            else if(h->v.fl & INDIRECT)
-                                {
-                                h->v.fl &= ~READY;
-                                }
-                            else if(Op(h) == EQUALS)
-                                {
-                                h->v.fl &= ~READY;
-                                }
-                            }
-
-                        wipe(tmp);
-                        last = backbone(arg, Pnode, &first);
-                        wipe(*last);
-                        *last = h;
-                        return first;
-                        }
-                    else
-                        {
-                        errorprintf("\nmacro evaluation fails because rhs of $ operator is not bound to a value: "); writeError(Pnode); errorprintf("\n");
-                        wipe(tmp);
-                        return NULL;
-                        }
-                    }
-                }
-            Pnode = Pnode->RIGHT;
-            if(!is_op(Pnode))
-                {
-                break;
-                }
-            }
-        }
-    return NULL;
-    }
-
-static psk lambda(psk Pnode, psk name, psk Arg)
-    {
-    if(!is_op(Pnode))
-        {
-        return NULL;
-        }
-    else
-        {
-        psk arg = Pnode;
-        while(!(Pnode->v.fl & READY))
-            {
-            if(atomtest(Pnode->LEFT) != 0)
-                {
-                psk left = lambda(Pnode->LEFT, name, Arg);
-                if(left != NULL)
-                    {
-                    /* copy backbone from lambda's argument to current Pnode
-                       release lhs of copy of current and replace with 'left'
-                       assign copy to 'Pnode'
-                       lambda current, if not null, replace current
-                       return current
-                    */
-                    psk ret;
-                    psk first = NULL;
-                    psk* last = backbone(arg, Pnode, &first);
-                    wipe((*last)->LEFT);
-                    (*last)->LEFT = left;
-                    if(atomtest((*last)->LEFT) == 0 && Op((*last)) == FUN)
-                        {
-                        ret = lambda(*last, name, Arg);
-                        if(ret)
-                            {
-                            wipe(*last);
-                            *last = ret;
-                            }
-                        }
-                    else
-                        {
-                        psk right = lambda((*last)->RIGHT, name, Arg);
-                        if(right)
-                            {
-                            wipe((*last)->RIGHT);
-                            (*last)->RIGHT = right;
-                            }
-                        }
-                    return first;
-                    }
-                }
-            else if(Op(Pnode) == FUN)
-                {
-                if(Op(Pnode->RIGHT) == UNDERSCORE)
-                    {
-                    int Flgs;
-                    psk h;
-                    psk hh;
-                    psk first = NULL;
-                    psk* last;
-                    Flgs = Pnode->v.fl & (UNOPS | SUCCESS);
-                    h = subtreecopy(Pnode->RIGHT);
-                    if(dummy_op == EQUALS)
-                        {
-                        psk becomes = (psk)bmalloc(__LINE__, sizeof(objectnode));
-#if WORD32
-                        ((typedObjectnode*)becomes)->u.Int = 0;
-#else
-                        ((typedObjectnode*)becomes)->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
-#endif
-                        becomes->LEFT = same_as_w(h->LEFT);
-                        becomes->RIGHT = same_as_w(h->RIGHT);
-                        wipe(h);
-                        h = becomes;
-                        }
-                    h->v.fl = dummy_op | Flgs;
-                    hh = lambda(h->LEFT, name, Arg);
-                    if(hh)
-                        {
-                        wipe(h->LEFT);
-                        h->LEFT = hh;
-                        }
-                    hh = lambda(h->RIGHT, name, Arg);
-                    if(hh)
-                        {
-                        wipe(h->RIGHT);
-                        h->RIGHT = hh;
-                        }
-                    last = backbone(arg, Pnode, &first);
-                    wipe(*last);
-                    *last = h;
-                    return first;
-                    }
-                else if(Op(Pnode->RIGHT) == FUN
-                        && atomtest(Pnode->RIGHT->LEFT) == 0
-                        )
-                    {
-                    int Flgs;
-                    psk h;
-                    psk hh;
-                    psk first = NULL;
-                    psk* last;
-                    Flgs = Pnode->v.fl & UNOPS;
-                    h = subtreecopy(Pnode->RIGHT);
-                    h->v.fl |= Flgs;
-                    assert(atomtest(h->LEFT) == 0);
-                    hh = lambda(h->RIGHT, name, Arg);
-                    if(hh)
-                        {
-                        wipe(h->RIGHT);
-                        h->RIGHT = hh;
-                        }
-                    last = backbone(arg, Pnode, &first);
-                    wipe(*last);
-                    *last = h;
-                    return first;
-                    }
-                else if(!equal(name, Pnode->RIGHT))
-                    {
-                    psk h;
-                    psk first;
-                    psk* last;
-                    h = subtreecopy(Arg);
-                    if(h->v.fl & INDIRECT)
-                        {
-                        h->v.fl &= ~READY;
-                        }
-                    else if(is_op(h) && Op(h) == EQUALS)
-                        {
-                        h->v.fl &= ~READY;
-                        }
-
-                    last = backbone(arg, Pnode, &first);
-                    wipe(*last);
-                    *last = h;
-                    return first;
-                    }
-                }
-            else if(Op(Pnode) == FUU
-                    && (Pnode->v.fl & FRACTION)
-                    && Op(Pnode->RIGHT) == DOT
-                    && !equal(name, Pnode->RIGHT->LEFT)
-                    )
-                {
-                return NULL;
-                }
-            Pnode = Pnode->RIGHT;
-            if(!is_op(Pnode))
-                {
-                break;
-                }
-            }
-        }
-    return NULL;
-    }
-
-
-static void combiflags(psk pnode)
-    {
-    int lflgs;
-    if((lflgs = pnode->LEFT->v.fl & UNOPS) != 0)
-        {
-        pnode->RIGHT = isolated(pnode->RIGHT);
-        if(NOTHINGF(lflgs))
-            {
-            pnode->RIGHT->v.fl |= lflgs & ~NOT;
-            pnode->RIGHT->v.fl ^= NOT | SUCCESS;
-            }
-        else
-            pnode->RIGHT->v.fl |= lflgs;
-        }
-    }
-
-
-static int is_dependent_of(psk el, psk input_buffer)
-    {
-    int ret;
-    psk pnode;
-    assert(!is_op(input_buffer));
-    pnode = NULL;
-    addr[1] = input_buffer;
-    addr[2] = el;
-    pnode = build_up(pnode, "(!dep:(? (\1.? \2 ?) ?)", NULL);
-    pnode = eval(pnode);
-    ret = isSUCCESS(pnode);
-    wipe(pnode);
-    return ret;
-    }
-
-static int search_opt(psk pnode, LONG opt)
-    {
-    while(is_op(pnode))
-        {
-        if(search_opt(pnode->LEFT, opt))
-            return TRUE;
-        pnode = pnode->RIGHT;
-        }
-    return PLOBJ(pnode) == opt;
-    }
-
-static void mmf(ppsk PPnode)
-    {
-    psk goal;
-    ppsk pgoal;
-    vars* nxtvar;
-    int alphabet, ext;
-    char dim[22];
-    ext = search_opt(*PPnode, EXT);
-    wipe(*PPnode);
-    pgoal = PPnode;
-    for(alphabet = 0; alphabet < 256/*0x80*/; alphabet++)
-        {
-        for(nxtvar = variables[alphabet];
-            nxtvar;
-            nxtvar = nxtvar->next)
-            {
-            goal = *pgoal = (psk)bmalloc(__LINE__, sizeof(knode));
-            goal->v.fl = WHITE | SUCCESS;
-            if(ext && nxtvar->n > 0)
-                {
-                goal = goal->LEFT = (psk)bmalloc(__LINE__, sizeof(knode));
-                goal->v.fl = DOT | SUCCESS;
-                sprintf(dim, "%d.%d", nxtvar->n, nxtvar->selector);
-                goal->RIGHT = NULL;
-                goal->RIGHT = build_up(goal->RIGHT, dim, NULL);
-                }
-            goal = goal->LEFT =
-                (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + strlen((char*)VARNAME(nxtvar)));
-            goal->v.fl = (READY | SUCCESS);
-            strcpy((char*)(goal)+sizeof(ULONG), (char*)VARNAME(nxtvar));
-            pgoal = &(*pgoal)->RIGHT;
-            }
-        }
-    *pgoal = same_as_w(&nilNode);
-    }
-
-static void lstsub(psk pnode)
-    {
-    vars* nxtvar;
-    unsigned char* name;
-    int alphabet, n;
-    beNice = FALSE;
-    name = POBJ(pnode);
-    for(alphabet = 0; alphabet < 256; alphabet++)
-        {
-        for(nxtvar = variables[alphabet];
-            nxtvar;
-            nxtvar = nxtvar->next)
-            {
-            if((pnode->u.obj == 0 && alphabet < 0x80) || !STRCMP(VARNAME(nxtvar), name))
-                {
-                for(n = nxtvar->n; n >= 0; n--)
-                    {
-                    ppsk tmp;
-                    if(listWithName)
-                        {
-                        if(global_fpo == stdout)
-                            {
-                            if(nxtvar->n > 0)
-                                Printf("%c%d (", n == nxtvar->selector ? '>' : ' ', n);
-                            else
-                                Printf("(");
-                            }
-                        if(quote(VARNAME(nxtvar)))
-                            myprintf("\"", (char*)VARNAME(nxtvar), "\"=", NULL);
-                        else
-                            myprintf((char*)VARNAME(nxtvar), "=", NULL);
-                        if(hum)
-                            myprintf("\n", NULL);
-                        }
-                    assert(nxtvar->pvaria);
-                    tmp = Entry(nxtvar->n, n, &nxtvar->pvaria);
-                    result(*tmp = Head(*tmp));
-                    if(listWithName)
-                        {
-                        if(global_fpo == stdout)
-                            Printf("\n)");
-                        myprintf(";\n", NULL);
-                        }
-                    else
-                        break; /*Only list variable on top of stack if RAW*/
-                    }
-                }
-            }
-        }
-    beNice = TRUE;
-    }
-
-static void lst(psk pnode)
-    {
-    while(is_op(pnode))
-        {
-        if(Op(pnode) == EQUALS)
-            {
-            beNice = FALSE;
-            myprintf("(", NULL);
-            if(hum)
-                myprintf("\n", NULL);
-            if(listWithName)
-                {
-                result(pnode);
-                }
-            else
-                {
-                result(pnode->RIGHT);
-                }
-            if(hum)
-                myprintf("\n", NULL);
-            myprintf(")\n", NULL);
-            beNice = TRUE;
-            return;
-            }
-        else
-            {
-            lst(pnode->LEFT);
-            pnode = pnode->RIGHT;
-            }
-        }
-    lstsub(pnode);
-    }
 
 #if !defined NO_FOPEN
 static fileStatus* findFileStatusByName(const char* name)
@@ -12198,6 +12205,7 @@ static int fil(ppsk PPnode)
 #endif
 #endif
 
+
 static int allopts(psk pnode, LONG opt[])
     {
     int i;
@@ -12459,6 +12467,312 @@ static void Sim(char* draft, char* str1, char* str2)
     LONG len2 = 0;
     LONG sim = simil(str1, str1 + strlen((char*)str1), str2, str2 + strlen((char*)str2), &utf1, &utf2, &len1, &len2);
     sprintf(draft, LONGD "/" LONGD, (2L * (LONG)sim), len1 + len2);
+    }
+
+classdef classes[] = { {"hash",hash},{NULL,NULL} };
+
+static int hasSubObject(psk src)
+    {
+    while(is_op(src))
+        {
+        if(Op(src) == EQUALS)
+            return TRUE;
+        else
+            {
+            if(hasSubObject(src->LEFT))
+                return TRUE;
+            src = src->RIGHT;
+            }
+        }
+    return FALSE;
+    }
+
+static psk objectcopysub(psk src);
+
+static psk objectcopysub2(psk src) /* src is NOT an object */
+    {
+    psk goal;
+    if(is_op(src) && hasSubObject(src))
+        {
+        goal = (psk)bmalloc(__LINE__, sizeof(knode));
+        goal->v.fl = src->v.fl & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+        goal->LEFT = objectcopysub(src->LEFT);
+        goal->RIGHT = objectcopysub(src->RIGHT);
+        return goal;
+        }
+    else
+        return same_as_w(src);
+    }
+
+static psk objectcopysub(psk src)
+    {
+    psk goal;
+    if(is_object(src))
+        {
+        if(ISBUILTIN((objectnode*)src))
+            {
+            return same_as_w(src);
+            }
+        else
+            {
+            goal = (psk)bmalloc(__LINE__, sizeof(objectnode));
+#if WORD32
+            ((typedObjectnode*)goal)->u.Int = 0;
+#else
+            ((typedObjectnode*)goal)->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
+#endif
+            }
+        goal->v.fl = src->v.fl & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+        goal->LEFT = same_as_w(src->LEFT);
+        goal->RIGHT = same_as_w(src->RIGHT);
+        return goal;
+        }
+    else
+        return objectcopysub2(src);
+    }
+
+static psk objectcopy(psk src)
+    {
+    psk goal;
+    if(is_object(src))                              /* Make a copy of this '=' node ... */
+        {
+        if(ISBUILTIN((objectnode*)src))
+            {
+            goal = (psk)bmalloc(__LINE__, sizeof(typedObjectnode));
+#if WORD32
+            ((typedObjectnode*)goal)->u.Int = BUILTIN;
+#else
+            ((typedObjectnode*)goal)->v.fl |= BUILT_IN;
+#endif
+            ((typedObjectnode*)goal)->vtab = ((typedObjectnode*)src)->vtab;
+            ((typedObjectnode*)goal)->voiddata = NULL;
+            }
+        else
+            {
+            goal = (psk)bmalloc(__LINE__, sizeof(objectnode));
+#if WORD32
+            ((typedObjectnode*)goal)->u.Int = 0;
+#else
+            ((typedObjectnode*)goal)->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
+#endif
+            }
+        goal->v.fl = src->v.fl & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+        goal->LEFT = same_as_w(src->LEFT);
+        /*?? This adds an extra level of copying, but ONLY for objects that have a '=' node as the lhs of the main '=' node*/
+        /* What is it good for? Bart 20010220 */
+        goal->RIGHT = objectcopysub(src->RIGHT); /* and of all '=' child nodes (but not of grandchildren!) */
+        return goal;
+        }
+    else
+        return objectcopysub2(src);
+    }
+
+static psk getObjectDef(psk src)
+    {
+    psk def;
+    typedObjectnode* dest;
+    if(!is_op(src))
+        {
+        classdef* df = classes;
+        for(; df->name && strcmp(df->name, (char*)POBJ(src)); ++df)
+            ;
+        if(df->vtab)
+            {
+            dest = (typedObjectnode*)bmalloc(__LINE__, sizeof(typedObjectnode));
+            dest->v.fl = EQUALS | SUCCESS;
+            dest->left = same_as_w(&nilNode);
+            dest->right = same_as_w(src);
+#if WORD32
+            dest->u.Int = BUILTIN;
+#else
+            dest->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
+            dest->v.fl |= BUILT_IN;
+#endif
+            VOID(dest) = NULL;
+            dest->vtab = df->vtab;
+            return (psk)dest;
+            }
+        }
+    else if(Op(src) == EQUALS)
+        {
+        src->RIGHT = Head(src->RIGHT);
+        return objectcopy(src);
+        }
+
+
+
+    if((def = SymbolBinding_w(src, src->v.fl & DOUBLY_INDIRECT)) != NULL)
+        {
+        dest = (typedObjectnode*)bmalloc(__LINE__, sizeof(typedObjectnode));
+        dest->v.fl = EQUALS | SUCCESS;
+        dest->left = same_as_w(&nilNode);
+        dest->right = objectcopy(def); /* TODO Head(&def) ? */
+        wipe(def);
+#if WORD32
+        dest->u.Int = 0;
+#else
+        dest->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
+#endif
+        VOID(dest) = NULL;
+        dest->vtab = NULL;
+        return (psk)dest;
+        }
+    return NULL;
+    }
+
+#include "unichartypes.h"
+
+#define LONGCASE
+
+#ifdef LONGCASE
+#define SWITCH(v) switch(v)
+#define FIRSTCASE(a) case a :
+#define CASE(a) case a :
+#define DEFAULT default :
+#else
+#define SWITCH(v) LONG lob;lob = v;
+#define FIRSTCASE(a) if(lob == a)
+#define CASE(a) else if(lob == a)
+#define DEFAULT else
+#endif
+
+
+#ifdef DELAY_DUE_TO_INPUT
+static clock_t delayDueToInput = 0;
+#endif
+
+#if !defined NO_C_INTERFACE
+static void* strToPointer(const char* str)
+    {
+    size_t res = 0;
+    while(*str)
+        res = 10 * res + (*str++ - '0');
+    return (void*)res;
+    }
+
+static void pointerToStr(char* pc, void* p)
+    {
+    size_t P = (size_t)p;
+    char* PC = pc;
+    while(P)
+        {
+        *pc++ = (char)((P % 10) + '0');
+        P /= 10;
+        }
+    *pc-- = '\0';
+    while(PC < pc)
+        {
+        char sav = *PC;
+        *PC = *pc;
+        *pc = sav;
+        ++PC;
+        --pc;
+        }
+    }
+#endif
+
+#if O_S
+static psk swi(psk Pnode, psk rlnode, psk rrightnode)
+    {
+    int i;
+    union
+        {
+        unsigned int i[sizeof(os_regset) + 1];
+        struct
+            {
+            int swicode;
+            os_regset regs;
+            } s;
+        } u;
+    char pc[121];
+    for(i = 0; i < sizeof(os_regset) / sizeof(int); i++)
+        u.s.regs.r[i] = 0;
+    rrightnode = Pnode;
+    i = 0;
+    do
+        {
+        rrightnode = rrightnode->RIGHT;
+        rlnode = is_op(rrightnode) ? rrightnode->LEFT : rrightnode;
+        if(is_op(rlnode) || !INTEGER_NOT_NEG(rlnode))
+            return functionFail(Pnode);
+        u.i[i++] = (unsigned int)
+            strtoul((char*)POBJ(rlnode), (char**)NULL, 10);
+        } while(is_op(rrightnode) && i < 10);
+#ifdef __TURBOC__
+        intr(u.s.swicode, (struct REGPACK*)&u.s.regs);
+        sprintf(pc, "0.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
+                u.i[1], u.i[2], u.i[3], u.i[4], u.i[5],
+                u.i[6], u.i[7], u.i[8], u.i[9], u.i[10]);
+#else
+#if defined ARM
+        i = (int)os_swix(u.s.swicode, &u.s.regs);
+        sprintf(pc, "%u.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
+                i,
+                u.i[1], u.i[2], u.i[3], u.i[4], u.i[5],
+                u.i[6], u.i[7], u.i[8], u.i[9], u.i[10]);
+#endif
+#endif
+        return build_up(Pnode, pc, NULL);
+    }
+#endif
+
+static void stringreverse(char* a, size_t len)
+    {
+    char* b;
+    b = a + len;
+    while(a < --b)
+        {
+        char c = *a;
+        *a = *b;
+        *b = c;
+        ++a;
+        }
+    }
+
+#if 0
+static void print_clock(char* pjotter, clock_t time)
+    {
+    if(time == (clock_t)-1)
+        sprintf(pjotter, "-1");
+    else
+#if defined __TURBOC__ && !defined __BORLANDC__
+        sprintf(pjotter, "%0lu/%lu", (ULONG)time, (ULONG)(10.0 * CLOCKS_PER_SEC));/* CLOCKS_PER_SEC == 18.2 */
+#else
+        sprintf(pjotter, LONG0D "/" LONGD, (LONG)time, (LONG)CLOCKS_PER_SEC);
+#endif
+    }
+#else
+static void print_clock(char* pjotter)
+    {
+    clock_t time = clock();
+#ifdef DELAY_DUE_TO_INPUT
+    time -= delayDueToInput;
+#endif
+    if(time == (clock_t)-1)
+        sprintf(pjotter, "-1");
+    else
+#if defined __TURBOC__ && !defined __BORLANDC__
+        sprintf(pjotter, "%0lu/%lu", (ULONG)time, (ULONG)(10.0 * CLOCKS_PER_SEC));/* CLOCKS_PER_SEC == 18.2 */
+#else
+        sprintf(pjotter, LONG0D "/" LONGD, (LONG)time, (LONG)CLOCKS_PER_SEC);
+#endif
+    }
+#endif
+
+static void combiflags(psk pnode)
+    {
+    int lflgs;
+    if((lflgs = pnode->LEFT->v.fl & UNOPS) != 0)
+        {
+        pnode->RIGHT = isolated(pnode->RIGHT);
+        if(NOTHINGF(lflgs))
+            {
+            pnode->RIGHT->v.fl |= lflgs & ~NOT;
+            pnode->RIGHT->v.fl ^= NOT | SUCCESS;
+            }
+        else
+            pnode->RIGHT->v.fl |= lflgs;
+        }
     }
 
 static function_return_type execFnc(psk Pnode)
@@ -12738,408 +13052,6 @@ static function_return_type execFnc(psk Pnode)
         return functionFail(Pnode);
     }
 
-static int hasSubObject(psk src)
-    {
-    while(is_op(src))
-        {
-        if(Op(src) == EQUALS)
-            return TRUE;
-        else
-            {
-            if(hasSubObject(src->LEFT))
-                return TRUE;
-            src = src->RIGHT;
-            }
-        }
-    return FALSE;
-    }
-
-static psk objectcopysub(psk src);
-
-static psk objectcopysub2(psk src) /* src is NOT an object */
-    {
-    psk goal;
-    if(is_op(src) && hasSubObject(src))
-        {
-        goal = (psk)bmalloc(__LINE__, sizeof(knode));
-        goal->v.fl = src->v.fl & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
-        goal->LEFT = objectcopysub(src->LEFT);
-        goal->RIGHT = objectcopysub(src->RIGHT);
-        return goal;
-        }
-    else
-        return same_as_w(src);
-    }
-
-static psk objectcopysub(psk src)
-    {
-    psk goal;
-    if(is_object(src))
-        {
-        if(ISBUILTIN((objectnode*)src))
-            {
-            return same_as_w(src);
-            }
-        else
-            {
-            goal = (psk)bmalloc(__LINE__, sizeof(objectnode));
-#if WORD32
-            ((typedObjectnode*)goal)->u.Int = 0;
-#else
-            ((typedObjectnode*)goal)->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
-#endif
-            }
-        goal->v.fl = src->v.fl & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
-        goal->LEFT = same_as_w(src->LEFT);
-        goal->RIGHT = same_as_w(src->RIGHT);
-        return goal;
-        }
-    else
-        return objectcopysub2(src);
-    }
-
-static psk objectcopy(psk src)
-    {
-    psk goal;
-    if(is_object(src))                              /* Make a copy of this '=' node ... */
-        {
-        if(ISBUILTIN((objectnode*)src))
-            {
-            goal = (psk)bmalloc(__LINE__, sizeof(typedObjectnode));
-#if WORD32
-            ((typedObjectnode*)goal)->u.Int = BUILTIN;
-#else
-            ((typedObjectnode*)goal)->v.fl |= BUILT_IN;
-#endif
-            ((typedObjectnode*)goal)->vtab = ((typedObjectnode*)src)->vtab;
-            ((typedObjectnode*)goal)->voiddata = NULL;
-            }
-        else
-            {
-            goal = (psk)bmalloc(__LINE__, sizeof(objectnode));
-#if WORD32
-            ((typedObjectnode*)goal)->u.Int = 0;
-#else
-            ((typedObjectnode*)goal)->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
-#endif
-            }
-        goal->v.fl = src->v.fl & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
-        goal->LEFT = same_as_w(src->LEFT);
-        /*?? This adds an extra level of copying, but ONLY for objects that have a '=' node as the lhs of the main '=' node*/
-        /* What is it good for? Bart 20010220 */
-        goal->RIGHT = objectcopysub(src->RIGHT); /* and of all '=' child nodes (but not of grandchildren!) */
-        return goal;
-        }
-    else
-        return objectcopysub2(src);
-    }
-
-static psk getObjectDef(psk src)
-    {
-    psk def;
-    typedObjectnode* dest;
-    if(!is_op(src))
-        {
-        classdef* df = classes;
-        for(; df->name && strcmp(df->name, (char*)POBJ(src)); ++df)
-            ;
-        if(df->vtab)
-            {
-            dest = (typedObjectnode*)bmalloc(__LINE__, sizeof(typedObjectnode));
-            dest->v.fl = EQUALS | SUCCESS;
-            dest->left = same_as_w(&nilNode);
-            dest->right = same_as_w(src);
-#if WORD32
-            dest->u.Int = BUILTIN;
-#else
-            dest->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
-            dest->v.fl |= BUILT_IN;
-#endif
-            VOID(dest) = NULL;
-            dest->vtab = df->vtab;
-            return (psk)dest;
-            }
-        }
-    else if(Op(src) == EQUALS)
-        {
-        src->RIGHT = Head(src->RIGHT);
-        return objectcopy(src);
-        }
-
-
-
-    if((def = SymbolBinding_w(src, src->v.fl & DOUBLY_INDIRECT)) != NULL)
-        {
-        dest = (typedObjectnode*)bmalloc(__LINE__, sizeof(typedObjectnode));
-        dest->v.fl = EQUALS | SUCCESS;
-        dest->left = same_as_w(&nilNode);
-        dest->right = objectcopy(def); /* TODO Head(&def) ? */
-        wipe(def);
-#if WORD32
-        dest->u.Int = 0;
-#else
-        dest->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
-#endif
-        VOID(dest) = NULL;
-        dest->vtab = NULL;
-        return (psk)dest;
-        }
-    return NULL;
-    }
-
-static psk changeCase(psk Pnode
-#if CODEPAGE850
-                      , int dos
-#endif
-                      , int low)
-    {
-#if !CODEPAGE850
-    const
-#endif
-        char* s;
-    psk pnode;
-    size_t len;
-    pnode = same_as_w(Pnode);
-    s = SPOBJ(Pnode);
-    len = strlen((const char*)s);
-    if(len > 0)
-        {
-        char* d;
-        char* dwarn;
-        char* buf = NULL;
-        char* obuf;
-        pnode = isolated(pnode);
-        d = SPOBJ(pnode);
-        obuf = d;
-        dwarn = obuf + strlen((const char*)obuf) - 6;
-#if CODEPAGE850
-        if(dos)
-            {
-            if(low)
-                {
-                for(; *s; ++s)
-                    {
-                    *s = ISO8859toCodePage850(lowerEquivalent[(int)(const unsigned char)*s]);
-                    }
-                }
-            else
-                {
-                for(; *s; ++s)
-                    {
-                    *s = ISO8859toCodePage850(upperEquivalent[(int)(const unsigned char)*s]);
-                    }
-                }
-            }
-        else
-#endif
-            {
-            int isutf = 1;
-            struct ccaseconv* t = low ? u2l : l2u;
-            for(; *s;)
-                {
-                int S = getCodePoint2(&s, &isutf);
-                int D = convertLetter(S, t);
-                if(isutf)
-                    {
-                    if(d >= dwarn)
-                        {
-                        int nb = utf8bytes(D);
-                        if(d + nb >= dwarn + 6)
-                            {
-                            /* overrun */
-                            buf = (char*)bmalloc(__LINE__, 2 * ((dwarn + 6) - obuf));
-                            dwarn = buf + 2 * ((dwarn + 6) - obuf) - 6;
-                            memcpy(buf, obuf, d - obuf);
-                            d = buf + (d - obuf);
-                            if(obuf != SPOBJ(pnode))
-                                bfree(obuf);
-                            obuf = buf;
-                            }
-                        }
-                    d = putCodePoint(D, d);
-                    }
-                else
-                    *d++ = (unsigned char)D;
-                }
-            *d = 0;
-            if(buf)
-                {
-                wipe(pnode);
-                pnode = scopy(buf);
-                bfree(buf);
-                }
-            }
-        }
-    return pnode;
-    }
-
-#if !defined NO_C_INTERFACE
-static void* strToPointer(const char* str)
-    {
-    size_t res = 0;
-    while(*str)
-        res = 10 * res + (*str++ - '0');
-    return (void*)res;
-    }
-
-static void pointerToStr(char* pc, void* p)
-    {
-    size_t P = (size_t)p;
-    char* PC = pc;
-    while(P)
-        {
-        *pc++ = (char)((P % 10) + '0');
-        P /= 10;
-        }
-    *pc-- = '\0';
-    while(PC < pc)
-        {
-        char sav = *PC;
-        *PC = *pc;
-        *pc = sav;
-        ++PC;
-        --pc;
-        }
-    }
-#endif
-
-#if O_S
-static psk swi(psk Pnode, psk rlnode, psk rrightnode)
-    {
-    int i;
-    union
-        {
-        unsigned int i[sizeof(os_regset) + 1];
-        struct
-            {
-            int swicode;
-            os_regset regs;
-            } s;
-        } u;
-    char pc[121];
-    for(i = 0; i < sizeof(os_regset) / sizeof(int); i++)
-        u.s.regs.r[i] = 0;
-    rrightnode = Pnode;
-    i = 0;
-    do
-        {
-        rrightnode = rrightnode->RIGHT;
-        rlnode = is_op(rrightnode) ? rrightnode->LEFT : rrightnode;
-        if(is_op(rlnode) || !INTEGER_NOT_NEG(rlnode))
-            return functionFail(Pnode);
-        u.i[i++] = (unsigned int)
-            strtoul((char*)POBJ(rlnode), (char**)NULL, 10);
-        } while(is_op(rrightnode) && i < 10);
-#ifdef __TURBOC__
-        intr(u.s.swicode, (struct REGPACK*)&u.s.regs);
-        sprintf(pc, "0.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
-                u.i[1], u.i[2], u.i[3], u.i[4], u.i[5],
-                u.i[6], u.i[7], u.i[8], u.i[9], u.i[10]);
-#else
-#if defined ARM
-        i = (int)os_swix(u.s.swicode, &u.s.regs);
-        sprintf(pc, "%u.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
-                i,
-                u.i[1], u.i[2], u.i[3], u.i[4], u.i[5],
-                u.i[6], u.i[7], u.i[8], u.i[9], u.i[10]);
-#endif
-#endif
-        return build_up(Pnode, pc, NULL);
-    }
-#endif
-
-static void stringreverse(char* a, size_t len)
-    {
-    char* b;
-    b = a + len;
-    while(a < --b)
-        {
-        char c = *a;
-        *a = *b;
-        *b = c;
-        ++a;
-        }
-    }
-
-#if 0
-static void print_clock(char* pjotter, clock_t time)
-    {
-    if(time == (clock_t)-1)
-        sprintf(pjotter, "-1");
-    else
-#if defined __TURBOC__ && !defined __BORLANDC__
-        sprintf(pjotter, "%0lu/%lu", (ULONG)time, (ULONG)(10.0 * CLOCKS_PER_SEC));/* CLOCKS_PER_SEC == 18.2 */
-#else
-        sprintf(pjotter, LONG0D "/" LONGD, (LONG)time, (LONG)CLOCKS_PER_SEC);
-#endif
-    }
-#else
-static void print_clock(char* pjotter)
-    {
-    clock_t time = clock();
-#ifdef DELAY_DUE_TO_INPUT
-    time -= delayDueToInput;
-#endif
-    if(time == (clock_t)-1)
-        sprintf(pjotter, "-1");
-    else
-#if defined __TURBOC__ && !defined __BORLANDC__
-        sprintf(pjotter, "%0lu/%lu", (ULONG)time, (ULONG)(10.0 * CLOCKS_PER_SEC));/* CLOCKS_PER_SEC == 18.2 */
-#else
-        sprintf(pjotter, LONG0D "/" LONGD, (LONG)time, (LONG)CLOCKS_PER_SEC);
-#endif
-    }
-#endif
-
-#define LONGCASE
-
-#ifdef LONGCASE
-#define SWITCH(v) switch(v)
-#define FIRSTCASE(a) case a :
-#define CASE(a) case a :
-#define DEFAULT default :
-#else
-#define SWITCH(v) LONG lob;lob = v;
-#define FIRSTCASE(a) if(lob == a)
-#define CASE(a) else if(lob == a)
-#define DEFAULT else
-#endif
-
-static function_return_type setIndex(psk Pnode)
-    {
-    psk lnode = Pnode->LEFT;
-    psk rightnode = Pnode->RIGHT;
-    if(INTEGER(lnode))
-        {
-        vars* nxtvar;
-        if(is_op(rightnode))
-            return functionFail(Pnode);
-        for(nxtvar = variables[rightnode->u.obj];
-            nxtvar && (STRCMP(VARNAME(nxtvar), POBJ(rightnode)) < 0);
-            nxtvar = nxtvar->next);
-        /* find first name in a row of equal names */
-        if(nxtvar && !STRCMP(VARNAME(nxtvar), POBJ(rightnode)))
-            {
-            nxtvar->selector =
-                (int)toLong(lnode)
-                % (nxtvar->n + 1);
-            if(nxtvar->selector < 0)
-                nxtvar->selector += (nxtvar->n + 1);
-            Pnode = rightbranch(Pnode);
-            return functionOk(Pnode);
-            }
-        else
-            return functionFail(Pnode);
-        }
-    return 0;
-    /*
-    if(!(rightnode->v.fl & SUCCESS))
-        return functionFail(Pnode);
-    addr[1] = NULL;
-    return execFnc(Pnode);
-    */
-    }
-
 static function_return_type functions(psk Pnode)
     {
     static char draft[22];
@@ -13335,7 +13247,7 @@ static function_return_type functions(psk Pnode)
                     sprintf(draft, "%llu", *(unsigned long long*)p);
                     break;
 #endif
-#endif                    
+#endif
                 case 1:
                 default:
                     sprintf(draft, "%u", (unsigned int)*(unsigned char*)p);
@@ -14617,6 +14529,43 @@ static function_return_type functions(psk Pnode)
     /*return functionOk(Pnode); 20 Dec 1995, unreachable code in Borland C */
     }
 
+static const char
+hash5[] = "\5",
+hash6[] = "\6";
+
+static psk tryq(psk Pnode, psk fun, Boolean* ok)
+    {
+    psk anchor;
+    psh(&argNode, Pnode, NULL);
+    Pnode->v.fl |= READY;
+
+    anchor = subtreecopy(fun->RIGHT);
+
+    psh(fun->LEFT, &zeroNode, NULL);
+    anchor = eval(anchor);
+    pop(fun->LEFT);
+    if(anchor->v.fl & SUCCESS)
+        {
+        *ok = TRUE;
+        wipe(Pnode);
+        Pnode = anchor;
+        }
+    else
+        {
+        *ok = FALSE;
+        wipe(anchor);
+        }
+    deleteNode(&argNode);
+    return Pnode;
+    }
+
+static int absone(psk pnode)
+    {
+    char* pstring;
+    pstring = SPOBJ(pnode);
+    return(*pstring == '1' && *++pstring == 0);
+    }
+
 static psk handleExponents(psk Pnode)
     {
     psk lnode;
@@ -14640,8 +14589,7 @@ static psk handleExponents(psk Pnode)
         {
         static const char* conc_arr[] = { NULL,NULL,NULL,NULL,NULL,NULL };
 
-        Qnumber iexponent,
-            hiexponent;
+        Qnumber iexponent, hiexponent;
 
         psk rightnode;
         if(!is_op(rightnode = Pnode->RIGHT))
@@ -14855,7 +14803,6 @@ static psk handleExponents(psk Pnode)
     return Pnode;
     }
 
-
 /*
 Improvement that DOES evaluate b+(i*c+i*d)+-i*c
 It also allows much deeper structures, because the right place for insertion
@@ -14919,43 +14866,6 @@ static void splitProduct_number_im_rest(psk pnode, ppsk Nm, ppsk I, ppsk NNNI)
         }/* NNNI */
     }
 
-static psk rightoperand_and_tail(psk Pnode, ppsk head, ppsk tail)
-    {
-    psk temp;
-    assert(is_op(Pnode));
-    temp = Pnode->RIGHT;
-    if(Op(Pnode) == Op(temp))
-        {
-        *head = temp->LEFT;
-        *tail = temp->RIGHT;
-        }
-    else
-        {
-        *head = temp;
-        *tail = NULL;
-        }
-    return temp;
-    }
-
-static psk leftoperand_and_tail(psk Pnode, ppsk head, ppsk tail)
-    {
-    psk temp;
-    assert(is_op(Pnode));
-    temp = Pnode->LEFT;
-    if(Op(Pnode) == Op(temp))
-        {
-        *head = temp->LEFT;
-        *tail = temp->RIGHT;
-        }
-    else
-        {
-        *head = temp;
-        *tail = NULL;
-        }
-    return temp;
-    }
-
-#define EXPAND 0
 #if EXPAND
 static psk expandDummy(psk Pnode, int* ok)
     {
@@ -16074,6 +15984,21 @@ static psk substlog(psk Pnode)
     return Pnode;
     }
 
+static int is_dependent_of(psk el, psk input_buffer)
+    {
+    int ret;
+    psk pnode;
+    assert(!is_op(input_buffer));
+    pnode = NULL;
+    addr[1] = input_buffer;
+    addr[2] = el;
+    pnode = build_up(pnode, "(!dep:(? (\1.? \2 ?) ?)", NULL);
+    pnode = eval(pnode);
+    ret = isSUCCESS(pnode);
+    wipe(pnode);
+    return ret;
+    }
+
 static psk substdiff(psk Pnode)
     {
     psk lnode, rightnode;
@@ -16242,6 +16167,7 @@ static psk handleComma(psk Pnode)
     return Pnode;
     }
 
+
 static psk evalvar(psk Pnode)
     {
     psk loc_adr = SymbolBinding_w(Pnode, Pnode->v.fl & DOUBLY_INDIRECT);
@@ -16265,43 +16191,15 @@ static psk evalvar(psk Pnode)
     return Pnode;
     }
 
-static void privatized(psk Pnode, psk plkn)
-    {
-    *plkn = *Pnode;
-    if(shared(plkn))
-        {
-        dec_refcount(Pnode);
-        plkn->LEFT = same_as_w(plkn->LEFT);
-        plkn->RIGHT = same_as_w(plkn->RIGHT);
-        }
-    else
-        pskfree(Pnode);
-    }
-
-static psk __rightbranch(psk Pnode)
-    {
-    psk ret;
-    int success = Pnode->v.fl & SUCCESS;
-    if(shared(Pnode))
-        {
-        ret = same_as_w(Pnode->RIGHT);
-        dec_refcount(Pnode);
-        }
-    else
-        {
-        ret = Pnode->RIGHT;
-        wipe(Pnode->LEFT);
-        pskfree(Pnode);
-        }
-    if(!success)
-        {
-        ret = isolated(ret);
-        ret->v.fl ^= SUCCESS;
-        }
-    return ret;
-    }
-
-
+#if MAXSTACK
+static int maxstack = 0;
+static int theStack = 0;
+#define ASTACK {++theStack;if(theStack > maxstack) maxstack = theStack;}{
+#define ZSTACK }{--theStack;}
+#else
+#define ASTACK
+#define ZSTACK
+#endif
 static psk eval(psk Pnode)
     {
     ASTACK
@@ -16693,6 +16591,150 @@ static psk eval(psk Pnode)
         return Pnode;
     }
 
+#if TELLING
+#if TELMAX == 0
+#undef TELMAX
+#define TELMAX 1
+#endif
+#ifndef TELMAX
+#define TELMAX 1
+#endif
+#endif
+
+/*#define reslt parenthesised_result */ /* to show ALL parentheses (one pair for each operator)*/
+
+#define LOGWORDLENGTH 2
+
+/*
+0:?n&whl'(1+!n:<100000:?n&57265978465924376578234566767834625978465923745729775787627876873875436743934786450097*53645235643259824350824580457283955438957043287250857432895703498700987123454567897656:?T)&!T
+NEWMULT
+{!} 3072046909146355923036506564192345471346475055611123765430367260576556764424411699428134904701221896786418686608674094452972067252677279867454597742488128986716908647272632
+    S   3,41 sec  (1437.1457.2)
+!NEWMULT
+{!} 3072046909146355923036506564192345471346475055611123765430367260576556764424411699428134904701221896786418686608674094452972067252677279867454597742488128986716908647272632
+    S   26,60 sec  (1437.1453.2)
+
+0:?n&whl'(1+!n:<1000000:?n&57265978465627876873875436743934786450097*53645235643259824350824987123454567897656:?T)&!T
+NEWMULT
+{!} 3072046909130450126528027450054726559442406960607487886384944156986716908647272632
+    S   18,53 sec  (1437.1457.2)!NEWMULT
+{!} 3072046909130450126528027450054726559442406960607487886384944156986716908647272632
+    S   67,78 sec  (1437.1456.2)
+
+0:?n&whl'(1+!n:<1000000:?n&75436743934786450097*53645235643259824350:?T)&!T
+NEWMULT
+{!} 4046821904541870443295997539156260461950
+    S   10,52 sec  (1437.1457.2)
+!NEWMULT
+{!} 4046821904541870443295997539156260461950
+    S   17,06 sec  (1437.1453.2)
+
+0:?n&whl'(1+!n:<1000000:?n&4350*2073384975284367439375369802:?T)&!T
+NEWMULT
+{!} 9019224642486998361282858638700
+    S   8,93 sec  (1437.1456.2)
+!NEWMULT
+{!} 9019224642486998361282858638700
+    S   5,59 sec  (1437.1456.2)
+
+0:?n&whl'(1+!n:<1000000:?n&43500273*384975284367439375369802:?T)&!T
+NEWMULT
+{!} 16746529968236245139535862955946
+    S   9,51 sec  (1437.1456.2)
+!NEWMULT
+{!} 16746529968236245139535862955946
+    S   8,53 sec  (1437.1456.2)
+
+0:?n&whl'(1+!n:<1000000:?n&384975284367439375369802*43500273:?T)&!T
+NEWMULT
+{!} 16746529968236245139535862955946
+    S   9,12 sec  (1437.1456.2)
+!NEWMULT
+{!} 16746529968236245139535862955946
+    S   8,10 sec  (1437.1456.2)
+
+0:?n&whl'(1+!n:<1000000:?n&38497528436743937536*980243500273:?T)&!T
+NEWMULT
+{!} 37736952026693231197301110947328
+    S   9,38 sec  (1437.1456.2)
+!NEWMULT
+{!} 37736952026693231197301110947328
+    S   8,80 sec  (1437.1454.2)
+    S   9,95 sec  (1437.1456.2)
+    S   9,58 sec  (1437.1453.2)
+
+0:?n&whl'(1+!n:<1000000:?n&3849752843674393*7536980243500273:?T)&!T
+NEWMULT
+{!} 29015511125132894970381018609289
+    S   9,60 sec  (1437.1454.2)
+!NEWMULT
+{!} 29015511125132894970381018609289
+    S   10,86 sec  (1437.1453.2)
+
+0:?n&whl'(1+!n:<10000000:?n&752843674393*753698024350:?T)&!T
+NEWMULT
+{!} 567416790034398785469550
+    S   71,22 sec  (1437.1457.2)
+!NEWMULT
+{!} 567416790034398785469550
+    S   66,63 sec  (1437.1453.2)
+
+0:?n&whl'(1+!n:<10000000:?n&7543674393*5369824350:?T)&!T
+NEWMULT
+{!} 40508206444002869550
+    S   62,38 sec  (1437.1456.2)
+!NEWMULT
+{!} 40508206444002869550
+    S   51,77 sec  (1437.1463.2)
+
+*/
+
+
+
+
+
+
+
+#if DEBUGBRACMAT
+#ifndef NDEBUG
+static void printMatchState(const char* msg, matchstate s, int pos, int len)
+    {
+    Printf("\n%s pos %d len %d once %d", msg, pos, len, s.b.bonce);
+    Printf("\n     t o p m f i");
+    Printf("\n lmr %d %d %d %d %d %d",
+           s.b.blmr_true, s.b.blmr_once, s.b.blmr_position_once, s.b.blmr_position_max_reached, s.b.blmr_fence, s.b.blmr_pristine);
+    Printf("\n rmr %d %d %d %d %d %d\n",
+           s.b.brmr_true, s.b.brmr_once, s.b.brmr_position_once, s.b.brmr_position_max_reached, s.b.brmr_fence, s.b.brmr_pristine);
+    }
+#endif
+#endif
+
+
+static const char
+fct[] = "(fct=f G T P C V I B W H J O.(T=m Z a p r R Q.!arg:(?m.?Z)&0:?R:?Q&"
+"whl'(!Z:?a+?p*!m*?r+?Z&!R+!a:?R&!Q+!p*!r:?Q)&(!Q.!R+!Z))&(P=M E.!arg:(?M.?E)&"
+"whl'(!E:?*(!M|!M^((#%:~<1)+?))*?+?E)&!E:0)&(G=f e r a.!arg:(?e.?f)&0:?r&whl'("
+"!e:%?a+?e&!a*!f:?a&!a+!r:?r)&!r)&(C=f r A Z M.!arg:%+%:(?+?*(?M^((#<%0:?f)+?r"
+")&!M^!f:?M)*?+?|?+?*(?M^(#>%1+?)&P$(!M.!arg))*?+?|%?f+?r&!f:?A*~#%?`M*(?Z&P$("
+"!M.!r)))&!M*C$(G$(!arg.!M^-1))|!arg)&(W=n A Z M s.C$!arg:?arg:?A*((~-1:#%?n)*"
+"?+?:?M)*?Z&(!n:<0&-1|1):?s&!s*!n*!A*(1+!s*!n^-1*!M+-1)*!Z|!arg)&(V=n A Z M.C$"
+"!arg:?arg:?A*(#%?n*?+?:?M)*?Z&!n*!A*(1+!n^-1*!M+-1)*!Z|!arg)&(I=f v l r.!arg:"
+"(?f.?v)&!v:?l_?r&I$(!f.!l)&I$(!f.!r)|!v:#|!v\017!f:0)&(O=a f e.!arg:?a*?f^(%*"
+"%:?e)*?arg&!a*!f^J$(1+!e+-1)*O$!arg|!arg)&(J=t.!arg:%?t+%?arg&O$!t+(!arg:%+%&"
+"J|O)$!arg|!arg)&(f=L R A Z a m z S Q r q t F h N D.(D=R Q S t x r X ax zx M."
+"!arg:(?R.?Q)&!Q:?+%`(?*(~#%?`M&T$(!M.!Q):(?x.?r)&I$(!r.!M))*?)+?&N$!x:?x&sub$"
+"(!R.!M.(VAR+-1*!r)*!x^-1):?S&(!x:?ax*(%+%:?X)*?zx&T$(!X^-1.!S):(?t.?S)&1+!ax*"
+"!zx*(!S*!X+!t)+-1:?S|1:?x)&T$(VAR.!S):(?t.0)&N$!t*!x^-1)&!arg:(?arg.(=?N))&N$"
+"!arg:?arg&(!arg:%?L*%?R&f$(!L.'$N)*f$(!R.'$N)|!arg:%?L^%?R&f$(!L.!R:~/#&'$V|'"
+"$W)^J$(1+!R+-1)|J$!arg:?arg:#?+~#%?A+%?Z&!A:?a*~#%?`m*?z&T$(!m.!Z):(~0:?Q.?)&"
+"!a*!z+!Q:?t:?r&!arg:?S&1:?Q&1:?F&whl'(!r:%?q*?r&N$!q:?h*(%+%:?q)&D$(!S.!q):?S"
+"&!h*!F:?F&!Q*!q:?Q)&!Q+-1*!F^-1*!t:0&f$(!Q.'$N)*f$(!S.'$N)|!arg))&(B=A E M Z "
+"a b e m n y z.!arg:?A*%?`M^?E*(?Z&!A*!Z:?a*%?`m^?e*(?z&!a*!z:?b*?n^!e*?y&!M+"
+"!m:0))&B$(!b*(1+-1*!n+-1)^!e*!y*!M^(!E+!e))|!arg)&(H=A Z a b e z w x n m o."
+"!arg:?A*(%?b+%?z:?m)*(?Z&!b:?*?a^%?e*(?&!z:?w&whl'(!w:?*!a^?*?+?w)&!w:0&!e:?+"
+"#?n*(~#%@*?:?x)+(?&!z:?w&whl'(!w:?*!a^(?+#?o*(!x&(!o:<!n:?n|))+?)*?+?w)&!w:0)"
+"))&fct$(!A*!a^(!n*!x)*(1+!a^(-1*!n*!x)*!m+-1)*!Z)|!arg)&H$(B$(f$(!arg.'$V))))";
+
 int startProc(
 #if _BRACMATEMBEDDED
     startStruct * init
@@ -16742,6 +16784,8 @@ int startProc(
         return 0;
     init_opcode();
     global_anchor = NULL;
+
+
     global_fpi = stdin;
     global_fpo = stdout;
 
@@ -16781,11 +16825,6 @@ int startProc(
     oneNodeNotNeutral.v.fl = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
     *(&(oneNode.u.obj) + 1) = 0;
 
-    minusTwoNode.u.lobj = 0L;
-    minusTwoNode.u.obj = '2';
-    minusTwoNode.v.fl = READY | SUCCESS | QNUMBER | MINUS BITWISE_OR_SELFMATCHING;
-    *(&(minusTwoNode.u.obj) + 1) = 0;
-
     minusOneNode.u.lobj = 0L;
     minusOneNode.u.obj = '1';
     minusOneNode.v.fl = READY | SUCCESS | QNUMBER | MINUS BITWISE_OR_SELFMATCHING;
@@ -16800,11 +16839,6 @@ int startProc(
     fourNode.u.obj = '4';
     fourNode.v.fl = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
     *(&(fourNode.u.obj) + 1) = 0;
-
-    minusFourNode.u.lobj = 0L;
-    minusFourNode.u.obj = '4';
-    minusFourNode.v.fl = READY | SUCCESS | QNUMBER | MINUS BITWISE_OR_SELFMATCHING;
-    *(&(minusFourNode.u.obj) + 1) = 0;
 
     m0 = build_up(m0, "?*(%+%)^~/#>1*?", NULL);
     m1 = build_up(m1, "?*(%+%)*?", NULL);
