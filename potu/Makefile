@@ -28,7 +28,6 @@ SRC = binding.c \
       potu.c \
       quote.c \
       rational.c \
-      real.c \
       result.c \
       simil.c \
       stringmatch.c \
