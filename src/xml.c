@@ -41,6 +41,7 @@ attributes can be empty (no =[valuex])
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <assert.h>
 
 #include <limits.h>
@@ -2436,7 +2437,7 @@ static int Put(const unsigned char * c)
         unsigned char tmp[8];
         if(assumeUTF8)
             {
-            static int safebytes = 0; /* Number of future bytes that can be safely regarded as part of UTF-8 char. */
+            static ptrdiff_t safebytes = 0; /* Number of future bytes that can be safely regarded as part of UTF-8 char. */
             if(*c & 0x40) /* first byte of multibyte char */
                 {
                 const char* d = (const char*)c;

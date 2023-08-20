@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "31 March 2023"
-#define VERSION "6.14.2"
-#define BUILD "274"
+#define DATUM "20 August 2023"
+#define VERSION "6.15.0"
+#define BUILD "275"
 /*
 COMPILATION
 -----------
@@ -43,7 +43,6 @@ implements reading JSON files.
 On *N?X, just compile with
 
     gcc -std=c99 -pedantic -Wall -O3 -static -DNDEBUG -o bracmat bracmat.c xml.c json.c
-
 
 The options are not necessary to successfully compile the program just
 
@@ -231,16 +230,13 @@ little bit slower, not faster.
 
 /* Optional #defines for debugging and adaptation to machine */
 
-#define TELMAX  1 /* Show the maximum number of allocated nodes. */
-#define TELLING 0 /* Same, plus current number of allocated nodes, in groups of
+#define SHOWMAXALLOCATED  1 /* Show the maximum number of allocated nodes. */
+#define SHOWCURRENTLYALLOCATED 0 /* Same, plus current number of allocated nodes, in groups of
                        4,8,12 and >12 bytes */
 
 #define EXPAND 0
 
-
-
-
-                       /* There are no optional #defines below this line. */
+/* There are no optional #defines below this line. */
 #if defined __BYTE_ORDER && defined __LITTLE_ENDIAN /* gcc on linux defines these */
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 #define BIGENDIAN 0
@@ -260,7 +256,6 @@ little bit slower, not faster.
 #ifndef BIGENDIAN
 #define BIGENDIAN     0
 #endif
-
 
 #if defined BRACMATEMBEDDED
 #define _BRACMATEMBEDDED 1
@@ -284,7 +279,6 @@ little bit slower, not faster.
 #if _BRACMATEMBEDDED
 #include "bracmat.h"
 #endif
-
 
 #if defined sun && !defined __GNUC__
 #include <unistd.h> /* SEEK_SET, SEEK_CUR */
@@ -313,7 +307,7 @@ typedef   signed __int32  INT32_T; /* pre VS2010 has no int32_t */
 #endif
 
 #if defined _WIN64
-/*Microsoft*/
+    /*Microsoft*/
 #define WORD32  0
 #define _4      1
 #define _5_6    1
@@ -487,20 +481,7 @@ typedef struct
 #define STRCMP(a,b) strcmp((char *)(a),(char *)(b))
 #endif
 
-
-
-
-#include <string.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <errno.h>
-
-
-
-
-
-
-#if TELMAX
+#if SHOWMAXALLOCATED
 #define BEZ O('b','e','z')
 #endif
 
@@ -610,9 +591,7 @@ typedef struct
 #define X2D O('x','2','d') /* hex -> dec */
 #define XX  O('e', 0 , 0 )
 
-
 #if GLOBALARGPTR
-static va_list argptr;
 #define VOIDORARGPTR void
 #else
 #define VOIDORARGPTR va_list * pargptr
@@ -629,9 +608,6 @@ static va_list argptr;
 
 #define NARROWLINELENGTH 80
 #define WIDELINELENGTH 120
-
-
-
 
 /* flags (prefixes) in node */
 #define NOT              1      /* ~ */
@@ -788,13 +764,13 @@ static va_list argptr;
 #define RATIONAL(psk)                   (((psk)->v.fl & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS)) == QNUMBER)
 #define RATIONAL_COMP_NOT_NUL(psk)      (((psk)->v.fl & (QNUMBER|QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
 #define RATIONAL_WEAK(psk)              (((psk)->v.fl & (QNUMBER|IS_OPERATOR|INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)) == QNUMBER)/* allows < > ~< and ~> as flags on numbers */
-#define       LESS(psk)                 (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN))
-#define LESS_EQUAL(psk)                 (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|GREATER_THAN))
-#define MORE_EQUAL(psk)                 (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN))
-#define       MORE(psk)                 (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|GREATER_THAN))
-#define    UNEQUAL(psk)                 (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT))
-#define LESSORMORE(psk)                 (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN|GREATER_THAN))
-#define      EQUAL(psk)                 (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == QNUMBER)
+#define          LESS(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN))
+#define    LESS_EQUAL(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|GREATER_THAN))
+#define    MORE_EQUAL(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN))
+#define          MORE(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|GREATER_THAN))
+#define       UNEQUAL(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT))
+#define    LESSORMORE(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN|GREATER_THAN))
+#define         EQUAL(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == QNUMBER)
 #define NOTLESSORMORE(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN|GREATER_THAN))
 
 #define INTEGER(pn)                     (((pn)->v.fl & (QNUMBER|QFRACTION|IS_OPERATOR|VISIBLE_FLAGS))                      == QNUMBER)
@@ -822,12 +798,6 @@ static va_list argptr;
 
 #define functionFail(x) ((x)->v.fl ^= SUCCESS,(x))
 #define functionOk(x) (x)
-
-
-        /*#define SUBJECTNOTNIL(sub,pat) (is_op(sub) || HAS_UNOPS(sub) || (PIOBJ(sub) != PIOBJ(nil(pat))))*/
-#define SUBJECTNOTNIL(sub,pat) (is_op(sub) || HAS_UNOPS(sub) || (PLOBJ(sub) != PLOBJ(nil(pat))))
-
-
 
 typedef union
     {
@@ -905,7 +875,6 @@ typedef union
     ULONG fl;
     } tFlags;
 
-
 typedef struct sk
     {
     tFlags v;
@@ -933,7 +902,6 @@ typedef struct knode
     psk left, right;
     } knode;
 
-
 typedef struct stringrefnode
     {
     tFlags v;
@@ -943,9 +911,6 @@ typedef struct stringrefnode
     } stringrefnode;
 
 typedef psk function_return_type;
-
-
-
 
 #define RIGHT u.p.right
 #define LEFT  u.p.left
@@ -992,14 +957,14 @@ typedef psk function_return_type;
 
 #define nil(p) knil[klopcode(p)]
 
-
-
 #define shared(pn) ((pn)->v.fl & ALL_REFCOUNT_BITS_SET)
 #define currRefCount(pn) (((pn)->v.fl & ALL_REFCOUNT_BITS_SET) >> NON_REF_COUNT_BITS)
 
 typedef int Boolean;
+
 #define TRUE 1
 #define FALSE 0
+
 #define RADIX2 (RADIX * RADIX)
 
 #define READBIN   "rb" /* BIN is default for get$, overrule with option TXT */
@@ -1013,7 +978,6 @@ typedef int Boolean;
 #define ONCE (1<<3)
 #define POSITION_ONCE (1<<4)
 #define POSITION_MAX_REACHED (1<<5)
-
 #define SHIFT_LMR 8
 #define SHIFT_RMR 16
 
@@ -1024,6 +988,7 @@ typedef int Boolean;
 #define UNREFERENCED_PARAMETER(P)
 #endif
 #endif
+
 #define SHIFT_STR 0
 #define SHIFT_VAP 1
 #define SHIFT_MEM 2
@@ -1049,9 +1014,6 @@ typedef int Boolean;
 #define isFENCE(x) (((x)->v.fl & (SUCCESS|FENCE)) == FENCE)
 #define isSUCCESSorFENCE(x) ((x)->v.fl & (SUCCESS|FENCE))
 #define isFailed(x) (((x)->v.fl & (SUCCESS|FENCE)) == 0)
-
-
-
 
 struct typedObjectnode;
 typedef Boolean(*method_pnt)(struct typedObjectnode* This, ppsk arg);
@@ -1079,9 +1041,7 @@ typedef struct typedObjectnode /* createdWithNew == 1 */
         int Int : 32;
         } u;
     struct Hash* voiddata;
-#define HASH(x) (Hash*)x->voiddata
-#define VOID(x) x->voiddata
-#define PHASH(x) (Hash**)&(x->voiddata)
+
     method* vtab; /* The last element n of the array must have vtab[n].name == NULL */
     } typedObjectnode;
 #else
@@ -1091,9 +1051,6 @@ typedef struct typedObjectnode /* createdWithNew == 1 */
     psk left, right; /* left == nil, right == data (if vtab == NULL)
             or name of object type, e.g. [set], [hash], [file], [float] (if vtab != NULL)*/
     struct Hash* voiddata;
-#define HASH(x) (Hash*)x->voiddata
-#define VOID(x) x->voiddata
-#define PHASH(x) (Hash**)&(x->voiddata)
     method* vtab; /* The last element n of the array must have vtab[n].name == NULL */
     } typedObjectnode;
 #endif
@@ -1104,7 +1061,6 @@ typedef struct
     psk object;
     method_pnt theMethod;
     } objectStuff;
-
 
 #if WORD32
 #define BUILTIN (1 << 30)
@@ -1144,9 +1100,6 @@ typedef struct objectnode /* createdWithNew == 0 */
 #define SETCREATEDWITHNEW(a) (a)->v.fl |= CREATEDWITHNEW
 #endif
 
-
-
-
 typedef struct nnumber
     {
     ptrdiff_t length;
@@ -1185,7 +1138,6 @@ typedef struct Hash
     cmpfuncTp cmpfunc;
     hashfuncTp hashfunc;
     } Hash;
-
 
 #include "unicaseconv.h"
 
@@ -1229,7 +1181,6 @@ typedef union matchstate
     unsigned int i;
     } matchstate;
 
-
 #ifdef __SYMBIAN32__
 /* #define DEFAULT_INPUT_BUFFER_SIZE 0x100*/ /* If too high you get __chkstk error. Stack = 8K only! */
 /* #define DEFAULT_INPUT_BUFFER_SIZE 0x7F00*/
@@ -1259,178 +1210,22 @@ typedef struct inputBuffer
     } inputBuffer;
 
 
-#if READMARKUPFAMILY
-#define OPT_ML  (1 << SHIFT_ML)
-#define OPT_TRM (1 << SHIFT_TRM)
-#define OPT_HT  (1 << SHIFT_HT)
-#define OPT_X   (1 << SHIFT_X)
-extern void XMLtext(FILE* fpi, unsigned char* source, int trim, int html, int xml);
-#endif
-
-#if READJSON
-#define OPT_JSON (1 << SHIFT_JSN)
-extern int JSONtext(FILE* fpi, char* source);
-#endif
 
 
-static sk nilNode, nilNodeNotNeutral,
-zeroNode, zeroNodeNotNeutral,
-oneNode, oneNodeNotNeutral,
-argNode, selfNode, SelfNode, minusOneNode, twoNode, fourNode, sjtNode;
-
-#if !defined NO_FOPEN
-static char* targetPath = NULL; /* Path that can be prepended to filenames. */
-#endif
-
-
-static psk addr[7], m0 = NULL, m1 = NULL, f0 = NULL, f1 = NULL, f4 = NULL, f5 = NULL;
-#if 0
-/* UNSAFE */
-/* The next two variables are used to cache the address of the most recently called user function.
-These values must be reset each time stringEval() is called.
-(When Bracmat is embedded in a Java program as a JNI, data addresses are not stable, it seems.) */
-static psk oldlnode = 0;
-static psk lastEvaluatedFunction = 0;
-#endif
-
-#define NNUMBERIS1(x) ((x)->sign == 0 && (x)->length == 1 && ((char*)((x)->number))[0] == '1')
-
-
-typedef struct varia
-    {
-    struct varia* prev; /* variableValue[-1] */
-    psk variableValue[1];       /* variableValue[0], arraysize is adjusted by psh */
-    } varia;
-
-typedef struct vars /* sizeof(vars) = n * 4 bytes */
-    {
-#if PVNAME
-    unsigned char* vname;
-#define VARNAME(x) x->vname
-#endif
-    struct vars* next;
-    int n;
-    int selector;
-    varia* pvaria; /* Can also contain entry[0]   (if n == 0) */
-#if !PVNAME
-    union
-        {
-        LONG Lobj;
-        unsigned char Obj;
-        } u;
-#define VARNAME(x) &x->u.Obj
-#endif
-    } vars;
-
-static vars* variables[256];
-
-static int ARGC = 0;
-static char** ARGV = NULL;
 
 struct Hash;
 
-
-/*#if !_BRACMATEMBEDDED*/
-#if !defined NO_FOPEN
-static char* errorFileName = NULL;
-#endif
-static FILE* errorStream = NULL;
-/*#endif*/
-
-typedef LONG refCountType;
-
-typedef struct indexType
-    {
-    LONG offset;
-    refCountType refCnt;
-    size_t size;
-    } indexType;
-
-typedef struct handleType
-    {
-    LONG number;
-    char* fileName;
-    } handleType;
-
-typedef struct objectType
-    {
-    handleType handle;
-    refCountType refCnt;
-    LONG offset;
-    psk obj;
-    LONG size;
-    } objectType;
-
-#define NOT_STORED -1L
-
-typedef struct freeStoreType
-    {
-    LONG nextFree;
-    LONG size;
-    } freeStoreType;
-
-
-
-static const psk knil[16] =
-    { NULL,NULL,NULL,NULL,NULL,NULL,&nilNode,&zeroNode,
-    &oneNode,NULL,NULL,NULL,NULL,NULL,NULL,NULL };
-
-static const char opchar[16] =
-    { '=','.',',','|','&',':',' ','+','*','^','\016','\017','\'','$','_','?' };
-
-
-
-
-
-
-#define STRING    1
-#define VAPORIZED 2
-#define MEMORY    4
-#define ECHO      8
-
+#include <stdio.h>
 #include <stdarg.h>
 
-
-
-static unsigned char* startPos;
-
-static const char
-unbalanced[] =
-"unbalanced";
-
-static size_t telling = 0;
-
-
-static int hum = 1;
-static int listWithName = 1;
-static int beNice = TRUE;
-static int optab[256];
-static int dummy_op = WHITE;
 #if DEBUGBRACMAT
 static int debug = 0;
 #endif
-
-static FILE* global_fpi;
-static FILE* global_fpo;
-
-static const char needsquotes[256] = {
-    /*
-       1 : needsquotes if first character;
-       3 : needsquotes always
-       4 : needsquotes if \t and \n must be expanded
-    */
-    0,0,0,0,0,0,0,0,0,4,4,0,0,0,3,3, /* \L \D */
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    3,1,0,1,3,1,3,3,3,3,3,3,3,1,3,1, /* SP ! # $ % & ' ( ) * + , - . / */
-    0,0,0,0,0,0,0,0,0,0,3,3,1,3,1,1, /* : < = > ? */
-    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* @ */
-    0,0,0,0,0,0,0,0,0,0,0,1,3,1,3,3, /* [ \ ] ^ _ */
-    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ` */
-    0,0,0,0,0,0,0,0,0,0,0,3,3,3,1,0 };/* { | } ~ */
-
-
+#if CHECKALLOCBOUNDS
+static int POINT = 0;
+#endif
 /* ISO8859 */ /* NOT DOS compatible! */
-#if 0
+#if CODEPAGE850
 static const unsigned char lowerEquivalent[256] =
     {
           0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,
@@ -1471,32 +1266,57 @@ static const unsigned char upperEquivalent[256] =
         208, 209, 210, 211, 212, 213, 214, 247, 216, 217, 218, 219, 220, 221, 222, 255 /* ij */
     };
 #endif
-static psk global_anchor;
 
-static inputBuffer* InputArray;
-static inputBuffer* InputElement; /* Points to member of InputArray */
-static unsigned char* start, ** pstart, * source;
-static unsigned char* inputBufferPointer;
-static unsigned char* maxInputBufferPointer; /* inputBufferPointer <= maxInputBufferPointer,
-                            if inputBufferPointer == maxInputBufferPointer, don't assign to *inputBufferPointer */
+static int dummy_op = WHITE;
+static psk addr[7];
+static sk zeroNode, oneNode, minusOneNode,
+nilNode, nilNodeNotNeutral,
+zeroNodeNotNeutral,
+oneNodeNotNeutral,
+argNode, selfNode, SelfNode, twoNode, fourNode, sjtNode;
 
+static FILE* global_fpi;
+static FILE* global_fpo;
+static int optab[256];
 
-
-static void parenthesised_result(psk Root, int level, int ind, int space);
-#if DEBUGBRACMAT
-static void hreslts(psk Root, int level, int ind, int space, psk cutoff);
+#if GLOBALARGPTR
+static va_list argptr;
 #endif
 
-static psk eval(psk Pnode);
-#define evaluate(x) \
-(    ( ((x) = eval(x))->v.fl \
-     & SUCCESS\
-     ) \
-   ? TRUE\
-   : ((x)->v.fl & FENCE)\
-)
+/*#if !_BRACMATEMBEDDED*/
+#if !defined NO_FOPEN
+static char* errorFileName = NULL;
+#endif
+static FILE* errorStream = NULL;
+/*#endif*/
 
-static psk subtreecopy(psk src);
+static int hum = 1;
+static int listWithName = 1;
+static int beNice = TRUE;
+static psk global_anchor;
+static size_t telling = 0;
+static unsigned char* source;
+
+static const psk knil[16] =
+    { NULL,NULL,NULL,NULL,NULL,NULL,&nilNode,&zeroNode,
+    &oneNode,NULL,NULL,NULL,NULL,NULL,NULL,NULL };
+
+#if !defined NO_FOPEN
+static char* targetPath = NULL; /* Path that can be prepended to filenames. */
+#endif
+
+static int ARGC = 0;
+static char** ARGV = NULL;
+
+static psk m0 = NULL, m1 = NULL, f0 = NULL, f1 = NULL, f4 = NULL, f5 = NULL;
+
+#if _BRACMATEMBEDDED && !defined _MT
+
+#else
+#define Printf printf
+#endif
+
+#include <string.h>
 
 #if _BRACMATEMBEDDED
 
@@ -1517,7 +1337,6 @@ static int mygetc(FILE* fpi)
         return fgetc(fpi);
     }
 
-
 static void myputc(int c)
     {
     if(WinOut && (global_fpo == stdout || global_fpo == stderr))
@@ -1530,7 +1349,11 @@ static void myputc(int c)
 #else
 static void myputc(int c)
     {
+#ifdef __EMSCRIPTEN__
+    fputc(c, stdout);
+#else
     fputc(c, global_fpo);
+#endif
     }
 
 static int mygetc(FILE* fpi)
@@ -1577,9 +1400,9 @@ static int mygetc(FILE* fpi)
 
 static void(*process)(int c) = myputc;
 
-static void myprintf(char* strng, ...)
+static void myprintf(const char* strng, ...)
     {
-    char* i, * j;
+    const char* i, * j;
     va_list ap;
     va_start(ap, strng);
     i = strng;
@@ -1591,7 +1414,6 @@ static void myprintf(char* strng, ...)
         }
     va_end(ap);
     }
-
 
 #if _BRACMATEMBEDDED && !defined _MT
 static int Printf(const char* fmt, ...)
@@ -1743,23 +1565,23 @@ static int sfullnumbercheck(char* begin, char* cutoff)
     return ret;
     }
 
-static int quote(unsigned char* strng)
-    {
-    unsigned char* pstring;
-    if(needsquotes[*strng] & 1)
-        return TRUE;
-    for(pstring = strng; *pstring; pstring++)
-        if(needsquotes[*pstring] & 2)
-            return TRUE;
-        else if(needsquotes[*pstring] & 4
-                && lineTooLong(strng)
-                )
-            return TRUE;
-    return FALSE;
-    }
+#if DOSUMCHECK
+#else
+#define bmalloc(LINENO,N) bmalloc(N)
+#endif
+
+static psk eval(psk Pnode);
+#define evaluate(x) \
+(    ( ((x) = eval(x))->v.fl \
+     & SUCCESS\
+     ) \
+   ? TRUE\
+   : ((x)->v.fl & FENCE)\
+)
+
+static void wipe(psk top);
 
 #include <assert.h>
-
 
 /*
 After running valid.bra  on 32 bit platform
@@ -1799,12 +1621,11 @@ total bytes = 1166400
 #define MEM6SIZE 64
 #endif
 
-
-#if TELMAX
+#if SHOWMAXALLOCATED
 static size_t globalloc = 0, maxgloballoc = 0;
 #endif
 
-#if TELLING
+#if SHOWCURRENTLYALLOCATED
 static size_t cnts[256], alloc_cnt = 0, totcnt = 0;
 #endif
 
@@ -1815,7 +1636,7 @@ struct memblock
     struct memoryElement* firstFreeElementBetweenAddresses; /* if NULL : no more free elements */
     struct memblock* previousOfSameLength; /* address of older ands smaller block with same sized elements */
     size_t sizeOfElement;
-#if TELMAX
+#if SHOWMAXALLOCATED
     size_t numberOfFreeElementsBetweenAddresses; /* optional field. */
     size_t numberOfElementsBetweenAddresses; /* optional field. */
     size_t minimumNumberOfFreeElementsBetweenAddresses;
@@ -1832,7 +1653,6 @@ struct allocation
 static struct allocation* global_allocations;
 static int global_nallocations = 0;
 
-
 struct memoryElement
     {
     struct memoryElement* next;
@@ -1843,10 +1663,10 @@ struct pointerStruct
     struct pointerStruct * lp;
     } *global_p, *global_ep;
 */
-struct memblock** pMemBlocks = 0; /* list of memblock, sorted
+static struct memblock** pMemBlocks = 0; /* list of memblock, sorted
                                       according to memory address */
 static int NumberOfMemBlocks = 0;
-#if TELMAX
+#if SHOWMAXALLOCATED
 static int malloced = 0;
 #endif
 
@@ -1898,10 +1718,8 @@ static void checksum(int line)
     }
 #else
 #define setChecksum(a,b)
-#define bmalloc(LINENO,N) bmalloc(N)
 #define checksum(a)
 #endif
-
 
 static struct memblock* initializeMemBlock(size_t elementSize, size_t numberOfElements)
     {
@@ -1916,7 +1734,7 @@ static struct memblock* initializeMemBlock(size_t elementSize, size_t numberOfEl
         mb->previousOfSameLength = 0;
         stepSize = elementSize / sizeof(struct memoryElement);
         nlongpointers = stepSize * numberOfElements;
-        mb->firstFreeElementBetweenAddresses = mb->lowestAddress = malloc(elementSize * numberOfElements);
+        mb->firstFreeElementBetweenAddresses = mb->lowestAddress = (struct memoryElement*)malloc(elementSize * numberOfElements);
         if(mb->lowestAddress == 0)
             {
 #if _BRACMATEMBEDDED
@@ -1927,13 +1745,12 @@ static struct memblock* initializeMemBlock(size_t elementSize, size_t numberOfEl
             }
         else
             {
-#if TELMAX
-            mb->numberOfElementsBetweenAddresses = numberOfElements;
-#endif
             mEa = mb->lowestAddress;
             mb->highestAddress = mEa + nlongpointers;
-#if TELMAX
+#if SHOWMAXALLOCATED
             mb->numberOfFreeElementsBetweenAddresses = numberOfElements;
+            mb->numberOfElementsBetweenAddresses = numberOfElements;
+            mb->minimumNumberOfFreeElementsBetweenAddresses = numberOfElements;
 #endif
             mEz = mb->highestAddress - stepSize;
             for(; mEa < mEz; )
@@ -2010,6 +1827,35 @@ static struct memblock* newMemBlocks(size_t n)
 
     }
 
+#if SHOWCURRENTLYALLOCATED
+static void bezetting(void)
+    {
+    struct memblock* mb = 0;
+    size_t words = 0;
+    int i;
+    Printf("\nfree\n");
+    for(i = 0; i < NumberOfMemBlocks; ++i)
+        {
+        mb = pMemBlocks[i];
+#if WORD32 || defined __VMS
+        Printf("%zd words per node : %lu of %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), mb->numberOfFreeElementsBetweenAddresses, mb->numberOfElementsBetweenAddresses);
+#else
+        Printf("%zd words per node : %zu of %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), mb->numberOfFreeElementsBetweenAddresses, mb->numberOfElementsBetweenAddresses);
+#endif
+        }
+    Printf("\nmin free\n");
+    for(i = 0; i < NumberOfMemBlocks; ++i)
+        {
+        mb = pMemBlocks[i];
+#if WORD32 || defined __VMS
+        Printf("%zd words per node : %lu of %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), mb->minimumNumberOfFreeElementsBetweenAddresses, mb->numberOfElementsBetweenAddresses);
+#else
+        Printf("%zd words per node : %zu of %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), mb->minimumNumberOfFreeElementsBetweenAddresses, mb->numberOfElementsBetweenAddresses);
+#endif
+        }
+    Printf("more than %zd words per node : %u\n", words, malloced);
+    }
+#endif
 
 static void* bmalloc(int lineno, size_t n)
     {
@@ -2017,14 +1863,14 @@ static void* bmalloc(int lineno, size_t n)
 #if DOSUMCHECK
     size_t nn = n;
 #endif
-#if TELLING
+#if SHOWCURRENTLYALLOCATED
     int tel;
     alloc_cnt++;
     if(n < 256)
         cnts[n]++;
     totcnt += n;
 #endif
-#if TELMAX
+#if SHOWMAXALLOCATED
     globalloc++;
     if(maxgloballoc < globalloc)
         maxgloballoc = globalloc;
@@ -2057,7 +1903,7 @@ static void* bmalloc(int lineno, size_t n)
             }
         if(ret != 0)
             {
-#if TELMAX
+#if SHOWMAXALLOCATED
             --(mb->numberOfFreeElementsBetweenAddresses);
             if(mb->numberOfFreeElementsBetweenAddresses < mb->minimumNumberOfFreeElementsBetweenAddresses)
                 mb->minimumNumberOfFreeElementsBetweenAddresses = mb->numberOfFreeElementsBetweenAddresses;
@@ -2085,7 +1931,7 @@ static void* bmalloc(int lineno, size_t n)
 
     if(!ret)
         {
-#if TELLING
+#if SHOWCURRENTLYALLOCATED
         errorprintf(
             "MEMORY FULL AFTER %lu ALLOCATIONS WITH MEAN LENGTH %lu\n",
             globalloc, totcnt / alloc_cnt);
@@ -2105,7 +1951,7 @@ static void* bmalloc(int lineno, size_t n)
         exit(1);
         }
 
-#if TELMAX
+#if SHOWMAXALLOCATED
     ++malloced;
 #endif
     ((LONG*)ret)[n] = 0;
@@ -2161,11 +2007,9 @@ static int rfree(psk p)
         {
         r |= rfree(p->LEFT);
         r |= rfree(p->RIGHT);
-    }
+        }
     return r;
-}
-
-static int POINT = 0;
+    }
 
 static int areFree(char* t, psk p)
     {
@@ -2186,8 +2030,8 @@ static void checkMem(void* p)
     LONG* q;
     q = (LONG*)p - 2;
     if(q[0] == ('s' << 24) + ('t' << 16) + ('a' << 8) + ('r')
-        && q[q[1]] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d')
-        )
+       && q[q[1]] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d')
+       )
         {
         ;
         }
@@ -2197,7 +2041,7 @@ static void checkMem(void* p)
         printf("s:[");
         for(; s < (char*)(q + q[1] + 1); ++s)
             {
-            if((((int)s) % 4) == 0)
+            if((((LONG)s) % 4) == 0)
                 printf("|");
             if(' ' <= *s && *s <= 127)
                 printf(" %c", *s);
@@ -2209,7 +2053,6 @@ static void checkMem(void* p)
     assert(q[0] == ('s' << 24) + ('t' << 16) + ('a' << 8) + ('r'));
     assert(q[q[1]] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d'));
     }
-
 
 static void checkBounds(void* p)
     {
@@ -2223,7 +2066,9 @@ static void checkBounds(void* p)
     assert(lp[lp[1]] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d'));
     for(q = pMemBlocks + NumberOfMemBlocks; --q >= pMemBlocks;)
         {
+#ifndef NDEBUG
         size_t stepSize = (*q)->sizeOfElement / sizeof(struct memoryElement);
+#endif // !NDEBUG
         if((*q)->lowestAddress <= (struct memoryElement*)p && (struct memoryElement*)p < (*q)->highestAddress)
             {
             assert(lp[stepSize - 1] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d'));
@@ -2232,7 +2077,7 @@ static void checkBounds(void* p)
         }
     }
 
-static void checkAllBounds()
+static void checkAllBounds(void)
     {
     struct memblock** q;
     for(q = pMemBlocks + NumberOfMemBlocks; --q >= pMemBlocks;)
@@ -2251,7 +2096,7 @@ static void checkAllBounds()
             else
                 {
                 if((((LONG*)x)[0] == ('s' << 24) + ('t' << 16) + ('a' << 8) + ('r'))
-                    && (((LONG*)x)[stepSize - 1] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d')))
+                   && (((LONG*)x)[stepSize - 1] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d')))
                     ;
                 else
                     {
@@ -2276,6 +2121,19 @@ static void checkAllBounds()
 
 static void bfree(void* p)
     {
+    assert(p != (void*)&zeroNode);
+    assert(p != (void*)&oneNode);
+    assert(p != (void*)&minusOneNode);
+    assert(p != (void*)&nilNode);
+    assert(p != (void*)&nilNodeNotNeutral);
+    assert(p != (void*)&zeroNodeNotNeutral);
+    assert(p != (void*)&oneNodeNotNeutral);
+    assert(p != (void*)&argNode);
+    assert(p != (void*)&selfNode);
+    assert(p != (void*)&SelfNode);
+    assert(p != (void*)&twoNode);
+    assert(p != (void*)&fourNode);
+    assert(p != (void*)&sjtNode);
     struct memblock** q;
 #if CHECKALLOCBOUNDS
     LONG* lp = (LONG*)p;
@@ -2287,14 +2145,14 @@ static void bfree(void* p)
     lp = lp - 2;
     p = lp;
 #endif
-#if TELMAX
+#if SHOWMAXALLOCATED
     globalloc--;
 #endif
     for(q = pMemBlocks + NumberOfMemBlocks; --q >= pMemBlocks;)
         {
         if((*q)->lowestAddress <= (struct memoryElement*)p && (struct memoryElement*)p < (*q)->highestAddress)
             {
-#if TELMAX
+#if SHOWMAXALLOCATED
             ++((*q)->numberOfFreeElementsBetweenAddresses);
 #endif
             ((struct memoryElement*)p)->next = (*q)->firstFreeElementBetweenAddresses;
@@ -2304,48 +2162,11 @@ static void bfree(void* p)
             }
         }
     free(p);
-#if TELMAX
+#if SHOWMAXALLOCATED
     --malloced;
 #endif
     setChecksum(LineNo, globN);
     }
-
-#if TELLING
-static void bezetting(void)
-    {
-    struct memblock* mb = 0;
-    size_t words = 0;
-    int i;
-    Printf("\noccupied (promilles)\n");
-    for(i = 0; i < NumberOfMemBlocks; ++i)
-        {
-        mb = pMemBlocks[i];
-#if WORD32 || defined __VMS
-        Printf("%zd word : %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->numberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
-#else
-        Printf("%zd word : %zu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->numberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
-#endif
-        }
-    Printf("\nmax occupied (promilles)\n");
-    for(i = 0; i < NumberOfMemBlocks; ++i)
-        {
-        mb = pMemBlocks[i];
-#if WORD32 || defined __VMS
-        Printf("%zd word : %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->minimumNumberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
-#else
-        Printf("%zd word : %zu\n", mb->sizeOfElement / sizeof(struct memoryElement), 1000UL - (1000UL * mb->minimumNumberOfFreeElementsBetweenAddresses) / mb->numberOfElementsBetweenAddresses);
-#endif
-        }
-    Printf("\noccupied (absolute)\n");
-    for(i = 0; i < NumberOfMemBlocks; ++i)
-        {
-        mb = pMemBlocks[i];
-        words = mb->sizeOfElement / sizeof(struct memoryElement);
-        Printf("%zd word : %zu\n", words, (mb->numberOfElementsBetweenAddresses - mb->numberOfFreeElementsBetweenAddresses));
-        }
-    Printf("more than %zd words : %u\n", words, malloced);
-    }
-#endif
 
 #if SHOWMEMBLOCKS
 static void showMemBlocks()
@@ -2386,8 +2207,7 @@ static void showMemBlocks()
     }
 #endif
 
-
-int addAllocation(size_t size, int number, int nallocations, struct allocation* allocations)
+static int addAllocation(size_t size, int number, int nallocations, struct allocation* allocations)
     {
     int i;
     for(i = 0; i < nallocations; ++i)
@@ -2403,7 +2223,7 @@ int addAllocation(size_t size, int number, int nallocations, struct allocation* 
     return nallocations + 1;
     }
 
-int memblocksort(const void* a, const void* b)
+static int memblocksort(const void* a, const void* b)
     {
     struct memblock* A = *(struct memblock**)a;
     struct memblock* B = *(struct memblock**)b;
@@ -2490,19 +2310,16 @@ static void dec_refcount(psk pnode)
 #endif
     }
 
-#if defined DEBUGBRACMAT
-static void result(psk Root);
-#endif
-#if TELMAX
-#if TELLING
-void initcnts(void)
+#if SHOWMAXALLOCATED
+#if SHOWCURRENTLYALLOCATED
+static void initcnts(void)
     {
-    for(int tel = 0; tel < sizeof(cnts) / sizeof(cnts[0]); ++tel)
+    for(ULONG tel = 0; tel < sizeof(cnts) / sizeof(cnts[0]); ++tel)
         cnts[tel] = 0;
     }
 #endif
 
-void Bez(char draft[22])
+static void Bez(char draft[22])
     {
 #if MAXSTACK
 #if defined _WIN32 || defined __VMS
@@ -2581,6 +2398,8 @@ static psk scopy(const char* str)
     pnode->v.fl = READY | SUCCESS | nr;
     return pnode;
     }
+
+static psk subtreecopy(psk src);
 
 static psk same_as_w(psk pnode)
     {
@@ -2699,8 +2518,6 @@ static psk charcopy(const char* strt, const char* until)
     return pnode;
     }
 
-static void wipe(psk top);
-
 static void copyToCutoff(psk* ppnode, psk pnode, psk cutoff)
     {
     for(;;)
@@ -2774,6 +2591,45 @@ static method_pnt findBuiltInMethod(typedObjectnode* object, psk methodName)
         }
     return NULL;
     }
+
+static const char needsquotes[256] = {
+    /*
+       1 : needsquotes if first character;
+       3 : needsquotes always
+       4 : needsquotes if \t and \n must be expanded
+    */
+    0,0,0,0,0,0,0,0,0,4,4,0,0,0,3,3, /* \L \D */
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    3,1,0,1,3,1,3,3,3,3,3,3,3,1,3,1, /* SP ! # $ % & ' ( ) * + , - . / */
+    0,0,0,0,0,0,0,0,0,0,3,3,1,3,1,1, /* : < = > ? */
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* @ */
+    0,0,0,0,0,0,0,0,0,0,0,1,3,1,3,3, /* [ \ ] ^ _ */
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ` */
+    0,0,0,0,0,0,0,0,0,0,0,3,3,3,1,0 };/* { | } ~ */
+
+static int quote(unsigned char* strng)
+    {
+    unsigned char* pstring;
+    if(needsquotes[*strng] & 1)
+        return TRUE;
+    for(pstring = strng; *pstring; pstring++)
+        if(needsquotes[*pstring] & 2)
+            return TRUE;
+        else if((needsquotes[*pstring] & 4)
+                && lineTooLong(strng)
+                )
+            return TRUE;
+    return FALSE;
+    }
+
+static const char opchar[16] =
+    { '=','.',',','|','&',':',' ','+','*','^','\016','\017','\'','$','_','?' };
+
+static void parenthesised_result(psk Root, int level, int ind, int space);
+#if DEBUGBRACMAT
+static void hreslts(psk Root, int level, int ind, int space, psk cutoff);
+#endif
+
 #define COMPLEX_MAX 80
 int LineLength = NARROWLINELENGTH;
 
@@ -2956,7 +2812,7 @@ static void endnode(psk Root, int space)
     int q, ikar;
 #if CHECKALLOCBOUNDS
     if(POINT)
-        printf("\n[%p %d]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
+        printf("\n[%p %lld]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
 #endif
     SM(Root)
 
@@ -3069,7 +2925,7 @@ static void reslt(psk Root, int level, int ind, int space)
             extraSpc = 1;
 #if CHECKALLOCBOUNDS
         if(POINT)
-            printf("\n[%p %d]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
+            printf("\n[%p %lld]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
 #endif
         SM(Root)
             do_something(opchar[klopcode(Root)]);
@@ -3158,7 +3014,6 @@ static void parenthesised_result(psk Root, int level, int ind, int space)
     if(is_op(Root))
         {
         int number_of_flags;
-
         if(Op(Root) == EQUALS)
             Root->RIGHT = Head(Root->RIGHT);
         indent(Root, level, -1);
@@ -3179,7 +3034,7 @@ static void parenthesised_result(psk Root, int level, int ind, int space)
             extraSpc = 1;
 #if CHECKALLOCBOUNDS
         if(POINT)
-            printf("\n[%p %d]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
+            printf("\n[%p %lld]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
 #endif
         SM(Root)
             do_something(opchar[klopcode(Root)]);
@@ -3202,35 +3057,6 @@ static void parenthesised_result(psk Root, int level, int ind, int space)
         endnode(Root, space);
         }
     }
-
-#if 1
-#define testMul(a,b,c,d)
-#else
-#if CHECKALLOCBOUNDS
-static int testMul(char* txt, psk variabele, psk pbinding, int doit)
-    {
-    if(doit
-       || is_op(pbinding) && Op(pbinding) == TIMES && pbinding->LEFT->u.obj == 'a'
-       )
-        {
-        POINT = 1;
-        printf("%s ", txt);
-        if(variabele)
-            {
-            result(variabele);
-            }
-        printf(":");
-        result(pbinding);
-        printf("\n");
-        POINT = 0;
-        return 1;
-        }
-    return 0;
-    }
-#else
-#define testMul(a,b,c,d)
-#endif
-#endif
 
 #if DEBUGBRACMAT
 static void hreslts(psk Root, int level, int ind, int space, psk cutoff)
@@ -3294,7 +3120,6 @@ static void results(psk Root, psk cutoff)
     }
 #endif
 
-
 static void result(psk Root)
     {
     if(Root)
@@ -3309,6 +3134,10 @@ static void result(psk Root)
     }
 
 
+static inputBuffer* InputArray;
+static unsigned char* inputBufferPointer;
+static unsigned char* maxInputBufferPointer; /* inputBufferPointer <= maxInputBufferPointer,
+                            if inputBufferPointer == maxInputBufferPointer, don't assign to *inputBufferPointer */
 
 static void lput(int c)
     {
@@ -3455,9 +3284,8 @@ static unsigned char CodePage850toISO8859(unsigned char kar)
     }
 #endif
 
-
 /* extern, is called from xml.c json.c */
-char* putCodePoint(ULONG val, char* s)
+unsigned char* putCodePoint(ULONG val, unsigned char* s)
     {
     /* Converts Unicode character w to 1,2,3 or 4 bytes of UTF8 in s. */
     if(val < 0x80)
@@ -3595,7 +3423,7 @@ int getCodePoint(const char** ps)
     return K;
     }
 
-static int getCodePoint2(const char** ps, int* isutf)
+int getCodePoint2(const char** ps, int* isutf)
     {
     int ks = *isutf ? getCodePoint(ps) : (const unsigned char)*(*ps)++;
     if(ks < 0)
@@ -3609,9 +3437,9 @@ static int getCodePoint2(const char** ps, int* isutf)
 
 static psk changeCase(psk Pnode
 #if CODEPAGE850
-                      , int dos
+               , int dos
 #endif
-                      , int low)
+               , int low)
     {
 #if !CODEPAGE850
     const
@@ -3676,7 +3504,7 @@ static psk changeCase(psk Pnode
                             obuf = buf;
                             }
                         }
-                    d = putCodePoint(D, d);
+                    d = (char*)putCodePoint(D, (unsigned char*)d);
                     }
                 else
                     *d++ = (unsigned char)D;
@@ -3733,7 +3561,6 @@ static int strcasecompu(char** S, char** P, char* cutoff)
     return (s < cutoff ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*p;
     }
 
-
 static int strcasecomp(const char* s, const char* p)
     {
     int sutf = 1; /* assume UTF-8, becomes 0 if it is not */
@@ -3766,7 +3593,7 @@ static int strcasecmpDOS(const char* s, const char* p)
     }
 #endif
 
-void writeError(psk Pnode)
+static void writeError(psk Pnode)
     {
     FILE* saveFpo;
     int saveNice;
@@ -3795,7 +3622,6 @@ void writeError(psk Pnode)
     beNice = saveNice;
     }
 
-/*#if !_BRACMATEMBEDDED*/
 static int redirectError(char* name)
     {
 #if !defined NO_FOPEN
@@ -3837,8 +3663,28 @@ static int redirectError(char* name)
         }
     return FALSE;
     }
-/*#endif*/
 
+
+#if READMARKUPFAMILY
+#define OPT_ML  (1 << SHIFT_ML)
+#define OPT_TRM (1 << SHIFT_TRM)
+#define OPT_HT  (1 << SHIFT_HT)
+#define OPT_X   (1 << SHIFT_X)
+extern void XMLtext(FILE* fpi, unsigned char* source, int trim, int html, int xml);
+#endif
+
+#if READJSON
+#define OPT_JSON (1 << SHIFT_JSN)
+extern int JSONtext(FILE* fpi, char* source);
+#endif
+
+static unsigned char* startPos;
+static unsigned char* start;
+static unsigned char** pstart;
+
+static const char unbalanced[] = "unbalanced";
+
+static inputBuffer* InputElement; /* Points to member of InputArray */
 
 static unsigned char* shift_nw(VOIDORARGPTR)
 /* Used from starttree_w and build_up */
@@ -3973,7 +3819,6 @@ static void tstr(int c)
         telling++;
     }
 
-
 static void pstr(int c)
     {
     static int esc = FALSE, str = FALSE;
@@ -4031,7 +3876,6 @@ static void glue(int c)
     {
     *source++ = (char)c;
     }
-
 
 static int flags(void)
     {
@@ -4182,13 +4026,13 @@ static psk leftDescend_rightDescend(psk top)
 #endif
 
 #if GLOBALARGPTR
-static psk lex(int* nxt, int priority, int Flags)
+static psk lex(unsigned int* nxt, int priority, int Flags)
 #else
-static psk lex(int* nxt, int priority, int Flags, va_list* pargptr)
+static psk lex(unsigned int* nxt, int priority, int Flags, va_list* pargptr)
 #endif
 /* *nxt (if nxt != 0) is set to the character following the expression. */
     {
-    int op_or_0;
+    unsigned int op_or_0;
     psk Pnode;
     if(*start > 0 && *start <= '\6')
         Pnode = same_as_w(addr[*start++]);
@@ -4242,7 +4086,7 @@ static psk lex(int* nxt, int priority, int Flags, va_list* pargptr)
                 {
                 /* op_or_0 == an operator */
                 psk operatorNode;
-                int child_op_or_0;
+                unsigned int child_op_or_0;
                 if(optab[op_or_0] < priority) /* 'op_or_0' has too low priority */
                     {
                     /* Our Pnode is followed by an operator, but it turns out
@@ -4507,11 +4351,10 @@ static psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrmtxt, Boolean* err, B
                            )
                             break;
                         }
-                    else
-                        if((ikar = *source++) == 0)
-                            {
-                            break;
-                            }
+                    else if((ikar = *source++) == 0)
+                        {
+                        break;
+                        }
                     if(ikar == 0) /* 20230309 We can just as well stop here.
                         Bracmat leafs are always treated as null terminated strings,
                         so anything after a null byte is ignored and would just occupy memory. */
@@ -4865,10 +4708,6 @@ void stringEval(const char* s, const char** out, int* err)
         sprintf(buf, "str$(%s)", s);
 #endif
         source = (unsigned char*)buf;
-#if 0
-        oldlnode = 0;
-        lastEvaluatedFunction = 0;
-#endif
         global_anchor = input(NULL, global_anchor, OPT_MEM, err, NULL); /* 4 -> OPT_MEM*/
         if(err && *err)
             return;
@@ -4887,15 +4726,14 @@ void stringEval(const char* s, const char** out, int* err)
     return;
     }
 
-
 static void init_opcode(void)
     {
     int tel;
+#if SHOWCURRENTLYALLOCATED
+    initcnts();
+#endif
     for(tel = 0; tel < 256; tel++)
         {
-#if TELLING
-        cnts[tel] = 0;
-#endif
         switch(tel)
             {
 
@@ -5033,7 +4871,6 @@ static void wipe(psk top)
     dec_refcount(top);
     }
 
-
 /*
 multiply number with 204586 digits with itself
 New algorithm:   17,13 s
@@ -5042,7 +4879,8 @@ Old algorithm: 1520,32 s
 {?} get$longint&!x*!x:?y&lst$(y,verylongint,NEW)&ok
 */
 #ifndef NDEBUG
-static void pbint(LONG * high, LONG * low)
+
+static void pbint(LONG* high, LONG* low)
     {
     for(; high <= low; ++high)
         {
@@ -5060,7 +4898,7 @@ static void pbint(LONG * high, LONG * low)
         }
     }
 
-static void validt(LONG * high, LONG * low)
+static void validt(LONG* high, LONG* low)
     {
     for(; high <= low; ++high)
         {
@@ -5069,7 +4907,7 @@ static void validt(LONG * high, LONG * low)
         }
     }
 
-static void valid(nnumber * res)
+static void valid(nnumber* res)
     {
     validt(res->inumber, res->inumber + res->ilength - 1);
     }
@@ -5103,7 +4941,7 @@ static ptrdiff_t numlength(nnumber* n)
     return len;
     }
 
-static LONG iAddSubtractFinal(LONG * highRemainder, LONG * lowRemainder, LONG carry)
+static LONG iAddSubtractFinal(LONG* highRemainder, LONG* lowRemainder, LONG carry)
     {
     while(highRemainder <= lowRemainder)
         {
@@ -5136,8 +4974,7 @@ static LONG iAddSubtractFinal(LONG * highRemainder, LONG * lowRemainder, LONG ca
     return carry;
     }
 
-
-static LONG iAdd(LONG * highRemainder, LONG * lowRemainder, LONG * highDivisor, LONG * lowDivisor)
+static LONG iAdd(LONG* highRemainder, LONG* lowRemainder, LONG* highDivisor, LONG* lowDivisor)
     {
     LONG carry = 0;
     assert(*highRemainder == 0);
@@ -5166,10 +5003,10 @@ static LONG iAdd(LONG * highRemainder, LONG * lowRemainder, LONG * highDivisor, 
         return iAddSubtractFinal(highRemainder, lowRemainder, carry);
     }
 
-static LONG iSubtract(LONG * highRemainder
-                      , LONG * lowRemainder
-                      , LONG * highDivisor
-                      , LONG * lowDivisor
+static LONG iSubtract(LONG* highRemainder
+                      , LONG* lowRemainder
+                      , LONG* highDivisor
+                      , LONG* lowDivisor
                       , LONG factor
 )
     {
@@ -5200,10 +5037,10 @@ static LONG iSubtract(LONG * highRemainder
         return iAddSubtractFinal(highRemainder, lowRemainder, carry);
     }
 
-static LONG iSubtract2(LONG * highRemainder
-                       , LONG * lowRemainder
-                       , LONG * highDivisor
-                       , LONG * lowDivisor
+static LONG iSubtract2(LONG* highRemainder
+                       , LONG* lowRemainder
+                       , LONG* highDivisor
+                       , LONG* lowDivisor
                        , LONG factor
 )
     {
@@ -5279,7 +5116,7 @@ static LONG iSubtract2(LONG * highRemainder
         }
     }
 
-static LONG nnDivide(nnumber * dividend, nnumber * divisor, nnumber * quotient, nnumber * remainder)
+static LONG nnDivide(nnumber* dividend, nnumber* divisor, nnumber* quotient, nnumber* remainder)
     {
     LONG* low, * quot, * head, * oldhead;
     /* Remainder starts out as copy of dividend. As the division progresses,
@@ -5302,7 +5139,7 @@ static LONG nnDivide(nnumber * dividend, nnumber * divisor, nnumber * quotient, 
     remainder->ilength = remainder->iallocated = dividend->sign & QNUL ? 1 : dividend->ilength;
     assert(remainder->iallocated > 0);
     assert((LONG)TEN_LOG_RADIX * remainder->ilength >= dividend->length);
-    remainder->inumber = remainder->ialloc = (LONG*)bmalloc(__LINE__, sizeof(LONG) * remainder->iallocated);
+    remainder->inumber = (LONG*)(remainder->ialloc = bmalloc(__LINE__, sizeof(LONG) * remainder->iallocated));
     *(remainder->inumber) = 0;
     assert(dividend->ilength != 0);/*if(dividend->ilength == 0)
         remainder->inumber[0] = 0;
@@ -5314,7 +5151,7 @@ static LONG nnDivide(nnumber * dividend, nnumber * divisor, nnumber * quotient, 
     else
         quotient->ilength = quotient->iallocated = 1;
 
-    quotient->inumber = quotient->ialloc = (LONG*)bmalloc(__LINE__, (size_t)(quotient->iallocated) * sizeof(LONG));
+    quotient->inumber = (LONG*)(quotient->ialloc = bmalloc(__LINE__, (size_t)(quotient->iallocated) * sizeof(LONG)));
     memset(quotient->inumber, 0, (size_t)(quotient->iallocated) * sizeof(LONG));
     quot = quotient->inumber;
 
@@ -5483,7 +5320,7 @@ static psk inumberNode(nnumber* g)
     return res;
     }
 
-static Qnumber nn2q(nnumber * num, nnumber * den)
+static Qnumber nn2q(nnumber* num, nnumber* den)
     {
     Qnumber res;
     assert(!(num->sign & QNUL));
@@ -5522,7 +5359,7 @@ static Qnumber not_a_number(void)
     return res;
     }
 
-static Qnumber qnDivide(nnumber * x, nnumber * y)
+static Qnumber qnDivide(nnumber* x, nnumber* y)
     {
     Qnumber res;
     nnumber gcd = { 0 }, hrem = { 0 };
@@ -5609,7 +5446,7 @@ static void nTimes(nnumber* x, nnumber* y, nnumber* product)
     assert(product->ialloc == 0);
     product->ilength = product->iallocated = x->ilength + y->ilength;
     assert(product->iallocated > 0);
-    product->inumber = product->ialloc = (LONG*)bmalloc(__LINE__, sizeof(LONG) * product->iallocated);
+    product->inumber = (LONG*)(product->ialloc = bmalloc(__LINE__, sizeof(LONG) * product->iallocated));
 
     for(ipointer = product->inumber; ipointer < product->inumber + product->ilength; *ipointer++ = 0)
         ;
@@ -5711,6 +5548,7 @@ static char* split(Qnumber _qget, nnumber* ptel, nnumber* pnoem)
 /* Create a node from a number, only allocating memory for the node if the
 number hasn't the right size (== too large). If new memory is allocated,
 the number's memory is deallocated. */
+
 static psk numberNode2(nnumber* g)
     {
     psk res;
@@ -5758,7 +5596,6 @@ static psk numberNode2(nnumber* g)
 {!} 62694910002908910202610946081623305253537463604246972909/75122371034222274084834066940872899586533484041821
     S   0,98 sec  (16500.31292.1022)
 
-
 70
 1,71*10E0 s Loop implemented as circular datastructure.
 1,79*10E0 s Loop implemented with variable name evaluation.
@@ -5772,7 +5609,7 @@ ok
     S   7,29 sec  (16497.31239.1022)
 */
 
-static Qnumber qDivideMultiply(nnumber * x1, nnumber * x2, nnumber * y1, nnumber * y2)
+static Qnumber qDivideMultiply(nnumber* x1, nnumber* x2, nnumber* y1, nnumber* y2)
     {
     nnumber pa = { 0 }, pb = { 0 };
     Qnumber res;
@@ -5789,7 +5626,6 @@ static Qnumber qDivideMultiply(nnumber * x1, nnumber * x2, nnumber * y1, nnumber
 {?} 0:?n&whl'(1+!n:<1000:?n&707957265978333334659243765782345642321377768009873333/676799876699834625978465923745729787673565217476876234*536452356432598243508245804572839536543879878347777777/113555480476987659789060958543895703333333333333333333+1:?T)&!T
 {!} 62694910002908910202610946081623305253537463604246972909/75122371034222274084834066940872899586533484041821
     S   1,03 sec  (1437.1463.2)
-
 
 70
 1,69*10E0 s Loop implemented as circular datastructure.
@@ -5828,7 +5664,7 @@ ok
     S   7,26 sec  (16497.31292.1022)
 */
 
-static Qnumber qDivideMultiply2(nnumber * x1, nnumber * x2, nnumber * y1, nnumber * y2)
+static Qnumber qDivideMultiply2(nnumber* x1, nnumber* x2, nnumber* y1, nnumber* y2)
     {
     nnumber pa = { 0 }, pb = { 0 };
     Qnumber res;
@@ -5861,7 +5697,7 @@ static Qnumber qTimes2(Qnumber _qx, Qnumber _qy)
         }
     }
 
-static int nnDivide(nnumber * x, nnumber * y)
+static int nnDivide(nnumber* x, nnumber* y)
     {
     division resx, resy;
     nnumber gcd = { 0 }, hrem = { 0 };
@@ -5910,7 +5746,7 @@ reduce the numerators with the denominators of the other
 number. Numerators and denominators may get smaller, speeding
 up the following multiplication.
 */
-static Qnumber qDivideMultiply(nnumber * x1, nnumber * x2, nnumber * y1, nnumber * y2)
+static Qnumber qDivideMultiply(nnumber* x1, nnumber* x2, nnumber* y1, nnumber* y2)
     {
     Qnumber res;
     nnumber z1 = { 0 }, z2 = { 0 };
@@ -6054,7 +5890,6 @@ static void skipnullen(nnumber* nget, int Sign)
     nget->sign = nget->length ? (Sign & MINUS) : QNUL;
     }
 
-
 static int addSubtractFinal(char* i1, char* i2, char tmp, char** pres, char* bx)
     {
     for(; i2 >= bx;)
@@ -6126,7 +5961,6 @@ static int decrease(char** pres, char* bx, char* ex, char* by, char* ey)
         } while(ypointer >= by);
         return addSubtractFinal(i1, i2, tmp, pres, bx);
     }
-
 
 static nnumber nPlus(nnumber* x, nnumber* y)
     {
@@ -6357,9 +6191,9 @@ static int subroot(nnumber* ag, char* conc[], int* pind)
     if(errno == ERANGE)
         return FALSE; /*{?} 45237183544316235476^1/2 => 45237183544316235476^1/2 */
 #else  /* TURBOC, vcc */
-    if(ag.length > 10 || ag.length == 10 && strcmp(ag.number, "4294967295") > 0)
+    if(ag->length > 10 || (ag->length == 10 && (strcmp(ag->number, "4294967295") > 0)))
         return FALSE;
-    g = STRTOUL(ag.number, NULL, 10);
+    g = STRTOUL(ag->number, NULL, 10);
 #endif
     ores = 1;
     macht = 1;
@@ -6628,34 +6462,6 @@ static int compare(psk s, psk p)
 #define scompare(wh,s,c,p) scompare(s,c,p)
 #endif
 
-#if INTSCMP
-static int intscmp(LONG* s1, LONG* s2) /* this routine produces different results
-                                  depending on BIGENDIAN */
-    {
-    while(*((char*)s1 + 3))
-        {
-        if(*s1 != *s2)
-            {
-            if(*s1 < *s2)
-                return -1;
-            else
-                return 1;
-            }
-        s1++;
-        s2++;
-        }
-    if(*s1 != *s2)
-        {
-        if(*s1 < *s2)
-            return -1;
-        else
-            return 1;
-        }
-    else
-        return 0;
-    }
-#endif
-
 
 /*
 With the % flag on an otherwise numeric pattern, the pattern is treated
@@ -6701,7 +6507,6 @@ static int scompare(char* wh, unsigned char* s, unsigned char* cutoff, psk p)
         status = AFraction;
     else if(Flgs & NUMBER)
         status = ANumber;
-
 
     if(!(Flgs & NONIDENT) /* % as flag on number forces comparison as string, not as number */
        && RATIONAL_WEAK(p)
@@ -7146,7 +6951,6 @@ static int scompare(char* wh, unsigned char* s, unsigned char* cutoff, psk p)
             }
         }
 
-
     switch(Flgs & (NOT | GREATER_THAN | SMALLER_THAN))
         {
         case NOT | GREATER_THAN | SMALLER_THAN:    /* n:~<>p */
@@ -7278,55 +7082,86 @@ static int scompare(char* wh, unsigned char* s, unsigned char* cutoff, psk p)
             }
         }
     }
-    static psk getmember2(psk name, psk tree)
+
+#if INTSCMP
+static int intscmp(LONG * s1, LONG * s2) /* this routine produces different results
+                                    depending on BIGENDIAN */
+    {
+    while(*((char*)s1 + 3))
         {
-        while(is_op(tree))
+        if(*s1 != *s2)
             {
-            if(Op(tree) == EQUALS)
+            if(*s1 < *s2)
+                return -1;
+            else
+                return 1;
+            }
+        s1++;
+        s2++;
+        }
+    if(*s1 != *s2)
+        {
+        if(*s1 < *s2)
+            return -1;
+        else
+            return 1;
+        }
+    else
+        return 0;
+    }
+#endif
+
+ /* name = tree with DOT in root */
+
+static psk getmember2(psk name, psk tree)
+    {
+    while(is_op(tree))
+        {
+        if(Op(tree) == EQUALS)
+            {
+            psk nname;
+
+            if(Op(name) == DOT)
+                nname = name->LEFT;
+            else
+                nname = name;
+
+            if(equal(tree->LEFT, nname))
+                return NULL;
+            else if(nname == name)
                 {
-                psk nname;
-
-                if(Op(name) == DOT)
-                    nname = name->LEFT;
-                else
-                    nname = name;
-
-                if(equal(tree->LEFT, nname))
-                    return NULL;
-                else if(nname == name)
-                    {
-                    return tree->RIGHT = Head(tree->RIGHT);
-                    }
-                else
-                    {
-                    name = name->RIGHT;
-                    }
+                return tree->RIGHT = Head(tree->RIGHT);
                 }
             else
                 {
-                psk tmp;
-                if((tmp = getmember2(name, tree->LEFT)) != NULL)
-                    {
-                    return tmp;
-                    }
+                name = name->RIGHT;
                 }
-            tree = tree->RIGHT;
             }
-        return NULL;
+        else
+            {
+            psk tmp;
+            if((tmp = getmember2(name, tree->LEFT)) != NULL)
+                {
+                return tmp;
+                }
+            }
+        tree = tree->RIGHT;
         }
+    return NULL;
+    }
 
 static psk getmember(psk name, psk tree, objectStuff* Object)
     {
     /* Returns NULL if either the method is not found or if the method is
-        built-in. In the latter case, Object->theMethod is set. */
+       built-in. In the latter case, Object->theMethod is set. */
     while(is_op(tree))
         {
         if(Op(tree) == EQUALS)
             {
             psk nname;
             if(ISBUILTIN((objectnode*)tree)
-                && Op(name) == DOT
-                )
+               && Op(name) == DOT
+               )
                 {
                 Object->object = tree;  /* object == (=) */
                 Object->theMethod = findBuiltInMethod((typedObjectnode*)tree, name->RIGHT);
@@ -7365,7 +7200,6 @@ static psk getmember(psk name, psk tree, objectStuff* Object)
         }
     return NULL;
     }
-
 
 static int atomtest(psk pnode)
     {
@@ -7642,7 +7476,6 @@ static psk lambda(psk Pnode, psk name, psk Arg)
     return NULL;
     }
 
-
 static int search_opt(psk pnode, LONG opt)
     {
     while(is_op(pnode))
@@ -7653,6 +7486,7 @@ static int search_opt(psk pnode, LONG opt)
         }
     return PLOBJ(pnode) == opt;
     }
+
 static psk _leftbranch(psk Pnode)
     {
     psk lnode;
@@ -7777,6 +7611,36 @@ static psk __rightbranch(psk Pnode)
     return ret;
     }
 
+#include <errno.h>
+
+typedef struct varia
+    {
+    struct varia* prev; /* variableValue[-1] */
+    psk variableValue[1];       /* variableValue[0], arraysize is adjusted by psh */
+    } varia;
+
+typedef struct vars /* sizeof(vars) = n * 4 bytes */
+    {
+#if PVNAME
+    unsigned char* vname;
+#define VARNAME(x) x->vname
+#endif
+    struct vars* next;
+    int n;
+    int selector;
+    varia* pvaria; /* Can also contain entry[0]   (if n == 0) */
+#if !PVNAME
+    union
+        {
+        LONG Lobj;
+        unsigned char Obj;
+        } u;
+#define VARNAME(x) &x->u.Obj
+#endif
+    } vars;
+
+static vars* variables[256];
+
 static int searchname(psk name,
                       vars** pprevvar,
                       vars** pnxtvar)
@@ -7834,9 +7698,7 @@ static int setmember(psk name, psk tree, psk newValue)
     return FALSE;
     }
 
-
-#define POWER2
-static int power2(int n)
+static int ilog2(int n)
 /* returns MSB of n */
     {
     int m;
@@ -7848,6 +7710,12 @@ static int power2(int n)
     return m >> 1;
     }
 
+/* Given the number of layers of a stack, an index and a pointer to the stack,
+   return the entry pointed at by the index.
+   Each level is twice the size of the level below it.
+   The lowest level has size 2.
+   The  role of the level with size 1 is played by the pointer to the stack.
+   The caller can mutate the returned entry.*/
 static ppsk Entry(int n, int index, varia** pv)
     {
     if(n == 0)
@@ -7858,7 +7726,7 @@ static ppsk Entry(int n, int index, varia** pv)
         {
 #if defined POWER2
         varia* hv;
-        int MSB = power2(n);
+        int MSB = ilog2(n);
         for(hv = *pv /* begin with longest varia record */
             ; MSB > 1 && index < MSB
             ; MSB >>= 1
@@ -7887,6 +7755,12 @@ static ppsk Entry(int n, int index, varia** pv)
         }
     }
 
+/* Given the number of layers of a stack, an index and a pointer to the stack,
+   return the entry pointed at by the index.
+   Each level is twice the size of the level below it.
+   The lowest level has size 2.
+   The  role of the level with size 1 is played by the pointer to the stack.
+   The caller cannot mutate the returned entry.*/
 static psk Entry2(int n, int index, varia* pv)
     {
     if(n == 0)
@@ -7897,7 +7771,7 @@ static psk Entry2(int n, int index, varia* pv)
         {
         varia* hv;
 #if defined POWER2
-        int MSB = power2(n);
+        int MSB = ilog2(n);
         for(hv = pv /* begin with longest varia record */
             ; MSB > 1 && index < MSB
             ; MSB >>= 1
@@ -7925,8 +7799,6 @@ static psk Entry2(int n, int index, varia* pv)
         return hv->variableValue[index];  /* variableValue[-1] == (psk)*prev */
         }
     }
-
-
 
 static int update(psk name, psk pnode) /* name = tree with DOT in root */
 /*
@@ -7966,7 +7838,6 @@ static int update(psk name, psk pnode) /* name = tree with DOT in root */
         return FALSE; /*{?} 66:?(someUnidentifiableObject.x) */
         }
     }
-
 
 static int insert(psk name, psk pnode)
     {
@@ -8105,7 +7976,7 @@ static int psh(psk name, psk pnode, psk dim)
         nxtvar->n++;
         nxtvar->selector = nxtvar->n;
         }
-    m2 = power2(n);
+    m2 = ilog2(n);
     if(m2 == 0)
         m22 = 1;
     else
@@ -8157,8 +8028,8 @@ static int deleteNode(psk name)
     vars* nxtvar, * prevvar;
     varia* hv;
     if(searchname(name,
-                    &prevvar,
-                    &nxtvar))
+                  &prevvar,
+                  &nxtvar))
         {
         psk tmp;
         assert(nxtvar->pvaria);
@@ -8166,7 +8037,7 @@ static int deleteNode(psk name)
         wipe(tmp);
         if(nxtvar->n)
             {
-            if((nxtvar->n) - 1 < power2(nxtvar->n))
+            if((nxtvar->n) - 1 < ilog2(nxtvar->n))
                 {
                 hv = nxtvar->pvaria;
                 nxtvar->pvaria = hv->prev;
@@ -8213,8 +8084,8 @@ static psk getValueByVariableName(psk namenode)
         nxtvar = nxtvar->next)
         ;
     if(nxtvar && !STRCMP(VARNAME(nxtvar), POBJ(namenode))
-        && nxtvar->selector <= nxtvar->n
-        )
+       && nxtvar->selector <= nxtvar->n
+       )
         {
         ppsk self;
         assert(nxtvar->pvaria);
@@ -8242,16 +8113,16 @@ static psk getValue(psk namenode, int* newval)
                 return same_as_w(namenode->RIGHT);
                 }
             case DOT: /*
-                        e.g.
+                      e.g.
 
                             x  =  (a=2) (b=3)
 
                             !(x.a)
-                        and
+                      and
                             !((=  (a=2) (b=3)).a)
 
-                        must give same result.
-                        */
+                      must give same result.
+                      */
                 {
                 psk tmp;
                 if(is_op(namenode->LEFT))
@@ -8277,13 +8148,13 @@ static psk getValue(psk namenode, int* newval)
                     */
                     }
                 /* The number of '=' to reach the method name in 'tmp' must be one greater
-                    than the number of '.' that precedes the method name in 'namenode->RIGHT'
+                   than the number of '.' that precedes the method name in 'namenode->RIGHT'
 
-                    e.g (= (say=.out$!arg)) and (.say) match
+                   e.g (= (say=.out$!arg)) and (.say) match
 
-                    For built-in methods (definitions of which are not visible) an invisible '=' has to be assumed.
+                   For built-in methods (definitions of which are not visible) an invisible '=' has to be assumed.
 
-                    The function getmember resolves this.
+                   The function getmember resolves this.
                 */
                 tmp = getmember2(namenode->RIGHT, tmp);
 
@@ -8311,39 +8182,38 @@ static psk getValue(psk namenode, int* newval)
     }
 
 static psk findMethod(psk namenode, objectStuff* Object)
-    /* Only for finding 'function' definitions. (LHS of ' or $)*/
-    /*
-    'namenode' is the expression that has to lead to a binding.
-    Conceptually, expression (or its complement) and binding are separated by a '=' operator.
-    E.g.
+/* Only for finding 'function' definitions. (LHS of ' or $)*/
+/*
+'namenode' is the expression that has to lead to a binding.
+Conceptually, expression (or its complement) and binding are separated by a '=' operator.
+E.g.
 
-        say            =         (.out$!arg)
-        ---            -         -----------
-        expression   '='-operator     binding
+  say            =         (.out$!arg)
+  ---            -         -----------
+  expression   '='-operator     binding
 
-        say$HELLO
-        and
-        (= (.out$!arg))$HELLO
-
-            must be equivalent. Therefore, both of 'say' and its complement '(= .out$!arg)' have the binding '(.out$!arg)'.
-
-            'find' returns returns a binding or NULL.
-            If the function returns NULL, 'theMethod' may still be bound.
-            The parameter 'self' is the rhs of the root '=' of an object. It is used for non-built-ins
-            The parameter 'object' is the root of an object, possibly having built-in methods.
-
-
-    Built in methods:
-    if
-        new$hash:?x
-    then
-        ((=).insert)$   (=) being the hash node with invisible built in method 'insert'
+    say$HELLO
     and
-        (!x.insert)$
-    and
-        (x..insert)$
-    must be equivalent
-    */
+    (= (.out$!arg))$HELLO
+
+      must be equivalent. Therefore, both of 'say' and its complement '(= .out$!arg)' have the binding '(.out$!arg)'.
+
+        'find' returns returns a binding or NULL.
+        If the function returns NULL, 'theMethod' may still be bound.
+        The parameter 'self' is the rhs of the root '=' of an object. It is used for non-built-ins
+        The parameter 'object' is the root of an object, possibly having built-in methods.
+
+Built in methods:
+if
+    new$hash:?x
+then
+    ((=).insert)$   (=) being the hash node with invisible built in method 'insert'
+and
+    (!x.insert)$
+and
+    (x..insert)$
+must be equivalent
+*/
     {
     psk tmp;
     assert(is_op(namenode));
@@ -8363,8 +8233,7 @@ static psk findMethod(psk namenode, objectStuff* Object)
         {
         if(Op(namenode->LEFT) == EQUALS)
             {
-            if(ISBUILTIN((objectnode*)(namenode->LEFT))
-                )
+            if(ISBUILTIN((objectnode*)(namenode->LEFT)))
                 {
                 Object->theMethod = findBuiltInMethod((typedObjectnode*)(namenode->LEFT), namenode->RIGHT);
                 /* findBuiltInMethod((=),(insert)) */
@@ -8378,17 +8247,17 @@ static psk findMethod(psk namenode, objectStuff* Object)
             tmp = namenode->LEFT->RIGHT;
             /* e.g. tmp == hash
             Or  tmp ==
-                    (name=(first=John),(last=Bull))
+                  (name=(first=John),(last=Bull))
                 , (age=20)
                 , ( new
-                    =
+                  =
                     .   new$(its.name):(=?(its.name))
-                        &   !arg
+                      &   !arg
                         : ( ?(its.name.first)
-                            . ?(its.name.last)
-                            . ?(its.age)
-                            )
-                    )
+                          . ?(its.name.last)
+                          . ?(its.age)
+                          )
+                  )
             */
             }
         else
@@ -8435,21 +8304,21 @@ static int copy_insert(psk name, psk pnode, psk cutoff)
     int ret;
     assert((pnode->RIGHT == 0 && cutoff == 0) || pnode->RIGHT != cutoff);
     if((pnode->v.fl & INDIRECT)
-        && (pnode->v.fl & READY)
-        /*
-        {?} !dagj a:?dagj a
-        {!} !dagj
-        The test (pnode->v.fl & READY) does not solve stackoverflow
-        in the following examples:
+       && (pnode->v.fl & READY)
+       /*
+       {?} !dagj a:?dagj a
+       {!} !dagj
+       The test (pnode->v.fl & READY) does not solve stackoverflow
+       in the following examples:
 
-        {?} (=!y):(=?y)
-        {?} !y
+       {?} (=!y):(=?y)
+       {?} !y
 
-        {?} (=!y):(=?x)
-        {?} (=!x):(=?y)
-        {?} !x
-        */
-        )
+       {?} (=!y):(=?x)
+       {?} (=!x):(=?y)
+       {?} !x
+       */
+       )
         {
         return FALSE;
         }
@@ -8675,6 +8544,13 @@ static function_return_type setIndex(psk Pnode)
     */
     }
 
+static void initVariables(void)
+    {
+    int tel;
+    for(tel = 0; tel < 256; variables[tel++] = NULL)
+        ;
+    }
+
 static int scopy_insert(psk name, const char* str)
     {
     int ret;
@@ -8724,9 +8600,9 @@ static int string_copy_insert(psk name, psk pnode, char* str, char* cutoff)
             psnode->length = cutoff - str;
             }
         DBGSRC(int saveNice; int redhum; saveNice = beNice; \
-                redhum = hum; beNice = FALSE; hum = FALSE; \
-                Printf("str [%s] length " LONGU "\n", psnode->str, (ULONG int)psnode->length); \
-                beNice = saveNice; hum = redhum;)
+               redhum = hum; beNice = FALSE; hum = FALSE; \
+               Printf("str [%s] length " LONGU "\n", psnode->str, (ULONG int)psnode->length); \
+               beNice = saveNice; hum = redhum;)
             ret = insert(name, (psk)psnode);
         if(ret)
             dec_refcount((psk)psnode);
@@ -8757,10 +8633,10 @@ static psk evalmacro(psk Pnode)
                 if(left != NULL)
                     {
                     /* copy backbone from evalmacro's argument to current Pnode
-                        release lhs of copy of current and replace with 'left'
-                        assign copy to 'Pnode'
-                        evalmacro current, if not null, replace current
-                        return current
+                       release lhs of copy of current and replace with 'left'
+                       assign copy to 'Pnode'
+                       evalmacro current, if not null, replace current
+                       return current
                     */
                     psk ret;
                     psk first = NULL;
@@ -8924,6 +8800,10 @@ static psk evalmacro(psk Pnode)
     return NULL;
     }
 
+#define HASH(x) (Hash*)x->voiddata
+#define VOID(x) x->voiddata
+#define PHASH(x) (Hash**)&(x->voiddata)
+
 static LONG casesensitivehash(const char* cp)
     {
     LONG hash_temp = 0;
@@ -8979,7 +8859,7 @@ static LONG caseinsensitivehashDOS(const char* cp)
     }
 #endif
 
-static psk removeFromHash(Hash * temp, psk Arg)
+static psk removeFromHash(Hash* temp, psk Arg)
     {
     const char* key = (const char*)POBJ(Arg);
     LONG i;
@@ -9015,7 +8895,7 @@ static psk removeFromHash(Hash * temp, psk Arg)
     return NULL;
     }
 
-static psk inserthash(Hash * temp, psk Arg)
+static psk inserthash(Hash* temp, psk Arg)
     {
     const char* key = (const char*)POBJ(Arg->LEFT);
     LONG i;
@@ -9067,7 +8947,7 @@ static psk inserthash(Hash * temp, psk Arg)
     return r->entry;
     }
 
-static psk findhash(Hash * temp, psk Arg)
+static psk findhash(Hash* temp, psk Arg)
     {
     const char* key = (const char*)POBJ(Arg);
     LONG i;
@@ -9096,7 +8976,7 @@ static psk findhash(Hash * temp, psk Arg)
     return NULL;
     }
 
-static void freehash(Hash * temp)
+static void freehash(Hash* temp)
     {
     if(temp)
         {
@@ -9183,7 +9063,7 @@ static ULONG nextprime(ULONG g)
     return g;
     }
 
-static void rehash(Hash * *ptemp, int loadFactor/*1-100*/)
+static void rehash(Hash** ptemp, int loadFactor/*1-100*/)
     {
     Hash* temp = *ptemp;
     if(temp)
@@ -9220,7 +9100,7 @@ static void rehash(Hash * *ptemp, int loadFactor/*1-100*/)
         }
     }
 
-static int loadfactor(Hash * temp)
+static int loadfactor(Hash* temp)
     {
     assert(temp->hash_size);
     if(temp->record_count < 10000000L)
@@ -9335,7 +9215,6 @@ static Boolean hashcasesensitive(struct typedObjectnode* This, ppsk arg)
     return TRUE;
     }
 
-
 static Boolean hashforall(struct typedObjectnode* This, ppsk arg)
     {
     ULONG i;
@@ -9378,8 +9257,7 @@ static Boolean hashforall(struct typedObjectnode* This, ppsk arg)
     return TRUE;
     }
 
-
-method hash[] = {
+static method hash[] = {
     {"find",hashfind},
     {"insert",hashinsert},
     {"remove",hashremove},
@@ -9625,9 +9503,9 @@ static LONG expressionLength(psk Pnode, unsigned int op)
 
 static char doPosition(matchstate s, psk pat, LONG pposition, size_t stringLength, psk expr
 #if CUTOFFSUGGEST
-                       , char** mayMoveStartOfSubject
+                , char** mayMoveStartOfSubject
 #endif
-                       , unsigned int op
+                , unsigned int op
 )
     {
     ULONG Flgs;
@@ -9942,7 +9820,6 @@ static char sdoEval(char* sub, char* cutoff, psk pat, psk subkn)
     return ret;
     }
 
-
 #if CUTOFFSUGGEST
 static char stringmatch
 (int ind
@@ -10043,9 +9920,7 @@ static char stringmatch
         }
     if(!(((Flgs & NONIDENT)
           && (NEGATION(Flgs, NONIDENT)
-              ? ((s.c.once = ONCE)
-                 , cutoff > sub
-                 )
+              ? ((s.c.once = ONCE), cutoff > sub)
               : cutoff == sub
               )
           )
@@ -10053,9 +9928,7 @@ static char stringmatch
              && (NEGATION(Flgs, ATOM)
                  ? (cutoff < sub + 2) /*!(sub[0] && sub[1])*/
                  : cutoff > sub
-                 && ((s.c.once = ONCE)
-                     , cutoff > sub + 1 /*sub[1]*/
-                     )
+                 && ((s.c.once = ONCE), cutoff > sub + 1 /*sub[1]*/)
                  )
              )
          || ((Flgs & (FRACTION | NUMBER))
@@ -10069,7 +9942,7 @@ static char stringmatch
                     )
                  )
              && (s.c.rmr = (ci == DEFINITELYNONUMBER) ? ONCE : FALSE
-                 , (s.c.lmr = PRISTINE)
+                 , (s.c.lmr = PRISTINE) /* Single = is correct! */
                  )
              )
          )
@@ -10546,6 +10419,9 @@ static char stringmatch
     return (char)(s.c.once | s.c.rmr);
     }
 
+/*#define SUBJECTNOTNIL(sub,pat) (is_op(sub) || HAS_UNOPS(sub) || (PIOBJ(sub) != PIOBJ(nil(pat))))*/
+#define SUBJECTNOTNIL(sub,pat) (is_op(sub) || HAS_UNOPS(sub) || (PLOBJ(sub) != PLOBJ(nil(pat))))
+
 /*
     ( Dogs and Cats are friends: ? [%(out$(!sjt SJT)&~) (|))&
     ( Dogs and Cats are friends: ? [%(out$(!sjt)&~) (|))&
@@ -10679,7 +10555,6 @@ static char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk exp
     &   a b c d
       : ?X !p (d|?&(p=`?Z&foo:?Y)&~)
     & out$(X !X Y !Y Z !Z));
-
 
     (once=a b c d:?X (?|?) d & out$(X !X))
     (once=a b c d:?X (@|@) d & out$(X !X))
@@ -11358,6 +11233,7 @@ static char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk exp
     }
 
 #if !defined NO_FOPEN
+
 enum { NoPending, Writing, Reading };
 typedef struct fileStatus
     {
@@ -11379,7 +11255,7 @@ typedef struct fileStatus
 #endif
     } fileStatus;
 
-    static fileStatus* fs0 = NULL;
+static fileStatus* fs0 = NULL;
 #endif
 
 #if !defined NO_FOPEN
@@ -11395,7 +11271,7 @@ static fileStatus* findFileStatusByName(const char* name)
     return NULL;
     }
 
-static fileStatus* allocateFileStatus(const char* name, FILE * fp
+static fileStatus* allocateFileStatus(const char* name, FILE* fp
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
                                       , Boolean dontcloseme
 #endif
@@ -11413,7 +11289,7 @@ static fileStatus* allocateFileStatus(const char* name, FILE * fp
     return fs0;
     }
 
-static void deallocateFileStatus(fileStatus * fs)
+static void deallocateFileStatus(fileStatus* fs)
     {
     fileStatus* fsPrevious, * fsaux;
     for(fsPrevious = NULL, fsaux = fs0
@@ -11439,7 +11315,7 @@ static void deallocateFileStatus(fileStatus * fs)
     bfree(fs);
     }
 
-fileStatus* mygetFileStatus(const char* filename, const char* mode
+static fileStatus* mygetFileStatus(const char* filename, const char* mode
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
                             , Boolean dontcloseme
 #endif
@@ -11458,7 +11334,7 @@ fileStatus* mygetFileStatus(const char* filename, const char* mode
     return NULL;
     }
 
-fileStatus* myfopen(const char* filename, const char* mode
+static fileStatus* myfopen(const char* filename, const char* mode
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
                     , Boolean dontcloseme
 #endif
@@ -11553,7 +11429,7 @@ static int closeAFile(void)
 #define preparefp(fs,name,mode) preparefp(fs,mode)
 #endif
 
-static fileStatus* preparefp(fileStatus * fs, char* name, LONG mode)
+static fileStatus* preparefp(fileStatus* fs, char* name, LONG mode)
     {
     assert(fs != NULL);
     assert(!strcmp(fs->fname, name));
@@ -11598,7 +11474,7 @@ static fileStatus* search_fp(char* name, LONG mode)
     return NULL;
     }
 
-static void setStop(fileStatus * fs, char* stopstring)
+static void setStop(fileStatus* fs, char* stopstring)
     {
     if(fs->stop)
 #ifdef BMALLLOC
@@ -11608,7 +11484,8 @@ static void setStop(fileStatus * fs, char* stopstring)
                               free(fs->stop);
     fs->stop = (char*)malloc(strlen(stopstring) + 1);
 #endif
-    strcpy(fs->stop, stopstring);
+    if(fs->stop)
+        strcpy(fs->stop, stopstring);
     }
 
 static int fil(ppsk PPnode)
@@ -11761,7 +11638,6 @@ static int fil(ppsk PPnode)
                 {
                 fs = search_fp(name, 0L);
                 }
-
 
             if(!fs)
                 {
@@ -12205,7 +12081,6 @@ static int fil(ppsk PPnode)
 #endif
 #endif
 
-
 static int allopts(psk pnode, LONG opt[])
     {
     int i;
@@ -12235,7 +12110,6 @@ static int flush(void)
 #endif
 #endif
     }
-
 
 static int output(ppsk PPnode, void(*how)(psk k))
     {
@@ -12345,7 +12219,7 @@ static int output(ppsk PPnode, void(*how)(psk k))
     }
 
 #if !defined NO_FOPEN
-static psk fileget(psk rlnode, int intval_i, psk Pnode, int* err, Boolean * GoOn)
+static psk fileget(psk rlnode, int intval_i, psk Pnode, int* err, Boolean* GoOn)
     {
     FILE* saveFp;
     fileStatus* fs;
@@ -12382,8 +12256,8 @@ static LONG simil
  , const char* s2end
  , int* putf1
  , int* putf2
- , LONG * plen1
- , LONG * plen2
+ , LONG* plen1
+ , LONG* plen2
 )
     {
     const char* ls1;
@@ -12599,8 +12473,6 @@ static psk getObjectDef(psk src)
         return objectcopy(src);
         }
 
-
-
     if((def = SymbolBinding_w(src, src->v.fl & DOUBLY_INDIRECT)) != NULL)
         {
         dest = (typedObjectnode*)bmalloc(__LINE__, sizeof(typedObjectnode));
@@ -12635,7 +12507,6 @@ static psk getObjectDef(psk src)
 #define CASE(a) else if(lob == a)
 #define DEFAULT else
 #endif
-
 
 #ifdef DELAY_DUE_TO_INPUT
 static clock_t delayDueToInput = 0;
@@ -12699,20 +12570,20 @@ static psk swi(psk Pnode, psk rlnode, psk rrightnode)
             strtoul((char*)POBJ(rlnode), (char**)NULL, 10);
         } while(is_op(rrightnode) && i < 10);
 #ifdef __TURBOC__
-        intr(u.s.swicode, (struct REGPACK*)&u.s.regs);
-        sprintf(pc, "0.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
-                u.i[1], u.i[2], u.i[3], u.i[4], u.i[5],
-                u.i[6], u.i[7], u.i[8], u.i[9], u.i[10]);
+    intr(u.s.swicode, (struct REGPACK*)&u.s.regs);
+    sprintf(pc, "0.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
+            u.i[1], u.i[2], u.i[3], u.i[4], u.i[5],
+            u.i[6], u.i[7], u.i[8], u.i[9], u.i[10]);
 #else
 #if defined ARM
-        i = (int)os_swix(u.s.swicode, &u.s.regs);
-        sprintf(pc, "%u.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
-                i,
-                u.i[1], u.i[2], u.i[3], u.i[4], u.i[5],
-                u.i[6], u.i[7], u.i[8], u.i[9], u.i[10]);
+    i = (int)os_swix(u.s.swicode, &u.s.regs);
+    sprintf(pc, "%u.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
+            i,
+            u.i[1], u.i[2], u.i[3], u.i[4], u.i[5],
+            u.i[6], u.i[7], u.i[8], u.i[9], u.i[10]);
 #endif
 #endif
-        return build_up(Pnode, pc, NULL);
+    return build_up(Pnode, pc, NULL);
     }
 #endif
 
@@ -12729,19 +12600,6 @@ static void stringreverse(char* a, size_t len)
         }
     }
 
-#if 0
-static void print_clock(char* pjotter, clock_t time)
-    {
-    if(time == (clock_t)-1)
-        sprintf(pjotter, "-1");
-    else
-#if defined __TURBOC__ && !defined __BORLANDC__
-        sprintf(pjotter, "%0lu/%lu", (ULONG)time, (ULONG)(10.0 * CLOCKS_PER_SEC));/* CLOCKS_PER_SEC == 18.2 */
-#else
-        sprintf(pjotter, LONG0D "/" LONGD, (LONG)time, (LONG)CLOCKS_PER_SEC);
-#endif
-    }
-#else
 static void print_clock(char* pjotter)
     {
     clock_t time = clock();
@@ -12757,7 +12615,6 @@ static void print_clock(char* pjotter)
         sprintf(pjotter, LONG0D "/" LONGD, (LONG)time, (LONG)CLOCKS_PER_SEC);
 #endif
     }
-#endif
 
 static void combiflags(psk pnode)
     {
@@ -13003,6 +12860,12 @@ static function_return_type execFnc(psk Pnode)
 #if 1
         lnode = getValueByVariableName(lnode);
 #else
+        /* UNSAFE */
+        /* The next two variables are used to cache the address of the most recently called user function.
+        These values must be reset each time stringEval() is called.
+        (When Bracmat is embedded in a Java program as a JNI, data addresses are not stable, it seems.) */
+        static psk oldlnode = 0;
+        static psk lastEvaluatedFunction = 0;
         /* Unsafe, esp. in JNI */
         if(oldlnode == lnode)
             lnode = lastEvaluatedFunction;  /* Speeding up! Esp. in map, vap, mop. */
@@ -13060,58 +12923,7 @@ static function_return_type functions(psk Pnode)
         int i;
         ULONG ul;
         } intVal;
-#if 1
     lnode = Pnode->LEFT;
-#else
-    if(is_op(lnode = Pnode->LEFT))
-        {
-        if(!is_op(rlnode = lnode->LEFT) && !strcmp((char*)POBJ(rlnode), "math"))
-            {
-            if(is_op(Pnode->RIGHT))
-                {
-                if(REAL_COMP(Pnode->RIGHT->LEFT))
-                    {
-                    if(is_op(Pnode->RIGHT->RIGHT))
-                        {
-                        ;
-                        }
-                    else
-                        {
-                        if(REAL_COMP(Pnode->RIGHT->RIGHT))
-                            {
-                            psk restl = Cmath2(lnode->RIGHT, Pnode->RIGHT->LEFT, Pnode->RIGHT->RIGHT);
-                            if(restl)
-                                {
-                                wipe(Pnode);
-                                Pnode = restl;
-                                return functionOk(Pnode);
-                                }
-                            else
-                                return functionFail(Pnode);
-                            }
-                        }
-                    }
-                }
-            else
-                {
-                if(REAL_COMP(Pnode->RIGHT))
-                    {
-                    psk restl = Cmath(lnode->RIGHT, Pnode->RIGHT);
-                    if(restl)
-                        {
-                        wipe(Pnode);
-                        Pnode = restl;
-                        return functionOk(Pnode);
-                        }
-                    else
-                        return functionFail(Pnode);
-                    }
-                }
-            }
-
-        return find_func(Pnode);
-        }
-#endif
     rightnode = Pnode->RIGHT;
     {
     SWITCH(PLOBJ(lnode))
@@ -13325,7 +13137,7 @@ static function_return_type functions(psk Pnode)
                 {
                 fncTp pfnc; /* Hoping this works. */
                 void* vp;  /* Pointers to data and pointers to functions may
-                               have different sizes. */
+                                have different sizes. */
                 } u;
             void* argStruct;
             if(sizeof(int(*)(void*)) != sizeof(void*) || !is_op(rightnode))
@@ -13397,7 +13209,7 @@ static function_return_type functions(psk Pnode)
             if(is_op(rightnode) || !INTEGER_POS(rightnode))
                 return functionFail(Pnode);
             val = STRTOUL((char*)POBJ(rightnode), (char**)NULL, 10);
-            if(putCodePoint(val, draft) == NULL)
+            if(putCodePoint(val, (unsigned char*)draft) == NULL)
                 return functionFail(Pnode);
             wipe(Pnode);
             Pnode = scopy((const char*)draft);
@@ -13534,12 +13346,12 @@ static function_return_type functions(psk Pnode)
                 }
             return functionFail(Pnode);
             }
-#if TELMAX
+#if SHOWMAXALLOCATED
         CASE(BEZ) /* bez $  */
             {
             Bez(draft);
             Pnode = build_up(Pnode, draft, NULL);
-#if TELLING
+#if SHOWCURRENTLYALLOCATED
             bezetting();
 #endif
             return functionOk(Pnode);
@@ -13735,13 +13547,13 @@ static function_return_type functions(psk Pnode)
                 return functionFail(Pnode);
             }
         CASE(MOP)/*     mop $ (<function>.<tree1>.(=<tree2>))
-                 mop regards tree1 as a right descending 'list' with a backbone
-                 operator that is the same as the heading operator of tree 2.
-                 For example,
+                    mop regards tree1 as a right descending 'list' with a backbone
+                    operator that is the same as the heading operator of tree 2.
+                    For example,
                         mop$((=.!arg).2*a+e\Lb+c^2.(=+))
-                 generates the list
+                    generates the list
                         2*a e\Lb c^2
-                 */
+                    */
             {
             if(is_op(rightnode))
                 {/*XXX*/
@@ -13860,8 +13672,8 @@ static function_return_type functions(psk Pnode)
                 return functionFail(Pnode);
             }
         CASE(Vap) /*    vap $ (<function>.<string>.<char>)
-                     or vap $ (<function>.<string>)
-                     Second form splits in characters. */
+                        or vap $ (<function>.<string>)
+                        Second form splits in characters. */
             {
             if(is_op(rightnode))
                 {/*XXX*/
@@ -14139,7 +13951,7 @@ static function_return_type functions(psk Pnode)
                                 return functionOk(Pnode);
                                 }
                             /* sprintf(draft,"%d",errno);
-                             break;*/
+                                break;*/
                             }
                         }
 #endif
@@ -14401,7 +14213,7 @@ static function_return_type functions(psk Pnode)
                     Pnode = build_up(Pnode, "(((\2.New)'\3)|)&\2", NULL);
                 /* We might be able to call 'new' if 'New' had attached the argument
                     (containing the definition of a 'new' method) to the rhs of the '='.
-                   This cannot be done in a general way without introducing new syntax rules for the new$ function.
+                    This cannot be done in a general way without introducing new syntax rules for the new$ function.
                 */
                 else
                     Pnode = build_up(Pnode, "(((\2.new)'\3)|)&\2", NULL);
@@ -14475,54 +14287,7 @@ static function_return_type functions(psk Pnode)
             }
         DEFAULT
             {
-#if 1
             return 0;
-#else
-#if 1
-            if(INTEGER(lnode))
-                {
-                vars* nxtvar;
-                if(is_op(rightnode))
-                    return functionFail(Pnode);
-                for(nxtvar = variables[rightnode->u.obj];
-                    nxtvar && (STRCMP(VARNAME(nxtvar),POBJ(rightnode)) < 0);
-                    nxtvar = nxtvar->next);
-                /* find first name in a row of equal names */
-                if(nxtvar && !STRCMP(VARNAME(nxtvar),POBJ(rightnode)))
-                    {
-                    nxtvar->selector =
-                       (int)toLong(lnode)
-                     % (nxtvar->n + 1);
-                    if(nxtvar->selector < 0)
-                        nxtvar->selector += (nxtvar->n + 1);
-                    Pnode = rightbranch(Pnode);
-                    return functionOk(Pnode);
-                    }
-                }
-            if(!(rightnode->v.fl & SUCCESS))
-                return functionFail(Pnode);
-            addr[1] = NULL;
-            return execFnc(Pnode);
-#else
-            if(INTEGER(lnode))
-                {
-                if(is_op(rightnode))
-                    return functionFail(Pnode);
-                else
-                    {
-                    if(setIndex(rightnode,lnode))
-                        {
-                        Pnode = rightbranch(Pnode);
-                        return functionOk(Pnode);
-                        }
-                    }
-                }
-            if(!(rightnode->v.fl & SUCCESS))
-                return functionFail(Pnode);
-            addr[1] = NULL;
-            return execFnc(Pnode);
-#endif
-#endif
             }
         }
     }
@@ -14958,7 +14723,6 @@ static psk mergeOrSortTerms(psk Pnode)
                 else
                     return Rhead + RtermS + sum(L,RtermGE) + Rtail
 
-
     */
     static const char* conc[] = { NULL,NULL,NULL,NULL };
     int res = FALSE;
@@ -15008,6 +14772,7 @@ static psk mergeOrSortTerms(psk Pnode)
     rightoperand_and_tail(top, &Rterm, &Rtail);
     leftoperand_and_tail(top, &Lterm, &Ltail);
     assert(Ltail == NULL);
+
     if(RATIONAL_COMP(Lterm))
         {
         if(RATIONAL_COMP(Rterm))
@@ -15101,7 +14866,7 @@ static psk mergeOrSortTerms(psk Pnode)
             if(LtermNNNI == NULL)
                 {
                 dif = RtermNNNI == NULL ? 0 : -1;/*{?} i+-i*x => i+-i*x */
-                /*{?} i+-i => 0 */
+                                                 /*{?} i+-i => 0 */
                 }
             else
                 {
@@ -15435,7 +15200,6 @@ static psk substtimes(psk Pnode)
             }
         }
 
-
     rlnode = Op(rkn) == EXP ? rkn->LEFT : rkn; /*{?} (f.e)*(y.s) => (f.e)*(y.s) */
     llnode = Op(lkn) == EXP ? lkn->LEFT : lkn;
     if((nodedifference = equal(llnode, rlnode)) == 0)
@@ -15621,7 +15385,6 @@ lloper = a * x
  a
  rennur = a*NIL
 
-
              1*
              / \
             x  3*
@@ -15763,7 +15526,7 @@ static psk merge
                 tmp = eval(tmp);
                 tmp = expand(tmp, &ok);
                 } while(ok);
-                Pnode->RIGHT = tmp;
+            Pnode->RIGHT = tmp;
 #else
             Pnode->RIGHT = eval(tmp);
 #endif
@@ -16055,7 +15818,6 @@ static psk substdiff(psk Pnode)
     return Pnode;
     }
 
-
 #if JMP /* Often no need for polling in multithreaded apps.*/
 #include <windows.h>
 #include <dde.h>
@@ -16166,7 +15928,6 @@ static psk handleComma(psk Pnode)
         }
     return Pnode;
     }
-
 
 static psk evalvar(psk Pnode)
     {
@@ -16591,19 +16352,21 @@ static psk eval(psk Pnode)
         return Pnode;
     }
 
-#if TELLING
-#if TELMAX == 0
-#undef TELMAX
-#define TELMAX 1
+#if SHOWCURRENTLYALLOCATED
+#if SHOWMAXALLOCATED == 0
+#undef SHOWMAXALLOCATED
+#define SHOWMAXALLOCATED 1
 #endif
-#ifndef TELMAX
-#define TELMAX 1
+#ifndef SHOWMAXALLOCATED
+#define SHOWMAXALLOCATED 1
 #endif
 #endif
 
 /*#define reslt parenthesised_result */ /* to show ALL parentheses (one pair for each operator)*/
 
 #define LOGWORDLENGTH 2
+
+#include <ctype.h>
 
 /*
 0:?n&whl'(1+!n:<100000:?n&57265978465924376578234566767834625978465923745729775787627876873875436743934786450097*53645235643259824350824580457283955438957043287250857432895703498700987123454567897656:?T)&!T
@@ -16689,12 +16452,6 @@ NEWMULT
 
 */
 
-
-
-
-
-
-
 #if DEBUGBRACMAT
 #ifndef NDEBUG
 static void printMatchState(const char* msg, matchstate s, int pos, int len)
@@ -16708,7 +16465,6 @@ static void printMatchState(const char* msg, matchstate s, int pos, int len)
     }
 #endif
 #endif
-
 
 static const char
 fct[] = "(fct=f G T P C V I B W H J O.(T=m Z a p r R Q.!arg:(?m.?Z)&0:?R:?Q&"
@@ -16737,13 +16493,12 @@ fct[] = "(fct=f G T P C V I B W H J O.(T=m Z a p r R Q.!arg:(?m.?Z)&0:?R:?Q&"
 
 int startProc(
 #if _BRACMATEMBEDDED
-    startStruct * init
+    startStruct* init
 #else
     void
 #endif
 )
     {
-    int tel;
     int err; /* evaluation of version string */
     static int called = 0;
     if(called)
@@ -16778,13 +16533,11 @@ int startProc(
 #endif
         }
 #endif
-    for(tel = 0; tel < 256; variables[tel++] = NULL)
-        ;
+    initVariables();
     if(!init_memoryspace())
         return 0;
     init_opcode();
     global_anchor = NULL;
-
 
     global_fpi = stdin;
     global_fpo = stdout;
@@ -17009,7 +16762,6 @@ int startProc(
                                 fct,
                                 NULL);
 
-
 #if JMP
     if(setjmp(jumper) != 0)
         return;
@@ -17033,11 +16785,8 @@ void endProc(void)
 
 /* main - the text-mode front end for bracmat */
 
-
 #if _BRACMATEMBEDDED
 #else
-
-#include <stddef.h>
 
 #if defined __EMSCRIPTEN__
 int oneShot(char* inp)
@@ -17107,10 +16856,7 @@ int mainLoop(int argc, char* argv[])
                 "!SEC*100,100),1):?SEC&!SEC:<10&0|) !SEC) sec))|put$\"\\n    F\")|"
                 "put$\"\\n    I\")&"
 
-
-
-
-#if TELMAX
+#if SHOWMAXALLOCATED
 
                 "out$str$(\"  \" bez')&"
 #else
