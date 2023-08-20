@@ -11,12 +11,12 @@
 
 static LONG expressionLength(psk Pnode, unsigned int op)
     {
-    if (!is_op(Pnode) && Pnode->u.lobj == knil[op >> OPSH]->u.lobj)
+    if(!is_op(Pnode) && Pnode->u.lobj == knil[op >> OPSH]->u.lobj)
         return 0;
     else
         {
         LONG len = 1;
-        while (Op(Pnode) == op)
+        while(Op(Pnode) == op)
             {
             ++len;
             Pnode = Pnode->RIGHT;
@@ -27,9 +27,9 @@ static LONG expressionLength(psk Pnode, unsigned int op)
 
 char doPosition(matchstate s, psk pat, LONG pposition, size_t stringLength, psk expr
 #if CUTOFFSUGGEST
-    , char** mayMoveStartOfSubject
+                , char** mayMoveStartOfSubject
 #endif
-    , unsigned int op
+                , unsigned int op
 )
     {
     ULONG Flgs;
@@ -37,29 +37,29 @@ char doPosition(matchstate s, psk pat, LONG pposition, size_t stringLength, psk 
     LONG pos;
     Flgs = pat->v.fl;
 #if CUTOFFSUGGEST
-    if (((Flgs & (SUCCESS | VISIBLE_FLAGS_POS0 | IS_OPERATOR)) == (SUCCESS | QNUMBER))
-        && mayMoveStartOfSubject
-        && *mayMoveStartOfSubject != 0
-        )
+    if(((Flgs & (SUCCESS | VISIBLE_FLAGS_POS0 | IS_OPERATOR)) == (SUCCESS | QNUMBER))
+       && mayMoveStartOfSubject
+       && *mayMoveStartOfSubject != 0
+       )
         {
         pos = toLong(pat); /* [20 */
-        if (pos < 0)
+        if(pos < 0)
             pos += (expr == NULL ? (LONG)stringLength : expr ? expressionLength(expr, op) : 0) + 1; /* [(20+-1*(!len+1)) -> `-7 */
 
-        if (pposition < pos
-            && (MORE_EQUAL(pat) || EQUAL(pat) || NOTLESSORMORE(pat))
-            )
+        if(pposition < pos
+           && (MORE_EQUAL(pat) || EQUAL(pat) || NOTLESSORMORE(pat))
+           )
             {
-            if ((long)stringLength > pos)
+            if((long)stringLength > pos)
                 *mayMoveStartOfSubject += pos - pposition;
             s.c.rmr = FALSE; /* [20 */
             return s.c.rmr;
             }
-        else if (pposition <= pos
-            && MORE(pat)
-            )
+        else if(pposition <= pos
+                && MORE(pat)
+                )
             {
-            if ((long)stringLength > pos)
+            if((long)stringLength > pos)
                 *mayMoveStartOfSubject += pos - pposition + 1;
             s.c.rmr = FALSE; /* [>5 */
             return s.c.rmr;
@@ -70,14 +70,14 @@ char doPosition(matchstate s, psk pat, LONG pposition, size_t stringLength, psk 
 
     name = subtreecopy(pat);
     name->v.fl |= SUCCESS;
-    if ((Flgs & UNIFY) && (is_op(pat) || (Flgs & INDIRECT)))
+    if((Flgs & UNIFY) && (is_op(pat) || (Flgs & INDIRECT)))
         {
         name->v.fl &= ~VISIBLE_FLAGS;
-        if (!is_op(name))
+        if(!is_op(name))
             name->v.fl |= READY;
         s.c.rmr = (char)evaluate(name) & TRUE;
 
-        if (!(s.c.rmr))
+        if(!(s.c.rmr))
             {
             wipe(name);
             return FALSE;
@@ -87,7 +87,7 @@ char doPosition(matchstate s, psk pat, LONG pposition, size_t stringLength, psk 
         {
         s.c.rmr = (char)evaluate(name) & TRUE;
 
-        if (!(s.c.rmr))
+        if(!(s.c.rmr))
             {
             wipe(name);
             return FALSE;
@@ -97,23 +97,23 @@ char doPosition(matchstate s, psk pat, LONG pposition, size_t stringLength, psk 
         Flgs |= name->v.fl;
         }
     pat = name;
-    if (Flgs & UNIFY)
+    if(Flgs & UNIFY)
         {
-        if (is_op(pat)
-            || pat->u.obj
-            )
+        if(is_op(pat)
+           || pat->u.obj
+           )
             {
-            if (Flgs & INDIRECT)        /* ?! of ?!! */
+            if(Flgs & INDIRECT)        /* ?! of ?!! */
                 {
                 psk loc;
-                if ((loc = SymbolBinding_w(pat, Flgs & DOUBLY_INDIRECT)) != NULL)
+                if((loc = SymbolBinding_w(pat, Flgs & DOUBLY_INDIRECT)) != NULL)
                     {
-                    if (is_object(loc))
+                    if(is_object(loc))
                         s.c.rmr = (char)icopy_insert(loc, pposition);
                     else
                         {
                         s.c.rmr = (char)evaluate(loc) & (TRUE | FENCE);
-                        if (!icopy_insert(loc, pposition))
+                        if(!icopy_insert(loc, pposition))
                             s.c.rmr = FALSE;
                         }
                     wipe(loc);
@@ -129,7 +129,7 @@ char doPosition(matchstate s, psk pat, LONG pposition, size_t stringLength, psk 
         else
             s.c.rmr = TRUE;
 
-        if (name)
+        if(name)
             wipe(name); /* [?a */
         /*
           (   ( CharacterLength
@@ -153,14 +153,14 @@ char doPosition(matchstate s, psk pat, LONG pposition, size_t stringLength, psk 
         return (char)(ONCE | POSITION_ONCE | s.c.rmr);
         }
 
-    if (((pat->v.fl & (SUCCESS | VISIBLE_FLAGS_POS0 | IS_OPERATOR)) == (SUCCESS | QNUMBER)))
+    if(((pat->v.fl & (SUCCESS | VISIBLE_FLAGS_POS0 | IS_OPERATOR)) == (SUCCESS | QNUMBER)))
         {
         pos = toLong(pat); /* [20 */
-        if (pos < 0)
+        if(pos < 0)
             pos += (expr == NULL ? (LONG)stringLength : expressionLength(expr, op)) + 1; /* [(20+-1*(!len+1)) -> `-7 */
-        if (LESS(pat))
+        if(LESS(pat))
             { /* [<18 */
-            if (pposition < pos)
+            if(pposition < pos)
                 {
                 s.c.rmr = TRUE;/* [<18 */
                 }
@@ -169,13 +169,13 @@ char doPosition(matchstate s, psk pat, LONG pposition, size_t stringLength, psk 
                 s.c.rmr = FALSE | POSITION_MAX_REACHED;
                 }
             }
-        else if (LESS_EQUAL(pat))
+        else if(LESS_EQUAL(pat))
             {
-            if (pposition < pos)
+            if(pposition < pos)
                 {
                 s.c.rmr = TRUE;
                 }
-            else if (pposition == pos)
+            else if(pposition == pos)
                 {
                 s.c.rmr = TRUE | POSITION_MAX_REACHED;
                 }
@@ -184,9 +184,9 @@ char doPosition(matchstate s, psk pat, LONG pposition, size_t stringLength, psk 
                 s.c.rmr = FALSE | POSITION_MAX_REACHED;
                 }
             }
-        else if (MORE_EQUAL(pat))
+        else if(MORE_EQUAL(pat))
             { /* [~<13 */
-            if (pposition >= pos)
+            if(pposition >= pos)
                 {
                 s.c.rmr = TRUE; /* [~<13 */
                 }
@@ -195,9 +195,9 @@ char doPosition(matchstate s, psk pat, LONG pposition, size_t stringLength, psk 
                 s.c.rmr = FALSE; /* [~<13 */
                 }
             }
-        else if (MORE(pat))
+        else if(MORE(pat))
             { /* [>5 */
-            if (pposition > pos)
+            if(pposition > pos)
                 {
                 s.c.rmr = TRUE; /* [>5 */
                 }
@@ -206,9 +206,9 @@ char doPosition(matchstate s, psk pat, LONG pposition, size_t stringLength, psk 
                 s.c.rmr = FALSE; /* [>5 */
                 }
             }
-        else if (UNEQUAL(pat) || LESSORMORE(pat))
+        else if(UNEQUAL(pat) || LESSORMORE(pat))
             { /* [~13 */
-            if (pposition != pos)
+            if(pposition != pos)
                 {
                 s.c.rmr = TRUE; /* [~13 */
                 }
@@ -217,13 +217,13 @@ char doPosition(matchstate s, psk pat, LONG pposition, size_t stringLength, psk 
                 s.c.rmr = FALSE; /* [~13 */
                 }
             }
-        else if (EQUAL(pat) || NOTLESSORMORE(pat))
+        else if(EQUAL(pat) || NOTLESSORMORE(pat))
             {
-            if (pposition == pos)
+            if(pposition == pos)
                 {
                 s.c.rmr = TRUE | POSITION_MAX_REACHED; /* [20 */
                 }
-            else if (pposition > pos)
+            else if(pposition > pos)
                 {
                 s.c.rmr = FALSE | POSITION_MAX_REACHED;
                 }

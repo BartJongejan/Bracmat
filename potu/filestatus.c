@@ -47,18 +47,18 @@ static fileStatus* fs0 = NULL;
 static fileStatus* findFileStatusByName(const char* name)
     {
     fileStatus* fs;
-    for (fs = fs0
+    for(fs = fs0
         ; fs
         ; fs = fs->next
         )
-        if (!strcmp(fs->fname, name))
+        if(!strcmp(fs->fname, name))
             return fs;
     return NULL;
     }
 
 static fileStatus* allocateFileStatus(const char* name, FILE* fp
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
-    , Boolean dontcloseme
+                                      , Boolean dontcloseme
 #endif
 )
     {
@@ -77,20 +77,20 @@ static fileStatus* allocateFileStatus(const char* name, FILE* fp
 static void deallocateFileStatus(fileStatus* fs)
     {
     fileStatus* fsPrevious, * fsaux;
-    for (fsPrevious = NULL, fsaux = fs0
+    for(fsPrevious = NULL, fsaux = fs0
         ; fsaux != fs
         ; fsPrevious = fsaux, fsaux = fsaux->next
         )
         ;
-    if (fsPrevious)
+    if(fsPrevious)
         fsPrevious->next = fs->next;
     else
         fs0 = fs->next;
-    if (fs->fp)
+    if(fs->fp)
         fclose(fs->fp);
     bfree(fs->fname);
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
-    if (fs->stop)
+    if(fs->stop)
 #ifdef BMALLLOC
         bfree(fs->stop);
 #else
@@ -102,16 +102,16 @@ static void deallocateFileStatus(fileStatus* fs)
 
 fileStatus* mygetFileStatus(const char* filename, const char* mode
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
-    , Boolean dontcloseme
+                            , Boolean dontcloseme
 #endif
 )
     {
     FILE* fp = fopen(filename, mode);
-    if (fp)
+    if(fp)
         {
         fileStatus* fs = allocateFileStatus(filename, fp
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
-            , dontcloseme
+                                            , dontcloseme
 #endif
         );
         return fs;
@@ -121,43 +121,43 @@ fileStatus* mygetFileStatus(const char* filename, const char* mode
 
 fileStatus* myfopen(const char* filename, const char* mode
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
-    , Boolean dontcloseme
+                    , Boolean dontcloseme
 #endif
 )
     {
 #if !defined NO_FOPEN
-    if (!findFileStatusByName(filename))
+    if(!findFileStatusByName(filename))
         {
         fileStatus* fs = mygetFileStatus(filename, mode
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
-            , dontcloseme
+                                         , dontcloseme
 #endif
         );
-        if (!fs && targetPath && strchr(mode, 'r'))
+        if(!fs && targetPath && strchr(mode, 'r'))
             {
             const char* p = filename;
             char* q;
             size_t len;
-            while (*p)
+            while(*p)
                 {
-                if (*p == '\\' || *p == '/')
+                if(*p == '\\' || *p == '/')
                     {
-                    if (p == filename)
+                    if(p == filename)
                         return NULL;
                     break;
                     }
-                else if ((*p == ':') && (p == filename + 1))
+                else if((*p == ':') && (p == filename + 1))
                     return NULL;
                 ++p;
                 }
             q = (char*)malloc((len = strlen(targetPath)) + strlen(filename) + 1);
-            if (q)
+            if(q)
                 {
                 strcpy(q, targetPath);
                 strcpy(q + len, filename);
                 fs = mygetFileStatus(q, mode
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
-                    , dontcloseme
+                                     , dontcloseme
 #endif
                 );
                 free(q);
@@ -175,8 +175,8 @@ static LONG someopt(psk pnode, LONG opt[])
     {
     int i;
     assert(!is_op(pnode));
-    for (i = 0; opt[i]; i++)
-        if (PLOBJ(pnode) == opt[i])
+    for(i = 0; opt[i]; i++)
+        if(PLOBJ(pnode) == opt[i])
             return opt[i];
     return 0L;
     }
@@ -188,19 +188,19 @@ static LONG tijdnr = 0L;
 static int closeAFile(void)
     {
     fileStatus* fs, * fsmin;
-    if (fs0 == NULL)
+    if(fs0 == NULL)
         return FALSE;
-    for (fs = fs0, fsmin = fs0;
+    for(fs = fs0, fsmin = fs0;
         fs != NULL;
         fs = fs->next)
         {
-        if (!fs->dontcloseme
-            && fs->filepos == -1L
-            && fs->time < fsmin->time
-            )
+        if(!fs->dontcloseme
+           && fs->filepos == -1L
+           && fs->time < fsmin->time
+           )
             fsmin = fs;
         }
-    if (fsmin == NULL || fsmin->dontcloseme)
+    if(fsmin == NULL || fsmin->dontcloseme)
         {
         return FALSE;
         }
@@ -218,23 +218,23 @@ static fileStatus* preparefp(fileStatus* fs, char* name, LONG mode)
     {
     assert(fs != NULL);
     assert(!strcmp(fs->fname, name));
-    if (mode != 0L
-        && mode != fs->mode
-        && fs->fp != NULL)
+    if(mode != 0L
+       && mode != fs->mode
+       && fs->fp != NULL)
         {
         fs->mode = mode;
-        if ((fs->fp = freopen(fs->fname, (char*)&(fs->mode), fs->fp)) == NULL)
+        if((fs->fp = freopen(fs->fname, (char*)&(fs->mode), fs->fp)) == NULL)
             return NULL;
         fs->rwstatus = NoPending;
         }
-    else if (fs->filepos >= 0L)
+    else if(fs->filepos >= 0L)
         {
-        if ((fs->fp = fopen(fs->fname, (char*)&(fs->mode))) == NULL)
+        if((fs->fp = fopen(fs->fname, (char*)&(fs->mode))) == NULL)
             {
-            if (closeAFile())
+            if(closeAFile())
                 fs->fp = fopen(fs->fname, (char*)&(fs->mode));
             }
-        if (fs->fp == NULL)
+        if(fs->fp == NULL)
             return NULL;
         fs->rwstatus = NoPending;
         FSEEK(fs->fp, fs->filepos, SEEK_SET);
@@ -253,20 +253,20 @@ If the file is known but has been closed (e.g. to save file handles),
 static fileStatus* search_fp(char* name, LONG mode)
     {
     fileStatus* fs;
-    for (fs = fs0; fs; fs = fs->next)
-        if (!strcmp(name, fs->fname))
+    for(fs = fs0; fs; fs = fs->next)
+        if(!strcmp(name, fs->fname))
             return preparefp(fs, name, mode);
     return NULL;
     }
 
 static void setStop(fileStatus* fs, char* stopstring)
     {
-    if (fs->stop)
+    if(fs->stop)
 #ifdef BMALLLOC
         bfree(fs->stop);
     fs->stop = (char*)bmalloc(__LINE__, strlen(stopstring + 1);
 #else
-        free(fs->stop);
+                              free(fs->stop);
     fs->stop = (char*)malloc(strlen(stopstring) + 1);
 #endif
     if(fs->stop)
@@ -320,18 +320,18 @@ int fil(ppsk PPnode)
     /*
     Fail if there are more than four arguments or if an argument is non-atomic
     */
-    for (ind = 0, pnode = (*PPnode)->RIGHT;
+    for(ind = 0, pnode = (*PPnode)->RIGHT;
         is_op(pnode);
         pnode = pnode->RIGHT)
         {
-        if (is_op(pnode->LEFT) || ind > 2)
+        if(is_op(pnode->LEFT) || ind > 2)
             {
             return FALSE;
             }
         kns[ind++] = pnode->LEFT;
         }
     kns[ind++] = pnode;
-    for (; ind < 4;)
+    for(; ind < 4;)
         kns[ind++] = NULL;
 
     /*
@@ -343,17 +343,17 @@ int fil(ppsk PPnode)
       fil$(name,...)
       name field is optional in all fil$ operations
     */
-    if (kns[0]->u.obj)
+    if(kns[0]->u.obj)
         {
         name = (char*)POBJ(kns[0]);
-        if (fs && strcmp(name, fs->fname))
+        if(fs && strcmp(name, fs->fname))
             {
             fs = NULL;
             }
         }
     else
         {
-        if (fs)
+        if(fs)
             name = fs->fname;
         else
             {
@@ -371,7 +371,7 @@ int fil(ppsk PPnode)
 
             If the second argument is set, fil$ does never read or write!
     */
-    if (kns[1] && kns[1]->u.obj)
+    if(kns[1] && kns[1]->u.obj)
         {
         /*
         SECOND ARGUMENT:FILE MODE
@@ -380,20 +380,20 @@ int fil(ppsk PPnode)
         fil$(,"a")
         etc.
         */
-        if ((mode.l = someopt(kns[1], modes)) != 0L)
+        if((mode.l = someopt(kns[1], modes)) != 0L)
             {
-            if (fs)
+            if(fs)
                 fs = preparefp(fs, name, mode.l);
             else
                 fs = search_fp(name, mode.l);
-            if (fs == NULL)
+            if(fs == NULL)
                 {
-                if ((fs = myfopen(name, (char*)&mode, FALSE)) == NULL)
+                if((fs = myfopen(name, (char*)&mode, FALSE)) == NULL)
                     {
-                    if (closeAFile())
+                    if(closeAFile())
                         fs = myfopen(name, (char*)&mode, FALSE);
                     }
-                if (fs == NULL)
+                if(fs == NULL)
                     {
                     return FALSE;
                     }
@@ -415,7 +415,7 @@ int fil(ppsk PPnode)
             /*
             We do not open a file now, so we should have a file handle in memory.
             */
-            if (fs)
+            if(fs)
                 {
                 fs = preparefp(fs, name, 0L);
                 }
@@ -425,7 +425,7 @@ int fil(ppsk PPnode)
                 }
 
 
-            if (!fs)
+            if(!fs)
                 {
                 return FALSE;
                 }
@@ -442,10 +442,10 @@ int fil(ppsk PPnode)
             fil$(,STR)        (stop == NULL)
             fil$(,STR,stop)
             */
-            if ((type = someopt(kns[1], types)) != 0L)
+            if((type = someopt(kns[1], types)) != 0L)
                 {
                 fs->type = type;
-                if (type == STRt)
+                if(type == STRt)
                     {
                     /*
                       THIRD ARGUMENT: primary stopping character (e.g. "\n")
@@ -453,13 +453,13 @@ int fil(ppsk PPnode)
                       An empty string "" sets stopping string to NULL,
                       (Changed behaviour! Previously default stop was newline!)
                     */
-                    if (kns[2] && kns[2]->u.obj)
+                    if(kns[2] && kns[2]->u.obj)
                         {
                         setStop(fs, (char*)&kns[2]->u.obj);
                         }
                     else
                         {
-                        if (fs->stop)
+                        if(fs->stop)
 #ifdef BMALLLOC
                             bfree(fs->stop);
                         fs->stop = NULL;
@@ -474,9 +474,9 @@ int fil(ppsk PPnode)
                     /*
                       THIRD ARGUMENT: a size of elements to read or write
                     */
-                    if (kns[2] && kns[2]->u.obj)
+                    if(kns[2] && kns[2]->u.obj)
                         {
-                        if (!INTEGER(kns[2]))
+                        if(!INTEGER(kns[2]))
                             {
                             return FALSE;
                             }
@@ -490,9 +490,9 @@ int fil(ppsk PPnode)
                     /*
                       FOURTH ARGUMENT: the number of elements to read or write
                     */
-                    if (kns[3] && kns[3]->u.obj)
+                    if(kns[3] && kns[3]->u.obj)
                         {
-                        if (!INTEGER(kns[3]))
+                        if(!INTEGER(kns[3]))
                             {
                             return FALSE;
                             }
@@ -512,7 +512,7 @@ int fil(ppsk PPnode)
             fil$(,END,offset)
             fil$(,CUR,offset)
             */
-            else if ((whence = someopt(kns[1], whences)) != 0L)
+            else if((whence = someopt(kns[1], whences)) != 0L)
                 {
                 LONG offset;
                 assert(fs->fp != 0);
@@ -520,9 +520,9 @@ int fil(ppsk PPnode)
                 /*
                   THIRD ARGUMENT: an offset
                 */
-                if (kns[2] && kns[2]->u.obj)
+                if(kns[2] && kns[2]->u.obj)
                     {
-                    if (!INTEGER(kns[2]))
+                    if(!INTEGER(kns[2]))
                         {
                         return FALSE;
                         }
@@ -531,11 +531,11 @@ int fil(ppsk PPnode)
                 else
                     offset = 0L;
 
-                if ((offset < 0L && whence == SEEK_SET)
-                    || (offset > 0L && whence == SEEK_END)
-                    || FSEEK(fs->fp, offset, whence == SET ? SEEK_SET
-                    : whence == END ? SEEK_END
-                    : SEEK_CUR))
+                if((offset < 0L && whence == SEEK_SET)
+                   || (offset > 0L && whence == SEEK_END)
+                   || FSEEK(fs->fp, offset, whence == SET ? SEEK_SET
+                            : whence == END ? SEEK_END
+                            : SEEK_CUR))
                     {
                     deallocateFileStatus(fs);
                     fs = NULL;
@@ -548,7 +548,7 @@ int fil(ppsk PPnode)
             SECOND ARGUMENT:TELL POSITION
             fil$(,TEL)
             */
-            else if (PLOBJ(kns[1]) == TEL)
+            else if(PLOBJ(kns[1]) == TEL)
                 {
                 char pos[11];
                 sprintf(pos, LONGD, FTELL(fs->fp));
@@ -567,7 +567,7 @@ int fil(ppsk PPnode)
         }
     else
         {
-        if (fs)
+        if(fs)
             {
             fs = preparefp(fs, name, 0L);
             }
@@ -577,7 +577,7 @@ int fil(ppsk PPnode)
             }
         }
 
-    if (!fs)
+    if(!fs)
         {
         return FALSE;
         }
@@ -595,15 +595,15 @@ int fil(ppsk PPnode)
     OR stop characters, depending on type (20081113)
     */
 
-    if (kns[2] && kns[2]->u.obj)
+    if(kns[2] && kns[2]->u.obj)
         {
-        if (type == STRt)
+        if(type == STRt)
             {
             setStop(fs, (char*)&kns[2]->u.obj);
             }
         else
             {
-            if (!INTEGER(kns[2]))
+            if(!INTEGER(kns[2]))
                 {
                 return FALSE;
                 }
@@ -616,82 +616,82 @@ int fil(ppsk PPnode)
     These can be distributed over decimal numbers.
     */
 
-    if (type == DEC)
+    if(type == DEC)
         {
-        switch ((int)fs->size)
+        switch((int)fs->size)
             {
-                case 1:
-                    if (fs->number > 4)
-                        fs->number = 4;
-                    break;
-                case 2:
-                    if (fs->number > 2)
-                        fs->number = 2;
-                    break;
-                default:
-                    fs->size = 4; /*Invalid size declaration adjusted*/
-                    fs->number = 1;
+            case 1:
+                if(fs->number > 4)
+                    fs->number = 4;
+                break;
+            case 2:
+                if(fs->number > 2)
+                    fs->number = 2;
+                break;
+            default:
+                fs->size = 4; /*Invalid size declaration adjusted*/
+                fs->number = 1;
             }
         }
     fs->time = tijdnr++;
     /*
     FOURTH ARGUMENT:VALUE TO WRITE
     */
-    if (kns[3])
+    if(kns[3])
         {
-        if (mode.c[0] != 'r' || mode.c[1] == '+' || mode.c[2] == '+')
+        if(mode.c[0] != 'r' || mode.c[1] == '+' || mode.c[2] == '+')
             /*
             WRITE
             */
             {
-            if (fs->rwstatus == Reading)
+            if(fs->rwstatus == Reading)
                 {
                 LONG fpos = FTELL(fs->fp);
                 FSEEK(fs->fp, fpos, SEEK_SET);
                 }
             fs->rwstatus = Writing;
-            if (type == DEC)
+            if(type == DEC)
                 {
                 numericalvalue = toLong(kns[3]);
-                for (ind = 0; ind < fs->number; ind++)
-                    switch ((int)fs->size)
+                for(ind = 0; ind < fs->number; ind++)
+                    switch((int)fs->size)
                         {
-                            case 1:
-                                fputc((int)numericalvalue & 0xFF, fs->fp);
-                                numericalvalue >>= 8;
-                                break;
-                            case 2:
-                                snum.s = (short)(numericalvalue & 0xFFFF);
-                                fwrite(snum.c, 1, 2, fs->fp);
-                                numericalvalue >>= 16;
-                                break;
-                            case 4:
-                                snum.i = (INT32_T)(numericalvalue & 0xFFFFFFFF);
-                                fwrite(snum.c, 1, 4, fs->fp);
-                                assert(fs->number == 1);
-                                break;
-                            default:
-                                fwrite((char*)&numericalvalue, 1, 4, fs->fp);
-                                break;
+                        case 1:
+                            fputc((int)numericalvalue & 0xFF, fs->fp);
+                            numericalvalue >>= 8;
+                            break;
+                        case 2:
+                            snum.s = (short)(numericalvalue & 0xFFFF);
+                            fwrite(snum.c, 1, 2, fs->fp);
+                            numericalvalue >>= 16;
+                            break;
+                        case 4:
+                            snum.i = (INT32_T)(numericalvalue & 0xFFFFFFFF);
+                            fwrite(snum.c, 1, 4, fs->fp);
+                            assert(fs->number == 1);
+                            break;
+                        default:
+                            fwrite((char*)&numericalvalue, 1, 4, fs->fp);
+                            break;
                         }
                 }
-            else if (type == CHR)
+            else if(type == CHR)
                 {
                 size_t len, len1, minl;
                 len1 = (size_t)(fs->size * fs->number);
                 len = strlen((char*)POBJ(kns[3]));
                 minl = len1 < len ? (len1 > 0 ? len1 : len) : len;
-                if (fwrite(POBJ(kns[3]), 1, minl, fs->fp) == minl)
-                    for (; len < len1 && putc(' ', fs->fp) != EOF; len++);
+                if(fwrite(POBJ(kns[3]), 1, minl, fs->fp) == minl)
+                    for(; len < len1 && putc(' ', fs->fp) != EOF; len++);
                 }
             else /*if(type == STRt)*/
                 {
-                if (fs->stop
-                    && fs->stop[0]
-                    )/* stop string also works when writing. */
+                if(fs->stop
+                   && fs->stop[0]
+                   )/* stop string also works when writing. */
                     {
                     char* s = (char*)POBJ(kns[3]);
-                    while (!strchr(fs->stop, *s))
+                    while(!strchr(fs->stop, *s))
                         fputc(*s++, fs->fp);
                     }
                 else
@@ -710,7 +710,7 @@ int fil(ppsk PPnode)
         }
     else
         {
-        if (mode.c[0] == 'r' || mode.c[1] == '+' || mode.c[2] == '+')
+        if(mode.c[0] == 'r' || mode.c[1] == '+' || mode.c[2] == '+')
             {
             /*
             READ
@@ -718,17 +718,17 @@ int fil(ppsk PPnode)
 #define INPUTBUFFERSIZE 256
             unsigned char buffer[INPUTBUFFERSIZE];
             unsigned char* bbuffer;/* = buffer;*/
-            if (fs->rwstatus == Writing)
+            if(fs->rwstatus == Writing)
                 {
                 fflush(fs->fp);
                 fs->rwstatus = NoPending;
                 }
-            if (feof(fp))
+            if(feof(fp))
                 {
                 return FALSE;
                 }
             fs->rwstatus = Reading;
-            if (type == STRt)
+            if(type == STRt)
                 {
                 psk lpkn = NULL;
                 psk rpkn = NULL;
@@ -736,16 +736,16 @@ int fil(ppsk PPnode)
                 int count = 0;
                 LONG pos = FTELL(fp);
                 int kar = 0;
-                while (count < (INPUTBUFFERSIZE - 1)
-                    && (kar = fgetc(fp)) != EOF
-                    && (!fs->stop
-                    || !strchr(fs->stop, kar)
-                    )
-                    )
+                while(count < (INPUTBUFFERSIZE - 1)
+                      && (kar = fgetc(fp)) != EOF
+                      && (!fs->stop
+                          || !strchr(fs->stop, kar)
+                          )
+                      )
                     {
                     buffer[count++] = (char)kar;
                     }
-                if (count < (INPUTBUFFERSIZE - 1))
+                if(count < (INPUTBUFFERSIZE - 1))
                     {
                     buffer[count] = '\0';
                     bbuffer = buffer;
@@ -753,29 +753,29 @@ int fil(ppsk PPnode)
                 else
                     {
                     buffer[(INPUTBUFFERSIZE - 1)] = '\0';
-                    while ((kar = fgetc(fp)) != EOF
-                        && (!fs->stop
-                        || !strchr(fs->stop, kar)
-                        )
-                        )
+                    while((kar = fgetc(fp)) != EOF
+                          && (!fs->stop
+                              || !strchr(fs->stop, kar)
+                              )
+                          )
                         count++;
-                    if (count >= INPUTBUFFERSIZE)
+                    if(count >= INPUTBUFFERSIZE)
                         {
                         bbuffer = (unsigned char*)bmalloc(__LINE__, (size_t)count + 1);
                         strcpy((char*)bbuffer, (char*)buffer);
                         FSEEK(fp, pos + (INPUTBUFFERSIZE - 1), SEEK_SET);
-                        if (fread((char*)bbuffer + (INPUTBUFFERSIZE - 1), 1, count - (INPUTBUFFERSIZE - 1), fs->fp) == 0)
+                        if(fread((char*)bbuffer + (INPUTBUFFERSIZE - 1), 1, count - (INPUTBUFFERSIZE - 1), fs->fp) == 0)
                             {
                             bfree(bbuffer);
                             return FALSE;
                             }
-                        if (ferror(fs->fp))
+                        if(ferror(fs->fp))
                             {
                             bfree(bbuffer);
                             perror("fread");
                             return FALSE;
                             }
-                        if (kar != EOF)
+                        if(kar != EOF)
                             fgetc(fp); /* skip stopping character (which is in 'kar') */
                         }
                     else
@@ -783,7 +783,7 @@ int fil(ppsk PPnode)
                     }
                 source = bbuffer;
                 lpkn = input(NULL, lpkn, 1, NULL, NULL);
-                if (kar == EOF)
+                if(kar == EOF)
                     bbuffer[0] = '\0';
                 else
                     {
@@ -803,48 +803,48 @@ int fil(ppsk PPnode)
             else
                 {
                 size_t readbytes = fs->size * fs->number;
-                if (readbytes >= INPUTBUFFERSIZE)
+                if(readbytes >= INPUTBUFFERSIZE)
                     bbuffer = (unsigned char*)bmalloc(__LINE__, readbytes + 1);
                 else
                     bbuffer = buffer;
-                if ((readbytes = fread((char*)bbuffer, (size_t)fs->size, (size_t)fs->number, fs->fp)) == 0
-                    && fs->size != 0
-                    && fs->number != 0
-                    )
+                if((readbytes = fread((char*)bbuffer, (size_t)fs->size, (size_t)fs->number, fs->fp)) == 0
+                   && fs->size != 0
+                   && fs->number != 0
+                   )
                     {
                     return FALSE;
                     }
-                if (ferror(fs->fp))
+                if(ferror(fs->fp))
                     {
                     perror("fread");
                     return FALSE;
                     }
                 *(bbuffer + (int)readbytes) = 0;
-                if (type == DEC)
+                if(type == DEC)
                     {
                     numericalvalue = 0L;
                     sh = 0;
-                    for (ind = 0; ind < fs->number;)
+                    for(ind = 0; ind < fs->number;)
                         {
-                        switch ((int)fs->size)
+                        switch((int)fs->size)
                             {
-                                case 1:
-                                    numericalvalue += (LONG)bbuffer[ind++] << sh;
-                                    sh += 8;
-                                    continue;
-                                case 2:
-                                    numericalvalue += (LONG)(*(short*)(bbuffer + ind)) << sh;
-                                    ind += 2;
-                                    sh += 16;
-                                    continue;
-                                case 4:
-                                    numericalvalue += (LONG)(*(INT32_T*)(bbuffer + ind)) << sh;
-                                    ind += 4;
-                                    sh += 32;
-                                    continue;
-                                default:
-                                    numericalvalue += *(LONG*)bbuffer;
-                                    break;
+                            case 1:
+                                numericalvalue += (LONG)bbuffer[ind++] << sh;
+                                sh += 8;
+                                continue;
+                            case 2:
+                                numericalvalue += (LONG)(*(short*)(bbuffer + ind)) << sh;
+                                ind += 2;
+                                sh += 16;
+                                continue;
+                            case 4:
+                                numericalvalue += (LONG)(*(INT32_T*)(bbuffer + ind)) << sh;
+                                ind += 4;
+                                sh += 32;
+                                continue;
+                            default:
+                                numericalvalue += *(LONG*)bbuffer;
+                                break;
                             }
                         break;
                         }
@@ -853,7 +853,7 @@ int fil(ppsk PPnode)
                 source = bbuffer;
                 *PPnode = input(NULL, *PPnode, 1, NULL, NULL);
                 }
-            if (bbuffer != (unsigned char*)&buffer[0])
+            if(bbuffer != (unsigned char*)&buffer[0])
                 bfree(bbuffer);
             return TRUE;
             }
@@ -868,170 +868,170 @@ int fil(ppsk PPnode)
 #endif
 
 
-    static int allopts(psk pnode, LONG opt[])
+static int allopts(psk pnode, LONG opt[])
+    {
+    int i;
+    while(is_op(pnode))
         {
-        int i;
-        while (is_op(pnode))
-            {
-            if (!allopts(pnode->LEFT, opt))
-                return FALSE;
-            pnode = pnode->RIGHT;
-            }
-        for (i = 0; opt[i]; i++)
-            if (PLOBJ(pnode) == opt[i])
-                return TRUE;
-        return FALSE;
+        if(!allopts(pnode->LEFT, opt))
+            return FALSE;
+        pnode = pnode->RIGHT;
         }
+    for(i = 0; opt[i]; i++)
+        if(PLOBJ(pnode) == opt[i])
+            return TRUE;
+    return FALSE;
+    }
 
-    static int flush(void)
-        {
+static int flush(void)
+    {
 #ifdef __GNUC__
-        return fflush(global_fpo);
+    return fflush(global_fpo);
 #else
 #if _BRACMATEMBEDDED
-        if (WinFlush)
-            WinFlush();
-        return 1;
+    if(WinFlush)
+        WinFlush();
+    return 1;
 #else
-        return 1;
+    return 1;
 #endif
 #endif
-        }
+    }
 
-    int output(ppsk PPnode, void(*how)(psk k))
+int output(ppsk PPnode, void(*how)(psk k))
+    {
+    FILE* saveFpo;
+    psk rightnode, rlnode, rrightnode, rrrightnode;
+    static LONG opts[] =
+        { APP,BIN,CON,EXT,MEM,LIN,NEW,RAW,TXT,VAP,WYD,0L };
+    if(Op(rightnode = (*PPnode)->RIGHT) == COMMA)
         {
-        FILE* saveFpo;
-        psk rightnode, rlnode, rrightnode, rrrightnode;
-        static LONG opts[] =
-            { APP,BIN,CON,EXT,MEM,LIN,NEW,RAW,TXT,VAP,WYD,0L };
-        if (Op(rightnode = (*PPnode)->RIGHT) == COMMA)
+        int wide;
+        saveFpo = global_fpo;
+        rlnode = rightnode->LEFT;
+        rrightnode = rightnode->RIGHT;
+        wide = search_opt(rrightnode, WYD);
+        if(wide)
+            LineLength = WIDELINELENGTH;
+        hum = !search_opt(rrightnode, LIN);
+        listWithName = !search_opt(rrightnode, RAW);
+        if(allopts(rrightnode, opts))
             {
-            int wide;
-            saveFpo = global_fpo;
-            rlnode = rightnode->LEFT;
-            rrightnode = rightnode->RIGHT;
-            wide = search_opt(rrightnode, WYD);
-            if (wide)
-                LineLength = WIDELINELENGTH;
-            hum = !search_opt(rrightnode, LIN);
-            listWithName = !search_opt(rrightnode, RAW);
-            if (allopts(rrightnode, opts))
+            if(search_opt(rrightnode, MEM))
                 {
-                if (search_opt(rrightnode, MEM))
-                    {
-                    psk ret;
-                    telling = 1;
-                    process = tel;
-                    global_fpo = NULL;
-                    (*how)(rlnode);
-                    ret = (psk)bmalloc(__LINE__, sizeof(ULONG) + telling);
-                    ret->v.fl = READY | SUCCESS;
-                    process = glue;
-                    source = POBJ(ret);
-                    (*how)(rlnode);
-                    hum = 1;
-                    process = myputc;
-                    wipe(*PPnode);
-                    *PPnode = ret;
-                    global_fpo = saveFpo;
-                    return TRUE;
-                    }
-                else
-                    {
-                    (*how)(rlnode);
-                    flush();
-                    addr[2] = rlnode;
-                    }
-                }
-            else if (Op(rrightnode) == COMMA
-                && !is_op(rrightnode->LEFT)
-                && allopts((rrrightnode = rrightnode->RIGHT), opts))
-                {
-#if !defined NO_FOPEN
-                int binmode = ((how == lst) && !search_opt(rrrightnode, TXT)) || search_opt(rrrightnode, BIN);
-                fileStatus* fs =
-                    myfopen((char*)POBJ(rrightnode->LEFT),
-                    search_opt(rrrightnode, NEW)
-                    ? (binmode
-                    ? WRITEBIN
-                    : WRITETXT
-                    )
-                    : (binmode
-                    ? APPENDBIN
-                    : APPENDTXT
-                    )
-#if !defined NO_LOW_LEVEL_FILE_HANDLING
-                    , TRUE
-#endif
-                    );
-                if (fs == NULL)
-                    {
-                    errorprintf("cannot open %s\n", POBJ(rrightnode->LEFT));
-                    global_fpo = saveFpo;
-                    hum = 1;
-                    return FALSE;
-                    }
-                else
-                    {
-                    global_fpo = fs->fp;
-                    (*how)(rlnode);
-                    deallocateFileStatus(fs);
-                    global_fpo = saveFpo;
-                    addr[2] = rlnode;
-                    }
-#else
+                psk ret;
+                telling = 1;
+                process = tel;
+                global_fpo = NULL;
+                (*how)(rlnode);
+                ret = (psk)bmalloc(__LINE__, sizeof(ULONG) + telling);
+                ret->v.fl = READY | SUCCESS;
+                process = glue;
+                source = POBJ(ret);
+                (*how)(rlnode);
                 hum = 1;
-                return FALSE;
-#endif
+                process = myputc;
+                wipe(*PPnode);
+                *PPnode = ret;
+                global_fpo = saveFpo;
+                return TRUE;
                 }
             else
                 {
-                (*how)(rightnode);
+                (*how)(rlnode);
                 flush();
-                addr[2] = rightnode;
+                addr[2] = rlnode;
                 }
-            *PPnode = dopb(*PPnode, addr[2]);
-            if (wide)
-                LineLength = NARROWLINELENGTH;
+            }
+        else if(Op(rrightnode) == COMMA
+                && !is_op(rrightnode->LEFT)
+                && allopts((rrrightnode = rrightnode->RIGHT), opts))
+            {
+#if !defined NO_FOPEN
+            int binmode = ((how == lst) && !search_opt(rrrightnode, TXT)) || search_opt(rrrightnode, BIN);
+            fileStatus* fs =
+                myfopen((char*)POBJ(rrightnode->LEFT),
+                        search_opt(rrrightnode, NEW)
+                        ? (binmode
+                           ? WRITEBIN
+                           : WRITETXT
+                           )
+                        : (binmode
+                           ? APPENDBIN
+                           : APPENDTXT
+                           )
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
+                        , TRUE
+#endif
+                );
+            if(fs == NULL)
+                {
+                errorprintf("cannot open %s\n", POBJ(rrightnode->LEFT));
+                global_fpo = saveFpo;
+                hum = 1;
+                return FALSE;
+                }
+            else
+                {
+                global_fpo = fs->fp;
+                (*how)(rlnode);
+                deallocateFileStatus(fs);
+                global_fpo = saveFpo;
+                addr[2] = rlnode;
+                }
+#else
+            hum = 1;
+            return FALSE;
+#endif
             }
         else
-            {   
+            {
             (*how)(rightnode);
             flush();
-            *PPnode = rightbranch(*PPnode);
+            addr[2] = rightnode;
             }
-        hum = 1;
-        listWithName = 1;
-        return TRUE;
+        *PPnode = dopb(*PPnode, addr[2]);
+        if(wide)
+            LineLength = NARROWLINELENGTH;
         }
+    else
+        {
+        (*how)(rightnode);
+        flush();
+        *PPnode = rightbranch(*PPnode);
+        }
+    hum = 1;
+    listWithName = 1;
+    return TRUE;
+    }
 
 #if !defined NO_FOPEN
-    psk fileget(psk rlnode, int intval_i,psk Pnode, int * err, Boolean* GoOn)
-        {
-        FILE* saveFp;
-        fileStatus* fs;
-        saveFp = global_fpi;
-        fs = myfopen((char*)POBJ(rlnode), (intval_i & OPT_TXT) ? READTXT : READBIN
+psk fileget(psk rlnode, int intval_i, psk Pnode, int* err, Boolean* GoOn)
+    {
+    FILE* saveFp;
+    fileStatus* fs;
+    saveFp = global_fpi;
+    fs = myfopen((char*)POBJ(rlnode), (intval_i & OPT_TXT) ? READTXT : READBIN
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
-            , TRUE
+                 , TRUE
 #endif
-        );
-        if (fs == NULL)
-            {
-            global_fpi = saveFp;
-            return 0L;
-            }
-        else
-            global_fpi = fs->fp;
-        for (;;)
-            {
-            Pnode = input(global_fpi, Pnode, intval_i, err, GoOn);
-            if (!*GoOn || *err)
-                break;
-            Pnode = eval(Pnode);
-            }
-        deallocateFileStatus(fs);
+    );
+    if(fs == NULL)
+        {
         global_fpi = saveFp;
-        return Pnode;
+        return 0L;
         }
+    else
+        global_fpi = fs->fp;
+    for(;;)
+        {
+        Pnode = input(global_fpi, Pnode, intval_i, err, GoOn);
+        if(!*GoOn || *err)
+            break;
+        Pnode = eval(Pnode);
+        }
+    deallocateFileStatus(fs);
+    global_fpi = saveFp;
+    return Pnode;
+    }
 #endif

@@ -22,55 +22,55 @@ int LineLength = NARROWLINELENGTH;
 static size_t complexity(psk Root, size_t max)
     {
     static int Parent, Child;
-    while (is_op(Root))
+    while(is_op(Root))
         {
         max += 2; /* Each time reslt is called, level is incremented by 1.
                      indent() calls complexity with twice that increment.
                      So to predict what complexity says at each level, we have
                      to add 2 in each iteration while descending the tree. */
-        switch (Op(Root))
+        switch(Op(Root))
             {
-                case OR:
-                case AND:
-                    max += COMPLEX_MAX / 5;
-                    break;
-                case EQUALS:
-                case MATCH:
-                    max += COMPLEX_MAX / 10;
-                    break;
-                case DOT:
-                case COMMA:
-                case WHITE:
-                    switch (Op(Root->LEFT))
-                        {
-                            case DOT:
-                            case COMMA:
-                            case WHITE:
-                                max += COMPLEX_MAX / 10;
-                                break;
-                            default:
-                                max += COMPLEX_MAX / LineLength;
-                        }
-                    break;
-                default:
-                    max += COMPLEX_MAX / LineLength;
+            case OR:
+            case AND:
+                max += COMPLEX_MAX / 5;
+                break;
+            case EQUALS:
+            case MATCH:
+                max += COMPLEX_MAX / 10;
+                break;
+            case DOT:
+            case COMMA:
+            case WHITE:
+                switch(Op(Root->LEFT))
+                    {
+                    case DOT:
+                    case COMMA:
+                    case WHITE:
+                        max += COMPLEX_MAX / 10;
+                        break;
+                    default:
+                        max += COMPLEX_MAX / LineLength;
+                    }
+                break;
+            default:
+                max += COMPLEX_MAX / LineLength;
             }
         Parent = Op(Root);
         Child = Op(Root->LEFT);
-        if (HAS__UNOPS(Root->LEFT) || Parent >= Child)
+        if(HAS__UNOPS(Root->LEFT) || Parent >= Child)
             max += (2 * COMPLEX_MAX) / LineLength; /* 2 parentheses */
 
         Child = Op(Root->RIGHT);
-        if (HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
+        if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
             max += (2 * COMPLEX_MAX) / LineLength; /* 2 parentheses */
 
-        if (max > COMPLEX_MAX)
+        if(max > COMPLEX_MAX)
             return max;
         max = complexity(Root->LEFT, max);
         Root = Root->RIGHT;
         }
-    if (!is_op(Root))
-        max += (COMPLEX_MAX*strlen((char *)POBJ(Root))) / LineLength;
+    if(!is_op(Root))
+        max += (COMPLEX_MAX * strlen((char*)POBJ(Root))) / LineLength;
     return max;
     }
 
@@ -78,19 +78,19 @@ static int indtel = 0, extraSpc = 0, number_of_flags_on_node = 0;
 
 static int indent(psk Root, int level, int ind)
     {
-    if (hum)
+    if(hum)
         {
-        if (ind > 0 || (ind == 0 && complexity(Root, 2 * level) > COMPLEX_MAX))
+        if(ind > 0 || (ind == 0 && complexity(Root, 2 * level) > COMPLEX_MAX))
             {  /*    blanks that start a line    */
             int p;
             (*process)('\n');
-            for (p = 2 * level + number_of_flags_on_node; p; p--)
+            for(p = 2 * level + number_of_flags_on_node; p; p--)
                 (*process)(' ');
             ind = TRUE;
             }
         else
             {  /* blanks after an operator or parenthesis */
-            for (indtel = extraSpc + 2 * indtel; indtel; indtel--)
+            for(indtel = extraSpc + 2 * indtel; indtel; indtel--)
                 (*process)(' ');
             ind = FALSE;
             }
@@ -106,7 +106,7 @@ static int needIndent(psk Root, int ind, int level)
 
 static void do_something(int c)
     {
-    if (c == 016 || c == 017)
+    if(c == 016 || c == 017)
         {
         (*process)('\\');
         (*process)(c == 016 ? 'L' : 'D');
@@ -120,62 +120,62 @@ static int printflags(psk Root)
     {
     int count = 0;
     ULONG Flgs = Root->v.fl;
-    if (Flgs & FENCE)
+    if(Flgs & FENCE)
         {
         (*process)('`');
         ++count;
         }
-    if (Flgs & POSITION)
+    if(Flgs & POSITION)
         {
         (*process)('[');
         ++count;
         }
-    if (Flgs & NOT)
+    if(Flgs & NOT)
         {
         (*process)('~');
         ++count;
         }
-    if (Flgs & FRACTION)
+    if(Flgs & FRACTION)
         {
         (*process)('/');
         ++count;
         }
-    if (Flgs & NUMBER)
+    if(Flgs & NUMBER)
         {
         (*process)('#');
         ++count;
         }
-    if (Flgs & SMALLER_THAN)
+    if(Flgs & SMALLER_THAN)
         {
         (*process)('<');
         ++count;
         }
-    if (Flgs & GREATER_THAN)
+    if(Flgs & GREATER_THAN)
         {
         (*process)('>');
         ++count;
         }
-    if (Flgs & NONIDENT)
+    if(Flgs & NONIDENT)
         {
         (*process)('%');
         ++count;
         }
-    if (Flgs & ATOM)
+    if(Flgs & ATOM)
         {
         (*process)('@');
         ++count;
         }
-    if (Flgs & UNIFY)
+    if(Flgs & UNIFY)
         {
         (*process)('?');
         ++count;
         }
-    if (Flgs & INDIRECT)
+    if(Flgs & INDIRECT)
         {
         (*process)('!');
         ++count;
         }
-    if (Flgs & DOUBLY_INDIRECT)
+    if(Flgs & DOUBLY_INDIRECT)
         {
         (*process)('!');
         ++count;
@@ -195,95 +195,95 @@ static int printflags(psk Root)
 
 static void endnode(psk Root, int space)
     {
-    unsigned char *pstring;
+    unsigned char* pstring;
     int q, ikar;
 #if CHECKALLOCBOUNDS
-    if (POINT)
+    if(POINT)
         printf("\n[%p %lld]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
 #endif
     SM(Root)
 
-        if (!Root->u.obj
-            && !HAS_UNOPS(Root)
-            && space)
+        if(!Root->u.obj
+           && !HAS_UNOPS(Root)
+           && space)
             {
             (*process)('(');
             (*process)(')');
             return;
             }
     printflags(Root);
-    if (Root->v.fl & MINUS)
+    if(Root->v.fl & MINUS)
         (*process)('-');
-    if (beNice)
+    if(beNice)
         {
-        for (pstring = POBJ(Root); *pstring; pstring++)
+        for(pstring = POBJ(Root); *pstring; pstring++)
             do_something(*pstring);
         }
     else
         {
         Boolean longline = FALSE;
-        if ((q = quote(POBJ(Root))) == TRUE)
+        if((q = quote(POBJ(Root))) == TRUE)
             (*process)('"');
-        for (pstring = POBJ(Root); (ikar = *pstring) != 0; pstring++)
+        for(pstring = POBJ(Root); (ikar = *pstring) != 0; pstring++)
             {
-            switch (ikar)
+            switch(ikar)
                 {
-                    case '\n':
-                        if (longline || lineTooLong(POBJ(Root)))
-                            /* We need to call this, even though quote returned TRUE,
-                            because quote may have returned before reaching this character.
-                            */
-                            {
-                            longline = TRUE;
-                            (*process)('\n');
-                            continue;
-                            }
-                        ikar = 'n';
-                        break;
-                    case '\f':
-                        ikar = 'f';
-                        break;
-                    case '\r':
-                        ikar = 'r';
-                        break;
-                    case '\b':
-                        ikar = 'b';
-                        break;
-                    case ALERT:
-                        ikar = 'a';
-                        break;
-                    case '\v':
-                        ikar = 'v';
-                        break;
-                    case '\t':
-                        if (longline || lineTooLong(POBJ(Root)))
-                            /* We need to call this, even though quote returned TRUE,
-                            because quote may have returned before reaching this character.
-                            */
-                            {
-                            longline = TRUE;
-                            (*process)('\t');
-                            continue;
-                            }
-                        ikar = 't';
-                        break;
-                    case '"':
-                    case '\\':
-                        break;
-                    case 016:
-                        ikar = 'L';
-                        break;
-                    case 017:
-                        ikar = 'D';
-                        break;
-                    default:
-                        (*process)(ikar);
+                case '\n':
+                    if(longline || lineTooLong(POBJ(Root)))
+                        /* We need to call this, even though quote returned TRUE,
+                        because quote may have returned before reaching this character.
+                        */
+                        {
+                        longline = TRUE;
+                        (*process)('\n');
                         continue;
+                        }
+                    ikar = 'n';
+                    break;
+                case '\f':
+                    ikar = 'f';
+                    break;
+                case '\r':
+                    ikar = 'r';
+                    break;
+                case '\b':
+                    ikar = 'b';
+                    break;
+                case ALERT:
+                    ikar = 'a';
+                    break;
+                case '\v':
+                    ikar = 'v';
+                    break;
+                case '\t':
+                    if(longline || lineTooLong(POBJ(Root)))
+                        /* We need to call this, even though quote returned TRUE,
+                        because quote may have returned before reaching this character.
+                        */
+                        {
+                        longline = TRUE;
+                        (*process)('\t');
+                        continue;
+                        }
+                    ikar = 't';
+                    break;
+                case '"':
+                case '\\':
+                    break;
+                case 016:
+                    ikar = 'L';
+                    break;
+                case 017:
+                    ikar = 'D';
+                    break;
+                default:
+                    (*process)(ikar);
+                    continue;
                 }
             (*process)('\\');
             (*process)(ikar);
             }
-        if (q)
+        if(q)
             (*process)('"');
         }
     }
@@ -297,40 +297,40 @@ static void endnode(psk Root, int space)
 static void reslt(psk Root, int level, int ind, int space)
     {
     static int Parent, Child, newind;
-    while (is_op(Root))
+    while(is_op(Root))
         {
-        if (Op(Root) == EQUALS)
+        if(Op(Root) == EQUALS)
             Root->RIGHT = Head(Root->RIGHT);
         Parent = Op(Root);
         Child = Op(Root->LEFT);
-        if (needIndent(Root, ind, level))
+        if(needIndent(Root, ind, level))
             indtel++;
-        if (HAS__UNOPS(Root->LEFT) || Parent >= Child)
+        if(HAS__UNOPS(Root->LEFT) || Parent >= Child)
             parenthesised_result(Root->LEFT, level + 1, FALSE, (space & LHS) | RSP);
         else
             reslt(Root->LEFT, level + 1, FALSE, (space & LHS) | RSP);
         newind = indent(Root, level, ind);
-        if (newind)
+        if(newind)
             extraSpc = 1;
 #if CHECKALLOCBOUNDS
-        if (POINT)
+        if(POINT)
             printf("\n[%p %lld]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
 #endif
         SM(Root)
             do_something(opchar[klopcode(Root)]);
         Parent = Op(Root);
         Child = Op(Root->RIGHT);
-        if (HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
+        if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
             {
             parenthesised_result(Root->RIGHT, level + 1, FALSE, LSP | (space & RHS));
             return;
             }
-        else if (Parent < Child)
+        else if(Parent < Child)
             {
             reslt(Root->RIGHT, level + 1, FALSE, LSP | (space & RHS));
             return;
             }
-        else if (newind != ind || ((LSP | (space & RHS)) != space))
+        else if(newind != ind || ((LSP | (space & RHS)) != space))
             {
             reslt(Root->RIGHT, level, newind, LSP | (space & RHS));
             return;
@@ -346,47 +346,47 @@ static void reslt(psk Root, int level, int ind, int space)
 static void reslts(psk Root, int level, int ind, int space, psk cutoff)
     {
     static int Parent, Child, newind;
-    if (is_op(Root))
+    if(is_op(Root))
         {
-        if (Op(Root) == EQUALS)
+        if(Op(Root) == EQUALS)
             Root->RIGHT = Head(Root->RIGHT);
 
         do
             {
-            if (cutoff && Root->RIGHT == cutoff)
+            if(cutoff && Root->RIGHT == cutoff)
                 {
                 reslt(Root->LEFT, level, ind, space);
                 return;
                 }
             Parent = Op(Root);
             Child = Op(Root->LEFT);
-            if (needIndent(Root, ind, level))
+            if(needIndent(Root, ind, level))
                 indtel++;
-            if (HAS__UNOPS(Root->LEFT) || Parent >= Child)
+            if(HAS__UNOPS(Root->LEFT) || Parent >= Child)
                 parenthesised_result(Root->LEFT, level + 1, FALSE, (space & LHS) | RSP);
             else
                 reslt(Root->LEFT, level + 1, FALSE, (space & LHS) | RSP);
             newind = indent(Root, level, ind);
-            if (newind)
+            if(newind)
                 extraSpc = 1;
             SM(Root)
                 do_something(opchar[klopcode(Root)]);
             Parent = Op(Root);
             Child = Op(Root->RIGHT);
-            if (HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
+            if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
                 hreslts(Root->RIGHT, level + 1, FALSE, LSP | (space & RHS), cutoff);
-            else if (Parent < Child)
+            else if(Parent < Child)
                 {
                 reslts(Root->RIGHT, level + 1, FALSE, LSP | (space & RHS), cutoff);
                 return;
                 }
-            else if (newind != ind || ((LSP | (space & RHS)) != space))
+            else if(newind != ind || ((LSP | (space & RHS)) != space))
                 {
                 reslts(Root->RIGHT, level, newind, LSP | (space & RHS), cutoff);
                 return;
                 }
             Root = Root->RIGHT;
-            } while (is_op(Root));
+            } while(is_op(Root));
         }
     else
         {
@@ -400,29 +400,29 @@ static void reslts(psk Root, int level, int ind, int space, psk cutoff)
 static void parenthesised_result(psk Root, int level, int ind, int space)
     {
     static int Parent, Child;
-    if (is_op(Root))
+    if(is_op(Root))
         {
         int number_of_flags;
-        if (Op(Root) == EQUALS)
+        if(Op(Root) == EQUALS)
             Root->RIGHT = Head(Root->RIGHT);
         indent(Root, level, -1);
         number_of_flags = printflags(Root);
         number_of_flags_on_node += number_of_flags;
         (*process)('(');
         indtel = 0;
-        if (needIndent(Root, ind, level))
+        if(needIndent(Root, ind, level))
             extraSpc = 1;
         Parent = Op(Root);
         Child = Op(Root->LEFT);
-        if (HAS__UNOPS(Root->LEFT) || Parent >= Child)
+        if(HAS__UNOPS(Root->LEFT) || Parent >= Child)
             parenthesised_result(Root->LEFT, level + 1, FALSE, RSP);
         else
             reslt(Root->LEFT, level + 1, FALSE, RSP);
         ind = indent(Root, level, ind);
-        if (ind)
+        if(ind)
             extraSpc = 1;
 #if CHECKALLOCBOUNDS
-        if (POINT)
+        if(POINT)
             printf("\n[%p %lld]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
 #endif
         SM(Root)
@@ -430,9 +430,9 @@ static void parenthesised_result(psk Root, int level, int ind, int space)
         Parent = Op(Root);
 
         Child = Op(Root->RIGHT);
-        if (HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
+        if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
             parenthesised_result(Root->RIGHT, level + 1, FALSE, LSP);
-        else if (Parent < Child)
+        else if(Parent < Child)
             reslt(Root->RIGHT, level + 1, FALSE, LSP);
         else
             reslt(Root->RIGHT, level, ind, LSP);
@@ -451,12 +451,12 @@ static void parenthesised_result(psk Root, int level, int ind, int space)
 static void hreslts(psk Root, int level, int ind, int space, psk cutoff)
     {
     static int Parent, Child;
-    if (is_op(Root))
+    if(is_op(Root))
         {
         int number_of_flags;
-        if (Op(Root) == EQUALS)
+        if(Op(Root) == EQUALS)
             Root->RIGHT = Head(Root->RIGHT);
-        if (cutoff && Root->RIGHT == cutoff)
+        if(cutoff && Root->RIGHT == cutoff)
             {
             parenthesised_result(Root->LEFT, level, ind, space);
             return;
@@ -466,24 +466,24 @@ static void hreslts(psk Root, int level, int ind, int space, psk cutoff)
         number_of_flags_on_node += number_of_flags;
         (*process)('(');
         indtel = 0;
-        if (needIndent(Root, ind, level))
+        if(needIndent(Root, ind, level))
             extraSpc = 1;
         Parent = Op(Root);
         Child = Op(Root->LEFT);
-        if (HAS__UNOPS(Root->LEFT) || Parent >= Child)
+        if(HAS__UNOPS(Root->LEFT) || Parent >= Child)
             parenthesised_result(Root->LEFT, level + 1, FALSE, RSP);
         else
             reslt(Root->LEFT, level + 1, FALSE, RSP);
         ind = indent(Root, level, ind);
-        if (ind)
+        if(ind)
             extraSpc = 1;
         SM(Root)
             do_something(opchar[klopcode(Root)]);
         Parent = Op(Root);
         Child = Op(Root->RIGHT);
-        if (HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
+        if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
             hreslts(Root->RIGHT, level + 1, FALSE, LSP, cutoff);
-        else if (Parent < Child)
+        else if(Parent < Child)
             reslts(Root->RIGHT, level + 1, FALSE, LSP, cutoff);
         else
             reslts(Root->RIGHT, level, ind, LSP, cutoff);
@@ -500,7 +500,7 @@ static void hreslts(psk Root, int level, int ind, int space, psk cutoff)
 
 void results(psk Root, psk cutoff)
     {
-    if (HAS__UNOPS(Root))
+    if(HAS__UNOPS(Root))
         {
         hreslts(Root, 0, FALSE, 0, cutoff);
         }
@@ -512,9 +512,9 @@ void results(psk Root, psk cutoff)
 
 void result(psk Root)
     {
-    if (Root)
+    if(Root)
         {
-        if (HAS__UNOPS(Root))
+        if(HAS__UNOPS(Root))
             {
             parenthesised_result(Root, 0, FALSE, 0);
             }

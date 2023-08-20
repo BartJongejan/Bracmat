@@ -15,14 +15,6 @@ psk vbuildup(psk Pnode, const char *conc[]);
 psk dopb(psk Pnode, psk src);
 psk starttree_w(psk Pnode, ...);
 psk build_up(psk Pnode, ...);
-/*
-void writeError(psk Pnode);
-int redirectError(char* name);
-*/
-/*
-void putOperatorChar(int c);
-void putLeafChar(int c);
-*/
 void stringEval(const char* s, const char** out, int* err);
 
 #endif

@@ -8,12 +8,12 @@ psk _leftbranch(psk Pnode)
     {
     psk lnode;
     lnode = Pnode->LEFT;
-    if (!(Pnode->v.fl & SUCCESS))
+    if(!(Pnode->v.fl & SUCCESS))
         {
         lnode = isolated(lnode);
         lnode->v.fl ^= SUCCESS;
         }
-    if ((Pnode->v.fl & FENCE) && !(lnode->v.fl & FENCE))
+    if((Pnode->v.fl & FENCE) && !(lnode->v.fl & FENCE))
         {
         lnode = isolated(lnode);
         lnode->v.fl |= FENCE;
@@ -33,12 +33,12 @@ psk _fleftbranch(psk Pnode)
     {
     psk lnode;
     lnode = Pnode->LEFT;
-    if (Pnode->v.fl & SUCCESS)
+    if(Pnode->v.fl & SUCCESS)
         {
         lnode = isolated(lnode);
         lnode->v.fl ^= SUCCESS;
         }
-    if ((Pnode->v.fl & FENCE) && !(lnode->v.fl & FENCE))
+    if((Pnode->v.fl & FENCE) && !(lnode->v.fl & FENCE))
         {
         lnode = isolated(lnode);
         lnode->v.fl |= FENCE;
@@ -58,20 +58,20 @@ psk _fenceleftbranch(psk Pnode)
     {
     psk lnode;
     lnode = Pnode->LEFT;
-    if (!(Pnode->v.fl & SUCCESS))
+    if(!(Pnode->v.fl & SUCCESS))
         {
         lnode = isolated(lnode);
         lnode->v.fl ^= SUCCESS;
         }
-    if (Pnode->v.fl & FENCE)
+    if(Pnode->v.fl & FENCE)
         {
-        if (!(lnode->v.fl & FENCE))
+        if(!(lnode->v.fl & FENCE))
             {
             lnode = isolated(lnode);
             lnode->v.fl |= FENCE;
             }
         }
-    else if (lnode->v.fl & FENCE)
+    else if(lnode->v.fl & FENCE)
         {
         lnode = isolated(lnode);
         lnode->v.fl &= ~FENCE;
@@ -84,12 +84,12 @@ psk _rightbranch(psk Pnode)
     {
     psk rightnode;
     rightnode = Pnode->RIGHT;
-    if (!(Pnode->v.fl & SUCCESS))
+    if(!(Pnode->v.fl & SUCCESS))
         {
         rightnode = isolated(rightnode);
         rightnode->v.fl ^= SUCCESS;
         }
-    if ((Pnode->v.fl & FENCE) && !(rightnode->v.fl & FENCE))
+    if((Pnode->v.fl & FENCE) && !(rightnode->v.fl & FENCE))
         {
         rightnode = isolated(rightnode);
         rightnode->v.fl |= FENCE;
@@ -109,7 +109,7 @@ psk __rightbranch(psk Pnode)
     {
     psk ret;
     int success = Pnode->v.fl & SUCCESS;
-    if (shared(Pnode))
+    if(shared(Pnode))
         {
         ret = same_as_w(Pnode->RIGHT);
         dec_refcount(Pnode);
@@ -120,7 +120,7 @@ psk __rightbranch(psk Pnode)
         wipe(Pnode->LEFT);
         pskfree(Pnode);
         }
-    if (!success)
+    if(!success)
         {
         ret = isolated(ret);
         ret->v.fl ^= SUCCESS;

@@ -3,7 +3,7 @@
 
 #include "nodestruct.h"
 
-void copyToCutoff(psk * ppnode, psk pnode, psk cutoff);
+void copyToCutoff(psk* ppnode, psk pnode, psk cutoff);
 psk Head(psk pnode);
 
 #endif

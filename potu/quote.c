@@ -18,15 +18,15 @@ static const char needsquotes[256] = {
     1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* ` */
     0,0,0,0,0,0,0,0,0,0,0,3,3,3,1,0 };/* { | } ~ */
 
-int quote(unsigned char *strng)
+int quote(unsigned char* strng)
     {
-    unsigned char *pstring;
-    if (needsquotes[*strng] & 1)
+    unsigned char* pstring;
+    if(needsquotes[*strng] & 1)
         return TRUE;
-    for (pstring = strng; *pstring; pstring++)
-        if (needsquotes[*pstring] & 2)
+    for(pstring = strng; *pstring; pstring++)
+        if(needsquotes[*pstring] & 2)
             return TRUE;
-        else if (  (needsquotes[*pstring] & 4)
+        else if((needsquotes[*pstring] & 4)
                 && lineTooLong(strng)
                 )
             return TRUE;

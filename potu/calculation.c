@@ -1939,7 +1939,7 @@ static int polish1(psk code, Boolean commentsAllowed)
             if(C == -1)
                 return -1;
             return 6 + C;
-            /* 0: jump +5 1: pop 2 : jump to start of loop 3: pop 4: jump out of the loop.
+            /* 0: jump +5 1: pop 2 : jump to wstart of loop 3: pop 4: jump out of the loop.
             One more for jump after loop*/
         default:
             if(is_op(code))
@@ -2388,19 +2388,19 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
 
 static Boolean shortcutJumpChains(forthword* wordp)
     {
-    forthword* start = wordp;
+    forthword* wstart = wordp;
     Boolean res = FALSE;
     for(; wordp->action != TheEnd; ++wordp)
         {
         if(wordp->action == Branch)
             {
-            forthword* label = start + wordp->offset;
+            forthword* label = wstart + wordp->offset;
             while(label->action == Branch)
                 {
-                label = start + label->offset;
+                label = wstart + label->offset;
                 res = TRUE;
                 }
-            wordp->offset = label - start;
+            wordp->offset = (unsigned int)(label - wstart);
             }
         }
     //#define SHOWOPTIMIZATIONS
@@ -2431,15 +2431,15 @@ static Boolean combinePopBranch(forthword* wordp)
     return res;
     }
 
-static Boolean combineBranchPopBranch(forthword* start)
+static Boolean combineBranchPopBranch(forthword* wstart)
     {
     Boolean res = FALSE;
-    forthword* wordp = start;
+    forthword* wordp = wstart;
     for(; wordp->action != TheEnd; ++wordp)
         {
         if(wordp->action == Branch)
             {
-            forthword* label = start + wordp->offset;
+            forthword* label = wstart + wordp->offset;
             if(label->action == PopBranch)
                 {
                 wordp->action = PopBranch;
@@ -2455,14 +2455,14 @@ static Boolean combineBranchPopBranch(forthword* start)
     return res;
     }
 
-static void markReachable(forthword* wordp, forthword* start, char* marks)
+static void markReachable(forthword* wordp, forthword* wstart, char* marks)
     {
-    if(marks[wordp - start] == 1)
+    if(marks[wordp - wstart] == 1)
         return; /* Already visited! */
 
     for(; wordp->action != TheEnd; ++wordp)
         {
-        marks[wordp - start] = 1;
+        marks[wordp - wstart] = 1;
         switch(wordp->action)
             {
             case var2stackBranch:
@@ -2471,7 +2471,7 @@ static void markReachable(forthword* wordp, forthword* start, char* marks)
             case PopBranch:
             case valPushBranch:
             case val2stackBranch:
-                markReachable(start + wordp->offset, start, marks);
+                markReachable(wstart + wordp->offset, wstart, marks);
                 return;
             case Fless:
             case Fless_equal:
@@ -2485,7 +2485,7 @@ static void markReachable(forthword* wordp, forthword* start, char* marks)
             case FmoreP:
             case FunequalP:
             case FequalP:
-                markReachable(start + wordp->offset, start, marks);
+                markReachable(wstart + wordp->offset, wstart, marks);
                 break;
             default:
                 ;
@@ -2493,13 +2493,13 @@ static void markReachable(forthword* wordp, forthword* start, char* marks)
         }
     }
 
-static Boolean markUnReachable(forthword* start, char* marks)
+static Boolean markUnReachable(forthword* wstart, char* marks)
     {
     Boolean res = FALSE;
-    markReachable(start, start, marks);
-    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+    markReachable(wstart, wstart, marks);
+    for(forthword* wordp = wstart; wordp->action != TheEnd; ++wordp)
         {
-        if(wordp->action != NoOp && marks[wordp - start] != 1)
+        if(wordp->action != NoOp && marks[wordp - wstart] != 1)
             {
             wordp->action = NoOp;
             res = TRUE;
@@ -2511,29 +2511,29 @@ static Boolean markUnReachable(forthword* start, char* marks)
     return res;
     }
 
-static Boolean dissolveNextWordBranches(forthword* start)
+static Boolean dissolveNextWordBranches(forthword* wstart)
     {
     Boolean res = FALSE;
-    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+    for(forthword* wordp = wstart; wordp->action != TheEnd; ++wordp)
         {
         switch(wordp->action)
             {
             case var2stackBranch:
-                if(start + wordp->offset == wordp + 1)
+                if(wstart + wordp->offset == wordp + 1)
                     {
                     wordp->action = var2stack;
                     res = TRUE;
                     }
                 break;
             case stack2varBranch:
-                if(start + wordp->offset == wordp + 1)
+                if(wstart + wordp->offset == wordp + 1)
                     {
                     wordp->action = stack2var;
                     res = TRUE;
                     }
                 break;
             case Branch:
-                if(start + wordp->offset == wordp + 1)
+                if(wstart + wordp->offset == wordp + 1)
                     {
                     wordp->action = NoOp;
                     res = TRUE;
@@ -2541,7 +2541,7 @@ static Boolean dissolveNextWordBranches(forthword* start)
                 break;
             case PopBranch:
                 {
-                if(wordp->offset == (wordp + 1) - start)
+                if(wordp->offset == (wordp + 1) - wstart)
                     {
                     wordp->action = Pop;
                     res = TRUE;
@@ -2550,7 +2550,7 @@ static Boolean dissolveNextWordBranches(forthword* start)
                 }
             case valPushBranch:
                 {
-                if(wordp->offset == (wordp + 1) - start)
+                if(wordp->offset == (wordp + 1) - wstart)
                     {
                     wordp->action = valPush;
                     res = TRUE;
@@ -2559,7 +2559,7 @@ static Boolean dissolveNextWordBranches(forthword* start)
                 }
             case val2stackBranch:
                 {
-                if(wordp->offset == (wordp + 1) - start)
+                if(wordp->offset == (wordp + 1) - wstart)
                     {
                     wordp->action = val2stack;
                     res = TRUE;
@@ -2576,16 +2576,16 @@ static Boolean dissolveNextWordBranches(forthword* start)
     return res;
     }
 
-static Boolean combineUnconditionalBranchTovalPush(forthword* start)
+static Boolean combineUnconditionalBranchTovalPush(forthword* wstart)
     {
     Boolean res = FALSE;
-    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+    for(forthword* wordp = wstart; wordp->action != TheEnd; ++wordp)
         {
         switch(wordp->action)
             {
             case Branch:
                 {
-                forthword* label = start + wordp->offset;
+                forthword* label = wstart + wordp->offset;
                 if(label->action == valPush)
                     {
                     wordp->action = valPushBranch;
@@ -2597,7 +2597,7 @@ static Boolean combineUnconditionalBranchTovalPush(forthword* start)
                 }
             case PopBranch:
                 {
-                forthword* label = start + wordp->offset;
+                forthword* label = wstart + wordp->offset;
                 if(label->action == valPush)
                     {
                     wordp->action = val2stackBranch;
@@ -2617,10 +2617,10 @@ static Boolean combineUnconditionalBranchTovalPush(forthword* start)
     return res;
     }
 
-static Boolean stack2var_var2stack(forthword* start)
+static Boolean stack2var_var2stack(forthword* wstart)
     {
     Boolean res = FALSE;
-    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+    for(forthword* wordp = wstart; wordp->action != TheEnd; ++wordp)
         {
         switch(wordp->action)
             {
@@ -2653,10 +2653,10 @@ static Boolean stack2var_var2stack(forthword* start)
     return res;
     }
 
-static Boolean removeIdempotentActions(forthword* start)
+static Boolean removeIdempotentActions(forthword* wstart)
     {
     Boolean res = FALSE;
-    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+    for(forthword* wordp = wstart; wordp->action != TheEnd; ++wordp)
         {
         switch(wordp->action)
             {
@@ -2721,10 +2721,10 @@ static Boolean removeIdempotentActions(forthword* start)
     return res;
     }
 
-static Boolean combinePushAndOperation(forthword* start)
+static Boolean combinePushAndOperation(forthword* wstart)
     {
     Boolean res = FALSE;
-    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+    for(forthword* wordp = wstart; wordp->action != TheEnd; ++wordp)
         {
         switch(wordp->action)
             {
@@ -2796,9 +2796,9 @@ static Boolean combinePushAndOperation(forthword* start)
     return res;
     }
 
-static void markLabels(forthword* start, char* marks)
+static void markLabels(forthword* wstart, char* marks)
     {
-    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+    for(forthword* wordp = wstart; wordp->action != TheEnd; ++wordp)
         {
         switch(wordp->action)
             {
@@ -2828,17 +2828,17 @@ static void markLabels(forthword* start, char* marks)
         }
     }
 
-static Boolean combineval2stack(forthword* start, char* marks)
+static Boolean combineval2stack(forthword* wstart, char* marks)
     {
     Boolean res = FALSE;
-    markLabels(start, marks);
-    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+    markLabels(wstart, marks);
+    for(forthword* wordp = wstart; wordp->action != TheEnd; ++wordp)
         {
         switch(wordp->action)
             {
             case Pop:
                 {
-                if(marks[1 + (wordp - start)] != 1)
+                if(marks[1 + (wordp - wstart)] != 1)
                     {
                     switch(wordp[1].action)
                         {
@@ -2868,7 +2868,7 @@ static Boolean combineval2stack(forthword* start, char* marks)
                             {
                             *wordp = wordp[1];
                             wordp->action = var2stackBranch;
-                            wordp->offset = (wordp + 2) - start;
+                            wordp->offset = (unsigned int)((wordp + 2) - wstart);
                             res = TRUE;
                             break;
                             }
@@ -2880,14 +2880,14 @@ static Boolean combineval2stack(forthword* start, char* marks)
                 }
             case PopBranch:
                 {
-                forthword* label = start + wordp->offset;
+                forthword* label = wstart + wordp->offset;
                 switch(label->action)
                     {
                     case varPush:
                         {
                         *wordp = *label;
                         wordp->action = var2stackBranch;
-                        wordp->offset = (label + 1) - start;
+                        wordp->offset = (unsigned int)((label + 1) - wstart);
                         res = TRUE;
                         break;
                         }
@@ -2905,9 +2905,9 @@ static Boolean combineval2stack(forthword* start, char* marks)
     return res;
     }
 
-static Boolean UnconditionalBranch(actionType action)
+static Boolean UnconditionalBranch(actionType calcaction)
     {
-    switch(action)
+    switch(calcaction)
         {
         case var2stackBranch:
         case stack2varBranch:
@@ -2980,7 +2980,7 @@ static Boolean IdemPotent(forthword* maybebranch, forthword* notbranch)
 
 
 
-static Boolean eliminateBranch(forthword* start)
+static Boolean eliminateBranch(forthword* wstart)
 /*
     118 Branch                     120   fand
     119 val2stackBranch            129   0.000000
@@ -3013,20 +3013,20 @@ Labels [119 - 129) decremented by 1
 */
     {
     Boolean res = FALSE;
-    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+    for(forthword* wordp = wstart; wordp->action != TheEnd; ++wordp)
         {
         if(UnconditionalBranch(wordp->action))
             {
-            if(wordp->offset + start == wordp + 2)
+            if(wordp->offset + wstart == wordp + 2)
                 {
-                unsigned int lo = (wordp + 1) - start;
+                unsigned int lo = (unsigned int)((wordp + 1) - wstart);
                 forthword tmp = wordp[1];
                 if(UnconditionalBranch(tmp.action))
                     {
                     unsigned int hi = tmp.offset - 1;
                     if(hi > lo)
                         {
-                        forthword* high = start + hi;
+                        forthword* high = wstart + hi;
                         if(UnconditionalBranch(high->action) || IdemPotent(wordp + 1, high))
                             {
                             switch(tmp.action)
@@ -3094,7 +3094,7 @@ Labels [119 - 129) decremented by 1
                                 default:
                                     ;
                                 }
-                            for(w = start; w->action != TheEnd; ++w)
+                            for(w = wstart; w->action != TheEnd; ++w)
                                 {
                                 switch(w->action)
                                     {
@@ -3141,7 +3141,7 @@ Labels [119 - 129) decremented by 1
 
 static int removeNoOp(forthMemory* mem, int length)
     {
-    forthword* start = mem->word;
+    forthword* wstart = mem->word;
     unsigned int* deltaoffset = calloc(length, sizeof(unsigned int));
     int newlength = 0;
     if(deltaoffset)
@@ -3149,14 +3149,14 @@ static int removeNoOp(forthMemory* mem, int length)
         memset(deltaoffset, 0, length * sizeof(char));
         unsigned int delta = 0;
         forthword* wordp;
-        for(wordp = start; wordp->action != TheEnd; ++wordp)
+        for(wordp = wstart; wordp->action != TheEnd; ++wordp)
             {
-            deltaoffset[wordp - start] = delta;
+            deltaoffset[wordp - wstart] = delta;
             if(wordp->action == NoOp)
                 ++delta;
             }
-        deltaoffset[wordp - start] = delta;
-        for(wordp = start; wordp->action != TheEnd; ++wordp)
+        deltaoffset[wordp - wstart] = delta;
+        for(wordp = wstart; wordp->action != TheEnd; ++wordp)
             {
             switch(wordp->action)
                 {
@@ -3189,7 +3189,7 @@ static int removeNoOp(forthMemory* mem, int length)
         if(newword)
             {
             mem->word = newword;
-            for(wordp = start; wordp->action != TheEnd; ++wordp)
+            for(wordp = wstart; wordp->action != TheEnd; ++wordp)
                 {
                 if(wordp->action != NoOp)
                     {
@@ -3197,21 +3197,21 @@ static int removeNoOp(forthMemory* mem, int length)
                     }
                 }
             *newword = *wordp;
-            bfree(start);
+            bfree(wstart);
             }
         free(deltaoffset);
         }
     return newlength;
     }
 
-static Boolean combinePopThenPop(forthword* start, char* marks)
+static Boolean combinePopThenPop(forthword* wstart, char* marks)
     {
     Boolean res = FALSE;
-    markLabels(start, marks);
-    for(forthword* wordp = start; wordp->action != TheEnd; ++wordp)
+    markLabels(wstart, marks);
+    for(forthword* wordp = wstart; wordp->action != TheEnd; ++wordp)
         {
         forthword* label;
-        if(marks[(wordp + 1) - start] != 1) // Nobody is jumping to the next word
+        if(marks[(wordp + 1) - wstart] != 1) // Nobody is jumping to the next word
             {
             switch(wordp->action)
                 {
@@ -3221,7 +3221,7 @@ static Boolean combinePopThenPop(forthword* start, char* marks)
                 case Fmore:
                 case Funequal:
                 case Fequal:
-                    label = start + wordp->offset;
+                    label = wstart + wordp->offset;
                     switch(wordp[1].action)
                         {
                         case Pop:
@@ -3257,7 +3257,7 @@ static Boolean combinePopThenPop(forthword* start, char* marks)
                             {
                             if(label->action == PopBranch)
                                 { /* see if backwards branch can be converted to branch to wordp+2 */
-                                if(label->offset == (wordp + 2) - start)
+                                if(label->offset == (wordp + 2) - wstart)
                                     {
                                     wordp->action = extraPopped(wordp->action, negations);
                                     wordp->offset = wordp[1].offset;
@@ -3586,7 +3586,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
             /*
                         0 or 1      Result of comparison between to doubles
                     AND @1          address to jump to 'if false' == end of RIGHT
-                        RIGHT       start of 'if true' branch
+                        RIGHT       wstart of 'if true' branch
                         ....
                         ....        end of 'if true' branch (RIGHT)
             @1:         ....
@@ -3657,7 +3657,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
             /*
                         0 or 1      Result of comparison between to doubles
                     OR  @1          address to jump to 'if true' == end of RIGHT
-                        RIGHT       start of 'if false' branch
+                        RIGHT       wstart of 'if false' branch
                         ....
                         ....        end of 'if false' branch (RIGHT)
             @1:         ....
@@ -3847,7 +3847,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                 {
                 wordp->action = Branch;
                 wordp->u.logic = fwhl;
-                wordp->offset = (unsigned int)((j5->j + ((mustpop == epop) ? epopS : eS)) - mem->word); /* If all good, jump back to start of loop */
+                wordp->offset = (unsigned int)((j5->j + ((mustpop == epop) ? epopS : eS)) - mem->word); /* If all good, jump back to wstart of loop */
 
                 ++wordp;
 

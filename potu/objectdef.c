@@ -12,17 +12,17 @@
 #include "wipecopy.h"
 #include <string.h>
 
-static classdef classes[] = { {"hash",hash},{"calculation",calculation}, {NULL,NULL}};
+static classdef classes[] = { {"hash",hash},{"calculation",calculation}, {NULL,NULL} };
 
 static int hasSubObject(psk src)
     {
-    while (is_op(src))
+    while(is_op(src))
         {
-        if (Op(src) == EQUALS)
+        if(Op(src) == EQUALS)
             return TRUE;
         else
             {
-            if (hasSubObject(src->LEFT))
+            if(hasSubObject(src->LEFT))
                 return TRUE;
             src = src->RIGHT;
             }
@@ -35,7 +35,7 @@ static psk objectcopysub(psk src);
 static psk objectcopysub2(psk src) /* src is NOT an object */
     {
     psk goal;
-    if (is_op(src) && hasSubObject(src))
+    if(is_op(src) && hasSubObject(src))
         {
         goal = (psk)bmalloc(__LINE__, sizeof(knode));
         goal->v.fl = src->v.fl & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
@@ -50,9 +50,9 @@ static psk objectcopysub2(psk src) /* src is NOT an object */
 static psk objectcopysub(psk src)
     {
     psk goal;
-    if (is_object(src))
+    if(is_object(src))
         {
-        if (ISBUILTIN((objectnode*)src))
+        if(ISBUILTIN((objectnode*)src))
             {
             return same_as_w(src);
             }
@@ -77,9 +77,9 @@ static psk objectcopysub(psk src)
 static psk objectcopy(psk src)
     {
     psk goal;
-    if (is_object(src))                              /* Make a copy of this '=' node ... */
+    if(is_object(src))                              /* Make a copy of this '=' node ... */
         {
-        if (ISBUILTIN((objectnode*)src))
+        if(ISBUILTIN((objectnode*)src))
             {
             goal = (psk)bmalloc(__LINE__, sizeof(typedObjectnode));
 #if WORD32
@@ -115,12 +115,12 @@ psk getObjectDef(psk src)
     {
     psk def;
     typedObjectnode* dest;
-    if (!is_op(src))
+    if(!is_op(src))
         {
         classdef* df = classes;
-        for (; df->name && strcmp(df->name, (char*)POBJ(src)); ++df)
+        for(; df->name && strcmp(df->name, (char*)POBJ(src)); ++df)
             ;
-        if (df->vtab)
+        if(df->vtab)
             {
             dest = (typedObjectnode*)bmalloc(__LINE__, sizeof(typedObjectnode));
             dest->v.fl = EQUALS | SUCCESS;
@@ -137,7 +137,7 @@ psk getObjectDef(psk src)
             return (psk)dest;
             }
         }
-    else if (Op(src) == EQUALS)
+    else if(Op(src) == EQUALS)
         {
         src->RIGHT = Head(src->RIGHT);
         return objectcopy(src);
@@ -145,7 +145,7 @@ psk getObjectDef(psk src)
 
 
 
-    if ((def = SymbolBinding_w(src, src->v.fl & DOUBLY_INDIRECT)) != NULL)
+    if((def = SymbolBinding_w(src, src->v.fl & DOUBLY_INDIRECT)) != NULL)
         {
         dest = (typedObjectnode*)bmalloc(__LINE__, sizeof(typedObjectnode));
         dest->v.fl = EQUALS | SUCCESS;

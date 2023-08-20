@@ -13,19 +13,19 @@
 #include <assert.h>
 psk evalmacro(psk Pnode)
     {
-    if (!is_op(Pnode))
+    if(!is_op(Pnode))
         {
         return NULL;
         }
     else
         {
         psk arg = Pnode;
-        while (!(Pnode->v.fl & READY))
+        while(!(Pnode->v.fl & READY))
             {
-            if (atomtest(Pnode->LEFT) != 0)
+            if(atomtest(Pnode->LEFT) != 0)
                 {
                 psk left = evalmacro(Pnode->LEFT);
-                if (left != NULL)
+                if(left != NULL)
                     {
                     /* copy backbone from evalmacro's argument to current Pnode
                        release lhs of copy of current and replace with 'left'
@@ -38,10 +38,10 @@ psk evalmacro(psk Pnode)
                     psk* last = backbone(arg, Pnode, &first);
                     wipe((*last)->LEFT);
                     (*last)->LEFT = left;
-                    if (atomtest((*last)->LEFT) == 0 && Op((*last)) == FUN)
+                    if(atomtest((*last)->LEFT) == 0 && Op((*last)) == FUN)
                         {
                         ret = evalmacro(*last);
-                        if (ret)
+                        if(ret)
                             {
                             wipe(*last);
                             *last = ret;
@@ -50,7 +50,7 @@ psk evalmacro(psk Pnode)
                     else
                         {
                         psk right = evalmacro((*last)->RIGHT);
-                        if (right)
+                        if(right)
                             {
                             wipe((*last)->RIGHT);
                             (*last)->RIGHT = right;
@@ -59,9 +59,9 @@ psk evalmacro(psk Pnode)
                     return first;
                     }
                 }
-            else if (Op(Pnode) == FUN)
+            else if(Op(Pnode) == FUN)
                 {
-                if (Op(Pnode->RIGHT) == UNDERSCORE)
+                if(Op(Pnode->RIGHT) == UNDERSCORE)
                     {
                     int Flgs;
                     psk h;
@@ -70,7 +70,7 @@ psk evalmacro(psk Pnode)
                     psk* last;
                     Flgs = Pnode->v.fl & (UNOPS | SUCCESS);
                     h = subtreecopy(Pnode->RIGHT);
-                    if (dummy_op == EQUALS)
+                    if(dummy_op == EQUALS)
                         {
                         psk becomes = (psk)bmalloc(__LINE__, sizeof(objectnode));
 #if WORD32
@@ -85,13 +85,13 @@ psk evalmacro(psk Pnode)
                         }
                     h->v.fl = dummy_op | Flgs;
                     hh = evalmacro(h->LEFT);
-                    if (hh)
+                    if(hh)
                         {
                         wipe(h->LEFT);
                         h->LEFT = hh;
                         }
                     hh = evalmacro(h->RIGHT);
-                    if (hh)
+                    if(hh)
                         {
                         wipe(h->RIGHT);
                         h->RIGHT = hh;
@@ -101,9 +101,9 @@ psk evalmacro(psk Pnode)
                     *last = h;
                     return first;
                     }
-                else if (Op(Pnode->RIGHT) == FUN
-                    && atomtest(Pnode->RIGHT->LEFT) == 0
-                    )
+                else if(Op(Pnode->RIGHT) == FUN
+                        && atomtest(Pnode->RIGHT->LEFT) == 0
+                        )
                     {
                     int Flgs;
                     psk h;
@@ -121,7 +121,7 @@ psk evalmacro(psk Pnode)
                         h->LEFT = hh;
                         }*/
                     hh = evalmacro(h->RIGHT);
-                    if (hh)
+                    if(hh)
                         {
                         wipe(h->RIGHT);
                         h->RIGHT = hh;
@@ -138,34 +138,34 @@ psk evalmacro(psk Pnode)
                     psk h;
                     tmp = eval(tmp);
 
-                    if ((h = getValue(tmp, &newval)) != NULL)
+                    if((h = getValue(tmp, &newval)) != NULL)
                         {
                         int Flgs;
                         psk first = NULL;
                         psk* last;
-                        if ((Op(h) == EQUALS) && ISBUILTIN((objectnode*)h))
+                        if((Op(h) == EQUALS) && ISBUILTIN((objectnode*)h))
                             {
-                            if (!newval)
+                            if(!newval)
                                 h = same_as_w(h);
                             }
                         else
                             {
                             Flgs = Pnode->v.fl & (UNOPS);
-                            if (!newval)
+                            if(!newval)
                                 {
                                 h = subtreecopy(h);
                                 }
-                            if (Flgs)
+                            if(Flgs)
                                 {
                                 h->v.fl |= Flgs;
-                                if (h->v.fl & INDIRECT)
+                                if(h->v.fl & INDIRECT)
                                     h->v.fl &= ~READY;
                                 }
-                            else if (h->v.fl & INDIRECT)
+                            else if(h->v.fl & INDIRECT)
                                 {
                                 h->v.fl &= ~READY;
                                 }
-                            else if (Op(h) == EQUALS)
+                            else if(Op(h) == EQUALS)
                                 {
                                 h->v.fl &= ~READY;
                                 }
@@ -186,7 +186,7 @@ psk evalmacro(psk Pnode)
                     }
                 }
             Pnode = Pnode->RIGHT;
-            if (!is_op(Pnode))
+            if(!is_op(Pnode))
                 {
                 break;
                 }

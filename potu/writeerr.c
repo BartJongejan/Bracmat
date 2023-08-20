@@ -15,16 +15,16 @@ void writeError(psk Pnode)
     saveFpo = global_fpo;
     global_fpo = errorStream;
 #if !defined NO_FOPEN
-    if (global_fpo == NULL && errorFileName != NULL)
+    if(global_fpo == NULL && errorFileName != NULL)
         global_fpo = fopen(errorFileName, APPENDBIN);
 #endif
-    if (global_fpo)
+    if(global_fpo)
         {
         result(Pnode);
         myputc('\n');
         /*#if !_BRACMATEMBEDDED*/
 #if !defined NO_FOPEN
-        if (errorStream == NULL && global_fpo != stderr && global_fpo != stdout)
+        if(errorStream == NULL && global_fpo != stderr && global_fpo != stdout)
             {
             fclose(global_fpo);
             }
@@ -38,18 +38,18 @@ void writeError(psk Pnode)
 int redirectError(char* name)
     {
 #if !defined NO_FOPEN
-    if (errorFileName)
+    if(errorFileName)
         {
         free(errorFileName);
         errorFileName = NULL;
         }
 #endif
-    if (!strcmp(name, "stdout"))
+    if(!strcmp(name, "stdout"))
         {
         errorStream = stdout;
         return TRUE;
         }
-    else if (!strcmp(name, "stderr"))
+    else if(!strcmp(name, "stderr"))
         {
         errorStream = stderr;
         return TRUE;
@@ -58,12 +58,12 @@ int redirectError(char* name)
         {
 #if !defined NO_FOPEN
         errorStream = fopen(name, APPENDTXT);
-        if (errorStream)
+        if(errorStream)
             {
             fclose(errorStream);
             errorStream = NULL;
             errorFileName = (char*)malloc(strlen(name) + 1);
-            if (errorFileName)
+            if(errorFileName)
                 {
                 strcpy(errorFileName, name);
                 return TRUE;

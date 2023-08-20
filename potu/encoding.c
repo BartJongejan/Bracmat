@@ -23,7 +23,7 @@ unsigned char ISO8859toCodePage850(unsigned char kar)
         0xD0,0xA4,0x95,0xA2,0x93,0xE4,0x94,0xF6,0x9B,0x97,0xA3,0x96,0x81,0xEC,0xE7,0x98
         };
 
-    if (kar & 0x80)
+    if(kar & 0x80)
         return translationTable[kar & 0x7F];
     else
         return kar;
@@ -48,7 +48,7 @@ unsigned char CodePage850toISO8859(unsigned char kar)
     /* delete bit-7 before search in tabel (0-6 is unchanged) */
     /* delete bit 15-8 */
 
-    if (kar & 0x80)
+    if(kar & 0x80)
         return translationTable[kar & 0x7F];
     else
         return kar;
@@ -57,40 +57,40 @@ unsigned char CodePage850toISO8859(unsigned char kar)
 #endif
 
 /* extern, is called from xml.c json.c */
-unsigned char * putCodePoint(ULONG val, unsigned char * s)
+unsigned char* putCodePoint(ULONG val, unsigned char* s)
     {
     /* Converts Unicode character w to 1,2,3 or 4 bytes of UTF8 in s. */
-    if (val < 0x80)
+    if(val < 0x80)
         {
         *s++ = (char)val;
         }
     else
         {
-        if (val < 0x0800) /* 7FF = 1 1111 111111 */
+        if(val < 0x0800) /* 7FF = 1 1111 111111 */
             {
             *s++ = (char)(0xc0 | (val >> 6));
             }
         else
             {
-            if (val < 0x10000) /* FFFF = 1111 111111 111111 */
+            if(val < 0x10000) /* FFFF = 1111 111111 111111 */
                 {
                 *s++ = (char)(0xe0 | (val >> 12));
                 }
             else
                 {
-                if (val < 0x200000)
+                if(val < 0x200000)
                     { /* 10000 = 010000 000000 000000, 10ffff = 100 001111 111111 111111 */
                     *s++ = (char)(0xf0 | (val >> 18));
                     }
                 else
                     {
-                    if (val < 0x4000000)
+                    if(val < 0x4000000)
                         {
                         *s++ = (char)(0xf8 | (val >> 24));
                         }
                     else
                         {
-                        if (val < 0x80000000)
+                        if(val < 0x80000000)
                             {
                             *s++ = (char)(0xfc | (val >> 30));
                             *s++ = (char)(0x80 | ((val >> 24) & 0x3f));
@@ -112,23 +112,23 @@ unsigned char * putCodePoint(ULONG val, unsigned char * s)
 
 static int utf8bytes(ULONG val)
     {
-    if (val < 0x80)
+    if(val < 0x80)
         {
         return 1;
         }
-    else if (val < 0x0800) /* 7FF = 1 1111 111111 */
+    else if(val < 0x0800) /* 7FF = 1 1111 111111 */
         {
         return 2;
         }
-    else if (val < 0x10000) /* FFFF = 1111 111111 111111 */
+    else if(val < 0x10000) /* FFFF = 1111 111111 111111 */
         {
         return 3;
         }
-    else if (val < 0x200000)
+    else if(val < 0x200000)
         { /* 10000 = 010000 000000 000000, 10ffff = 100 001111 111111 111111 */
         return 4;
         }
-    else if (val < 0x4000000)
+    else if(val < 0x4000000)
         {
         return 5;
         }
@@ -138,7 +138,7 @@ static int utf8bytes(ULONG val)
         }
     }
 
-int getCodePoint(const char ** ps)
+int getCodePoint(const char** ps)
     {
     /*
     return values:
@@ -147,27 +147,27 @@ int getCodePoint(const char ** ps)
     -2:     too short for being UTF-8
     */
     int K;
-    const char * s = *ps;
-    if ((K = (const unsigned char)*s++) != 0)
+    const char* s = *ps;
+    if((K = (const unsigned char)*s++) != 0)
         {
-        if ((K & 0xc0) == 0xc0) /* 11bbbbbb */
+        if((K & 0xc0) == 0xc0) /* 11bbbbbb */
             {
             int k[6];
             int i;
             int I;
-            if ((K & 0xfe) == 0xfe) /* 11111110 */
+            if((K & 0xfe) == 0xfe) /* 11111110 */
                 {
                 return -1;
                 }
             /* Start of multibyte */
 
             k[0] = K;
-            for (i = 1; (K << i) & 0x80; ++i)
+            for(i = 1; (K << i) & 0x80; ++i)
                 {
                 k[i] = (const unsigned char)*s++;
-                if ((k[i] & 0xc0) != 0x80) /* 10bbbbbb */
+                if((k[i] & 0xc0) != 0x80) /* 10bbbbbb */
                     {
-                    if (k[i])
+                    if(k[i])
                         {
                         return -1;
                         }
@@ -176,17 +176,17 @@ int getCodePoint(const char ** ps)
                 }
             K = ((k[0] << i) & 0xff) << (5 * i - 6);
             I = --i;
-            while (i > 0)
+            while(i > 0)
                 {
                 K |= (k[i] & 0x3f) << ((I - i) * 6);
                 --i;
                 }
-            if (K <= 0x7F) /* ASCII, must be a single byte */
+            if(K <= 0x7F) /* ASCII, must be a single byte */
                 {
                 return -1;
                 }
             }
-        else if ((K & 0xc0) == 0x80) /* 10bbbbbb, wrong first byte */
+        else if((K & 0xc0) == 0x80) /* 10bbbbbb, wrong first byte */
             {
             return -1;
             }
@@ -195,10 +195,10 @@ int getCodePoint(const char ** ps)
     return K;
     }
 
-int getCodePoint2(const char ** ps, int * isutf)
+int getCodePoint2(const char** ps, int* isutf)
     {
     int ks = *isutf ? getCodePoint(ps) : (const unsigned char)*(*ps)++;
-    if (ks < 0)
+    if(ks < 0)
         {
         *isutf = 0;
         ks = (const unsigned char)*(*ps)++;
@@ -209,42 +209,42 @@ int getCodePoint2(const char ** ps, int * isutf)
 
 psk changeCase(psk Pnode
 #if CODEPAGE850
-                      , int dos
+               , int dos
 #endif
-                      , int low)
+               , int low)
     {
 #if !CODEPAGE850
     const
 #endif
-        char * s;
+        char* s;
     psk pnode;
     size_t len;
     pnode = same_as_w(Pnode);
     s = SPOBJ(Pnode);
-    len = strlen((const char *)s);
-    if (len > 0)
+    len = strlen((const char*)s);
+    if(len > 0)
         {
-        char * d;
-        char * dwarn;
-        char * buf = NULL;
-        char * obuf;
+        char* d;
+        char* dwarn;
+        char* buf = NULL;
+        char* obuf;
         pnode = isolated(pnode);
         d = SPOBJ(pnode);
         obuf = d;
         dwarn = obuf + strlen((const char*)obuf) - 6;
 #if CODEPAGE850
-        if (dos)
+        if(dos)
             {
-            if (low)
+            if(low)
                 {
-                for (; *s; ++s)
+                for(; *s; ++s)
                     {
                     *s = ISO8859toCodePage850(lowerEquivalent[(int)(const unsigned char)*s]);
                     }
                 }
             else
                 {
-                for (; *s; ++s)
+                for(; *s; ++s)
                     {
                     *s = ISO8859toCodePage850(upperEquivalent[(int)(const unsigned char)*s]);
                     }
@@ -254,35 +254,35 @@ psk changeCase(psk Pnode
 #endif
             {
             int isutf = 1;
-            struct ccaseconv * t = low ? u2l : l2u;
-            for (; *s;)
+            struct ccaseconv* t = low ? u2l : l2u;
+            for(; *s;)
                 {
                 int S = getCodePoint2(&s, &isutf);
                 int D = convertLetter(S, t);
-                if (isutf)
+                if(isutf)
                     {
-                    if (d >= dwarn)
+                    if(d >= dwarn)
                         {
                         int nb = utf8bytes(D);
-                        if (d + nb >= dwarn + 6)
+                        if(d + nb >= dwarn + 6)
                             {
                             /* overrun */
-                            buf = (char *)bmalloc(__LINE__, 2 * ((dwarn + 6) - obuf));
+                            buf = (char*)bmalloc(__LINE__, 2 * ((dwarn + 6) - obuf));
                             dwarn = buf + 2 * ((dwarn + 6) - obuf) - 6;
                             memcpy(buf, obuf, d - obuf);
                             d = buf + (d - obuf);
-                            if (obuf != SPOBJ(pnode))
+                            if(obuf != SPOBJ(pnode))
                                 bfree(obuf);
                             obuf = buf;
                             }
                         }
-                    d = (char *)putCodePoint(D, (unsigned char *)d);
+                    d = (char*)putCodePoint(D, (unsigned char*)d);
                     }
                 else
                     *d++ = (unsigned char)D;
                 }
             *d = 0;
-            if (buf)
+            if(buf)
                 {
                 wipe(pnode);
                 pnode = scopy(buf);
@@ -293,33 +293,33 @@ psk changeCase(psk Pnode
     return pnode;
     }
 
-int hasUTF8MultiByteCharacters(const char * s)
+int hasUTF8MultiByteCharacters(const char* s)
     { /* returns 0 if s is not valid UTF-8 or if s is pure 7-bit ASCII */
     int ret;
     int multiByteCharSeen = 0;
-    for (; (ret = getCodePoint(&s)) > 0;)
-        if (ret > 0x7F)
+    for(; (ret = getCodePoint(&s)) > 0;)
+        if(ret > 0x7F)
             ++multiByteCharSeen;
     return ret == 0 ? multiByteCharSeen : 0;
     }
 
-int strcasecompu(char ** S, char ** P, char * cutoff)
+int strcasecompu(char** S, char** P, char* cutoff)
 /* Additional argument cutoff */
     {
     int sutf = 1;
     int putf = 1;
-    char * s = *S;
-    char * p = *P;
-    while (s < cutoff && *s && *p)
+    char* s = *S;
+    char* p = *P;
+    while(s < cutoff && *s && *p)
         {
         int diff;
-        char * ns = s;
-        char * np = p;
-        int ks = getCodePoint2((const char **)&ns, &sutf);
-        int kp = getCodePoint2((const char **)&np, &putf);
+        char* ns = s;
+        char* np = p;
+        int ks = getCodePoint2((const char**)&ns, &sutf);
+        int kp = getCodePoint2((const char**)&np, &putf);
         assert(ks >= 0 && kp >= 0);
         diff = toLowerUnicode(ks) - toLowerUnicode(kp);
-        if (diff)
+        if(diff)
             {
             *S = s;
             *P = p;
@@ -333,16 +333,16 @@ int strcasecompu(char ** S, char ** P, char * cutoff)
     return (s < cutoff ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*p;
     }
 
-int strcasecomp(const char *s, const char *p)
+int strcasecomp(const char* s, const char* p)
     {
     int sutf = 1; /* assume UTF-8, becomes 0 if it is not */
     int putf = 1;
-    while (*s && *p)
+    while(*s && *p)
         {
-        int ks = getCodePoint2((const char **)&s, &sutf);
-        int kp = getCodePoint2((const char **)&p, &putf);
+        int ks = getCodePoint2((const char**)&s, &sutf);
+        int kp = getCodePoint2((const char**)&p, &putf);
         int diff = toLowerUnicode(ks) - toLowerUnicode(kp);
-        if (diff)
+        if(diff)
             {
             return diff;
             }
@@ -351,12 +351,12 @@ int strcasecomp(const char *s, const char *p)
     }
 
 #if CODEPAGE850
-int strcasecmpDOS(const char *s, const char *p)
+int strcasecmpDOS(const char* s, const char* p)
     {
-    while (*s && *p)
+    while(*s && *p)
         {
         int diff = (int)ISO8859toCodePage850(lowerEquivalent[CodePage850toISO8859((unsigned char)*s)]) - (int)ISO8859toCodePage850(lowerEquivalent[CodePage850toISO8859((unsigned char)*p)]);
-        if (diff)
+        if(diff)
             return diff;
         ++s;
         ++p;

@@ -14,7 +14,7 @@ psk subtreecopy(psk src);
 psk isolated(psk Pnode);
 psk setflgs(psk pokn, ULONG Flgs);
 #if ICPY
-void icpy(LONG *d, LONG *b, int words);
+void icpy(LONG* d, LONG* b, int words);
 #endif
 psk copyop(psk Pnode);
 psk charcopy(const char* strt, const char* until);

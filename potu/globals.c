@@ -10,6 +10,7 @@ int debug = 0;
 #if CHECKALLOCBOUNDS
 int POINT = 0;
 #endif
+/* ISO8859 */ /* NOT DOS compatible! */
 #if CODEPAGE850
 const unsigned char lowerEquivalent[256] =
     {
@@ -60,8 +61,8 @@ zeroNodeNotNeutral,
 oneNodeNotNeutral,
 argNode, selfNode, SelfNode, twoNode, fourNode, sjtNode;
 
-FILE * global_fpi;
-FILE * global_fpo;
+FILE* global_fpi;
+FILE* global_fpo;
 int optab[256];
 
 #if GLOBALARGPTR
@@ -70,9 +71,9 @@ va_list argptr;
 
 /*#if !_BRACMATEMBEDDED*/
 #if !defined NO_FOPEN
-char * errorFileName = NULL;
+char* errorFileName = NULL;
 #endif
-FILE * errorStream = NULL;
+FILE* errorStream = NULL;
 /*#endif*/
 
 int hum = 1;
@@ -80,7 +81,7 @@ int listWithName = 1;
 int beNice = TRUE;
 psk global_anchor;
 size_t telling = 0;
-unsigned char *source;
+unsigned char* source;
 
 const psk knil[16] =
     { NULL,NULL,NULL,NULL,NULL,NULL,&nilNode,&zeroNode,

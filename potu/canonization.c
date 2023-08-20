@@ -8,7 +8,6 @@
 #include "wipecopy.h"
 #include "input.h"
 #include "rational.h"
-//#include "real.h"
 #include "memory.h"
 #include "treematch.h"
 #include "nodeutil.h"
@@ -105,22 +104,7 @@ psk handleExponents(psk Pnode)
 
             if(!is_op(rightnode)) 
                 {
-#ifdef REAL_COMP
-                if(REAL_COMP(rightnode) && REAL_COMP(lnode))
-                    {
-                    /*"2.0E0" ^ "5.0E-1"*/
-                    conc_arr[1] = NULL;
-                    conc_arr[2] = hash6;
-                    conc_arr[3] = NULL;
-                    addr[6] = fExp(lnode, rightnode);
-                    assert(lnode == Pnode->LEFT);
-                    Pnode = vbuildup(Pnode, conc_arr + 2);
-                    wipe(addr[6]);
-                    return Pnode;
-                    }
-                else
-#endif
-                    if(RATIONAL_COMP(rightnode))
+                if(RATIONAL_COMP(rightnode))
                     {
                     if(RATIONAL_COMP(lnode))
                         {
@@ -518,48 +502,7 @@ psk mergeOrSortTerms(psk Pnode)
     leftoperand_and_tail(top, &Lterm, &Ltail);
     assert(Ltail == NULL);
 
-#ifdef REAL_COMP
-    if(REAL_COMP(Lterm))
-        {
-        switch(PLOBJ(Rterm))
-            {
-            case PI:
-            case XX:
-                conc[0] = hash6;
-                /* "4.0E0"+"7.0E0" -> "1.1E1" */
-                addr[6] = dfPlus(Lterm, PLOBJ(Rterm) == PI ? MPI : ME);
-                conc[1] = NULL;
-                conc[2] = NULL;
-                if(Rtail != NULL)
-                    {
-                    addr[4] = Rtail;
-                    conc[1] = "+\4";
-                    }
-                Pnode = vbuildup(top, conc);
-                wipe(addr[6]);
-                return Pnode;
-            default:
-                if(REAL_COMP(Rterm))
-                    {
-                    conc[0] = hash6;
-                    /* "4.0E0"+"7.0E0" -> "1.1E1" */
-                    addr[6] = fPlus(Lterm, Rterm);
-                    conc[1] = NULL;
-                    conc[2] = NULL;
-                    if(Rtail != NULL)
-                        {
-                        addr[4] = Rtail;
-                        conc[1] = "+\4";
-                        }
-                    Pnode = vbuildup(top, conc);
-                    wipe(addr[6]);
-                    }
-                return Pnode;
-            }
-        }
-    else
-#endif
-        if(RATIONAL_COMP(Lterm))
+    if(RATIONAL_COMP(Lterm))
         {
         if(RATIONAL_COMP(Rterm))
             {
@@ -985,46 +928,6 @@ psk substtimes(psk Pnode)
                     }
                 }
             }
-#ifdef REAL_COMP
-        else if(REAL_COMP(lkn) && rvar)
-            {
-            switch(PLOBJ(rkn))
-                {
-                case PI:
-                case XX:
-                    conc[0] = hash6;
-                    addr[6] = dfTimes(PLOBJ(rkn) == PI ? MPI : ME, lvar);
-                    if(rkn == Pnode->RIGHT)
-                        conc[1] = NULL; /*{?} -1*140/1000 => -7/50 */
-                    else
-                        {
-                        addr[1] = Pnode->RIGHT->RIGHT; /*{?} -1*1/4*e^(2*i*x) => -1/4*e^(2*i*x) */
-                        conc[1] = "*\1";
-                        }
-                    Pnode = vbuildup(Pnode, conc);
-                    wipe(addr[6]);
-                    return Pnode;
-                default:
-                    if(REAL_COMP(rkn))
-                        {
-                        if(rkn == lkn)
-                            lvar = (Pnode->LEFT = isolated(lkn)); /*{?} 1/10*1/10 => 1/100 */
-                        conc[0] = hash6;
-                        addr[6] = fTimes(rvar, lvar);
-                        if(rkn == Pnode->RIGHT)
-                            conc[1] = NULL; /*{?} -1*140/1000 => -7/50 */
-                        else
-                            {
-                            addr[1] = Pnode->RIGHT->RIGHT; /*{?} -1*1/4*e^(2*i*x) => -1/4*e^(2*i*x) */
-                            conc[1] = "*\1";
-                            }
-                        Pnode = vbuildup(Pnode, conc);
-                        wipe(addr[6]);
-                        return Pnode;
-                        }
-                }
-            }
-#endif
         }
 
     rlnode = Op(rkn) == EXP ? rkn->LEFT : rkn; /*{?} (f.e)*(y.s) => (f.e)*(y.s) */
@@ -1354,7 +1257,7 @@ psk merge
                 tmp = eval(tmp);
                 tmp = expand(tmp, &ok);
                 } while(ok);
-                Pnode->RIGHT = tmp;
+            Pnode->RIGHT = tmp;
 #else
             Pnode->RIGHT = eval(tmp);
 #endif

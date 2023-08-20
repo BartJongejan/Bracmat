@@ -16,9 +16,9 @@
 static LONG casesensitivehash(const char* cp)
     {
     LONG hash_temp = 0;
-    while (*cp != '\0')
+    while(*cp != '\0')
         {
-        if (hash_temp < 0)
+        if(hash_temp < 0)
             {
             hash_temp = (hash_temp << 1) + 1;
             }
@@ -36,9 +36,9 @@ static LONG caseinsensitivehash(const char* cp)
     {
     LONG hash_temp = 0;
     int isutf = 1;
-    while (*cp != '\0')
+    while(*cp != '\0')
         {
-        if (hash_temp < 0)
+        if(hash_temp < 0)
             {
             hash_temp = (hash_temp << 1) + 1;
             }
@@ -55,9 +55,9 @@ static LONG caseinsensitivehash(const char* cp)
 static LONG caseinsensitivehashDOS(const char* cp)
     {
     LONG hash_temp = 0;
-    while (*cp != '\0')
+    while(*cp != '\0')
         {
-        if (hash_temp < 0)
+        if(hash_temp < 0)
             hash_temp = (hash_temp << 1) + 1;
         else
             hash_temp = hash_temp << 1;
@@ -78,20 +78,20 @@ static psk removeFromHash(Hash* temp, psk Arg)
     assert(temp->hash_size);
     i = ((unsigned int)hash_temp) % temp->hash_size;
     pr = temp->hash_table + i;
-    if (*pr)
+    if(*pr)
         {
-        while (*pr)
+        while(*pr)
             {
-            if (Op((*pr)->entry) == WHITE)
+            if(Op((*pr)->entry) == WHITE)
                 {
-                if (!(*temp->cmpfunc)(key, (const char*)POBJ((*pr)->entry->LEFT->LEFT)))
+                if(!(*temp->cmpfunc)(key, (const char*)POBJ((*pr)->entry->LEFT->LEFT)))
                     break;
                 }
-            else if (!(*temp->cmpfunc)(key, (const char*)POBJ((*pr)->entry->LEFT)))
+            else if(!(*temp->cmpfunc)(key, (const char*)POBJ((*pr)->entry->LEFT)))
                 break;
             pr = &(*pr)->next;
             }
-        if (*pr)
+        if(*pr)
             {
             pskRecord* next = (*pr)->next;
             psk ret = (*pr)->entry;
@@ -114,28 +114,28 @@ static psk inserthash(Hash* temp, psk Arg)
     assert(temp->hash_size);
     i = ((unsigned int)hash_temp) % temp->hash_size;
     r = temp->hash_table[i];
-    if (!r)
+    if(!r)
         --temp->unoccupied;
     else
-        while (r)
+        while(r)
             {
-            if (Op(r->entry) == WHITE)
+            if(Op(r->entry) == WHITE)
                 {
-                if (!(*temp->cmpfunc)(key, (const char*)POBJ(r->entry->LEFT->LEFT)))
+                if(!(*temp->cmpfunc)(key, (const char*)POBJ(r->entry->LEFT->LEFT)))
                     {
                     break;
                     }
                 }
             else
                 {
-                if (!(*temp->cmpfunc)(key, (const char*)POBJ(r->entry->LEFT)))
+                if(!(*temp->cmpfunc)(key, (const char*)POBJ(r->entry->LEFT)))
                     {
                     break;
                     }
                 }
             r = r->next;
             }
-    if (r)
+    if(r)
         {
         psk goal = (psk)bmalloc(__LINE__, sizeof(knode));
         goal->v.fl = WHITE | SUCCESS;
@@ -166,20 +166,20 @@ static psk findhash(Hash* temp, psk Arg)
     assert(temp->hash_size);
     i = ((unsigned int)hash_temp) % temp->hash_size;
     r = temp->hash_table[i];
-    if (r)
+    if(r)
         {
-        while (r)
+        while(r)
             {
-            if (Op(r->entry) == WHITE)
+            if(Op(r->entry) == WHITE)
                 {
-                if (!(*temp->cmpfunc)(key, (const char*)POBJ(r->entry->LEFT->LEFT)))
+                if(!(*temp->cmpfunc)(key, (const char*)POBJ(r->entry->LEFT->LEFT)))
                     break;
                 }
-            else if (!(*temp->cmpfunc)(key, (const char*)POBJ(r->entry->LEFT)))
+            else if(!(*temp->cmpfunc)(key, (const char*)POBJ(r->entry->LEFT)))
                 break;
             r = r->next;
             }
-        if (r)
+        if(r)
             return r->entry;
         }
     return NULL;
@@ -187,16 +187,16 @@ static psk findhash(Hash* temp, psk Arg)
 
 static void freehash(Hash* temp)
     {
-    if (temp)
+    if(temp)
         {
-        if (temp->hash_table)
+        if(temp->hash_table)
             {
             ULONG i;
-            for (i = temp->hash_size; i > 0;)
+            for(i = temp->hash_size; i > 0;)
                 {
                 pskRecord* r = temp->hash_table[--i];
                 pskRecord* next;
-                while (r)
+                while(r)
                     {
                     wipe(r->entry);
                     next = r->next;
@@ -227,7 +227,7 @@ static Hash* newhash(ULONG size)
     temp->elements = 0L;     /* elements >= record_count */
     temp->record_count = 0L; /* record_count >= size - unoccupied */
     temp->unoccupied = size;
-    for (i = temp->hash_size; i > 0;)
+    for(i = temp->hash_size; i > 0;)
         temp->hash_table[--i] = NULL;
     return temp;
     }
@@ -246,17 +246,17 @@ static ULONG nextprime(ULONG g)
         { 1,  2,  2,  4,    2,    4,    2,    4,    6,    2,  6 };
     /*2-3,3-5,5-7,7-11,11-13,13-17,17-19,19-23,23-29,29-1,1-7*/
     ULONG bigdivisor;
-    if (!(g & 1))
+    if(!(g & 1))
         {
-        if (g <= 2)
+        if(g <= 2)
             return 2;
         ++g;
         }
     smalldivisor = 2;
     i = 0;
-    while ((bigdivisor = g / smalldivisor) >= smalldivisor)
+    while((bigdivisor = g / smalldivisor) >= smalldivisor)
         {
-        if (bigdivisor * smalldivisor == g)
+        if(bigdivisor * smalldivisor == g)
             {
             g += 2;
             smalldivisor = 2;
@@ -265,7 +265,7 @@ static ULONG nextprime(ULONG g)
         else
             {
             smalldivisor += bijt[i];
-            if (++i > 10)
+            if(++i > 10)
                 i = 3;
             }
         }
@@ -275,26 +275,26 @@ static ULONG nextprime(ULONG g)
 static void rehash(Hash** ptemp, int loadFactor/*1-100*/)
     {
     Hash* temp = *ptemp;
-    if (temp)
+    if(temp)
         {
         ULONG newsize;
         Hash* newtable;
         newsize = nextprime((100 * temp->record_count) / loadFactor);
-        if (!newsize)
+        if(!newsize)
             newsize = 1;
         newtable = newhash(newsize);
         newtable->cmpfunc = temp->cmpfunc;
         newtable->hashfunc = temp->hashfunc;
-        if (temp->hash_table)
+        if(temp->hash_table)
             {
             ULONG i;
-            for (i = temp->hash_size; i > 0;)
+            for(i = temp->hash_size; i > 0;)
                 {
                 pskRecord* r = temp->hash_table[--i];
-                while (r)
+                while(r)
                     {
                     psk Pnode = r->entry;
-                    while (is_op(Pnode) && Op(Pnode) == WHITE)
+                    while(is_op(Pnode) && Op(Pnode) == WHITE)
                         {
                         inserthash(newtable, Pnode->LEFT);
                         Pnode = Pnode->RIGHT;
@@ -312,7 +312,7 @@ static void rehash(Hash** ptemp, int loadFactor/*1-100*/)
 static int loadfactor(Hash* temp)
     {
     assert(temp->hash_size);
-    if (temp->record_count < 10000000L)
+    if(temp->record_count < 10000000L)
         return (int)((100 * temp->record_count) / temp->hash_size);
     else
         return (int)(temp->record_count / (temp->hash_size / 100));
@@ -321,11 +321,11 @@ static int loadfactor(Hash* temp)
 static Boolean hashinsert(struct typedObjectnode* This, ppsk arg)
     {
     psk Arg = (*arg)->RIGHT;
-    if (is_op(Arg) && !is_op(Arg->LEFT))
+    if(is_op(Arg) && !is_op(Arg->LEFT))
         {
         psk ret;
         int lf = loadfactor(HASH(This));
-        if (lf > 100)
+        if(lf > 100)
             rehash((Hash**)(&(This->voiddata)), 60);
         ret = inserthash(HASH(This), Arg);
         wipe(*arg);
@@ -338,10 +338,10 @@ static Boolean hashinsert(struct typedObjectnode* This, ppsk arg)
 static Boolean hashfind(struct typedObjectnode* This, ppsk arg)
     {
     psk Arg = (*arg)->RIGHT;
-    if (!is_op(Arg))
+    if(!is_op(Arg))
         {
         psk ret = findhash(HASH(This), Arg);
-        if (ret)
+        if(ret)
             {
             wipe(*arg);
             *arg = same_as_w(ret);
@@ -354,13 +354,13 @@ static Boolean hashfind(struct typedObjectnode* This, ppsk arg)
 static Boolean hashremove(struct typedObjectnode* This, ppsk arg)
     {
     psk Arg = (*arg)->RIGHT;
-    if (!is_op(Arg))
+    if(!is_op(Arg))
         {
         Hash* temp = HASH(This);
         psk ret = removeFromHash(temp, Arg);
-        if (ret)
+        if(ret)
             {
-            if (loadfactor(temp) < 50 && temp->hash_size > 97)
+            if(loadfactor(temp) < 50 && temp->hash_size > 97)
                 rehash(PHASH(This), 90);
             wipe(*arg);
             *arg = ret;
@@ -374,10 +374,10 @@ static Boolean hashnew(struct typedObjectnode* This, ppsk arg)
     {
     /*    UNREFERENCED_PARAMETER(arg);*/
     unsigned long Nprime = 97;
-    if (INTEGER_POS_COMP((*arg)->RIGHT))
+    if(INTEGER_POS_COMP((*arg)->RIGHT))
         {
         Nprime = strtoul((char*)POBJ((*arg)->RIGHT), NULL, 10);
-        if (Nprime == 0 || Nprime == ULONG_MAX)
+        if(Nprime == 0 || Nprime == ULONG_MAX)
             Nprime = 97;
         }
     This->voiddata = (void*)newhash(Nprime);
@@ -430,7 +430,7 @@ static Boolean hashforall(struct typedObjectnode* This, ppsk arg)
     ULONG i;
     int ret = TRUE;
     This = (typedObjectnode*)same_as_w((psk)This);
-    for (i = 0
+    for(i = 0
         ;    ret && HASH(This)
         && i < (HASH(This))->hash_size
         ;
@@ -438,7 +438,7 @@ static Boolean hashforall(struct typedObjectnode* This, ppsk arg)
         {
         pskRecord* r = (HASH(This))->hash_table[i];
         int j = 0;
-        while (r)
+        while(r)
             {
             int m;
             psk Pnode = NULL;
@@ -448,14 +448,14 @@ static Boolean hashforall(struct typedObjectnode* This, ppsk arg)
             Pnode = eval(Pnode);
             ret = isSUCCESSorFENCE(Pnode);
             wipe(Pnode);
-            if (!ret
-                || !HASH(This)
-                || i >= (HASH(This))->hash_size
-                || !(HASH(This))->hash_table[i]
-                )
+            if(!ret
+               || !HASH(This)
+               || i >= (HASH(This))->hash_size
+               || !(HASH(This))->hash_table[i]
+               )
                 break;
             ++j;
-            for (m = 0, r = (HASH(This))->hash_table[i]
+            for(m = 0, r = (HASH(This))->hash_table[i]
                 ; r && m < j
                 ; ++m
                 )
@@ -528,6 +528,21 @@ Examples:
   : (=?(h.))
 & (h..List)$
 & :?h
+);
+
+(   (
+    =   ( List
+        =
+          .   out$List
+            & lst$its
+            & lst$Its
+        )
+        (die=.out$"The end.")
+    )
+  : (=?(new$hash:?k))
+& (k..List)$
+& lst$k
+& :?k
 );
 
 */

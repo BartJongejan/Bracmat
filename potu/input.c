@@ -40,8 +40,7 @@ static unsigned char* startPos;
 static unsigned char* start;
 static unsigned char** pstart;
 
-static const char
-unbalanced[] = "unbalanced";
+static const char unbalanced[] = "unbalanced";
 
 static inputBuffer* InputElement; /* Points to member of InputArray */
 
@@ -712,11 +711,10 @@ psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrmtxt, Boolean* err, Boolean*
                            )
                             break;
                         }
-                    else
-                        if((ikar = *source++) == 0)
-                            {
-                            break;
-                            }
+                    else if((ikar = *source++) == 0)
+                        {
+                        break;
+                        }
                     if(ikar == 0) /* 20230309 We can just as well stop here.
                         Bracmat leafs are always treated as null terminated strings,
                         so anything after a null byte is ignored and would just occupy memory. */
@@ -735,8 +733,8 @@ psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrmtxt, Boolean* err, Boolean*
                             lput(' ' | 0x80);
                         else
                             lput(' ');
+                        }
                     }
-                }
                 *inputBufferPointer = 0;
                 Pnode = buildtree_w(Pnode);
                 if(err) *err = error;
@@ -746,7 +744,7 @@ psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrmtxt, Boolean* err, Boolean*
                 if(GoOn)
                     *GoOn = FALSE;
                 return Pnode;
-    }
+                }
     for(inputBufferPointer = input_buffer
         ;
 #if _BRACMATEMBEDDED
@@ -956,13 +954,13 @@ psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrmtxt, Boolean* err, Boolean*
                                         if(hasop)
                                             backslashesAreEscaped = TRUE;
                                         }
-                                        }
-                            }
-                        }
                                 }
                             }
                         }
                     }
+                }
+            }
+        }
     if((fpi == stdin) && (ikar == EOF))
         {
         stdinEOF = TRUE;
@@ -1061,7 +1059,9 @@ void stringEval(const char* s, const char** out, int* err)
     {
 #if _BRACMATEMBEDDED
     char* buf = (char*)malloc(strlen(s) + 11);
-    sprintf(buf, "put$(%s,MEM)", s);
+    if(buf)
+        {
+        sprintf(buf, "put$(%s,MEM)", s);
 #else
     char* buf = (char*)malloc(strlen(s) + 7);
     if(buf)
@@ -1091,7 +1091,7 @@ void stringEval(const char* s, const char** out, int* err)
 void init_opcode(void)
     {
     int tel;
-#if TELLING
+#if SHOWCURRENTLYALLOCATED
     initcnts();
 #endif
     for(tel = 0; tel < 256; tel++)

@@ -12,12 +12,12 @@ static int(*WinIn)(void) = NULL;
 static void(*WinOut)(int c) = NULL;
 static void(*WinFlush)(void) = NULL;
 #if defined PYTHONINTERFACE
-static void(*Ni)(const char *) = NULL;
-static const char * (*Nii)(const char *) = NULL;
+static void(*Ni)(const char*) = NULL;
+static const char* (*Nii)(const char*) = NULL;
 #endif
-int mygetc(FILE * fpi)
+int mygetc(FILE* fpi)
     {
-    if (WinIn && fpi == stdin)
+    if(WinIn && fpi == stdin)
         {
         return WinIn();
         }
@@ -28,7 +28,7 @@ int mygetc(FILE * fpi)
 
 void myputc(int c)
     {
-    if (WinOut && (global_fpo == stdout || global_fpo == stderr))
+    if(WinOut && (global_fpo == stdout || global_fpo == stderr))
         {
         WinOut(c);
         }
@@ -45,35 +45,35 @@ void myputc(int c)
 #endif
     }
 
-int mygetc(FILE * fpi)
+int mygetc(FILE* fpi)
     {
 #ifdef __SYMBIAN32__
-    if (fpi == stdin)
+    if(fpi == stdin)
         {
         static unsigned char inputbuffer[256] = { 0 };
-        static unsigned char * out = inputbuffer;
-        if (!*out)
+        static unsigned char* out = inputbuffer;
+        if(!*out)
             {
-            static unsigned char * in = inputbuffer;
+            static unsigned char* in = inputbuffer;
             static int kar;
-            while (in < inputbuffer + sizeof(inputbuffer) - 2
-                   && (kar = fgetc(fpi)) != '\n'
-                   )
+            while(in < inputbuffer + sizeof(inputbuffer) - 2
+                  && (kar = fgetc(fpi)) != '\n'
+                  )
                 {
-                switch (kar)
+                switch(kar)
                     {
-                        case '\r':
-                            break;
-                        case 8:
-                            if (in > inputbuffer)
-                                {
-                                --in;
-                                putchar(' ');
-                                putchar(8);
-                                }
-                            break;
-                        default:
-                            *in++ = kar;
+                    case '\r':
+                        break;
+                    case 8:
+                        if(in > inputbuffer)
+                            {
+                            --in;
+                            putchar(' ');
+                            putchar(8);
+                            }
+                        break;
+                    default:
+                        *in++ = kar;
                     }
                 }
             *in = kar;
@@ -89,24 +89,24 @@ int mygetc(FILE * fpi)
 
 void(*process)(int c) = myputc;
 
-void myprintf(char *strng, ...)
+void myprintf(const char* strng, ...)
     {
-    char *i, *j;
+    const char* i, * j;
     va_list ap;
     va_start(ap, strng);
     i = strng;
-    while (i)
+    while(i)
         {
-        for (j = i; *j; j++)
+        for(j = i; *j; j++)
             (*process)(*j);
-        i = va_arg(ap, char *);
+        i = va_arg(ap, char*);
         }
     va_end(ap);
     }
 
 
 #if _BRACMATEMBEDDED && !defined _MT
-static int Printf(const char *fmt, ...)
+static int Printf(const char* fmt, ...)
     {
     char buffer[1000];
     int ret;
@@ -121,27 +121,27 @@ static int Printf(const char *fmt, ...)
 #define Printf printf
 #endif
 
-int errorprintf(const char *fmt, ...)
+int errorprintf(const char* fmt, ...)
     {
     char buffer[1000];
     int ret;
-    FILE * save = global_fpo;
+    FILE* save = global_fpo;
     va_list ap;
     va_start(ap, fmt);
     ret = vsprintf(buffer, fmt, ap);
     global_fpo = errorStream;
 #if !defined NO_FOPEN
-    if (global_fpo == NULL && errorFileName != NULL)
+    if(global_fpo == NULL && errorFileName != NULL)
         global_fpo = fopen(errorFileName, APPENDTXT);
 #endif
     /*#endif*/
-    if (global_fpo)
+    if(global_fpo)
         myprintf(buffer, NULL);
     else
         ret = 0;
     /*#if !_BRACMATEMBEDDED*/
 #if !defined NO_FOPEN
-    if (errorStream == NULL && global_fpo != NULL)
+    if(errorStream == NULL && global_fpo != NULL)
         fclose(global_fpo);
 #endif
     /*#endif*/
@@ -150,12 +150,12 @@ int errorprintf(const char *fmt, ...)
     return ret;
     }
 
-int lineTooLong(unsigned char *strng)
+int lineTooLong(unsigned char* strng)
     {
-    if (hum
-        && strlen((const char *)strng) > 10 /*LineLength*/
-        /* very short strings are allowed to keep \n and \t */
-        )
+    if(hum
+       && strlen((const char*)strng) > 10 /*LineLength*/
+       /* very short strings are allowed to keep \n and \t */
+       )
         return TRUE;
     return FALSE;
     }

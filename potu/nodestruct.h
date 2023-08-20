@@ -90,7 +90,7 @@ typedef struct sk
         {
         struct
             {
-            struct sk *left, *right;
+            struct sk* left, * right;
             } p;
         LONG lobj; /* This part of the structure can be used for comparisons
                       with short strings that fit into one word in one machine
@@ -100,8 +100,8 @@ typedef struct sk
         } u;
     } sk;
 
-typedef  sk * psk;
-typedef psk * ppsk;
+typedef  sk* psk;
+typedef psk* ppsk;
 
 typedef struct knode
     {
@@ -114,7 +114,7 @@ typedef struct stringrefnode
     {
     tFlags v;
     psk pnode;
-    char * str;
+    char* str;
     size_t length;
     } stringrefnode;
 

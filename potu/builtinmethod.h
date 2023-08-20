@@ -3,7 +3,7 @@
 #include "nodestruct.h"
 #include "typedobjectnode.h"
 
-method_pnt findBuiltInMethodByName(typedObjectnode * object, const char * name);
-method_pnt findBuiltInMethod(typedObjectnode * object, psk methodName);
+method_pnt findBuiltInMethodByName(typedObjectnode* object, const char* name);
+method_pnt findBuiltInMethod(typedObjectnode* object, psk methodName);
 
 #endif

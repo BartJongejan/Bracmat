@@ -18,7 +18,6 @@
 #include "result.h"
 #include <string.h>
 
-/*MOVETO evaluate.c*/
 #if MAXSTACK
 static int maxstack = 0;
 static int theStack = 0;

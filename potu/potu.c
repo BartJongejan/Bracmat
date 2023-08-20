@@ -68,7 +68,48 @@ Test coverage:
     gcov json.c
 
 */
+/* How to compile
+   (with a ANSI-C compiler or newer)
 
+Archimedes ANSI-C release 3:
+*up
+*del. :0.$.c.clog
+*spool :0.$.c.clog
+*cc bracmat
+*spool
+
+With RISC_OS functions:
+
+cc bracmat
+
+file cc (in directory c):
+
+| >cc
+up
+delete $.c.clog
+spool $.c.clog
+cc -c %0 -IRAM:$.RISC_OSLib
+if Sys$ReturnCode = 0 then run c.li %0 else spool
+
+file li (in directory c):
+
+| >li
+link -o %0 o.%0 RAM:$.RISC_OSLib.o.RISC_OSLib RAM:$.Clib.o.Stubs
+||G
+spool
+if Sys$ReturnCode = 0 then squeeze %0 else echo |G
+
+Microsoft QUICKC (MS-DOS) (compact and large model both possible)
+qcl /Ox /AC /F D000 bracmat.c
+Microsoft optimizing compiler V5.1
+cl /Ox /AC /F D000 bracmat.c
+
+Borland TURBOC (MS-DOS) V2.0
+tcc -w -f- -r- -mc -K- bracmat
+
+Atari : define -DATARI because of BIGENDIAN and extern int _stksize = -1;
+               and -DW32   but only if (int)==(long)
+*/
 /*
 NOTES
 =====
@@ -123,6 +164,30 @@ TODO list:
    20010821 a () () was evaluated to a (). Removed last ().
    20010903 (a.) () was evaluated to a
 */
+/*
+About reference counting.
+Most nodes can be shared by no more than 1024 referers. Copies must be made as needed.
+Objects (nodes with = ('EQUALS') are objects and can be shared by almost 2^40 referers.
+
+small refcounter       large refcounter              comment
+(9 bits, all nodes)   (30 bits, only objects)
+0                      0                             not shared, no test of large refcounter needed.
+1                      0                             shared with one, so totalling two
+2                      0                             shared with two
+..                     ..
+1022                   0
+1023                   0                             totalling 1024, *** max for normal nodes ***
+1                      1                             totalling 1025
+2                      1
+..                     ..
+m                      1
+..                     ..                            totalling 1024+(1-1)*1023+m
+1023                   1                             totalling 1024+1*1023
+..                     ..
+m                      n                             totalling 1024+(n-1)*1023+m or 1+n*1023+m
+1023                   2^30-1                        totalling 1024+(2^30-2)*1023+1023=1 098 437 885 953
+                                                         (or   1+2^30*1023)
+*/
 #include "defines01.h"
 #include "platformdependentdefs.h"
 #include "flags.h"
@@ -138,6 +203,7 @@ TODO list:
 #include "charput.h"
 
 #if defined SINGLEOBJECT
+#define NODESTRUCT_H
 #define UNICASECONV_H
 #define UNICHARTYPES_H
 #define GLOBALS_H                  
@@ -198,9 +264,6 @@ TODO list:
 #include "input.c"
 #include "wipecopy.c"
 #include "rational.c"
-#ifdef REAL_COMP
-#include "real.c"
-#endif
 #include "equal.c"
 #include "object.c"
 #include "nodeutil.c"
@@ -239,9 +302,6 @@ TODO list:
 #include "input.h"
 #include "wipecopy.h"
 #include "rational.h"
-#ifdef REAL_COMP
-#include "real.h"
-#endif
 #include "encoding.h"
 #include "equal.h"
 #include "object.h"
@@ -266,90 +326,20 @@ TODO list:
 #include "evaluate.h"
 #endif
 
-/*
-About reference counting.
-Most nodes can be shared by no more than 1024 referers. Copies must be made as needed.
-Objects (nodes with = ('EQUALS') are objects and can be shared by almost 2^40 referers.
-
-small refcounter       large refcounter              comment
-(9 bits, all nodes)   (30 bits, only objects)
-0                      0                             not shared, no test of large refcounter needed.
-1                      0                             shared with one, so totalling two
-2                      0                             shared with two
-..                     ..
-1022                   0
-1023                   0                             totalling 1024, *** max for normal nodes ***
-1                      1                             totalling 1025
-2                      1
-..                     ..
-m                      1
-..                     ..                            totalling 1024+(1-1)*1023+m
-1023                   1                             totalling 1024+1*1023
-..                     ..
-m                      n                             totalling 1024+(n-1)*1023+m or 1+n*1023+m
-1023                   2^30-1                        totalling 1024+(2^30-2)*1023+1023=1 098 437 885 953
-                                                         (or   1+2^30*1023)
-*/
 
 #include <assert.h>
 
-/*#define ARM */ /* assume it isn't an Acorn */
-
-
-/* How to compile
-   (with a ANSI-C compiler or newer)
-
-Archimedes ANSI-C release 3:
-*up
-*del. :0.$.c.clog
-*spool :0.$.c.clog
-*cc bracmat
-*spool
-
-With RISC_OS functions:
-
-cc bracmat
-
-file cc (in directory c):
-
-| >cc
-up
-delete $.c.clog
-spool $.c.clog
-cc -c %0 -IRAM:$.RISC_OSLib
-if Sys$ReturnCode = 0 then run c.li %0 else spool
-
-file li (in directory c):
-
-| >li
-link -o %0 o.%0 RAM:$.RISC_OSLib.o.RISC_OSLib RAM:$.Clib.o.Stubs
-||G
-spool
-if Sys$ReturnCode = 0 then squeeze %0 else echo |G
-
-Microsoft QUICKC (MS-DOS) (compact and large model both possible)
-qcl /Ox /AC /F D000 bracmat.c
-Microsoft optimizing compiler V5.1
-cl /Ox /AC /F D000 bracmat.c
-
-Borland TURBOC (MS-DOS) V2.0
-tcc -w -f- -r- -mc -K- bracmat
-
-Atari : define -DATARI because of BIGENDIAN and extern int _stksize = -1;
-               and -DW32   but only if (int)==(long)
-*/
-
-#if TELLING
-#if TELMAX == 0
-#undef TELMAX
-#define TELMAX 1
+#if SHOWCURRENTLYALLOCATED
+#if SHOWMAXALLOCATED == 0
+#undef SHOWMAXALLOCATED
+#define SHOWMAXALLOCATED 1
 #endif
-#ifndef TELMAX
-#define TELMAX 1
+#ifndef SHOWMAXALLOCATED
+#define SHOWMAXALLOCATED 1
 #endif
 #endif
 
-                       /*#define reslt parenthesised_result */ /* to show ALL parentheses (one pair for each operator)*/
+/*#define reslt parenthesised_result */ /* to show ALL parentheses (one pair for each operator)*/
 
 #define LOGWORDLENGTH 2
 
@@ -468,42 +458,42 @@ static void printMatchState(const char* msg, matchstate s, int pos, int len)
     Printf("\n%s pos %d len %d once %d", msg, pos, len, s.b.bonce);
     Printf("\n     t o p m f i");
     Printf("\n lmr %d %d %d %d %d %d",
-        s.b.blmr_true, s.b.blmr_once, s.b.blmr_position_once, s.b.blmr_position_max_reached, s.b.blmr_fence, s.b.blmr_pristine);
+           s.b.blmr_true, s.b.blmr_once, s.b.blmr_position_once, s.b.blmr_position_max_reached, s.b.blmr_fence, s.b.blmr_pristine);
     Printf("\n rmr %d %d %d %d %d %d\n",
-        s.b.brmr_true, s.b.brmr_once, s.b.brmr_position_once, s.b.brmr_position_max_reached, s.b.brmr_fence, s.b.brmr_pristine);
+           s.b.brmr_true, s.b.brmr_once, s.b.brmr_position_once, s.b.brmr_position_max_reached, s.b.brmr_fence, s.b.brmr_pristine);
     }
 #endif
 #endif
 
 
 static const char
-    fct[] = "(fct=f G T P C V I B W H J O.(T=m Z a p r R Q.!arg:(?m.?Z)&0:?R:?Q&"
-    "whl'(!Z:?a+?p*!m*?r+?Z&!R+!a:?R&!Q+!p*!r:?Q)&(!Q.!R+!Z))&(P=M E.!arg:(?M.?E)&"
-    "whl'(!E:?*(!M|!M^((#%:~<1)+?))*?+?E)&!E:0)&(G=f e r a.!arg:(?e.?f)&0:?r&whl'("
-    "!e:%?a+?e&!a*!f:?a&!a+!r:?r)&!r)&(C=f r A Z M.!arg:%+%:(?+?*(?M^((#<%0:?f)+?r"
-    ")&!M^!f:?M)*?+?|?+?*(?M^(#>%1+?)&P$(!M.!arg))*?+?|%?f+?r&!f:?A*~#%?`M*(?Z&P$("
-    "!M.!r)))&!M*C$(G$(!arg.!M^-1))|!arg)&(W=n A Z M s.C$!arg:?arg:?A*((~-1:#%?n)*"
-    "?+?:?M)*?Z&(!n:<0&-1|1):?s&!s*!n*!A*(1+!s*!n^-1*!M+-1)*!Z|!arg)&(V=n A Z M.C$"
-    "!arg:?arg:?A*(#%?n*?+?:?M)*?Z&!n*!A*(1+!n^-1*!M+-1)*!Z|!arg)&(I=f v l r.!arg:"
-    "(?f.?v)&!v:?l_?r&I$(!f.!l)&I$(!f.!r)|!v:#|!v\017!f:0)&(O=a f e.!arg:?a*?f^(%*"
-    "%:?e)*?arg&!a*!f^J$(1+!e+-1)*O$!arg|!arg)&(J=t.!arg:%?t+%?arg&O$!t+(!arg:%+%&"
-    "J|O)$!arg|!arg)&(f=L R A Z a m z S Q r q t F h N D.(D=R Q S t x r X ax zx M."
-    "!arg:(?R.?Q)&!Q:?+%`(?*(~#%?`M&T$(!M.!Q):(?x.?r)&I$(!r.!M))*?)+?&N$!x:?x&sub$"
-    "(!R.!M.(VAR+-1*!r)*!x^-1):?S&(!x:?ax*(%+%:?X)*?zx&T$(!X^-1.!S):(?t.?S)&1+!ax*"
-    "!zx*(!S*!X+!t)+-1:?S|1:?x)&T$(VAR.!S):(?t.0)&N$!t*!x^-1)&!arg:(?arg.(=?N))&N$"
-    "!arg:?arg&(!arg:%?L*%?R&f$(!L.'$N)*f$(!R.'$N)|!arg:%?L^%?R&f$(!L.!R:~/#&'$V|'"
-    "$W)^J$(1+!R+-1)|J$!arg:?arg:#?+~#%?A+%?Z&!A:?a*~#%?`m*?z&T$(!m.!Z):(~0:?Q.?)&"
-    "!a*!z+!Q:?t:?r&!arg:?S&1:?Q&1:?F&whl'(!r:%?q*?r&N$!q:?h*(%+%:?q)&D$(!S.!q):?S"
-    "&!h*!F:?F&!Q*!q:?Q)&!Q+-1*!F^-1*!t:0&f$(!Q.'$N)*f$(!S.'$N)|!arg))&(B=A E M Z "
-    "a b e m n y z.!arg:?A*%?`M^?E*(?Z&!A*!Z:?a*%?`m^?e*(?z&!a*!z:?b*?n^!e*?y&!M+"
-    "!m:0))&B$(!b*(1+-1*!n+-1)^!e*!y*!M^(!E+!e))|!arg)&(H=A Z a b e z w x n m o."
-    "!arg:?A*(%?b+%?z:?m)*(?Z&!b:?*?a^%?e*(?&!z:?w&whl'(!w:?*!a^?*?+?w)&!w:0&!e:?+"
-    "#?n*(~#%@*?:?x)+(?&!z:?w&whl'(!w:?*!a^(?+#?o*(!x&(!o:<!n:?n|))+?)*?+?w)&!w:0)"
-    "))&fct$(!A*!a^(!n*!x)*(1+!a^(-1*!n*!x)*!m+-1)*!Z)|!arg)&H$(B$(f$(!arg.'$V))))";
+fct[] = "(fct=f G T P C V I B W H J O.(T=m Z a p r R Q.!arg:(?m.?Z)&0:?R:?Q&"
+"whl'(!Z:?a+?p*!m*?r+?Z&!R+!a:?R&!Q+!p*!r:?Q)&(!Q.!R+!Z))&(P=M E.!arg:(?M.?E)&"
+"whl'(!E:?*(!M|!M^((#%:~<1)+?))*?+?E)&!E:0)&(G=f e r a.!arg:(?e.?f)&0:?r&whl'("
+"!e:%?a+?e&!a*!f:?a&!a+!r:?r)&!r)&(C=f r A Z M.!arg:%+%:(?+?*(?M^((#<%0:?f)+?r"
+")&!M^!f:?M)*?+?|?+?*(?M^(#>%1+?)&P$(!M.!arg))*?+?|%?f+?r&!f:?A*~#%?`M*(?Z&P$("
+"!M.!r)))&!M*C$(G$(!arg.!M^-1))|!arg)&(W=n A Z M s.C$!arg:?arg:?A*((~-1:#%?n)*"
+"?+?:?M)*?Z&(!n:<0&-1|1):?s&!s*!n*!A*(1+!s*!n^-1*!M+-1)*!Z|!arg)&(V=n A Z M.C$"
+"!arg:?arg:?A*(#%?n*?+?:?M)*?Z&!n*!A*(1+!n^-1*!M+-1)*!Z|!arg)&(I=f v l r.!arg:"
+"(?f.?v)&!v:?l_?r&I$(!f.!l)&I$(!f.!r)|!v:#|!v\017!f:0)&(O=a f e.!arg:?a*?f^(%*"
+"%:?e)*?arg&!a*!f^J$(1+!e+-1)*O$!arg|!arg)&(J=t.!arg:%?t+%?arg&O$!t+(!arg:%+%&"
+"J|O)$!arg|!arg)&(f=L R A Z a m z S Q r q t F h N D.(D=R Q S t x r X ax zx M."
+"!arg:(?R.?Q)&!Q:?+%`(?*(~#%?`M&T$(!M.!Q):(?x.?r)&I$(!r.!M))*?)+?&N$!x:?x&sub$"
+"(!R.!M.(VAR+-1*!r)*!x^-1):?S&(!x:?ax*(%+%:?X)*?zx&T$(!X^-1.!S):(?t.?S)&1+!ax*"
+"!zx*(!S*!X+!t)+-1:?S|1:?x)&T$(VAR.!S):(?t.0)&N$!t*!x^-1)&!arg:(?arg.(=?N))&N$"
+"!arg:?arg&(!arg:%?L*%?R&f$(!L.'$N)*f$(!R.'$N)|!arg:%?L^%?R&f$(!L.!R:~/#&'$V|'"
+"$W)^J$(1+!R+-1)|J$!arg:?arg:#?+~#%?A+%?Z&!A:?a*~#%?`m*?z&T$(!m.!Z):(~0:?Q.?)&"
+"!a*!z+!Q:?t:?r&!arg:?S&1:?Q&1:?F&whl'(!r:%?q*?r&N$!q:?h*(%+%:?q)&D$(!S.!q):?S"
+"&!h*!F:?F&!Q*!q:?Q)&!Q+-1*!F^-1*!t:0&f$(!Q.'$N)*f$(!S.'$N)|!arg))&(B=A E M Z "
+"a b e m n y z.!arg:?A*%?`M^?E*(?Z&!A*!Z:?a*%?`m^?e*(?z&!a*!z:?b*?n^!e*?y&!M+"
+"!m:0))&B$(!b*(1+-1*!n+-1)^!e*!y*!M^(!E+!e))|!arg)&(H=A Z a b e z w x n m o."
+"!arg:?A*(%?b+%?z:?m)*(?Z&!b:?*?a^%?e*(?&!z:?w&whl'(!w:?*!a^?*?+?w)&!w:0&!e:?+"
+"#?n*(~#%@*?:?x)+(?&!z:?w&whl'(!w:?*!a^(?+#?o*(!x&(!o:<!n:?n|))+?)*?+?w)&!w:0)"
+"))&fct$(!A*!a^(!n*!x)*(1+!a^(-1*!n*!x)*!m+-1)*!Z)|!arg)&H$(B$(f$(!arg.'$V))))";
 
 int startProc(
 #if _BRACMATEMBEDDED
-    startStruct * init
+    startStruct* init
 #else
     void
 #endif
@@ -511,40 +501,40 @@ int startProc(
     {
     int err; /* evaluation of version string */
     static int called = 0;
-    if (called)
+    if(called)
         {
         return 2;
         }
     called = 1;
 #if _BRACMATEMBEDDED
-    if (init)
+    if(init)
         {
-        if (init->WinIn)
+        if(init->WinIn)
             {
             WinIn = init->WinIn;
             }
-        if (init->WinOut)
+        if(init->WinOut)
             {
             WinOut = init->WinOut;
             }
-        if (init->WinFlush)
+        if(init->WinFlush)
             {
             WinFlush = init->WinFlush;
             }
 #if defined PYTHONINTERFACE
-        if (init->Ni)
+        if(init->Ni)
             {
             Ni = init->Ni;
             }
-        if (init->Nii)
+        if(init->Nii)
             {
             Nii = init->Nii;
-    }
+            }
 #endif
         }
 #endif
     initVariables();
-    if (!init_memoryspace())
+    if(!init_memoryspace())
         return 0;
     init_opcode();
     global_anchor = NULL;
@@ -775,7 +765,7 @@ int startProc(
 
 
 #if JMP
-    if (setjmp(jumper) != 0)
+    if(setjmp(jumper) != 0)
         return;
 #endif
     global_anchor = eval(global_anchor);
@@ -787,11 +777,11 @@ void endProc(void)
     {
     int err;
     static int called = 0;
-    if (called)
+    if(called)
         return;
     called = 1;
     stringEval("cat$:? CloseDown ? & CloseDown$ | ", NULL, &err);
-    if (err)
+    if(err)
         errorprintf("Error executing CloseDown\n");
     }
 
@@ -804,12 +794,12 @@ void endProc(void)
 #include <stddef.h>
 
 #if defined __EMSCRIPTEN__
-int oneShot(char * inp)
+int oneShot(char* inp)
     {
     int err;
-    char * mainLoopExpression;
-    const char * ret;
-    char * argv[1] = { NULL };
+    char* mainLoopExpression;
+    const char* ret;
+    char* argv[1] = { NULL };
     argv[0] = inp;
     ARGV = argv;
     ARGC = 1;
@@ -819,19 +809,19 @@ int oneShot(char * inp)
     }
 #endif
 
-int mainLoop(int argc, char *argv[])
+int mainLoop(int argc, char* argv[])
     {
     int err;
-    char * mainLoopExpression;
-    const char * ret = 0;
+    char* mainLoopExpression;
+    const char* ret = 0;
 #if defined __EMSCRIPTEN__
-    if (argc == 2)
+    if(argc == 2)
         { /* to get here, e.g.: ./bracmat out$hello */
         return oneShot(argv[1]);
         }
     else
 #endif
-        if (argc > 1)
+        if(argc > 1)
             { /* to get here, e.g.: ./bracmat "you:?a" "out$(hello !a)" */
             ARGC = argc;
             ARGV = argv;
@@ -874,7 +864,7 @@ int mainLoop(int argc, char *argv[])
 
 
 
-#if TELMAX
+#if SHOWMAXALLOCATED
 
                 "out$str$(\"  \" bez')&"
 #else
@@ -892,16 +882,16 @@ int main()
     {
     int ret = 0;
     errorStream = stderr;
-    if (!startProc())
+    if(!startProc())
         return -1;
     return ret;
     }
 #else
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
     {
     int ret; /* numerical result of mainLoop becomes exit code.
              If out of integer range or not numerical: 0*/
-    char * p = argv[0] + strlen(argv[0]);
+    char* p = argv[0] + strlen(argv[0]);
 #if 0
     char s1[] = { 160,0 };
     char s2[] = { 32,0 };
@@ -910,7 +900,7 @@ int main(int argc, char *argv[])
 #else /* 32 bit and gcc 64 bit */
     printf("!_WIN64\n");
 #endif
-    printf("sizeof(char *) " LONGU "\n", (ULONG)sizeof(char *));
+    printf("sizeof(char *) " LONGU "\n", (ULONG)sizeof(char*));
     printf("sizeof(LONG) " LONGU "\n", (ULONG)sizeof(LONG));
     printf("sizeof(ULONG) " LONGU "\n", (ULONG)sizeof(ULONG));
     printf("sizeof(size_t) " LONGU "\n", (ULONG)sizeof(size_t));
@@ -928,24 +918,24 @@ int main(int argc, char *argv[])
     {
     LONG radix, ten_log_radix;
 #if defined _WIN64
-    assert(HEADROOM*RADIX2 < LLONG_MAX);
+    assert(HEADROOM * RADIX2 < LLONG_MAX);
 #else
-    assert(HEADROOM*RADIX2 < LONG_MAX);
+    assert(HEADROOM * RADIX2 < LONG_MAX);
 #endif
-    for (radix = 1, ten_log_radix = 1; ten_log_radix <= TEN_LOG_RADIX; radix *= 10, ++ten_log_radix)
+    for(radix = 1, ten_log_radix = 1; ten_log_radix <= TEN_LOG_RADIX; radix *= 10, ++ten_log_radix)
         ;
     assert(RADIX == radix);
     }
 #endif
     assert(sizeof(tFlags) == sizeof(ULONG));
 #if !defined __EMSCRIPTEN__
-    while (--p >= argv[0])
-        if (*p == '\\' || *p == '/')
+    while(--p >= argv[0])
+        if(*p == '\\' || *p == '/')
             {
             ++p;
 #if !defined NO_FOPEN
-            targetPath = (char *)malloc(p - argv[0] + 1);
-            if (targetPath)
+            targetPath = (char*)malloc(p - argv[0] + 1);
+            if(targetPath)
                 {
                 strncpy(targetPath, argv[0], p - argv[0]);
                 targetPath[p - argv[0]] = '\0';
@@ -956,12 +946,12 @@ int main(int argc, char *argv[])
 #endif
 
     errorStream = stderr;
-    if (!startProc())
+    if(!startProc())
         return -1;
     ret = mainLoop(argc, argv);
     endProc();/* to get here, eg: {?} main=out$bye! */
 #if !defined NO_FOPEN
-    if (targetPath)
+    if(targetPath)
         free(targetPath);
 #endif
     return ret;

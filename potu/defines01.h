@@ -43,8 +43,8 @@ little bit slower, not faster.
 
 /* Optional #defines for debugging and adaptation to machine */
 
-#define TELMAX  1 /* Show the maximum number of allocated nodes. */
-#define TELLING 0 /* Same, plus current number of allocated nodes, in groups of
+#define SHOWMAXALLOCATED  1 /* Show the maximum number of allocated nodes. */
+#define SHOWCURRENTLYALLOCATED 0 /* Same, plus current number of allocated nodes, in groups of
                        4,8,12 and >12 bytes */
 
 #define EXPAND 0

@@ -163,6 +163,8 @@ typedef   signed long  INT32_T;
 extern int _stksize = -1;
 #endif
 
+/*#define ARM */ /* assume it isn't an Acorn */
+
 #if (defined __TURBOC__ && !defined __WIN32__) || (defined ARM && !defined __SYMBIAN32__)
 #define O_S 1 /* 1 = with operating system interface swi$ (RISC_OS or TURBO-C), 0 = without  */
 #else
@@ -248,7 +250,7 @@ typedef struct
 #define STRCMP(a,b) strcmp((char *)(a),(char *)(b))
 #endif
 
-#if TELMAX
+#if SHOWMAXALLOCATED
 #define BEZ O('b','e','z')
 #endif
 

@@ -13,8 +13,8 @@ int cmp(psk kn1, psk kn2);
 int compare(psk s, psk p);
 int scompare(char* s, char* cutoff, psk p
 #if CUTOFFSUGGEST
-    , char** suggestedCutOff
-    , char** mayMoveStartOfSubject
+             , char** suggestedCutOff
+             , char** mayMoveStartOfSubject
 #endif
 );
 

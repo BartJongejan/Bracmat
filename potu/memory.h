@@ -14,13 +14,12 @@
 int init_memoryspace(void);
 
 void * bmalloc(int lineno, size_t n);
-/*void wipe(psk top);*/
 void dec_refcount(psk pnode);
 void bfree(void *p);
 void pskfree(psk p);
 int all_refcount_bits_set(psk pnode);
-#if TELMAX
-#if TELLING
+#if SHOWMAXALLOCATED
+#if SHOWCURRENTLYALLOCATED
 void bezetting(void);
 #endif
 void Bez(char draft[22]);

@@ -26,20 +26,20 @@
 
 typedef struct varia
     {
-    struct varia *prev; /* variableValue[-1] */
+    struct varia* prev; /* variableValue[-1] */
     psk variableValue[1];       /* variableValue[0], arraysize is adjusted by psh */
     } varia;
 
 typedef struct vars /* sizeof(vars) = n * 4 bytes */
     {
 #if PVNAME
-    unsigned char *vname;
+    unsigned char* vname;
 #define VARNAME(x) x->vname
 #endif
-    struct vars *next;
+    struct vars* next;
     int n;
     int selector;
-    varia *pvaria; /* Can also contain entry[0]   (if n == 0) */
+    varia* pvaria; /* Can also contain entry[0]   (if n == 0) */
 #if !PVNAME
     union
         {
@@ -50,19 +50,19 @@ typedef struct vars /* sizeof(vars) = n * 4 bytes */
 #endif
     } vars;
 
-static vars * variables[256];
+static vars* variables[256];
 
 static int searchname(psk name,
-                      vars **pprevvar,
-                      vars **pnxtvar)
+                      vars** pprevvar,
+                      vars** pnxtvar)
     {
-    unsigned char *strng;
-    vars *nxtvar, *prevvar;
+    unsigned char* strng;
+    vars* nxtvar, * prevvar;
     strng = POBJ(name);
-    for (prevvar = NULL, nxtvar = variables[*strng]
-         ;  nxtvar && (STRCMP(VARNAME(nxtvar), strng) < 0)
-         ; prevvar = nxtvar, nxtvar = nxtvar->next
-         )
+    for(prevvar = NULL, nxtvar = variables[*strng]
+        ;  nxtvar && (STRCMP(VARNAME(nxtvar), strng) < 0)
+        ; prevvar = nxtvar, nxtvar = nxtvar->next
+        )
         ;
     /* prevvar < strng <= nxtvar */
     *pprevvar = prevvar;
@@ -75,20 +75,20 @@ name must be atom or <atom>.<atom>.<atom>...
 */
 static int setmember(psk name, psk tree, psk newValue)
     {
-    while (is_op(tree))
+    while(is_op(tree))
         {
-        if (Op(tree) == EQUALS)
+        if(Op(tree) == EQUALS)
             {
             psk nname;
-            if (Op(name) == DOT)
+            if(Op(name) == DOT)
                 nname = name->LEFT;
             else
                 nname = name;
-            if (equal(tree->LEFT, nname))
+            if(equal(tree->LEFT, nname))
                 {
                 return FALSE;
                 }
-            else if (nname == name)
+            else if(nname == name)
                 {
                 wipe(tree->RIGHT);
                 tree->RIGHT = same_as_w(newValue);
@@ -100,7 +100,7 @@ static int setmember(psk name, psk tree, psk newValue)
                 name = name->RIGHT;
                 }
             }
-        else if (setmember(name, tree->LEFT, newValue))
+        else if(setmember(name, tree->LEFT, newValue))
             {
             return TRUE;
             }
@@ -109,54 +109,104 @@ static int setmember(psk name, psk tree, psk newValue)
     return FALSE;
     }
 
-static int power2(int n)
+static int ilog2(int n)
 /* returns MSB of n */
     {
     int m;
-    for (m = 1
-         ; n
-         ; n >>= 1, m <<= 1
-         )
+    for(m = 1
+        ; n
+        ; n >>= 1, m <<= 1
+        )
         ;
     return m >> 1;
     }
 
-static ppsk Entry(int n, int index, varia **pv)
+/* Given the number of layers of a stack, an index and a pointer to the stack,
+   return the entry pointed at by the index.
+   Each level is twice the size of the level below it.
+   The lowest level has size 2.
+   The  role of the level with size 1 is played by the pointer to the stack.
+   The caller can mutate the returned entry.*/
+static ppsk Entry(int n, int index, varia** pv)
     {
-    if (n == 0)
+    if(n == 0)
         {
         return (ppsk)pv;  /* no varia records are needed for 1 entry */
         }
     else
         {
-        varia *hv;
-        int MSB = power2(n);
-        for (hv = *pv /* begin with longest varia record */
-             ; MSB > 1 && index < MSB
-             ; MSB >>= 1
-             )
+#if defined POWER2
+        varia* hv;
+        int MSB = ilog2(n);
+        for(hv = *pv /* begin with longest varia record */
+            ; MSB > 1 && index < MSB
+            ; MSB >>= 1
+            )
             hv = hv->prev;
         index -= MSB;   /* if index == 0, then index becomes -1 */
+#else
+        /* This code does not make Bracmat noticeably faster*/
+        int MSB;
+        varia* hv = *pv;
+        for(MSB = 1; MSB <= index; MSB <<= 1)
+            ;
+
+        if(MSB > 1)
+            index %= (MSB >> 1);
+        else
+            {
+            index = -1;
+            MSB <<= 1;
+            }
+
+        for(; MSB <= n; MSB <<= 1)
+            hv = hv->prev;
+#endif
         return &hv->variableValue[index];  /* variableValue[-1] == (psk)*prev */
         }
     }
 
-static psk Entry2(int n, int index, varia * pv)
+/* Given the number of layers of a stack, an index and a pointer to the stack,
+   return the entry pointed at by the index.
+   Each level is twice the size of the level below it.
+   The lowest level has size 2.
+   The  role of the level with size 1 is played by the pointer to the stack.
+   The caller cannot mutate the returned entry.*/
+static psk Entry2(int n, int index, varia* pv)
     {
-    if (n == 0)
+    if(n == 0)
         {
         return (psk)pv;  /* no varia records needed for 1 entry */
         }
     else
         {
-        varia *hv;
-        int MSB = power2(n);
-        for (hv = pv /* begin with longest varia record */
-             ; MSB > 1 && index < MSB
-             ; MSB >>= 1
-             )
+        varia* hv;
+#if defined POWER2
+        int MSB = ilog2(n);
+        for(hv = pv /* begin with longest varia record */
+            ; MSB > 1 && index < MSB
+            ; MSB >>= 1
+            )
             hv = hv->prev;
         index -= MSB;   /* if index == 0, then index becomes -1 */
+#else
+        /* This code does not make Bracmat noticeably faster*/
+        int MSB;
+        hv = pv;
+        for(MSB = 1; MSB <= index; MSB <<= 1)
+            ;
+
+        if(MSB > 1)
+            index %= (MSB >> 1);
+        else
+            {
+            index = -1;
+            MSB <<= 1;
+            }
+
+        for(; MSB <= n; MSB <<= 1)
+            hv = hv->prev;
+#endif
         return hv->variableValue[index];  /* variableValue[-1] == (psk)*prev */
         }
     }
@@ -167,11 +217,11 @@ int update(psk name, psk pnode) /* name = tree with DOT in root */
     x:?((=(a=) (b=)).b)
 */
     {
-    vars * nxtvar;
-    vars * prevvar;
-    if (is_op(name->LEFT))
+    vars* nxtvar;
+    vars* prevvar;
+    if(is_op(name->LEFT))
         {
-        if (Op(name->LEFT) == EQUALS)
+        if(Op(name->LEFT) == EQUALS)
             /*{?} x:?((=(a=) (b=)).b) => x */
             /*          ^              */
             return setmember(name->RIGHT, name->LEFT->RIGHT, pnode);
@@ -181,15 +231,15 @@ int update(psk name, psk pnode) /* name = tree with DOT in root */
             return FALSE;
             }
         }
-    if (Op(name) == EQUALS) /* {?} (=a+b)=5 ==> =5 */
+    if(Op(name) == EQUALS) /* {?} (=a+b)=5 ==> =5 */
         {
         wipe(name->RIGHT);
         name->RIGHT = same_as_w(pnode);
         return TRUE;
         }
-    else if (searchname(name->LEFT,
-                        &prevvar,
-                        &nxtvar))
+    else if(searchname(name->LEFT,
+                       &prevvar,
+                       &nxtvar))
         {
         assert(nxtvar->pvaria);
         return setmember(name->RIGHT, Entry2(nxtvar->n, nxtvar->selector, nxtvar->pvaria), pnode);
@@ -203,11 +253,11 @@ int update(psk name, psk pnode) /* name = tree with DOT in root */
 
 int insert(psk name, psk pnode)
     {
-    vars *nxtvar, *prevvar, *newvar;
+    vars* nxtvar, * prevvar, * newvar;
 
-    if (is_op(name))
+    if(is_op(name))
         {
-        if (Op(name) == EQUALS)
+        if(Op(name) == EQUALS)
             {
             wipe(name->RIGHT);
             name->RIGHT = same_as_w(pnode);  /*{?} monk2:?(=monk1) => monk2 */
@@ -218,9 +268,9 @@ int insert(psk name, psk pnode)
             return update(name, pnode); /*{?} (borfo=klot=)&bk:?(borfo klot)&!(borfo.klot):bk => bk */
             }
         }
-    if (searchname(name,
-                   &prevvar,
-                   &nxtvar))
+    if(searchname(name,
+                  &prevvar,
+                  &nxtvar))
         {
         ppsk PPnode;
         wipe(*(PPnode = Entry(nxtvar->n, nxtvar->selector, &nxtvar->pvaria)));
@@ -229,27 +279,27 @@ int insert(psk name, psk pnode)
     else
         {
         size_t len;
-        unsigned char *strng;
+        unsigned char* strng;
         strng = POBJ(name);
-        len = strlen((char *)strng);
+        len = strlen((char*)strng);
 #if PVNAME
         newvar = (vars*)bmalloc(__LINE__, sizeof(vars));
-        if (*strng)
+        if(*strng)
             {
 #if ICPY
-            MEMCPY(newvar->vname = (unsigned char *)
+            MEMCPY(newvar->vname = (unsigned char*)
                    bmalloc(__LINE__, len + 1), strng, (len >> LOGWORDLENGTH) + 1);
 #else
-            MEMCPY(newvar->vname = (unsigned char *)
+            MEMCPY(newvar->vname = (unsigned char*)
                    bmalloc(__LINE__, len + 1), strng, ((len / sizeof(LONG)) + 1) * sizeof(LONG));
 #endif
             }
 #else
-        if (len < 4)
+        if(len < 4)
             newvar = (vars*)bmalloc(__LINE__, sizeof(vars));
         else
             newvar = (vars*)bmalloc(__LINE__, sizeof(vars) - 3 + len);
-        if (*strng)
+        if(*strng)
             {
 #if ICPY
             MEMCPY(&newvar->u.Obj, strng, (len / sizeof(LONG)) + 1);
@@ -267,7 +317,7 @@ int insert(psk name, psk pnode)
 #endif
             }
         newvar->next = nxtvar;
-        if (prevvar == NULL)
+        if(prevvar == NULL)
             variables[*strng] = newvar;
         else
             prevvar->next = newvar;
@@ -281,25 +331,25 @@ int insert(psk name, psk pnode)
 int psh(psk name, psk pnode, psk dim)
     {
     /* string must fulfill requirements of icpy */
-    vars *nxtvar, *prevvar;
-    varia *nvaria;
+    vars* nxtvar, * prevvar;
+    varia* nvaria;
     psk cnode;
     int oldn, n, m2, m22;
-    while (is_op(name))
+    while(is_op(name))
         {
         /* return psh(name->LEFT,pnode,dim) && psh(name->RIGHT,pnode,dim); */
-        if (!psh(name->LEFT, pnode, dim))
+        if(!psh(name->LEFT, pnode, dim))
             return FALSE;
         name = name->RIGHT;
         }
-    if (dim && !INTEGER(dim))
+    if(dim && !INTEGER(dim))
         return FALSE;
-    if (!searchname(name,
-                    &prevvar,
-                    &nxtvar))
+    if(!searchname(name,
+                   &prevvar,
+                   &nxtvar))
         {
         insert(name, pnode);
-        if (dim)
+        if(dim)
             {
             searchname(name,
                        &prevvar,
@@ -311,26 +361,26 @@ int psh(psk name, psk pnode, psk dim)
             }
         }
     n = oldn = nxtvar->n;
-    if (dim)
+    if(dim)
         {
         int newn;
         errno = 0;
-        newn = (int)STRTOUL((char *)POBJ(dim), (char **)NULL, 10);
-        if (errno == ERANGE)
+        newn = (int)STRTOUL((char*)POBJ(dim), (char**)NULL, 10);
+        if(errno == ERANGE)
             return FALSE;
-        if (RAT_NEG(dim))
+        if(RAT_NEG(dim))
             newn = oldn - newn + 1;
-        if (newn < 0)
+        if(newn < 0)
             return FALSE;
         nxtvar->n = newn;
-        if (oldn >= nxtvar->n)
+        if(oldn >= nxtvar->n)
             {
             assert(nxtvar->pvaria);
-            for (; oldn >= nxtvar->n;)
+            for(; oldn >= nxtvar->n;)
                 wipe(Entry2(n, oldn--, nxtvar->pvaria));
             }
         nxtvar->n--;
-        if (nxtvar->selector > nxtvar->n)
+        if(nxtvar->selector > nxtvar->n)
             nxtvar->selector = nxtvar->n;
         }
     else
@@ -338,38 +388,38 @@ int psh(psk name, psk pnode, psk dim)
         nxtvar->n++;
         nxtvar->selector = nxtvar->n;
         }
-    m2 = power2(n);
-    if (m2 == 0)
+    m2 = ilog2(n);
+    if(m2 == 0)
         m22 = 1;
     else
         m22 = m2 << 1;
-    if (nxtvar->n >= m22)
+    if(nxtvar->n >= m22)
         /* allocate */
         {
-        for (; nxtvar->n >= m22; m22 <<= 1)
+        for(; nxtvar->n >= m22; m22 <<= 1)
             {
             nvaria = (varia*)bmalloc(__LINE__, sizeof(varia) + (m22 - 1) * sizeof(psk));
             nvaria->prev = nxtvar->pvaria;
             nxtvar->pvaria = nvaria;
             }
         }
-    else if (nxtvar->n < m2)
+    else if(nxtvar->n < m2)
         /* deallocate */
         {
-        for (; m2 && nxtvar->n < m2; m2 >>= 1)
+        for(; m2 && nxtvar->n < m2; m2 >>= 1)
             {
             nvaria = nxtvar->pvaria;
             nxtvar->pvaria = nvaria->prev;
             bfree(nvaria);
             }
-        if (nxtvar->n < 0)
+        if(nxtvar->n < 0)
             {
-            if (prevvar)
+            if(prevvar)
                 prevvar->next = nxtvar->next;
             else
                 variables[*POBJ(name)] = nxtvar->next;
 #if PVNAME
-            if (nxtvar->vname != OBJ(nilNode))
+            if(nxtvar->vname != OBJ(nilNode))
                 bfree(nxtvar->vname);
 #endif
             bfree(nxtvar);
@@ -377,46 +427,46 @@ int psh(psk name, psk pnode, psk dim)
             }
         }
     assert(nxtvar->pvaria);
-    for (cnode = pnode
-         ; ++oldn <= nxtvar->n
-         ; cnode = *Entry(nxtvar->n, oldn, &nxtvar->pvaria) = same_as_w(cnode)
-         )
+    for(cnode = pnode
+        ; ++oldn <= nxtvar->n
+        ; cnode = *Entry(nxtvar->n, oldn, &nxtvar->pvaria) = same_as_w(cnode)
+        )
         ;
     return TRUE;
     }
 
 int deleteNode(psk name)
     {
-    vars *nxtvar, *prevvar;
-    varia *hv;
-    if (searchname(name,
-                   &prevvar,
-                   &nxtvar))
+    vars* nxtvar, * prevvar;
+    varia* hv;
+    if(searchname(name,
+                  &prevvar,
+                  &nxtvar))
         {
         psk tmp;
         assert(nxtvar->pvaria);
         tmp = Entry2(nxtvar->n, nxtvar->n, nxtvar->pvaria);
         wipe(tmp);
-        if (nxtvar->n)
+        if(nxtvar->n)
             {
-            if ((nxtvar->n) - 1 < power2(nxtvar->n))
+            if((nxtvar->n) - 1 < ilog2(nxtvar->n))
                 {
                 hv = nxtvar->pvaria;
                 nxtvar->pvaria = hv->prev;
                 bfree(hv);
                 }
             nxtvar->n--;
-            if (nxtvar->n < nxtvar->selector)
+            if(nxtvar->n < nxtvar->selector)
                 nxtvar->selector = nxtvar->n;
             }
         else
             {
-            if (prevvar)
+            if(prevvar)
                 prevvar->next = nxtvar->next;
             else
                 variables[*POBJ(name)] = nxtvar->next;
 #if PVNAME
-            if (nxtvar->vname != OBJ(nilNode))
+            if(nxtvar->vname != OBJ(nilNode))
                 bfree(nxtvar->vname);
 #endif
             bfree(nxtvar);
@@ -429,7 +479,7 @@ int deleteNode(psk name)
 
 void pop(psk pnode)
     {
-    while (is_op(pnode))
+    while(is_op(pnode))
         {
         pop(pnode->LEFT);
         pnode = pnode->RIGHT;
@@ -596,8 +646,7 @@ must be equivalent
         {
         if(Op(namenode->LEFT) == EQUALS)
             {
-            if(ISBUILTIN((objectnode*)(namenode->LEFT))
-               )
+            if(ISBUILTIN((objectnode*)(namenode->LEFT)))
                 {
                 Object->theMethod = findBuiltInMethod((typedObjectnode*)(namenode->LEFT), namenode->RIGHT);
                 /* findBuiltInMethod((=),(insert)) */
@@ -660,7 +709,6 @@ must be equivalent
         { /* You get here if a built-in method is called. */
         return NULL; /* (=hash)..insert when evaluating (new$hash..insert)$(a.b) */
         }
-
     }
 
 int copy_insert(psk name, psk pnode, psk cutoff)
@@ -668,44 +716,44 @@ int copy_insert(psk name, psk pnode, psk cutoff)
     psk PNODE;
     int ret;
     assert((pnode->RIGHT == 0 && cutoff == 0) || pnode->RIGHT != cutoff);
-    if ((pnode->v.fl & INDIRECT)
-        && (pnode->v.fl & READY)
-        /*
-        {?} !dagj a:?dagj a
-        {!} !dagj
-        The test (pnode->v.fl & READY) does not solve stackoverflow
-        in the following examples:
+    if((pnode->v.fl & INDIRECT)
+       && (pnode->v.fl & READY)
+       /*
+       {?} !dagj a:?dagj a
+       {!} !dagj
+       The test (pnode->v.fl & READY) does not solve stackoverflow
+       in the following examples:
 
-        {?} (=!y):(=?y)
-        {?} !y
+       {?} (=!y):(=?y)
+       {?} !y
 
-        {?} (=!y):(=?x)
-        {?} (=!x):(=?y)
-        {?} !x
-        */
-        )
+       {?} (=!y):(=?x)
+       {?} (=!x):(=?y)
+       {?} !x
+       */
+       )
         {
         return FALSE;
         }
-    else if (pnode->v.fl & IDENT)
+    else if(pnode->v.fl & IDENT)
         {
         PNODE = copyof(pnode);
         }
-    else if (cutoff == NULL)
+    else if(cutoff == NULL)
         {
         return insert(name, pnode);
         }
     else
         {
         assert(!is_object(pnode));
-        if ((shared(pnode) != ALL_REFCOUNT_BITS_SET) && !all_refcount_bits_set(cutoff))
+        if((shared(pnode) != ALL_REFCOUNT_BITS_SET) && !all_refcount_bits_set(cutoff))
             {/* cutoff: either node with headroom in the small refcounter
                 or object */
             PNODE = new_operator_like(pnode);
             PNODE->v.fl = (pnode->v.fl & COPYFILTER/*~ALL_REFCOUNT_BITS_SET*/) | LATEBIND;
             pnode->v.fl += ONEREF;
 #if WORD32
-            if (shared(cutoff) == ALL_REFCOUNT_BITS_SET)
+            if(shared(cutoff) == ALL_REFCOUNT_BITS_SET)
                 {
                 /*
                 (T=
@@ -757,21 +805,21 @@ void mmf(ppsk PPnode)
     {
     psk goal;
     ppsk pgoal;
-    vars *nxtvar;
+    vars* nxtvar;
     int alphabet, ext;
     char dim[22];
     ext = search_opt(*PPnode, EXT);
     wipe(*PPnode);
     pgoal = PPnode;
-    for (alphabet = 0; alphabet < 256/*0x80*/; alphabet++)
+    for(alphabet = 0; alphabet < 256/*0x80*/; alphabet++)
         {
-        for (nxtvar = variables[alphabet];
-             nxtvar;
-             nxtvar = nxtvar->next)
+        for(nxtvar = variables[alphabet];
+            nxtvar;
+            nxtvar = nxtvar->next)
             {
             goal = *pgoal = (psk)bmalloc(__LINE__, sizeof(knode));
             goal->v.fl = WHITE | SUCCESS;
-            if (ext && nxtvar->n > 0)
+            if(ext && nxtvar->n > 0)
                 {
                 goal = goal->LEFT = (psk)bmalloc(__LINE__, sizeof(knode));
                 goal->v.fl = DOT | SUCCESS;
@@ -780,9 +828,9 @@ void mmf(ppsk PPnode)
                 goal->RIGHT = build_up(goal->RIGHT, dim, NULL);
                 }
             goal = goal->LEFT =
-                (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + strlen((char *)VARNAME(nxtvar)));
+                (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + strlen((char*)VARNAME(nxtvar)));
             goal->v.fl = (READY | SUCCESS);
-            strcpy((char *)(goal)+sizeof(ULONG), (char *)VARNAME(nxtvar));
+            strcpy((char*)(goal)+sizeof(ULONG), (char*)VARNAME(nxtvar));
             pgoal = &(*pgoal)->RIGHT;
             }
         }
@@ -791,44 +839,44 @@ void mmf(ppsk PPnode)
 
 static void lstsub(psk pnode)
     {
-    vars *nxtvar;
-    unsigned char *name;
+    vars* nxtvar;
+    unsigned char* name;
     int alphabet, n;
     beNice = FALSE;
     name = POBJ(pnode);
-    for (alphabet = 0; alphabet < 256; alphabet++)
+    for(alphabet = 0; alphabet < 256; alphabet++)
         {
-        for (nxtvar = variables[alphabet];
-             nxtvar;
-             nxtvar = nxtvar->next)
+        for(nxtvar = variables[alphabet];
+            nxtvar;
+            nxtvar = nxtvar->next)
             {
-            if ((pnode->u.obj == 0 && alphabet < 0x80) || !STRCMP(VARNAME(nxtvar), name))
+            if((pnode->u.obj == 0 && alphabet < 0x80) || !STRCMP(VARNAME(nxtvar), name))
                 {
-                for (n = nxtvar->n; n >= 0; n--)
+                for(n = nxtvar->n; n >= 0; n--)
                     {
                     ppsk tmp;
-                    if (listWithName)
+                    if(listWithName)
                         {
-                        if (global_fpo == stdout)
+                        if(global_fpo == stdout)
                             {
-                            if (nxtvar->n > 0)
+                            if(nxtvar->n > 0)
                                 Printf("%c%d (", n == nxtvar->selector ? '>' : ' ', n);
                             else
                                 Printf("(");
                             }
-                        if (quote(VARNAME(nxtvar)))
-                            myprintf("\"", (char *)VARNAME(nxtvar), "\"=", NULL);
+                        if(quote(VARNAME(nxtvar)))
+                            myprintf("\"", (char*)VARNAME(nxtvar), "\"=", NULL);
                         else
-                            myprintf((char *)VARNAME(nxtvar), "=", NULL);
-                        if (hum)
+                            myprintf((char*)VARNAME(nxtvar), "=", NULL);
+                        if(hum)
                             myprintf("\n", NULL);
                         }
                     assert(nxtvar->pvaria);
                     tmp = Entry(nxtvar->n, n, &nxtvar->pvaria);
                     result(*tmp = Head(*tmp));
-                    if (listWithName)
+                    if(listWithName)
                         {
-                        if (global_fpo == stdout)
+                        if(global_fpo == stdout)
                             Printf("\n)");
                         myprintf(";\n", NULL);
                         }
@@ -843,15 +891,15 @@ static void lstsub(psk pnode)
 
 void lst(psk pnode)
     {
-    while (is_op(pnode))
+    while(is_op(pnode))
         {
-        if (Op(pnode) == EQUALS)
+        if(Op(pnode) == EQUALS)
             {
             beNice = FALSE;
             myprintf("(", NULL);
-            if (hum)
+            if(hum)
                 myprintf("\n", NULL);
-            if (listWithName)
+            if(listWithName)
                 {
                 result(pnode);
                 }
@@ -859,7 +907,7 @@ void lst(psk pnode)
                 {
                 result(pnode->RIGHT);
                 }
-            if (hum)
+            if(hum)
                 myprintf("\n", NULL);
             myprintf(")\n", NULL);
             beNice = TRUE;
@@ -912,7 +960,7 @@ function_return_type setIndex(psk Pnode)
 void initVariables(void)
     {
     int tel;
-    for (tel = 0; tel < 256; variables[tel++] = NULL)
+    for(tel = 0; tel < 256; variables[tel++] = NULL)
         ;
     }
 
@@ -938,7 +986,7 @@ int string_copy_insert(psk name, psk pnode, char* str, char* cutoff)
     char sav = *cutoff;
     int ret;
     *cutoff = '\0';
-    if ((pnode->v.fl & IDENT) || all_refcount_bits_set(pnode))
+    if((pnode->v.fl & IDENT) || all_refcount_bits_set(pnode))
         {
         ret = scopy_insert(name, str);
         }
@@ -947,14 +995,14 @@ int string_copy_insert(psk name, psk pnode, char* str, char* cutoff)
         stringrefnode* psnode;
         int nr;
         nr = fullnumbercheck(str) & ~DEFINITELYNONUMBER;
-        if ((nr & MINUS) && !(name->v.fl & NUMBER))
+        if((nr & MINUS) && !(name->v.fl & NUMBER))
             nr = 0; /* "-1" is only converted to -1 if the # flag is present on the pattern */
         psnode = (stringrefnode*)bmalloc(__LINE__, sizeof(stringrefnode));
         psnode->v.fl = /*(pnode->v.fl & ~(ALL_REFCOUNT_BITS_SET|VISIBLE_FLAGS)) substring doesn't inherit flags like */
             READY | SUCCESS | LATEBIND | nr;
         /*psnode->v.fl |= SUCCESS;*/ /*{?} @(~`ab:%?x %?y)&!x => a */ /*{!} a */
         psnode->pnode = same_as_w(pnode);
-        if (nr & MINUS)
+        if(nr & MINUS)
             {
             psnode->str = str + 1;
             psnode->length = cutoff - str - 1;
@@ -965,11 +1013,11 @@ int string_copy_insert(psk name, psk pnode, char* str, char* cutoff)
             psnode->length = cutoff - str;
             }
         DBGSRC(int saveNice; int redhum; saveNice = beNice; \
-            redhum = hum; beNice = FALSE; hum = FALSE; \
-            Printf("str [%s] length " LONGU "\n", psnode->str, (ULONG int)psnode->length); \
-            beNice = saveNice; hum = redhum;)
+               redhum = hum; beNice = FALSE; hum = FALSE; \
+               Printf("str [%s] length " LONGU "\n", psnode->str, (ULONG int)psnode->length); \
+               beNice = saveNice; hum = redhum;)
             ret = insert(name, (psk)psnode);
-        if (ret)
+        if(ret)
             dec_refcount((psk)psnode);
         else
             {

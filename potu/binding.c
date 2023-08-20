@@ -11,34 +11,34 @@ static psk SymbolBinding(psk variabele, int* newval, int twolevelsofindirection)
     {
     psk pbinding;
     *newval = 0;
-    if ((pbinding = getValue(variabele, newval)) != NULL)
+    if((pbinding = getValue(variabele, newval)) != NULL)
         {
-        if (twolevelsofindirection)
+        if(twolevelsofindirection)
             {
             psk peval;
 
-            if (pbinding->v.fl & INDIRECT)
+            if(pbinding->v.fl & INDIRECT)
                 {
                 peval = subtreecopy(pbinding);
                 peval = eval(peval);
-                if (!isSUCCESS(peval)
-                    || (is_op(peval)
-                    && Op(peval) != EQUALS
-                    && Op(peval) != DOT
-                    )
-                    )
+                if(!isSUCCESS(peval)
+                   || (is_op(peval)
+                       && Op(peval) != EQUALS
+                       && Op(peval) != DOT
+                       )
+                   )
                     {
                     wipe(peval);
                     return 0;
                     }
-                if (*newval)
+                if(*newval)
                     wipe(pbinding);
                 *newval = TRUE;
                 pbinding = peval;
                 }
-            if (is_op(pbinding))
+            if(is_op(pbinding))
                 {
-                if (is_object(pbinding))
+                if(is_object(pbinding))
                     {
                     peval = same_as_w(pbinding);
                     }
@@ -53,15 +53,15 @@ static psk SymbolBinding(psk variabele, int* newval, int twolevelsofindirection)
                     f
                     */
                     peval = eval(peval);
-                    if (!isSUCCESS(peval)
-                        || (is_op(peval)
-                        && Op(peval) != EQUALS
-                        && Op(peval) != DOT
-                        )
-                        )
+                    if(!isSUCCESS(peval)
+                       || (is_op(peval)
+                           && Op(peval) != EQUALS
+                           && Op(peval) != DOT
+                           )
+                       )
                         {
                         wipe(peval);
-                        if (*newval)
+                        if(*newval)
                             {
                             *newval = FALSE;
                             wipe(pbinding);
@@ -70,7 +70,7 @@ static psk SymbolBinding(psk variabele, int* newval, int twolevelsofindirection)
                         }
                     }
                 assert(pbinding);
-                if (*newval)
+                if(*newval)
                     {
                     *newval = FALSE;
                     wipe(pbinding);
@@ -84,7 +84,7 @@ static psk SymbolBinding(psk variabele, int* newval, int twolevelsofindirection)
                 psk binding;
                 *newval = FALSE;
                 binding = SymbolBinding(pbinding, newval, pbinding->v.fl & DOUBLY_INDIRECT);
-                if (newv)
+                if(newv)
                     {
                     wipe(pbinding);
                     }
@@ -106,11 +106,11 @@ first finds (=B), which is an object that should not obtain the flags !! as in
     psk pbinding;
     int newval;
     newval = FALSE;
-    if ((pbinding = SymbolBinding(variabele, &newval, twolevelsofindirection)) != NULL)
+    if((pbinding = SymbolBinding(variabele, &newval, twolevelsofindirection)) != NULL)
         {
         ULONG nameflags, valueflags;
         nameflags = (variabele->v.fl & (BEQUEST | SUCCESS));
-        if (ANYNEGATION(variabele->v.fl))
+        if(ANYNEGATION(variabele->v.fl))
             nameflags |= NOT;
 
         valueflags = (pbinding)->v.fl;
@@ -119,17 +119,17 @@ first finds (=B), which is an object that should not obtain the flags !! as in
 
         assert(pbinding != NULL);
 
-        if (Op(pbinding) == EQUALS)
+        if(Op(pbinding) == EQUALS)
             {
-            if (!newval)
+            if(!newval)
                 {
                 pbinding->RIGHT = Head(pbinding->RIGHT);
                 pbinding = same_as_w(pbinding);
                 }
             }
-        else if ((pbinding)->v.fl == valueflags)
+        else if((pbinding)->v.fl == valueflags)
             {
-            if (!newval)
+            if(!newval)
                 {
                 pbinding = same_as_w(pbinding);
                 }
@@ -137,7 +137,7 @@ first finds (=B), which is an object that should not obtain the flags !! as in
         else
             {
             assert(Op(pbinding) != EQUALS);
-            if (newval)
+            if(newval)
                 {
                 pbinding = isolated(pbinding);
                 }

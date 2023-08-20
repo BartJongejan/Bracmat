@@ -1,5 +1,5 @@
-#ifndef CANONIZATION_C
-#define CANONIZATION_C
+#ifndef CANONIZATION_H
+#define CANONIZATION_H
 
 #include "nodestruct.h"
 #include "defines01.h"

@@ -15,11 +15,11 @@ psk changeCase(psk Pnode
                , int dos
 #endif
                , int low);
-unsigned char * putCodePoint(ULONG val, unsigned char * s);
-int getCodePoint(const char ** ps);
-int hasUTF8MultiByteCharacters(const char * s);
-int getCodePoint2(const char ** ps, int * isutf);
-int strcasecompu(char ** S, char ** P, char * cutoff);
-int strcasecomp(const char *s, const char *p);
+unsigned char* putCodePoint(ULONG val, unsigned char* s);
+int getCodePoint(const char** ps);
+int hasUTF8MultiByteCharacters(const char* s);
+int getCodePoint2(const char** ps, int* isutf);
+int strcasecompu(char** S, char** P, char* cutoff);
+int strcasecomp(const char* s, const char* p);
 
 #endif

@@ -35,7 +35,7 @@ psk copyof(psk pnode)
 
 psk new_operator_like(psk pnode)
     {
-    if (Op(pnode) == EQUALS)
+    if(Op(pnode) == EQUALS)
         {
         objectnode* goal;
         assert(!ISBUILTIN((objectnode*)pnode));
@@ -55,7 +55,7 @@ psk scopy(const char* str)
     {
     int nr = fullnumbercheck(str) & ~DEFINITELYNONUMBER;
     psk pnode;
-    if (nr & MINUS)
+    if(nr & MINUS)
         { /* bracmat out$arg$() -123 */
         pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + strlen((const char*)str));
         strcpy((char*)(pnode)+sizeof(ULONG), str + 1);
@@ -73,13 +73,13 @@ psk subtreecopy(psk src);
 
 psk same_as_w(psk pnode)
     {
-    if (shared(pnode) != ALL_REFCOUNT_BITS_SET)
+    if(shared(pnode) != ALL_REFCOUNT_BITS_SET)
         {
         (pnode)->v.fl += ONEREF;
         return pnode;
         }
 #if WORD32
-    else if (is_object(pnode))
+    else if(is_object(pnode))
         {
         INCREFCOUNT(pnode);
         return pnode;
@@ -94,13 +94,13 @@ psk same_as_w(psk pnode)
 static psk same_as_w_2(ppsk PPnode)
     {
     psk pnode = *PPnode;
-    if (shared(pnode) != ALL_REFCOUNT_BITS_SET)
+    if(shared(pnode) != ALL_REFCOUNT_BITS_SET)
         {
         pnode->v.fl += ONEREF;
         return pnode;
         }
 #if WORD32
-    else if (is_object(pnode))
+    else if(is_object(pnode))
         {
         INCREFCOUNT(pnode);
         return pnode;
@@ -130,7 +130,7 @@ psk _copyop(psk Pnode)
 
 psk subtreecopy(psk src)
     {
-    if (is_op(src))
+    if(is_op(src))
         return _copyop(src);
     else
         return iCopyOf(src);
@@ -138,7 +138,7 @@ psk subtreecopy(psk src)
 
 psk isolated(psk Pnode)
     {
-    if (shared(Pnode))
+    if(shared(Pnode))
         {
         dec_refcount(Pnode);
         return subtreecopy(Pnode);
@@ -148,21 +148,21 @@ psk isolated(psk Pnode)
 
 psk setflgs(psk pokn, ULONG Flgs)
     {
-    if ((Flgs & BEQUEST) || !(Flgs & SUCCESS))
+    if((Flgs & BEQUEST) || !(Flgs & SUCCESS))
         {
         pokn = isolated(pokn);
         pokn->v.fl ^= ((Flgs & SUCCESS) ^ SUCCESS);
         pokn->v.fl |= (Flgs & BEQUEST);
-        if (ANYNEGATION(Flgs))
+        if(ANYNEGATION(Flgs))
             pokn->v.fl |= NOT;
         }
     return pokn;
     }
 
 #if ICPY
-void icpy(LONG *d, LONG *b, int words)
+void icpy(LONG* d, LONG* b, int words)
     {
-    while (words--)
+    while(words--)
         *d++ = *b++;
     }
 #endif
@@ -177,10 +177,10 @@ psk charcopy(const char* strt, const char* until)
     {
     int  nr = 0;
     psk pnode;
-    if ('0' <= *strt && *strt <= '9')
+    if('0' <= *strt && *strt <= '9')
         {
         nr = QNUMBER BITWISE_OR_SELFMATCHING;
-        if (*strt == '0')
+        if(*strt == '0')
             nr |= QNUL;
         }
     pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + (until - strt));

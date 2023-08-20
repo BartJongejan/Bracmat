@@ -52,11 +52,11 @@ total bytes = 1166400
 #endif
 
 
-#if TELMAX
+#if SHOWMAXALLOCATED
 static size_t globalloc = 0, maxgloballoc = 0;
 #endif
 
-#if TELLING
+#if SHOWCURRENTLYALLOCATED
 static size_t cnts[256], alloc_cnt = 0, totcnt = 0;
 #endif
 
@@ -67,7 +67,7 @@ struct memblock
     struct memoryElement* firstFreeElementBetweenAddresses; /* if NULL : no more free elements */
     struct memblock* previousOfSameLength; /* address of older ands smaller block with same sized elements */
     size_t sizeOfElement;
-#if TELMAX
+#if SHOWMAXALLOCATED
     size_t numberOfFreeElementsBetweenAddresses; /* optional field. */
     size_t numberOfElementsBetweenAddresses; /* optional field. */
     size_t minimumNumberOfFreeElementsBetweenAddresses;
@@ -98,7 +98,7 @@ struct pointerStruct
 struct memblock** pMemBlocks = 0; /* list of memblock, sorted
                                       according to memory address */
 static int NumberOfMemBlocks = 0;
-#if TELMAX
+#if SHOWMAXALLOCATED
 static int malloced = 0;
 #endif
 
@@ -151,7 +151,6 @@ static void checksum(int line)
     }
 #else
 #define setChecksum(a,b)
-#define bmalloc(LINENO,N) bmalloc(N)
 #define checksum(a)
 #endif
 
@@ -181,7 +180,7 @@ static struct memblock* initializeMemBlock(size_t elementSize, size_t numberOfEl
             {
             mEa = mb->lowestAddress;
             mb->highestAddress = mEa + nlongpointers;
-#if TELMAX
+#if SHOWMAXALLOCATED
             mb->numberOfFreeElementsBetweenAddresses = numberOfElements;
             mb->numberOfElementsBetweenAddresses = numberOfElements;
             mb->minimumNumberOfFreeElementsBetweenAddresses = numberOfElements;
@@ -261,20 +260,50 @@ static struct memblock* newMemBlocks(size_t n)
 
     }
 
+#if SHOWCURRENTLYALLOCATED
+void bezetting(void)
+    {
+    struct memblock* mb = 0;
+    size_t words = 0;
+    int i;
+    Printf("\nfree\n");
+    for(i = 0; i < NumberOfMemBlocks; ++i)
+        {
+        mb = pMemBlocks[i];
+#if WORD32 || defined __VMS
+        Printf("%zd words per node : %lu of %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), mb->numberOfFreeElementsBetweenAddresses, mb->numberOfElementsBetweenAddresses);
+#else                                                                                                                                         
+        Printf("%zd words per node : %zu of %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), mb->numberOfFreeElementsBetweenAddresses, mb->numberOfElementsBetweenAddresses);
+#endif
+        }
+    Printf("\nmin free\n");
+    for(i = 0; i < NumberOfMemBlocks; ++i)
+        {
+        mb = pMemBlocks[i];
+#if WORD32 || defined __VMS
+        Printf("%zd words per node : %lu of %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), mb->minimumNumberOfFreeElementsBetweenAddresses, mb->numberOfElementsBetweenAddresses);
+#else                                                                                                                                                
+        Printf("%zd words per node : %zu of %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), mb->minimumNumberOfFreeElementsBetweenAddresses, mb->numberOfElementsBetweenAddresses);
+#endif
+        }
+    Printf("more than %zd words per node : %u\n", words, malloced);
+    }
+#endif
+
 void* bmalloc(int lineno, size_t n)
     {
     void* ret;
 #if DOSUMCHECK
     size_t nn = n;
 #endif
-#if TELLING
+#if SHOWCURRENTLYALLOCATED
     int tel;
     alloc_cnt++;
     if(n < 256)
         cnts[n]++;
     totcnt += n;
 #endif
-#if TELMAX
+#if SHOWMAXALLOCATED
     globalloc++;
     if(maxgloballoc < globalloc)
         maxgloballoc = globalloc;
@@ -307,7 +336,7 @@ void* bmalloc(int lineno, size_t n)
             }
         if(ret != 0)
             {
-#if TELMAX
+#if SHOWMAXALLOCATED
             --(mb->numberOfFreeElementsBetweenAddresses);
             if(mb->numberOfFreeElementsBetweenAddresses < mb->minimumNumberOfFreeElementsBetweenAddresses)
                 mb->minimumNumberOfFreeElementsBetweenAddresses = mb->numberOfFreeElementsBetweenAddresses;
@@ -335,7 +364,7 @@ void* bmalloc(int lineno, size_t n)
 
     if(!ret)
         {
-#if TELLING
+#if SHOWCURRENTLYALLOCATED
         errorprintf(
             "MEMORY FULL AFTER %lu ALLOCATIONS WITH MEAN LENGTH %lu\n",
             globalloc, totcnt / alloc_cnt);
@@ -355,7 +384,7 @@ void* bmalloc(int lineno, size_t n)
         exit(1);
         }
 
-#if TELMAX
+#if SHOWMAXALLOCATED
     ++malloced;
 #endif
     ((LONG*)ret)[n] = 0;
@@ -551,14 +580,14 @@ void bfree(void* p)
     lp = lp - 2;
     p = lp;
 #endif
-#if TELMAX
+#if SHOWMAXALLOCATED
     globalloc--;
 #endif
     for(q = pMemBlocks + NumberOfMemBlocks; --q >= pMemBlocks;)
         {
         if((*q)->lowestAddress <= (struct memoryElement*)p && (struct memoryElement*)p < (*q)->highestAddress)
             {
-#if TELMAX
+#if SHOWMAXALLOCATED
             ++((*q)->numberOfFreeElementsBetweenAddresses);
 #endif
             ((struct memoryElement*)p)->next = (*q)->firstFreeElementBetweenAddresses;
@@ -568,41 +597,12 @@ void bfree(void* p)
             }
         }
     free(p);
-#if TELMAX
+#if SHOWMAXALLOCATED
     --malloced;
 #endif
     setChecksum(LineNo, globN);
     }
 
-#if TELLING
-void bezetting(void)
-    {
-    struct memblock* mb = 0;
-    size_t words = 0;
-    int i;
-    Printf("\nfree\n");
-    for(i = 0; i < NumberOfMemBlocks; ++i)
-        {
-        mb = pMemBlocks[i];
-#if WORD32 || defined __VMS
-        Printf("%zd words per node : %lu of %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), mb->numberOfFreeElementsBetweenAddresses, mb->numberOfElementsBetweenAddresses);
-#else                                                                                                                                         
-        Printf("%zd words per node : %zu of %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), mb->numberOfFreeElementsBetweenAddresses, mb->numberOfElementsBetweenAddresses);
-#endif
-        }
-    Printf("\nmin free\n");
-    for(i = 0; i < NumberOfMemBlocks; ++i)
-        {
-        mb = pMemBlocks[i];
-#if WORD32 || defined __VMS
-        Printf("%zd words per node : %lu of %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), mb->minimumNumberOfFreeElementsBetweenAddresses, mb->numberOfElementsBetweenAddresses);
-#else                                                                                                                                                
-        Printf("%zd words per node : %zu of %lu\n", mb->sizeOfElement / sizeof(struct memoryElement), mb->minimumNumberOfFreeElementsBetweenAddresses, mb->numberOfElementsBetweenAddresses);
-#endif
-        }
-    Printf("more than %zd words per node : %u\n", words, malloced);
-    }
-#endif
 
 
 #if SHOWMEMBLOCKS
@@ -715,7 +715,7 @@ int init_memoryspace(void)
                     ,pMemBlocks[i]->sizeOfElement
                     );
             }
-        //*/
+        */
         return 1;
         }
     else
@@ -747,11 +747,11 @@ void dec_refcount(psk pnode)
 #endif
     }
 
-#if TELMAX
-#if TELLING
-void initcnts(void)
+#if SHOWMAXALLOCATED
+#if SHOWCURRENTLYALLOCATED
+static void initcnts(void)
     {
-    for(int tel = 0; tel < sizeof(cnts) / sizeof(cnts[0]); ++tel)
+    for(ULONG tel = 0; tel < sizeof(cnts) / sizeof(cnts[0]); ++tel)
         cnts[tel] = 0;
     }
 #endif

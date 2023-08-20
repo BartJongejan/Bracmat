@@ -15,8 +15,8 @@ int atomtest(psk pnode)
 LONG toLong(psk pnode)
     {
     LONG res;
-    res = (LONG)STRTOUL((char *)POBJ(pnode), (char **)NULL, 10);
-    if (pnode->v.fl & MINUS)
+    res = (LONG)STRTOUL((char*)POBJ(pnode), (char**)NULL, 10);
+    if(pnode->v.fl & MINUS)
         res = -res;
     return res;
     }
@@ -26,37 +26,33 @@ LONG toLong(psk pnode)
 
 int number_degree(psk pnode)
     {
-#ifdef REAL_COMP
-    if (REAL_COMP(pnode))
-        return 3;
-#endif
-    if (RATIONAL_COMP(pnode))
+    if(RATIONAL_COMP(pnode))
         return 5;
-    switch (PLOBJ(pnode))
+    switch(PLOBJ(pnode))
         {
-            case IM: return 4;
-            case PI: return 2;
-            case XX: return 1;
-            default: return 0;
+        case IM: return 4;
+        case PI: return 2;
+        case XX: return 1;
+        default: return 0;
         }
     }
 
 int is_constant(psk pnode)
     {
-    while (is_op(pnode))
+    while(is_op(pnode))
         {
-        if (!is_constant(pnode->LEFT))
+        if(!is_constant(pnode->LEFT))
             return FALSE;
         pnode = pnode->RIGHT;
         }
     return number_degree(pnode);
     }
 
-psk * backbone(psk arg, psk Pnode, psk * pfirst)
+psk* backbone(psk arg, psk Pnode, psk* pfirst)
     {
     psk first = *pfirst = subtreecopy(arg);
-    psk * plast = pfirst;
-    while (arg != Pnode)
+    psk* plast = pfirst;
+    while(arg != Pnode)
         {
         psk R = subtreecopy((*plast)->RIGHT);
         wipe((*plast)->RIGHT);
@@ -71,7 +67,7 @@ psk * backbone(psk arg, psk Pnode, psk * pfirst)
 void cleanOncePattern(psk pat)
     {
     pat->v.fl &= ~IMPLIEDFENCE;
-    if (is_op(pat))
+    if(is_op(pat))
         {
         cleanOncePattern(pat->LEFT);
         cleanOncePattern(pat->RIGHT);
@@ -84,8 +80,8 @@ psk rightoperand(psk Pnode)
     ULONG Sign;
     temp = (Pnode->RIGHT);
     return((Sign = Op(Pnode)) == Op(temp) &&
-        (Sign == PLUS || Sign == TIMES || Sign == WHITE) ?
-        temp->LEFT : temp);
+           (Sign == PLUS || Sign == TIMES || Sign == WHITE) ?
+           temp->LEFT : temp);
     }
 
 psk rightoperand_and_tail(psk Pnode, ppsk head, ppsk tail)
@@ -93,7 +89,7 @@ psk rightoperand_and_tail(psk Pnode, ppsk head, ppsk tail)
     psk temp;
     assert(is_op(Pnode));
     temp = Pnode->RIGHT;
-    if (Op(Pnode) == Op(temp))
+    if(Op(Pnode) == Op(temp))
         {
         *head = temp->LEFT;
         *tail = temp->RIGHT;
@@ -111,7 +107,7 @@ psk leftoperand_and_tail(psk Pnode, ppsk head, ppsk tail)
     psk temp;
     assert(is_op(Pnode));
     temp = Pnode->LEFT;
-    if (Op(Pnode) == Op(temp))
+    if(Op(Pnode) == Op(temp))
         {
         *head = temp->LEFT;
         *tail = temp->RIGHT;
@@ -127,7 +123,7 @@ psk leftoperand_and_tail(psk Pnode, ppsk head, ppsk tail)
 void privatized(psk Pnode, psk plkn)
     {
     *plkn = *Pnode;
-    if (shared(plkn))
+    if(shared(plkn))
         {
         dec_refcount(Pnode);
         plkn->LEFT = same_as_w(plkn->LEFT);
