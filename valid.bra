@@ -7409,10 +7409,13 @@ string line 2\"
                   )
               : ?myCalc
               : (=calculation)
+            & out$A36
             &   (myCalc..calculate)$(4,7)
               : "1.1000000000000000E+01"
+            & out$A37
             &   (myCalc..export)$(N,Arr)
               : (,4 7 11)
+            & out$A38
             & (       new
                     $ ( calculation
                       , ( 
@@ -7436,10 +7439,13 @@ string line 2\"
                   $ "Failed compilation of calculation object must lead to failure."
               | 
               )
+            & out$A39
             &   (myCalc..calculate)$(4,7)
               : "1.1000000000000000E+01"
+            & out$A41
             &   (myCalc..export)$(N,Arr)
               : (,4 7 11)
+            & out$A42
           | Out$"No support for calculation objects."
           )
       &   out
