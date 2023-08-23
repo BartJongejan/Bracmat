@@ -7409,13 +7409,10 @@ string line 2\"
                   )
               : ?myCalc
               : (=calculation)
-            & out$A36
             &   (myCalc..calculate)$(4,7)
               : "1.1000000000000000E+01"
-            & out$A37
             &   (myCalc..export)$(N,Arr)
               : (,4 7 11)
-            & out$A38
             & (       new
                     $ ( calculation
                       , ( 
@@ -7439,13 +7436,153 @@ string line 2\"
                   $ "Failed compilation of calculation object must lead to failure."
               | 
               )
-            & out$A39
             &   (myCalc..calculate)$(4,7)
               : "1.1000000000000000E+01"
-            & out$A41
             &   (myCalc..export)$(N,Arr)
               : (,4 7 11)
-            & out$A42
+            & (       new
+                    $ ( calculation
+                      , (=.9|10)
+                      )
+                  : ?myCalc
+                  : (=calculation)
+                & (   (myCalc..calculate)$
+                    &   Out
+                      $ "Runtime error expected. In a calculation object, an OR (|) statement is not an expression returning a value."
+                  | 
+                  )
+              |   Out
+                $ "Compilation does not (yet) check whether a calculation object can ever run."
+              )
+            & (       new
+                    $ ( calculation
+                      , ( 
+                        =   
+                          .   0:?n
+                            &   whl
+                              ' ( !n:<10
+                                & 1+!n:?n
+                                )
+                        )
+                      )
+                  : ?myCalc
+                  : (=calculation)
+                & (   (myCalc..calculate)$
+                    &   Out
+                      $ "Runtime error expected. In a calculation object, an WHILE (whl') statement is not an expression returning a value."
+                  | 
+                  )
+              |   Out
+                $ "Compilation does not (yet) check whether a calculation object can ever run."
+              )
+            & (       new
+                    $ ( calculation
+                      , ( 
+                        =   
+                          .   0:?n
+                            &   whl
+                              ' ( !n:<10
+                                & 1+!n:?n
+                                )
+                            & !n
+                        )
+                      )
+                  : ?myCalc
+                  : (=calculation)
+                & ( (myCalc..calculate)$
+                  | Out$"No runtime error expected."
+                  )
+              | Out$"Compilation failed for unknown reason (1)."
+              )
+            & (       new
+                    $ ( calculation
+                      , ( 
+                        =   
+                          .   20:?n:?m
+                            & !n+!m
+                        )
+                      )
+                  : ?myCalc
+                  : (=calculation)
+                & ( (myCalc..calculate)$
+                  | Out$"No runtime error expected."
+                  )
+              | Out$"Compilation failed for unknown reason (2)."
+              )
+            & (       new
+                    $ ( calculation
+                      , ( 
+                        =   
+                          .   20 7 500:%?k %?l %?m
+                            & !k+!l+!m
+                        )
+                      )
+                  : ?myCalc
+                  : (=calculation)
+                &   Out
+                  $ "Compilation failed because the : operator expects a numeric value on the Left Hand Side."
+                & (   (myCalc..calculate)$
+                    : "1.5000000000000000E+03"
+                  |   Out
+                    $ "Calculation objects don't have pattern matching. The last element in the list, `500' is assigned to each of k , l and m."
+                  )
+              | 
+              )
+            & (     new$(calculation,(=.5*0^-1))
+                  : ?myCalc
+                  : (=calculation)
+                & (   (myCalc..calculate)$:
+                    &   Out
+                      $ "Division by zero is a run time error and does not result in a returnable value."
+                  | 
+                  )
+              | Out$"Compilation failed for unknown reason (4)."
+              )
+            & (       new
+                    $ ( calculation
+                      , ( 
+                        =   
+                          .   (   5*0^-1
+                                & 888:?i
+                              | 7:?i
+                              )
+                            & !i
+                        )
+                      )
+                  : ?myCalc
+                  : (=calculation)
+                & (     (myCalc..calculate)$
+                      : "8.8800000000000000E+02"
+                    &   out
+                      $ "Division by zero is a run time error, but not necessarily leading to halting the calculation. TODO handle inf and nan in calculation objects"
+                  | 
+                  )
+              | Out$"Compilation failed for unknown reason (5)."
+              )
+            & (       new
+                    $ ( calculation
+                      , ( 
+                        =   
+                          .   (   5*0^-1:INfinity
+                                & 888:?i
+                                & out$888
+                              | 7:?i
+                              )
+                            & !i
+                        )
+                      )
+                  : ?myCalc
+                  : (=calculation)
+                &   Out
+                  $ "\"INfinity\" is not a numeric value and strings are not supported in calculation objects."
+                & (     (myCalc..calculate)$
+                      : "8.8800000000000000E+02"
+                    &   Out
+                      $ "Division by zero is a run time error, but not necessarily leading to halting the calculation."
+                  | out$"TODO handle inf and nan in calculation objects"
+                  )
+              | 
+              )
           | Out$"No support for calculation objects."
           )
       &   out
