@@ -7299,6 +7299,149 @@ string line 2\"
             & Out$"Hash insert: Missing value"
           | 
           )
+          (       new
+                $ ( calculation
+                  , (=(s.myParm).!myParm)
+                  )
+              : ?myCalc
+              : (=calculation)
+            &   (myCalc..calculate)$2
+              : "2.0000000000000000E+00"
+            &   (myCalc..export)$("%a",myParm)
+              : "0x1.0000000000000p+1"
+            &   (myCalc..calculate)$256
+              : "2.5600000000000000E+02"
+            &   (myCalc..export)$("%a",myParm)
+              : "0x1.0000000000000p+8"
+            &   (myCalc..calculate)$"0.015625"
+              : "1.5625000000000000E-02"
+            &   (myCalc..export)$("%a",myParm)
+              : "0x1.0000000000000p-6"
+            &   (myCalc..calculate)$0xCAP-007
+              : "1.5781250000000000E+00"
+            &   (myCalc..export)$("%a",myParm)
+              : "0x1.9400000000000p+0"
+            &   (myCalc..calculate)$"0.857421875"
+              : "8.5742187500000000E-01"
+            &   (myCalc..export)$("%a",myParm)
+              : "0x1.b700000000000p-1"
+            &   (myCalc..calculate)$0x1p-1074
+              : "4.9406564584124654E-324"
+            &   (myCalc..export)$("%a",myParm)
+              : "0x0.0000000000001p-1022"
+            &   (myCalc..calculate)$"3.1415926"
+              : "3.1415926000000001E+00"
+            &   (myCalc..export)$("%a",myParm)
+              : "0x1.921fb4d12d84ap+1"
+            &   (myCalc..calculate)$5
+              : "5.0000000000000000E+00"
+            &   (myCalc..export)$("%a",myParm)
+              : "0x1.4000000000000p+2"
+            &   (myCalc..calculate)$"0x1.999999999999ap-4"
+              : "1.0000000000000001E-01"
+            &   (myCalc..export)$("%a",myParm)
+              : "0x1.999999999999ap-4"
+            &   (myCalc..calculate)$"0x3.3333333333334p-5"
+              : "1.0000000000000001E-01"
+            &   (myCalc..export)$("%a",myParm)
+              : "0x1.999999999999ap-4"
+            &   (myCalc..calculate)$"0xcc.ccccccccccdp-11"
+              : "1.0000000000000001E-01"
+            &   (myCalc..export)$("%a",myParm)
+              : "0x1.999999999999ap-4"
+            &   (myCalc..calculate)$"1.0000000000000000E-01"
+              : "1.0000000000000001E-01"
+            &   flt$(x2d$1999999999999a*2^-56,80)
+              : "1,00000000000000005551115123125782702118158340454101562500000000000000000000000000*10E-1"
+            &   (myCalc..export)$("%a",myParm)
+              : "0x1.999999999999ap-4"
+            &     new
+                $ ( calculation
+                  , ( 
+                    =   (s.myParm)
+                      .   (   !myParm:<"1.0"
+                            & -1:?answ
+                          | 1:?answ
+                          )
+                        & !answ
+                    )
+                  )
+              : ?myCalc
+              : (=calculation)
+            &   (myCalc..calculate)$1/2
+              : "-1.0000000000000000E+00"
+            &   (myCalc..calculate)$3/2
+              : "1.0000000000000000E+00"
+            &   (   new
+                  $ ( calculation
+                    , ( 
+                      =   (s.myParm)
+                        .   (   !myParm:<"0.5"
+                              & -1:?answ
+                            | 1:?answ
+                            )
+                          & !answ
+                      )
+                    )
+                : ?myCalc
+                )
+              : (=calculation)
+            &   (myCalc..calculate)$1/4
+              : "-1.0000000000000000E+00"
+            &   (myCalc..calculate)$3/4
+              : "1.0000000000000000E+00"
+            &     new
+                $ ( calculation
+                  , ( 
+                    =   (s.parm1) (s.parm2)
+                      .   ( add
+                          =   (a.Arry)
+                            .     !(idx$(Arry,0))
+                                + !(idx$(Arry,1))
+                              : ?(idx$(Arry,2))
+                          )
+                        & tbl$(Arr,3)
+                        & !parm1:?(idx$(Arr,0))
+                        & !parm2:?(idx$(Arr,1))
+                        & add$Arr
+                        & !(idx$(Arr,2))
+                    )
+                  )
+              : ?myCalc
+              : (=calculation)
+            &   (myCalc..calculate)$(4,7)
+              : "1.1000000000000000E+01"
+            &   (myCalc..export)$(N,Arr)
+              : (,4 7 11)
+            & (       new
+                    $ ( calculation
+                      , ( 
+                        =   (s.parm1) (s.parm2)
+                          .   ( add
+                              =   (a.Arry)
+                                .     !(idx$(Arry,0))
+                                    + !(idx$(Arry,1))
+                                  : ?(idx$(Arry,2))
+                              )
+                            & tbl$(Arr,3)
+                            & !parm1:?(idx$(Ars,0))
+                            & !parm2:?(idx$(Ars,1))
+                            & add$Arr
+                            & !(idx$(Arr,2))
+                        )
+                      )
+                  : ?myCalc
+                  : (=calculation)
+                &   Out
+                  $ "Failed compilation of calculation object must lead to failure."
+              | 
+              )
+            &   (myCalc..calculate)$(4,7)
+              : "1.1000000000000000E+01"
+            &   (myCalc..export)$(N,Arr)
+              : (,4 7 11)
+          | Out$"No support for calculation objects."
+          )
       &   out
         $ ( str
           $ ( "Done. "
