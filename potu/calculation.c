@@ -506,15 +506,15 @@ static fortharray* getOrCreateArrayPointerButNoArray(fortharray** arrp, char* na
                 if(curarrp->name)
                     {
                     strcpy(curarrp->name, name);
-                    curarrp->next = curarrp;
                     /*
+                    curarrp->next = 0;
                     curarrp->pval = 0;
                     curarrp->size = 0;
                     curarrp->index = 0;
                     curarrp->rank = 0;
                     curarrp->range = 0;
-                    */
                     curarrp = *arrp;
+                    */
                     }
                 }
             }
@@ -4520,61 +4520,62 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
                 if(lastword != 0)
                     {
                     unsigned int theend = (unsigned int)(lastword - forthstuff->word);
-                    j5->j[epopS].offset = theend;
-                    j5->j[epopS].action = Branch; /* Leave last value on the stack. (If there is one.) */
-                    j5->j[eS].offset = theend;
-                    j5->j[eS].action = Branch;
-                    j5->j[eF].offset = theend;
-                    j5->j[eF].action = Branch;
-
-                    assert(theend + 1 == length);
-
-                    lastword->action = TheEnd;
-                    if(newval)
-                        wipe(fullcode);
-                    char* marks = calloc(length, sizeof(char));
-                    if(marks)
+                    if(theend + 1 == length)
                         {
-#ifdef SHOWOPTIMIZATIONS
-                        int loop = 0;
-#endif
-                        for(;;)
+                        j5->j[epopS].offset = theend;
+                        j5->j[epopS].action = Branch; /* Leave last value on the stack. (If there is one.) */
+                        j5->j[eS].offset = theend;
+                        j5->j[eS].action = Branch;
+                        j5->j[eF].offset = theend;
+                        j5->j[eF].action = Branch;
+
+                        lastword->action = TheEnd;
+                        if(newval)
+                            wipe(fullcode);
+                        char* marks = calloc(length, sizeof(char));
+                        if(marks)
                             {
 #ifdef SHOWOPTIMIZATIONS
-                            printf("\nOptimization loop %d\n", ++loop);
+                            int loop = 0;
 #endif
-                            Boolean somethingdone = FALSE;
-                            somethingdone |= shortcutJumpChains(forthstuff->word);
-                            somethingdone |= combinePopBranch(forthstuff->word);
-                            somethingdone |= combineBranchPopBranch(forthstuff->word);
-                            memset(marks, 0, length * sizeof(char));
-                            somethingdone |= markUnReachable(forthstuff->word, marks);
-                            //somethingdone |= moveBranchesTowardsEndOverNoOp(forthstuff->word);
-                            if(somethingdone)
+                            for(;;)
                                 {
-                                length = removeNoOp(forthstuff, length);
-                                continue;
+#ifdef SHOWOPTIMIZATIONS
+                                printf("\nOptimization loop %d\n", ++loop);
+#endif
+                                Boolean somethingdone = FALSE;
+                                somethingdone |= shortcutJumpChains(forthstuff->word);
+                                somethingdone |= combinePopBranch(forthstuff->word);
+                                somethingdone |= combineBranchPopBranch(forthstuff->word);
+                                memset(marks, 0, length * sizeof(char));
+                                somethingdone |= markUnReachable(forthstuff->word, marks);
+                                //somethingdone |= moveBranchesTowardsEndOverNoOp(forthstuff->word);
+                                if(somethingdone)
+                                    {
+                                    length = removeNoOp(forthstuff, length);
+                                    continue;
+                                    }
+                                somethingdone |= dissolveNextWordBranches(forthstuff->word);
+                                somethingdone |= combineUnconditionalBranchTovalPush(forthstuff->word);
+                                memset(marks, 0, length * sizeof(char));
+                                somethingdone |= combineval2stack(forthstuff->word, marks); // FAULTY!
+                                memset(marks, 0, length * sizeof(char));
+                                somethingdone |= combinePopThenPop(forthstuff->word, marks);
+                                somethingdone |= eliminateBranch(forthstuff->word);
+                                somethingdone |= stack2var_var2stack(forthstuff->word);
+                                somethingdone |= removeIdempotentActions(forthstuff->word);
+                                somethingdone |= combinePushAndOperation(forthstuff->word);
+                                if(somethingdone)
+                                    {
+                                    length = removeNoOp(forthstuff, length);
+                                    continue;
+                                    }
+                                break;
                                 }
-                            somethingdone |= dissolveNextWordBranches(forthstuff->word);
-                            somethingdone |= combineUnconditionalBranchTovalPush(forthstuff->word);
-                            memset(marks, 0, length * sizeof(char));
-                            somethingdone |= combineval2stack(forthstuff->word, marks); // FAULTY!
-                            memset(marks, 0, length * sizeof(char));
-                            somethingdone |= combinePopThenPop(forthstuff->word, marks);
-                            somethingdone |= eliminateBranch(forthstuff->word);
-                            somethingdone |= stack2var_var2stack(forthstuff->word);
-                            somethingdone |= removeIdempotentActions(forthstuff->word);
-                            somethingdone |= combinePushAndOperation(forthstuff->word);
-                            if(somethingdone)
-                                {
-                                length = removeNoOp(forthstuff, length);
-                                continue;
-                                }
-                            break;
+                            free(marks);
                             }
-                        free(marks);
+                        return forthstuff;
                         }
-                    return forthstuff;
                     }
                 }
             if(!in_function)
