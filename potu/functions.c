@@ -1746,7 +1746,7 @@ function_return_type functions(psk Pnode)
                     return functionFail(Pnode);
                 addr[3] = rightnode->RIGHT;
                 if(ISBUILTIN((objectnode*)addr[2]))
-                    Pnode = build_up(Pnode, "(((\2.New)'\3)|)&\2", NULL);
+                    Pnode = build_up(Pnode, "((\2.New)'\3)&\2", NULL);
                 /* We might be able to call 'new' if 'New' had attached the argument
                     (containing the definition of a 'new' method) to the rhs of the '='.
                     This cannot be done in a general way without introducing new syntax rules for the new$ function.
@@ -1760,7 +1760,7 @@ function_return_type functions(psk Pnode)
                 if(!addr[2])
                     return functionFail(Pnode);
                 if(ISBUILTIN((objectnode*)addr[2]))
-                    Pnode = build_up(Pnode, "(((\2.New)')|)&\2", NULL);
+                    Pnode = build_up(Pnode, "((\2.New)')&\2", NULL);
                 /* There cannot be a user-defined 'new' method on a built-in object if there is no way to supply it*/
                 /* 'die' CAN be user-supplied. The built-in function is 'Die' */
                 else
