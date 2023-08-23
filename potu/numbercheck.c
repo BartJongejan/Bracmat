@@ -79,10 +79,10 @@ int numbercheck(const char* begin)
         {
         if(op_or_0 == '0')
             {
-            if(*(begin + 1) == 'x' || *(begin + 1) == 'X')
+            if(*(begin + 1) == 'x' || *(begin + 1) == 'X' || *(begin + 1) == '.')
                 {
                 /* hexadecimal number, must be in domain of strtod */
-                char* endptr;
+                static char* endptr;
                 double testdouble = strtod(begin, &endptr);
                 if(*endptr)
                     return 0; /* format error */
@@ -212,18 +212,18 @@ int numbercheck(const char* begin)
         {
         check = 0;
         }
-/*  if(check & (QNUMBER | QNUL | QFRACTION | QDOUBLE))
-        printf("%s",save);
+    /*  if(check & (QNUMBER | QNUL | QFRACTION | QDOUBLE))
+            printf("%s",save);
 
-    if(check & QNUMBER)
-        printf("QNUMBER ");
-    if(check & QNUL)
-        printf("QNUL ");
-    if(check & QFRACTION)
-        printf("QFRACTION ");
-    if(check & QDOUBLE)
-        printf("QDOUBLE ");
-    printf("\n");*/
+        if(check & QNUMBER)
+            printf("QNUMBER ");
+        if(check & QNUL)
+            printf("QNUL ");
+        if(check & QFRACTION)
+            printf("QFRACTION ");
+        if(check & QDOUBLE)
+            printf("QDOUBLE ");
+        printf("\n");*/
     return check;
     }
 
