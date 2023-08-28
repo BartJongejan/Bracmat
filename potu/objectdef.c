@@ -12,7 +12,12 @@
 #include "wipecopy.h"
 #include <string.h>
 
-static classdef classes[] = { {"hash",hash},{"calculation",calculation}, {NULL,NULL} };
+static classdef classes[] =
+    { {"hash",hash}
+    , {"calculation",calculation}
+    , {"UFP",calculation} /*Next thing after UFO. Unshackled Floating Point?*/
+    , {NULL,NULL}
+    }; /**/
 
 static int hasSubObject(psk src)
     {

@@ -1,3 +1,13 @@
+28 August 2023
+Changed the output format of flt$. The decimal comma has become a decimal dot.
+The `*10' in front of the `E' has been removed.
+The new `calcuation' object has been renamed to the shorter `UFP'. (Think:
+the next thing after UFO.) Its member function `calculate' is renamed to `go'.
+The old names can still be used, for the time being. Also `run' instead of `go'
+will work. A few bugs and weaknesses in calculation.c are fixed. If an error is
+found during compilation, the `new$(UFP... )' call fails.  
+The test suite valid.bra is extended with some UFP examples.
+
 20 August 2023
 For some time, the old, stable source code in the `src' directory and the
 source code in the more experimental `potu' directory have diverged. Sometimes,

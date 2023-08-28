@@ -4677,6 +4677,8 @@ static Boolean calculationdie(struct typedObjectnode* This, ppsk arg)
 
 method calculation[] = {
     {"calculate",calculate},
+    {"run",calculate}, /*Alternative to `calculate' and `go'*/
+    {"go",calculate}, /*Alternative to calculate and `run'*/
     {"trc",trc},
     {"print",print},
     {"export",eksport},

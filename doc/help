@@ -1943,25 +1943,23 @@ Example:
   & ( calctxt
     =   M
       , "Floating point calculations"
-      , "Bracmat is best at symbolic processing. However, sometimes you may
-want to do floating point calculations, for example to a create a graphic
-illustration of the result of some symbolic processing, such as a complex
-graph. Whereas the graph is purely symbolic in nature, the drawing
-requires coordinates. For the computation of those coordinates you may want
-to model the vertices as charged particles and the edges as elastic strings
-connecting the particles. To let this physical model evolve under the influence
-of elastic and Coulomb forces, the computer must iterate many times over
-the same set of arithmetic instructions. For purposes like these, Bracmat has
-an object type called |_calculation_|.
+      , "Bracmat is best at symbolic processing. However, sometimes you may want to do
+floating point calculations, for example to a create a graphic illustration of
+the result of some symbolic processing, such as a complex graph. Whereas the
+graph is purely symbolic in nature, the drawing requires coordinates. For the
+computation of those coordinates you may want to model the vertices as charged
+particles and the edges as elastic strings connecting the particles. To let
+this physical model evolve under the influence of elastic and Coulomb forces,
+the computer must iterate many times over the same set of arithmetic
+instructions. For purposes like these, Bracmat has an object type called `UFP'
+(`UnIfancyfied Floating Point').
 
-A |_calculation_| object contains |_calculation_| code that is syntactically
-the same as Bracmat code, but semantically different. Source code inside a
-|_calculation_| object behaves very different from what we are used to:
+A UFP object houses UFP programming code that is syntactically the same as
+Bracmat code, but semantically different:
 
-* When a |_calculation_| object is created with |_new$_|, the passed Bracmat code
-  is parsed and compiled to a bytecode. Bytecode can be listed using the
-  |_print_| method. Compilation is fast, as is executing the resulting
-  bytecode.
+* When a UFP object is created with |_new$_|, the passed Bracmat code is parsed
+  and compiled to a bytecode. Bytecode can be listed using the |_print_|
+  method. Compilation is fast, as is executing the resulting bytecode.
 * There is no pattern matching. The |_:_| operator is only for assignment and
   for simple comparisons of two numbers.
 * There are two data types: floating point numbers (scalars) and arrays of
@@ -1972,42 +1970,41 @@ the same as Bracmat code, but semantically different. Source code inside a
 * All values are C-doubles. There are no strings and no rational or integer
   numbers.
 * The semantics of the |_|_| operator is very similar to that of |_if_|
-  in other languages in that it does not return a value.
+  in imperative languages in that it does not return a value.
 * Variables have function scope and are not visible in nested functions.
 
-You create a |_calculation_| object as follows
+You create a UFP object as follows
 
-{?} new$(calculation,(=.1+2)):?myCalculation
-{?} (myCalculation..calculate)$
-{!} 1.3940221304312031E+01
+{?} new$(UFP,(=.1+2)):?myCalculation
+{?} (myCalculation..go)$
+{!} 3.0000000000000000E+00
 
 Or, with parameters:
 
-{?} new$(calculation,(=(s.a) (s.b).pow$(1/3,!a^3+!b^3))):?myCalculation
-{?} (myCalculation..calculate)$(13,8)
+{?} new$(UFP,(=(s.a) (s.b).pow$(1/3,!a^3+!b^3))):?myCalculation
+{?} (myCalculation..go)$(13,8)
 {!} 1.3940221304312031E+01
 
-Hereafter, |_myCalculation_| refers to a calculation object and is treated
-in the same way as a user defined object.
+Hereafter, |_myCalculation_| refers to a UFP object and is treated in the same
+way as a user defined object.
 
-Before you can get started with calculation objects you need to learn
-about the calculation object API, parameters, variables, constants, arrays,
-loops, built-in functions and user defined functions.
+Before you can get started with UFP objects you need to learn about the UFP
+object API, parameters, variables, constants, arrays, loops, built-in functions
+and user defined functions.
 
-1 Member functions of calculation objects
-    Member functions are the API: they constitute the communication
-    channels between the Bracmat code outside and the Bracmat code inside
-    the calculation object.
-2 Built-in calculation functions
-    These functions can be used in the code that runs inside a calculation
+1 Member functions of UFP objects
+    Member functions are the API: they constitute the communication channels
+    between the Bracmat code outside and the Bracmat code inside the UFP
     object.
+2 Built-in UFP functions
+    These functions can be used in the code that runs inside a UFP object.
 3 Parameters
-    How are parameters passed from outside to inside calculation objects?
+    How are parameters passed from outside to inside UFP objects?
     And how are they passed to built-in and user defined functions?
 4 Variables
     When to declare variables and how.
 5 Constants
-    There are two ways to write constant values into calculation source code.
+    There are two ways to write constant values into UFP source code.
 6 Arrays
     Declaring rank and ranges of arrays, indexing and accessing arrays.
 7 Iterations
@@ -2023,17 +2020,17 @@ loops, built-in functions and user defined functions.
     )
   & ( CalcMethodtxt
     =   M
-      , "Listing of calculation object methods"
+      , "Listing of UFP object methods"
       , "
-The following methods are defined for |_calculation_| objects:
-1 |_calculate_|
+The following methods are defined for UFP objects:
+1 |_go_|
     Perform a floating point calculation.
 2 |_trc_|
     Perform a floating point calculation, showing the details of each step.
 3 |_print_|
-    Show a listing of the instructions contained in the |_calculation_| object.
+    Show a listing of the instructions contained in the UFP object.
 4 |_export_|
-    Export the value of a variable contained in a |_calculation_| object.
+    Export the value of a variable contained in a UFP object.
 "
       ,   (1,Calculatetxt)
           (2,CalcTrctxt)
@@ -2042,57 +2039,66 @@ The following methods are defined for |_calculation_| objects:
     )
   & ( CalcFunctxt
     =   T
-      , "Listing of built-in functions and function-like constructs in calculation objects"
-      , "Bracmat maps all floating point functions that are available as standard C functions to Bracmat functions.
-For a description, see the documentation of the math.h C header file.
+      , "Listing of built-in functions and function-like constructs in UFP objects"
+      , "Bracmat maps all floating point functions that are available as standard C
+functions to Bracmat functions. For a description, see the documentation of the
+math.h C header file.
 
 In addition:
 
-|_sign$<number>_| returns -1, 0 or 1, depending on whether the number is negative, zero or positive.
+|_sign$<number>_| returns -1, 0 or 1, depending on whether the number is
+negative, zero or positive.
 
 |_cube$<number>_| returns the third power of the number.
 
 |_sqr$<number>_| returns the second power of the number.
 
-|_subtract$(<number1>,<number2>)_| returns number1-number2. (Remember that Bracmat has no operator for subtraction!)
+|_subtract$(<number1>,<number2>)_| returns number1-number2. (Remember that
+Bracmat has no operator for subtraction!)
 
-|_divide$(<number1>,<number2>)_| returns number1/number2. (Remember that Bracmat has no operator for division!)
+|_divide$(<number1>,<number2>)_| returns number1/number2. (Remember that
+Bracmat has no operator for division!)
 
 |_out$<number>_| writes a number to the console.
 
 |_outln$<number>_| writes a number, followed by a new line to the console.
 
-|_tbl$(<name>,<whole number>, ...)_| creates an array with the first argument as name. Each whole number adds a (sub)range. The number of whole numbers defines the rank of the array. The array is destroyed when the |_calculation_| object is destroyed or when another array by the same name is created.
+|_tbl$(<name>,<whole number>, ...)_| creates an array with the first argument
+as name. Each whole number adds a (sub)range. The number of whole numbers
+defines the rank of the array. The array is destroyed when the UFP object is
+destroyed or when another array by the same name is created.
 
 |_rank$<name>_| returns the rank of the array named <name>.
 
-|_range$(<name>,<whole number>)_| returns a range of the array named <name>. The number must be non-negative and smaller than the rank of the array.
+|_range$(<name>,<whole number>)_| returns a range of the array named <name>.
+The number must be non-negative and smaller than the rank of the array.
 
-|_idx$(<name>,<whole number>, ...)_| Sets the pointer of array <name> to the indicated index (or indices, if the rank is > 1).
+|_idx$(<name>,<whole number>, ...)_| Sets the pointer of array <name> to the
+indicated index (or indices, if the rank is > 1).
 
 |_whl'(<code>)_| Implements a loop.
 "
     )
   & ( CalcParmtxt
     =   T
-      , "Calculation parameters"
-      , "Since calculation objects only handle numbers and arrays of numbers, all
-parameters passed to a calculation object must be numbers or arrays of
-numbers. Numbers can be represented in Bracmat's native format or in any
-of the formats recognized by the C |_strtod()_| function.
+      , "UFP parameters"
+      , "Since UFP objects only handle numbers and arrays of numbers, all
+parameters passed to a UFP object must be numbers or arrays of numbers.
+Numbers can be represented in Bracmat's native format or in any of the formats
+recognized by the C |_strtod()_| function.
 
-In the source code of the calculation, each parameter must be explicitly
-and completely declared. Single values (scalars) are declared as
-|_(s.<parameterName>)_|, while arrays must be declared as
-|_(a.<parameterName>.<range>)_| (1-dimensional arrays) or
+In the source code of the UFP, each parameter must be explicitly and completely
+declared. Single values (scalars) are declared as |_(s.<parameterName>)_|,
+while arrays must be declared as |_(a.<parameterName>.<range>)_| (1-dimensional
+arrays) or
 
 |_(a.<parameterName>.<range>.<range>. ...)_| (multidimensional arrays).
 
-In the calculation source code the same rules apply on the calling side, but
-in user defined functions declarations are slightly simpler: you cannot
-specify the ranges on arrays. (These are inferred during compilation.) So
-scalars are declared as |_(s.<parameterName>)_|, while arrays must be
-declared as |_(a.<parameterName>)_|.
+In the UFP source code the same rules apply on the calling side, but in user
+defined functions declarations are slightly simpler: you cannot specify the
+ranges on arrays. (These are inferred during compilation.) So scalars are
+declared as |_(s.<parameterName>)_|, while arrays must be declared as
+|_(a.<parameterName>)_|.
 
 Scalar parameters are passed by value, while arrays are passed by reference.
 That means that a function, as a side effect, can change an array that is
@@ -2101,9 +2107,9 @@ of functions are always scalar values."
     )
   & ( CalcVartxt
     =   T
-      , "Calculation variables"
-      , "Scalar calculation variables are not explicitly declared. Arrays are declared
-when they are created.
+      , "UFP variables"
+      , "Scalar UFP variables are not explicitly declared. Arrays are declared when they
+are created.
 
 Variables have a restricted scope. The main code and each user defined function
 has its own scope. Variables in functions are not visible outside that
@@ -2111,32 +2117,60 @@ function and variables outside a function are not visible inside that function."
     )
   & ( CalcConsttxt
     =   T
-      , "Calculation constants"
-      , "There are two ways to introduce constant values in calculation source code
+      , "UFP constants"
+      , "There are two ways to introduce constant values in UFP source code.
 The most obvious one is writing a numerical value. Such values can be written
 by using the native Bracmat format (rational numbers that can contain a |_/_|)
 or by using one of the formats recognized by |_strtod()_|.
-The other way to write constants into calculation source code is by means of
-macro expressions, similar to how one uses |_#define_| in C."
+The other way to write constants into UFP source code is by means of macro
+expressions, similar to how one uses |_#define_| in C."
     )
   & ( CalcArraytxt
     =   T
-      , "Calculation arrays"
-      , "Arrays are allocated by the built-in |_tbl$_| function. This function takes
-a number of parameters. The first parameter is the name of the array. The
-next parameter is the range of the array. Each following parameter adds another
+      , "UFP arrays"
+      , "Arrays are allocated by the built-in |_tbl$_| function. This function takes a
+number of parameters. The first parameter is the name of the array. The next
+parameter is the range of the array. Each following parameter adds another
 range and increments the rank by one. To create an array for the coordinates of
 all nine planets of the solar system, one would as follows:
 
-{?} ( 9:?nrOfPlanets
+{?} ( 8:?nrOfPlanets
     & 3:?spaceDimensions
     &     new
-        $ ( calculation
+        $ ( UFP
           ,
-            ' (.tbl$(planets,$nrOfPlanets,$spaceDimensions))
+            ' (
+              .   \"The array `planets' is allocated at compile time,
+                   because the sizes are already known at that time.\"
+                & tbl$(planets,$nrOfPlanets,$spaceDimensions)
+                & rank$planets:?nrOfIndices
+                & \"The array `dynamic' is allocated at run time.\"
+                & tbl$(dynamic,!nrOfIndices)
+                & 0:?index
+                &   whl
+                  ' ( !index:<!nrOfIndices
+                    &   range$(planets,!index)
+                      : ?(idx$(dynamic,!index))
+                    & 1+!index:?index
+                    )
+                & 1:?cells
+                & 0:?index
+                &   whl
+                  ' ( !index:<!nrOfIndices
+                    & !(idx$(dynamic,!index))*!cells:?cells
+                    & 1+!index:?index
+                    )
+                & \"You can comment source code this way.
+                   The value !cells is returned 
+                   as the result of this function\"
+                & !cells
+              )
           )
-      : ?calculationObject
-    );
+      : ?UFPobject
+    & (UFPobject..go)$:\"2.4000000000000000E+01\"
+    & (UFPobject..export)$(N,dynamic)
+    )
+{!} ,8 3
 
 The |_idx_| function selects an array element. This function has the same
 signature as the |_tbl_| function. The first parameter is the name of the array
@@ -2171,22 +2205,22 @@ position variable is just an index pointing into this C array."
     )
   & ( CaltItertxt
     =   T
-      , "Calculation iterations"
-      , "There is just one way to implement a loop in a calculation object: using
+      , "UFP iterations"
+      , "There is just one way to implement a loop in a UFP object: using
 |_whl'(<body of loop>)_|. In order to exit from the loop, the body of the
 loop must have at least one comparison expression."
     )
   & ( Calculatetxt
     =   T
-      , "(myCalculation..calculate)$<Parameters>"
-      , "Once a calculation object is created, it can be executed using the
-|_calculate_| method. This method expects zero or more parameters, as specified
-by the parameter declarations in the calculation object's source code."
+      , "(myCalculation..go)$<Parameters>"
+      , "Once a UFP object is created, it can be executed using the |_go_| method. This
+method expects zero or more parameters, as specified by the parameter
+declarations in the UFP object's source code."
     )
   & ( CalcTrctxt
     =   T
       , "(myCalculation..trc)$<Parameters>"
-      , "The |_trc_| method is equivalent to the |_calculate_| method, except that it
+      , "The |_trc_| method is equivalent to the |_go_| method, except that it
 prints the details of each step it takes during execution of the source code.
 The only use for |_trc_| is while debugging and optimizing the C-source code
 `calculation.c'."
@@ -2195,21 +2229,20 @@ The only use for |_trc_| is while debugging and optimizing the C-source code
     =   T
       , "(myCalculation..print)$"
       , "The |_print_| method writes a listing of the result of the compilation of
-the calculation source code. The only use for |_print_| is while debugging and
+the UFP source code. The only use for |_print_| is while debugging and
 optimizing the C-source code `calculation.c'."
     )
   & ( CalcExporttxt
     =   T
-      , "(myCalculation..export)$(<format>,<name of variable of |_calculation_| object>)"
-      , "After executing a calculation object, the results of the calculations are
-still hidden in the calculation object. To make further use of the results,
-they must be exported as native Bracmat expressions. The |_export_| method
-can export one variable at a time. Only variables in the main source code
-can be exported, variables in user defined functions cannot be exported.
-Also the variables that are declared as the parameters of the calculation
-object can be exported.
-{?} ( new$(calculation,(=(s.a) (s.b).!a+!b:?b&2*!b:?c)):?calc
-    & (calc..calculate)$(10,11):?Y
+      , "(myCalculation..export)$(<format>,<name of variable of UFP object>)"
+      , "After executing a UFP object, the results of the calculations are still hidden
+in the UFP object. To make further use of the results, they must be exported as
+native Bracmat expressions. The |_export_| method can export one variable at a
+time. Only variables in the main source code can be exported, variables in user
+defined functions cannot be exported. The variables that are declared as the
+parameters of the UFP object can also be exported.
+{?} ( new$(UFP,(=(s.a) (s.b).!a+!b:?b&2*!b:?c)):?calc
+    & (calc..go)$(10,11):?Y
     & out$(Y !Y)
     & (calc..export)$(N,b):?b
     & out$(b !b)
@@ -3175,12 +3208,14 @@ visible functions are predefined:
   & ( flttxt
     =   T
       , "flt$(<rational-number>,<number-of-decimals>)"
-      , "flt$ converts a rational number to a floating point presentation. The result
-is stored in an atom. This function is meant for output, Bracmat does not use
-floating point numbers itself.
+      , "flt$ converts a rational number to a floating point presentation. The result is
+stored in an atom and can be used to export results in foreign formats such as
+XML, JSON, CSV. Floating point numbers can also be employed in UFP objects.
 
 {?} flt$(123/456,78)
-{?} flt$(sub$(tay$(sin$x,x,40).x.11/7),12)"
+{!} 2.697368421052631578947368421052631578947368421052631578947368421052631578947368E-1
+{?} flt$(sub$(tay$(sin$x,x,40).x.11/7),12)
+{!} 9.999998001334E-1"
     )
   & ( sgntxt
     =   T
