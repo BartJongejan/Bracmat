@@ -283,22 +283,22 @@ int insert(psk name, psk pnode)
         strng = POBJ(name);
         len = strlen((char*)strng);
 #if PVNAME
-        newvar = (vars*)bmalloc(__LINE__, sizeof(vars));
+        newvar = (vars*)bmalloc(sizeof(vars));
         if(*strng)
             {
 #if ICPY
             MEMCPY(newvar->vname = (unsigned char*)
-                   bmalloc(__LINE__, len + 1), strng, (len >> LOGWORDLENGTH) + 1);
+                   bmalloc(len + 1), strng, (len >> LOGWORDLENGTH) + 1);
 #else
             MEMCPY(newvar->vname = (unsigned char*)
-                   bmalloc(__LINE__, len + 1), strng, ((len / sizeof(LONG)) + 1) * sizeof(LONG));
+                   bmalloc(len + 1), strng, ((len / sizeof(LONG)) + 1) * sizeof(LONG));
 #endif
             }
 #else
         if(len < 4)
-            newvar = (vars*)bmalloc(__LINE__, sizeof(vars));
+            newvar = (vars*)bmalloc(sizeof(vars));
         else
-            newvar = (vars*)bmalloc(__LINE__, sizeof(vars) - 3 + len);
+            newvar = (vars*)bmalloc(sizeof(vars) - 3 + len);
         if(*strng)
             {
 #if ICPY
@@ -398,7 +398,7 @@ int psh(psk name, psk pnode, psk dim)
         {
         for(; nxtvar->n >= m22; m22 <<= 1)
             {
-            nvaria = (varia*)bmalloc(__LINE__, sizeof(varia) + (m22 - 1) * sizeof(psk));
+            nvaria = (varia*)bmalloc(sizeof(varia) + (m22 - 1) * sizeof(psk));
             nvaria->prev = nxtvar->pvaria;
             nxtvar->pvaria = nvaria;
             }
@@ -817,18 +817,18 @@ void mmf(ppsk PPnode)
             nxtvar;
             nxtvar = nxtvar->next)
             {
-            goal = *pgoal = (psk)bmalloc(__LINE__, sizeof(knode));
+            goal = *pgoal = (psk)bmalloc(sizeof(knode));
             goal->v.fl = WHITE | SUCCESS;
             if(ext && nxtvar->n > 0)
                 {
-                goal = goal->LEFT = (psk)bmalloc(__LINE__, sizeof(knode));
+                goal = goal->LEFT = (psk)bmalloc(sizeof(knode));
                 goal->v.fl = DOT | SUCCESS;
                 sprintf(dim, "%d.%d", nxtvar->n, nxtvar->selector);
                 goal->RIGHT = NULL;
                 goal->RIGHT = build_up(goal->RIGHT, dim, NULL);
                 }
             goal = goal->LEFT =
-                (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + strlen((char*)VARNAME(nxtvar)));
+                (psk)bmalloc(sizeof(ULONG) + 1 + strlen((char*)VARNAME(nxtvar)));
             goal->v.fl = (READY | SUCCESS);
             strcpy((char*)(goal)+sizeof(ULONG), (char*)VARNAME(nxtvar));
             pgoal = &(*pgoal)->RIGHT;
@@ -997,7 +997,7 @@ int string_copy_insert(psk name, psk pnode, char* str, char* cutoff)
         nr = fullnumbercheck(str) & ~DEFINITELYNONUMBER;
         if((nr & MINUS) && !(name->v.fl & NUMBER))
             nr = 0; /* "-1" is only converted to -1 if the # flag is present on the pattern */
-        psnode = (stringrefnode*)bmalloc(__LINE__, sizeof(stringrefnode));
+        psnode = (stringrefnode*)bmalloc(sizeof(stringrefnode));
         psnode->v.fl = /*(pnode->v.fl & ~(ALL_REFCOUNT_BITS_SET|VISIBLE_FLAGS)) substring doesn't inherit flags like */
             READY | SUCCESS | LATEBIND | nr;
         /*psnode->v.fl |= SUCCESS;*/ /*{?} @(~`ab:%?x %?y)&!x => a */ /*{!} a */

@@ -50,7 +50,7 @@ psk Head(psk pnode)
         else
             {
             stringrefnode* ps = (stringrefnode*)pnode;
-            pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + ps->length);
+            pnode = (psk)bmalloc(sizeof(ULONG) + 1 + ps->length);
             pnode->v.fl = (ps->v.fl & COPYFILTER /*~ALL_REFCOUNT_BITS_SET*/ & ~LATEBIND);
             strncpy((char*)(pnode)+sizeof(ULONG), (char*)ps->str, ps->length);
             wipe(ps->pnode);

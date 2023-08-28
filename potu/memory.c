@@ -105,6 +105,7 @@ static int malloced = 0;
 #if DOSUMCHECK
 
 static int LineNo;
+static const char* FileName;
 static int globN;
 
 
@@ -128,30 +129,31 @@ static int getchecksum(void)
 
 static int Checksum = 0;
 
-static void setChecksum(int lineno, int n)
+static void setChecksum(const char* file,int lineno, int n)
     {
     if(lineno)
         {
         LineNo = lineno;
+        FileName = file;
         globN = n;
         }
     Checksum = getchecksum();
     }
 
-static void checksum(int line)
+static void checksum(const char* file, int line)
     {
     static int nChecksum = 0;
     nChecksum = getchecksum();
     if(Checksum && Checksum != nChecksum)
         {
-        Printf("Line %d: Illegal write after bmalloc(%d) on line %d", line, globN, LineNo);
+        Printf("File %s, Line %d: Illegal write after bmalloc(%d) on line %d", file, line, globN, LineNo);
         getchar();
         exit(1);
         }
     }
 #else
-#define setChecksum(a,b)
-#define checksum(a)
+#define setChecksum(a,b,c)
+#define checksum(a,b)
 #endif
 
 static struct memblock* initializeMemBlock(size_t elementSize, size_t numberOfElements)
@@ -290,7 +292,11 @@ void bezetting(void)
     }
 #endif
 
-void* bmalloc(int lineno, size_t n)
+#if DOSUMCHECK
+void* Bmalloc(const char* file, int lineno, size_t n)
+#else
+void* Bmalloc(size_t n)
+#endif
     {
     void* ret;
 #if DOSUMCHECK
@@ -311,7 +317,7 @@ void* bmalloc(int lineno, size_t n)
 #if CHECKALLOCBOUNDS
     n += 3 * sizeof(LONG);
 #endif
-    checksum(__LINE__);
+    checksum(__FILE__, __LINE__);
     n = (n - 1) / sizeof(struct memoryElement);
     if(n <
 #if _5_6
@@ -347,7 +353,7 @@ void* bmalloc(int lineno, size_t n)
             / **/
             ((LONG*)ret)[n] = 0;
             ((LONG*)ret)[0] = 0;
-            setChecksum(lineno, nn);
+            setChecksum(file,lineno, nn);
 #if CHECKALLOCBOUNDS
             ((LONG*)ret)[n - 1] = 0;
             ((LONG*)ret)[2] = 0;
@@ -389,7 +395,7 @@ void* bmalloc(int lineno, size_t n)
 #endif
     ((LONG*)ret)[n] = 0;
     ((LONG*)ret)[0] = 0;
-    setChecksum(lineno, n);
+    setChecksum(file,lineno, n);
 #if CHECKALLOCBOUNDS
     ((LONG*)ret)[n - 1] = 0;
     ((LONG*)ret)[2] = 0;
@@ -574,7 +580,7 @@ void bfree(void* p)
     LONG* lp = (LONG*)p;
 #endif
     assert(p != 0);
-    checksum(__LINE__);
+    checksum(__FILE__, __LINE__);
 #if CHECKALLOCBOUNDS
     checkBounds(p);
     lp = lp - 2;
@@ -592,7 +598,7 @@ void bfree(void* p)
 #endif
             ((struct memoryElement*)p)->next = (*q)->firstFreeElementBetweenAddresses;
             (*q)->firstFreeElementBetweenAddresses = (struct memoryElement*)p;
-            setChecksum(LineNo, globN);
+            setChecksum(FileName,LineNo, globN);
             return;
             }
         }
@@ -600,7 +606,7 @@ void bfree(void* p)
 #if SHOWMAXALLOCATED
     --malloced;
 #endif
-    setChecksum(LineNo, globN);
+    setChecksum(FileName, LineNo, globN);
     }
 
 

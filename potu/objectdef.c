@@ -42,7 +42,7 @@ static psk objectcopysub2(psk src) /* src is NOT an object */
     psk goal;
     if(is_op(src) && hasSubObject(src))
         {
-        goal = (psk)bmalloc(__LINE__, sizeof(knode));
+        goal = (psk)bmalloc(sizeof(knode));
         goal->v.fl = src->v.fl & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
         goal->LEFT = objectcopysub(src->LEFT);
         goal->RIGHT = objectcopysub(src->RIGHT);
@@ -63,7 +63,7 @@ static psk objectcopysub(psk src)
             }
         else
             {
-            goal = (psk)bmalloc(__LINE__, sizeof(objectnode));
+            goal = (psk)bmalloc(sizeof(objectnode));
 #if WORD32
             ((typedObjectnode*)goal)->u.Int = 0;
 #else
@@ -86,7 +86,7 @@ static psk objectcopy(psk src)
         {
         if(ISBUILTIN((objectnode*)src))
             {
-            goal = (psk)bmalloc(__LINE__, sizeof(typedObjectnode));
+            goal = (psk)bmalloc(sizeof(typedObjectnode));
 #if WORD32
             ((typedObjectnode*)goal)->u.Int = BUILTIN;
 #else
@@ -97,7 +97,7 @@ static psk objectcopy(psk src)
             }
         else
             {
-            goal = (psk)bmalloc(__LINE__, sizeof(objectnode));
+            goal = (psk)bmalloc(sizeof(objectnode));
 #if WORD32
             ((typedObjectnode*)goal)->u.Int = 0;
 #else
@@ -127,7 +127,7 @@ psk getObjectDef(psk src)
             ;
         if(df->vtab)
             {
-            dest = (typedObjectnode*)bmalloc(__LINE__, sizeof(typedObjectnode));
+            dest = (typedObjectnode*)bmalloc(sizeof(typedObjectnode));
             dest->v.fl = EQUALS | SUCCESS;
             dest->left = same_as_w(&nilNode);
             dest->right = same_as_w(src);
@@ -152,7 +152,7 @@ psk getObjectDef(psk src)
 
     if((def = SymbolBinding_w(src, src->v.fl & DOUBLY_INDIRECT)) != NULL)
         {
-        dest = (typedObjectnode*)bmalloc(__LINE__, sizeof(typedObjectnode));
+        dest = (typedObjectnode*)bmalloc(sizeof(typedObjectnode));
         dest->v.fl = EQUALS | SUCCESS;
         dest->left = same_as_w(&nilNode);
         dest->right = objectcopy(def); /* TODO Head(&def) ? */

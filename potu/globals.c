@@ -10,7 +10,7 @@ int debug = 0;
 #if CHECKALLOCBOUNDS
 int POINT = 0;
 #endif
-/* ISO8859 */ /* NOT DOS compatible! */
+
 #if CODEPAGE850
 const unsigned char lowerEquivalent[256] =
     {

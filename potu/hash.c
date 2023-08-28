@@ -137,7 +137,7 @@ static psk inserthash(Hash* temp, psk Arg)
             }
     if(r)
         {
-        psk goal = (psk)bmalloc(__LINE__, sizeof(knode));
+        psk goal = (psk)bmalloc(sizeof(knode));
         goal->v.fl = WHITE | SUCCESS;
         goal->v.fl &= ~ALL_REFCOUNT_BITS_SET;
         goal->LEFT = same_as_w(Arg);
@@ -146,7 +146,7 @@ static psk inserthash(Hash* temp, psk Arg)
         }
     else
         {
-        r = (pskRecord*)bmalloc(__LINE__, sizeof(pskRecord));
+        r = (pskRecord*)bmalloc(sizeof(pskRecord));
         r->entry = same_as_w(Arg);
         r->next = temp->hash_table[i];
         temp->hash_table[i] = r;
@@ -213,11 +213,11 @@ static void freehash(Hash* temp)
 static Hash* newhash(ULONG size)
     {
     ULONG i;
-    Hash* temp = (Hash*)bmalloc(__LINE__, sizeof(Hash));
+    Hash* temp = (Hash*)bmalloc(sizeof(Hash));
     assert(size > 0);
     temp->hash_size = size;
     temp->record_count = (unsigned int)0;
-    temp->hash_table = (pskRecord**)bmalloc(__LINE__, sizeof(pskRecord*) * temp->hash_size);
+    temp->hash_table = (pskRecord**)bmalloc(sizeof(pskRecord*) * temp->hash_size);
 #ifdef __VMS
     temp->cmpfunc = (int(*)())strcmp;
 #else

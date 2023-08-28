@@ -82,7 +82,7 @@ the next buffers. These buffers are combined into one big buffer.
         len += strlen((const char*)nextInputElement->buffer);
         }
 
-    bigBuffer = (unsigned char*)bmalloc(__LINE__, len);
+    bigBuffer = (unsigned char*)bmalloc(len);
 
     nextInputElement = InputElement;
 
@@ -305,7 +305,7 @@ static psk Atom(int Flgs)
             af++;
 
     eind = start;
-    Pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + (size_t)(eind - begin) - af);
+    Pnode = (psk)bmalloc(sizeof(ULONG) + 1 + (size_t)(eind - begin) - af);
     start = begin;
     begin = POBJ(Pnode);
     while(start < eind)
@@ -480,11 +480,11 @@ static psk lex(unsigned int* nxt, int priority, int Flags, va_list* pargptr)
                     /* The coming operator has the same or higher priority. */
 #if WORD32
                     if(optab[op_or_0] == EQUALS)
-                        operatorNode = (psk)bmalloc(__LINE__, sizeof(objectnode));
+                        operatorNode = (psk)bmalloc(sizeof(objectnode));
                     else
 #endif
                         /* on 64 bit platform, sizeof(objectnode) == sizeof(knode) 20210803*/
-                        operatorNode = (psk)bmalloc(__LINE__, sizeof(knode));
+                        operatorNode = (psk)bmalloc(sizeof(knode));
                     assert(optab[op_or_0] != NOOP);
                     assert(optab[op_or_0] >= 0);
                     operatorNode->v.fl = optab[op_or_0] | SUCCESS;
@@ -634,7 +634,7 @@ psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrmtxt, Boolean* err, Boolean*
         inString, parentheses, error;
 #ifdef __SYMBIAN32__
     unsigned char* input_buffer;
-    input_buffer = bmalloc(__LINE__, DEFAULT_INPUT_BUFFER_SIZE);
+    input_buffer = bmalloc(DEFAULT_INPUT_BUFFER_SIZE);
 #else
     unsigned char input_buffer[DEFAULT_INPUT_BUFFER_SIZE];
 #endif
@@ -643,7 +643,7 @@ psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrmtxt, Boolean* err, Boolean*
     maxInputBufferPointer = input_buffer + (DEFAULT_INPUT_BUFFER_SIZE - 1);/* there must be room  for terminating 0 */
     /* Array of pointers to inputbuffers. Initially 2 elements,
        large enough for small inputs (< DEFAULT_INPUT_BUFFER_SIZE)*/
-    InputArray = (inputBuffer*)bmalloc(__LINE__, 2 * sizeof(inputBuffer));
+    InputArray = (inputBuffer*)bmalloc(2 * sizeof(inputBuffer));
     InputArray[0].buffer = input_buffer;
     InputArray[0].cutoff = FALSE;
     InputArray[0].mallocallocated = FALSE;

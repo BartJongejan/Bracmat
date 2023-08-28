@@ -76,7 +76,7 @@ psk lambda(psk Pnode, psk name, psk Arg)
                     h = subtreecopy(Pnode->RIGHT);
                     if(dummy_op == EQUALS)
                         {
-                        psk becomes = (psk)bmalloc(__LINE__, sizeof(objectnode));
+                        psk becomes = (psk)bmalloc(sizeof(objectnode));
 #if WORD32
                         ((typedObjectnode*)becomes)->u.Int = 0;
 #else

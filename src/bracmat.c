@@ -236,6 +236,13 @@ little bit slower, not faster.
 
 #define EXPAND 0
 
+#if DOSUMCHECK
+#define BMALLOC(x,y,z) Bmalloc(x,y,z)
+#define bmalloc(n) BMALLOC(__FILE__,__LINE__,n)
+#else
+#define bmalloc(n) Bmalloc(n)
+#endif
+
 /* There are no optional #defines below this line. */
 #if defined __BYTE_ORDER && defined __LITTLE_ENDIAN /* gcc on linux defines these */
 #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -760,8 +767,8 @@ typedef struct
 #define VISIBLE_FLAGS                   (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|FRACTION|UNIFY|NOT|GREATER_THAN|SMALLER_THAN|FENCE|POSITION)
 
 #define HAS_VISIBLE_FLAGS_OR_MINUS(psk) ((psk)->v.fl & (VISIBLE_FLAGS|MINUS))
-#define RATIONAL_COMP(psk)              (((psk)->v.fl & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
 #define RATIONAL(psk)                   (((psk)->v.fl & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS)) == QNUMBER)
+#define RATIONAL_COMP(psk)              (((psk)->v.fl & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
 #define RATIONAL_COMP_NOT_NUL(psk)      (((psk)->v.fl & (QNUMBER|QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
 #define RATIONAL_WEAK(psk)              (((psk)->v.fl & (QNUMBER|IS_OPERATOR|INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)) == QNUMBER)/* allows < > ~< and ~> as flags on numbers */
 #define          LESS(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN))
@@ -1211,6 +1218,12 @@ typedef struct inputBuffer
 
 
 
+#if DOSUMCHECK
+#define BMALLOC(x,y,z) Bmalloc(x,y,z)
+#define bmalloc(n) BMALLOC(__FILE__,__LINE__,n)
+#else
+#define bmalloc(n) Bmalloc(n)
+#endif
 
 
 struct Hash;
@@ -1565,11 +1578,6 @@ static int sfullnumbercheck(char* begin, char* cutoff)
     return ret;
     }
 
-#if DOSUMCHECK
-#else
-#define bmalloc(LINENO,N) bmalloc(N)
-#endif
-
 static psk eval(psk Pnode);
 #define evaluate(x) \
 (    ( ((x) = eval(x))->v.fl \
@@ -1673,6 +1681,7 @@ static int malloced = 0;
 #if DOSUMCHECK
 
 static int LineNo;
+static const char* FileName;
 static int globN;
 
 static int getchecksum(void)
@@ -1700,25 +1709,26 @@ static void setChecksum(int lineno, int n)
     if(lineno)
         {
         LineNo = lineno;
+        FileName = file;
         globN = n;
         }
     Checksum = getchecksum();
     }
 
-static void checksum(int line)
+static void checksum(const char* file, int line)
     {
     static int nChecksum = 0;
     nChecksum = getchecksum();
     if(Checksum && Checksum != nChecksum)
         {
-        Printf("Line %d: Illegal write after bmalloc(%d) on line %d", line, globN, LineNo);
+        Printf("File %s, Line %d: Illegal write after bmalloc(%d) on line %d", file, line, globN, LineNo);
         getchar();
         exit(1);
         }
     }
 #else
-#define setChecksum(a,b)
-#define checksum(a)
+#define setChecksum(a,b,c)
+#define checksum(a,b)
 #endif
 
 static struct memblock* initializeMemBlock(size_t elementSize, size_t numberOfElements)
@@ -1857,7 +1867,11 @@ static void bezetting(void)
     }
 #endif
 
-static void* bmalloc(int lineno, size_t n)
+#if DOSUMCHECK
+static void* Bmalloc(const char* file, int lineno, size_t n)
+#else
+static void* Bmalloc(size_t n)
+#endif
     {
     void* ret;
 #if DOSUMCHECK
@@ -1878,7 +1892,7 @@ static void* bmalloc(int lineno, size_t n)
 #if CHECKALLOCBOUNDS
     n += 3 * sizeof(LONG);
 #endif
-    checksum(__LINE__);
+    checksum(__FILE__, __LINE__);
     n = (n - 1) / sizeof(struct memoryElement);
     if(n <
 #if _5_6
@@ -1914,7 +1928,7 @@ static void* bmalloc(int lineno, size_t n)
             / **/
             ((LONG*)ret)[n] = 0;
             ((LONG*)ret)[0] = 0;
-            setChecksum(lineno, nn);
+            setChecksum(file,lineno, nn);
 #if CHECKALLOCBOUNDS
             ((LONG*)ret)[n - 1] = 0;
             ((LONG*)ret)[2] = 0;
@@ -1956,7 +1970,7 @@ static void* bmalloc(int lineno, size_t n)
 #endif
     ((LONG*)ret)[n] = 0;
     ((LONG*)ret)[0] = 0;
-    setChecksum(lineno, n);
+    setChecksum(file,lineno, n);
 #if CHECKALLOCBOUNDS
     ((LONG*)ret)[n - 1] = 0;
     ((LONG*)ret)[2] = 0;
@@ -1992,7 +2006,7 @@ static int isFree(void* p)
     return 0;
     }
 
-static void result(psk Root);
+//static void result(psk Root);
 static int rfree(psk p)
     {
     int r = 0;
@@ -2139,7 +2153,7 @@ static void bfree(void* p)
     LONG* lp = (LONG*)p;
 #endif
     assert(p != 0);
-    checksum(__LINE__);
+    checksum(__FILE__, __LINE__);
 #if CHECKALLOCBOUNDS
     checkBounds(p);
     lp = lp - 2;
@@ -2157,7 +2171,7 @@ static void bfree(void* p)
 #endif
             ((struct memoryElement*)p)->next = (*q)->firstFreeElementBetweenAddresses;
             (*q)->firstFreeElementBetweenAddresses = (struct memoryElement*)p;
-            setChecksum(LineNo, globN);
+            setChecksum(FileName,LineNo, globN);
             return;
             }
         }
@@ -2165,7 +2179,7 @@ static void bfree(void* p)
 #if SHOWMAXALLOCATED
     --malloced;
 #endif
-    setChecksum(LineNo, globN);
+    setChecksum(FileName, LineNo, globN);
     }
 
 #if SHOWMEMBLOCKS
@@ -2345,7 +2359,7 @@ static psk iCopyOf(psk pnode)
     psk ret;
     size_t len;
     len = sizeof(ULONG) + strlen((char*)POBJ(pnode));
-    ret = (psk)bmalloc(__LINE__, len + 1);
+    ret = (psk)bmalloc(len + 1);
 #if ICPY
     MEMCPY(ret, pnode, (len >> LOGWORDLENGTH) + 1);
 #else
@@ -2369,7 +2383,7 @@ static psk new_operator_like(psk pnode)
         {
         objectnode* goal;
         assert(!ISBUILTIN((objectnode*)pnode));
-        goal = (objectnode*)bmalloc(__LINE__, sizeof(objectnode));
+        goal = (objectnode*)bmalloc(sizeof(objectnode));
 #if WORD32
         goal->u.Int = 0;
 #else
@@ -2378,7 +2392,7 @@ static psk new_operator_like(psk pnode)
         return (psk)goal;
         }
     else
-        return (psk)bmalloc(__LINE__, sizeof(knode));
+        return (psk)bmalloc(sizeof(knode));
     }
 
 static psk scopy(const char* str)
@@ -2387,12 +2401,12 @@ static psk scopy(const char* str)
     psk pnode;
     if(nr & MINUS)
         { /* bracmat out$arg$() -123 */
-        pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + strlen((const char*)str));
+        pnode = (psk)bmalloc(sizeof(ULONG) + strlen((const char*)str));
         strcpy((char*)(pnode)+sizeof(ULONG), str + 1);
         }
     else
         {
-        pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + strlen((const char*)str));
+        pnode = (psk)bmalloc(sizeof(ULONG) + 1 + strlen((const char*)str));
         strcpy((char*)(pnode)+sizeof(ULONG), str);
         }
     pnode->v.fl = READY | SUCCESS | nr;
@@ -2512,7 +2526,7 @@ static psk charcopy(const char* strt, const char* until)
         if(*strt == '0')
             nr |= QNUL;
         }
-    pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + (until - strt));
+    pnode = (psk)bmalloc(sizeof(ULONG) + 1 + (until - strt));
     strncpy((char*)(pnode)+sizeof(ULONG), strt, until - strt);
     pnode->v.fl = READY | SUCCESS | nr;
     return pnode;
@@ -2561,7 +2575,7 @@ static psk Head(psk pnode)
         else
             {
             stringrefnode* ps = (stringrefnode*)pnode;
-            pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + ps->length);
+            pnode = (psk)bmalloc(sizeof(ULONG) + 1 + ps->length);
             pnode->v.fl = (ps->v.fl & COPYFILTER /*~ALL_REFCOUNT_BITS_SET*/ & ~LATEBIND);
             strncpy((char*)(pnode)+sizeof(ULONG), (char*)ps->str, ps->length);
             wipe(ps->pnode);
@@ -3161,7 +3175,7 @@ static void lput(int c)
         /* inputBufferPointer points at last operator (where string can be split) or at
            the start of the string. */
 
-        newInputArray = (inputBuffer*)bmalloc(__LINE__, (2 + len) * sizeof(inputBuffer));
+        newInputArray = (inputBuffer*)bmalloc((2 + len) * sizeof(inputBuffer));
         /* allocate new array one element bigger than the previous. */
 
         newInputArray[len + 1].buffer = NULL;
@@ -3180,7 +3194,7 @@ static void lput(int c)
         if(inputBufferPointer == input_buffer)
             {
             /* copy the full content of input_buffer to the second last element */
-            dest = newInputArray[len].buffer = (unsigned char*)bmalloc(__LINE__, DEFAULT_INPUT_BUFFER_SIZE);
+            dest = newInputArray[len].buffer = (unsigned char*)bmalloc(DEFAULT_INPUT_BUFFER_SIZE);
             strncpy((char*)dest, (char*)input_buffer, DEFAULT_INPUT_BUFFER_SIZE - 1);
             dest[DEFAULT_INPUT_BUFFER_SIZE - 1] = '\0';
             /* Make a notice that the element's string is cut-off */
@@ -3192,7 +3206,7 @@ static void lput(int c)
             ++inputBufferPointer; /* inputBufferPointer points at first character after the operator */
             /* maxInputBufferPointer - inputBufferPointer >= 0 */
             L = (size_t)(inputBufferPointer - input_buffer);
-            dest = newInputArray[len].buffer = (unsigned char*)bmalloc(__LINE__, L + 1);
+            dest = newInputArray[len].buffer = (unsigned char*)bmalloc(L + 1);
             strncpy((char*)dest, (char*)input_buffer, L);
             dest[L] = '\0';
             newInputArray[len].cutoff = FALSE;
@@ -3495,7 +3509,7 @@ static psk changeCase(psk Pnode
                         if(d + nb >= dwarn + 6)
                             {
                             /* overrun */
-                            buf = (char*)bmalloc(__LINE__, 2 * ((dwarn + 6) - obuf));
+                            buf = (char*)bmalloc(2 * ((dwarn + 6) - obuf));
                             dwarn = buf + 2 * ((dwarn + 6) - obuf) - 6;
                             memcpy(buf, obuf, d - obuf);
                             d = buf + (d - obuf);
@@ -3723,7 +3737,7 @@ the next buffers. These buffers are combined into one big buffer.
         len += strlen((const char*)nextInputElement->buffer);
         }
 
-    bigBuffer = (unsigned char*)bmalloc(__LINE__, len);
+    bigBuffer = (unsigned char*)bmalloc(len);
 
     nextInputElement = InputElement;
 
@@ -3945,7 +3959,7 @@ static psk Atom(int Flgs)
             af++;
 
     eind = start;
-    Pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + (size_t)(eind - begin) - af);
+    Pnode = (psk)bmalloc(sizeof(ULONG) + 1 + (size_t)(eind - begin) - af);
     start = begin;
     begin = POBJ(Pnode);
     while(start < eind)
@@ -4120,11 +4134,11 @@ static psk lex(unsigned int* nxt, int priority, int Flags, va_list* pargptr)
                     /* The coming operator has the same or higher priority. */
 #if WORD32
                     if(optab[op_or_0] == EQUALS)
-                        operatorNode = (psk)bmalloc(__LINE__, sizeof(objectnode));
+                        operatorNode = (psk)bmalloc(sizeof(objectnode));
                     else
 #endif
                         /* on 64 bit platform, sizeof(objectnode) == sizeof(knode) 20210803*/
-                        operatorNode = (psk)bmalloc(__LINE__, sizeof(knode));
+                        operatorNode = (psk)bmalloc(sizeof(knode));
                     assert(optab[op_or_0] != NOOP);
                     assert(optab[op_or_0] >= 0);
                     operatorNode->v.fl = optab[op_or_0] | SUCCESS;
@@ -4274,7 +4288,7 @@ static psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrmtxt, Boolean* err, B
         inString, parentheses, error;
 #ifdef __SYMBIAN32__
     unsigned char* input_buffer;
-    input_buffer = bmalloc(__LINE__, DEFAULT_INPUT_BUFFER_SIZE);
+    input_buffer = bmalloc(DEFAULT_INPUT_BUFFER_SIZE);
 #else
     unsigned char input_buffer[DEFAULT_INPUT_BUFFER_SIZE];
 #endif
@@ -4283,7 +4297,7 @@ static psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrmtxt, Boolean* err, B
     maxInputBufferPointer = input_buffer + (DEFAULT_INPUT_BUFFER_SIZE - 1);/* there must be room  for terminating 0 */
     /* Array of pointers to inputbuffers. Initially 2 elements,
        large enough for small inputs (< DEFAULT_INPUT_BUFFER_SIZE)*/
-    InputArray = (inputBuffer*)bmalloc(__LINE__, 2 * sizeof(inputBuffer));
+    InputArray = (inputBuffer*)bmalloc(2 * sizeof(inputBuffer));
     InputArray[0].buffer = input_buffer;
     InputArray[0].cutoff = FALSE;
     InputArray[0].mallocallocated = FALSE;
@@ -5139,7 +5153,7 @@ static LONG nnDivide(nnumber* dividend, nnumber* divisor, nnumber* quotient, nnu
     remainder->ilength = remainder->iallocated = dividend->sign & QNUL ? 1 : dividend->ilength;
     assert(remainder->iallocated > 0);
     assert((LONG)TEN_LOG_RADIX * remainder->ilength >= dividend->length);
-    remainder->inumber = (LONG*)(remainder->ialloc = bmalloc(__LINE__, sizeof(LONG) * remainder->iallocated));
+    remainder->inumber = (LONG*)(remainder->ialloc = bmalloc(sizeof(LONG) * remainder->iallocated));
     *(remainder->inumber) = 0;
     assert(dividend->ilength != 0);/*if(dividend->ilength == 0)
         remainder->inumber[0] = 0;
@@ -5151,7 +5165,7 @@ static LONG nnDivide(nnumber* dividend, nnumber* divisor, nnumber* quotient, nnu
     else
         quotient->ilength = quotient->iallocated = 1;
 
-    quotient->inumber = (LONG*)(quotient->ialloc = bmalloc(__LINE__, (size_t)(quotient->iallocated) * sizeof(LONG)));
+    quotient->inumber = (LONG*)(quotient->ialloc = bmalloc((size_t)(quotient->iallocated) * sizeof(LONG)));
     memset(quotient->inumber, 0, (size_t)(quotient->iallocated) * sizeof(LONG));
     quot = quotient->inumber;
 
@@ -5307,7 +5321,7 @@ static psk inumberNode(nnumber* g)
     psk res;
     size_t len;
     len = offsetof(sk, u.obj) + numlength(g);
-    res = (psk)bmalloc(__LINE__, len + 1);
+    res = (psk)bmalloc(len + 1);
     if(g->sign & QNUL)
         res->u.obj = '0';
     else
@@ -5340,7 +5354,7 @@ static Qnumber nn2q(nnumber* num, nnumber* den)
         {
         char* endp;
         size_t len = offsetof(sk, u.obj) + 2 + numlength(num) + numlength(den);
-        res = (psk)bmalloc(__LINE__, len);
+        res = (psk)bmalloc(len);
         endp = iconvert2decimal(num, (char*)POBJ(res));
         *endp++ = '/';
         endp = iconvert2decimal(den, endp);
@@ -5446,7 +5460,7 @@ static void nTimes(nnumber* x, nnumber* y, nnumber* product)
     assert(product->ialloc == 0);
     product->ilength = product->iallocated = x->ilength + y->ilength;
     assert(product->iallocated > 0);
-    product->inumber = (LONG*)(product->ialloc = bmalloc(__LINE__, sizeof(LONG) * product->iallocated));
+    product->inumber = (LONG*)(product->ialloc = bmalloc(sizeof(LONG) * product->iallocated));
 
     for(ipointer = product->inumber; ipointer < product->inumber + product->ilength; *ipointer++ = 0)
         ;
@@ -5574,7 +5588,7 @@ static psk numberNode2(nnumber* g)
         }
     else
         {
-        res = (psk)bmalloc(__LINE__, neededlen);
+        res = (psk)bmalloc(neededlen);
         if(g->sign & QNUL)
             res->u.obj = '0';
         else
@@ -5774,7 +5788,7 @@ static void convert2binary(nnumber* x)
     ptrdiff_t n;
 
     x->ilength = x->iallocated = ((x->sign & QNUL ? 1 : x->length) + TEN_LOG_RADIX - 1) / TEN_LOG_RADIX;
-    x->inumber = x->ialloc = (LONG*)bmalloc(__LINE__, sizeof(LONG) * x->iallocated);
+    x->inumber = x->ialloc = (LONG*)bmalloc(sizeof(LONG) * x->iallocated);
 
     for(ipointer = x->inumber
         , charpointer = x->number
@@ -5969,7 +5983,7 @@ static nnumber nPlus(nnumber* x, nnumber* y)
     ptrdiff_t xGreaterThany;
     res.length = 1 + (x->length > y->length ? x->length : y->length);
     res.allocated = (size_t)res.length + offsetof(sk, u.obj);
-    res.alloc = res.number = (char*)bmalloc(__LINE__, res.allocated);
+    res.alloc = res.number = (char*)bmalloc(res.allocated);
     *res.number = '0';
     hres = res.number + (size_t)res.length - 1;
     if(x->length == y->length)
@@ -6000,7 +6014,7 @@ static void nnSPlus(nnumber* x, nnumber* y, nnumber* som)
 
     som->ilength = 1 + (x->ilength > y->ilength ? x->ilength : y->ilength);
     som->iallocated = som->ilength;
-    som->ialloc = som->inumber = (LONG*)bmalloc(__LINE__, sizeof(LONG) * som->iallocated);
+    som->ialloc = som->inumber = (LONG*)bmalloc(sizeof(LONG) * som->iallocated);
     *som->inumber = 0;
     hres = som->inumber + som->ilength;
 
@@ -6144,7 +6158,7 @@ static psk qDenominator(psk Pnode)
     nnumber xt = { 0 }, xn = { 0 };
     split(_qx, &xt, &xn);
     len = offsetof(sk, u.obj) + 1 + xn.length;
-    res = (psk)bmalloc(__LINE__, len);
+    res = (psk)bmalloc(len);
     assert(!(xn.sign & QNUL)); /*Because RATIONAL_COMP(_qx)*/
     memcpy((void*)POBJ(res), xn.number, xn.length);
     res->v.fl = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
@@ -6168,7 +6182,7 @@ static Qnumber qTimesMinusOne(Qnumber _qx)
     Qnumber res;
     size_t len;
     len = offsetof(sk, u.obj) + 1 + strlen((char*)POBJ(_qx));
-    res = (Qnumber)bmalloc(__LINE__, len);
+    res = (Qnumber)bmalloc(len);
     memcpy(res, _qx, len);
     res->v.fl ^= MINUS;
     res->v.fl &= ~ALL_REFCOUNT_BITS_SET;
@@ -6210,11 +6224,11 @@ static int subroot(nnumber* ag, char* conc[], int* pind)
                     {
                     if(ores < 1000)
                         {
-                        conc[(*pind)] = (char*)bmalloc(__LINE__, 12);/*{?} 327365274^1/2 => 2^1/2*3^1/2*2477^1/2*22027^1/2 */
+                        conc[(*pind)] = (char*)bmalloc(12);/*{?} 327365274^1/2 => 2^1/2*3^1/2*2477^1/2*22027^1/2 */
                         }
                     else
                         {
-                        conc[*pind] = (char*)bmalloc(__LINE__, 20);
+                        conc[*pind] = (char*)bmalloc(20);
                         }
                     sprintf(conc[(*pind)++], LONGU "^(%d*\1)*", ores, macht);
                     }
@@ -6235,7 +6249,7 @@ static int subroot(nnumber* ag, char* conc[], int* pind)
         }
     if(ores == 1 && macht == 1)
         return FALSE;
-    conc[*pind] = (char*)bmalloc(__LINE__, 32);
+    conc[*pind] = (char*)bmalloc(32);
     if((ores == g && ++macht) || ores == 1)
         sprintf(conc[(*pind)++], LONGU "^(%d*\1)", g, macht); /*{?} 32^1/2 => 2^5/2 */
     else
@@ -7384,7 +7398,7 @@ static psk lambda(psk Pnode, psk name, psk Arg)
                     h = subtreecopy(Pnode->RIGHT);
                     if(dummy_op == EQUALS)
                         {
-                        psk becomes = (psk)bmalloc(__LINE__, sizeof(objectnode));
+                        psk becomes = (psk)bmalloc(sizeof(objectnode));
 #if WORD32
                         ((typedObjectnode*)becomes)->u.Int = 0;
 #else
@@ -7871,22 +7885,22 @@ static int insert(psk name, psk pnode)
         strng = POBJ(name);
         len = strlen((char*)strng);
 #if PVNAME
-        newvar = (vars*)bmalloc(__LINE__, sizeof(vars));
+        newvar = (vars*)bmalloc(sizeof(vars));
         if(*strng)
             {
 #if ICPY
             MEMCPY(newvar->vname = (unsigned char*)
-                   bmalloc(__LINE__, len + 1), strng, (len >> LOGWORDLENGTH) + 1);
+                   bmalloc(len + 1), strng, (len >> LOGWORDLENGTH) + 1);
 #else
             MEMCPY(newvar->vname = (unsigned char*)
-                   bmalloc(__LINE__, len + 1), strng, ((len / sizeof(LONG)) + 1) * sizeof(LONG));
+                   bmalloc(len + 1), strng, ((len / sizeof(LONG)) + 1) * sizeof(LONG));
 #endif
             }
 #else
         if(len < 4)
-            newvar = (vars*)bmalloc(__LINE__, sizeof(vars));
+            newvar = (vars*)bmalloc(sizeof(vars));
         else
-            newvar = (vars*)bmalloc(__LINE__, sizeof(vars) - 3 + len);
+            newvar = (vars*)bmalloc(sizeof(vars) - 3 + len);
         if(*strng)
             {
 #if ICPY
@@ -7986,7 +8000,7 @@ static int psh(psk name, psk pnode, psk dim)
         {
         for(; nxtvar->n >= m22; m22 <<= 1)
             {
-            nvaria = (varia*)bmalloc(__LINE__, sizeof(varia) + (m22 - 1) * sizeof(psk));
+            nvaria = (varia*)bmalloc(sizeof(varia) + (m22 - 1) * sizeof(psk));
             nvaria->prev = nxtvar->pvaria;
             nxtvar->pvaria = nvaria;
             }
@@ -8404,18 +8418,18 @@ static void mmf(ppsk PPnode)
             nxtvar;
             nxtvar = nxtvar->next)
             {
-            goal = *pgoal = (psk)bmalloc(__LINE__, sizeof(knode));
+            goal = *pgoal = (psk)bmalloc(sizeof(knode));
             goal->v.fl = WHITE | SUCCESS;
             if(ext && nxtvar->n > 0)
                 {
-                goal = goal->LEFT = (psk)bmalloc(__LINE__, sizeof(knode));
+                goal = goal->LEFT = (psk)bmalloc(sizeof(knode));
                 goal->v.fl = DOT | SUCCESS;
                 sprintf(dim, "%d.%d", nxtvar->n, nxtvar->selector);
                 goal->RIGHT = NULL;
                 goal->RIGHT = build_up(goal->RIGHT, dim, NULL);
                 }
             goal = goal->LEFT =
-                (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + strlen((char*)VARNAME(nxtvar)));
+                (psk)bmalloc(sizeof(ULONG) + 1 + strlen((char*)VARNAME(nxtvar)));
             goal->v.fl = (READY | SUCCESS);
             strcpy((char*)(goal)+sizeof(ULONG), (char*)VARNAME(nxtvar));
             pgoal = &(*pgoal)->RIGHT;
@@ -8584,7 +8598,7 @@ static int string_copy_insert(psk name, psk pnode, char* str, char* cutoff)
         nr = fullnumbercheck(str) & ~DEFINITELYNONUMBER;
         if((nr & MINUS) && !(name->v.fl & NUMBER))
             nr = 0; /* "-1" is only converted to -1 if the # flag is present on the pattern */
-        psnode = (stringrefnode*)bmalloc(__LINE__, sizeof(stringrefnode));
+        psnode = (stringrefnode*)bmalloc(sizeof(stringrefnode));
         psnode->v.fl = /*(pnode->v.fl & ~(ALL_REFCOUNT_BITS_SET|VISIBLE_FLAGS)) substring doesn't inherit flags like */
             READY | SUCCESS | LATEBIND | nr;
         /*psnode->v.fl |= SUCCESS;*/ /*{?} @(~`ab:%?x %?y)&!x => a */ /*{!} a */
@@ -8677,7 +8691,7 @@ static psk evalmacro(psk Pnode)
                     h = subtreecopy(Pnode->RIGHT);
                     if(dummy_op == EQUALS)
                         {
-                        psk becomes = (psk)bmalloc(__LINE__, sizeof(objectnode));
+                        psk becomes = (psk)bmalloc(sizeof(objectnode));
 #if WORD32
                         ((typedObjectnode*)becomes)->u.Int = 0;
 #else
@@ -8928,7 +8942,7 @@ static psk inserthash(Hash* temp, psk Arg)
             }
     if(r)
         {
-        psk goal = (psk)bmalloc(__LINE__, sizeof(knode));
+        psk goal = (psk)bmalloc(sizeof(knode));
         goal->v.fl = WHITE | SUCCESS;
         goal->v.fl &= ~ALL_REFCOUNT_BITS_SET;
         goal->LEFT = same_as_w(Arg);
@@ -8937,7 +8951,7 @@ static psk inserthash(Hash* temp, psk Arg)
         }
     else
         {
-        r = (pskRecord*)bmalloc(__LINE__, sizeof(pskRecord));
+        r = (pskRecord*)bmalloc(sizeof(pskRecord));
         r->entry = same_as_w(Arg);
         r->next = temp->hash_table[i];
         temp->hash_table[i] = r;
@@ -9004,11 +9018,11 @@ static void freehash(Hash* temp)
 static Hash* newhash(ULONG size)
     {
     ULONG i;
-    Hash* temp = (Hash*)bmalloc(__LINE__, sizeof(Hash));
+    Hash* temp = (Hash*)bmalloc(sizeof(Hash));
     assert(size > 0);
     temp->hash_size = size;
     temp->record_count = (unsigned int)0;
-    temp->hash_table = (pskRecord**)bmalloc(__LINE__, sizeof(pskRecord*) * temp->hash_size);
+    temp->hash_table = (pskRecord**)bmalloc(sizeof(pskRecord*) * temp->hash_size);
 #ifdef __VMS
     temp->cmpfunc = (int(*)())strcmp;
 #else
@@ -11277,8 +11291,8 @@ static fileStatus* allocateFileStatus(const char* name, FILE* fp
 #endif
 )
     {
-    fileStatus* fs = (fileStatus*)bmalloc(__LINE__, sizeof(fileStatus));
-    fs->fname = (char*)bmalloc(__LINE__, strlen(name) + 1);
+    fileStatus* fs = (fileStatus*)bmalloc(sizeof(fileStatus));
+    fs->fname = (char*)bmalloc(strlen(name) + 1);
     strcpy(fs->fname, name);
     fs->fp = fp;
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
@@ -11479,7 +11493,7 @@ static void setStop(fileStatus* fs, char* stopstring)
     if(fs->stop)
 #ifdef BMALLLOC
         bfree(fs->stop);
-    fs->stop = (char*)bmalloc(__LINE__, strlen(stopstring + 1);
+    fs->stop = (char*)bmalloc(strlen(stopstring + 1);
 #else
                               free(fs->stop);
     fs->stop = (char*)malloc(strlen(stopstring) + 1);
@@ -11975,7 +11989,7 @@ static int fil(ppsk PPnode)
                         count++;
                     if(count >= INPUTBUFFERSIZE)
                         {
-                        bbuffer = (unsigned char*)bmalloc(__LINE__, (size_t)count + 1);
+                        bbuffer = (unsigned char*)bmalloc((size_t)count + 1);
                         strcpy((char*)bbuffer, (char*)buffer);
                         FSEEK(fp, pos + (INPUTBUFFERSIZE - 1), SEEK_SET);
                         if(fread((char*)bbuffer + (INPUTBUFFERSIZE - 1), 1, count - (INPUTBUFFERSIZE - 1), fs->fp) == 0)
@@ -12018,7 +12032,7 @@ static int fil(ppsk PPnode)
                 {
                 size_t readbytes = fs->size * fs->number;
                 if(readbytes >= INPUTBUFFERSIZE)
-                    bbuffer = (unsigned char*)bmalloc(__LINE__, readbytes + 1);
+                    bbuffer = (unsigned char*)bmalloc(readbytes + 1);
                 else
                     bbuffer = buffer;
                 if((readbytes = fread((char*)bbuffer, (size_t)fs->size, (size_t)fs->number, fs->fp)) == 0
@@ -12137,7 +12151,7 @@ static int output(ppsk PPnode, void(*how)(psk k))
                 process = tel;
                 global_fpo = NULL;
                 (*how)(rlnode);
-                ret = (psk)bmalloc(__LINE__, sizeof(ULONG) + telling);
+                ret = (psk)bmalloc(sizeof(ULONG) + telling);
                 ret->v.fl = READY | SUCCESS;
                 process = glue;
                 source = POBJ(ret);
@@ -12368,7 +12382,7 @@ static psk objectcopysub2(psk src) /* src is NOT an object */
     psk goal;
     if(is_op(src) && hasSubObject(src))
         {
-        goal = (psk)bmalloc(__LINE__, sizeof(knode));
+        goal = (psk)bmalloc(sizeof(knode));
         goal->v.fl = src->v.fl & COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
         goal->LEFT = objectcopysub(src->LEFT);
         goal->RIGHT = objectcopysub(src->RIGHT);
@@ -12389,7 +12403,7 @@ static psk objectcopysub(psk src)
             }
         else
             {
-            goal = (psk)bmalloc(__LINE__, sizeof(objectnode));
+            goal = (psk)bmalloc(sizeof(objectnode));
 #if WORD32
             ((typedObjectnode*)goal)->u.Int = 0;
 #else
@@ -12412,7 +12426,7 @@ static psk objectcopy(psk src)
         {
         if(ISBUILTIN((objectnode*)src))
             {
-            goal = (psk)bmalloc(__LINE__, sizeof(typedObjectnode));
+            goal = (psk)bmalloc(sizeof(typedObjectnode));
 #if WORD32
             ((typedObjectnode*)goal)->u.Int = BUILTIN;
 #else
@@ -12423,7 +12437,7 @@ static psk objectcopy(psk src)
             }
         else
             {
-            goal = (psk)bmalloc(__LINE__, sizeof(objectnode));
+            goal = (psk)bmalloc(sizeof(objectnode));
 #if WORD32
             ((typedObjectnode*)goal)->u.Int = 0;
 #else
@@ -12452,7 +12466,7 @@ static psk getObjectDef(psk src)
             ;
         if(df->vtab)
             {
-            dest = (typedObjectnode*)bmalloc(__LINE__, sizeof(typedObjectnode));
+            dest = (typedObjectnode*)bmalloc(sizeof(typedObjectnode));
             dest->v.fl = EQUALS | SUCCESS;
             dest->left = same_as_w(&nilNode);
             dest->right = same_as_w(src);
@@ -12475,7 +12489,7 @@ static psk getObjectDef(psk src)
 
     if((def = SymbolBinding_w(src, src->v.fl & DOUBLY_INDIRECT)) != NULL)
         {
-        dest = (typedObjectnode*)bmalloc(__LINE__, sizeof(typedObjectnode));
+        dest = (typedObjectnode*)bmalloc(sizeof(typedObjectnode));
         dest->v.fl = EQUALS | SUCCESS;
         dest->left = same_as_w(&nilNode);
         dest->right = objectcopy(def); /* TODO Head(&def) ? */
@@ -12935,7 +12949,7 @@ static function_return_type functions(psk Pnode)
             telling = 1;
             process = tstr;
             result(rightnode);
-            rlnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + telling);
+            rlnode = (psk)bmalloc(sizeof(ULONG) + telling);
             process = pstr;
             source = POBJ(rlnode);
             result(rightnode);
@@ -13001,7 +13015,7 @@ static function_return_type functions(psk Pnode)
             void* p;
             if(is_op(rightnode)
                || !INTEGER_POS(rightnode)
-               || (p = bmalloc(__LINE__, (int)strtoul((char*)POBJ(rightnode), (char**)NULL, 10)))
+               || (p = bmalloc((int)strtoul((char*)POBJ(rightnode), (char**)NULL, 10)))
                == NULL)
                 return functionFail(Pnode);
             pointerToStr(draft, p);
@@ -13473,7 +13487,7 @@ static function_return_type functions(psk Pnode)
                 rrightnode = rightnode->RIGHT;
                 while(is_op(rrightnode) && Op(rrightnode) == WHITE)
                     {
-                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                    nnode = (psk)bmalloc(sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
                     nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                     nnode->LEFT = same_as_w(rightnode->LEFT);
@@ -13501,7 +13515,7 @@ static function_return_type functions(psk Pnode)
                         }
                     else
                         {
-                        rlnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                        rlnode = (psk)bmalloc(sizeof(knode));
                         rlnode->v.fl = WHITE | SUCCESS;
                         *ppnode = rlnode;
                         ppnode = &(rlnode->RIGHT);
@@ -13512,7 +13526,7 @@ static function_return_type functions(psk Pnode)
                     }
                 if(is_op(rrightnode) || !IS_NIL(rrightnode))
                     {
-                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                    nnode = (psk)bmalloc(sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
                     nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                     nnode->LEFT = same_as_w(rightnode->LEFT);
@@ -13574,7 +13588,7 @@ static function_return_type functions(psk Pnode)
                                 {
                                 while(is_op(rrightnode) && Op(rrightnode) == intVal.ul)
                                     {
-                                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                    nnode = (psk)bmalloc(sizeof(knode));
                                     nnode->v.fl = Pnode->v.fl;
                                     nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                                     nnode->LEFT = same_as_w(rightnode->LEFT);
@@ -13602,7 +13616,7 @@ static function_return_type functions(psk Pnode)
                                         }
                                     else
                                         {
-                                        rlnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                        rlnode = (psk)bmalloc(sizeof(knode));
                                         rlnode->v.fl = WHITE | SUCCESS;
                                         *ppnode = rlnode;
                                         ppnode = &(rlnode->RIGHT);
@@ -13636,7 +13650,7 @@ static function_return_type functions(psk Pnode)
                     }
                 if(is_op(rrightnode) || !IS_NIL(rrightnode))
                     {
-                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                    nnode = (psk)bmalloc(sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
                     nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                     nnode->LEFT = same_as_w(rightnode->LEFT);
@@ -13702,7 +13716,7 @@ static function_return_type functions(psk Pnode)
                             while(subject)
                                 {
                                 psk nnode;
-                                nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                nnode = (psk)bmalloc(sizeof(knode));
                                 nnode->v.fl = Pnode->v.fl;
                                 nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                                 nnode->LEFT = same_as_w(rightnode->LEFT);
@@ -13737,7 +13751,7 @@ static function_return_type functions(psk Pnode)
 
                                 if(subject)
                                     {
-                                    rlnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                    rlnode = (psk)bmalloc(sizeof(knode));
                                     rlnode->v.fl = WHITE | SUCCESS;
                                     *ppnode = rlnode;
                                     ppnode = &(rlnode->RIGHT);
@@ -13767,7 +13781,7 @@ static function_return_type functions(psk Pnode)
                         for(; (k = getCodePoint(&subject)) > 0; oldsubject = subject)
                             {
                             psk nnode;
-                            nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                            nnode = (psk)bmalloc(sizeof(knode));
                             nnode->v.fl = Pnode->v.fl;
                             nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                             nnode->LEFT = same_as_w(rightnode->LEFT);
@@ -13791,7 +13805,7 @@ static function_return_type functions(psk Pnode)
 
                             if(*subject)
                                 {
-                                rlnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                rlnode = (psk)bmalloc(sizeof(knode));
                                 rlnode->v.fl = WHITE | SUCCESS;
                                 *ppnode = rlnode;
                                 ppnode = &(rlnode->RIGHT);
@@ -13808,7 +13822,7 @@ static function_return_type functions(psk Pnode)
                         for(; (k = *subject++) != 0; oldsubject = subject)
                             {
                             psk nnode;
-                            nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                            nnode = (psk)bmalloc(sizeof(knode));
                             nnode->v.fl = Pnode->v.fl;
                             nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                             nnode->LEFT = same_as_w(rightnode->LEFT);
@@ -13832,7 +13846,7 @@ static function_return_type functions(psk Pnode)
 
                             if(*subject)
                                 {
-                                rlnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                rlnode = (psk)bmalloc(sizeof(knode));
                                 rlnode->v.fl = WHITE | SUCCESS;
                                 *ppnode = rlnode;
                                 ppnode = &(rlnode->RIGHT);
@@ -14252,7 +14266,7 @@ static function_return_type functions(psk Pnode)
                     else
                         {
                         rightnode = evalmacro(Pnode->RIGHT);
-                        rrightnode = (psk)bmalloc(__LINE__, sizeof(objectnode));
+                        rrightnode = (psk)bmalloc(sizeof(objectnode));
 #if WORD32
                         ((typedObjectnode*)rrightnode)->u.Int = 0;
 #else
@@ -14509,7 +14523,7 @@ static psk handleExponents(psk Pnode)
                 nnumber numerator = { 0 }, denominator = { 0 };
                 for(ind = 0; ind < 20; wipe[ind++] = TRUE);
                 ind = 0;
-                conc = (char**)bmalloc(__LINE__, 20 * sizeof(char**));
+                conc = (char**)bmalloc(20 * sizeof(char**));
                 /* 20 is safe value for ULONGs */
                 addr[1] = Pnode->RIGHT;
                 if(RAT_RAT_COMP(Pnode->LEFT))
@@ -16312,7 +16326,7 @@ static psk eval(psk Pnode)
                         if(dummy_op == EQUALS)
                             {
                             auxkn = Pnode;
-                            Pnode = (psk)bmalloc(__LINE__, sizeof(objectnode));
+                            Pnode = (psk)bmalloc(sizeof(objectnode));
 #if WORD32
                             ((typedObjectnode*)(Pnode))->u.Int = 0;
 #else

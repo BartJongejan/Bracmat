@@ -20,6 +20,13 @@ X=
             mainLoop
             errorprintf
         : ?exportFnc
+      & ( requiresDeclaration
+        =   subtreecopy
+          | wipe
+          | eval
+          | cmp
+          | result
+        )
       & chu$(128+10):?escapednl
       &   0
         : ?incomment
@@ -62,26 +69,44 @@ X=
             & str$!arg
         )
       & ( removeEmptyLines
-        =   narg
-          .         vap
-                  $ ((=.(.) !arg).!arg.\n)
-                : (.) ?arg
-              & 0:?nls
-              &   str
-                $ ( map
-                  $ ( ( 
-                      =   
-                        .     !arg:(.)
-                            & (   1+!nls:<3:?nls
-                                & \n
-                              | 
-                              )
-                          | 0:?nls&!arg
+        =   narg cleaned
+          .   !arg:(?arg.?naam)
+            & (       vap
+                    $ ((=.(.) !arg).!arg.\n)
+                  : (.) ?arg
+                & 0:?nls
+                &     str
+                    $ ( map
+                      $ ( ( 
+                          =   
+                            .     !arg:(.)
+                                & (   1+!nls:<3:?nls
+                                    & \n
+                                  | 
+                                  )
+                              | 0:?nls&!arg
+                          )
+                        . !arg
+                        )
                       )
-                    . !arg
-                    )
+                  : ?cleaned
+                & (     !cleaned
+                      : (|\n|\n\n)
+                    & 
+                  |   str
+                    $ ( "/* Begin of "
+                        !naam
+                        " */"
+                        \n
+                        !cleaned
+                        "/* End of "
+                        !naam
+                        " */"
+                        \n
+                      )
                   )
-            | !arg
+              | !arg
+              )
         )
       & ( WS
         =   
@@ -456,14 +481,12 @@ X=
                                           ?
                                       )
                                   & @(!XX:~(? "=" ?))
-                                  & (   @( !XX
-                                         :   ?u
-                                             ( subtreecopy
-                                             | wipe
-                                             | eval
-                                             | cmp
-                                             )
-                                             ?v
+                                  & (   !( 
+                                         ' @( !XX
+                                            :   ?u
+                                                ()$requiresDeclaration
+                                                ?v
+                                            )
                                          )
                                       & ( !u:
                                         |   @(!u:? %@?u)
@@ -805,7 +828,9 @@ X=
                   )
               & totext$!text:?text
               & trimall$!text:?text
-              & (~|removeEmptyLines$!text:?text)
+              & ( ~
+                | removeEmptyLines$(!text.!arg):?text
+                )
               &   put
                 $ (!text,str$(!NAAM ".txt"),NEW,RAW,BIN)
               & !text

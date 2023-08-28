@@ -471,7 +471,7 @@ function_return_type functions(psk Pnode)
             telling = 1;
             process = tstr;
             result(rightnode);
-            rlnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + telling);
+            rlnode = (psk)bmalloc(sizeof(ULONG) + telling);
             process = pstr;
             source = POBJ(rlnode);
             result(rightnode);
@@ -537,7 +537,7 @@ function_return_type functions(psk Pnode)
             void* p;
             if(is_op(rightnode)
                || !INTEGER_POS(rightnode)
-               || (p = bmalloc(__LINE__, (int)strtoul((char*)POBJ(rightnode), (char**)NULL, 10)))
+               || (p = bmalloc((int)strtoul((char*)POBJ(rightnode), (char**)NULL, 10)))
                == NULL)
                 return functionFail(Pnode);
             pointerToStr(draft, p);
@@ -1009,7 +1009,7 @@ function_return_type functions(psk Pnode)
                 rrightnode = rightnode->RIGHT;
                 while(is_op(rrightnode) && Op(rrightnode) == WHITE)
                     {
-                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                    nnode = (psk)bmalloc(sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
                     nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                     nnode->LEFT = same_as_w(rightnode->LEFT);
@@ -1037,7 +1037,7 @@ function_return_type functions(psk Pnode)
                         }
                     else
                         {
-                        rlnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                        rlnode = (psk)bmalloc(sizeof(knode));
                         rlnode->v.fl = WHITE | SUCCESS;
                         *ppnode = rlnode;
                         ppnode = &(rlnode->RIGHT);
@@ -1048,7 +1048,7 @@ function_return_type functions(psk Pnode)
                     }
                 if(is_op(rrightnode) || !IS_NIL(rrightnode))
                     {
-                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                    nnode = (psk)bmalloc(sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
                     nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                     nnode->LEFT = same_as_w(rightnode->LEFT);
@@ -1110,7 +1110,7 @@ function_return_type functions(psk Pnode)
                                 {
                                 while(is_op(rrightnode) && Op(rrightnode) == intVal.ul)
                                     {
-                                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                    nnode = (psk)bmalloc(sizeof(knode));
                                     nnode->v.fl = Pnode->v.fl;
                                     nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                                     nnode->LEFT = same_as_w(rightnode->LEFT);
@@ -1138,7 +1138,7 @@ function_return_type functions(psk Pnode)
                                         }
                                     else
                                         {
-                                        rlnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                        rlnode = (psk)bmalloc(sizeof(knode));
                                         rlnode->v.fl = WHITE | SUCCESS;
                                         *ppnode = rlnode;
                                         ppnode = &(rlnode->RIGHT);
@@ -1172,7 +1172,7 @@ function_return_type functions(psk Pnode)
                     }
                 if(is_op(rrightnode) || !IS_NIL(rrightnode))
                     {
-                    nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                    nnode = (psk)bmalloc(sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
                     nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                     nnode->LEFT = same_as_w(rightnode->LEFT);
@@ -1238,7 +1238,7 @@ function_return_type functions(psk Pnode)
                             while(subject)
                                 {
                                 psk nnode;
-                                nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                nnode = (psk)bmalloc(sizeof(knode));
                                 nnode->v.fl = Pnode->v.fl;
                                 nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                                 nnode->LEFT = same_as_w(rightnode->LEFT);
@@ -1273,7 +1273,7 @@ function_return_type functions(psk Pnode)
 
                                 if(subject)
                                     {
-                                    rlnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                    rlnode = (psk)bmalloc(sizeof(knode));
                                     rlnode->v.fl = WHITE | SUCCESS;
                                     *ppnode = rlnode;
                                     ppnode = &(rlnode->RIGHT);
@@ -1303,7 +1303,7 @@ function_return_type functions(psk Pnode)
                         for(; (k = getCodePoint(&subject)) > 0; oldsubject = subject)
                             {
                             psk nnode;
-                            nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                            nnode = (psk)bmalloc(sizeof(knode));
                             nnode->v.fl = Pnode->v.fl;
                             nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                             nnode->LEFT = same_as_w(rightnode->LEFT);
@@ -1327,7 +1327,7 @@ function_return_type functions(psk Pnode)
 
                             if(*subject)
                                 {
-                                rlnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                rlnode = (psk)bmalloc(sizeof(knode));
                                 rlnode->v.fl = WHITE | SUCCESS;
                                 *ppnode = rlnode;
                                 ppnode = &(rlnode->RIGHT);
@@ -1344,7 +1344,7 @@ function_return_type functions(psk Pnode)
                         for(; (k = *subject++) != 0; oldsubject = subject)
                             {
                             psk nnode;
-                            nnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                            nnode = (psk)bmalloc(sizeof(knode));
                             nnode->v.fl = Pnode->v.fl;
                             nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
                             nnode->LEFT = same_as_w(rightnode->LEFT);
@@ -1368,7 +1368,7 @@ function_return_type functions(psk Pnode)
 
                             if(*subject)
                                 {
-                                rlnode = (psk)bmalloc(__LINE__, sizeof(knode));
+                                rlnode = (psk)bmalloc(sizeof(knode));
                                 rlnode->v.fl = WHITE | SUCCESS;
                                 *ppnode = rlnode;
                                 ppnode = &(rlnode->RIGHT);
@@ -1788,7 +1788,7 @@ function_return_type functions(psk Pnode)
                     else
                         {
                         rightnode = evalmacro(Pnode->RIGHT);
-                        rrightnode = (psk)bmalloc(__LINE__, sizeof(objectnode));
+                        rrightnode = (psk)bmalloc(sizeof(objectnode));
 #if WORD32
                         ((typedObjectnode*)rrightnode)->u.Int = 0;
 #else

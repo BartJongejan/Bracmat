@@ -157,7 +157,6 @@
 
 #define HAS_VISIBLE_FLAGS_OR_MINUS(psk) ((psk)->v.fl & (VISIBLE_FLAGS|MINUS))
 #define RATIONAL(psk)                   (((psk)->v.fl & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS)) == QNUMBER)
-//#define REAL_COMP(psk)                  (((psk)->v.fl & (QNUMBER|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == (QNUMBER|QDOUBLE))
 #define RATIONAL_COMP(psk)              (((psk)->v.fl & (QNUMBER|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
 #define RATIONAL_COMP_NOT_NUL(psk)      (((psk)->v.fl & (QNUMBER|QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
 #define RATIONAL_WEAK(psk)              (((psk)->v.fl & (QNUMBER|IS_OPERATOR|INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)) == QNUMBER)/* allows < > ~< and ~> as flags on numbers */

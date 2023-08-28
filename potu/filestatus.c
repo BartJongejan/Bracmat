@@ -62,8 +62,8 @@ static fileStatus* allocateFileStatus(const char* name, FILE* fp
 #endif
 )
     {
-    fileStatus* fs = (fileStatus*)bmalloc(__LINE__, sizeof(fileStatus));
-    fs->fname = (char*)bmalloc(__LINE__, strlen(name) + 1);
+    fileStatus* fs = (fileStatus*)bmalloc(sizeof(fileStatus));
+    fs->fname = (char*)bmalloc(strlen(name) + 1);
     strcpy(fs->fname, name);
     fs->fp = fp;
 #if !defined NO_LOW_LEVEL_FILE_HANDLING
@@ -264,7 +264,7 @@ static void setStop(fileStatus* fs, char* stopstring)
     if(fs->stop)
 #ifdef BMALLLOC
         bfree(fs->stop);
-    fs->stop = (char*)bmalloc(__LINE__, strlen(stopstring + 1);
+    fs->stop = (char*)bmalloc(strlen(stopstring + 1);
 #else
                               free(fs->stop);
     fs->stop = (char*)malloc(strlen(stopstring) + 1);
@@ -761,7 +761,7 @@ int fil(ppsk PPnode)
                         count++;
                     if(count >= INPUTBUFFERSIZE)
                         {
-                        bbuffer = (unsigned char*)bmalloc(__LINE__, (size_t)count + 1);
+                        bbuffer = (unsigned char*)bmalloc((size_t)count + 1);
                         strcpy((char*)bbuffer, (char*)buffer);
                         FSEEK(fp, pos + (INPUTBUFFERSIZE - 1), SEEK_SET);
                         if(fread((char*)bbuffer + (INPUTBUFFERSIZE - 1), 1, count - (INPUTBUFFERSIZE - 1), fs->fp) == 0)
@@ -804,7 +804,7 @@ int fil(ppsk PPnode)
                 {
                 size_t readbytes = fs->size * fs->number;
                 if(readbytes >= INPUTBUFFERSIZE)
-                    bbuffer = (unsigned char*)bmalloc(__LINE__, readbytes + 1);
+                    bbuffer = (unsigned char*)bmalloc(readbytes + 1);
                 else
                     bbuffer = buffer;
                 if((readbytes = fread((char*)bbuffer, (size_t)fs->size, (size_t)fs->number, fs->fp)) == 0
@@ -924,7 +924,7 @@ int output(ppsk PPnode, void(*how)(psk k))
                 process = tel;
                 global_fpo = NULL;
                 (*how)(rlnode);
-                ret = (psk)bmalloc(__LINE__, sizeof(ULONG) + telling);
+                ret = (psk)bmalloc(sizeof(ULONG) + telling);
                 ret->v.fl = READY | SUCCESS;
                 process = glue;
                 source = POBJ(ret);

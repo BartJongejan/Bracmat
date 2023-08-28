@@ -237,7 +237,7 @@ psk handleExponents(psk Pnode)
                 nnumber numerator = { 0 }, denominator = { 0 };
                 for(ind = 0; ind < 20; wipe[ind++] = TRUE);
                 ind = 0;
-                conc = (char**)bmalloc(__LINE__, 20 * sizeof(char**));
+                conc = (char**)bmalloc(20 * sizeof(char**));
                 /* 20 is safe value for ULONGs */
                 addr[1] = Pnode->RIGHT;
                 if(RAT_RAT_COMP(Pnode->LEFT))

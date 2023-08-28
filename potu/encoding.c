@@ -6,7 +6,6 @@
 #include <assert.h>
 #include <string.h>
 
-/* ISO8859 */ /* NOT DOS compatible! */
 #if CODEPAGE850
 unsigned char ISO8859toCodePage850(unsigned char kar)
 
@@ -267,7 +266,7 @@ psk changeCase(psk Pnode
                         if(d + nb >= dwarn + 6)
                             {
                             /* overrun */
-                            buf = (char*)bmalloc(__LINE__, 2 * ((dwarn + 6) - obuf));
+                            buf = (char*)bmalloc(2 * ((dwarn + 6) - obuf));
                             dwarn = buf + 2 * ((dwarn + 6) - obuf) - 6;
                             memcpy(buf, obuf, d - obuf);
                             d = buf + (d - obuf);

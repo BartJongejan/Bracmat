@@ -49,4 +49,11 @@ little bit slower, not faster.
 
 #define EXPAND 0
 
+#if DOSUMCHECK
+#define BMALLOC(x,y,z) Bmalloc(x,y,z)
+#define bmalloc(n) BMALLOC(__FILE__,__LINE__,n)
+#else
+#define bmalloc(n) Bmalloc(n)
+#endif
+
 #endif

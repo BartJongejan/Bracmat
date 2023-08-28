@@ -15,7 +15,7 @@ psk iCopyOf(psk pnode)
     psk ret;
     size_t len;
     len = sizeof(ULONG) + strlen((char*)POBJ(pnode));
-    ret = (psk)bmalloc(__LINE__, len + 1);
+    ret = (psk)bmalloc(len + 1);
 #if ICPY
     MEMCPY(ret, pnode, (len >> LOGWORDLENGTH) + 1);
 #else
@@ -39,7 +39,7 @@ psk new_operator_like(psk pnode)
         {
         objectnode* goal;
         assert(!ISBUILTIN((objectnode*)pnode));
-        goal = (objectnode*)bmalloc(__LINE__, sizeof(objectnode));
+        goal = (objectnode*)bmalloc(sizeof(objectnode));
 #if WORD32
         goal->u.Int = 0;
 #else
@@ -48,7 +48,7 @@ psk new_operator_like(psk pnode)
         return (psk)goal;
         }
     else
-        return (psk)bmalloc(__LINE__, sizeof(knode));
+        return (psk)bmalloc(sizeof(knode));
     }
 
 psk scopy(const char* str)
@@ -57,12 +57,12 @@ psk scopy(const char* str)
     psk pnode;
     if(nr & MINUS)
         { /* bracmat out$arg$() -123 */
-        pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + strlen((const char*)str));
+        pnode = (psk)bmalloc(sizeof(ULONG) + strlen((const char*)str));
         strcpy((char*)(pnode)+sizeof(ULONG), str + 1);
         }
     else
         {
-        pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + strlen((const char*)str));
+        pnode = (psk)bmalloc(sizeof(ULONG) + 1 + strlen((const char*)str));
         strcpy((char*)(pnode)+sizeof(ULONG), str);
         }
     pnode->v.fl = READY | SUCCESS | nr;
@@ -183,7 +183,7 @@ psk charcopy(const char* strt, const char* until)
         if(*strt == '0')
             nr |= QNUL;
         }
-    pnode = (psk)bmalloc(__LINE__, sizeof(ULONG) + 1 + (until - strt));
+    pnode = (psk)bmalloc(sizeof(ULONG) + 1 + (until - strt));
     strncpy((char*)(pnode)+sizeof(ULONG), strt, until - strt);
     pnode->v.fl = READY | SUCCESS | nr;
     return pnode;

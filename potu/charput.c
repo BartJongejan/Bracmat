@@ -47,7 +47,7 @@ void lput(int c)
         /* inputBufferPointer points at last operator (where string can be split) or at
            the start of the string. */
 
-        newInputArray = (inputBuffer*)bmalloc(__LINE__, (2 + len) * sizeof(inputBuffer));
+        newInputArray = (inputBuffer*)bmalloc((2 + len) * sizeof(inputBuffer));
         /* allocate new array one element bigger than the previous. */
 
         newInputArray[len + 1].buffer = NULL;
@@ -66,7 +66,7 @@ void lput(int c)
         if(inputBufferPointer == input_buffer)
             {
             /* copy the full content of input_buffer to the second last element */
-            dest = newInputArray[len].buffer = (unsigned char*)bmalloc(__LINE__, DEFAULT_INPUT_BUFFER_SIZE);
+            dest = newInputArray[len].buffer = (unsigned char*)bmalloc(DEFAULT_INPUT_BUFFER_SIZE);
             strncpy((char*)dest, (char*)input_buffer, DEFAULT_INPUT_BUFFER_SIZE - 1);
             dest[DEFAULT_INPUT_BUFFER_SIZE - 1] = '\0';
             /* Make a notice that the element's string is cut-off */
@@ -78,7 +78,7 @@ void lput(int c)
             ++inputBufferPointer; /* inputBufferPointer points at first character after the operator */
             /* maxInputBufferPointer - inputBufferPointer >= 0 */
             L = (size_t)(inputBufferPointer - input_buffer);
-            dest = newInputArray[len].buffer = (unsigned char*)bmalloc(__LINE__, L + 1);
+            dest = newInputArray[len].buffer = (unsigned char*)bmalloc(L + 1);
             strncpy((char*)dest, (char*)input_buffer, L);
             dest[L] = '\0';
             newInputArray[len].cutoff = FALSE;

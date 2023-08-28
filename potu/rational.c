@@ -279,7 +279,7 @@ static LONG nnDivide(nnumber* dividend, nnumber* divisor, nnumber* quotient, nnu
     remainder->ilength = remainder->iallocated = dividend->sign & QNUL ? 1 : dividend->ilength;
     assert(remainder->iallocated > 0);
     assert((LONG)TEN_LOG_RADIX * remainder->ilength >= dividend->length);
-    remainder->inumber = (LONG*)(remainder->ialloc = bmalloc(__LINE__, sizeof(LONG) * remainder->iallocated));
+    remainder->inumber = (LONG*)(remainder->ialloc = bmalloc(sizeof(LONG) * remainder->iallocated));
     *(remainder->inumber) = 0;
     assert(dividend->ilength != 0);/*if(dividend->ilength == 0)
         remainder->inumber[0] = 0;
@@ -291,7 +291,7 @@ static LONG nnDivide(nnumber* dividend, nnumber* divisor, nnumber* quotient, nnu
     else
         quotient->ilength = quotient->iallocated = 1;
 
-    quotient->inumber = (LONG*)(quotient->ialloc = bmalloc(__LINE__, (size_t)(quotient->iallocated) * sizeof(LONG)));
+    quotient->inumber = (LONG*)(quotient->ialloc = bmalloc((size_t)(quotient->iallocated) * sizeof(LONG)));
     memset(quotient->inumber, 0, (size_t)(quotient->iallocated) * sizeof(LONG));
     quot = quotient->inumber;
 
@@ -447,7 +447,7 @@ static psk inumberNode(nnumber* g)
     psk res;
     size_t len;
     len = offsetof(sk, u.obj) + numlength(g);
-    res = (psk)bmalloc(__LINE__, len + 1);
+    res = (psk)bmalloc(len + 1);
     if(g->sign & QNUL)
         res->u.obj = '0';
     else
@@ -481,7 +481,7 @@ static Qnumber nn2q(nnumber* num, nnumber* den)
         {
         char* endp;
         size_t len = offsetof(sk, u.obj) + 2 + numlength(num) + numlength(den);
-        res = (psk)bmalloc(__LINE__, len);
+        res = (psk)bmalloc(len);
         endp = iconvert2decimal(num, (char*)POBJ(res));
         *endp++ = '/';
         endp = iconvert2decimal(den, endp);
@@ -590,7 +590,7 @@ static void nTimes(nnumber* x, nnumber* y, nnumber* product)
     assert(product->ialloc == 0);
     product->ilength = product->iallocated = x->ilength + y->ilength;
     assert(product->iallocated > 0);
-    product->inumber = (LONG*)(product->ialloc = bmalloc(__LINE__, sizeof(LONG) * product->iallocated));
+    product->inumber = (LONG*)(product->ialloc = bmalloc(sizeof(LONG) * product->iallocated));
 
     for(ipointer = product->inumber; ipointer < product->inumber + product->ilength; *ipointer++ = 0)
         ;
@@ -719,7 +719,7 @@ static psk numberNode2(nnumber* g)
         }
     else
         {
-        res = (psk)bmalloc(__LINE__, neededlen);
+        res = (psk)bmalloc(neededlen);
         if(g->sign & QNUL)
             res->u.obj = '0';
         else
@@ -922,7 +922,7 @@ static void convert2binary(nnumber* x)
     ptrdiff_t n;
 
     x->ilength = x->iallocated = ((x->sign & QNUL ? 1 : x->length) + TEN_LOG_RADIX - 1) / TEN_LOG_RADIX;
-    x->inumber = x->ialloc = (LONG*)bmalloc(__LINE__, sizeof(LONG) * x->iallocated);
+    x->inumber = x->ialloc = (LONG*)bmalloc(sizeof(LONG) * x->iallocated);
 
     for(ipointer = x->inumber
         , charpointer = x->number
@@ -1124,7 +1124,7 @@ nnumber nPlus(nnumber* x, nnumber* y)
     ptrdiff_t xGreaterThany;
     res.length = 1 + (x->length > y->length ? x->length : y->length);
     res.allocated = (size_t)res.length + offsetof(sk, u.obj);
-    res.alloc = res.number = (char*)bmalloc(__LINE__, res.allocated);
+    res.alloc = res.number = (char*)bmalloc(res.allocated);
     *res.number = '0';
     hres = res.number + (size_t)res.length - 1;
     if(x->length == y->length)
@@ -1156,7 +1156,7 @@ void nnSPlus(nnumber* x, nnumber* y, nnumber* som)
 
     som->ilength = 1 + (x->ilength > y->ilength ? x->ilength : y->ilength);
     som->iallocated = som->ilength;
-    som->ialloc = som->inumber = (LONG*)bmalloc(__LINE__, sizeof(LONG) * som->iallocated);
+    som->ialloc = som->inumber = (LONG*)bmalloc(sizeof(LONG) * som->iallocated);
     *som->inumber = 0;
     hres = som->inumber + som->ilength;
 
@@ -1301,7 +1301,7 @@ psk qDenominator(psk Pnode)
     nnumber xt = { 0 }, xn = { 0 };
     split(_qx, &xt, &xn);
     len = offsetof(sk, u.obj) + 1 + xn.length;
-    res = (psk)bmalloc(__LINE__, len);
+    res = (psk)bmalloc(len);
     assert(!(xn.sign & QNUL)); /*Because RATIONAL_COMP(_qx)*/
     memcpy((void*)POBJ(res), xn.number, xn.length);
     res->v.fl = READY | SUCCESS | QNUMBER BITWISE_OR_SELFMATCHING;
@@ -1326,7 +1326,7 @@ Qnumber qTimesMinusOne(Qnumber _qx)
     Qnumber res;
     size_t len;
     len = offsetof(sk, u.obj) + 1 + strlen((char*)POBJ(_qx));
-    res = (Qnumber)bmalloc(__LINE__, len);
+    res = (Qnumber)bmalloc(len);
     memcpy(res, _qx, len);
     res->v.fl ^= MINUS;
     res->v.fl &= ~ALL_REFCOUNT_BITS_SET;
@@ -1368,11 +1368,11 @@ int subroot(nnumber* ag, char* conc[], int* pind)
                     {
                     if(ores < 1000)
                         {
-                        conc[(*pind)] = (char*)bmalloc(__LINE__, 12);/*{?} 327365274^1/2 => 2^1/2*3^1/2*2477^1/2*22027^1/2 */
+                        conc[(*pind)] = (char*)bmalloc(12);/*{?} 327365274^1/2 => 2^1/2*3^1/2*2477^1/2*22027^1/2 */
                         }
                     else
                         {
-                        conc[*pind] = (char*)bmalloc(__LINE__, 20);
+                        conc[*pind] = (char*)bmalloc(20);
                         }
                     sprintf(conc[(*pind)++], LONGU "^(%d*\1)*", ores, macht);
                     }
@@ -1393,7 +1393,7 @@ int subroot(nnumber* ag, char* conc[], int* pind)
         }
     if(ores == 1 && macht == 1)
         return FALSE;
-    conc[*pind] = (char*)bmalloc(__LINE__, 32);
+    conc[*pind] = (char*)bmalloc(32);
     if((ores == g && ++macht) || ores == 1)
         sprintf(conc[(*pind)++], LONGU "^(%d*\1)", g, macht); /*{?} 32^1/2 => 2^5/2 */
     else

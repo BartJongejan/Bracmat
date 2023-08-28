@@ -378,7 +378,7 @@ psk eval(psk Pnode)
                         if(dummy_op == EQUALS)
                             {
                             auxkn = Pnode;
-                            Pnode = (psk)bmalloc(__LINE__, sizeof(objectnode));
+                            Pnode = (psk)bmalloc(sizeof(objectnode));
 #if WORD32
                             ((typedObjectnode*)(Pnode))->u.Int = 0;
 #else

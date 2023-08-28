@@ -363,10 +363,10 @@ static forthvariable* getVariablePointer(forthvariable* varp, char* name)
 
 static forthvariable* createVariablePointer(forthvariable** varp, char* name)
     {
-    forthvariable* newvarp = (forthvariable*)bmalloc(__LINE__, sizeof(forthvariable));
+    forthvariable* newvarp = (forthvariable*)bmalloc(sizeof(forthvariable));
     if(newvarp)
         {
-        newvarp->name = bmalloc(__LINE__, strlen(name) + 1);
+        newvarp->name = bmalloc(strlen(name) + 1);
         if(newvarp->name)
             {
             strcpy(newvarp->name, name);
@@ -393,7 +393,7 @@ Boolean initialise(fortharray* curarrp, size_t size)
     //assert(curarrp->pval == 0);
     assert(curarrp->pval == 0 || curarrp->size == size);
     if(curarrp->pval == 0)
-        curarrp->pval = (forthvalue*)bmalloc(__LINE__, size * sizeof(forthvalue));
+        curarrp->pval = (forthvalue*)bmalloc(size * sizeof(forthvalue));
     if(curarrp->pval)
         {
         memset(curarrp->pval, 0, size * sizeof(forthvalue));
@@ -425,14 +425,14 @@ static fortharray* getOrCreateArrayPointer(fortharray** arrp, char* name, size_t
         {
         curarrp = *arrp;
         //assert(*arrp == 0);
-        *arrp = (fortharray*)bmalloc(__LINE__, sizeof(fortharray));
+        *arrp = (fortharray*)bmalloc(sizeof(fortharray));
         if(*arrp)
             {
             memset(*arrp, 0, sizeof(fortharray));
             (*arrp)->next = curarrp;
             curarrp = *arrp;
             assert(curarrp->name == 0);
-            curarrp->name = bmalloc(__LINE__, strlen(name) + 1);
+            curarrp->name = bmalloc(strlen(name) + 1);
             if(curarrp->name)
                 {
                 strcpy(curarrp->name, name);
@@ -497,12 +497,12 @@ static fortharray* getOrCreateArrayPointerButNoArray(fortharray** arrp, char* na
         {
         if(*arrp == 0)
             {
-            *arrp = (fortharray*)bmalloc(__LINE__, sizeof(fortharray));
+            *arrp = (fortharray*)bmalloc(sizeof(fortharray));
             if(*arrp)
                 {
                 curarrp = *arrp;
                 memset(curarrp, 0, sizeof(fortharray));
-                curarrp->name = bmalloc(__LINE__, strlen(name) + 1);
+                curarrp->name = bmalloc(strlen(name) + 1);
                 if(curarrp->name)
                     {
                     strcpy(curarrp->name, name);
@@ -690,7 +690,7 @@ static long setArgs(forthMemory* mem, size_t Nparm, psk args)
             { /* args is an array */
             /* find rank and ranges */
             size_t rank = find_rank(args);
-            size_t* range = (size_t*)bmalloc(__LINE__, 2 * rank * sizeof(size_t)); /* twice: both ranges and strides */
+            size_t* range = (size_t*)bmalloc(2 * rank * sizeof(size_t)); /* twice: both ranges and strides */
             if(range != 0)
                 {
                 memset(range, 0, 2 * rank * sizeof(size_t));/* twice: both ranges and strides */
@@ -933,7 +933,7 @@ static stackvalue* doTbl(stackvalue* sp, forthword* wordp, fortharray** parr)
     size_t* range = arr->range;
     if(range == 0)
         {
-        range = (size_t*)bmalloc(__LINE__, 2 * rank * sizeof(size_t));/* twice: both ranges and strides */
+        range = (size_t*)bmalloc(2 * rank * sizeof(size_t));/* twice: both ranges and strides */
         arr->range = range;
         }
     if(range != 0)
@@ -965,7 +965,7 @@ static stackvalue* doTbl(stackvalue* sp, forthword* wordp, fortharray** parr)
         arr->size = size;
         arr->index = 0;
         assert(arr->pval == 0);
-        arr->pval = (forthvalue*)bmalloc(__LINE__, size * sizeof(forthvalue));
+        arr->pval = (forthvalue*)bmalloc(size * sizeof(forthvalue));
         if(arr->pval)
             {
             memset(arr->pval, 0, size * sizeof(forthvalue));
@@ -1304,7 +1304,7 @@ static Boolean calculate(struct typedObjectnode* This, ppsk arg)
                         flags = READY | SUCCESS | QNUMBER | QDOUBLE BITWISE_OR_SELFMATCHING;
                         }
                     len = offsetof(sk, u.obj) + strlen(buf);
-                    res = (psk)bmalloc(__LINE__, len + 1);
+                    res = (psk)bmalloc(len + 1);
 
                     if(res)
                         {
@@ -1771,7 +1771,7 @@ static Boolean trc(struct typedObjectnode* This, ppsk arg)
                         flags = READY | SUCCESS | QNUMBER | QDOUBLE BITWISE_OR_SELFMATCHING;
                         }
                     len = offsetof(sk, u.obj) + strlen(buf);
-                    res = (psk)bmalloc(__LINE__, len + 1);
+                    res = (psk)bmalloc(len + 1);
 
                     if(res)
                         {
@@ -2170,7 +2170,7 @@ static enum formt getFormat(char* psobj)
 static psk createOperatorNode(int operator)
     {
     assert(operator == DOT || operator == COMMA || operator == WHITE);
-    psk operatorNode = (psk)bmalloc(__LINE__, sizeof(knode));
+    psk operatorNode = (psk)bmalloc(sizeof(knode));
     if(operatorNode)
         {
         operatorNode->v.fl = (operator | SUCCESS | READY) & COPYFILTER;
@@ -2186,7 +2186,7 @@ static psk FloatNode(double val)
     char jotter[500];
     size_t bytes = offsetof(sk, u.obj) + 1;
     bytes += sprintf(jotter, "%e", val);
-    psk res = (psk)bmalloc(__LINE__, bytes);
+    psk res = (psk)bmalloc(bytes);
     if(res)
         {
         strcpy((char*)(res)+offsetof(sk, u.sobj), jotter);
@@ -2201,7 +2201,7 @@ static psk HexNode(double val)
     char jotter[500];
     size_t bytes = offsetof(sk, u.obj) + 1;
     bytes += sprintf(jotter, "%a", val);
-    psk res = (psk)bmalloc(__LINE__, bytes);
+    psk res = (psk)bmalloc(bytes);
     if(res)
         {
         strcpy((char*)(res)+offsetof(sk, u.sobj), jotter);
@@ -2219,7 +2219,7 @@ static psk IntegerNode(double val)
         bytes += sprintf(jotter, "%d", (int)-val);
     else
         bytes += sprintf(jotter, "%d", (int)val);
-    psk res = (psk)bmalloc(__LINE__, bytes);
+    psk res = (psk)bmalloc(bytes);
     if(res)
         {
         strcpy((char*)(res)+offsetof(sk, u.sobj), jotter);
@@ -2272,7 +2272,7 @@ static psk FractionNode(double val)
     else
         bytes += sprintf(jotter, "0 ");
 
-    psk res = (psk)bmalloc(__LINE__, bytes);
+    psk res = (psk)bmalloc(bytes);
     if(res)
         {
         strcpy((char*)(res)+offsetof(sk, u.sobj), jotter);
@@ -3185,7 +3185,7 @@ static int removeNoOp(forthMemory* mem, int length)
                 }
             }
         newlength = length - delta;
-        forthword* newword = bmalloc(__LINE__, newlength * sizeof(forthword));
+        forthword* newword = bmalloc(newlength * sizeof(forthword));
         if(newword)
             {
             mem->word = newword;
@@ -3379,7 +3379,7 @@ static fortharray* haveArray(forthMemory* forthstuff, psk declaration, Boolean i
 
         a->rank = rank;
         assert(a->range == 0);
-        a->range = (size_t*)bmalloc(__LINE__, 2 * rank * sizeof(size_t));/* twice: both ranges and strides */
+        a->range = (size_t*)bmalloc(2 * rank * sizeof(size_t));/* twice: both ranges and strides */
         if(a->range)
             {
             a->stride = a->range + rank;
@@ -4421,7 +4421,7 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
             fprintf(stderr, "polish1 returns length < 0 [%d]\n", length);
             return 0; /* Something wrong happened. */
             }
-        forthstuff = (forthMemory*)bmalloc(__LINE__, sizeof(forthMemory));
+        forthstuff = (forthMemory*)bmalloc(sizeof(forthMemory));
         if(forthstuff)
             {
             memset(forthstuff, 0, sizeof(forthMemory));
@@ -4440,7 +4440,7 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
                     {
                     //printf("Creating function [%s]\n", name);
                     assert(forthstuff->name == 0);
-                    forthstuff->name = (char*)bmalloc(__LINE__, strlen(name) + 1);
+                    forthstuff->name = (char*)bmalloc(strlen(name) + 1);
                     if(forthstuff->name)
                         {
                         strcpy(forthstuff->name, name);
@@ -4454,7 +4454,7 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
             forthstuff->arr = 0;
             */
             assert(forthstuff->word == 0);
-            forthstuff->word = bmalloc(__LINE__, length * sizeof(forthword));
+            forthstuff->word = bmalloc(length * sizeof(forthword));
             if(forthstuff->word)
                 {
                 memset(forthstuff->word, 0, length * sizeof(forthword));
@@ -4475,7 +4475,7 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
                     forthstuff->nparameters = Ndecl;
                     if(Ndecl > 0)
                         {
-                        forthstuff->parameters = bmalloc(__LINE__, Ndecl * sizeof(parameter));
+                        forthstuff->parameters = bmalloc(Ndecl * sizeof(parameter));
                         if(forthstuff->parameters != 0)
                             {
                             for(decl = declarations; Ndecl-- > 0 && decl && is_op(decl); decl = decl->RIGHT)
