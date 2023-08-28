@@ -674,9 +674,8 @@ Diagram=
               & !n
             )
         : ?code
-      & new$(calculation,!code):?calc
-      & (     (calc..calculate)
-            $ ((,!links) (,!degrees))
+      & new$(UFP,!code):?calc
+      & (   (calc..go)$((,!links) (,!degrees))
           & (|(calc..print)$)
           & out$executed
           & (calc..export)$(N,T):?pointsT
