@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "23 Auguts 2023"
-#define VERSION "6.15.0"
-#define BUILD "281"
+#define DATUM "28 Auguts 2023"
+#define VERSION "6.16.0"
+#define BUILD "282"
 /*
 COMPILATION
 -----------
@@ -16679,7 +16679,7 @@ int startProc(
                                 "(flt=((e,d,m,s,f).!arg:(?arg,~<0:?d)&!arg:0|(-1*!arg:>0:?arg&-1|1):?s&"
                                 "10\016!arg:?e+(10\016?m|0&1:?m)&(!m+1/2*1/10^!d:~<10&1+!e:?e&!m*1/10"
                                 ":?m|)&@(div$(!m+1/2*(1/10^!d:?d),!d):"
-                                "`%?f ?m)&str$(!s*!f (!d:~1&\254|) !m \252\261\260\305 !e))),",
+                                "`%?f ?m)&str$(!s*!f (!d:~1&\256|) !m \305 !e))),",
 
                                 "(tay=((f,tot,x,fac,cnt,res,R).",
                                 "(R=!cnt:!tot&!res|!res+(sub$(!x\017!f:?f.!x.0))*((!fac*(!cnt+1:?cnt))"
