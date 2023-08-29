@@ -1,3 +1,5 @@
+#define SINGLEOBJECT
+/* Begin of potu.c */
 /*
     Bracmat. Programming language with pattern matching on tree structures.
     Copyright (C) 2002  Bart Jongejan
@@ -20,7 +22,7 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "28 Auguts 2023"
+#define DATUM "28 August 2023"
 #define VERSION "6.16.0"
 #define BUILD "282"
 /*
