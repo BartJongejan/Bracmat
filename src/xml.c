@@ -34,14 +34,14 @@ A closing angled parenthesis > is implied in certain circumstances:
 <p<span>  is interpreted as <p><span>
 attributes can be empty (no =[valuex])
 */
-/*
+
 #include "xml.h"
 #include "encoding.h"
-*/
+#include "input.h"
+#include "charput.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stddef.h>
 #include <assert.h>
 
 #include <limits.h>
@@ -56,11 +56,6 @@ attributes can be empty (no =[valuex])
 
 #define TRUE 1
 #define FALSE 0
-
-extern void putOperatorChar(int c);
-extern void putLeafChar(int c);
-extern unsigned char * putCodePoint(unsigned LONG val,unsigned char * s);
-extern int getCodePoint(const char** ps);
 
 typedef enum {notag,tag,endoftag,endoftag_startoftag} estate;
 static estate (*tagState)(const unsigned char * pkar);

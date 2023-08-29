@@ -21,6 +21,12 @@ json.c
 Convert JSONL file to Bracmat file.
 */
 
+#include "json.h"
+#include "encoding.h"
+#include "input.h"
+#include "filewrite.h"
+#include "charput.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -37,11 +43,6 @@ Convert JSONL file to Bracmat file.
 
 #define TRUE 1
 #define FALSE 0
-
-extern void putOperatorChar(int c);
-extern void putLeafChar(int c);
-extern char * putCodePoint(unsigned LONG val,unsigned char * s);
-extern int errorprintf(const char* fmt, ...);
 
 typedef enum {nojson,json} jstate;
 

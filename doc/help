@@ -7353,12 +7353,12 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
       |   htmltable
         & out$"HTML with excercises in tables"
         & doHTML$("bracmat.html".convertBlockQuoteToTable)
-      | latex&out$TeX&doTEX$("bracmat.html"."help.tex")
+      | latex&out$TeX&doTEX$("bracmat.html"."bracmat.tex")
       |   htmllatex
         & out$"1:HTML"
         & doHTML$("bracmat.html".)
         & out$"2:LATEX"
-        & doTEX$("bracmat.html"."help.tex")
+        & doTEX$("bracmat.html"."bracmat.tex")
       | lex&get$"lex.bra"&lex$help
       |   save
         & lst$(help,"help.bra",NEW,WYD)

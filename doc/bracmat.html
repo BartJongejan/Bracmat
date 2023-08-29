@@ -3162,8 +3162,8 @@ all nine planets of the solar system, one would as follows:</p>
           ,
             ' (
               .   "The array `planets' is allocated at compile time,
-                  because the sizes are already known at that time."
-                &amp;  tbl$(planets,$nrOfPlanets,$spaceDimensions)
+                   because the sizes are already known at that time."
+                &amp; tbl$(planets,$nrOfPlanets,$spaceDimensions)
                 &amp; rank$planets:?nrOfIndices
                 &amp; "The array `dynamic' is allocated at run time."
                 &amp; tbl$(dynamic,!nrOfIndices)
@@ -3182,8 +3182,8 @@ all nine planets of the solar system, one would as follows:</p>
                     &amp; 1+!index:?index
                     )
                 &amp; "You can comment source code this way.
-                    The value !cells is returned
-                    as the result of this function"
+                   The value !cells is returned
+                   as the result of this function"
                 &amp; !cells
               )
           )

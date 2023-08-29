@@ -8,4 +8,4 @@
 /*#define NO_FOPEN*/
 #define NO_EXIT_ON_NON_SEVERE_ERRORS
 
-#include "../src/bracmat.c"
+#include "../singlesource/bracmat.c"

@@ -1,0 +1,883 @@
+{one.bra
+𝕌𝕋𝔽-𝟠
+
+Combine all files into one file, bracmat.c.
+The result should 1) be compilable and 2) be quite similar to the old bracmat.c
+Purpose: discover things that need mutual merging between bracmat.c and the potu sources,
+thereafter creating a new bracmat.c.}
+
+X=
+  (folder="../src/")
+  ( doit
+  =   included kept declared
+    .   :?included:?kept:?declared
+      &     stringEval
+            putOperatorChar
+            putLeafChar
+            putCodePoint
+            getCodePoint
+            startProc
+            endProc
+            oneShot
+            mainLoop
+            errorprintf
+        : ?exportFnc
+      & ( requiresDeclaration
+        =   subtreecopy
+          | wipe
+          | eval
+          | cmp
+          | result
+        )
+      & chu$(128+10):?escapednl
+      &   0
+        : ?incomment
+        : ?unfinished
+        : ?unfinishedStatic
+      & ( exactMatch
+        =   x p s z
+          .   !arg:(?s.?p)
+            & !( 
+               ' ( @(!s:?x ()$p ?z)
+                 & ( !x:
+                   | @(!x:? @?x)&~(let$!x)
+                   )
+                 & ( !z:
+                   | @(!z:%@?z ?)&~(let$!z)
+                   )
+                 )
+               )
+        )
+      & ( trim
+        =   
+          .     whl
+              ' ( @( !arg
+                   :   ?arg
+                       ( " "
+                       | \n
+                       | \r
+                       | \t
+                       | \f
+                       )
+                   )
+                & 
+                )
+            & !arg
+        )
+      & ( trimall
+        =   
+          .     vap$((=.\n trim$!arg).!arg.\n)
+              : (\n ?arg|?arg)
+            & str$!arg
+        )
+      & ( removeEmptyLines
+        =   narg cleaned
+          .   !arg:(?arg.?naam)
+            & (       vap
+                    $ ((=.(.) !arg).!arg.\n)
+                  : (.) ?arg
+                & 0:?nls
+                &     str
+                    $ ( map
+                      $ ( ( 
+                          =   
+                            .     !arg:(.)
+                                & (   1+!nls:<3:?nls
+                                    & \n
+                                  | 
+                                  )
+                              | 0:?nls&!arg
+                          )
+                        . !arg
+                        )
+                      )
+                  : ?cleaned
+                & (     !cleaned
+                      : (|\n|\n\n)
+                    & 
+                  |   str
+                    $ ( "/* Begin of "
+                        !naam
+                        " */"
+                        \n
+                        !cleaned
+                        "/* End of "
+                        !naam
+                        " */"
+                        \n
+                      )
+                  )
+              | !arg
+              )
+        )
+      & ( WS
+        =   
+          .     vap
+              $ ( ( 
+                  =   
+                    .     !arg
+                        : ~( " "
+                           | \n
+                           | \r
+                           | \t
+                           | \v
+                           )
+                      | 
+                  )
+                . !arg
+                )
+            : 
+        )
+      & ( spliceEscapedNewlines
+        =   A Z L M
+          .   :?L
+            &   whl
+              ' ( @(!arg:?A "\\" ?arg)
+                & (   @(!arg:?M \n ?rest)
+                    & WS$!M
+                    & !escapednl "\\" !A !L:?L
+                    & !rest:?arg
+                  | "\\" !A !L:?L
+                  )
+                )
+            & !arg !L:?L
+            & str$(rvrs$!L)
+        )
+      & ( rvrs
+        =   L A
+          .   :?L
+            &   whl
+              ' ( !arg:%?A ?arg
+                & !A !L:?L
+                )
+            & !L
+        )
+      & ( kommentar
+        =   A C textParts
+          .   :?textParts
+            &   whl
+              ' ( @( !arg
+                   :   ?A
+                       "/"
+                       (   "*" ?C "*/" ?arg
+                         & (.,!C,):?C
+                       |   "/" ?C
+                         & @( !C
+                            : ( ?C \n ?arg
+                              | ?C&:?arg
+                              )
+                            )
+                         & (.,!C \n):?C
+                       )
+                   )
+                & !C !A !textParts:?textParts
+                )
+            & rvrs$(!arg !textParts)
+        )
+      & ( defines
+        =   A B a d
+          .   :?text
+            &   whl
+              ' ( !arg:%?A ?arg
+                &     (   !A:@
+                        & :?B
+                        &   whl
+                          ' ( @(!A:?a "#define" ?A)
+                            &     ( define
+                                  .     @(!A:?d \n ?A)
+                                      & !d \n
+                                    |   (!A.):(?d.?A)
+                                      & !d
+                                  )
+                                  !a
+                                  !B
+                              : ?B
+                            )
+                        & !A !B:?B
+                      | !A
+                      )
+                      !text
+                  : ?text
+                )
+            & rvrs$!text
+        )
+      & ( conditionals
+        =   
+          .       map
+                $ ( ( 
+                    =   
+                      .     !arg:@
+                          &     vap
+                              $ ( ( 
+                                  =   A cond Z
+                                    .   \n
+                                        (   @( !arg
+                                             :   ?A
+                                                 "#"
+                                                 ?cond
+                                                 (     (" "|\t)
+                                                       ?
+                                                   : ?Z
+                                                 | :?Z
+                                                 )
+                                             )
+                                          & WS$!A
+                                          & (!cond.!A,!Z)
+                                        | !arg
+                                        )
+                                  )
+                                . !arg
+                                . \n
+                                )
+                            : (\n ?arg|?arg)
+                          & !arg
+                        | !arg
+                    )
+                  . !arg
+                  )
+              : ?arg
+            & :?L
+            &   whl
+              ' ( !arg:?atoms (?A.?B) ?arg
+                & (!A.!B) str$!atoms !L:?L
+                )
+            & rvrs$(str$!arg !L)
+        )
+      & ( strings
+        =   
+          .   map
+            $ ( ( 
+                =   A S L
+                  .     !arg:@
+                      & :?L
+                      &   whl
+                        ' ( @( !arg
+                             :   ?A
+                                 (\"&@(!A:~(? "\\")))
+                                 ?S
+                                 ( \" ?arg
+                                 & @(!S:~(? "\\"))
+                                 )
+                             )
+                          & !L !A (STRING.!S):?L
+                          )
+                      & !L !arg:?L
+                    | !arg
+                )
+              . !arg
+              )
+        )
+      & ( separators
+        =   
+          .   map
+            $ ( ( 
+                =   
+                  .     !arg:@
+                      &     vap
+                          $ ( ( 
+                              =   
+                                .   (";".)
+                                    (     vap
+                                        $ ( ( 
+                                            =   
+                                              .   ("{".)
+                                                  (     vap
+                                                      $ ( ( 
+                                                          =   
+                                                            .   ("}".)
+                                                                !arg
+                                                          )
+                                                        . !arg
+                                                        . "}"
+                                                        )
+                                                    : (   ("}".)
+                                                          ?arg
+                                                      | !arg
+                                                      )
+                                                  & !arg
+                                                  )
+                                            )
+                                          . !arg
+                                          . "{"
+                                          )
+                                      : ( ("{".) ?arg
+                                        | ?arg
+                                        )
+                                    & !arg
+                                    )
+                              )
+                            . !arg
+                            . ";"
+                            )
+                        : ((";".) ?arg|?arg)
+                      & !arg
+                    | !arg
+                )
+              . !arg
+              )
+        )
+      & ( tokenize
+        =   text textParts A C d B
+          .     lst
+              $ (arg,str$(!NAAM "-arg.bra"),NEW,RAW,BIN)
+            & ( ~
+              | spliceEscapedNewlines$!arg:?text
+              )
+            &   lst
+              $ ( text
+                , str$(!NAAM "-1spliced.bra")
+                , NEW
+                , RAW
+                , BIN
+                )
+            & kommentar$!text:?text
+            &   lst
+              $ ( text
+                , str$(!NAAM "-2comments.bra")
+                , NEW
+                , RAW
+                , BIN
+                )
+            & defines$!text:?text
+            &   lst
+              $ ( text
+                , str$(!NAAM "-3defines.bra")
+                , NEW
+                , RAW
+                , BIN
+                )
+            & conditionals$!text:?text
+            &   lst
+              $ ( text
+                , str$(!NAAM "-4conditionals.bra")
+                , NEW
+                , RAW
+                , BIN
+                )
+            & strings$!text:?text
+            &   lst
+              $ ( text
+                , str$(!NAAM "-5strings.bra")
+                , NEW
+                , RAW
+                , BIN
+                )
+            & separators$!text:?text
+            &   lst
+              $ ( text
+                , str$(!NAAM "-6separators.bra")
+                , NEW
+                , RAW
+                , BIN
+                )
+            & !text
+        )
+      & ( declare
+        =   
+          .   !declared:? !arg ?&
+            | !arg !declared:?declared&!arg
+        )
+      & ( excludeDeclarations
+        =   A L Z a crnl crnls sep M
+          .   :?L
+            &   whl
+              ' (   !arg
+                  :   ?A
+                      ((";"|"{".):?sep)
+                      ?arg
+                &     ( 
+                      .       !A
+                            :   ?a
+                                ( %@:?XX
+                                &     map
+                                    $ ( ( 
+                                        =   
+                                          .     @(!XX:? !arg ?)
+                                              & exactMatch$(!XX.!arg)
+                                              & !XX
+                                            | 
+                                        )
+                                      . !exportFnc
+                                      )
+                                  : 
+                                & :?crnls
+                                &   whl
+                                  ' ( @( !XX
+                                       :   ( (\r|\n)
+                                           : ?crnl
+                                           )
+                                           ?XX
+                                       )
+                                    & !crnls !crnl:?crnls
+                                    )
+                                & ( !crnls:~
+                                  |   @( !XX
+                                       :   ?
+                                           (LONG0nD|quote)
+                                           ?
+                                       )
+                                    &   !a
+                                      : ( 
+                                        | ~(? @(%?:? "\n " ?) ?)
+                                        )
+                                  )
+                                & @( !XX
+                                   : ~(" " ?)
+                                   : ~
+                                   :   %@( ~<A:~>Z
+                                         | ~<a:~>z
+                                         | "_"
+                                         )
+                                       ?
+                                   : ~(static ?)
+                                   : ~(typedef ?)
+                                   : ~(enum ?)
+                                   : ( ~(struct ?)
+                                     |   ?
+                                       & !sep:(";".)
+                                     )
+                                   )
+                                )
+                                ?Z
+                          & (   @(!XX:extern ?M)
+                              & !a !crnls !Z:?aZ
+                              & (   @(!M:? "(" ? ")" ?)
+                                  &   !aZ
+                                      ( WS$!aZ:
+                                      | !sep
+                                      )
+                                |   (   !arg
+                                      :   @(?sp&WS$!sp)
+                                          (.,?)
+                                          ?arg
+                                    | 
+                                    )
+                                  &   !aZ
+                                      ( WS$!aZ:
+                                      | !sep
+                                      )
+                                )
+                            |   @(!XX:?x main ?z)
+                              & ( !x:
+                                |   @(!x:? @?x)
+                                  & ~(let$!x)
+                                )
+                              & ( !z:
+                                |   @(!z:%@?z ?)
+                                  & ~(let$!z)
+                                )
+                              & !a !crnls !XX !Z !sep
+                            |   !sep:(";".)
+                              & (     !XX
+                                    : (   ?
+                                          @(?:? "(" ? ")" ?)
+                                          ?
+                                      |   ?
+                                          @(?:? "(" ?)
+                                          ?
+                                          @(?:? ")" ?)
+                                          ?
+                                      )
+                                  & @(!XX:~(? "=" ?))
+                                  & (   !( 
+                                         ' @( !XX
+                                            :   ?u
+                                                ()$requiresDeclaration
+                                                ?v
+                                            )
+                                         )
+                                      & ( !u:
+                                        |   @(!u:? %@?u)
+                                          & ~(let$!u)
+                                        )
+                                      & ( !v:
+                                        |   @(!v:%@?v ?)
+                                          & ~(let$!v)
+                                        )
+                                      &   !a
+                                          !crnls
+                                            declare
+                                          $ ("static " !XX !Z !sep)
+                                    | !a !crnls
+                                    )
+                                |     !XX
+                                    : ? @(?:? "(" ?) ?
+                                  &   !Z
+                                    : ? @(?:? ")" ?) ?
+                                  & (   @(!XX:? merge ?)
+                                      &   out
+                                        $ ( str
+                                          $ ( "XX{"
+                                              !XX
+                                              "}["
+                                              !sep
+                                              "]<<<"
+                                              !Z
+                                              ">>>"
+                                            )
+                                          )
+                                    | 
+                                    )
+                                  & @(!XX:~(? "=" ?))
+                                  & (   @( !XX
+                                         :   ?u
+                                             ( subtreecopy
+                                             | wipe
+                                             | eval
+                                             | cmp
+                                             )
+                                             ?v
+                                         )
+                                      & ( !u:
+                                        |   @(!u:? %@?u)
+                                          & ~(let$!u)
+                                        )
+                                      & ( !v:
+                                        |   @(!v:%@?v ?)
+                                          & ~(let$!v)
+                                        )
+                                      &   !a
+                                          !crnls
+                                            declare
+                                          $ ("static " !XX !Z !sep)
+                                    | !a !crnls
+                                    )
+                                )
+                            |   @(!XX:struct ?z)
+                              & @(!z:~(? " " ? " " ?))
+                              & !a !crnls !XX !Z !sep
+                            | !a !crnls "static " !XX !Z !sep
+                            )
+                        | !A !sep
+                      )
+                      !L
+                  : ?L
+                )
+            & rvrs$((.!arg) !L):?L
+            &   map
+              $ ( ( 
+                  = .!arg:(.?arg)&!arg
+                  )
+                . !L
+                )
+        )
+      & ( totext
+        =   what value
+          .       vap
+                $ ( (=.\n !arg)
+                  .   str
+                    $ ( map
+                      $ ( ( 
+                          =   
+                            .   !arg:@
+                              |   !arg:(.,?arg,)
+                                & "/*" !arg "*/"
+                              |   !arg:(.,?arg)
+                                & "//" !arg
+                              |   !arg:(?what.,?value)
+                                & # !what !value
+                              |   !arg:(define.?value)
+                                & #define !value
+                              | !arg:("{".)&"{"
+                              | !arg:("}".)&"}"
+                              | !arg:(";".)&";"
+                              |   !arg:(STRING.?value)
+                                & \" !value \"
+                              | !arg
+                          )
+                        . !arg
+                        )
+                      )
+                  . !escapednl
+                  )
+              : \n ?arg
+            & str$!arg
+        )
+      & ( include
+        =   what data
+          .   map
+            $ ( ( 
+                =   
+                  .     !arg:(include.,?what)
+                      & (   @(!what:? "<" ?what ">" ?)
+                          & (   !included:? !what ?
+                              & 
+                            |   !what !included:?included
+                              & !arg
+                            )
+                        |   @(!what:? \" ?what \" ?)
+                          & (   !included:? !what ?
+                              & 
+                            |   !what !included:?included
+                              & (   ~
+                                  & @( !what
+                                     :   ?
+                                         ( unicaseconv
+                                         | unichartypes
+                                         | xml
+                                         | json
+                                         | calculation
+                                         )
+                                         ?
+                                     )
+                                  & !arg
+                                |   includeStuff$!what:?data
+                                  & !data
+                                | !arg
+                                )
+                            )
+                        )
+                    | !arg
+                )
+              . !arg
+              )
+        )
+      & ( eliminateHeaderstuff
+        =   lines
+          .       vap
+                $ ( ( 
+                    =   
+                      .   ( 
+                          |   whl
+                            ' ( @( !arg
+                                 :   ?arg
+                                     ( \r
+                                     | \n
+                                     | \t
+                                     | " "
+                                     )
+                                 )
+                              & 
+                              )
+                          )
+                        & (.!arg)
+                    )
+                  . !arg
+                  . \n
+                  )
+              : ?lines
+            & ( 
+              |   whl'(!lines:(.) ?lines)
+                & whl'(!lines:?lines (.))
+              )
+            & :?end
+            &   !lines
+              : (   ( 
+                    . @( ?
+                       :   "#if"
+                           (ndef|" !defined")
+                           " "
+                           (?H&trim$!H:?H)
+                       )
+                    )
+                    ( (.@(?:"#define " ? !H ?))
+                      ?body
+                    )
+                    (.@(?:"#endif" ?))
+                    ( 
+                    | (.?end)&WS$!end
+                    )
+                | ?body
+                )
+            &     map
+                $ ( ( 
+                    =   
+                      . !arg:(.?arg)&\n !arg
+                    )
+                  . !body !end
+                  )
+              : (\n ?arg|?arg)
+            & str$!arg
+        )
+      & ( removeEmptyConditionals
+        =   A M L done
+          .   0:?done
+            & :?L
+            &   whl
+              ' (   !arg
+                  :   ?A
+                      (   (else|elif.,?)
+                          ?M
+                          (endif.,?)
+                          ?narg
+                      &     map
+                          $ ( ( 
+                              =   
+                                .     !arg
+                                    : ~(\n|(";".))
+                                  | 
+                              )
+                            . !M
+                            )
+                        : 
+                      & 1+!done:?done
+                      )
+                & !narg:?arg
+                &   (.endif.,) (.!A) !L
+                  : ?L
+                )
+            & (.!arg) !L:?L
+            & :?M
+            &   whl
+              ' ( !L:(.?A) ?L
+                & !A !M:?M
+                )
+            & !M:?arg
+            & :?L
+            &   whl
+              ' (   !arg
+                  :   ?A
+                      (   (if|ifdef.,?TTT)
+                          ?M
+                          (endif.,?)
+                          ?narg
+                      &     map
+                          $ ( ( 
+                              =   
+                                .     !arg
+                                    : ~(\n|(";".))
+                                  | 
+                              )
+                            . !M
+                            )
+                        : 
+                      & 1+!done:?done
+                      )
+                & !narg:?arg
+                & (.!A) !L:?L
+                )
+            & (.!arg) !L:?L
+            & :?M
+            &   whl
+              ' ( !L:(.?A) ?L
+                & !A !M:?M
+                )
+            & ( !done:0&!M
+              | removeEmptyConditionals$!M
+              )
+        )
+      & ( removeEmptyStatements
+        =   A M L done
+          .   0:?done
+            & :?L
+            &   whl
+              ' (   !arg
+                  :   ?A
+                      (%@:@(?M:? \n))
+                      (";".)
+                      ?arg
+                & (.!A) (.!M) !L:?L
+                )
+            & (.!arg) !L:?L
+            & :?M
+            &   whl
+              ' ( !L:(.?A) ?L
+                & !A !M:?M
+                )
+            & !M
+        )
+      & ( includeStuff
+        =   body lines text A C textParts NAAM
+          .     str$(BRA/ !arg):?NAAM
+              &   get$(str$(!(its.folder) !arg),STR)
+                : ?text
+              & ( ~
+                | eliminateHeaderstuff$!text:?text
+                )
+              &   lst
+                $ ( text
+                  , str$(!NAAM "-eliminated.bra")
+                  , NEW
+                  , RAW
+                  , BIN
+                  )
+              & tokenize$!text:?text
+              &   lst
+                $ ( text
+                  , str$(!NAAM "-7tokenized.bra")
+                  , NEW
+                  , RAW
+                  , BIN
+                  )
+              & excludeDeclarations$!text:?text
+              &   lst
+                $ ( text
+                  , str$(!NAAM "-8excluded.bra")
+                  , NEW
+                  , RAW
+                  , BIN
+                  )
+              & include$!text:?text
+              &   lst
+                $ ( text
+                  , str$(!NAAM "-9included.bra")
+                  , NEW
+                  , RAW
+                  , BIN
+                  )
+              & removeEmptyConditionals$!text:?text
+              & removeEmptyStatements$!text:?text
+              &   lst
+                $ ( text
+                  , str$(!NAAM "-A-removeEmptyConditionals.bra")
+                  , NEW
+                  , RAW
+                  , BIN
+                  )
+              & totext$!text:?text
+              & trimall$!text:?text
+              & ( ~
+                | removeEmptyLines$(!text.!arg):?text
+                )
+              &   put
+                $ (!text,str$(!NAAM ".txt"),NEW,RAW,BIN)
+              & !text
+            | out$(CANNOT-READ !arg)&~
+        )
+      & includeStuff$!arg:?uit
+      &   put
+        $ (   str
+            $ ( "/*"
+                \n
+                "  Do not edit this file. It is generated by running `one.bra'."
+                \n
+                "  The `one.bra' script combines many smaller .c and .h files."
+                \n
+                "*/"
+                \n
+                "#define SINGLESOURCE"
+                \n
+                !uit
+              )
+          , "../singlesource/bracmat.c"
+          , NEW
+          , BIN
+          )
+  )
+  (new=.~|(its.doit)$"potu.c");
+
+r=
+  get'("one.bra",TXT)
+& rmv$(str$(one ".bak"))
+& ren$("one.bra".str$(one ".bak"))
+&   put
+  $ ( "{one.bra
+𝕌𝕋𝔽-𝟠
+
+Combine all files into one file, bracmat.c.
+The result should 1) be compilable and 2) be quite similar to the old bracmat.c
+Purpose: discover things that need mutual merging between bracmat.c and the potu sources,
+thereafter creating a new bracmat.c.}
+
+"
+    , "one.bra"
+    , NEW
+    , BIN
+    )
+& lst'(X,"one.bra",APP)
+& put'(\n,"one.bra",APP,BIN)
+& lst'(r,"one.bra",APP)
+& put$(str$("\nnew'" X ";\n"),"one.bra",APP,BIN)
+& ;
+
+new'X;
