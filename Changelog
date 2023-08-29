@@ -1,3 +1,24 @@
+29 August 2023
+From today, bracmat.c is no longer the primary source code for further development.
+Instead, bracmat.c is moved to a new folder, `singlesource', while the old `src'
+folder contains `potu.c' and many other .c and .h files, neatly organized in
+functional modules. These are the files that will be manually maintained in the
+future. The file singlesource/bracmat.c is more or less a concatenation of all
+source files in `src', minus repetitions and minus the majority of function
+declarations.
+New in the `doc' folder is `bracmat.pdf', which is created from `bracmat.tex' 
+(not in this repo), which, in turn, is created from `bracmat.html', which is
+created by running `get$help' in the Bracmat CLI and choosing the menu item
+`htmllatex'. The conversion from Latex to PDF was done by TeXstudio
+(https://github.com/texstudio-org).
+Also from today, bracmat.c includes floating point support in `UFP' objects,
+called `UnIfancyfied Floating Point' because I have been thinking for many years
+how to implement Floating Point capability in Bracmat without breaking it. The
+solution is a sandbox solely for floating point calculations. At the surface,
+code running in this sandbox looks like any other Bracmat code, but below the
+surface is a compiler and a byte code interpreter. The performance is not as good
+as Java, but a lot faster than Python.
+
 28 August 2023
 Changed the output format of flt$. The decimal comma has become a decimal dot.
 The `*10' in front of the `E' has been removed.
