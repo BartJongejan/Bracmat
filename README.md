@@ -44,7 +44,7 @@ Bracmat is a good choice for tasks that require dynamic programming.
 
     * setup.py
 
-      Makefile for buidling the module.
+      Makefile for building the module.
 
 * Windows
     * bracmat.exe
