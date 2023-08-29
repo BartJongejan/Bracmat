@@ -10,7 +10,6 @@
 #define LOBJ(p) ((p).u.lobj)
 #define POBJ(p) &((p)->u.obj)
 #define SPOBJ(p) &((p)->u.sobj)
-/*#define PIOBJ(p) ((p)->u.iobj)*/ /* Added. Bart 20031110 */
 #define PLOBJ(p) ((p)->u.lobj)
 
 #define Qnumber psk

@@ -134,17 +134,14 @@ int errorprintf(const char* fmt, ...)
     if(global_fpo == NULL && errorFileName != NULL)
         global_fpo = fopen(errorFileName, APPENDTXT);
 #endif
-    /*#endif*/
     if(global_fpo)
         myprintf(buffer, NULL);
     else
         ret = 0;
-    /*#if !_BRACMATEMBEDDED*/
 #if !defined NO_FOPEN
     if(errorStream == NULL && global_fpo != NULL)
         fclose(global_fpo);
 #endif
-    /*#endif*/
     global_fpo = save;
     va_end(ap);
     return ret;

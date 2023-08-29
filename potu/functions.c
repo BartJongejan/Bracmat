@@ -519,7 +519,6 @@ function_return_type functions(psk Pnode)
 #endif
 
 #ifdef ERR
-        /*#if !_BRACMATEMBEDDED*/
         CASE(ERR) /* err $ <file name to direct errorStream to> */
             {
             if(!is_op(rightnode))
@@ -529,7 +528,6 @@ function_return_type functions(psk Pnode)
                 }
             return functionFail(Pnode);
             }
-        /*#endif*/
 #endif
 #if !defined NO_C_INTERFACE
         CASE(ALC)  /* alc $ <number of bytes> */

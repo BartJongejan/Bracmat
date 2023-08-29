@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "28 Auguts 2023"
-#define VERSION "6.16.0"
-#define BUILD "282"
+#define DATUM "29 August 2023"
+#define VERSION "6.16.1"
+#define BUILD "283"
 /*
 COMPILATION
 -----------
@@ -202,8 +202,8 @@ m                      n                             totalling 1024+(n-1)*1023+m
 #include "matchstate.h"
 #include "charput.h"
 
-#if defined SINGLEOBJECT
-#define NODESTRUCT_H
+#if defined SINGLESOURCE
+//#define NODESTRUCT_H
 #define UNICASECONV_H
 #define UNICHARTYPES_H
 #define GLOBALS_H                  
@@ -284,7 +284,7 @@ m                      n                             totalling 1024+(n-1)*1023+m
 #include "functions.c"
 #include "canonization.c"
 #include "evaluate.c"
-#else
+#else /*#if defined SINGLESOURCE*/
 
 #include "globals.h"
 #include "filewrite.h"
@@ -322,9 +322,9 @@ m                      n                             totalling 1024+(n-1)*1023+m
 #include "objectdef.h"
 #include "functions.h"
 #include "canonization.h"
-#include "eval.h" /*implemented in evaluate.c*/
+#include "eval.h"
 #include "evaluate.h"
-#endif
+#endif /*#if defined SINGLESOURCE*/
 
 
 #include <assert.h>
@@ -787,9 +787,7 @@ void endProc(void)
 
 /* main - the text-mode front end for bracmat */
 
-
-#if _BRACMATEMBEDDED
-#else
+#if !_BRACMATEMBEDDED
 
 #include <stddef.h>
 

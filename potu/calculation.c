@@ -271,7 +271,6 @@ typedef struct forthword
 #if CALCULATION_PROFILING
 #define INDNT " %8u ",wordp->count
 #else
-/*#define INDNT "%*s",4*In,""*/
 #define INDNT " "
 #endif
 

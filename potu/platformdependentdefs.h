@@ -320,7 +320,6 @@ typedef struct
 #define FLG O('f','l','g')
 #define GET O('g','e','t')
 #define GLF O('g','l','f') /* The opposite of flg */
-/*#define HUM O('H','U','M')*/
 #define HT  O('H','T', 0 )
 #define IM  O('i', 0 , 0 )
 #define JSN O('J','S','N')

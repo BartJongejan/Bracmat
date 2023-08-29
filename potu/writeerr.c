@@ -22,7 +22,6 @@ void writeError(psk Pnode)
         {
         result(Pnode);
         myputc('\n');
-        /*#if !_BRACMATEMBEDDED*/
 #if !defined NO_FOPEN
         if(errorStream == NULL && global_fpo != stderr && global_fpo != stdout)
             {
@@ -30,7 +29,6 @@ void writeError(psk Pnode)
             }
 #endif
         }
-    /*#endif*/
     global_fpo = saveFpo;
     beNice = saveNice;
     }

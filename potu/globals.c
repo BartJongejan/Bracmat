@@ -69,12 +69,10 @@ int optab[256];
 va_list argptr;
 #endif
 
-/*#if !_BRACMATEMBEDDED*/
 #if !defined NO_FOPEN
 char* errorFileName = NULL;
 #endif
 FILE* errorStream = NULL;
-/*#endif*/
 
 int hum = 1;
 int listWithName = 1;
