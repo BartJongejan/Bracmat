@@ -21,6 +21,12 @@ json.c
 Convert JSONL file to Bracmat file.
 */
 
+#include "json.h"
+#include "encoding.h"
+#include "input.h"
+#include "filewrite.h"
+#include "charput.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -37,11 +43,6 @@ Convert JSONL file to Bracmat file.
 
 #define TRUE 1
 #define FALSE 0
-
-extern void putOperatorChar(int c);
-extern void putLeafChar(int c);
-extern char * putCodePoint(unsigned LONG val,char * s);
-extern int errorprintf(const char* fmt, ...);
 
 typedef enum {nojson,json} jstate;
 
@@ -110,22 +111,22 @@ static void endObject(void)/* called when } has been read */
 
 typedef jstate (*stateFncTp)(int);
 static unsigned int stacksiz;
-static stateFncTp * stack;
+static stateFncTp * theStack;
 static stateFncTp * stackpointer;
 static stateFncTp action;
 
 static stateFncTp push(stateFncTp arg)
     {
     ++stackpointer;
-    if(stackpointer == stack + stacksiz)
+    if(stackpointer == theStack + stacksiz)
         {
         stateFncTp* newstack;
         unsigned int newsiz = (2 * stacksiz + 1);
-        newstack = (stateFncTp *)realloc(stack,newsiz * sizeof(stateFncTp));
+        newstack = (stateFncTp *)realloc(theStack,newsiz * sizeof(stateFncTp));
         if(newstack)
             {
-            stack = newstack;
-            stackpointer = stack + stacksiz;
+            theStack = newstack;
+            stackpointer = theStack + stacksiz;
             stacksiz = newsiz;
             }
         else
@@ -142,7 +143,7 @@ static stateFncTp push(stateFncTp arg)
 static stateFncTp popj(void)
     {
     --stackpointer;
-    assert(stackpointer >= stack);
+    assert(stackpointer >= theStack);
     return *stackpointer;
     }
 
@@ -162,7 +163,7 @@ static jstate hexdigits(int arg)
     if(--needed == 0)
         {
         unsigned char tmp[22];
-        if(putCodePoint(hexvalue,(char*)tmp))
+        if(putCodePoint(hexvalue,tmp))
             {
             unsigned char * c = tmp;
             while(*c)
@@ -212,18 +213,18 @@ static jstate string(int arg)
             action = push(escape); break;
         default:
             if(0 < arg && arg < ' ')
-				switch(arg)
-					{
-					case 8:
-					case 9:
-					case 10:
-					case 12:
-					case 13:
-						/*See http://www.bennadel.com/blog/2576-testing-which-ascii-characters-break-json-javascript-object-notation-parsing.htm*/
-						break;
-					default:
-						return nojson;
-					}
+                switch(arg)
+                    {
+                    case 8:
+                    case 9:
+                    case 10:
+                    case 12:
+                    case 13:
+                        /*See http://www.bennadel.com/blog/2576-testing-which-ascii-characters-break-json-javascript-object-notation-parsing.htm*/
+                        break;
+                    default:
+                        return nojson;
+                    }
             putLeafChar(arg);
         }
     return json;
@@ -582,12 +583,12 @@ static jstate top(int arg)
 static int doit(char * arg)
     {
     stacksiz = 1;
-    stack = (stateFncTp *)malloc(stacksiz * sizeof(stateFncTp));
-    if(stack)
+    theStack = (stateFncTp *)malloc(stacksiz * sizeof(stateFncTp));
+    if(theStack)
         {
         int R;
-        *stack = 0;
-        stackpointer = stack + 0;
+        *theStack = 0;
+        stackpointer = theStack + 0;
 
         action = top;
         for(; *arg && action; ++arg)
@@ -608,8 +609,8 @@ static int doit(char * arg)
                     return FALSE;
                 }
             }
-        R = stackpointer == stack;
-        free(stack);
+        R = stackpointer == theStack;
+        free(theStack);
         return R;
         }
     return 0;

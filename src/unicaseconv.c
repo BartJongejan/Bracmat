@@ -395,13 +395,14 @@ struct ccaseconv u2l[]={
 int convertLetter(int a, struct ccaseconv * T)
     {
     int i;
-    if ((unsigned int)a < T[0].L || a > 0x10FFFF)
+    if (a > 0x10FFFF)
         return a;
-
-    for (i = 1;; ++i)
+    for (i = 0;; ++i)
         {
         if ((unsigned int)a < T[i].L)
             {
+            if (i == 0)
+                return a;
             --i;
             if (  (unsigned int)a <= (unsigned int)(T[i].L + T[i].range)
                && (  T[i].inc < 2
@@ -420,12 +421,3 @@ int convertLetter(int a, struct ccaseconv * T)
     return a;
     }
 
-int toUpperUnicode(int a)
-    {
-    return convertLetter(a,l2u);
-    }
-
-int toLowerUnicode(int a)
-    {
-    return convertLetter(a, u2l);
-    }

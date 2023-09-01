@@ -5,128 +5,175 @@ have some points move under influence of gravity}
 
 X=
   ( do
-  =   
-    .   3:?planets
+  =     L M Q SVG U a b calc code
+      , dimensions dimpla g iterations
+      , pla planets pointsT pointsa0 pointsa1 pointsa2
+      , times varv3 x y z
+    .   4:?planets
       & 3:?dimensions
-      & 6000:?iterations
-      & 300:?g
+      & 3000:?iterations
+      & 3000/10:?g
       & 1:?M
+      & "F elasticity"
+      & -2/100000:?F
+      & "W friction"
+      & 297/300:?W
+      & 1:?W
+      & 3000/10:?g
+      & 1:?M
+      & "F elasticity"
+      & -1/10000:?F
+      & "W friction"
+      & 2985/3000:?W
       & 1/11:?U
       & !dimensions*!planets:?dimpla
       &     
-          ' ( tbl$(Diff,$dimensions)
-            & tbl$(T,$dimpla*$iterations)
-            & $iterations:?n
-            & !v1:?V
-            &   whl
-              ' ( !n:>0
-                & -1+!n:?n
-                & $planets:?p
-                &   whl
-                  ' ( !p:>0
-                    & -1+!p:?p
-                    & $dimensions:?d
-                    &   whl
-                      ' ( !d:>0
-                        & -1+!d:?d
-                        &   2*$dimpla+$dimensions*!p+!d
-                          : ?Ia
-                        & 0:?(ind$(a0,!Ia))
-                        )
-                    )
-                & $planets:?p
-                &   whl
-                  ' ( !p:>0
-                    & -1+!p:?p
-                    & $planets:?q
-                    &   whl
-                      ' ( !q:>0
-                        & -1+!q:?q
-                        & (   !q:~!p
-                            & 0:?dist2
-                            & $dimensions:?d
-                            &   whl
-                              ' ( !d:>0
-                                & -1+!d:?d
-                                & $dimensions*!p+!d:?i
-                                & $dimensions*!q+!d:?j
-                                &     !(ind$(a0,!i))
-                                    + -1*!(ind$(a0,!j))
-                                  : ?(ind$(Diff,!d))
-                                & !Diff^2+!dist2:?dist2
-                                & $dimpla*!n+!i:?k
-                                )
-                            & ( !dist2:0
-                              |   !dist2^-3/2:?tsid3
-                                & $dimensions:?d
-                                &   whl
-                                  ' ( !d:>0
-                                    & -1+!d:?d
-                                    &   $dimensions*!p+!d
-                                      : ?Ip
-                                    & $dimpla+!Ip:?Iv
-                                    & $dimpla+!Iv:?Ia
-                                    &     -1
-                                        * $g
-                                        * !(ind$(Diff,!d))
-                                        * !tsid3
-                                      : ?(ind$(a0,!Ia))
-                                    )
-                              )
-                          | 
+          ' (   (a.position,$planets,$dimensions)
+                (a.velocity,$planets,$dimensions)
+                (a.acceleration,$planets,$dimensions)
+            .   tbl$(Diff,$dimensions)
+              &   tbl
+                $ (T,$iterations,$planets,$dimensions)
+              & rank$T:?DD
+              & 0:?b
+              &   whl
+                ' ( !b:<!DD
+                  & range$(T,!b):?R
+                  & 1+!b:?b
+                  )
+              & -1:?n
+              &   whl
+                ' ( 1+!n:?n:<($iterations)
+                  & $planets:?p
+                  &   whl
+                    ' ( !p:>0
+                      & -1+!p:?p
+                      & $dimensions:?d
+                      &   whl
+                        ' ( !d:>0
+                          & -1+!d:?d
+                          & 0:?(idx$(acceleration,!p,!d))
                           )
-                        )
-                    )
-                & $planets:?p
-                &   whl
-                  ' ( !p:>0
-                    & -1+!p:?p
-                    & $dimensions:?d
-                    &   whl
-                      ' ( !d:>0
-                        & -1+!d:?d
-                        & $dimensions*!p+!d:?Ip
-                        & $dimpla+!Ip:?Iv
-                        & $dimpla+!Iv:?Ia
-                        &     $M*!(ind$(a0,!Ia))
-                            + !(ind$(a0,!Iv))
-                          : ?a0
-                        &   $U*!a0+!(ind$(a0,!Ip))
-                          : ?a0
-                        &   !a0
-                          : ?(ind$(T,$dimpla*!n+!Ip))
-                        )
-                    )
-                )
-            & !n
+                      )
+                  & $planets:?p
+                  &   whl
+                    ' ( !p:>0
+                      & -1+!p:?p
+                      & $planets:?q
+                      &   whl
+                        ' ( !q:>0
+                          & -1+!q:?q
+                          & ( !q:!p
+                            |   0:?dist2
+                              & 0:?d
+                              &   whl
+                                ' ( !d:<($dimensions)
+                                  &     subtract
+                                      $ ( !(idx$(position,!p,!d))
+                                        , !(idx$(position,!q,!d))
+                                        )
+                                    : ?(idx$(Diff,!d))
+                                  & !Diff^2+!dist2:?dist2
+                                  & 1+!d:?d
+                                  )
+                              & ( !dist2:0
+                                |   sqrt$!dist2:?dist
+                                  & !dist^-3:?tsid3
+                                  & !dist^-1:?tsid1
+                                  & $F*!dist:?elastiek
+                                  &   divide$($g,!dist2)
+                                    : ?coulomb
+                                  & !elastiek+!coulomb:?Force
+                                  & 0:?d
+                                  &   whl
+                                    ' ( !d:<($dimensions)
+                                      &       !(idx$(Diff,!d))
+                                            * !tsid1
+                                            * !Force
+                                          + !(idx$(acceleration,!p,!d))
+                                        : ?acceleration
+                                      & 1+!d:?d
+                                      )
+                                )
+                            )
+                          )
+                      )
+                  & 0:?p
+                  &   whl
+                    ' ( !p:<($planets)
+                      & 1+!J:?J
+                      & 0:?d
+                      &   whl
+                        ' ( !d:<($dimensions)
+                          &   !(idx$(position,!p,!d))
+                            : ?(idx$(T,!n,!p,!d))
+                          &       $M
+                                * !(idx$(acceleration,!p,!d))
+                              + $W*!(idx$(velocity,!p,!d))
+                            : ?velocity
+                          &   $U*!velocity+!position
+                            : ?position
+                          & 1+!d:?d
+                          )
+                      & 1+!p:?p
+                      )
+                  )
+              & !n
             )
         : ?code
       & new$(calculation,!code):?calc
       & (|(calc..print)$)
       & (     (calc..calculate)
-            $ (   ((0,100,0),(0,-100,0),1,0,0)
-                , ((2,0,0),(-2,0,0),-1/2,0,0)
-                , (0,0,0)
-                , (0,0,0)
-                , 0
-                , 0
-                , 0
-              . 123
+            $ (   
+                ,   (,0 100 0)
+                    (,0 -100 0)
+                    (,0 10 30)
+                    (,1 0 0)
+              .   
+                ,   (,2 0 0)
+                    (,-2 0 0)
+                    (,0 1 0)
+                    (,-10/21 0 0)
+              .   
+                ,   (,0 0 0)
+                    (,0 0 0)
+                    (,0 0 0)
+                    (,0 0 0)
               )
           & out$executed
           & (calc..export)$(N,T):?pointsT
-          & (calc..export)$(N,a0):?pointsa0
+          & (calc..export)$(R,position):?pointsa0
+          & (calc..export)$(R,velocity):?pointsa1
+          &   (calc..export)$(R,acceleration)
+            : ?pointsa2
           & out$exported
           & lst$(pointsT,pointsT,NEW)
           & lst$(pointsa0,pointsa0,NEW)
-          &   vap$((=.!arg).!pointsT.\n)
-            : ?points
-          & :?L
-          &   whl
-            ' ( !points:%?x %?y %?z ?points
-              & (!x+!z.!y) !L:?L
-              )
-          & lst$(L,L,NEW)
+          & lst$(pointsa1,pointsa1,NEW)
+          & lst$(pointsa2,pointsa2,NEW)
+          & !pointsT:(,?times)
+          & out$map
+          &     map
+              $ ( ( 
+                  =   
+                    .   !arg:(,?pla)
+                      &   map
+                        $ ( ( 
+                            =   
+                              .   !arg:(,%?x %?y %?z)
+                                & (!x+!z.!y)
+                            )
+                          . !pla
+                          )
+                  )
+                . !times
+                )
+            : ?L
+          & out$mapped
+          & lst$(L,LLL,NEW)
+          & !L:? [?NN
+          & !NN^-1:?MM
+          & 0:?nn
           &     ("!DOCTYPE html".)
                 ( html
                 .   
@@ -149,11 +196,27 @@ X=
                               $ ( ( 
                                   =   
                                     .   !arg:(?a.?b)
+                                      & 1+!nn:?nn
+                                      &     255
+                                          +   -1
+                                            *   div
+                                              $ (255*!nn*!MM,1)
+                                        : ?col
                                       & ( circle
                                         .     (cx.!a+300)
                                               (cy.!b+300)
                                               (r.1)
-                                              (stroke.black)
+                                              ( stroke
+                                              .   str
+                                                $ ( "rgb("
+                                                    !col
+                                                    ","
+                                                    !col
+                                                    ","
+                                                    !col
+                                                    ")"
+                                                  )
+                                              )
                                               (fill.red)
                                           , 
                                         )
@@ -164,9 +227,13 @@ X=
                       )
                 )
             : ?SVG
+          & out$writing
           & put$(toML$!SVG,"svg.html",NEW)
         | out$"something wrogn"
         )
+      & out$"Reset calc"
+      & (|:?calc)
+      & out$"Calc reset"
   )
   (new=.~|(its.do)$);
 

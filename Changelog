@@ -1,3 +1,70 @@
+29 August 2023
+From today, bracmat.c is no longer the primary source code for further development.
+Instead, bracmat.c is moved to a new folder, `singlesource', while the old `src'
+folder contains `potu.c' and many other .c and .h files, neatly organized in
+functional modules. These are the files that will be manually maintained in the
+future. The file singlesource/bracmat.c is more or less a concatenation of all
+source files in `src', minus repetitions and minus the majority of function
+declarations.
+New in the `doc' folder is `bracmat.pdf', which is created from `bracmat.tex' 
+(not in this repo), which, in turn, is created from `bracmat.html', which is
+created by running `get$help' in the Bracmat CLI and choosing the menu item
+`htmllatex'. The conversion from Latex to PDF was done by TeXstudio
+(https://github.com/texstudio-org).
+Also from today, bracmat.c includes floating point support in `UFP' objects,
+called `UnIfancyfied Floating Point' because I have been thinking for many years
+how to implement Floating Point capability in Bracmat without breaking it. The
+solution is a sandbox solely for floating point calculations. At the surface,
+code running in this sandbox looks like any other Bracmat code, but below the
+surface is a compiler and a byte code interpreter. The performance is not as good
+as Java, but a lot faster than Python.
+
+28 August 2023
+Changed the output format of flt$. The decimal comma has become a decimal dot.
+The `*10' in front of the `E' has been removed.
+The new `calcuation' object has been renamed to the shorter `UFP'. (Think:
+the next thing after UFO.) Its member function `calculate' is renamed to `go'.
+The old names can still be used, for the time being. Also `run' instead of `go'
+will work. A few bugs and weaknesses in calculation.c are fixed. If an error is
+found during compilation, the `new$(UFP... )' call fails.  
+The test suite valid.bra is extended with some UFP examples.
+
+20 August 2023
+For some time, the old, stable source code in the `src' directory and the
+source code in the more experimental `potu' directory have diverged. Sometimes,
+small improvements to one of them were not applied to the other. The reason for
+that was that the source codes were very hard to compare, let alone merge: in
+`src' most of the code is in a single file, `bracmat.c'. In `potu', on the
+other hand, are many files that have to be taken together to become equivalent
+to `bracmat.c'.
+The `potu' source code was created from `bracmat.c', and it is still possible
+to compile `potu' quasi single file:
+
+	gcc -std=c99 -O2 -DNDEBUG -DSINGLEOBJECT -o potu1 potu.c -lm
+
+However, the order in which `potu.c' includes other C source files did not lead
+to the same (implicit) order of #defines, #includes, typedefs, variable
+declarations and function definitions as the (explicit) order in `bracmat.c'.
+Now, a script, `potu/one.bra', constructs a single file, `src/bracmot.c' from
+the source code files in `potu'. This generated file `bracmot.c' is compilable
+in the same way as `bracmat.c', but has the extra functionality of `potu', that
+is, floating point calculations. The file `bracmat.c' has been reshuffled to
+minimize the differences with `bracmot.c' when seen side by side in WinMerge
+(https://github.com/WinMerge), but without including the still experimental
+floating point functionality. From now on, if a small change is made in either
+`src' or `potu', the change can later be picked up in the other one by
+comparing `bracmat.c' and a freshly generated `bracmot.c'. The actual update
+has to be made by hand. That is easiest when having to update `bracmat.c'. In
+the other direction one has to find the source file in `potu' based on
+recognisable text in `bracmot.c'.
+I don't know yet how to go on from here. I still like the single file approach
+of `bracmat.c' (just to be in opposition), but many people like the traditional
+multi-file approach in the `potu' folder. Maintaining both is untenable. The
+stuff in the `potu' directory is going to survive, no doubt about that. For
+maintainability, I will at some time have to slash `bracmat.c' altogether, or
+`bracmat.c' will just become identical to `bracmot.c'.
+And then there is the naming...
+
 28 March 2023
 HTML input is assumed to be UTF-8 encoded. All character entities are converted
 to UTF-8 characters. (This has not unchanged.) While reading HTML input, when a

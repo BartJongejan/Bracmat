@@ -15,7 +15,7 @@ rm bracmat
 rm dk_cst_bracmat.h
 
 # Create stand-alone bracmat.
-gcc -std=c99 -pedantic -Wall -O2 -DNDEBUG ../src/bracmat.c ../src/xml.c ../src/json.c ../src/unicaseconv.c ../src/unichartypes.c
+gcc -std=c99 -pedantic -Wall -O2 -DNDEBUG ../singlesource/bracmat.c -lm
 mv a.out bracmat
 # Test the stand-alone version of Bracmat.
 # Expect a line only saying 'bracmat alife and kicking'.
@@ -43,8 +43,8 @@ javac ./dk/cst/*.java -h .. -Xlint
 cd ..
 
 # Compile bracmat.c as relocatable code for shared object
-# Create bracmatso.o, xml.o, json.o, unicaseconv.o and unichartypes.o
-gcc -std=c99 -pedantic -Wall -O2 -c -fPIC -DNDEBUG ../safe/bracmatso.c ../src/xml.c ../src/json.c ../src/unicaseconv.c ../src/unichartypes.c
+# Create bracmatso.o, 
+gcc -std=c99 -pedantic -Wall -O2 -c -fPIC -DNDEBUG ../safe/bracmatso.c -lm
 
 cd java
 
@@ -56,15 +56,15 @@ jar cfv bracmat.jar dk/cst/bracmat.class
 
 cd ..
 # Compile the C code that exposes methods to Java.
-gcc -std=c99 -pedantic -Wall -pthread -c -fPIC -DNDEBUG -I$JAVA_HOME/include -I$JAVA_HOME/include/linux/ dk_cst_bracmat.c -o dk_cst_bracmat.o    
+gcc -std=c99 -pedantic -Wall -pthread -c -fPIC -DNDEBUG -I$JAVA_HOME/include -I$JAVA_HOME/include/linux/ dk_cst_bracmat.c -o dk_cst_bracmat.o -lm
 # Link the two object files into a shared library (REALNAME).
-gcc -shared -Wl,-soname,libbracmat.so.1 -o libbracmat.so.1.0 bracmatso.o xml.o json.o unicaseconv.o unichartypes.o dk_cst_bracmat.o -lpthread
+gcc -shared -Wl,-soname,libbracmat.so.1 -o libbracmat.so.1.0 bracmatso.o dk_cst_bracmat.o -lpthread -lm
 # Link REALNAME to SONAME.
 ln -sf libbracmat.so.1.0 libbracmat.so.1
 # Link SONAME to LINKERNAME.
 ln -sf libbracmat.so.1 libbracmat.so
 # Compile and link test proggram that uses shared object.
-gcc -std=c99 -pedantic -Wall -L. -DNDEBUG bracmattest.c -lbracmat -o bracmattest
+gcc -std=c99 -pedantic -Wall -L. -DNDEBUG bracmattest.c -lbracmat -o bracmattest -lm
 # Set up library path.
 LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH
@@ -88,7 +88,7 @@ sudo ln -sf /usr/lib/libbracmat.so.1 /usr/lib/libbracmat.so
 rm libbracmat.so
 rm libbracmat.so.1
 # Compile and link test proggram that uses shared object in offical place.
-gcc -std=c99 -pedantic -Wall -DNDEBUG bracmattest.c -lbracmat -o bracmattest
+gcc -std=c99 -pedantic -Wall -DNDEBUG bracmattest.c -lbracmat -o bracmattest -lm
 # Test Java-app using global JNI.
 # Expect {?} prompt. Type e.g. 1+3 <Enter> Answer {!} 4 
 # Exit with Ctrl-C.
@@ -135,6 +135,7 @@ else
     fi
 fi
 
+# OBSOLETE!
 # Windows, Visual Studio C++ (2008, 2010 Express):
 # CREATE A DLL
 # ------------

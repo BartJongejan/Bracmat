@@ -22,46 +22,57 @@ Mandelbrot=
   ( doit
   =   
     .   1000:?iterations
-      & 2000:?ypixels
-      & (1|20/9):?ratio
+      & 2000:?xpixels:?ypixels
       &   glf$('(<.$iterations))
         : (=?"<iterations")
       & 256*!iterations^-1:?colfactor
       &     
-          ' ( -1+!v3:?i
-            & tbl$(T,!v0*!v3)
-            & !i*!v0:?row
-            &   whl
-              ' ( !i:~<0
-                & -1+!v0:?j
-                &   whl
-                  ' ( !j:~<0
-                    & !j*!v1+!v2:?x0
-                    & !i*!v4+!v5:?y0
-                    & 0:?x:?y
-                    & 1:?J
-                    &   whl
-                      ' ( hypot$(!x,!y):~>2
-                        & !J:$"<iterations"
-                        & !x*!x+-1*!y*!y+!x0:?xtemp
-                        & 2*!x*!y+!y0:?y
-                        & !xtemp:?x
-                        & 1+!J:?J
+          ' (   (s.xpixels)
+                (s.ypixels)
+                (s.X)
+                (s.Y)
+                (s.R)
+            .   !X+-1*!R:?beginx
+              & !X+!R:?endx
+              & !Y+-1*!R:?beginy
+              & !Y+!R:?endy
+              &   (!endx+-1*!beginx)*(!xpixels+-1)^-1
+                : ?deltax
+              &   (!endy+-1*!beginy)*(!ypixels+-1)^-1
+                : ?deltay
+              & tbl$(T,!ypixels,!xpixels)
+              & -1+!ypixels:?i
+              &   whl
+                ' ( !i:~<0
+                  & -1+!xpixels:?j
+                  &   whl
+                    ' ( !j:~<0
+                      & !j*!deltax+!beginx:?x0
+                      & !i*!deltay+!beginy:?y0
+                      & 0:?x:?y
+                      & 1:?J
+                      &   whl
+                        ' ( hypot$(!x,!y):~>2
+                          & !J:$"<iterations"
+                          &   !x*!x+subtract$(!x0,!y*!y)
+                            : ?xtemp
+                          & 2*!x*!y+!y0:?y
+                          & !xtemp:?x
+                          & 1+!J:?J
+                          )
+                      & idx$(T,!i,!j)
+                      & (   !J:$"<iterations"
+                          & floor$(!J*$colfactor):?T
+                        | 0:?T
                         )
-                    &   (   !J:$"<iterations"
-                          & floor$(!J*$colfactor)
-                        | 0
-                        )
-                      : ?(ind$(T,!j+!row))
-                    & !j+-1:?j
-                    )
-                & !i+-1:?i
-                & !row+-1*!v0:?row
-                )
+                      & !j+-1:?j
+                      )
+                  & !i+-1:?i
+                  )
             )
         : ?calcule
       & new$(calculation,!calcule):?compiledCalcule
-      & ( ~
+      & ( 
         |   lst$calc
           & out$"ITER DEFINED"
           & (compiledCalcule..print)$
@@ -99,7 +110,7 @@ Mandelbrot=
       & (   
           &   ( ~&"[0.2929859127507,0.6117848324958,1.0E-11]"
               | ~&"[-0.0452407411,0.9868162204352258,2.7E-10]"
-              | &"[-0.7450,0.1102,0.005]"
+              | ~&"[-0.7450,0.1102,0.005]"
               | ~&"[-0.7463,0.1102,0.005]"
               | ~&"[0.45272105023,0.396494224267,1.4E-10]"
               | ~&"[-0.235125,0.827215,4.0E-5]"
@@ -108,50 +119,26 @@ Mandelbrot=
               )
             : ?jsn
           & get$(!jsn,MEM,JSN):(,#%?X #%?Y #%?R)
-          & !X+-1*!R:?beginx
-          & !X+!R:?endx
-          & !Y+-1*!R:?beginy
-          & !Y+!R:?endy
-          & div$(!ratio*!ypixels,1):?xpixels
         |   -2:?beginx
           & 47/100:?endx
           & -112/100:?beginy
           & 112/100:?endy
-          &   (!endx+-1*!beginx)*(!endy+-1*!beginy)^-1
-            : ?X/Y
-          & div$(!ratio*!X/Y*!ypixels+1/2,1):?xpixels
+          & 1/2*(!endx+-1*!beginx):?R
+          & 1/2*(!beginx+!endx):?X
+          & 1/2*(!beginy+!endy):?Y
         )
-      & (!endx+-1*!beginx)*(!xpixels+-1)^-1:?deltax
-      & (!endy+-1*!beginy)*(!ypixels+-1)^-1:?deltay
-      &   out
-        $ ( imagesize
-            (!xpixels+1)*!ypixels
-            xpixels
-            !xpixels
-            deltax
-            !deltax
-            beginx
-            !beginx
-            ypixels
-            !ypixels
-            deltay
-            !deltay
-            beginy
-            !beginy
-          )
-      & (       (compiledCalcule..calculate)
-              $ ( !xpixels
-                , !deltax
-                , !beginx
-                , !ypixels
-                , !deltay
-                , !beginy
-                )
+      & clk$:?t0
+      & ( ~
+        |       (compiledCalcule..calculate)
+              $ (!xpixels,!ypixels,!X,!Y,!R)
             : ?Result
-          & out$(Result !Result)
+          &   (NoProfiling|compiledCalcule..print)
+            $ 
+          & (|out$(Result !Result))
         | out$"Calculation did not return a value."
         )
-      & (compiledCalcule..export)$(N,T):?eks
+      & out$(div$(clk$+-1*!t0,1) S)
+      & (compiledCalcule..export)$(N,T):(,?eks)
       & out$calculated
       &   put
         $ (   str
@@ -163,22 +150,29 @@ Mandelbrot=
                 !ypixels
                 \n
                 255
-                  vap
+                \n
+                  map
                 $ ( ( 
                     =   
-                      .   \n
-                          ( !arg:
-                          | !arg " " !arg " " !arg
-                          )
+                      .   !arg:(,?arg)
+                        &   map
+                          $ ( ( 
+                              =   
+                                .   !arg:
+                                  | !arg " " !arg " " !arg \n
+                              )
+                            . !arg
+                            )
                     )
                   . !eks
-                  . \n
                   )
               )
-          , "MandelbrotSetArr.pgm"
+          , str$(MandelbrotSetArr !jsn ".pgm")
           , NEW WYD BIN
           )
       & out$eksported
+      & out$("Total Time:" div$(clk$+-1*!t0,1) S)
+      & put$\a
   )
   ( new
   =   

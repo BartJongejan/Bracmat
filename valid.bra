@@ -3681,11 +3681,11 @@ towards operators that are closer to the root of the tree"
               )
             &   (   !speed:slow
                   &   flt$(pi$800,1120)
-                    : "3,1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091456485669234603486104543266482133936072602491412737245870066063155881748815209209628292540917153643678925903600113305305488204665213841469519415116094330572703657595919530921861173819326117931051185480744623799627495673518857527248912279381830119491298336733624406566430860213949463952247371907021798609437027705392171762931767523846748184676694051320005681271452635608277857713427577896091736371787214684409012249534301465495853710507922796892589235420199561121290219608640344181598136297747713099605187072113499999983729780499510597317328160963185950244594553469083026425223082533446850352619311881710100031378387528865875332083814206171776691473035982534904287554687311595628638823537875937519577818577805321712268066130019278766111959092164201989380952572010654858632788659361533818279682303019520353018529689957736225994138912497217752834791315155748572424541506959*10E0"
+                    : "3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091456485669234603486104543266482133936072602491412737245870066063155881748815209209628292540917153643678925903600113305305488204665213841469519415116094330572703657595919530921861173819326117931051185480744623799627495673518857527248912279381830119491298336733624406566430860213949463952247371907021798609437027705392171762931767523846748184676694051320005681271452635608277857713427577896091736371787214684409012249534301465495853710507922796892589235420199561121290219608640344181598136297747713099605187072113499999983729780499510597317328160963185950244594553469083026425223082533446850352619311881710100031378387528865875332083814206171776691473035982534904287554687311595628638823537875937519577818577805321712268066130019278766111959092164201989380952572010654858632788659361533818279682303019520353018529689957736225994138912497217752834791315155748572424541506959E0"
                 |   
                   &   flt$(pi$8,11)
                     : ?PI
-                    : "3,14159265359*10E0"
+                    : "3.14159265359E0"
                 )
               : ?pI
             & out$!pI
@@ -7298,6 +7298,348 @@ string line 2\"
           (   (new$hash.insert)$a
             & Out$"Hash insert: Missing value"
           | 
+          )
+          (   (       new
+                    $ (UFP,(=(s.myParm).!myParm))
+                  : ?myCalc
+                  : (=UFP)
+                & (myCalc..go)$2:"2.0000000000000000E+00"
+                &   (myCalc..export)$("%a",myParm)
+                  : ("0x1.0000000000000p+1"|"0x1p+1")
+                &   (myCalc..go)$256
+                  : "2.5600000000000000E+02"
+                &   (myCalc..export)$("%a",myParm)
+                  : ("0x1.0000000000000p+8"|"0x1p+8")
+                &   (myCalc..go)$"0.015625"
+                  : "1.5625000000000000E-02"
+                &   (myCalc..export)$("%a",myParm)
+                  : ("0x1.0000000000000p-6"|0x1p-6)
+                &   (myCalc..go)$0xCAP-007
+                  : "1.5781250000000000E+00"
+                &   (myCalc..export)$("%a",myParm)
+                  : ("0x1.9400000000000p+0"|"0x1.94p+0")
+                &   (myCalc..go)$"0.857421875"
+                  : "8.5742187500000000E-01"
+                &   (myCalc..export)$("%a",myParm)
+                  : ("0x1.b700000000000p-1"|"0x1.b7p-1")
+                &   (myCalc..go)$0x1p-1074
+                  : "4.9406564584124654E-324"
+                &   (myCalc..export)$("%a",myParm)
+                  : "0x0.0000000000001p-1022"
+                &   (myCalc..go)$"3.1415926"
+                  : "3.1415926000000001E+00"
+                &   (myCalc..export)$("%a",myParm)
+                  : "0x1.921fb4d12d84ap+1"
+                & (myCalc..go)$5:"5.0000000000000000E+00"
+                &   (myCalc..export)$("%a",myParm)
+                  : ("0x1.4000000000000p+2"|"0x1.4p+2")
+                &   (myCalc..go)$"0x1.999999999999ap-4"
+                  : "1.0000000000000001E-01"
+                &   (myCalc..export)$("%a",myParm)
+                  : "0x1.999999999999ap-4"
+                &   (myCalc..go)$"0x3.3333333333334p-5"
+                  : "1.0000000000000001E-01"
+                &   (myCalc..export)$("%a",myParm)
+                  : "0x1.999999999999ap-4"
+                &   (myCalc..go)$"0xcc.ccccccccccdp-11"
+                  : "1.0000000000000001E-01"
+                &   (myCalc..export)$("%a",myParm)
+                  : "0x1.999999999999ap-4"
+                &   (myCalc..go)$"1.0000000000000000E-01"
+                  : "1.0000000000000001E-01"
+                &   flt$(x2d$1999999999999a*2^-56,80)
+                  : "1.00000000000000005551115123125782702118158340454101562500000000000000000000000000E-1"
+                &   (myCalc..export)$("%a",myParm)
+                  : "0x1.999999999999ap-4"
+              | Out$"Something amiss with very simple UFP object."
+              )
+            & (       new
+                    $ ( UFP
+                      , ( 
+                        =   (s.myParm)
+                          .   (   !myParm:<"1.0"
+                                & -1:?answ
+                              | 1:?answ
+                              )
+                            & !answ
+                        )
+                      )
+                  : ?myCalc
+                  : (=UFP)
+                &   (myCalc..go)$1/2
+                  : "-1.0000000000000000E+00"
+                &   (myCalc..go)$3/2
+                  : "1.0000000000000000E+00"
+              | Out$"UFP code with less-than test fails."
+              )
+            & (     (   new
+                      $ ( UFP
+                        , ( 
+                          =   (s.myParm)
+                            .   (   !myParm:<"0.5"
+                                  & -1:?answ
+                                | 1:?answ
+                                )
+                              & !answ
+                          )
+                        )
+                    : ?myCalc
+                    )
+                  : (=UFP)
+                &   (myCalc..go)$1/4
+                  : "-1.0000000000000000E+00"
+                &   (myCalc..go)$3/4
+                  : "1.0000000000000000E+00"
+              |   Out
+                $ "UFP code with less-than test against value smaller than 1 fails."
+              )
+            & (       new
+                    $ ( UFP
+                      , ( 
+                        =   (s.parm1) (s.parm2)
+                          .   ( add
+                              =   (a.Arry)
+                                .     !(idx$(Arry,0))
+                                    + !(idx$(Arry,1))
+                                  : ?(idx$(Arry,2))
+                              )
+                            & tbl$(Arr,3)
+                            & !parm1:?(idx$(Arr,0))
+                            & !parm2:?(idx$(Arr,1))
+                            & add$Arr
+                            & !(idx$(Arr,2))
+                        )
+                      )
+                  : ?myCalc
+                  : (=UFP)
+                &   (myCalc..go)$(4,7)
+                  : "1.1000000000000000E+01"
+                &   (myCalc..export)$(N,Arr)
+                  : (,4 7 11)
+              |   Out
+                $ "UFP code with user defined function and some simple array manipulation fails."
+              )
+            & (       new
+                    $ ( UFP
+                      , ( 
+                        =   (s.parm1) (s.parm2)
+                          .   ( add
+                              =   (a.Arry)
+                                .     !(idx$(Arry,0))
+                                    + !(idx$(Arry,1))
+                                  : ?(idx$(Arry,2))
+                              )
+                            & tbl$(Arr,3)
+                            & !parm1:?(idx$(Ars,0))
+                            & !parm2:?(idx$(Ars,1))
+                            & add$Arr
+                            & !(idx$(Arr,2))
+                        )
+                      )
+                  : ?myCalc
+                  : (=UFP)
+                &   Out
+                  $ "Failed compilation of UFP object (`Ars' instead of `Arr') must lead to failure."
+              | 
+              )
+            & (     (myCalc..go)$(4,7)
+                  : "1.1000000000000000E+01"
+                &   (myCalc..export)$(N,Arr)
+                  : (,4 7 11)
+              | Out$"Existing UFP object must survive a failed compilation."
+              )
+            & (       new
+                    $ (UFP,(=.9|10))
+                  : ?myCalc
+                  : (=UFP)
+                & (   (myCalc..go)$
+                    &   Out
+                      $ "Runtime error expected. In a UFP object, an OR (|) statement is not an expression returning a value."
+                  | 
+                  )
+              |   Out
+                $ "Compilation does not (yet) check whether a UFP object can ever run."
+              )
+            & (       new
+                    $ ( UFP
+                      , ( 
+                        =   
+                          .   0:?n
+                            &   whl
+                              ' ( !n:<10
+                                & 1+!n:?n
+                                )
+                        )
+                      )
+                  : ?myCalc
+                  : (=UFP)
+                & (   (myCalc..go)$
+                    &   Out
+                      $ "Runtime error expected. In a UFP object, an WHILE (whl') statement is not an expression returning a value."
+                  | 
+                  )
+              |   Out
+                $ "Compilation does not (yet) check whether a UFP object can ever run."
+              )
+            & (       new
+                    $ ( UFP
+                      , ( 
+                        =   
+                          .   0:?n
+                            &   whl
+                              ' ( !n:<10
+                                & 1+!n:?n
+                                )
+                            & !n
+                        )
+                      )
+                  : ?myCalc
+                  : (=UFP)
+                & ( (myCalc..go)$
+                  | Out$"No runtime error expected."
+                  )
+              | Out$"Compilation failed for unknown reason (1)."
+              )
+            & (       new
+                    $ ( UFP
+                      , ( 
+                        =   
+                          .   20:?n:?m
+                            & !n+!m
+                        )
+                      )
+                  : ?myCalc
+                  : (=UFP)
+                & ( (myCalc..go)$
+                  | Out$"No runtime error expected."
+                  )
+              | Out$"Compilation failed for unknown reason (2)."
+              )
+            & (       new
+                    $ ( UFP
+                      , ( 
+                        =   
+                          .   20 7 500:%?k %?l %?m
+                            & !k+!l+!m
+                        )
+                      )
+                  : ?myCalc
+                  : (=UFP)
+                &   Out
+                  $ "Compilation failed because the : operator expects a numeric value on the Left Hand Side."
+                & (   (myCalc..go)$
+                    : "1.5000000000000000E+03"
+                  |   Out
+                    $ "UFP objects don't have pattern matching. The last element in the list, `500' is assigned to each of k , l and m."
+                  )
+              | 
+              )
+            & (     new$(UFP,(=.5*0^-1))
+                  : ?myCalc
+                  : (=UFP)
+                & (   (myCalc..go)$:
+                    &   Out
+                      $ "Division by zero is a run time error and does not result in a returnable value."
+                  | 
+                  )
+              | Out$"Compilation failed for unknown reason (4)."
+              )
+            & (       new
+                    $ ( UFP
+                      , ( 
+                        =   
+                          .   (   5*0^-1
+                                & 888:?i
+                              | 7:?i
+                              )
+                            & !i
+                        )
+                      )
+                  : ?myCalc
+                  : (=UFP)
+                & (     (myCalc..go)$
+                      : "8.8800000000000000E+02"
+                    &   out
+                      $ "Division by zero is a run time error, but not necessarily leading to halting the calculation. TODO handle inf and nan in UFP objects"
+                  | 
+                  )
+              | Out$"Compilation failed for unknown reason (5)."
+              )
+            & (       new
+                    $ ( UFP
+                      , ( 
+                        =   
+                          .   (   5*0^-1:INfinity
+                                & 888:?i
+                                & out$888
+                              | 7:?i
+                              )
+                            & !i
+                        )
+                      )
+                  : ?myCalc
+                  : (=UFP)
+                &   Out
+                  $ "\"INfinity\" is not a numeric value and strings are not supported in UFP objects."
+                & (     (myCalc..go)$
+                      : "8.8800000000000000E+02"
+                    &   Out
+                      $ "Division by zero is a run time error, but not necessarily leading to halting the calculation."
+                  | out$"TODO handle inf and nan in UFP objects"
+                  )
+              | 
+              )
+            & (       (   new
+                        $ ( UFP
+                          , ( 
+                            =   (s.a) (s.b)
+                              . pow$(1/3,!a^3+!b^3)
+                            )
+                          )
+                      . go
+                      )
+                    $ (13,8)
+                  : "1.3940221304312031E+01"
+                & 9:?nrOfPlanets
+                & 3:?spaceDimensions
+                &     new
+                    $ ( UFP
+                      ,   
+                        ' ( 
+                          .     tbl
+                              $ ( planets
+                                , $nrOfPlanets
+                                , $spaceDimensions
+                                )
+                            & rank$planets:?nrOfIndices
+                            & tbl$(dynamic,!nrOfIndices)
+                            & 0:?index
+                            &   whl
+                              ' ( !index:<!nrOfIndices
+                                &   range$(planets,!index)
+                                  : ?(idx$(dynamic,!index))
+                                & 1+!index:?index
+                                )
+                            & 1:?cells
+                            & 0:?index
+                            &   whl
+                              ' ( !index:<!nrOfIndices
+                                &   !(idx$(dynamic,!index))*!cells
+                                  : ?cells
+                                & 1+!index:?index
+                                )
+                            & !cells
+                          )
+                      )
+                  : ?UFPobject
+                &   (UFPobject..go)$
+                  : "2.7000000000000000E+01"
+                &   (UFPobject..export)$(N,dynamic)
+                  : (,9 3)
+              |   Out
+                $ "Complex code containing `static' and `dynamic' arrays, `rank$', `range$' and some whl' loops fails."
+              )
+          | Out$"No support for UFP objects."
           )
       &   out
         $ ( str

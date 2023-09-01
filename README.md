@@ -44,7 +44,7 @@ Bracmat is a good choice for tasks that require dynamic programming.
 
     * setup.py
 
-      Makefile for buidling the module.
+      Makefile for building the module.
 
 * Windows
     * bracmat.exe
@@ -184,6 +184,25 @@ Bracmat is a good choice for tasks that require dynamic programming.
 
       The initial version of potu is functionally not different from bracmat.
       
+      While "vanilla" bracmat restricts numerical computations to computation
+      with bignums, potu is now (spring 2023) also able to perform floating point
+      computations using C's 64 bit "double" data type. These computations
+      are handled by so called "calculation" objects.
+      The motivation for implementing the "calculation" object is the whish to be able to
+      create illustrations in e.g. SVG or PGM format.
+      
+      Initial tests (generating
+      graphic depictions of parts of the Mandelbrot set) indicate that potu's
+      computations are about six times slower than the same algorithm implemented in C,
+      almost four times slower than Java, and almost four times faster than Python, 
+      C being twenty times faster than Python.
+            
+      A full documentation of how to do floating point computations in potu will be made
+      when the feature set is more stable. The following characterization will probably be true
+      when that time has come: 64-bit as the only data type (no integers!), support for 
+      multidimensional arrays, no recursion allowed, no pattern matching, 
+      arrays passed by reference, functions only returning scalar values, or nothing at all.
+           
 * safe
 
     * bracmatso.c
@@ -192,37 +211,26 @@ Bracmat is a good choice for tasks that require dynamic programming.
       that we don't want in a JNI or Python module running in a production
       system: low level file manipulations, system() calls, and exit() which
       would bring the application container down.
-    
-* src
+
+* singlesource
     * Makefile
       
-      Builds the standard edition of bracmat, a "safe" version of bracmat,
-      a version for profiling, and a version for code coverage.
+      Builds a `standard' edition of bracmat, a `safe' version of bracmat,
+      a version for profiling, and a version for measuring code coverage.
       
     * bracmat.c
     
-      Most of the source code of the program.
+      All of the source code of the program in a single file. This file is generated and should not be permanently redacted by hand.
       
     * bracmat.h
     
-      An optional header file, if you want to compile Bracmat as a library.
-      
-    * json.c
-    
-      Source code that implements support for reading JSON-files
-      
-    * xml.c
-    
-      Source code that implements support for reading XML-files
-    
-    * unicaseconv.c + unicaseconv.h
+      A header file, needed when compiling Bracmat as a library.
 
-      Conversion to lowercase or uppercase, based on data extracted from https://unicode.org/Public/UNIDATA/UnicodeData.txt
-
-    * unichartypes.c + unichartypes.h
-
-      Categorization of characters in any of the general classes defined by unicode.org. Data extracted from https://unicode.org/Public/UNIDATA/UnicodeData.txt
-
+    * one.bra
+     
+      A bracmat script that combines all source code in the `src' folder into a compilable single file, bracmat.c
+      This bracmat.c replaces the original bracmat.c that was maintained by hand.
+  
     * CONFIGURE.COM
 
       Script that configures DESCRIP.MMS
@@ -230,6 +238,32 @@ Bracmat is a good choice for tasks that require dynamic programming.
     * DESCRIP.MMS
      
       OpenVMS makefile.
+    
+* src
+    * Makefile
+      
+      Builds bracmat in two ways: either by compiling each .c file separately before linking, or by compiling
+      potu.c, which, if the SINGLESOURCE is #defined, #includes all .c files in an order that necessitates a
+      minimum of declarations. (This is also the order in which the source code in bracmat.c is organized.)
+      
+    * potu.c
+    
+      The main source file. Includes all other .c files if SINGLESOURCE is #defined.
+    
+    * unicaseconv.c + unicaseconv.h
+
+      Conversion to lowercase or uppercase, based on data extracted from https://unicode.org/Public/UNIDATA/UnicodeData.txt
+      You can update these files by cloning https://github.com/kuhumcst/letterfunc or https://github.com/BartJongejan/letterfunc 
+      and running letterfunc/updateTables/UnicodeData.bra
+
+    * unichartypes.c + unichartypes.h
+
+      Categorization of characters in any of the general classes defined by unicode.org. Data extracted from https://unicode.org/Public/UNIDATA/UnicodeData.txt
+      You can update these files by cloning https://github.com/kuhumcst/letterfunc or https://github.com/BartJongejan/letterfunc 
+      and running letterfunc/updateTables/UnicodeData.bra
+
+    * several more .c and .h files
+
 
 * WebAssembly
 

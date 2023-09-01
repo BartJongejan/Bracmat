@@ -1,5 +1,5 @@
 #include "dk_cst_bracmat.h"
-#include "../src/bracmat.h"
+#include "../singlesource/bracmat.h"
 
 #if !defined WIN32
 #include <stdio.h>

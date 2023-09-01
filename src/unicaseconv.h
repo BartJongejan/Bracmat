@@ -7,7 +7,7 @@ extern struct ccaseconv l2u[];
 extern struct ccaseconv u2l[];
 
 int convertLetter(int a, struct ccaseconv * T);
-int toUpperUnicode(int a);
-int toLowerUnicode(int a);
+#define toUpperUnicode(a) convertLetter(a,l2u)
+#define toLowerUnicode(a) convertLetter(a,u2l)
 
 #endif
