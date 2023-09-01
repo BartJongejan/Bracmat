@@ -120,6 +120,11 @@ else
 	echo "Assuming Tomcat lib is /opt/tomcat/latest/lib. Testing..."
         sudo java -classpath /opt/tomcat/latest/lib/bracmat.jar:. bracmattest
 	echo "Test done. Did you see sensible output?"
+    elif [ -d /opt/tomcat-texton/lib ]; then
+        sudo cp -p ./bracmat.jar /opt/tomcat-texton/lib
+        echo "Assuming Tomcat lib is /opt/tomcat-texton/lib. Testing..."
+        sudo java -classpath /opt/tomcat-texton/lib/bracmat.jar:. bracmattest
+        echo "Test done. Did you see sensible output?"
     elif [ -d /usr/share/tomcat9/lib ]; then
         sudo cp -p ./bracmat.jar /usr/share/tomcat9/lib/
 	echo "Assuming Tomcat lib is /usr/share/tomcat9/lib. Testing..."
