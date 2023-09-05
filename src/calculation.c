@@ -19,8 +19,7 @@ typedef enum { epop, enopop } popping;
 static popping mustpop = enopop;
 
 typedef enum
-    {
-    TheEnd
+    { TheEnd
     , varPush
     , var2stack // copy variable to stack w/o incrementing stack
     , var2stackBranch // same, then jump
@@ -2215,9 +2214,9 @@ static psk IntegerNode(double val)
     char jotter[500];
     size_t bytes = offsetof(sk, u.obj) + 1;
     if(val < 0)
-        bytes += sprintf(jotter, "%d", (int)-val);
+        bytes += sprintf(jotter, "%" PRId64, (int64_t)-val);
     else
-        bytes += sprintf(jotter, "%d", (int)val);
+        bytes += sprintf(jotter, "%" PRId64, (int64_t)val);
     psk res = (psk)bmalloc(bytes);
     if(res)
         {
@@ -2236,10 +2235,11 @@ static psk FractionNode(double val)
     {
     char jotter[500];
     size_t bytes = offsetof(sk, u.obj) + 1;
-#if defined __EMSCRIPTEN__ 
-    long long long1 = (long long)1;
+#if defined __EMSCRIPTEN__
+//    long long long1 = (long long)1;
+    int64_t long1 = (int64_t)1;
 #else
-    LONG long1 = (LONG)1;
+    int64_t long1 = (int64_t)1;
 #endif
     double fcac = (double)(long1 << 52);
     int exponent;
@@ -2252,7 +2252,7 @@ static psk FractionNode(double val)
     else if(val == 0)
         flg |= QNUL;
     double mantissa = frexp(val, &exponent);
-    LONG Mantissa = (LONG)(fcac * mantissa);
+    int64_t Mantissa = (int64_t)(fcac * mantissa);
 
     if(Mantissa)
         {
@@ -2261,15 +2261,15 @@ static psk FractionNode(double val)
             ;
 
         if(shft == 0)
-            bytes += sprintf(jotter, LONGD "\n", Mantissa);
+            bytes += sprintf(jotter, "%" PRId64, Mantissa);
         else
             {
-            bytes += sprintf(jotter, LONGD "/" LONGD "\n", Mantissa, (LONG)(long1 << shft));
+            bytes += sprintf(jotter, "%" PRId64 "/" "%" PRId64, Mantissa, (int64_t)(long1 << shft));
             flg |= QFRACTION;
             }
         }
     else
-        bytes += sprintf(jotter, "0 ");
+        bytes += sprintf(jotter, "0");
 
     psk res = (psk)bmalloc(bytes);
     if(res)

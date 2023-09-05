@@ -64,6 +64,8 @@
 #endif
 
 #include <limits.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 #if defined _WIN64 || defined _WIN32
 #ifdef __BORLANDC__
@@ -72,6 +74,13 @@ typedef   signed int  INT32_T;
 #else
 typedef unsigned __int32 UINT32_T; /* pre VS2010 has no int32_t */
 typedef   signed __int32  INT32_T; /* pre VS2010 has no int32_t */
+#define STRTOUL _strtoui64
+#define STRTOL _strtoi64
+#endif
+#else
+#if defined __EMSCRIPTEN__ /* This is set if compiling with __EMSCRIPTEN__. */
+#define STRTOUL strtoull
+#define STRTOL strtoll
 #endif
 #endif
 
@@ -88,8 +97,10 @@ typedef   signed __int32  INT32_T; /* pre VS2010 has no int32_t */
 #define LONG0D "%0lld"
 #define LONG0nD "%0*lld"
 #define LONGX "%llX"
+/*
 #define STRTOUL _strtoui64
 #define STRTOL _strtoi64
+*/
 #define FSEEK _fseeki64
 #define FTELL _ftelli64
 #else
@@ -124,8 +135,10 @@ typedef   signed long  INT32_T;
 #define LONG0D "%0ld"
 #define LONG0nD "%0*ld"
 #define LONGX "%lX"
+#ifndef STRTOUL
 #define STRTOUL strtoul
 #define STRTOL strtol
+#endif
 #define FSEEK fseek
 #define FTELL ftell
 #endif
