@@ -748,6 +748,61 @@ Diagram=
                 )
             : ?lines
           & lst$(lines,lines,NEW)
+          & 1000000:?xmin:?ymin
+          & -1000000:?xmax:?ymax
+          &     map
+              $ ( ( 
+                  =   
+                    .   !arg:(?a.?b)
+                      & 1+!nn:?nn
+                      &   255+-1*div$(255*!nn*!MM,1)
+                        : ?col
+                      & !a+!svgX:?a
+                      & !b+!svgX:?b
+                      & ( !a:<!xmin:?xmin
+                        | !a:>!xmax:?xmax
+                        | 
+                        )
+                      & ( !b:<!ymin:?ymin
+                        | !b:>!ymax:?ymax
+                        | 
+                        )
+                      &   ( circle
+                          .     (cx.!a)
+                                (cy.!b)
+                                (r.12)
+                                ( stroke
+                                .   str
+                                  $ ( "rgb("
+                                      !col
+                                      ","
+                                      !col
+                                      ","
+                                      !col
+                                      ")"
+                                    )
+                                )
+                                (fill.red)
+                            , 
+                          )
+                          ( text
+                          .     (x.!a)
+                                (y.!b)
+                                (text-anchor.middle)
+                                (stroke.black)
+                                (stroke-width.1px)
+                                (dominant-baseline.middle)
+                            , !nn
+                          )
+                  )
+                . !L
+                )
+            : ?circles
+          & 20:?margin
+          & !xmin+-1*!margin:?xmin
+          & !ymin+-1*!margin:?ymin
+          & !xmax+-1*!xmin+!margin:?xwidth
+          & !ymax+-1*!ymin+!margin:?ywidth
           &     ("!DOCTYPE html".)
                 ( html
                 .   
@@ -763,9 +818,17 @@ Diagram=
                       ( body
                       .   
                         , ( svg
-                          .     (height.1500)
-                                (width.1500)
-                                (viewBox."0 0 1500 1500")
+                          .   ( viewBox
+                              .   str
+                                $ ( !xmin
+                                    " "
+                                    !ymin
+                                    " "
+                                    !xwidth
+                                    " "
+                                    !ywidth
+                                  )
+                              )
                             ,   ( ~
                                 | ("!--"."A marker to be used as an arrowhead")
                                 )
@@ -786,50 +849,12 @@ Diagram=
                                     )
                                 )
                                 !lines
-                                  map
-                                $ ( ( 
-                                    =   
-                                      .   !arg:(?a.?b)
-                                        & 1+!nn:?nn
-                                        &     255
-                                            +   -1
-                                              *   div
-                                                $ (255*!nn*!MM,1)
-                                          : ?col
-                                        &   ( circle
-                                            .     (cx.!a+!svgX)
-                                                  (cy.!b+!svgX)
-                                                  (r.12)
-                                                  ( stroke
-                                                  .   str
-                                                    $ ( "rgb("
-                                                        !col
-                                                        ","
-                                                        !col
-                                                        ","
-                                                        !col
-                                                        ")"
-                                                      )
-                                                  )
-                                                  (fill.red)
-                                              , 
-                                            )
-                                            ( text
-                                            .     (x.!a+!svgX)
-                                                  (y.!b+!svgX)
-                                                  (text-anchor.middle)
-                                                  (stroke.black)
-                                                  (stroke-width.1px)
-                                                  (dominant-baseline.middle)
-                                              , !nn
-                                            )
-                                    )
-                                  . !L
-                                  )
+                                !circles
                           )
                       )
                 )
             : ?SVG
+          & lst$(SVG,"svg.svg",NEW)
           & put$(toML$!SVG,"svg.html",NEW)
         | out$"something wrogn"
         )
