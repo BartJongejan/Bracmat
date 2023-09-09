@@ -1,6 +1,6 @@
 {arr.bra
 
-Send an array to a calculation object and multiply two of its elements, returning the result.
+Send an array to a UFP (UnIfancyfied Floating Point) object and multiply two of its elements, returning the result.
 }
 
 ArrayTest=
@@ -68,7 +68,7 @@ r=
 &   put
   $ ( "{arr.bra
 
-Send an array to a calculation object and multiply two of its elements, returning the result.
+Send an array to a UFP (UnIfancyfied Floating Point) object and multiply two of its elements, returning the result.
 }
 
 "

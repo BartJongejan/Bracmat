@@ -30,8 +30,12 @@ Bracmat is a good choice for tasks that require dynamic programming.
     * build-launch.bat
 
       Windows batch file for creating a Bracmat module that can be included in Python programs.
-      Contains two lines. The first line compiles and links the module,
-      the second tests the result.
+      Contains two Python commands. The first compiles and links the module, the second tests the result.
+
+    * build-launch.sh
+
+      Linux bash script for creating a Bracmat module that can be included in Python programs.
+      Contains two Python commands. The first compiles and links the module, the second tests the result.
 
     * launch.py
 
@@ -69,32 +73,28 @@ Bracmat is a good choice for tasks that require dynamic programming.
     * NLPwithBracmat.pdf
     
       Tour through Bracmat for computational linguists.
-      
-    * bracmat-table.html
-
-      The documentation in HTML format, automatically generated from the file
-      'help' and using an alternative lay-out with tables.
 
     * bracmat.html
 
       The documentation in HTML format, automatically generated from the file
-      'help'.
+      'help'. Run bracmat. At the prompt, enter `get$help'. Choose `html', `htmltable',
+      or `htmllatex' to generate this file.
+
+    * bracmat.pdf
+    
+      Documentation in PDF format, generated from bracmat.tex, which, in turn,
+      can be generated from the bracmat script `help'.
+      Run bracmat. At the prompt, enter `get$help'. Choose `htmllatex' to generate
+      bracmat.tex. Use e.g. TeXstudio to create bracat.pdf from bracmat.tex.
+      Remember to rerun 'makeindex bracmat.idx' from the command line to update
+      the index.
 
     * help
 
-      The documentation in Bracmat format. (You have to run Bracmat and issue
-      'get$help' to see it properly.)
-      
-    * bracmat.tex
-    
-      The documentation in LaTeX format. This file has to be maintained manually;
-      it is not automatically generated from 'help' or 'bracmat.html'.
-      Remember to rerun 'makeindex bracmat.idx' from the command line to update
-      the index.
-      
-    * bracmat.pdf
-    
-      Documentation in PDF format, generated from bracmat.tex.
+      The Bracmat documentation is maintained in this file. The file is in Bracmat format.
+      You have to run Bracmat and issue `get$help' to use it as for on-line help. Edits have to
+      take place in a text editor.
+
 
 * epoc
     * bracmat.SIS
