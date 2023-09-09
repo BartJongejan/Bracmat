@@ -1,3 +1,10 @@
+5 September 2023
+Using int64_t (C99: stdint.h, inttypes.h) to cast double to integer and convert
+double to a rational number in decimal notation. Also used in subroot(), x2d
+and d2x. The 32-bit version uses int64_t as well.
+Removed the whitespace behind the result of exporting from a UFP object in `Q'
+format. (There was no good reason to have that whitespace.)
+
 29 August 2023
 From today, bracmat.c is no longer the primary source code for further development.
 Instead, bracmat.c is moved to a new folder, `singlesource', while the old `src'

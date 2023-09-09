@@ -26,9 +26,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "29 August 2023"
-#define VERSION "6.16.1"
-#define BUILD "283"
+#define DATUM "5 September 2023"
+#define VERSION "6.16.2"
+#define BUILD "284"
 /*
 COMPILATION
 -----------
@@ -312,6 +312,8 @@ little bit slower, not faster.
 #endif
 
 #include <limits.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 #if defined _WIN64 || defined _WIN32
 #ifdef __BORLANDC__
@@ -320,6 +322,13 @@ typedef   signed int  INT32_T;
 #else
 typedef unsigned __int32 UINT32_T; /* pre VS2010 has no int32_t */
 typedef   signed __int32  INT32_T; /* pre VS2010 has no int32_t */
+#define STRTOUL _strtoui64
+#define STRTOL _strtoi64
+#endif
+#else
+#if defined __EMSCRIPTEN__ /* This is set if compiling with __EMSCRIPTEN__. */
+#define STRTOUL strtoull
+#define STRTOL strtoll
 #endif
 #endif
 
@@ -336,8 +345,10 @@ typedef   signed __int32  INT32_T; /* pre VS2010 has no int32_t */
 #define LONG0D "%0lld"
 #define LONG0nD "%0*lld"
 #define LONGX "%llX"
+/*
 #define STRTOUL _strtoui64
 #define STRTOL _strtoi64
+*/
 #define FSEEK _fseeki64
 #define FTELL _ftelli64
 #else
@@ -372,8 +383,10 @@ typedef   signed long  INT32_T;
 #define LONG0D "%0ld"
 #define LONG0nD "%0*ld"
 #define LONGX "%lX"
+#ifndef STRTOUL
 #define STRTOUL strtoul
 #define STRTOL strtol
+#endif
 #define FSEEK fseek
 #define FTELL ftell
 #endif
@@ -12025,12 +12038,12 @@ static Qnumber qTimesMinusOne(Qnumber _qx)
 static int subroot(nnumber* ag, char* conc[], int* pind)
     {
     int macht, i;
-    ULONG g, smalldivisor;
-    ULONG ores;
+    int64_t g, smalldivisor;
+    int64_t ores;
     static int bijt[12] =
         { 1,  2,  2,  4,    2,    4,    2,    4,    6,    2,  6 };
     /* 2-3,3-5,5-7,7-11,11-13,13-17,17-19,19-23,23-29,29-1,1-7*/
-    ULONG bigdivisor;
+    int64_t bigdivisor;
 
 #ifdef ERANGE   /* ANSI C : strtoul() out of range */
     errno = 0;
@@ -12063,7 +12076,7 @@ static int subroot(nnumber* ag, char* conc[], int* pind)
                         {
                         conc[*pind] = (char*)bmalloc(20);
                         }
-                    sprintf(conc[(*pind)++], LONGU "^(%d*\1)*", ores, macht);
+                    sprintf(conc[(*pind)++], "%" PRId64 "^(%d*\1)*", ores, macht);
                     }
                 macht = 1;
                 ores = smalldivisor;
@@ -12084,9 +12097,9 @@ static int subroot(nnumber* ag, char* conc[], int* pind)
         return FALSE;
     conc[*pind] = (char*)bmalloc(32);
     if((ores == g && ++macht) || ores == 1)
-        sprintf(conc[(*pind)++], LONGU "^(%d*\1)", g, macht); /*{?} 32^1/2 => 2^5/2 */
+        sprintf(conc[(*pind)++], "%" PRId64 "^(%d*\1)", g, macht); /*{?} 32^1/2 => 2^5/2 */
     else
-        sprintf(conc[(*pind)++], LONGU "^(%d*\1)*" LONGU "^\1", ores, macht, g);
+        sprintf(conc[(*pind)++], "%" PRId64 "^(%d*\1)*" "%" PRId64 "^\1", ores, macht, g);
     return TRUE;
     }
 /* End of rational.c */
@@ -15231,8 +15244,7 @@ typedef enum { epop, enopop } popping;
 static popping mustpop = enopop;
 
 typedef enum
-    {
-    TheEnd
+    { TheEnd
     , varPush
     , var2stack // copy variable to stack w/o incrementing stack
     , var2stackBranch // same, then jump
@@ -17425,9 +17437,9 @@ static psk IntegerNode(double val)
     char jotter[500];
     size_t bytes = offsetof(sk, u.obj) + 1;
     if(val < 0)
-        bytes += sprintf(jotter, "%d", (int)-val);
+        bytes += sprintf(jotter, "%" PRId64, (int64_t)-val);
     else
-        bytes += sprintf(jotter, "%d", (int)val);
+        bytes += sprintf(jotter, "%" PRId64, (int64_t)val);
     psk res = (psk)bmalloc(bytes);
     if(res)
         {
@@ -17447,9 +17459,10 @@ static psk FractionNode(double val)
     char jotter[500];
     size_t bytes = offsetof(sk, u.obj) + 1;
 #if defined __EMSCRIPTEN__
-    long long long1 = (long long)1;
+//    long long long1 = (long long)1;
+    int64_t long1 = (int64_t)1;
 #else
-    LONG long1 = (LONG)1;
+    int64_t long1 = (int64_t)1;
 #endif
     double fcac = (double)(long1 << 52);
     int exponent;
@@ -17462,7 +17475,7 @@ static psk FractionNode(double val)
     else if(val == 0)
         flg |= QNUL;
     double mantissa = frexp(val, &exponent);
-    LONG Mantissa = (LONG)(fcac * mantissa);
+    int64_t Mantissa = (int64_t)(fcac * mantissa);
 
     if(Mantissa)
         {
@@ -17471,15 +17484,15 @@ static psk FractionNode(double val)
             ;
 
         if(shft == 0)
-            bytes += sprintf(jotter, LONGD "\n", Mantissa);
+            bytes += sprintf(jotter, "%" PRId64, Mantissa);
         else
             {
-            bytes += sprintf(jotter, LONGD "/" LONGD "\n", Mantissa, (LONG)(long1 << shft));
+            bytes += sprintf(jotter, "%" PRId64 "/" "%" PRId64, Mantissa, (int64_t)(long1 << shft));
             flg |= QFRACTION;
             }
         }
     else
-        bytes += sprintf(jotter, "0 ");
+        bytes += sprintf(jotter, "0");
 
     psk res = (psk)bmalloc(bytes);
     if(res)
@@ -23758,7 +23771,7 @@ static function_return_type functions(psk Pnode)
         CASE(X2D) /* x2d $ hexnumber */
             {
             char* endptr;
-            ULONG val;
+            uint64_t val;
             if(is_op(rightnode)
                || HAS_VISIBLE_FLAGS_OR_MINUS(rightnode)
                )
@@ -23767,7 +23780,7 @@ static function_return_type functions(psk Pnode)
             val = STRTOUL((char*)POBJ(rightnode), &endptr, 16);
             if(errno == ERANGE || (endptr && *endptr))
                 return functionFail(Pnode); /*not all characters scanned*/
-            sprintf(draft, LONGU, val);
+            sprintf(draft, "%" PRIu64, val);
             wipe(Pnode);
             Pnode = scopy((const char*)draft);
             return functionOk(Pnode);
@@ -23775,7 +23788,7 @@ static function_return_type functions(psk Pnode)
         CASE(D2X) /* d2x $ decimalnumber */
             {
             char* endptr;
-            ULONG val;
+            int64_t val;
             if(is_op(rightnode) || !INTEGER_NOT_NEG(rightnode))
                 return functionFail(Pnode);
 #ifdef __BORLANDC__
@@ -23791,7 +23804,7 @@ static function_return_type functions(psk Pnode)
                || (endptr && *endptr)
                )
                 return functionFail(Pnode); /*not all characters scanned*/
-            sprintf(draft, LONGX, val);
+            sprintf(draft, "%" PRIX64, val);
             wipe(Pnode);
             Pnode = scopy((const char*)draft);
             return functionOk(Pnode);
@@ -23811,10 +23824,10 @@ static function_return_type functions(psk Pnode)
             }
         CASE(Chu) /* chu $ number */
             {
-            ULONG val;
+            unsigned long val;
             if(is_op(rightnode) || !INTEGER_POS(rightnode))
                 return functionFail(Pnode);
-            val = STRTOUL((char*)POBJ(rightnode), (char**)NULL, 10);
+            val = strtoul((char*)POBJ(rightnode), (char**)NULL, 10);
             if(putCodePoint(val, (unsigned char*)draft) == NULL)
                 return functionFail(Pnode);
             wipe(Pnode);
@@ -24579,11 +24592,11 @@ static function_return_type functions(psk Pnode)
                 return functionFail(Pnode);
             if(PLOBJ(rightnode) != '\0')
                 {
-                LONG val;
+                unsigned long val;
                 if(!INTEGER_NOT_NEG(rightnode))
                     return functionFail(Pnode);
-                val = STRTOUL((char*)POBJ(rightnode), (char**)NULL, 10);
-                if(val >= ARGC)
+                val = strtoul((char*)POBJ(rightnode), (char**)NULL, 10);
+                if(val >= (unsigned long)ARGC)
                     return functionFail(Pnode);
                 wipe(Pnode);
                 Pnode = scopy((const char*)ARGV[val]);

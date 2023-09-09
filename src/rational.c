@@ -1336,12 +1336,12 @@ Qnumber qTimesMinusOne(Qnumber _qx)
 int subroot(nnumber* ag, char* conc[], int* pind)
     {
     int macht, i;
-    ULONG g, smalldivisor;
-    ULONG ores;
+    int64_t g, smalldivisor;
+    int64_t ores;
     static int bijt[12] =
         { 1,  2,  2,  4,    2,    4,    2,    4,    6,    2,  6 };
     /* 2-3,3-5,5-7,7-11,11-13,13-17,17-19,19-23,23-29,29-1,1-7*/
-    ULONG bigdivisor;
+    int64_t bigdivisor;
 
 #ifdef ERANGE   /* ANSI C : strtoul() out of range */
     errno = 0;
@@ -1374,7 +1374,7 @@ int subroot(nnumber* ag, char* conc[], int* pind)
                         {
                         conc[*pind] = (char*)bmalloc(20);
                         }
-                    sprintf(conc[(*pind)++], LONGU "^(%d*\1)*", ores, macht);
+                    sprintf(conc[(*pind)++], "%" PRId64 "^(%d*\1)*", ores, macht);
                     }
                 macht = 1;
                 ores = smalldivisor;
@@ -1395,8 +1395,8 @@ int subroot(nnumber* ag, char* conc[], int* pind)
         return FALSE;
     conc[*pind] = (char*)bmalloc(32);
     if((ores == g && ++macht) || ores == 1)
-        sprintf(conc[(*pind)++], LONGU "^(%d*\1)", g, macht); /*{?} 32^1/2 => 2^5/2 */
+        sprintf(conc[(*pind)++], "%" PRId64 "^(%d*\1)", g, macht); /*{?} 32^1/2 => 2^5/2 */
     else
-        sprintf(conc[(*pind)++], LONGU "^(%d*\1)*" LONGU "^\1", ores, macht, g);
+        sprintf(conc[(*pind)++], "%" PRId64 "^(%d*\1)*" "%" PRId64 "^\1", ores, macht, g);
     return TRUE;
     }

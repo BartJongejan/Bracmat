@@ -7322,6 +7322,12 @@ string line 2\"
                   : "8.5742187500000000E-01"
                 &   (myCalc..export)$("%a",myParm)
                   : ("0x1.b700000000000p-1"|"0x1.b7p-1")
+                & (myCalc..export)$(Q,myParm):439/512
+                & (myCalc..go)$9007199254740991
+                &   (myCalc..export)$(R,myParm)
+                  : "9.007199e+15"
+                &   (myCalc..export)$(N,myParm)
+                  : 9007199254740991
                 &   (myCalc..go)$0x1p-1074
                   : "4.9406564584124654E-324"
                 &   (myCalc..export)$("%a",myParm)

@@ -686,7 +686,7 @@ function_return_type functions(psk Pnode)
         CASE(X2D) /* x2d $ hexnumber */
             {
             char* endptr;
-            ULONG val;
+            uint64_t val;
             if(is_op(rightnode)
                || HAS_VISIBLE_FLAGS_OR_MINUS(rightnode)
                )
@@ -695,7 +695,7 @@ function_return_type functions(psk Pnode)
             val = STRTOUL((char*)POBJ(rightnode), &endptr, 16);
             if(errno == ERANGE || (endptr && *endptr))
                 return functionFail(Pnode); /*not all characters scanned*/
-            sprintf(draft, LONGU, val);
+            sprintf(draft, "%" PRIu64, val);
             wipe(Pnode);
             Pnode = scopy((const char*)draft);
             return functionOk(Pnode);
@@ -703,7 +703,7 @@ function_return_type functions(psk Pnode)
         CASE(D2X) /* d2x $ decimalnumber */
             {
             char* endptr;
-            ULONG val;
+            int64_t val;
             if(is_op(rightnode) || !INTEGER_NOT_NEG(rightnode))
                 return functionFail(Pnode);
 #ifdef __BORLANDC__
@@ -719,7 +719,7 @@ function_return_type functions(psk Pnode)
                || (endptr && *endptr)
                )
                 return functionFail(Pnode); /*not all characters scanned*/
-            sprintf(draft, LONGX, val);
+            sprintf(draft, "%" PRIX64, val);
             wipe(Pnode);
             Pnode = scopy((const char*)draft);
             return functionOk(Pnode);
@@ -739,10 +739,10 @@ function_return_type functions(psk Pnode)
             }
         CASE(Chu) /* chu $ number */
             {
-            ULONG val;
+            unsigned long val;
             if(is_op(rightnode) || !INTEGER_POS(rightnode))
                 return functionFail(Pnode);
-            val = STRTOUL((char*)POBJ(rightnode), (char**)NULL, 10);
+            val = strtoul((char*)POBJ(rightnode), (char**)NULL, 10);
             if(putCodePoint(val, (unsigned char*)draft) == NULL)
                 return functionFail(Pnode);
             wipe(Pnode);
@@ -1507,11 +1507,11 @@ function_return_type functions(psk Pnode)
                 return functionFail(Pnode);
             if(PLOBJ(rightnode) != '\0')
                 {
-                LONG val;
+                unsigned long val;
                 if(!INTEGER_NOT_NEG(rightnode))
                     return functionFail(Pnode);
-                val = STRTOUL((char*)POBJ(rightnode), (char**)NULL, 10);
-                if(val >= ARGC)
+                val = strtoul((char*)POBJ(rightnode), (char**)NULL, 10);
+                if(val >= (unsigned long)ARGC)
                     return functionFail(Pnode);
                 wipe(Pnode);
                 Pnode = scopy((const char*)ARGV[val]);
