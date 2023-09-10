@@ -13,6 +13,15 @@ patterns that allow embedded expression evaluation is almost unique.
 
 Bracmat is a good choice for tasks that require dynamic programming.
 
+Since 2023, Bracmat can do floating point calculations. The motivation for
+implementing the `UFP' object is the long fancied ability to create
+illustrations in e.g. SVG or PGM format from within Bracmat code. Therefore
+its name: `UnIfancyfied Floating Point'.
+      
+The only data type in UFP objects is the 64 bit double. UFP objects support
+multidimensional arrays, do not allow recursion allowed and do not support
+pattern matching.
+
 [More than three hundred examples of Bracmat code](http://rosettacode.org/wiki/Category:Bracmat) can be found at
 [Rosetta Code](http://rosettacode.org/wiki/Rosetta_Code)
 
@@ -59,6 +68,18 @@ Bracmat is a good choice for tasks that require dynamic programming.
 
       64 bit executable for Windows
 
+*demo
+    Folder containing Mandelbrot set generating code in four languages.
+    * Mandelbrot.java
+    
+    * mandel.c
+    
+    * mandel.py
+    
+    * mandelbrot.bra
+
+    * readme.md
+    
 * doc
     * CLIN26-poster.pdf
     
@@ -111,18 +132,14 @@ Bracmat is a good choice for tasks that require dynamic programming.
 
     Java code
 
-    * bracmattest.java
+    * java/bracmattest.java
         
       Example program showing how to evaluate a Bracmat expression from
       within a Java program
           
-    * dk
-
-        * cst
-        
-        * bracmat.java
+    * jva/dk/cst/bracmat.java
                 
-          Java code that loads the Bracmat dynamic library.
+      Java code that loads the Bracmat dynamic library.
     
   * bracmatdll.cpp, 
     bracmatdll.h
@@ -158,51 +175,6 @@ Bracmat is a good choice for tasks that require dynamic programming.
 
       executable for Apple computers
 
-* potu
-    * many .c and .h files
-    * Makefile
-
-      There are two ways to compile and link the program, and both ways should
-      be kept working in future development
-
-      * All .c files (except potu.c) #included in potu.c, while making all .h
-        files that contain function or global variable declarations
-        ineffective.
-        This way of compilation forces a (partial) order on the inclusion of
-        the .c files. In general, the lower level functions are toward the top
-        of the list, while the higher level functions are closer to the bottom
-        of the list. This order mimics the order in the original bracmat.c
-        file.
-
-      * All .c files compiled separately and then linked. In this way, we
-        ensure that each .c file includes all needed header files.
-
-      The name 'potu', like 'bracmat', stems from the 1741 novel
-      Nicolai Klimii Iter Subterraneum by Ludvig Holberg. Both are places on
-      the planet Nazar that is inside the Earth. Nazar is inhabited by
-      intelligent trees.
-
-      The initial version of potu is functionally not different from bracmat.
-      
-      While "vanilla" bracmat restricts numerical computations to computation
-      with bignums, potu is now (spring 2023) also able to perform floating point
-      computations using C's 64 bit "double" data type. These computations
-      are handled by so called "calculation" objects.
-      The motivation for implementing the "calculation" object is the whish to be able to
-      create illustrations in e.g. SVG or PGM format.
-      
-      Initial tests (generating
-      graphic depictions of parts of the Mandelbrot set) indicate that potu's
-      computations are about six times slower than the same algorithm implemented in C,
-      almost four times slower than Java, and almost four times faster than Python, 
-      C being twenty times faster than Python.
-            
-      A full documentation of how to do floating point computations in potu will be made
-      when the feature set is more stable. The following characterization will probably be true
-      when that time has come: 64-bit as the only data type (no integers!), support for 
-      multidimensional arrays, no recursion allowed, no pattern matching, 
-      arrays passed by reference, functions only returning scalar values, or nothing at all.
-           
 * safe
 
     * bracmatso.c
@@ -238,14 +210,38 @@ Bracmat is a good choice for tasks that require dynamic programming.
     * DESCRIP.MMS
      
       OpenVMS makefile.
-    
+
 * src
+    * many .c and .h files
     * Makefile
-      
+
       Builds bracmat in two ways: either by compiling each .c file separately before linking, or by compiling
       potu.c, which, if the SINGLESOURCE is #defined, #includes all .c files in an order that necessitates a
       minimum of declarations. (This is also the order in which the source code in bracmat.c is organized.)
+
+      Both ways should be kept working in future development.
+
+      * SINGLESOURCE defined
       
+        All .c files (except potu.c) #included in potu.c, while making all .h
+        files that contain function or global variable declarations
+        ineffective.
+        This way of compilation forces a (partial) order on the inclusion of
+        the .c files. In general, the lower level functions are toward the top
+        of the list, while the higher level functions are closer to the bottom
+        of the list. This order mimics the order in the original bracmat.c
+        file.
+
+      * SINGLESOURCE not defined
+      
+        All .c files compiled separately and then linked. In this way, we
+        ensure that each .c file includes all needed header files.
+
+      The name 'potu', like 'bracmat', stems from the 1741 novel
+      Nicolai Klimii Iter Subterraneum by Ludvig Holberg. Both are places on
+      the planet Nazar that is inside the Earth. Nazar is inhabited by
+      intelligent trees.
+
     * potu.c
     
       The main source file. Includes all other .c files if SINGLESOURCE is #defined.
@@ -264,7 +260,6 @@ Bracmat is a good choice for tasks that require dynamic programming.
 
     * several more .c and .h files
 
-
 * WebAssembly
 
    All that is needed to create a version of Bracmat that runs in a browser.  
@@ -275,7 +270,7 @@ Bracmat is a good choice for tasks that require dynamic programming.
       in a single HTML-page. Nice for toy scripts, slow.
       
       
-    * editbracmatjs.bra
+    * edit-potuC.html.bra
     
       A Bracmat script that edits the output of the emscripten C-to-Javascript
       compiler and creates a HTML page that also contains a large amount of
@@ -287,6 +282,10 @@ Bracmat is a good choice for tasks that require dynamic programming.
       creating a Javascript version of Bracmat, bracmatJS.html.
       Requirement: emscripten 1.38.0
       emcc and bracmat must be in PATH to run this script.
+
+   * pre.js
+
+     Javascript file needed as argument for the --pre-js command line option of the emcc command 
       
 * Changelog
   
