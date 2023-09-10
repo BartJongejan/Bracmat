@@ -388,16 +388,20 @@ You can download Bracmat from GitHub.
 The Bracmat source code has no other dependencies than what is provided by
 Standard C. Building bracmat from source is extremely simple, e.g.:
 
-    gcc bracmat.c xml.c json.c unicaseconv.c unichartypes.c
+    cd singlesource
+    gcc bracmat.c -lm
     
-You can also use the Makefile, which is in the src directory.    
+You can also use the Makefile, which is in the src directory.
+
+Bracmat requires a C99 compatible compiler since 2023. The older compilers
+mentioned below will no longer be able to compile Bracmat.
 
 Bracmat has been compiled and run on the following platforms:
 
 * Windows 
-    * All versions, compiled with 32 bit VC 6.0 and newer, BCC 5.02, tcc. 
+    * Compiled with 32 bit VC 6.0 and newer, BCC 5.02, tcc. 
     * A 16 bit version existed until version 2.8
-    * Bracmat can be compiled to 64 bits. This gives faster multiplication of very large numbers.
+    * Bracmat can be compiled for 64 bit platforms. This gives faster multiplication of very large numbers.
 * RISC-OS (Norcroft C ver 3)
 * EPOC 5  (Psion 5mx, Ericsson MC218: gcc)
 * HP-UNIX (gcc, cc)
