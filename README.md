@@ -14,9 +14,9 @@ patterns that allow embedded expression evaluation is almost unique.
 Bracmat is a good choice for tasks that require dynamic programming.
 
 Since 2023, Bracmat can do floating point calculations. The motivation for
-implementing the `UFP' object is the long fancied ability to create
+implementing the 'UFP' object is the long fancied ability to create
 illustrations in e.g. SVG or PGM format from within Bracmat code. Therefore
-its name: `UnIfancyfied Floating Point'.
+its name: 'UnIfancyfied Floating Point'.
       
 The only data type in UFP objects is the 64 bit double. UFP objects support
 multidimensional arrays, do not allow recursion allowed and do not support
@@ -98,14 +98,14 @@ pattern matching.
     * bracmat.html
 
       The documentation in HTML format, automatically generated from the file
-      'help'. Run bracmat. At the prompt, enter `get$help'. Choose `html', `htmltable',
-      or `htmllatex' to generate this file.
+      'help'. Run bracmat. At the prompt, enter 'get$help'. Choose 'html', 'htmltable',
+      or 'htmllatex' to generate this file.
 
     * bracmat.pdf
     
       Documentation in PDF format, generated from bracmat.tex, which, in turn,
-      can be generated from the bracmat script `help'.
-      Run bracmat. At the prompt, enter `get$help'. Choose `htmllatex' to generate
+      can be generated from the bracmat script 'help'.
+      Run bracmat. At the prompt, enter 'get$help'. Choose 'htmllatex' to generate
       bracmat.tex. Use e.g. TeXstudio to create bracat.pdf from bracmat.tex.
       Remember to rerun 'makeindex bracmat.idx' from the command line to update
       the index.
@@ -113,7 +113,7 @@ pattern matching.
     * help
 
       The Bracmat documentation is maintained in this file. The file is in Bracmat format.
-      You have to run Bracmat and issue `get$help' to use it as for on-line help. Edits have to
+      You have to run Bracmat and issue 'get$help' to use it as for on-line help. Edits have to
       take place in a text editor.
 
 
@@ -187,7 +187,7 @@ pattern matching.
 * singlesource
     * Makefile
       
-      Builds a `standard' edition of bracmat, a `safe' version of bracmat,
+      Builds a 'standard' edition of bracmat, a 'safe' version of bracmat,
       a version for profiling, and a version for measuring code coverage.
       
     * bracmat.c
@@ -200,7 +200,7 @@ pattern matching.
 
     * one.bra
      
-      A bracmat script that combines all source code in the `src' folder into a compilable single file, bracmat.c
+      A bracmat script that combines all source code in the 'src' folder into a compilable single file, bracmat.c
       This bracmat.c replaces the original bracmat.c that was maintained by hand.
   
     * CONFIGURE.COM
