@@ -26,49 +26,8 @@ pattern matching.
 [Rosetta Code](http://rosettacode.org/wiki/Rosetta_Code)
 
 **This distribution contains the following directories and files:**
-* Linux
-    * bracmat
 
-      64 bit statically linked executable for Linux (tested with Ubuntu 16.04, 18.04 and 20.04)
-
-* Python-module
-
-    Python and Cython source code for creating a Python module 'prythat' so
-    the Bracmat evaluator can be called from the Python programming language
-
-    * build-launch.bat
-
-      Windows batch file for creating a Bracmat module that can be included in Python programs.
-      Contains two Python commands. The first compiles and links the module, the second tests the result.
-
-    * build-launch.sh
-
-      Linux bash script for creating a Bracmat module that can be included in Python programs.
-      Contains two Python commands. The first compiles and links the module, the second tests the result.
-
-    * launch.py
-
-      Python program that demonstrates evaluation of Bracmat expressions, also call back to Python. 
-      Tests the prythat module.  
-
-    * prythat.pyx
-
-      Cython source code that interfaces Python with Bracmat and vv.
-
-    * setup.py
-
-      Makefile for building the module.
-
-* Windows
-    * bracmat.exe
-
-      32 bit executable for Windows
-
-    * bracmat64.exe
-
-      64 bit executable for Windows
-
-*demo
+* demo
     Folder containing Mandelbrot set generating code in four languages.
     * Mandelbrot.java
     
@@ -170,10 +129,43 @@ pattern matching.
       Batch file for Windows to create a Bracmat JNI. Should work with a number
       of versions of Microsoft's C-compiler.
 
+* Linux
+    * bracmat
+
+      64 bit statically linked executable for Linux (tested with Ubuntu 16.04, 18.04 and 20.04)
+
 * macOS
     * bracmat
 
       executable for Apple computers
+
+* Python-module
+
+    Python and Cython source code for creating a Python module 'prythat' so
+    the Bracmat evaluator can be called from the Python programming language
+
+    * build-launch.bat
+
+      Windows batch file for creating a Bracmat module that can be included in Python programs.
+      Contains two Python commands. The first compiles and links the module, the second tests the result.
+
+    * build-launch.sh
+
+      Linux bash script for creating a Bracmat module that can be included in Python programs.
+      Contains two Python commands. The first compiles and links the module, the second tests the result.
+
+    * launch.py
+
+      Python program that demonstrates evaluation of Bracmat expressions, also call back to Python. 
+      Tests the prythat module.  
+
+    * prythat.pyx
+
+      Cython source code that interfaces Python with Bracmat and vv.
+
+    * setup.py
+
+      Makefile for building the module.
 
 * safe
 
@@ -286,18 +278,19 @@ pattern matching.
    * pre.js
 
      Javascript file needed as argument for the --pre-js command line option of the emcc command 
+
+* Windows
+    * bracmat.exe
+
+      32 bit executable for Windows
+
+    * bracmat64.exe
+
+      64 bit executable for Windows
       
 * Changelog
   
   A document describing changes between versions.
-
-* README.md
-
-  This file.
-  
-* LICENSE
-
-  The full text of the GNU public licence.
 
 * howto.md
 
@@ -309,6 +302,10 @@ pattern matching.
   Utility to spot unused variables and functions.
   It also tells you which variables are used outside their lexical scope.
   (Which is not an error, since Bracmat is dynamically scoped.)
+
+* LICENSE
+
+  The full text of the GNU public licence.
   
 * pr-xml-utf-8.xml
 
@@ -326,6 +323,10 @@ pattern matching.
   Cyclus: edit program, save from editor, reread in  Bracmat, reload in editor,
   edit program.
 
+* README.md
+
+  This file.
+  
 * UnicodeData.bra
 
   A utility that generates UNICODE-related tables from UnicodeData.txt 
