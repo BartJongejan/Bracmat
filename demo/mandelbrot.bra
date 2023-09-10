@@ -71,7 +71,7 @@ Mandelbrot=
                   )
             )
         : ?calcule
-      & new$(calculation,!calcule):?compiledCalcule
+      & new$(UFP,!calcule):?compiledCalcule
       & ( 
         |   lst$calc
           & out$"ITER DEFINED"
@@ -129,7 +129,7 @@ Mandelbrot=
         )
       & clk$:?t0
       & ( ~
-        |       (compiledCalcule..calculate)
+        |       (compiledCalcule..go)
               $ (!xpixels,!ypixels,!X,!Y,!R)
             : ?Result
           &   (NoProfiling|compiledCalcule..print)

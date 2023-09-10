@@ -156,7 +156,7 @@ static void* compiledCalcule(
     /*
                 )
             : ?calcule
-          & new$(calculation,!calcule):?compiledCalcule
+          & new$(UFP,!calcule):?compiledCalcule
     */
     return ret;
     }
@@ -233,7 +233,7 @@ static void doit()
     */
     time_t t0 = clock();
     /*
-              & (       (compiledCalcule..calculate)
+              & (       (compiledCalcule..go)
                       $ (!xpixels,!ypixels,!X,!Y,!R)
                     : ?Result
                   & out$(Result !Result)
