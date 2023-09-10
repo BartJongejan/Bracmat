@@ -14,8 +14,7 @@ language.
 * Y = 1.0375665;
 * R = 1.0E-7;
 
-| Language | source code         | computation<br/>(I) | computation | computation | computation  | relative |
-|          |                     |          |+ writing (I)|     (II)    |+ writing (II)|  (C=1)   |
+| Language | source code         | computation<br/>(I) | computation<br/>+ writing (I) | computation<br/>(II)  | computation<br/>+ writing (II)  | relative<br/>(C=1) |
 | :--------| :-------------------|-----------: |-----------: |-----------: |------------: |--------: |
 | C        | mandel.c            |          18 |          19 |          54 |           57 |        1 |
 | Java     | Mandelbrot.java     |          40 |          41 |          91 |           92 | 1.7 -  2 |
