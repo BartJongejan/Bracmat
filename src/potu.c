@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "5 September 2023"
-#define VERSION "6.16.2"
-#define BUILD "284"
+#define DATUM "11 September 2023"
+#define VERSION "6.17.0"
+#define BUILD "285"
 /*
 COMPILATION
 -----------
@@ -37,39 +37,43 @@ The program only utilizes standard libraries.
 
 Until 2012, the source code consisted of a single file, bracmat.c.
 Because XML is becoming more popular, a separate source file, xml.c
-implements reading XML files. Another separate source file, json.c,
-implements reading JSON files.
+implemented reading XML files. Another separate source file, json.c,
+implemented reading JSON files.
+Since autumn 2023, bracmat.c is again complete source code for bracmat,
+but it is no longer meant to be edited by hand! bracmat.c is now
+in the folder 'singlesource' and created from multiple source files that
+are in the 'src' folder. The script doing this is called 'one.bra'. It is
+of course also possible to compile the source code in 'src' without first 
+creating bracmat.c.
 
 On *N?X, just compile with
 
-    gcc -std=c99 -pedantic -Wall -O3 -static -DNDEBUG -o bracmat bracmat.c xml.c json.c
+    gcc -std=c99 -pedantic -Wall -O3 -static -DNDEBUG -o bracmat bracmat.c -lm
 
 
 The options are not necessary to successfully compile the program just
 
-    gcc *.c
+    gcc *.c -lm
 
 also works and produces the executable a.out.
 
 Profiling:
 
-    gcc -Wall -c -pg -DNDEBUG bracmat.c xml.c json.c
-    gcc -Wall -pg bracmat.o xml.o json.o
+    gcc -Wall -c -pg -DNDEBUG bracmat.c
+    gcc -Wall -pg bracmat.o -lm
     ./a.out 'get$"valid.bra";!r'
     gprof a.out
 
 Test coverage:
 (see http://gcc.gnu.org/onlinedocs/gcc/Invoking-Gcov.html#Invoking-Gcov)
 
-    gcc -fprofile-arcs -ftest-coverage -DNDEBUG bracmat.c xml.c json.c
+    gcc -fprofile-arcs -ftest-coverage -DNDEBUG bracmat.c -lm
     ./a.out
     gcov bracmat.c
-    gcov xml.c
-    gcov json.c
 
 */
-/* How to compile
-   (with a ANSI-C compiler or newer)
+/* How to compile with a ANSI-C compiler or newer 
+(OBSOLETE, Norcroft compiler, Microsoft qcl, Borland C, Atari compiler are not C99 compatible)
 
 Archimedes ANSI-C release 3:
 *up
@@ -152,42 +156,6 @@ blank " ", the comma "," and the full stop ".". (The interpunction symbols
 "?", "!" and ";" were already 'taken' to serve other purposes.)
 */
 
-/*
-TODO list:
-20010103: Make > and < work on non-atomic stuff
-20010904: Issue warning if 'arg' is declared as a local variable
-*/
-/* 20010309 evaluate on WHITE and COMMA strings is now iterative on the
-   right descending (deep) branch, not recursive.
-   (It is now possible to read long lists, e.g. dictionairies, without causing
-   stack overflow when evaluating the list.)
-   20010821 a () () was evaluated to a (). Removed last ().
-   20010903 (a.) () was evaluated to a
-*/
-/*
-About reference counting.
-Most nodes can be shared by no more than 1024 referers. Copies must be made as needed.
-Objects (nodes with = ('EQUALS') are objects and can be shared by almost 2^40 referers.
-
-small refcounter       large refcounter              comment
-(9 bits, all nodes)   (30 bits, only objects)
-0                      0                             not shared, no test of large refcounter needed.
-1                      0                             shared with one, so totalling two
-2                      0                             shared with two
-..                     ..
-1022                   0
-1023                   0                             totalling 1024, *** max for normal nodes ***
-1                      1                             totalling 1025
-2                      1
-..                     ..
-m                      1
-..                     ..                            totalling 1024+(1-1)*1023+m
-1023                   1                             totalling 1024+1*1023
-..                     ..
-m                      n                             totalling 1024+(n-1)*1023+m or 1+n*1023+m
-1023                   2^30-1                        totalling 1024+(2^30-2)*1023+1023=1 098 437 885 953
-                                                         (or   1+2^30*1023)
-*/
 #include "defines01.h"
 #include "platformdependentdefs.h"
 #include "flags.h"
