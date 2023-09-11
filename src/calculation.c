@@ -96,7 +96,7 @@ typedef enum
     , Idx   /*   idx$(<array name>,<index>,...)  */
     , QIdx  /* ?(idx$(<array name>,<index>,...)) */
     , EIdx  /* !(idx$(<array name>,<index>,...)) */
-    , Range /* range$(<array name>,d)) 0 <= d < rank, returns 0 if d < 0 or d >= array rank */
+    , Extent /* extent$(<array name>,d)) 0 <= d < rank, returns 0 if d < 0 or d >= array rank */
     , Rank  /* rank$(<array name>)) */
     , NoOp
     } actionType;
@@ -179,7 +179,7 @@ static char* ActionAsWord[] =
     ,"idx"
     ,"Qidx"
     ,"Eidx"
-    ,"range"
+    ,"extent"
     ,"rank"
     ,"NoOp"
     };
@@ -203,8 +203,8 @@ typedef struct fortharray
     size_t size;
     size_t index;
     size_t rank;
-    size_t* range;
-    size_t* stride; // Product of ranges
+    size_t* extent;
+    size_t* stride; // Product of extents
     } fortharray;
 
 typedef union stackvalue
@@ -319,9 +319,9 @@ static void showProblematicNode(char* msg, psk node)
     global_fpo = saveFpo;
     }
 
-static double drand(double range)
+static double drand(double extent)
     {
-    return range * (double)rand() / ((double)RAND_MAX + 1.0);
+    return extent * (double)rand() / ((double)RAND_MAX + 1.0);
     }
 
 static char* getVarName(forthMemory* mem, forthvalue* val)
@@ -436,7 +436,7 @@ static fortharray* getOrCreateArrayPointer(fortharray** arrp, char* name, size_t
                 strcpy(curarrp->name, name);
                 /* already done by memset()
                 curarrp->rank = 0;
-                curarrp->range = 0;
+                curarrp->extent = 0;
                 curarrp->index = 0;
                 curarrp->size = 0;
                 curarrp->pval = 0;
@@ -510,7 +510,7 @@ static fortharray* getOrCreateArrayPointerButNoArray(fortharray** arrp, char* na
                     curarrp->size = 0;
                     curarrp->index = 0;
                     curarrp->rank = 0;
-                    curarrp->range = 0;
+                    curarrp->extent = 0;
                     curarrp = *arrp;
                     */
                     }
@@ -589,7 +589,7 @@ static stackvalue* fsetArgs(stackvalue* sp, int arity, forthMemory* thatmem)
             arrp->size = arr->size;
             arrp->index = arr->index;
             arrp->rank = arr->rank;
-            arrp->range = arr->range;
+            arrp->extent = arr->extent;
             arrp->stride = arr->stride;
             }
         --sp;
@@ -620,30 +620,30 @@ static size_t find_rank(psk Node)
     return 1 + msubrank;
     }
 
-static void set_range(size_t* range, psk Node)
+static void set_extent(size_t* extent, psk Node)
     {
     assert(Op(Node) == COMMA);
-    size_t lrange = 1;
+    size_t lextent = 1;
     psk el;
     for(el = Node->RIGHT; is_op(el) && Op(el) == WHITE; el = el->RIGHT)
         {
-        ++lrange;
+        ++lextent;
         if(is_op(el->LEFT) && Op(el->LEFT) == COMMA)
             {
-            set_range(range - 1, el->LEFT);
+            set_extent(extent - 1, el->LEFT);
             }
         }
     if(is_op(el) && Op(el) == COMMA)
         {
-        set_range(range - 1, el);
+        set_extent(extent - 1, el);
         }
-    if(lrange > *range)
+    if(lextent > *extent)
         {
-        *range = lrange;
+        *extent = lextent;
         }
     }
 
-static void set_vals(forthvalue* pval, size_t rank, size_t* range, psk Node)
+static void set_vals(forthvalue* pval, size_t rank, size_t* extent, psk Node)
     {
     assert(Op(Node) == COMMA);
     psk el;
@@ -652,13 +652,13 @@ static void set_vals(forthvalue* pval, size_t rank, size_t* range, psk Node)
     size_t index;
 
     for(size_t k = 0; k + 1 < rank; ++k)
-        stride *= range[k];
-    N = stride * range[rank - 1];
+        stride *= extent[k];
+    N = stride * extent[rank - 1];
     for(index = 0, el = Node->RIGHT; index < N && is_op(el) && Op(el) == WHITE; index += stride, el = el->RIGHT)
         {
         if(is_op(el->LEFT) && Op(el->LEFT) == COMMA)
             {
-            set_vals(pval + index, rank - 1, range, el->LEFT);
+            set_vals(pval + index, rank - 1, extent, el->LEFT);
             }
         else
             {
@@ -668,7 +668,7 @@ static void set_vals(forthvalue* pval, size_t rank, size_t* range, psk Node)
         }
     if(is_op(el) && Op(el) == COMMA)
         {
-        set_vals(pval + index, rank - 1, range, el);
+        set_vals(pval + index, rank - 1, extent, el);
         }
     else
         {
@@ -686,17 +686,17 @@ static long setArgs(forthMemory* mem, size_t Nparm, psk args)
         assert(Op(args) == DOT || Op(args) == COMMA || Op(args) == WHITE);
         if(Op(args) == COMMA && !is_op(args->LEFT) && args->LEFT->u.sobj == '\0')
             { /* args is an array */
-            /* find rank and ranges */
+            /* find rank and extents */
             size_t rank = find_rank(args);
-            size_t* range = (size_t*)bmalloc(2 * rank * sizeof(size_t)); /* twice: both ranges and strides */
-            if(range != 0)
+            size_t* extent = (size_t*)bmalloc(2 * rank * sizeof(size_t)); /* twice: both extents and strides */
+            if(extent != 0)
                 {
-                memset(range, 0, 2 * rank * sizeof(size_t));/* twice: both ranges and strides */
-                set_range(range + rank - 1, args);
+                memset(extent, 0, 2 * rank * sizeof(size_t));/* twice: both extents and strides */
+                set_extent(extent + rank - 1, args);
                 size_t totsize = 1;
                 for(size_t k = 0; k < rank; ++k)
                     {
-                    totsize *= range[k];
+                    totsize *= extent[k];
                     }
                 fortharray* a = 0;
                 if(curparm)
@@ -705,26 +705,26 @@ static long setArgs(forthMemory* mem, size_t Nparm, psk args)
                     if(a->size != totsize)
                         {
                         fprintf(stderr, "Declared size of array \"%s\" is %zu, actual size is %zu.\n", a->name, a->size, totsize);
-                        bfree(range);
+                        bfree(extent);
                         return -1;
                         }
                     for(size_t k = 0; k < a->rank; ++k)
-                        if(a->range[k] != range[k])
+                        if(a->extent[k] != extent[k])
                             {
-                            fprintf(stderr, "Declared range of array \"%s\" is %zu, actual range is %zu.\n", a->name, a->range[k], range[k]);
-                            bfree(range);
+                            fprintf(stderr, "Declared extent of array \"%s\" is %zu, actual extent is %zu.\n", a->name, a->extent[k], extent[k]);
+                            bfree(extent);
                             return -1;
                             }
                     initialise(a, totsize);
                     /*
-                    assert(a->range == 0);
-                    a->range = range;
+                    assert(a->extent == 0);
+                    a->extent = extent;
                     a->rank = rank;
                     */
-                    set_vals(a->pval, rank, range, args);
+                    set_vals(a->pval, rank, extent, args);
                     ++ParmIndex;
                     }
-                bfree(range);
+                bfree(extent);
                 }
             }
         else
@@ -841,7 +841,7 @@ static Etriple etriples[] =
         {"idx",   Idx,0},
         {"Qidx",  QIdx,0},
         {"Eidx",  EIdx,0},
-        {"range", Range,0},
+        {"extent", Extent,0},
         {"rank",  Rank,0},
         {"NoOp",  NoOp,0},
         {0,0}
@@ -853,7 +853,7 @@ static char* getLogiName(dumbl logi)
     }
 
 static stackvalue* setArray(stackvalue* sp, forthword* wordp)
-/* 'runtime' function, creation of array with ranges that were unknown during compilation */
+/* 'runtime' function, creation of array with extents that were unknown during compilation */
     {
     size_t rank = wordp->offset - 1;
     fortharray* arrp = (sp - rank)->arrp;
@@ -861,9 +861,9 @@ static stackvalue* setArray(stackvalue* sp, forthword* wordp)
     i = (size_t)((sp--)->val).floating;
     if(arrp->stride != 0)
         {
-        for(size_t range_index = arrp->rank - rank; range_index < rank - 1; ++range_index)
+        for(size_t extent_index = arrp->rank - rank; extent_index < rank - 1; ++extent_index)
             {
-            i += (size_t)((sp--)->val).floating * arrp->stride[range_index];
+            i += (size_t)((sp--)->val).floating * arrp->stride[extent_index];
             }
         }
     /* else linear array passed as argument to calculation, a0, a1, ... */
@@ -880,9 +880,9 @@ static stackvalue* getArrayIndex(stackvalue* sp, forthword* wordp)
     i = (size_t)((sp--)->val).floating;
     if(arrp->stride != 0)
         {
-        for(size_t range_index = arrp->rank - rank; range_index < rank - 1; ++range_index)
+        for(size_t extent_index = arrp->rank - rank; extent_index < rank - 1; ++extent_index)
             {
-            i += (size_t)((sp--)->val).floating * arrp->stride[range_index];
+            i += (size_t)((sp--)->val).floating * arrp->stride[extent_index];
             }
         }
     /* else linear array passed as argument to calculation, a0, a1, ... */
@@ -895,12 +895,12 @@ static stackvalue* getArrayIndex(stackvalue* sp, forthword* wordp)
     return sp;
     }
 
-static stackvalue* getArrayRange(stackvalue* sp)
+static stackvalue* getArrayExtent(stackvalue* sp)
     {
     fortharray* arrp = (sp - 1)->arrp;
     size_t rank = arrp->rank;
     LONG arg = (LONG)sp->val.floating;
-    (--sp)->val.floating = (double)((0 <= arg && arg < (LONG)rank) ? (arrp->range[rank - arg - 1]) : 0);
+    (--sp)->val.floating = (double)((0 <= arg && arg < (LONG)rank) ? (arrp->extent[rank - arg - 1]) : 0);
     return sp;
     }
 
@@ -928,35 +928,35 @@ static stackvalue* doTbl(stackvalue* sp, forthword* wordp, fortharray** parr)
     size_t rank = arr->rank;
     size_t size = 1;
 
-    size_t* range = arr->range;
-    if(range == 0)
+    size_t* extent = arr->extent;
+    if(extent == 0)
         {
-        range = (size_t*)bmalloc(2 * rank * sizeof(size_t));/* twice: both ranges and strides */
-        arr->range = range;
+        extent = (size_t*)bmalloc(2 * rank * sizeof(size_t));/* twice: both extents and strides */
+        arr->extent = extent;
         }
-    if(range != 0)
+    if(extent != 0)
         {
-        arr->stride = range + rank;
+        arr->stride = extent + rank;
         for(size_t j = 0; j < rank; ++j)
             {
-            if(range[j] == 0)
-                range[j] = (size_t)(sp->val).floating; /* range[0] = range of last index*/
-            else if(range[j] != (size_t)(sp->val).floating)
+            if(extent[j] == 0)
+                extent[j] = (size_t)(sp->val).floating; /* extent[0] = extent of last index*/
+            else if(extent[j] != (size_t)(sp->val).floating)
                 {
-                fprintf(stderr, "tbl: attempting to change fixed range from %zu to %zu.\n", range[j], (size_t)(sp->val).floating);
+                fprintf(stderr, "tbl: attempting to change fixed extent from %zu to %zu.\n", extent[j], (size_t)(sp->val).floating);
                 --sp;
                 --sp;
                 return 0;
                 }
             --sp;
-            size *= range[j];
+            size *= extent[j];
             }
 
-        arr->stride[0] = arr->range[0];
-        for(size_t range_index = 1; range_index < rank;)
+        arr->stride[0] = arr->extent[0];
+        for(size_t extent_index = 1; extent_index < rank;)
             {
-            arr->stride[range_index] = arr->stride[range_index - 1] * arr->range[range_index];
-            ++range_index;
+            arr->stride[extent_index] = arr->stride[extent_index - 1] * arr->extent[extent_index];
+            ++extent_index;
             }
 
         arr = sp->arrp;
@@ -969,7 +969,7 @@ static stackvalue* doTbl(stackvalue* sp, forthword* wordp, fortharray** parr)
             memset(arr->pval, 0, size * sizeof(forthvalue));
             }
         arr->rank = rank;
-        //                    arr->range = range;
+        //                    arr->extent = extent;
 
         }
     return sp;
@@ -1241,9 +1241,9 @@ static stackvalue* calculateBody(forthMemory* mem)
                 ++wordp;
                 break;
                 }
-            case Range:
+            case Extent:
                 {
-                sp = getArrayRange(sp);
+                sp = getArrayExtent(sp);
                 ++wordp;
                 break;
                 }
@@ -1697,11 +1697,11 @@ static stackvalue* trcBody(forthMemory* mem)
                 ++wordp;
                 break;
                 }
-            case Range:
+            case Extent:
                 {
-                printf("Range       ");
+                printf("Extent      ");
                 assert(sp >= mem->stack);
-                sp = getArrayRange(sp);
+                sp = getArrayExtent(sp);
                 ++wordp;
                 break;
                 }
@@ -1825,16 +1825,16 @@ static Boolean StaticArray(psk declaration)
     {
     if(is_op(declaration))
         {
-        for(psk ranges = declaration->RIGHT;; ranges = ranges->RIGHT)
+        for(psk extents = declaration->RIGHT;; extents = extents->RIGHT)
             {
-            if(is_op(ranges))
+            if(is_op(extents))
                 {
-                if(!INTEGER_POS(ranges->LEFT))
+                if(!INTEGER_POS(extents->LEFT))
                     return FALSE;
                 }
             else
                 {
-                if(INTEGER_POS(ranges))
+                if(INTEGER_POS(extents))
                     return TRUE;
                 else
                     return FALSE;
@@ -2124,7 +2124,7 @@ static Boolean printmem(forthMemory* mem)
             case Idx:  printf(INDNT); printf(LONGnD      " Pop idx\n", 5, wordp - mem->word); --In; break;
             case QIdx:  printf(INDNT); printf(LONGnD     " PopPop Qidx\n", 5, wordp - mem->word); --In; --In; break;
             case EIdx:  printf(INDNT); printf(LONGnD     " Pop Eidx\n", 5, wordp - mem->word); --In; break;
-            case Range: printf(INDNT); printf(LONGnD     " Pop range\n", 5, wordp - mem->word); --In; break;
+            case Extent: printf(INDNT); printf(LONGnD     " Pop extent\n", 5, wordp - mem->word); --In; break;
             case Rank: printf(INDNT); printf(LONGnD      " Pop rank\n", 5, wordp - mem->word); --In; break;
             case NoOp:
                 naam = "";// getLogiName(wordp->u.logic);
@@ -2281,7 +2281,7 @@ static psk FractionNode(double val)
     return res;
     }
 
-static psk eksportArray(forthvalue* val, size_t rank, size_t* range)
+static psk eksportArray(forthvalue* val, size_t rank, size_t* extent)
     {
     psk res;
     psk head = createOperatorNode(COMMA);
@@ -2291,18 +2291,18 @@ static psk eksportArray(forthvalue* val, size_t rank, size_t* range)
         { /* Go deeper */
         size_t stride = 1;
         for(size_t k = 0; k < rank - 1; ++k)
-            stride *= range[k];
-        for(size_t r = range[rank - 1]; --r > 0; val += stride)
+            stride *= extent[k];
+        for(size_t r = extent[rank - 1]; --r > 0; val += stride)
             {
             head->RIGHT = createOperatorNode(WHITE);
             head = head->RIGHT;
-            head->LEFT = eksportArray(val, rank - 1, range);
+            head->LEFT = eksportArray(val, rank - 1, extent);
             }
-        head->RIGHT = eksportArray(val, rank - 1, range);
+        head->RIGHT = eksportArray(val, rank - 1, extent);
         }
     else
         { /* Export list of values. */
-        for(size_t r = *range; --r > 0; ++val)
+        for(size_t r = *extent; --r > 0; ++val)
             {
             head->RIGHT = createOperatorNode(WHITE);
             head = head->RIGHT;
@@ -2370,7 +2370,7 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                     if(a)
                         {
                         psk res = 0;
-                        res = eksportArray(a->pval, a->rank, a->range);
+                        res = eksportArray(a->pval, a->rank, a->extent);
                         if(res)
                             {
                             wipe(*arg);
@@ -3338,7 +3338,7 @@ static Boolean setArity(forthword* wordp, psk code, unsigned int expectedArity)
 static fortharray* haveArray(forthMemory* forthstuff, psk declaration, Boolean in_function)
     {
     psk pname = 0;
-    psk ranges = 0;
+    psk extents = 0;
     //printf("haveArray:"); result(declaration); printf("\n");
     if(is_op(declaration))
         {
@@ -3348,11 +3348,11 @@ static fortharray* haveArray(forthMemory* forthstuff, psk declaration, Boolean i
             return 0;
             }
         pname = declaration->LEFT;
-        ranges = declaration->RIGHT;
+        extents = declaration->RIGHT;
 
         if(in_function)
             {
-            fprintf(stderr, "In functions, array parameter (here: [%s]) declarations do not take range specs.\n", &(pname->u.sobj));
+            fprintf(stderr, "In functions, array parameter (here: [%s]) declarations do not take extent specs.\n", &(pname->u.sobj));
             }
         }
     else
@@ -3367,24 +3367,24 @@ static fortharray* haveArray(forthMemory* forthstuff, psk declaration, Boolean i
         }
 
     fortharray* a = getOrCreateArrayPointer(&(forthstuff->arr), &(pname->u.sobj), 0);
-    if(!in_function && a && ranges)
+    if(!in_function && a && extents)
         {
         size_t rank = 1;
         psk kn;
-        for(kn = ranges; is_op(kn); kn = kn->RIGHT)
+        for(kn = extents; is_op(kn); kn = kn->RIGHT)
             {
             ++rank;
             }
 
         a->rank = rank;
-        assert(a->range == 0);
-        a->range = (size_t*)bmalloc(2 * rank * sizeof(size_t));/* twice: both ranges and strides */
-        if(a->range)
+        assert(a->extent == 0);
+        a->extent = (size_t*)bmalloc(2 * rank * sizeof(size_t));/* twice: both extents and strides */
+        if(a->extent)
             {
-            a->stride = a->range + rank;
-            size_t* prange;
+            a->stride = a->extent + rank;
+            size_t* pextent;
             size_t totsize = 1;
-            for(kn = ranges, prange = a->range + rank - 1;; )
+            for(kn = extents, pextent = a->extent + rank - 1;; )
                 {
                 psk H;
 
@@ -3394,34 +3394,34 @@ static fortharray* haveArray(forthMemory* forthstuff, psk declaration, Boolean i
                     H = kn;
 
                 if(INTEGER_POS(H))
-                    *prange = strtol(&(H->u.sobj), 0, 10);
+                    *pextent = strtol(&(H->u.sobj), 0, 10);
                 else if((H->v.fl & VISIBLE_FLAGS) == INDIRECT)
-                    *prange = 0; /* range still unknown. */
+                    *pextent = 0; /* extent still unknown. */
                 else
                     {
-                    fprintf(stderr, "Range specification of array \"%s\" invalid. It must be a positive number or a variable name prefixed with '!'\n", a->name);
+                    fprintf(stderr, "Extent specification of array \"%s\" invalid. It must be a positive number or a variable name prefixed with '!'\n", a->name);
                     return 0;
                     }
 
-                totsize *= *prange;
+                totsize *= *pextent;
                 if(!is_op(kn))
                     break;
                 kn = kn->RIGHT;
-                --prange;
+                --pextent;
                 }
-            a->stride[0] = a->range[0];
-            for(size_t range_index = 1; range_index < rank;)
+            a->stride[0] = a->extent[0];
+            for(size_t extent_index = 1; extent_index < rank;)
                 {
-                a->stride[range_index] = a->stride[range_index - 1] * a->range[range_index];
-                ++range_index;
+                a->stride[extent_index] = a->stride[extent_index - 1] * a->extent[extent_index];
+                ++extent_index;
                 }
 
             if(totsize > 0)
                 {
                 if(!initialise(a, totsize))
                     {
-                    bfree(a->range);
-                    a->range = 0;
+                    bfree(a->extent);
+                    a->extent = 0;
                     a->stride = 0;
                     return 0;
                     }
@@ -3894,7 +3894,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                     }
                 else
                     {
-                    fprintf(stderr, "Right hand side of \"tbl$\" must be at least two arguments: an array name and one or more ranges.\n");
+                    fprintf(stderr, "Right hand side of \"tbl$\" must be at least two arguments: an array name and one or more extents.\n");
                     return 0;
                     }
                 }
@@ -3916,7 +3916,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                     size_t rank = arr->rank;
                     if(rank == 0)
                         {
-                        //                                    fprintf(stderr, "idx: Array \"%s\" has unknown rank and range(s). Assuming %zu, based on idx.\n", arrname, h);
+                        //                                    fprintf(stderr, "idx: Array \"%s\" has unknown rank and extent(s). Assuming %zu, based on idx.\n", arrname, h);
                         rank = arr->rank = h;
                         //                                    return 0;
                         }
@@ -3925,14 +3925,14 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                         fprintf(stderr, "idx: Array \"%s\" expects %zu arguments. %zu have been found\n", arr->name, rank, h);
                         return 0;
                         }
-                    if(arr->range != 0)
+                    if(arr->extent != 0)
                         {
-                        size_t* rng = arr->range + rank;
+                        size_t* rng = arr->extent + rank;
                         for(R = rhs->RIGHT; ; R = R->RIGHT)
                             {
                             psk Arg;
                             --rng;
-                            if(*rng != 0) /* If 0, range is still unknown. Has to wait until running.  */
+                            if(*rng != 0) /* If 0, extent is still unknown. Has to wait until running.  */
                                 {
                                 if(is_op(R))
                                     Arg = R->LEFT;
@@ -3943,7 +3943,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                                     long index = strtol(&(Arg->u.sobj), 0, 10);
                                     if(index < 0 || index >= (long)(*rng))
                                         {
-                                        fprintf(stderr, "idx: Array \"%s\": index %zu is out of bounds 0 <= index < %zu, found %ld\n", arr->name, rank - (rng - arr->range), *rng, index);
+                                        fprintf(stderr, "idx: Array \"%s\": index %zu is out of bounds 0 <= index < %zu, found %ld\n", arr->name, rank - (rng - arr->extent), *rng, index);
                                         return 0;
                                         }
                                     }
@@ -3955,7 +3955,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                     }
                 else
                     {
-                    fprintf(stderr, "Right hand side of \"idx$\" must be at least two arguments: an array name and one or more ranges.\n");
+                    fprintf(stderr, "Right hand side of \"idx$\" must be at least two arguments: an array name and one or more extents.\n");
                     return 0;
                     }
                 }
@@ -3964,15 +3964,15 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                 fortharray* arr = namedArray("rank", mem, rhs);
                 if(arr == 0)
                     {
-                    fprintf(stderr, "\"range\" takes one argument: the name of an array.\n");
+                    fprintf(stderr, "\"extent\" takes one argument: the name of an array.\n");
                     return 0;
                     }
                 }
-            else if(!strcmp(name, "range"))
+            else if(!strcmp(name, "extent"))
                 {
-                if(!is_op(rhs) || namedArray("range", mem, rhs->LEFT) == 0 || argcount(rhs->RIGHT) != 1)
+                if(!is_op(rhs) || namedArray("extent", mem, rhs->LEFT) == 0 || argcount(rhs->RIGHT) != 1)
                     {
-                    fprintf(stderr, "\"range\" takes two arguments: the name of an array and the range index.\n");
+                    fprintf(stderr, "\"extent\" takes two arguments: the name of an array and the extent index.\n");
                     showProblematicNode("Here", rhs);
                     return 0;
                     }
@@ -4266,7 +4266,7 @@ static Boolean setparm(size_t Ndecl, forthMemory* forthstuff, psk declaration, B
         {
         if(is_op(declaration->RIGHT))
             {
-            fprintf(stderr, "Scalar parameter declaration doesn't take range.\n");
+            fprintf(stderr, "Scalar parameter declaration doesn't take extent.\n");
             return FALSE;
             }
         forthvariable* var = getVariablePointer(forthstuff->var, &(declaration->RIGHT->u.sobj));
@@ -4330,7 +4330,7 @@ static Boolean functiondie(forthMemory* mem)
         fortharray* nextarrp = curarr->next;
         if(curarr->name)
             {
-            /* range and pval are not allocated when function is called.
+            /* extent and pval are not allocated when function is called.
                Instead, pointers are set to caller's pointers. */
             parameter* pars = 0;
             for(pars = parameters; pars < parameters + mem->nparameters; ++pars)
@@ -4350,10 +4350,10 @@ static Boolean functiondie(forthMemory* mem)
                      So this array is not a function parameter.
                      So the function owns the data and should delete them.
                   */
-                if(curarr->range)
+                if(curarr->extent)
                     {
-                    bfree(curarr->range);
-                    curarr->range = 0;
+                    bfree(curarr->extent);
+                    curarr->extent = 0;
                     curarr->stride = 0;
                     }
                 if(curarr->pval)
@@ -4519,7 +4519,7 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
                 if(lastword != 0)
                     {
                     unsigned int theend = (unsigned int)(lastword - forthstuff->word);
-                    if(theend + 1 == length)
+                    if(theend + 1 == (unsigned int)length)
                         {
                         j5->j[epopS].offset = theend;
                         j5->j[epopS].action = Branch; /* Leave last value on the stack. (If there is one.) */
@@ -4632,10 +4632,10 @@ static Boolean calcdie(forthMemory* mem)
             fortharray* nextarrp = curarr->next;
             bfree(curarr->name);
             curarr->name = 0;
-            if(curarr->range)
+            if(curarr->extent)
                 {
-                bfree(curarr->range);
-                curarr->range = 0;
+                bfree(curarr->extent);
+                curarr->extent = 0;
                 curarr->stride = 0;
                 }
             if(curarr->pval)
