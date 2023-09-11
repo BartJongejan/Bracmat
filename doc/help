@@ -2006,7 +2006,7 @@ and user defined functions.
 5 Constants
     There are two ways to write constant values into UFP source code.
 6 Arrays
-    Declaring rank and ranges of arrays, indexing and accessing arrays.
+    Declaring rank and extents of arrays, indexing and accessing arrays.
 7 Iterations
     How to escape a loop.
 "
@@ -2064,13 +2064,13 @@ Bracmat has no operator for division!)
 |_outln$<number>_| writes a number, followed by a new line to the console.
 
 |_tbl$(<name>,<whole number>, ...)_| creates an array with the first argument
-as name. Each whole number adds a (sub)range. The number of whole numbers
+as name. Each whole number adds an extent. The number of whole numbers
 defines the rank of the array. The array is destroyed when the UFP object is
 destroyed or when another array by the same name is created.
 
 |_rank$<name>_| returns the rank of the array named <name>.
 
-|_range$(<name>,<whole number>)_| returns a range of the array named <name>.
+|_extent$(<name>,<whole number>)_| returns an extent of the array named <name>.
 The number must be non-negative and smaller than the rank of the array.
 
 |_idx$(<name>,<whole number>, ...)_| Sets the pointer of array <name> to the
@@ -2089,14 +2089,14 @@ recognized by the C |_strtod()_| function.
 
 In the source code of the UFP, each parameter must be explicitly and completely
 declared. Single values (scalars) are declared as |_(s.<parameterName>)_|,
-while arrays must be declared as |_(a.<parameterName>.<range>)_| (1-dimensional
+while arrays must be declared as |_(a.<parameterName>.<extent>)_| (1-dimensional
 arrays) or
 
-|_(a.<parameterName>.<range>.<range>. ...)_| (multidimensional arrays).
+|_(a.<parameterName>.<extent>.<extent>. ...)_| (multidimensional arrays).
 
 In the UFP source code the same rules apply on the calling side, but in user
 defined functions declarations are slightly simpler: you cannot specify the
-ranges on arrays. (These are inferred during compilation.) So scalars are
+extents on arrays. (These are inferred during compilation.) So scalars are
 declared as |_(s.<parameterName>)_|, while arrays must be declared as
 |_(a.<parameterName>)_|.
 
@@ -2130,8 +2130,8 @@ expressions, similar to how one uses |_#define_| in C."
       , "UFP arrays"
       , "Arrays are allocated by the built-in |_tbl$_| function. This function takes a
 number of parameters. The first parameter is the name of the array. The next
-parameter is the range of the array. Each following parameter adds another
-range and increments the rank by one. To create an array for the coordinates of
+parameter is the extent of the array. Each following parameter adds another
+extent and increments the rank by one. To create an array for the coordinates of
 all nine planets of the solar system, one would as follows:
 
 {?} ( 8:?nrOfPlanets
@@ -2149,7 +2149,7 @@ all nine planets of the solar system, one would as follows:
                 & 0:?index
                 &   whl
                   ' ( !index:<!nrOfIndices
-                    &   range$(planets,!index)
+                    &   extent$(planets,!index)
                       : ?(idx$(dynamic,!index))
                     & 1+!index:?index
                     )
@@ -2177,7 +2177,7 @@ signature as the |_tbl_| function. The first parameter is the name of the array
 while the following parameters are index values, one for each array dimension.
 
 For each dimension, the lowest index value is |_0_| and the highest value is
-the the value of the range of that dimension, minus one.
+the the value of the extent of that dimension, minus one.
 
 Each array has a position variable. The position variable is set by the |_idx_|
 function and keeps its value until it is changed by another call to |_idx_|.
@@ -2200,7 +2200,7 @@ To copy a value from one element to another, one can write
     !(idx$(planets,8,5)):?(idx$(planets,1,6))
 
 Arrays are allocated as a contiguous C array of |_double_|. The size of this
-array is the product of all the ranges with which the array is created. The
+array is the product of all the extents with which the array is created. The
 position variable is just an index pointing into this C array."
     )
   & ( CaltItertxt
@@ -4449,7 +4449,7 @@ output string. Main use : pasting of two or more atoms.
   & ( switxt
     =   T
       , "swi$(<interrupt-number>.<input-value>,[<input-value>,...])"
-      ,   "This function is the most operating-system-dependent function in Bracmat.
+      , "This function is the most operating-system-dependent function in Bracmat.
 It was implemented for RISC-OS (Archimedes) and 16-bit MS-DOS versions.
 All arguments must be integer values. The list of input values (registers
 r0 and upwards) need not be complete. Missing values are assumed to be zero.
@@ -7353,7 +7353,9 @@ G\\'{e}rard Milmeister is the creator of the initial \\LaTeX version of this doc
       |   htmltable
         & out$"HTML with excercises in tables"
         & doHTML$("bracmat.html".convertBlockQuoteToTable)
-      | latex&out$TeX&doTEX$("bracmat.html"."bracmat.tex")
+      |   latex
+        & out$TeX
+        & doTEX$("bracmat.html"."bracmat.tex")
       |   htmllatex
         & out$"1:HTML"
         & doHTML$("bracmat.html".)

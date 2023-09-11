@@ -507,9 +507,9 @@ recursive pattern to find out whether two continents are connected over land.</p
         )
         ?
     );    { pattern using second order logic }</pre></blockquote>
-<blockquote><pre>   Europe is reachable from Africa
-   Europe is reachable from Asia
-   Africa is reachable from Asia
+<blockquote><pre>   Europe is reachable from Africa
+   Europe is reachable from Asia
+   Africa is reachable from Asia
    North America is reachable from South America</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#patternm" style="line-height:12pt">Pattern matching</a></p>
 <h3><a name="pattxttxt">Pattern matching in strings</a></h3>
@@ -628,9 +628,9 @@ of the match might fail, resulting in backtracking and retry.</p>
 <blockquote><pre>   !s:(!pa:!pb)</pre></blockquote>
 <p>If pattern<code> !pa </code>matches with<code> !s, </code>then pattern<code> !pb </code>is also tried.</p>
 <p>The next example combines these operators in a grammar-like expression:</p>
-<blockquote><pre>!s:( !pa         &amp; !A    { If either !pa, or !pb or both of !pc1 and !pc2 }
-   | !pb         &amp; !B    { fire, actions !A, !B and !C, respectively are  }
-   | (!pc1:!pc2) &amp; !C    { triggered.                                     }
+<blockquote><pre>!s:( !pa         &amp; !A    { If either !pa, or !pb or both of !pc1 and !pc2 }
+   | !pb         &amp; !B    { fire, actions !A, !B and !C, respectively are  }
+   | (!pc1:!pc2) &amp; !C    { triggered.                                     }
    )</pre></blockquote>
 <p>Notice the grouping of the <code>:</code>, <code>&amp;</code> and <code>|</code> operators<code> :</code></p>
 <p><code>(!s:!pa):!pb</code> and <code>!s:(!pa:!pb)</code> have, incidentally, the same effect, but the
@@ -693,10 +693,10 @@ operators <code>.</code>, <code>,</code>, whitespace, <code>+</code>, <code>*</c
 <h2><a name="syntax">The grammar of Bracmat</a></h2>
 <p>Note: in long lists the vertical bar<code> | </code>is left out.</p>
 <blockquote><pre>&lt;input&gt;           ::= [&lt;expression&gt;] [;&lt;input&gt;]
-&lt;expression&gt;      ::=   &lt;whitespace&gt; &lt;expression&gt; &lt;whitespace&gt;
-                     | [&lt;prefixes&gt;] ( &lt;expression&gt; )
-                     | &lt;leaf&gt;
-                     | &lt;expression&gt; &lt;binop&gt; &lt;expression&gt;
+&lt;expression&gt;      ::=   &lt;whitespace&gt; &lt;expression&gt; &lt;whitespace&gt;
+                     | [&lt;prefixes&gt;] ( &lt;expression&gt; )
+                     | &lt;leaf&gt;
+                     | &lt;expression&gt; &lt;binop&gt; &lt;expression&gt;
 &lt;leaf&gt;            ::= [&lt;prefixes&gt;] &lt;atom-or-nil&gt;
 &lt;atom-or-nil&gt;     ::= &lt;atom&gt; | &lt;nil&gt;
 &lt;atom&gt;            ::= "&lt;string&gt;" | &lt;string&gt;
@@ -1153,9 +1153,9 @@ matches are forgotten<code> : </code>the <code>_</code> operator is a global var
 <p>Here are the nearest equivalents of some traditional control structures.</p>
 <p>Sequence:</p>
 <p>a; b;</p>
-<blockquote><pre>   `!a&amp;!b
-   !a !b
-   !a,!b
+<blockquote><pre>   `!a&amp;!b
+   !a !b
+   !a,!b
    !a.!b</pre></blockquote>
 <p>Repetition:</p>
 <dl><dt>WHILE a DO b;</dt><dd><code>whl'(!a&amp;`!b)</code></dd><dt>DO b WHILE a;</dt><dd><code>whl'(`!b&amp;!a)</code></dd><dt>DO b UNTIL a;</dt><dd><code>whl'(`!b&amp;~!a)</code></dd><dt>FOR i<code> := </code>m TO n DO b;</dt><dd><code>!m+-1:?i&amp;whl'(1+!i:~&gt;!n:?i&amp;`!b);</code></dd></dl>
@@ -1282,10 +1282,10 @@ age by operating on the variable <code>alias</code><code>:</code></p>
 <p>To see that the above expression indeed has the wanted (side-)effect, we can
 inspect <code>John</code><code>:</code></p>
 <blockquote><pre class="exinput">{?} lst$John</pre></blockquote>
-<blockquote><pre>(John=
-  (length=180)
-, (age=31)
-, (name=(first=John) (family=Bull))
+<blockquote><pre>(John=
+  (length=180)
+, (age=31)
+, (name=(first=John) (family=Bull))
 );</pre></blockquote>
 <p>Alternatively, we can also just show the field <code>age</code> in <code>John</code><code>:</code></p>
 <blockquote><pre class="exinput">{?} !(John.age)</pre><pre class="exoutput">{!} 31</pre></blockquote>
@@ -1295,9 +1295,9 @@ example, we could create an alias for the name member:</p>
 <p>Now assign a new family name:</p>
 <blockquote><pre class="exinput">{?} Flinter:?(nm.family)
 {?} lst$John</pre></blockquote>
-<blockquote><pre>(John=
-  (length=180)
-, (age=30)
+<blockquote><pre>(John=
+  (length=180)
+, (age=30)
 , (name=(first=John) (family=Flinter)));</pre></blockquote>
 <p>Using an alias for a subobject can save some code and processing time if the
 subobject is accessed many times. Without the alias for John's name, we can
@@ -1311,7 +1311,7 @@ value of <code>b</code><code>:</code></p>
 <p>To retrieve the whole subobject:</p>
 <blockquote><pre class="exinput">{?} '$(x.):(=?subobject)
 {?} lst$subobject</pre></blockquote>
-<blockquote><pre>(subobject=
+<blockquote><pre>(subobject=
 (a=1) (b=2));</pre></blockquote>
 <p>An alias can also be created for part of an object:</p>
 <blockquote><pre class="exinput">{?} x=(a=) (b=) (c=) (d=)
@@ -1418,9 +1418,9 @@ printed to the screen.</p>
         ?                           { ---skip rest of rows }
     )</pre></blockquote>
 <p>This prints</p>
-<blockquote><pre>   3 is both odd and prime
-   5 is both odd and prime
-   7 is both odd and prime
+<blockquote><pre>   3 is both odd and prime
+   5 is both odd and prime
+   7 is both odd and prime
    2 is both even and prime</pre></blockquote>
 <p>and finally fails when backtracking (induced by the <code>~</code>) has found all answers
 to the query.</p>
@@ -1751,10 +1751,10 @@ relevant operator or prefixes. If the change of evaluator only applies to the
 left (right) operand of the cross link operator, the symbol `l' (`r') is used.
 If the transition depends on the left operand being <i>nil</i>, the symbol `n' is
 used.</p>
-<blockquote><pre>            expression     match          macro          archivist
-expression                 :r             n'r            =r 'r
-match       &amp;r $ 'l ?! !!                 n'r            =r 'r
-macro       $r
+<blockquote><pre>            expression     match          macro          archivist
+expression                 :r             n'r            =r 'r
+match       &amp;r $ 'l ?! !!                 n'r            =r 'r
+macro       $r
 archivist</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a></p>
 <h2><a name="progsmenu">Programming advice</a></h2>
@@ -1783,47 +1783,47 @@ same debugging protocol applies as with other programming languages<code> :</cod
 <h3><a name="debugtxt2">Using<code> out$ </code>as debugging aid</a></h3>
 <p>The best aid in finding out what a program does, is using the<code> out$ </code>function.
 The following code is part of a function that computes n!<code> .</code></p>
-<blockquote><pre>(loop = !k+1 : ?k          { increment k }
-             : &lt;!n         { compare (old) k+1 with n; if not less, stop }
-      &amp; !fac*!k : ?fac     { multiply fac with k }
+<blockquote><pre>(loop = !k+1 : ?k          { increment k }
+             : &lt;!n         { compare (old) k+1 with n; if not less, stop }
+      &amp; !fac*!k : ?fac     { multiply fac with k }
       &amp; !loop)             { repeat until k = n }</pre></blockquote>
 <p>Outside patterns<code> out$ </code>is most easily used. Inside patterns, if you want to
 inspect a variable that has just been assigned a new value, you use the<code> &amp;</code>
 operator to temporarily escape into the non-pattern world. If you want to add
 extra text to the output, remember that the atgument to<code> out$ </code>is returned.</p>
-<blockquote><pre>(loop = out$!k+1 : (?k &amp; out$(k is !k)) {show k before and after
-                                         increment}
-                 : &lt;!n                  {but before comparison with n}
-      &amp; out$("new fac is:" (!fac*!k:?fac)) {show fac after computation}
-      &amp; out$(still need !n+-1*!k loops) {you don't always need quotation
-                                         marks}
+<blockquote><pre>(loop = out$!k+1 : (?k &amp; out$(k is !k)) {show k before and after
+                                         increment}
+                 : &lt;!n                  {but before comparison with n}
+      &amp; out$("new fac is:" (!fac*!k:?fac)) {show fac after computation}
+      &amp; out$(still need !n+-1*!k loops) {you don't always need quotation
+                                         marks}
       &amp; !loop)</pre></blockquote>
 <p>Now an example that is faulty. The purpose is to find two equal words in a
 sentence with a non-linear pattern.
 This expression succeeds, but finds nothing:</p>
-<blockquote><pre>   (   De kok snijdt recht en de meid snijdt scheef
-     : (? ?a ? !a ?)
-   &amp; out$(!a is occurring twice)
+<blockquote><pre>   (   De kok snijdt recht en de meid snijdt scheef
+     : (? ?a ? !a ?)
+   &amp; out$(!a is occurring twice)
    )</pre></blockquote>
 <p>Check what is unified with <code>? ?a</code>. To do so, put a variable after the first
 <code>?</code> and insert an output action after each subpattern.</p>
-<blockquote><pre>   (   De kok snijdt recht en de meid snijdt scheef
-     : ( (?x &amp; out$(x is !x))    {output x after unification}
-         (?a &amp; out$(a is !a))    {output a after unification}
-         ? !a ?                  {the remainder of the pattern}
-       )
-   &amp; out$(!a is occurring twice)
+<blockquote><pre>   (   De kok snijdt recht en de meid snijdt scheef
+     : ( (?x &amp; out$(x is !x))    {output x after unification}
+         (?a &amp; out$(a is !a))    {output a after unification}
+         ? !a ?                  {the remainder of the pattern}
+       )
+   &amp; out$(!a is occurring twice)
    )</pre></blockquote>
 <p>The program would have to backtrack several times until<code> ?a </code>was unified with
 <code>snijdt</code>, but the match succeeds with<code> ?a </code>unified with the omnipresent zero
 length word. A<code> % </code>sign avoids this. A back quote <code>`</code> helps speeding up, since it
 avoids multi-word assignments and forces immediate backtracking.</p>
-<blockquote><pre>   (   De kok snijdt recht en de meid snijdt scheef
-     : ( (?x &amp; out$(x is !x))    { Watch the number of words in ?x grow }
-         (%`?a &amp; out$(a is !a))  { while ?a moves towards "snijdt". }
-         ? !a ?                  { There, backtracking stops }
-       )
-   &amp; out$(!a is occurring twice) { and the message is output. }
+<blockquote><pre>   (   De kok snijdt recht en de meid snijdt scheef
+     : ( (?x &amp; out$(x is !x))    { Watch the number of words in ?x grow }
+         (%`?a &amp; out$(a is !a))  { while ?a moves towards "snijdt". }
+         ? !a ?                  { There, backtracking stops }
+       )
+   &amp; out$(!a is occurring twice) { and the message is output. }
    )</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#progsmenu" style="line-height:12pt">Programming advice</a></p>
 <p><span class="arrow">&#8657;</span><a href="#predefmenu" style="line-height:12pt">Predefined functions</a></p>
@@ -1953,10 +1953,10 @@ evaluated from left to right, unless arguments are consumed by calls to<code> ar
 For example,</p>
 <blockquote><pre>   bracmat get$myprog -i c:\documents\input.txt -o d:\html\index.html</pre></blockquote>
 <p>would evaluate</p>
-<blockquote><pre>   get$myprog
-   -i
-   c:\documents\input.txt
-   -o
+<blockquote><pre>   get$myprog
+   -i
+   c:\documents\input.txt
+   -o
    d:\html\index.html</pre></blockquote>
 <p>in that order. Evaluating the last four arguments is not very meaningful,
 however: the backslashes are interpreted as escapes, which they are not.
@@ -1974,31 +1974,31 @@ quotes.</p>
 command name <code>bracmat</code> or a path leading to `bracmat'. Here is a simple
 program <code>myprog</code> that demonstrates the two ways of calling the <code>arg$</code> function</p>
 <blockquote><pre>   { myprog }</pre></blockquote>
-<blockquote><pre>   (test=
-     0:?N
-   &amp;   whl
-     ' ( arg$:?argument
-       &amp; out$(The next argument is !argument)
-       )
-   &amp;   whl
-     ' ( arg$!N:?argument
-       &amp; out$(Argument !N is !argument)
-       &amp; 1+!N:?N
-       )
+<blockquote><pre>   (test=
+     0:?N
+   &amp;   whl
+     ' ( arg$:?argument
+       &amp; out$(The next argument is !argument)
+       )
+   &amp;   whl
+     ' ( arg$!N:?argument
+       &amp; out$(Argument !N is !argument)
+       &amp; 1+!N:?N
+       )
    );</pre></blockquote>
 <blockquote><pre>   !test;</pre></blockquote>
 <p>Now running Bracmat with these arguments (example is Windows):</p>
 <blockquote><pre>   bracmat get$myprog -i c:\documents\input.txt -o d:\html\index.html</pre></blockquote>
 <p>results in the following output being written to the terminal:</p>
-<blockquote><pre>   The next argument is -i
-   The next argument is c:documentsinput.txt
-   The next argument is -o
-   The next argument is d:htmlindex.html
-   Argument 0 is bin\bracmat
-   Argument 1 is get$myprog
-   Argument 2 is -i
-   Argument 3 is c:documentsinput.txt
-   Argument 4 is -o
+<blockquote><pre>   The next argument is -i
+   The next argument is c:documentsinput.txt
+   The next argument is -o
+   The next argument is d:htmlindex.html
+   Argument 0 is bin\bracmat
+   Argument 1 is get$myprog
+   Argument 2 is -i
+   Argument 3 is c:documentsinput.txt
+   Argument 4 is -o
    Argument 5 is d:htmlindex.html</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
 <h4><a name="asctxt"><code>asc$<i>character</i></code></a></h4>
@@ -2597,50 +2597,50 @@ local variables onto and from a stack.</p>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
 <h4><a name="ugctxt"><code>ugc$(<i>atom-or-nil</i>)</code></a></h4>
 <p><code>ugc$ </code>determines the Unicode General Category of a character.</p>
-<blockquote><pre>Lu   Uppercase_Letter        an uppercase letter
-Ll   Lowercase_Letter        a lowercase letter
-Lt   Titlecase_Letter        a digraphic character, with first part
-                             uppercase
-LC   Cased_Letter            Lu | Ll | Lt
-Lm   Modifier_Letter         a modifier letter
-Lo   Other_Letter            other letters, including syllables and
-                             ideographs
-L    Letter                  Lu | Ll | Lt | Lm | Lo
-Mn   Nonspacing_Mark         a nonspacing combining mark (zero
-                             advance width)
-Mc   Spacing_Mark            a spacing combining mark (positive
-                             advance width)
-Me   Enclosing_Mark          an enclosing combining mark
-M    Mark                    Mn | Mc | Me
-Nd   Decimal_Number          a decimal digit
-Nl   Letter_Number           a letterlike numeric character
-No   Other_Number            a numeric character of other type
-N    Number                  Nd | Nl | No
-Pc   Connector_Punctuation   a connecting punctuation mark, like a
-                             tie
-Pd   Dash_Punctuation        a dash or hyphen punctuation mark
-Ps   Open_Punctuation        an opening punctuation mark (of a pair)
-Pe   Close_Punctuation       a closing punctuation mark (of a pair)
-Pi   Initial_Punctuation     an initial quotation mark
-Pf   Final_Punctuation       a final quotation mark
-Po   Other_Punctuation       a punctuation mark of other type
-P    Punctuation             Pc | Pd | Ps | Pe | Pi | Pf | Po
-Sm   Math_Symbol             a symbol of mathematical use
-Sc   Currency_Symbol         a currency sign
-Sk   Modifier_Symbol         a non-letterlike modifier symbol
-So   Other_Symbol            a symbol of other type
-S    Symbol                  Sm | Sc | Sk | So
-Zs   Space_Separator         a space character (of various non-zero
-                             widths)
-Zl   Line_Separator          U+2028 LINE SEPARATOR only
-Zp   Paragraph_Separator     U+2029 PARAGRAPH SEPARATOR only
-Z    Separator               Zs | Zl | Zp
-Cc   Control                 a C0 or C1 control code
-Cf   Format                  a format control character
-Cs   Surrogate               a surrogate code point
-Co   Private_Use             a private-use character
-Cn   Unassigned              a reserved unassigned code point or a
-                             noncharacter
+<blockquote><pre>Lu   Uppercase_Letter        an uppercase letter
+Ll   Lowercase_Letter        a lowercase letter
+Lt   Titlecase_Letter        a digraphic character, with first part
+                             uppercase
+LC   Cased_Letter            Lu | Ll | Lt
+Lm   Modifier_Letter         a modifier letter
+Lo   Other_Letter            other letters, including syllables and
+                             ideographs
+L    Letter                  Lu | Ll | Lt | Lm | Lo
+Mn   Nonspacing_Mark         a nonspacing combining mark (zero
+                             advance width)
+Mc   Spacing_Mark            a spacing combining mark (positive
+                             advance width)
+Me   Enclosing_Mark          an enclosing combining mark
+M    Mark                    Mn | Mc | Me
+Nd   Decimal_Number          a decimal digit
+Nl   Letter_Number           a letterlike numeric character
+No   Other_Number            a numeric character of other type
+N    Number                  Nd | Nl | No
+Pc   Connector_Punctuation   a connecting punctuation mark, like a
+                             tie
+Pd   Dash_Punctuation        a dash or hyphen punctuation mark
+Ps   Open_Punctuation        an opening punctuation mark (of a pair)
+Pe   Close_Punctuation       a closing punctuation mark (of a pair)
+Pi   Initial_Punctuation     an initial quotation mark
+Pf   Final_Punctuation       a final quotation mark
+Po   Other_Punctuation       a punctuation mark of other type
+P    Punctuation             Pc | Pd | Ps | Pe | Pi | Pf | Po
+Sm   Math_Symbol             a symbol of mathematical use
+Sc   Currency_Symbol         a currency sign
+Sk   Modifier_Symbol         a non-letterlike modifier symbol
+So   Other_Symbol            a symbol of other type
+S    Symbol                  Sm | Sc | Sk | So
+Zs   Space_Separator         a space character (of various non-zero
+                             widths)
+Zl   Line_Separator          U+2028 LINE SEPARATOR only
+Zp   Paragraph_Separator     U+2029 PARAGRAPH SEPARATOR only
+Z    Separator               Zs | Zl | Zp
+Cc   Control                 a C0 or C1 control code
+Cf   Format                  a format control character
+Cs   Surrogate               a surrogate code point
+Co   Private_Use             a private-use character
+Cn   Unassigned              a reserved unassigned code point or a
+                             noncharacter
 C    Other                   Cc | Cf | Cs | Co | Cn</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#inbltmenu" style="line-height:12pt">Built-in functions</a></p>
 <h4><a name="upptxt"><code>upp$(<i>atom-or-nil</i>)</code></a></h4>
@@ -2737,8 +2737,8 @@ XML, JSON, CSV. Floating point numbers can also be employed in UFP objects.</p>
 <h4><a name="jsntxt"><code>jsn$<i>expression</i></code></a></h4>
 <p><code>jsn$</code> serializes <i>expression</i> to JSON format.</p>
 <p>Suppose <code>mars.json</code> contains</p>
-<blockquote><pre>   {"planet":"Mars",
-    "moons":["Deimos","Phobos"],
+<blockquote><pre>   {"planet":"Mars",
+    "moons":["Deimos","Phobos"],
     "Eccentricity":0.0934}</pre></blockquote>
 <p>Read <code>mars.json</code> into variable <code>mars</code><code>:</code></p>
 <blockquote><pre class="exinput">{?} get$("mars.json",JSN):?mars</pre><pre class="exoutput">{!}     (Eccentricity.934/10000)
@@ -2933,25 +2933,25 @@ the object <code>myhash</code><code>:</code></p>
 the <code>myhash</code> object, namely <code>die</code> and <code>Insert</code><code>:</code></p>
 <blockquote><pre class="exinput">{?} lst$myhash</pre></blockquote>
 <blockquote><pre>   (myhash=</pre></blockquote>
-<blockquote><pre>   =   (die=.out$"Who ordered th")
-       ( Insert
-       =   K,V
-         .     !arg:(?K.?V)
-             &amp; (Its..find)$!K:(?.?v)
-             &amp;   out
-               $ ( Key
-                   !K
-                   already
-                   present
-                   with
-                   ( !V:!v&amp;same
-                   | different
-                   )
-                   value
-                   !v
-                 )
-           | (Its..insert)$!arg
-       )
+<blockquote><pre>   =   (die=.out$"Who ordered th")
+       ( Insert
+       =   K,V
+         .     !arg:(?K.?V)
+             &amp; (Its..find)$!K:(?.?v)
+             &amp;   out
+               $ ( Key
+                   !K
+                   already
+                   present
+                   with
+                   ( !V:!v&amp;same
+                   | different
+                   )
+                   value
+                   !v
+                 )
+           | (Its..insert)$!arg
+       )
    )</pre></blockquote>
 <p>And here is what happens when we delete the hash object:</p>
 <blockquote><pre class="exinput">{?} :?myhash</pre></blockquote>
@@ -3002,7 +3002,7 @@ missed and others may be processed more than once.</p>
           &amp; ~!loop
       )
     )</pre></blockquote>
-<blockquote><pre> Key=X Value=12
+<blockquote><pre> Key=X Value=12
  Key=Z Value=1</pre></blockquote>
 <p><span class="arrow">&#8657;</span><a href="#hashtxt" style="line-height:12pt">Hash tables</a></p>
 <h2><a name="calctxt">Floating point calculations</a></h2>
@@ -3040,7 +3040,7 @@ way as a user defined object.</p>
 object API, parameters, variables, constants, arrays, loops, built-in functions
 and user defined functions.
 </p>
-<dl><dt><a href="#CalcMethodtxt">Member functions of UFP objects</a></dt><dd>    Member functions are the API: they constitute the communication channels</dd><dd>    between the Bracmat code outside and the Bracmat code inside the UFP</dd><dd>    object.</dd><dt><a href="#CalcFunctxt">Built-in UFP functions</a></dt><dd>    These functions can be used in the code that runs inside a UFP object.</dd><dt><a href="#CalcParmtxt">Parameters</a></dt><dd>    How are parameters passed from outside to inside UFP objects?</dd><dd>    And how are they passed to built-in and user defined functions?</dd><dt><a href="#CalcVartxt">Variables</a></dt><dd>    When to declare variables and how.</dd><dt><a href="#CalcConsttxt">Constants</a></dt><dd>    There are two ways to write constant values into UFP source code.</dd><dt><a href="#CalcArraytxt">Arrays</a></dt><dd>    Declaring rank and ranges of arrays, indexing and accessing arrays.</dd><dt><a href="#CaltItertxt">Iterations</a></dt><dd>    How to escape a loop.</dd></dl>
+<dl><dt><a href="#CalcMethodtxt">Member functions of UFP objects</a></dt><dd>    Member functions are the API: they constitute the communication channels</dd><dd>    between the Bracmat code outside and the Bracmat code inside the UFP</dd><dd>    object.</dd><dt><a href="#CalcFunctxt">Built-in UFP functions</a></dt><dd>    These functions can be used in the code that runs inside a UFP object.</dd><dt><a href="#CalcParmtxt">Parameters</a></dt><dd>    How are parameters passed from outside to inside UFP objects?</dd><dd>    And how are they passed to built-in and user defined functions?</dd><dt><a href="#CalcVartxt">Variables</a></dt><dd>    When to declare variables and how.</dd><dt><a href="#CalcConsttxt">Constants</a></dt><dd>    There are two ways to write constant values into UFP source code.</dd><dt><a href="#CalcArraytxt">Arrays</a></dt><dd>    Declaring rank and extents of arrays, indexing and accessing arrays.</dd><dt><a href="#CaltItertxt">Iterations</a></dt><dd>    How to escape a loop.</dd></dl>
 <p><span class="arrow">&#8657;</span><a href="#lusmenu" style="line-height:12pt">                       BRACMAT                       </a></p>
 <h3><a name="CalcMethodtxt">Listing of UFP object methods</a></h3>
 <p>The following methods are defined for UFP objects:</p>
@@ -3077,8 +3077,8 @@ parameters of the UFP object can also be exported.</p>
     &amp; (calc..export)$(N,c):?c
     &amp; out$(c !c)
     )</pre></blockquote>
-<blockquote><pre>   Y 4.2000000000000000E+01
-   b 21
+<blockquote><pre>   Y 4.2000000000000000E+01
+   b 21
    c 42</pre></blockquote>
 <p>The first argument to the <code>export</code> method tells wich notation is expected in the output:</p>
 <dl><dt>N</dt><dd>An integer is expected. Only digits are allowed, the first digit not being
@@ -3104,11 +3104,11 @@ Bracmat has no operator for division!)</p>
 <p><code>out$<i>number</i></code> writes a number to the console.</p>
 <p><code>outln$<i>number</i></code> writes a number, followed by a new line to the console.</p>
 <p><code>tbl$(<i>name</i>,<i>whole number</i>, ...)</code> creates an array with the first argument
-as name. Each whole number adds a (sub)range. The number of whole numbers
+as name. Each whole number adds an extent. The number of whole numbers
 defines the rank of the array. The array is destroyed when the UFP object is
 destroyed or when another array by the same name is created.</p>
 <p><code>rank$<i>name</i></code> returns the rank of the array named <i>name</i>.</p>
-<p><code>range$(<i>name</i>,<i>whole number</i>)</code> returns a range of the array named <i>name</i>.
+<p><code>extent$(<i>name</i>,<i>whole number</i>)</code> returns an extent of the array named <i>name</i>.
 The number must be non-negative and smaller than the rank of the array.</p>
 <p><code>idx$(<i>name</i>,<i>whole number</i>, ...)</code> Sets the pointer of array <i>name</i> to the
 indicated index (or indices, if the rank is &gt; 1).</p>
@@ -3121,12 +3121,12 @@ Numbers can be represented in Bracmat's native format or in any of the formats
 recognized by the C <code>strtod()</code> function.</p>
 <p>In the source code of the UFP, each parameter must be explicitly and completely
 declared. Single values (scalars) are declared as <code>(s.<i>parameterName</i>)</code>,
-while arrays must be declared as <code>(a.<i>parameterName</i>.<i>range</i>)</code> (1-dimensional
+while arrays must be declared as <code>(a.<i>parameterName</i>.<i>extent</i>)</code> (1-dimensional
 arrays) or</p>
-<p><code>(a.<i>parameterName</i>.<i>range</i>.<i>range</i>. ...)</code> (multidimensional arrays).</p>
+<p><code>(a.<i>parameterName</i>.<i>extent</i>.<i>extent</i>. ...)</code> (multidimensional arrays).</p>
 <p>In the UFP source code the same rules apply on the calling side, but in user
 defined functions declarations are slightly simpler: you cannot specify the
-ranges on arrays. (These are inferred during compilation.) So scalars are
+extents on arrays. (These are inferred during compilation.) So scalars are
 declared as <code>(s.<i>parameterName</i>)</code>, while arrays must be declared as
 <code>(a.<i>parameterName</i>)</code>.</p>
 <p>Scalar parameters are passed by value, while arrays are passed by reference.
@@ -3152,8 +3152,8 @@ expressions, similar to how one uses <code>#define</code> in C.</p>
 <h3><a name="CalcArraytxt">UFP arrays</a></h3>
 <p>Arrays are allocated by the built-in <code>tbl$</code> function. This function takes a
 number of parameters. The first parameter is the name of the array. The next
-parameter is the range of the array. Each following parameter adds another
-range and increments the rank by one. To create an array for the coordinates of
+parameter is the extent of the array. Each following parameter adds another
+extent and increments the rank by one. To create an array for the coordinates of
 all nine planets of the solar system, one would as follows:</p>
 <blockquote><pre class="exinput">{?} ( 8:?nrOfPlanets
     &amp; 3:?spaceDimensions
@@ -3170,7 +3170,7 @@ all nine planets of the solar system, one would as follows:</p>
                 &amp; 0:?index
                 &amp;   whl
                   ' ( !index:&lt;!nrOfIndices
-                    &amp;   range$(planets,!index)
+                    &amp;   extent$(planets,!index)
                       : ?(idx$(dynamic,!index))
                     &amp; 1+!index:?index
                     )
@@ -3196,12 +3196,12 @@ all nine planets of the solar system, one would as follows:</p>
 signature as the <code>tbl</code> function. The first parameter is the name of the array
 while the following parameters are index values, one for each array dimension.</p>
 <p>For each dimension, the lowest index value is <code>0</code> and the highest value is
-the the value of the range of that dimension, minus one.</p>
+the the value of the extent of that dimension, minus one.</p>
 <p>Each array has a position variable. The position variable is set by the <code>idx</code>
 function and keeps its value until it is changed by another call to <code>idx</code>.
 As long as there is no need to change the position variable, the `current' array
 element can be accessed by treating the array as a scalar variable.</p>
-<blockquote><pre>     idx$(planets,3,2)
+<blockquote><pre>     idx$(planets,3,2)
    &amp; "200.3":?planets</pre></blockquote>
 <p>The above could also be written as</p>
 <blockquote><pre>   "200.3":?(idx$(planets,3,2))</pre></blockquote>
@@ -3210,7 +3210,7 @@ element can be accessed by treating the array as a scalar variable.</p>
 <p>To copy a value from one element to another, one can write</p>
 <blockquote><pre>   !(idx$(planets,8,5)):?(idx$(planets,1,6))</pre></blockquote>
 <p>Arrays are allocated as a contiguous C array of <code>double</code>. The size of this
-array is the product of all the ranges with which the array is created. The
+array is the product of all the extents with which the array is created. The
 position variable is just an index pointing into this C array.</p>
 <p><span class="arrow">&#8657;</span><a href="#calctxt" style="line-height:12pt">Floating point calculations</a></p>
 <h3><a name="CaltItertxt">UFP iterations</a></h3>

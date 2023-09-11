@@ -1,3 +1,6 @@
+11 September 2023
+In UFP object, renamed 'range' to 'extent'.
+
 5 September 2023
 Using int64_t (C99: stdint.h, inttypes.h) to cast double to integer and convert
 double to a rational number in decimal notation. Also used in subroot(), x2d

@@ -48,42 +48,47 @@
 #endif
 #endif
 
-        /*          operator              leaf                optab       comment
-        Flgs 0                   NOT
-             1                  SUCCESS
-             2                  READY
-             3                  POSITION
-             4                 INDIRECT
-             5              DOUBLY_INDIRECT
-             6                  FENCE
-             7                  ATOM
-             8                 NONIDENT
-             9                GREATER_THAN
-            10                SMALLER_THAN
-            11                  NUMBER
-            12                  FRACTION
-            13                  UNIFY
-            14                  IDENT
-            15               IMPLIEDFENCE
-            16               IS_OPERATOR                                  SHL
-            17      (operators 0-14)      QNUMBER
-            18          "                 MINUS
-            19          "                 QNUL
-            20          "                 QFRACTION
-            21                LATEBIND                        NOOP
-            22               SELFMATCHING                                Toggles with DATAMATCHESITSELF
-            23                 BUILT_IN                                  ONLY for 64 bit platform
-            24              CREATEDWITHNEW                               ONLY for 64 bit platform
-            25             (reference count)                             NON_REF_COUNT_BITS 25 or 23
-            26                    "
-            27                    "
-            28                    "
-            29                    "
-            30                    "
-            31                    "
+/*          operator              leaf                optab       comment
+Flgs 0                   NOT
+        1                  SUCCESS
+        2                  READY
+        3                  POSITION
+        4                 INDIRECT
+        5              DOUBLY_INDIRECT
+        6                  FENCE
+        7                  ATOM
+        8                 NONIDENT
+        9                GREATER_THAN
+    10                SMALLER_THAN
+    11                  NUMBER
+    12                  FRACTION
+    13                  UNIFY
+    14                  IDENT
+    15               IMPLIEDFENCE
+    16               IS_OPERATOR                                  SHL
+    17      (operators 0-14)      QNUMBER
+    18          "                 MINUS
+    19          "                 QNUL
+    20          "                 QFRACTION
+    21                LATEBIND                        NOOP
+    22               SELFMATCHING                                Toggles with DATAMATCHESITSELF
+    23                 BUILT_IN                                  ONLY for 64 bit platform
+    24              CREATEDWITHNEW                               ONLY for 64 bit platform
+    25             (reference count)                             NON_REF_COUNT_BITS 25 or 23
+    26                    "
+    27                    "
+    28                    "
+    29                    "
+    30                    "
+    31                    "
 
-        Reference count starts with 0, not 1
-        */
+Reference count starts with 0, not 1
+
+About reference counting.
+In a 32-bit version of Bracmat, most nodes have no more than 7 bits for refcounting.
+Copies must be (and are) made as needed.
+Objects (nodes with = ('EQUALS') have refcounters that are at least word-size.
+*/
 
 #if DATAMATCHESITSELF
 #if WORD32

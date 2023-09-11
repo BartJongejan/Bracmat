@@ -1,3 +1,5 @@
+EXECUTABLE = bracmat
+
 SRC = binding.c \
       branch.c \
       builtinmethod.c \
@@ -58,7 +60,7 @@ profiling:
 	cp ../valid.bra .
 	cp ../pr-xml-utf-8.xml .
 	./a.out "get'\"valid.bra\";!r" 
-	gprof a.out > potu1.prof
+	gprof a.out > $(EXECUTABLE)1.prof
 	rm a.out
 
 coverage:
@@ -72,9 +74,9 @@ coverage:
 all: potu potu1 potusafe potu1safe profiling coverage
 
 clean:
-	rm potu
-	rm potu1
-	rm potusafe
-	rm potu1safe
+	rm $(EXECUTABLE)
+	rm $(EXECUTABLE)1
+	rm $(EXECUTABLE)safe
+	rm $(EXECUTABLE)1safe
 	rm *.gcov
 	rm *.o
