@@ -1,3 +1,5 @@
+EXECUTABLE = bracmat
+
 SRC = binding.c \
       branch.c \
       builtinmethod.c \
@@ -40,17 +42,17 @@ SRC = binding.c \
       xml.c
 
 potu: $(SRC) 
-	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -o potu $(SRC) -lm
+	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -o $(EXECUTABLE) $(SRC) -lm
 
 
 potu1: potu.c 
-	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DSINGLESOURCE -o potu1 potu.c -lm
+	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DSINGLESOURCE -o $(EXECUTABLE)1 potu.c -lm
 
 potusafe: $(SRC)
-	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DNO_C_INTERFACE -DNO_FILE_RENAME -DNO_FILE_REMOVE -DNO_SYSTEM_CALL -DNO_LOW_LEVEL_FILE_HANDLING -o potusafe $(SRC) -lm
+	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DNO_C_INTERFACE -DNO_FILE_RENAME -DNO_FILE_REMOVE -DNO_SYSTEM_CALL -DNO_LOW_LEVEL_FILE_HANDLING -o $(EXECUTABLE)safe $(SRC) -lm
 
 potu1safe: potu.c
-	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DNO_C_INTERFACE -DNO_FILE_RENAME -DNO_FILE_REMOVE -DNO_SYSTEM_CALL -DNO_LOW_LEVEL_FILE_HANDLING -DSINGLESOURCE -o potu1safe potu.c -lm
+	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DNO_C_INTERFACE -DNO_FILE_RENAME -DNO_FILE_REMOVE -DNO_SYSTEM_CALL -DNO_LOW_LEVEL_FILE_HANDLING -DSINGLESOURCE -o $(EXECUTABLE)1safe potu.c -lm
 
 profiling:
 	gcc -std=c99 -pedantic -Wall -O2 -static -c -pg -DNDEBUG -DSINGLESOURCE potu.c -lm
@@ -58,7 +60,7 @@ profiling:
 	cp ../valid.bra .
 	cp ../pr-xml-utf-8.xml .
 	./a.out "get'\"valid.bra\";!r" 
-	gprof a.out > potu1.prof
+	gprof a.out > $(EXECUTABLE)1.prof
 	rm a.out
 
 coverage:
@@ -72,9 +74,9 @@ coverage:
 all: potu potu1 potusafe potu1safe profiling coverage
 
 clean:
-	rm potu
-	rm potu1
-	rm potusafe
-	rm potu1safe
+	rm $(EXECUTABLE)
+	rm $(EXECUTABLE)1
+	rm $(EXECUTABLE)safe
+	rm $(EXECUTABLE)1safe
 	rm *.gcov
 	rm *.o
