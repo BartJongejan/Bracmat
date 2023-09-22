@@ -1,3 +1,7 @@
+22 September 2023
+Fixed bug in export from UFP object of double as fraction ('Q' option).
+This did not handle integer values correctly.
+
 11 September 2023
 In UFP object, renamed 'range' to 'extent'.
 

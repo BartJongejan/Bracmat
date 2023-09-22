@@ -2227,6 +2227,7 @@ static psk IntegerNode(double val)
             res->v.fl |= MINUS;
         else if(val == 0)
             res->v.fl |= QNUL;
+        res->v.fl &= ~DEFINITELYNONUMBER;
         }
     return res;
     }
@@ -2262,6 +2263,10 @@ static psk FractionNode(double val)
 
         if(shft == 0)
             bytes += sprintf(jotter, "%" PRId64, Mantissa);
+        else if(shft < 0)
+            { /* DANGER: multiplication can easily overflow! */
+            bytes += sprintf(jotter, "%" PRId64, Mantissa * (int64_t)(long1 << (-shft)));
+            }
         else
             {
             bytes += sprintf(jotter, "%" PRId64 "/" "%" PRId64, Mantissa, (int64_t)(long1 << shft));
@@ -2360,7 +2365,7 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                         wipe(*arg);
                         *arg = res;
                         //*arg = same_as_w(res);
-                        res->v.fl = READY | SUCCESS;
+                        //res->v.fl = READY | SUCCESS;
                         return TRUE;
                         }
                     }
