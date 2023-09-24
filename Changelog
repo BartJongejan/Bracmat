@@ -1,3 +1,7 @@
+24 September 2023
+Further debugged and improved export of double values from UFP.
+Export as integer not limited to range INT64_MIN < val <= INT64_MAX
+
 22 September 2023
 Fixed bug in export from UFP object of double as fraction ('Q' option).
 This did not handle integer values correctly.
