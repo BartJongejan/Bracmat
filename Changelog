@@ -1,3 +1,8 @@
+25 September 2023
+UFP: Passing value that cannot be represented as a double results in failure.
+Handle errors in consistent way; err$ can redirect or silence error messages.
+Documented err$ function.
+
 24 September 2023
 Further debugged and improved export of double values from UFP.
 Export as integer not limited to range INT64_MIN < val <= INT64_MAX
