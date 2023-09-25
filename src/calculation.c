@@ -5,6 +5,8 @@
 #include "wipecopy.h"
 #include "input.h"
 #include "globals.h" /*nilNode*/
+#include "writeerr.h"
+#include "filewrite.h"
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -312,12 +314,9 @@ typedef struct
 
 static void showProblematicNode(char* msg, psk node)
     {
-    FILE* saveFpo = global_fpo;
-    global_fpo = stderr;
-    fprintf(stderr, "%s", msg);
-    result(node);
-    fprintf(stderr, "\n");
-    global_fpo = saveFpo;
+    errorprintf("%s", msg);
+    writeError(node);
+    errorprintf("\n");
     }
 
 static double drand(double extent)
@@ -411,7 +410,7 @@ static fortharray* getOrCreateArrayPointer(fortharray** arrp, char* name, size_t
     fortharray* curarrp = *arrp;
     if (name[0] == '\0')
         {
-        fprintf(stderr, "Array name is empty string.\n");
+        errorprintf( "Array name is empty string.\n");
         return 0; /* Something wrong happened. */
         }
 
@@ -445,13 +444,13 @@ static fortharray* getOrCreateArrayPointer(fortharray** arrp, char* name, size_t
                 }
             else
                 {
-                fprintf(stderr, "Cannot allocate memory for array name \"%s\".\n", name);
+                errorprintf( "Cannot allocate memory for array name \"%s\".\n", name);
                 return 0;
                 }
             }
         else
             {
-            fprintf(stderr, "Cannot allocate memory for array struct.\n");
+            errorprintf( "Cannot allocate memory for array struct.\n");
             return 0;
             }
         }
@@ -529,7 +528,7 @@ static fortharray* getOrCreateArrayPointerButNoArray(fortharray** arrp, char* na
     return curarrp;
     }
 
-static int setFloat(double* destination, psk args)
+static Boolean setFloat(double* destination, psk args)
     {
     if (args->v.fl & QDOUBLE)
         {
@@ -538,14 +537,20 @@ static int setFloat(double* destination, psk args)
             {
             *destination = -(*destination);
             }
-        return 1;
+        return TRUE;
         }
     else if (INTEGER_COMP(args))
         {
         *destination = strtod(&(args->u.sobj), 0);
+        if (isinf(*destination))
+            {
+            /*'((s.value).!value):?code & new$(UFP,!code):?test &  (test..go)$555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555 */
+            errorprintf( "'%s' cannot be represented as a double ('infinite' value)\n", &(args->u.sobj));
+            return FALSE;
+            }
         if (HAS_MINUS_SIGN(args))
             *destination = -*destination;
-        return 1;
+        return TRUE;
         }
     else if (RAT_RAT_COMP(args))
         {
@@ -561,15 +566,24 @@ static int setFloat(double* destination, psk args)
             *destination = numerator / denominator;
             if (HAS_MINUS_SIGN(args))
                 *destination = -*destination;
-            return 1;
+            return TRUE;
             }
         }
     else if (args->u.sobj == '\0')
         {
-        fprintf(stderr, "Numerical value missing.\n");
-        return 0; /* Something wrong happened. */
+        errorprintf( "Numerical value missing.\n");
+        return FALSE; /* Something wrong happened. */
         }
-    return 1;
+    char* endptr;
+    double temp = strtod(&(args->u.sobj), &endptr);
+    if (*endptr == '\0')
+        {
+        *destination = temp;
+        return TRUE;
+        }
+    /*'((s.value).!value):?code & new$(UFP,!code):?test &  (test..go)$abc*/
+    errorprintf( "'%s' is not a numerical value.\n", &(args->u.sobj));
+    return FALSE;
     }
 
 static stackvalue* fsetArgs(stackvalue* sp, int arity, forthMemory* thatmem)
@@ -644,7 +658,7 @@ static void set_extent(size_t* extent, psk Node)
         }
     }
 
-static void set_vals(forthvalue* pval, size_t rank, size_t* extent, psk Node)
+static Boolean set_vals(forthvalue* pval, size_t rank, size_t* extent, psk Node)
     {
     assert(Op(Node) == COMMA);
     psk el;
@@ -659,23 +673,27 @@ static void set_vals(forthvalue* pval, size_t rank, size_t* extent, psk Node)
         {
         if (is_op(el->LEFT) && Op(el->LEFT) == COMMA)
             {
-            set_vals(pval + index, rank - 1, extent, el->LEFT);
+            if (!set_vals(pval + index, rank - 1, extent, el->LEFT))
+                return FALSE;
             }
         else
             {
             for (size_t t = 0; t < stride; ++t)
-                setFloat(&(pval[index + t].floating), el->LEFT);
+                if (!setFloat(&(pval[index + t].floating), el->LEFT))
+                    return FALSE;
             }
         }
     if (is_op(el) && Op(el) == COMMA)
         {
-        set_vals(pval + index, rank - 1, extent, el);
+        return set_vals(pval + index, rank - 1, extent, el);
         }
     else
         {
         for (size_t t = 0; t < stride; ++t)
-            setFloat(&(pval[index + t].floating), el);
+            if(!setFloat(&(pval[index + t].floating), el))
+                return FALSE;
         }
+    return TRUE;
     }
 
 static long setArgs(forthMemory* mem, size_t Nparm, psk args)
@@ -705,14 +723,14 @@ static long setArgs(forthMemory* mem, size_t Nparm, psk args)
                     a = curparm[ParmIndex].u.a;
                     if (a->size != totsize)
                         {
-                        fprintf(stderr, "Declared size of array \"%s\" is %zu, actual size is %zu.\n", a->name, a->size, totsize);
+                        errorprintf( "Declared size of array \"%s\" is %zu, actual size is %zu.\n", a->name, a->size, totsize);
                         bfree(extent);
                         return -1;
                         }
                     for (size_t k = 0; k < a->rank; ++k)
                         if (a->extent[k] != extent[k])
                             {
-                            fprintf(stderr, "Declared extent of array \"%s\" is %zu, actual extent is %zu.\n", a->name, a->extent[k], extent[k]);
+                            errorprintf( "Declared extent of array \"%s\" is %zu, actual extent is %zu.\n", a->name, a->extent[k], extent[k]);
                             bfree(extent);
                             return -1;
                             }
@@ -722,7 +740,12 @@ static long setArgs(forthMemory* mem, size_t Nparm, psk args)
                     a->extent = extent;
                     a->rank = rank;
                     */
-                    set_vals(a->pval, rank, extent, args);
+                    if (!set_vals(a->pval, rank, extent, args))
+                        {
+                        errorprintf( "Value is not numeric.\n");
+                        bfree(extent);
+                        return -1;
+                        }
                     ++ParmIndex;
                     }
                 bfree(extent);
@@ -741,7 +764,8 @@ static long setArgs(forthMemory* mem, size_t Nparm, psk args)
         if (curparm)
             {
             var = curparm[ParmIndex].u.v;
-            setFloat(&(var->val.floating), args);
+            if (!setFloat(&(var->val.floating), args))
+                return -1;
             ++ParmIndex;
             }
         }
@@ -889,7 +913,7 @@ static stackvalue* getArrayIndex(stackvalue* sp, forthword* wordp)
     /* else linear array passed as argument to calculation, a0, a1, ... */
     if (i >= arrp->size)
         {
-        fprintf(stderr, "%s: index %d is out of array bounds. (0 <= index < %zu)\n", arrp->name, (signed int)i, arrp->size);
+        errorprintf( "%s: index %d is out of array bounds. (0 <= index < %zu)\n", arrp->name, (signed int)i, arrp->size);
         return 0;
         }
     arrp->index = i;
@@ -944,7 +968,7 @@ static stackvalue* doTbl(stackvalue* sp, forthword* wordp, fortharray** parr)
                 extent[j] = (size_t)(sp->val).floating; /* extent[0] = extent of last index*/
             else if (extent[j] != (size_t)(sp->val).floating)
                 {
-                fprintf(stderr, "tbl: attempting to change fixed extent from %zu to %zu.\n", extent[j], (size_t)(sp->val).floating);
+                errorprintf( "tbl: attempting to change fixed extent from %zu to %zu.\n", extent[j], (size_t)(sp->val).floating);
                 --sp;
                 --sp;
                 return 0;
@@ -1913,7 +1937,7 @@ static int polish1(psk code, Boolean commentsAllowed)
             case FUN:
                 if (is_op(code->LEFT))
                     {
-                    fprintf(stderr, "calculation: lhs of $ is operator\n");
+                    errorprintf( "calculation: lhs of $ is operator\n");
                     return -1;
                     }
                 if (!strcmp(&(code->LEFT->u.sobj), "tbl") && StaticArray(code->RIGHT))
@@ -1931,7 +1955,7 @@ static int polish1(psk code, Boolean commentsAllowed)
             case FUU:
                 if (is_op(code->LEFT))
                     {
-                    fprintf(stderr, "calculation: lhs of ' is operator\n");
+                    errorprintf( "calculation: lhs of ' is operator\n");
                     return -1;
                     }
                 C = polish1(code->RIGHT, FALSE);
@@ -2212,10 +2236,9 @@ static psk HexNode(double val)
 
 static psk IntegerNode(double val)
     {
-    char jotter[500];
+    char jotter[512];
     if (val <= (double)INT64_MIN || val > (double)INT64_MAX)
         {
-        char jotter[500];
 #if defined __EMSCRIPTEN__
 //    long long long1 = (long long)1;
         int64_t long1 = (int64_t)1;
@@ -2276,7 +2299,7 @@ static psk IntegerNode(double val)
 
 static psk FractionNode(double val)
     {
-    char jotter[500];
+    char jotter[512];
     size_t bytes = offsetof(sk, u.obj) + 1;
 #if defined __EMSCRIPTEN__
 //    long long long1 = (long long)1;
@@ -3403,7 +3426,7 @@ static Boolean setArity(forthword* wordp, psk code, unsigned int expectedArity)
     if (expectedArity > 0 && arity != expectedArity)
         {
         /*TODO: check whether function does not take a single argument!*/
-        fprintf(stderr, "The arity is %u, but %u arguments found.\n", expectedArity, arity);
+        errorprintf( "The arity is %u, but %u arguments found.\n", expectedArity, arity);
         return FALSE;
         }
     wordp->offset = arity;
@@ -3419,7 +3442,7 @@ static fortharray* haveArray(forthMemory* forthstuff, psk declaration, Boolean i
         {
         if (is_op(declaration->LEFT))
             {
-            fprintf(stderr, "Array parameter declaration requires name.\n");
+            errorprintf( "Array parameter declaration requires name.\n");
             return 0;
             }
         pname = declaration->LEFT;
@@ -3427,7 +3450,7 @@ static fortharray* haveArray(forthMemory* forthstuff, psk declaration, Boolean i
 
         if (in_function)
             {
-            fprintf(stderr, "In functions, array parameter (here: [%s]) declarations do not take extent specs.\n", &(pname->u.sobj));
+            errorprintf( "In functions, array parameter (here: [%s]) declarations do not take extent specs.\n", &(pname->u.sobj));
             }
         }
     else
@@ -3437,7 +3460,7 @@ static fortharray* haveArray(forthMemory* forthstuff, psk declaration, Boolean i
 
     if (HAS_VISIBLE_FLAGS_OR_MINUS(pname))
         {
-        fprintf(stderr, "Array name may not have any prefixes.\n");
+        errorprintf( "Array name may not have any prefixes.\n");
         return 0;
         }
 
@@ -3474,7 +3497,7 @@ static fortharray* haveArray(forthMemory* forthstuff, psk declaration, Boolean i
                     *pextent = 0; /* extent still unknown. */
                 else
                     {
-                    fprintf(stderr, "Extent specification of array \"%s\" invalid. It must be a positive number or a variable name prefixed with '!'\n", a->name);
+                    errorprintf( "Extent specification of array \"%s\" invalid. It must be a positive number or a variable name prefixed with '!'\n", a->name);
                     return 0;
                     }
 
@@ -3540,12 +3563,12 @@ static int argcount(psk rhs)
             }
         else if ((rhs->LEFT->u.sobj) == 0)
             {
-            fprintf(stderr, "Function argument is empty string. (It must be a number or a variable prefixed with \"!\")\n");
+            errorprintf( "Function argument is empty string. (It must be a number or a variable prefixed with \"!\")\n");
             return -1;
             }
         else if (!okatomicarg(rhs->LEFT))
             {
-            fprintf(stderr, "Function argument is not valid. (It must be a number or a variable prefixed with \"!\")\n");
+            errorprintf( "Function argument is not valid. (It must be a number or a variable prefixed with \"!\")\n");
             return -1;
             }
         else
@@ -3561,12 +3584,12 @@ static int argcount(psk rhs)
         }
     else if ((rhs->u.sobj) == 0)
         {
-        fprintf(stderr, "Last (or only) function argument is empty string. (It must be a number or a variable prefixed with \"!\")\n");
+        errorprintf( "Last (or only) function argument is empty string. (It must be a number or a variable prefixed with \"!\")\n");
         return -1;
         }
     else if (!okatomicarg(rhs))
         {
-        fprintf(stderr, "Last function argument is not valid. (It must be a number or a variable prefixed with \"!\")\n");
+        errorprintf( "Last function argument is not valid. (It must be a number or a variable prefixed with \"!\")\n");
         return -1;
         }
     return 1;
@@ -3592,13 +3615,13 @@ static fortharray* namedArray(char* name, forthMemory* mem, psk node)
             }
         else
             {
-            fprintf(stderr, "First argument of \"%s\" must be without any prefixes.\n", name);
+            errorprintf( "First argument of \"%s\" must be without any prefixes.\n", name);
             return 0;
             }
         }
     else
         {
-        fprintf(stderr, "First argument of \"%s\" must be an atom.\n", name);
+        errorprintf( "First argument of \"%s\" must be an atom.\n", name);
         return 0;
         }
     }
@@ -3963,13 +3986,13 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
 
                         if (arr == 0)
                             {
-                            fprintf(stderr, "tbl:Array is not declared\n");
+                            errorprintf( "tbl:Array is not declared\n");
                             return 0;
                             }
                         }
                     else
                         {
-                        fprintf(stderr, "Right hand side of \"tbl$\" must be at least two arguments: an array name and one or more extents.\n");
+                        errorprintf( "Right hand side of \"tbl$\" must be at least two arguments: an array name and one or more extents.\n");
                         return 0;
                         }
                     }
@@ -3991,13 +4014,13 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                         size_t rank = arr->rank;
                         if (rank == 0)
                             {
-                            //                                    fprintf(stderr, "idx: Array \"%s\" has unknown rank and extent(s). Assuming %zu, based on idx.\n", arrname, h);
+                            //                                    errorprintf( "idx: Array \"%s\" has unknown rank and extent(s). Assuming %zu, based on idx.\n", arrname, h);
                             rank = arr->rank = h;
                             //                                    return 0;
                             }
                         if (h != rank)
                             {
-                            fprintf(stderr, "idx: Array \"%s\" expects %zu arguments. %zu have been found\n", arr->name, rank, h);
+                            errorprintf( "idx: Array \"%s\" expects %zu arguments. %zu have been found\n", arr->name, rank, h);
                             return 0;
                             }
                         if (arr->extent != 0)
@@ -4018,7 +4041,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                                         long index = strtol(&(Arg->u.sobj), 0, 10);
                                         if (index < 0 || index >= (long)(*rng))
                                             {
-                                            fprintf(stderr, "idx: Array \"%s\": index %zu is out of bounds 0 <= index < %zu, found %ld\n", arr->name, rank - (rng - arr->extent), *rng, index);
+                                            errorprintf( "idx: Array \"%s\": index %zu is out of bounds 0 <= index < %zu, found %ld\n", arr->name, rank - (rng - arr->extent), *rng, index);
                                             return 0;
                                             }
                                         }
@@ -4030,7 +4053,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                         }
                     else
                         {
-                        fprintf(stderr, "Right hand side of \"idx$\" must be at least two arguments: an array name and one or more extents.\n");
+                        errorprintf( "Right hand side of \"idx$\" must be at least two arguments: an array name and one or more extents.\n");
                         return 0;
                         }
                     }
@@ -4039,7 +4062,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                     fortharray* arr = namedArray("rank", mem, rhs);
                     if (arr == 0)
                         {
-                        fprintf(stderr, "\"extent\" takes one argument: the name of an array.\n");
+                        errorprintf( "\"extent\" takes one argument: the name of an array.\n");
                         return 0;
                         }
                     }
@@ -4047,7 +4070,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                     {
                     if (!is_op(rhs) || namedArray("extent", mem, rhs->LEFT) == 0 || argcount(rhs->RIGHT) != 1)
                         {
-                        fprintf(stderr, "\"extent\" takes two arguments: the name of an array and the extent index.\n");
+                        errorprintf( "\"extent\" takes two arguments: the name of an array and the extent index.\n");
                         showProblematicNode("Here", rhs);
                         return 0;
                         }
@@ -4078,7 +4101,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                                 {
                                 if (!is_op(rhs) && parms > func->parameters)
                                     {
-                                    fprintf(stderr, "Too few parameters.\n");
+                                    errorprintf( "Too few parameters.\n");
                                     //    return 0;
                                     }
                                 psk parm;
@@ -4090,14 +4113,14 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                                     {
                                     if (is_op(parm))
                                         {
-                                        fprintf(stderr, "Array name expected.\n");
+                                        errorprintf( "Array name expected.\n");
                                         return 0;
                                         }
                                     else
                                         {
                                         if (HAS_VISIBLE_FLAGS_OR_MINUS(parm))
                                             {
-                                            fprintf(stderr, "When passing an array to a function, the array name must be free of any prefixes.\n");
+                                            errorprintf( "When passing an array to a function, the array name must be free of any prefixes.\n");
                                             return 0;
                                             }
                                         }
@@ -4116,12 +4139,12 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                         int ArgCount = argcount(rhs);
                         if (ArgCount < 0)
                             {
-                            fprintf(stderr, "Function \"%s\" has an invalid argument.\n", name);
+                            errorprintf( "Function \"%s\" has an invalid argument.\n", name);
                             return 0;
                             }
                         else if (ArgCount == 0)
                             {
-                            fprintf(stderr, "Function \"%s\" used without argument(s).\n", name);
+                            errorprintf( "Function \"%s\" used without argument(s).\n", name);
                             return 0;
                             }
                         }
@@ -4170,7 +4193,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                             //if(wordp->action == Idx || wordp->action == Tbl)
                             if (!setArity(wordp, code, ep->arity))
                                 {
-                                fprintf(stderr, "Argument error in call to \"%s\".\n", name);
+                                errorprintf( "Argument error in call to \"%s\".\n", name);
                                 return 0;
                                 }
                             mustpop = enopop;
@@ -4200,7 +4223,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                     }
 
 
-                fprintf(stderr, "Function named \"%s\" not found.\n", name);
+                errorprintf( "Function named \"%s\" not found.\n", name);
                 return 0; /* Something wrong happened. */
                 }
             default:
@@ -4333,7 +4356,7 @@ static Boolean setparm(size_t Ndecl, forthMemory* forthstuff, psk declaration, B
     parameter* npar;
     if (is_op(declaration->LEFT))
         {
-        fprintf(stderr, "Parameter declaration requires 's' or 'a'.\n");
+        errorprintf( "Parameter declaration requires 's' or 'a'.\n");
         return FALSE;
         }
 
@@ -4341,7 +4364,7 @@ static Boolean setparm(size_t Ndecl, forthMemory* forthstuff, psk declaration, B
         {
         if (is_op(declaration->RIGHT))
             {
-            fprintf(stderr, "Scalar parameter declaration doesn't take extent.\n");
+            errorprintf( "Scalar parameter declaration doesn't take extent.\n");
             return FALSE;
             }
         forthvariable* var = getVariablePointer(forthstuff->var, &(declaration->RIGHT->u.sobj));
@@ -4382,7 +4405,7 @@ static Boolean functiondie(forthMemory* mem)
     {
     if (!mem)
         {
-        fprintf(stderr, "calculation.functiondie does not deallocate, member \"mem\" is zero.\n");
+        errorprintf( "calculation.functiondie does not deallocate, member \"mem\" is zero.\n");
         return FALSE;
         }
     forthvariable* curvarp = mem->var;
@@ -4492,7 +4515,7 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
         length = polish1(code, FALSE) + sizeof(jumpblock) / sizeof(forthword) + 1; /* 1 for TheEnd */
         if (length < 1)
             {
-            fprintf(stderr, "polish1 returns length < 0 [%d]\n", length);
+            errorprintf( "polish1 returns length < 0 [%d]\n", length);
             return 0; /* Something wrong happened. */
             }
         forthstuff = (forthMemory*)bmalloc(sizeof(forthMemory));
@@ -4558,7 +4581,7 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
                                     {
                                     if (!setparm(Ndecl, forthstuff, decl, in_function))
                                         {
-                                        fprintf(stderr, "Error in parameter declaration.\n");
+                                        errorprintf( "Error in parameter declaration.\n");
                                         return 0; /* Something wrong happened. */
                                         }
                                     break;
@@ -4568,7 +4591,7 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
                                     if (is_op(decl->LEFT) && Op(decl->LEFT) == DOT)
                                         if (!setparm(Ndecl, forthstuff, decl->LEFT, in_function))
                                             {
-                                            fprintf(stderr, "Error in parameter declaration.\n");
+                                            errorprintf( "Error in parameter declaration.\n");
                                             return 0; /* Something wrong happened. */
                                             }
                                     }

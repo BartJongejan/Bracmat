@@ -42,7 +42,12 @@ int redirectError(char* name)
         errorFileName = NULL;
         }
 #endif
-    if(!strcmp(name, "stdout"))
+    if(!*name || !strcmp(name, "0"))
+        {
+        errorStream = 0;
+        return TRUE;
+        }
+    else if(!strcmp(name, "stdout"))
         {
         errorStream = stdout;
         return TRUE;
