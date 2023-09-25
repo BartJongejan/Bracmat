@@ -16,7 +16,7 @@ help=
   . outtxt,taytxt,newtxt,newobjecttxt,humtxt,objecttxt,hashtxt
   . paragraphs,fname,findtxt,inserttxt,removetxt,Dietxt
   . ISOtxt,casesensitivetxt,foralltxt,doHTML,clktxt,limitations
-  . lowtxt,upptxt,whltxt,argtxt,d2xtxt,x2dtxt,toMLtxt
+  . lowtxt,upptxt,whltxt,argtxt,d2xtxt,x2dtxt,toMLtxt,errtxt
   . rewriting,jsntranstxt,transformtxt,MLencodingtxt,nestMLtxt
   . gentlepat recurpat closetxt filesettxt interaction usecases
   . fixdtxt modetxt positiontxt readtxt varitxt writetxt nonlinpat
@@ -165,63 +165,65 @@ lex lexical analysis of help file"
     denominator: den$22/7:7
 12 |_div_|
     quotient: div$(22.7):1
-13 |_fil_|
-    file I/O (low-level)
-14 |_flg_|
+13 |_err_|
+    redirect or silence error messages
+14 |_fil_|
+     file I/O (low-level)
+15 |_flg_|
     splits expression in prefixes and expression without prefixes
-15 |_glf_|
+16 |_glf_|
     opposite of flg: combines prefixes and expression
-16 |_fre_|
+17 |_fre_|
     return allocated memory (low level)
-17 |_get_|
+18 |_get_|
     get input (from file,keyboard or memory)
-18 |_low_|
+19 |_low_|
     convert to lower case
-19 |_lst_|
+10 |_lst_|
     list un-evaluated expression(s) or value(s) of variable(s)
-20 |_map_|
+21 |_map_|
     apply function to each member of a list
-21 |_mem_|
+22 |_mem_|
     list existing variable names
-22 |_mod_|
+23 |_mod_|
     remainder
-23 |_mop_|
+24 |_mop_|
     map expression to space separated list
-24 |_new_|
+25 |_new_|
     create new object as a copy of another object
-25 |_pee_|
+26 |_pee_|
     get value from address (peek) (low level)
-26 |_pok_|
+27 |_pok_|
     put value at address (poke) (low level)
-27 |_put_|
+28 |_put_|
     write output
-28 |_ren_|
+29 |_ren_|
     rename file or directory or move file
-29 |_rev_|
+20 |_rev_|
     string reverse
-30 |_rmv_|
+31 |_rmv_|
     remove file
-31 |_sim_|
+32 |_sim_|
     similarity between two atoms
-32 |_str_|
+33 |_str_|
     stringize expression into atom
-33 |_swi_|
+34 |_swi_|
     software interrupt (low level)
-34 |_sys_|
+35 |_sys_|
     command line shell
-35 |_tbl_|
+36 |_tbl_|
     create array, remove array/variable
-36 |_ugc_|
+37 |_ugc_|
     determine the Unicode General Category of a character
-37 |_upp_|
+38 |_upp_|
     convert to upper case
-38 |_utf_|
+39 |_utf_|
     convert UTF-8 character to Unicode codepoint
-39 |_vap_|
+30 |_vap_|
     deconstruct a string character-wise or according to specified separator
-40 |_whl_|
-    while loop
-41 |_x2d_|
+41 |_whl_|
+   while loop
+42 |_x2d_|
     convert hexadecimal number to decimal number x2d$BABEFACE:3133078222
 "
       ,   (1,seltxt)
@@ -236,35 +238,36 @@ lex lexical analysis of help file"
           (10,dbgtxt)
           (11,dentxt)
           (12,divtxt)
-          (13,filtxt)
-          (14,flgtxt)
-          (15,glftxt)
-          (16,fretxt)
-          (17,gettxt)
-          (18,lowtxt)
-          (19,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt)
-          (20,maptxt)
-          (21,memtxt)
-          (22,modtxt)
-          (23,moptxt)
-          (24,newobjecttxt)
-          (25,peetxt)
-          (26,poktxt)
-          (27,puttxt1 humtxt puttxt2 puttxt3 newtxt)
-          (28,rentxt)
-          (29,rmvtxt)
-          (30,revtxt)
-          (31,simtxt)
-          (32,strtxt)
-          (33,switxt)
-          (34,systxt)
-          (35,tbltxt)
-          (36,ugctxt)
-          (37,upptxt)
-          (38,utftxt)
-          (39,vaptxt)
-          (40,whltxt)
-          (41,x2dtxt)
+          (13,errtxt)
+          (14,filtxt)
+          (15,flgtxt)
+          (16,glftxt)
+          (17,fretxt)
+          (18,gettxt)
+          (19,lowtxt)
+          (10,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt)
+          (21,maptxt)
+          (22,memtxt)
+          (23,modtxt)
+          (24,moptxt)
+          (25,newobjecttxt)
+          (26,peetxt)
+          (27,poktxt)
+          (28,puttxt1 humtxt puttxt2 puttxt3 newtxt)
+          (29,rentxt)
+          (20,rmvtxt)
+          (31,revtxt)
+          (32,simtxt)
+          (33,strtxt)
+          (34,switxt)
+          (35,systxt)
+          (36,tbltxt)
+          (37,ugctxt)
+          (38,upptxt)
+          (39,utftxt)
+          (30,vaptxt)
+          (41,whltxt)
+          (42,x2dtxt)
     )
   & ( intro
     =   M
@@ -4649,6 +4652,23 @@ Use macro evaluation if the expression to be split is the value of a variable.
 {?} glf$('($prefixes.z))
 {!} =?!z
 "
+    )
+  & ( errtxt
+    =   T
+      , "  err$<destination>   "
+      , "Send error messages to destination.
+
+<destination> is one of the following:
+
+|_stderr_|
+    Send error messages to the standard error stream. 
+|_stdout_|
+    Send error messages to the standard output stream. 
+|_0_|
+    Send error messages nowhere.
+<filename>
+    Send error messages to the specified file. Error messages are sent to the
+    standard error stream if the specified file cannot be opened."
     )
   & ( filtxt
     =   M
