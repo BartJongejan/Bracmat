@@ -7767,6 +7767,13 @@ string line 2\"
                     & Out$"Too large number"
                   | 
                   )
+                & (   "868.33":?val
+                    & '(.$val):?code
+                    & new$(UFP,!code):?test
+                    &   (test..go)$
+                      : "8.6833000000000004E+02"
+                  | Out$"Fixed point number >= 10 not recognized"
+                  )
               |   Out
                 $ "Complex code containing `static' and `dynamic' arrays, `rank$', `extent$' and some whl' loops fails."
               )
