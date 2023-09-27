@@ -12,9 +12,9 @@ int numbercheck(const char* begin)
     const char* savebegin = begin;
     if(!*begin)
         return 0;
-    op_or_0 = strspn(begin, "0123456789.-+/eEpPxX");
+    op_or_0 = strspn(begin, "0123456789.-+/aAbBcCdDeEfFpPxX");
     if(begin[op_or_0])
-        return 0;
+        return DEFINITELYNONUMBER;
     check = QNUMBER;
     op_or_0 = *begin;
 
@@ -32,7 +32,7 @@ int numbercheck(const char* begin)
                 /* hexadecimal number, must be in domain of strtod */
                 double testdouble = strtod(begin, &endptr);
                 if(*endptr)
-                    return 0; /* format error */
+                    return DEFINITELYNONUMBER; /* format error */
                 if(testdouble == 0.0)
                     check |= QNUL;
                 /* Since doubles can be serialised to hex strings without

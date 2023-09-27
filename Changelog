@@ -1,3 +1,6 @@
+27 September 2023
+numbercheck: Accept hexadecimal floating point notation: chars a-f A-F.
+
 26 September 2023
 numbercheck: Accept fixed point notation having more than one digits before
 the dot.

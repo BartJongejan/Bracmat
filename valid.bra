@@ -7774,6 +7774,19 @@ string line 2\"
                       : "8.6833000000000004E+02"
                   | Out$"Fixed point number >= 10 not recognized"
                   )
+                & (   "0x1.abcdef0456789p+1023":?val
+                    & new$(UFP,'(.$val)):?test
+                    &   (test..go)$
+                      : "1.5020724295408577E+308"
+                  | Out$"Hexadecimal value not recognized as double value."
+                  )
+                & (   "0x1.abcdeABCDEF678p+1023":?val
+                    & new$(UFP,'(.$val)):?test
+                    &   (test..go)$
+                      : "1.5020722002826281E+308"
+                  |   Out
+                    $ "Mixed case hexadecimal value not recognized as double value."
+                  )
               |   Out
                 $ "Complex code containing `static' and `dynamic' arrays, `rank$', `extent$' and some whl' loops fails."
               )
