@@ -14,6 +14,8 @@ rm bracmattest
 rm bracmat
 rm dk_cst_bracmat.h
 
+# Create bracmat.c from multiple source files.
+pushd ../src && make && popd
 # Create stand-alone bracmat.
 gcc -std=c99 -pedantic -Wall -O2 -DNDEBUG ../singlesource/bracmat.c -lm
 mv a.out bracmat
