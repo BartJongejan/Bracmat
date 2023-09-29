@@ -54,13 +54,13 @@ pattern matching.
     
       Tour through Bracmat for computational linguists.
 
-    * bracmat.html
+    * bracmat.html _(deleted, but uploaded to latest release)_
 
       The documentation in HTML format, automatically generated from the file
       'help'. Run bracmat. At the prompt, enter 'get$help'. Choose 'html', 'htmltable',
       or 'htmllatex' to generate this file.
 
-    * bracmat.pdf
+    * bracmat.pdf _(deleted, but uploaded to latest release)_
     
       Documentation in PDF format, generated from bracmat.tex, which, in turn,
       can be generated from the bracmat script 'help'.
@@ -129,12 +129,12 @@ pattern matching.
       Batch file for Windows to create a Bracmat JNI. Should work with a number
       of versions of Microsoft's C-compiler.
 
-* Linux
-    * bracmat
+* Linux _(deleted, executable uploaded to latest release)_
+    * bracmat 
 
       64 bit statically linked executable for Linux (tested with Ubuntu 16.04, 18.04 and 20.04)
 
-* macOS
+* macOS _(deleted, executable uploaded to latest release)_
     * bracmat
 
       executable for Apple computers
@@ -182,7 +182,7 @@ pattern matching.
       Builds a 'standard' edition of bracmat, a 'safe' version of bracmat,
       a version for profiling, and a version for measuring code coverage.
       
-    * bracmat.c
+    * bracmat.c _(deleted, created when building using 'make')_
     
       All of the source code of the program in a single file. This file is generated and should not be permanently redacted by hand.
       
@@ -256,7 +256,7 @@ pattern matching.
 
    All that is needed to create a version of Bracmat that runs in a browser.  
 
-    * bracmatJS.html
+    * bracmatJS.html _(deleted, executable uploaded to latest release)_
     
       Bracmat compiled to WebAssembly and Javascript using emscripten, embedded
       in a single HTML-page. Nice for toy scripts, slow.
@@ -279,7 +279,7 @@ pattern matching.
 
      Javascript file needed as argument for the --pre-js command line option of the emcc command 
 
-* Windows
+* Windows _(deleted, executables uploaded to latest release)_
     * bracmat.exe
 
       32 bit executable for Windows
@@ -390,8 +390,13 @@ Standard C. Building bracmat from source is extremely simple, e.g.:
 
     cd singlesource
     gcc bracmat.c -lm
+
+or, if bracmat.c does not (yet) exist:
+
+    cd singlesource
+    make
     
-You can also use the Makefile, which is in the src directory.
+You can also run 'make' in the src directory.
 
 Bracmat requires a C99 compatible compiler since 2023. The older compilers
 mentioned below will no longer be able to compile Bracmat.
