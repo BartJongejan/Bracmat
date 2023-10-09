@@ -56,11 +56,11 @@ static size_t complexity(psk Root, size_t max)
                 max += COMPLEX_MAX / LineLength;
             }
         Parent = Op(Root);
-        Child = Op(Root->LEFT);
+        Child = is_op(Root->LEFT) ? Op(Root->LEFT) : 0;
         if(HAS__UNOPS(Root->LEFT) || Parent >= Child)
             max += (2 * COMPLEX_MAX) / LineLength; /* 2 parentheses */
 
-        Child = Op(Root->RIGHT);
+        Child = is_op(Root->RIGHT) ? Op(Root->RIGHT) : 0;
         if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
             max += (2 * COMPLEX_MAX) / LineLength; /* 2 parentheses */
 
@@ -302,7 +302,7 @@ static void reslt(psk Root, int level, int ind, int space)
         if(Op(Root) == EQUALS)
             Root->RIGHT = Head(Root->RIGHT);
         Parent = Op(Root);
-        Child = Op(Root->LEFT);
+        Child = is_op(Root->LEFT) ? Op(Root->LEFT) : 0;
         if(needIndent(Root, ind, level))
             indtel++;
         if(HAS__UNOPS(Root->LEFT) || Parent >= Child)
@@ -319,7 +319,7 @@ static void reslt(psk Root, int level, int ind, int space)
         SM(Root)
             do_something(opchar[klopcode(Root)]);
         Parent = Op(Root);
-        Child = Op(Root->RIGHT);
+        Child = is_op(Root->RIGHT) ? Op(Root->RIGHT) : 0;
         if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
             {
             parenthesised_result(Root->RIGHT, level + 1, FALSE, LSP | (space & RHS));
@@ -359,7 +359,7 @@ static void reslts(psk Root, int level, int ind, int space, psk cutoff)
                 return;
                 }
             Parent = Op(Root);
-            Child = Op(Root->LEFT);
+            Child = is_op(Root->LEFT) ? Op(Root->LEFT) : 0;
             if(needIndent(Root, ind, level))
                 indtel++;
             if(HAS__UNOPS(Root->LEFT) || Parent >= Child)
@@ -372,7 +372,7 @@ static void reslts(psk Root, int level, int ind, int space, psk cutoff)
             SM(Root)
                 do_something(opchar[klopcode(Root)]);
             Parent = Op(Root);
-            Child = Op(Root->RIGHT);
+            Child = is_op(Root->RIGHT) ? Op(Root->RIGHT) : 0;
             if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
                 hreslts(Root->RIGHT, level + 1, FALSE, LSP | (space & RHS), cutoff);
             else if(Parent < Child)
@@ -413,7 +413,7 @@ static void parenthesised_result(psk Root, int level, int ind, int space)
         if(needIndent(Root, ind, level))
             extraSpc = 1;
         Parent = Op(Root);
-        Child = Op(Root->LEFT);
+        Child = is_op(Root->LEFT) ? Op(Root->LEFT) : 0;
         if(HAS__UNOPS(Root->LEFT) || Parent >= Child)
             parenthesised_result(Root->LEFT, level + 1, FALSE, RSP);
         else
@@ -429,7 +429,7 @@ static void parenthesised_result(psk Root, int level, int ind, int space)
             do_something(opchar[klopcode(Root)]);
         Parent = Op(Root);
 
-        Child = Op(Root->RIGHT);
+        Child = is_op(Root->RIGHT) ? Op(Root->RIGHT) : 0;
         if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
             parenthesised_result(Root->RIGHT, level + 1, FALSE, LSP);
         else if(Parent < Child)
@@ -469,7 +469,7 @@ static void hreslts(psk Root, int level, int ind, int space, psk cutoff)
         if(needIndent(Root, ind, level))
             extraSpc = 1;
         Parent = Op(Root);
-        Child = Op(Root->LEFT);
+        Child = is_op(Root->LEFT) ? Op(Root->LEFT) : 0;
         if(HAS__UNOPS(Root->LEFT) || Parent >= Child)
             parenthesised_result(Root->LEFT, level + 1, FALSE, RSP);
         else
@@ -480,7 +480,7 @@ static void hreslts(psk Root, int level, int ind, int space, psk cutoff)
         SM(Root)
             do_something(opchar[klopcode(Root)]);
         Parent = Op(Root);
-        Child = Op(Root->RIGHT);
+        Child = is_op(Root->RIGHT) ? Op(Root->RIGHT) : 0;
         if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
             hreslts(Root->RIGHT, level + 1, FALSE, LSP, cutoff);
         else if(Parent < Child)
