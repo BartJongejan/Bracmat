@@ -1,3 +1,7 @@
+12 October 2023
+Fixed: argument of 'idx$(array, args)' can be complex expression that evaluates
+to a number. 
+
 9 October 2023
 Minor fix of indentation algorithm.
 

@@ -994,8 +994,6 @@ static stackvalue* doTbl(stackvalue* sp, forthword* wordp, fortharray** parr)
             memset(arr->pval, 0, size * sizeof(forthvalue));
             }
         arr->rank = rank;
-        //                    arr->extent = extent;
-
         }
     return sp;
     }
@@ -1377,9 +1375,6 @@ static stackvalue* trcBody(forthMemory* mem)
         double a;
         double b;
         size_t i;
-        //        forthvariable* v;
-        //fortharray* arr;
-        //      stackvalue* svp;
         char* naam;
         assert(sp + 1 >= mem->stack);
         printf("%-16s %5d %5d: ", ActionAsWord[wordp->action], (int)(wordp - word), (int)(sp - mem->stack));
@@ -1940,7 +1935,6 @@ static int polish1(psk code, Boolean commentsAllowed)
                     }
                 if(!strcmp(&(code->LEFT->u.sobj), "tbl") && StaticArray(code->RIGHT))
                     {
-                    //                printf("Static:"); result(code); printf("\n");
                     return 0;
                     }
 
@@ -2150,7 +2144,7 @@ static Boolean printmem(forthMemory* mem)
                 case Extent: printf(INDNT); printf("%*td"     " Pop extent\n", 5, wordp - mem->word); --In; break;
                 case Rank: printf(INDNT); printf("%*td"      " Pop rank\n", 5, wordp - mem->word); --In; break;
                 case NoOp:
-                    naam = "";// getLogiName(wordp->u.logic);
+                    naam = "";
                     printf(INDNT); printf("%*td" " %-32s %s\n", 5, wordp - mem->word, "NoOp", naam);
                     break;
                 case TheEnd:
@@ -2195,7 +2189,6 @@ static psk createOperatorNode(int operator)
     if(operatorNode)
         {
         operatorNode->v.fl = (operator | SUCCESS | READY) & COPYFILTER;
-        //operatorNode->v.fl &= COPYFILTER;
         operatorNode->LEFT = 0;
         operatorNode->RIGHT = 0;
         }
@@ -2455,8 +2448,6 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                         {
                         wipe(*arg);
                         *arg = res;
-                        //*arg = same_as_w(res);
-                        //res->v.fl = READY | SUCCESS;
                         return TRUE;
                         }
                     }
@@ -3435,7 +3426,6 @@ static fortharray* haveArray(forthMemory* forthstuff, psk declaration, Boolean i
     {
     psk pname = 0;
     psk extents = 0;
-    //printf("haveArray:"); result(declaration); printf("\n");
     if(is_op(declaration))
         {
         if(is_op(declaration->LEFT))
@@ -3495,7 +3485,7 @@ static fortharray* haveArray(forthMemory* forthstuff, psk declaration, Boolean i
                     *pextent = 0; /* extent still unknown. */
                 else
                     {
-                    errorprintf("Extent specification of array \"%s\" invalid. It must be a positive number or a variable name prefixed with '!'\n", a->name);
+                    errorprintf("Extent specification \"%s\" of array \"%s\" invalid. It must be a positive number or a variable name prefixed with '!'\n", (is_op(H) ? "(non-leaf)" : &(H->u.sobj)), a->name);
                     return 0;
                     }
 
@@ -3978,13 +3968,13 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                         if(arr == 0)
                             {
                             arr = haveArray(mem, rhs, FALSE);
-                            if(arr->size != 0)
+                            if(arr != 0 && arr->size != 0)
                                 return wordp; /* Arguments are fixed. Memory is allocated foNo nr array cells. No need to reevaluate. */
                             }
 
                         if(arr == 0)
                             {
-                            errorprintf("tbl:Array is not declared\n");
+                            errorprintf("tbl:Array \"%s\"is not declared\n", &(rhs->LEFT->u.sobj));
                             return 0;
                             }
                         }
@@ -4028,6 +4018,8 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                                 {
                                 psk Arg;
                                 --rng;
+                                if(rng < arr->extent)
+                                    break; /* Why this can happen: array with rank 1, and Arg is a non atomic expression that eventually evaluates to a single integer.*/
                                 if(*rng != 0) /* If 0, extent is still unknown. Has to wait until running.  */
                                     {
                                     if(is_op(R))
@@ -4188,7 +4180,6 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                         if(!strcmp(ep->name, name))
                             {
                             wordp->action = ep->action;
-                            //if(wordp->action == Idx || wordp->action == Tbl)
                             if(!setArity(wordp, code, ep->arity))
                                 {
                                 errorprintf("Argument error in call to \"%s\".\n", name);
@@ -4533,7 +4524,6 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
                 name = &(arg->LEFT->u.sobj);
                 if(*name)
                     {
-                    //printf("Creating function [%s]\n", name);
                     assert(forthstuff->name == 0);
                     forthstuff->name = (char*)bmalloc(strlen(name) + 1);
                     if(forthstuff->name)
@@ -4690,7 +4680,6 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
 
 static Boolean calculationnew(struct typedObjectnode* This, ppsk arg)
     {
-    //printf("sizeof forthword %zu\n", sizeof(forthword));
     if(is_op(*arg))
         {
         forthMemory* forthstuff = calcnew((*arg)->RIGHT, 0, FALSE);
