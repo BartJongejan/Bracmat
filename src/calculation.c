@@ -7,6 +7,7 @@
 #include "globals.h" /*nilNode*/
 #include "writeerr.h"
 #include "filewrite.h"
+#include "eval.h"
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -101,6 +102,7 @@ typedef enum
     , EIdx  /* !(idx$(<array name>,<index>,...)) */
     , Extent /* extent$(<array name>,d)) 0 <= d < rank, returns 0 if d < 0 or d >= array rank */
     , Rank  /* rank$(<array name>)) */
+    , Eval /* callback, evaluate normal Bracmat code */
     , NoOp
     } actionType;
 
@@ -184,6 +186,7 @@ static char* ActionAsWord[] =
     ,"Eidx"
     ,"extent"
     ,"rank"
+    ,"eval"
     ,"NoOp"
     };
 
@@ -266,7 +269,7 @@ typedef struct forthword
 #endif
     union
         {
-        fortharray* arrp; forthvalue* valp; forthvalue val; dumbl logic; struct forthMemory* that;
+        fortharray* arrp; forthvalue* valp; forthvalue val; dumbl logic; struct forthMemory* that; psk Pnode /*callback*/;
         } u;
     } forthword;
 
@@ -868,8 +871,9 @@ static Etriple etriples[] =
         {"Eidx",  EIdx,0},
         {"extent", Extent,0},
         {"rank",  Rank,0},
+        {"eval",  Eval,0},
         {"NoOp",  NoOp,0},
-        {0,0}
+        {0,0,0}
     };
 
 static char* getLogiName(dumbl logi)
@@ -1273,6 +1277,14 @@ static stackvalue* calculateBody(forthMemory* mem)
                 case Rank:
                     {
                     sp = getArrayRank(sp);
+                    ++wordp;
+                    break;
+                    }
+                case Eval:
+                    {
+                    psk pnode;
+                    pnode = eval(same_as_w(wordp->u.Pnode));
+                    wipe(pnode);
                     ++wordp;
                     break;
                     }
@@ -1731,6 +1743,13 @@ static stackvalue* trcBody(forthMemory* mem)
                     ++wordp;
                     break;
                     }
+                case Eval:
+                    {
+                    printf("Eval        ");
+                    eval(wordp->u.Pnode);
+                    ++wordp;
+                    break;
+                    }
                 case NoOp:
                     printf("NoOp        ");
                     ++wordp;
@@ -1933,9 +1952,13 @@ static int polish1(psk code, Boolean commentsAllowed)
                     errorprintf("calculation: lhs of $ is operator\n");
                     return -1;
                     }
-                if(!strcmp(&(code->LEFT->u.sobj), "tbl") && StaticArray(code->RIGHT))
+                else if(!strcmp(&(code->LEFT->u.sobj), "tbl") && StaticArray(code->RIGHT))
                     {
                     return 0;
+                    }
+                else if(!strcmp(&(code->LEFT->u.sobj), "eval"))
+                    {
+                    return 1;
                     }
 
                 C = polish1(code->RIGHT, FALSE);
@@ -2143,6 +2166,7 @@ static Boolean printmem(forthMemory* mem)
                 case EIdx:  printf(INDNT); printf("%*td"     " Pop Eidx\n", 5, wordp - mem->word); --In; break;
                 case Extent: printf(INDNT); printf("%*td"     " Pop extent\n", 5, wordp - mem->word); --In; break;
                 case Rank: printf(INDNT); printf("%*td"      " Pop rank\n", 5, wordp - mem->word); --In; break;
+                case Eval: printf(INDNT); printf("%*td"      " Pop eval\n", 5, wordp - mem->word); --In; break;
                 case NoOp:
                     naam = "";
                     printf(INDNT); printf("%*td" " %-32s %s\n", 5, wordp - mem->word, "NoOp", naam);
@@ -2488,13 +2512,13 @@ static Boolean shortcutJumpChains(forthword* wordp)
                 }
             wordp->offset = (unsigned int)(label - wstart);
             }
-        }
-    //#define SHOWOPTIMIZATIONS
+            }
+        //#define SHOWOPTIMIZATIONS
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("shortcutJumpChains\n");
 #endif
     return res;
-    }
+        }
 
 static Boolean combinePopBranch(forthword* wordp)
     {
@@ -2509,13 +2533,13 @@ static Boolean combinePopBranch(forthword* wordp)
                 wordp->offset = wordp[1].offset;
                 res = TRUE;
                 }
+                }
             }
-        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("combinePopBranch\n");
 #endif
     return res;
-    }
+        }
 
 static Boolean combineBranchPopBranch(forthword* wstart)
     {
@@ -2533,13 +2557,13 @@ static Boolean combineBranchPopBranch(forthword* wstart)
                 wordp->u.logic = label->u.logic;
                 res = TRUE;
                 }
+                }
             }
-        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("combineBranchPopBranch\n");
 #endif
     return res;
-    }
+        }
 
 static void markReachable(forthword* wordp, forthword* wstart, char* marks)
     {
@@ -3216,13 +3240,13 @@ Labels [119 - 129) decremented by 1
                         }
                     }
                 }
-            }
-        }
+                    }
+                }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("eliminateBranch\n");
 #endif
     return res;
-    }
+            }
 
 
 static int removeNoOp(forthMemory* mem, int length)
@@ -3385,13 +3409,13 @@ static Boolean combinePopThenPop(forthword* wstart, char* marks)
                     default:
                         ;
                 }
+                }
             }
-        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("combinePopThenPop\n");
 #endif
     return res;
-    }
+        }
 
 #define VARCOMP (NOT|GREATER_THAN|SMALLER_THAN|INDIRECT)
 
@@ -3960,7 +3984,13 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                 Etriple* ep = etriples;
                 char* name = &code->LEFT->u.sobj;
                 psk rhs = code->RIGHT;
-                if(!strcmp(name, "tbl"))
+                if(!strcmp(name, "eval"))
+                    {
+                    wordp->action = Eval;
+                    wordp->u.Pnode = same_as_w(rhs);
+                    return ++wordp;
+                    }
+                else if(!strcmp(name, "tbl"))
                     { /* Check that name is array name and that arity is correct. */
                     if(is_op(rhs))
                         {
@@ -4388,6 +4418,15 @@ static Boolean setparm(size_t Ndecl, forthMemory* forthstuff, psk declaration, B
     return TRUE;
     }
 
+static void wipepnodes(forthword* word)
+    {
+    for(; word && word->action != TheEnd; ++word)
+        {
+        if(word->action == Eval)
+            wipe(word->u.Pnode);
+        }
+    }
+
 static Boolean calcdie(forthMemory* mem);
 
 static Boolean functiondie(forthMemory* mem)
@@ -4476,6 +4515,7 @@ static Boolean functiondie(forthMemory* mem)
         }
     if(mem->word)
         {
+        wipepnodes(mem->word);
         bfree(mem->word);
         mem->word = 0;
         }
@@ -4698,6 +4738,7 @@ static Boolean calcdie(forthMemory* mem)
         {
         if(mem->word)
             {
+            wipepnodes(mem->word);
             bfree(mem->word);
             mem->word = 0;
             }
