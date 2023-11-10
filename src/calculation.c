@@ -1746,7 +1746,9 @@ static stackvalue* trcBody(forthMemory* mem)
                 case Eval:
                     {
                     printf("Eval        ");
-                    eval(wordp->u.Pnode);
+                    psk pnode;
+                    pnode = eval(same_as_w(wordp->u.Pnode));
+                    wipe(pnode);
                     ++wordp;
                     break;
                     }
@@ -2171,7 +2173,7 @@ static Boolean printmem(forthMemory* mem)
                 case EIdx:  printf(INDNT); printf("%*td"     " Pop Eidx\n", 5, wordp - mem->word); --In; break;
                 case Extent: printf(INDNT); printf("%*td"     " Pop extent\n", 5, wordp - mem->word); --In; break;
                 case Rank: printf(INDNT); printf("%*td"      " Pop rank\n", 5, wordp - mem->word); --In; break;
-                case Eval: printf(INDNT); printf("%*td"      " Pop eval\n", 5, wordp - mem->word); --In; break;
+                case Eval: printf(INDNT); printf("%*td"      " eval\n", 5, wordp - mem->word); --In; break;
                 case NoOp:
                     naam = "";
                     printf(INDNT); printf("%*td" " %-32s %s\n", 5, wordp - mem->word, "NoOp", naam);
@@ -3947,6 +3949,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                     {
                     wordp->action = Eval;
                     wordp->u.Pnode = same_as_w(code->RIGHT);
+                    mustpop = enopop;
                     return ++wordp;
                     }
                 else /* whl'(blbla) */
@@ -4677,12 +4680,13 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
                                 printf("\nOptimization loop %d\n", ++loop);
 #endif
                                 Boolean somethingdone = FALSE;
+                                
                                 somethingdone |= shortcutJumpChains(forthstuff->word);
                                 somethingdone |= combinePopBranch(forthstuff->word);
                                 somethingdone |= combineBranchPopBranch(forthstuff->word);
                                 memset(marks, 0, length * sizeof(char));
                                 somethingdone |= markUnReachable(forthstuff->word, marks);
-                                //somethingdone |= moveBranchesTowardsEndOverNoOp(forthstuff->word);
+                                
                                 if(somethingdone)
                                     {
                                     length = removeNoOp(forthstuff, length);
@@ -4698,6 +4702,7 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
                                 somethingdone |= stack2var_var2stack(forthstuff->word);
                                 somethingdone |= removeIdempotentActions(forthstuff->word);
                                 somethingdone |= combinePushAndOperation(forthstuff->word);
+                                
                                 if(somethingdone)
                                     {
                                     length = removeNoOp(forthstuff, length);
