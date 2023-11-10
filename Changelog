@@ -1,3 +1,8 @@
+10 November 2023
+Embed `normal' Bracmat expression in UFP object using eval'(expression).
+For now, no value is passed to or returned from eval. (This might change.)
+Expression can export data from UFP object.
+
 12 October 2023
 Fixed: argument of 'idx$(array, args)' can be complex expression that evaluates
 to a number. 
