@@ -1956,29 +1956,34 @@ static int polish1(psk code, Boolean commentsAllowed)
                     {
                     return 0;
                     }
-                else if(!strcmp(&(code->LEFT->u.sobj), "eval"))
+                else
                     {
-                    return 1;
+                    C = polish1(code->RIGHT, FALSE);
+                    if(C == 1 && code->RIGHT->u.sobj == '\0') /* No parameters at all. */
+                        C = 0;
+                    if(C == -1)
+                        return -1;
+                    return 1 + C;
                     }
-
-                C = polish1(code->RIGHT, FALSE);
-                if(C == 1 && code->RIGHT->u.sobj == '\0') /* No parameters at all. */
-                    C = 0;
-                if(C == -1)
-                    return -1;
-                return 1 + C;
             case FUU:
                 if(is_op(code->LEFT))
                     {
                     errorprintf("calculation: lhs of ' is operator\n");
                     return -1;
                     }
-                C = polish1(code->RIGHT, FALSE);
-                if(C == -1)
-                    return -1;
-                return 6 + C;
-                /* 0: jump +5 1: pop 2 : jump to wstart of loop 3: pop 4: jump out of the loop.
-                One more for jump after loop*/
+                else if(!strcmp(&(code->LEFT->u.sobj), "eval"))
+                    {
+                    return 1;
+                    }
+                else
+                    {
+                    C = polish1(code->RIGHT, FALSE);
+                    if(C == -1)
+                        return -1;
+                    return 6 + C;
+                    /* 0: jump +5 1: pop 2 : jump to wstart of loop 3: pop 4: jump out of the loop.
+                    One more for jump after loop*/
+                    }
             default:
                 if(is_op(code))
                     {
@@ -3936,47 +3941,56 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                     }
                 return wordp;
                 }
-            case FUU: /* whl'(blbla) */
+            case FUU: 
                 {
-                forthword* saveword = wordp;
-                forthword* loop = wordp + sizeof(jumpblock) / sizeof(forthword);
-                jumpblock* j5 = (jumpblock*)wordp;
-                wordp = polish2(mem, j5, code->RIGHT, loop, FALSE);
-                if(wordp == 0)
+                if(!strcmp(&code->LEFT->u.sobj, "eval")) /* eval'(normal Bracmat code) */
                     {
-                    mustpop = enopop;
-                    return 0; /* Something wrong happened. */
+                    wordp->action = Eval;
+                    wordp->u.Pnode = same_as_w(code->RIGHT);
+                    return ++wordp;
                     }
-                else if(wordp == loop) /* Loop body is function definition. Ignore this ' operator. */
+                else /* whl'(blbla) */
                     {
-                    mustpop = enopop;
-                    return saveword;
-                    }
-                else
-                    {
-                    wordp->action = Branch;
-                    wordp->u.logic = fwhl;
-                    wordp->offset = (unsigned int)((j5->j + ((mustpop == epop) ? epopS : eS)) - mem->word); /* If all good, jump back to wstart of loop */
+                    forthword* saveword = wordp;
+                    forthword* loop = wordp + sizeof(jumpblock) / sizeof(forthword);
+                    jumpblock* j5 = (jumpblock*)wordp;
+                    wordp = polish2(mem, j5, code->RIGHT, loop, FALSE);
+                    if(wordp == 0)
+                        {
+                        mustpop = enopop;
+                        return 0; /* Something wrong happened. */
+                        }
+                    else if(wordp == loop) /* Loop body is function definition. Ignore this ' operator. */
+                        {
+                        mustpop = enopop;
+                        return saveword;
+                        }
+                    else
+                        {
+                        wordp->action = Branch;
+                        wordp->u.logic = fwhl;
+                        wordp->offset = (unsigned int)((j5->j + ((mustpop == epop) ? epopS : eS)) - mem->word); /* If all good, jump back to wstart of loop */
 
-                    ++wordp;
+                        ++wordp;
 
-                    j5->j[estart].offset = (unsigned int)(((j5->j + estart) + sizeof(jumpblock) / sizeof(forthword)) - mem->word);
-                    j5->j[estart].action = Branch;
-                    j5->j[estart].u.logic = fwhl;
-                    j5->j[epopS].offset = 1;
-                    j5->j[epopS].action = Pop;
-                    j5->j[epopS].u.logic = fwhl;
-                    j5->j[eS].offset = j5->j[estart].offset;
-                    j5->j[eS].action = Branch;
-                    j5->j[eS].u.logic = fwhl;
-                    j5->j[epopF].offset = 1;
-                    j5->j[epopF].action = Pop;
-                    j5->j[epopF].u.logic = fwhl;
-                    j5->j[eF].offset = (unsigned int)(&(jumps->j[eS]) - mem->word); /* whl loop terminates when one of the steps in the loop failed */
-                    j5->j[eF].action = Branch;
-                    j5->j[eF].u.logic = fwhl;
-                    mustpop = enopop;
-                    return wordp;
+                        j5->j[estart].offset = (unsigned int)(((j5->j + estart) + sizeof(jumpblock) / sizeof(forthword)) - mem->word);
+                        j5->j[estart].action = Branch;
+                        j5->j[estart].u.logic = fwhl;
+                        j5->j[epopS].offset = 1;
+                        j5->j[epopS].action = Pop;
+                        j5->j[epopS].u.logic = fwhl;
+                        j5->j[eS].offset = j5->j[estart].offset;
+                        j5->j[eS].action = Branch;
+                        j5->j[eS].u.logic = fwhl;
+                        j5->j[epopF].offset = 1;
+                        j5->j[epopF].action = Pop;
+                        j5->j[epopF].u.logic = fwhl;
+                        j5->j[eF].offset = (unsigned int)(&(jumps->j[eS]) - mem->word); /* whl loop terminates when one of the steps in the loop failed */
+                        j5->j[eF].action = Branch;
+                        j5->j[eF].u.logic = fwhl;
+                        mustpop = enopop;
+                        return wordp;
+                        }
                     }
                 }
             case FUN:
@@ -3984,13 +3998,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                 Etriple* ep = etriples;
                 char* name = &code->LEFT->u.sobj;
                 psk rhs = code->RIGHT;
-                if(!strcmp(name, "eval"))
-                    {
-                    wordp->action = Eval;
-                    wordp->u.Pnode = same_as_w(rhs);
-                    return ++wordp;
-                    }
-                else if(!strcmp(name, "tbl"))
+                if(!strcmp(name, "tbl"))
                     { /* Check that name is array name and that arity is correct. */
                     if(is_op(rhs))
                         {
