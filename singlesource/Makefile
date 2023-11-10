@@ -1,8 +1,11 @@
 bracmat: bracmat.c 
 	gcc -std=c99 -pedantic -Wall -O2 -DNDEBUG -o bracmat bracmat.c -lm
 
-bracmat.c: ../src/bracmat
+bracmat.c: ../src/bracmat | BRA
 	../src/bracmat "get'\"one.bra\""
+
+BRA:
+	mkdir -p $@
 
 ../src/bracmat:
 	cd ../src && make && cd ../singlesource
