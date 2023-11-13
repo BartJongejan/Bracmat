@@ -2324,10 +2324,9 @@ static psk FractionNode(double val)
     char jotter[512];
     size_t bytes = offsetof(sk, u.obj) + 1;
 #if defined __EMSCRIPTEN__
-//    long long long1 = (long long)1;
-    int64_t long1 = (int64_t)1;
+    uint64_t long1 = (uint64_t)1;
 #else
-    int64_t long1 = (int64_t)1;
+    uint64_t long1 = (uint64_t)1;
 #endif
     double fcac = (double)(long1 << 52);
     int exponent;
@@ -2375,7 +2374,7 @@ static psk FractionNode(double val)
             { /* DANGER: multiplication can easily overflow! */
             if(shft < 64)
                 {
-                bytes += sprintf(jotter, "%" PRId64 "/" "%" PRId64, Mantissa, (int64_t)(long1 << shft));
+                bytes += sprintf(jotter, "%" PRId64 "/" "%" PRIu64, Mantissa, (uint64_t)(long1 << shft));
                 flg |= QFRACTION;
                 }
             else
