@@ -832,7 +832,14 @@ X=
               &   put
                 $ (!text,str$(!NAAM ".txt"),NEW,RAW,BIN)
               & !text
-            | out$(CANNOT-READ !arg)&~
+            |   (   !arg
+                  : ( "bracmat.h"
+                    | "sys/os.h"
+                    | "os.h"
+                    )
+                | out$(CANNOT-READ !arg)
+                )
+              & ~
         )
       & includeStuff$!arg:?uit
       &   put
