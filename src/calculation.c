@@ -4131,7 +4131,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                                 {
                                 if(!is_op(rhs) && parms > func->parameters)
                                     {
-                                    errorprintf("Too few parameters.\n");
+                                    errorprintf("Too few parameters when calling \"%s\".\n",name);
                                     //    return 0;
                                     }
                                 psk parm;
@@ -4143,14 +4143,14 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                                     {
                                     if(is_op(parm))
                                         {
-                                        errorprintf("Array name expected.\n");
+                                        errorprintf("Array name expected in call to \"%s\".\n",name);
                                         return 0;
                                         }
                                     else
                                         {
                                         if(HAS_VISIBLE_FLAGS_OR_MINUS(parm))
                                             {
-                                            errorprintf("When passing an array to a function, the array name must be free of any prefixes.\n");
+                                            errorprintf("Parameter \"%s\", while calling \"%s\": You seem to pass a scalar where an array is expected.\n",&(parm->u.sobj),name);
                                             return 0;
                                             }
                                         }
