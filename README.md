@@ -65,7 +65,7 @@ pattern matching.
       Documentation in PDF format, generated from bracmat.tex, which, in turn,
       can be generated from the bracmat script 'help'.
       Run bracmat. At the prompt, enter 'get$help'. Choose 'htmllatex' to generate
-      bracmat.tex. Use e.g. TeXstudio to create bracat.pdf from bracmat.tex.
+      bracmat.tex. Use e.g. TeXstudio to create bracmat.pdf from bracmat.tex.
       Remember to rerun 'makeindex bracmat.idx' from the command line to update
       the index.
 
