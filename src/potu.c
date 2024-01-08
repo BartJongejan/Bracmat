@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "10 November 2023"
-#define VERSION "6.20.5"
-#define BUILD "297"
+#define DATUM "7 Januari 2024"
+#define VERSION "6.20.6"
+#define BUILD "298"
 /*
 COMPILATION
 -----------
@@ -700,7 +700,7 @@ int startProc(
                                 "?s&whl'(!arg:%?a ?arg&(!a:(.?e.)&(!L.) !B:?B&:?L&!e !s:?s|(!a:(?e.?,?"
                                 ")&!a|!a:(?e.?x)&(!s:!e ?s&(!e.!x,!L) (!B:(%?L.) ?B&)|!a)|!a) !L:?L))&"
                                 "!L),",
-                                "(toML=O d t g l \246 w \242 \247 H G S D E F I U x.:?O&0:?x&chr$\261\262\267"
+                                "(toML=O d t g l \246 w \242 \247 H G S D E F I U x Q.:?O&0:?x&chr$\261\262\267"
                                 ":?D&(d=a.whl'(!arg:%?a ?arg&!a !O:?O))&'(a c n.@(!arg:?a (>%@($D) ?:"
                                 "?arg))&(@(!arg:(%?c&utf$!c:?n) ?arg)|@(!arg:(%?c&asc$!c:?n) ?arg))&!a"
                                 " \246\243 !n \273 S$!arg|!arg):(=?S)&'(a c n.@(!arg:?a (>%@($D) ?:"

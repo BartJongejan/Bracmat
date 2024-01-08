@@ -1,4 +1,5 @@
 {lex.bra
+𝕌𝕋𝔽-𝟠
 
 analyse bracmat code for lexicality
 
@@ -76,7 +77,16 @@ Usage:
             + x2d
             + "?"
           : ?builtins
-        &   cat+cos+fct+flt+jsn+nestML+out+sin+tay+toML
+        &     cat
+            + cos
+            + fct
+            + flt
+            + jsn
+            + nestML
+            + out
+            + sin
+            + tay
+            + toML
           : ?predefs
         &   0
           : ?notreffunc
@@ -97,7 +107,15 @@ Usage:
           )
         & (CONTXT=.!arg:!sjt ?&?)
         & ( testDeclaration
-          =   name vars unrefs A a b Z context contxt
+          =     name
+                vars
+                unrefs
+                A
+                a
+                b
+                Z
+                context
+                contxt
             .   !arg:(?context.?name.?vars.?unrefs)
               & ( !name:
                 |     '$vars
@@ -111,9 +129,34 @@ Usage:
                               ?Z
                             )
                       & "Remove function or variable from list of unreferenced functions or variables."
-                      & !A (!contxt.!a+!b) !Z:?unrefs
+                      &   !A (!contxt.!a+!b) !Z
+                        : ?unrefs
                     | 
                     )
+                )
+              & !unrefs
+          )
+        & ( variabl
+          =   name context vars unrefs
+            .   !arg:(?name.?context.?vars.?unrefs)
+              & "******** VARIABLE (?var or !var) ********"
+              & ( !name:(arg|sjt)
+                |   testDeclaration$(!context.!name.!vars.!unrefs)
+                  : ?unrefs
+                | !globalvars:?+#*!name+?
+                |   (     !definedfuncs
+                        :   ?aaF
+                            (CONTXT$!context.?Af+#*!name+?Zf)
+                            ?zzF
+                      &   !aaF (!CONTXT.!Af+!Zf) !zzF
+                        : ?definedfuncs
+                    | 
+                    )
+                  &   (   !notdeclvars:?A+(!context.?M)+?Z
+                        & !A+(!context.!name+!M)+!Z
+                      | !notdeclvars+(!context.!name)
+                      )
+                    : ?notdeclvars
                 )
               & !unrefs
           )
@@ -125,12 +168,18 @@ Usage:
             .   !arg:(?context.?vars.?unrefs.?arg)
               & (   !arg:(=?lhs_?rhs)
                   & (     !arg
-                        : (=$(?$?)|$(?'?))
+                        : ( 
+                          = $(?$?)|$(?'?)
+                          )
                       & "******** FUNCTION CALL (function$parameters or function'parameters) ********"
-                      & ( !lhs:
+                      & (   !lhs:
+                          & ( !rhs:@:~&
+                            | 
+                            )
                         | !builtins+!predefs:?+!lhs+?
                         | !lhs:(=?.?)
-                        | !('(flg'$lhs)):(=$!.?)
+                        |   !('(flg'$lhs))
+                          : (=$!.?)
                         |   (     testDeclaration
                                 $ (!context.!lhs.!vars.!unrefs)
                               : ?unrefs
@@ -149,7 +198,11 @@ Usage:
                                     )
                                     ?Z
                               &     !A
-                                    (!C.!AA+!N*(!lhs.!use+Referenced)+!ZZ)
+                                    ( !C
+                                    .   !AA
+                                      + !N*(!lhs.!use+Referenced)
+                                      + !ZZ
+                                    )
                                     !Z
                                 : ?definedfuncs
                             |   (     !undefinedfuncs
@@ -160,10 +213,12 @@ Usage:
                               : ?undefinedfuncs
                             )
                         )
-                      &   Y$(!context.!vars.!unrefs.'$rhs)
+                      &     Y
+                          $ (!context.!vars.!unrefs.'$rhs)
                         : ?unrefs
                     |   !arg:(=$(?=?))
-                      & (!lhs:~|^):?lhs
+                      &   (!lhs:~|^)
+                        : ?lhs
                       & (   '$rhs:(=?V.?c)
                           & "******** FUNCTION DEFINITION (function=local vars.definition) ********"
                           & pickVars$!V:?V
@@ -182,26 +237,35 @@ Usage:
                                 )
                               &   (     !definedfuncs
                                       : ?A (!context.?M) ?Z
-                                    & (   !M:?+#*(!lhs.?)+?
+                                    & (     !M
+                                          : ?+#*(!lhs.?)+?
                                         & !definedfuncs
-                                      | !A (!context.(!lhs.0)+!M) !Z
+                                      |   !A
+                                          (!context.(!lhs.0)+!M)
+                                          !Z
                                       )
-                                  | (!context.!lhs.0) !definedfuncs
+                                  |   (!context.!lhs.0)
+                                      !definedfuncs
                                   )
                                 : ?definedfuncs
                             )
                           &     Y
                               $ ( !context !lhs
-                                . (!context !lhs.!V) !vars
-                                . (!context !lhs.!V) !unrefs
+                                .   (!context !lhs.!V)
+                                    !vars
+                                .   (!context !lhs.!V)
+                                    !unrefs
                                 . '$c
                                 )
                             : ?unrefs
                           & (     !unrefs
                                 :   ?
-                                    (!context !lhs.%+?:?unr)
+                                    ( !context !lhs
+                                    . %+?:?unr
+                                    )
                                     ?
-                              &   (!context !lhs.!unr)+!unusedLocals
+                              &     (!context !lhs.!unr)
+                                  + !unusedLocals
                                 : ?unusedLocals
                             | 
                             )
@@ -212,51 +276,42 @@ Usage:
                               : ?unrefs
                             |   !context:
                               & !globalvars+!lhs:?globalvars
-                            |   (   !notdeclvars:?A+(!context.?M)+?Z
+                            |   (     !notdeclvars
+                                    : ?A+(!context.?M)+?Z
                                   & !A+(!context.!lhs+!M)+!Z
                                 | !notdeclvars+(!context.!lhs)
                                 )
                               : ?notdeclvars
                             )
-                          &   Y$(!context.!vars.!unrefs.'$rhs)
+                          &     Y
+                              $ (!context.!vars.!unrefs.'$rhs)
                             : ?unrefs
                         )
-                    |     Y$(!context.!vars.!unrefs.'$lhs)
+                    |       Y
+                          $ (!context.!vars.!unrefs.'$lhs)
                         : ?unrefs
-                      &   Y$(!context.!vars.!unrefs.'$rhs)
+                      &     Y
+                          $ (!context.!vars.!unrefs.'$rhs)
                         : ?unrefs
                     )
-                |   !arg:(=$!|$?)
+                |     !arg
+                    : (=$!|$?)
                   &   flg$!arg
                     : (=?.%?name (|))
-                  & "******** VARIABLE (?var or !var) ********"
-                  & ( !name:(arg|sjt)
-                    |   testDeclaration$(!context.!name.!vars.!unrefs)
-                      : ?unrefs
-                    | !globalvars:?+#*!name+?
-                    |   (     !definedfuncs
-                            :   ?aaF
-                                (CONTXT$!context.?Af+#*!name+?Zf)
-                                ?zzF
-                          &   !aaF (!CONTXT.!Af+!Zf) !zzF
-                            : ?definedfuncs
-                        | 
-                        )
-                      &   (   !notdeclvars:?A+(!context.?M)+?Z
-                            & !A+(!context.!name+!M)+!Z
-                          | !notdeclvars+(!context.!name)
-                          )
-                        : ?notdeclvars
-                    )
+                  &   variabl$(!name.!context.vars.!unrefs)
+                    : ?unrefs
                 | 
                 )
               & !unrefs
           )
         & (   '$lex:(=? !arg ?.?)
             & out$(!arg is local var in lex)
-            & Y$(...'($arg=$(-2$!arg))):?unrefs
+            &     Y
+                $ (...'($arg=$(-2$!arg)))
+              : ?unrefs
             & -1$!arg
-          | Y$(...'($arg=$!arg)):?unrefs
+          |   Y$(...'($arg=$!arg))
+            : ?unrefs
           )
         &   put
           $ ( "==========================================================
@@ -268,9 +323,9 @@ Lexical analysis. See program code further down this file.
  ----------------------
 "
             , "lex.txt"
-            , NEW
+            , NEW BIN
             )
-        & lst$(notdeclfuncs,"lex.txt",APP)
+        & lst$(notdeclfuncs,"lex.txt",APP BIN)
         &   put
           $ ( "
  ----------------------
@@ -278,13 +333,14 @@ Lexical analysis. See program code further down this file.
  ----------------------
 "
             , "lex.txt"
-            , APP
+            , APP BIN
             )
-        & lst$(notdeclvars,"lex.txt",APP)
+        & lst$(notdeclvars,"lex.txt",APP BIN)
         & !definedfuncs:?reffunc
         & 0:?notreffunc
         &   whl
-          ' ( !reffunc:?A (?M.?AA+#?N*(?jj.0)+?ZZ) ?Z
+          ' (   !reffunc
+              : ?A (?M.?AA+#?N*(?jj.0)+?ZZ) ?Z
             & !notreffunc+(!M !jj):?notreffunc
             & !A (!M.!AA+!ZZ) !Z:?reffunc
             )
@@ -295,9 +351,9 @@ Lexical analysis. See program code further down this file.
  ------------------------
 "
             , "lex.txt"
-            , APP
+            , APP BIN
             )
-        & lst$(unusedLocals,"lex.txt",APP)
+        & lst$(unusedLocals,"lex.txt",APP BIN)
         &   put
           $ ( "
  ----------------
@@ -305,9 +361,9 @@ Lexical analysis. See program code further down this file.
  ----------------
 "
             , "lex.txt"
-            , APP
+            , APP BIN
             )
-        & lst$(unrefs,"lex.txt",APP)
+        & lst$(unrefs,"lex.txt",APP BIN)
         &   put
           $ ( "
  -------------------
@@ -315,9 +371,9 @@ Lexical analysis. See program code further down this file.
  -------------------
 "
             , "lex.txt"
-            , APP
+            , APP BIN
             )
-        & lst$(definedfuncs,"lex.txt",APP)
+        & lst$(definedfuncs,"lex.txt",APP BIN)
         &   put
           $ ( "
  ---------------------
@@ -325,9 +381,9 @@ Lexical analysis. See program code further down this file.
  ---------------------
 "
             , "lex.txt"
-            , APP
+            , APP BIN
             )
-        & lst$(undefinedfuncs,"lex.txt",APP)
+        & lst$(undefinedfuncs,"lex.txt",APP BIN)
         &   put
           $ ( "
  ------------------------
@@ -335,9 +391,9 @@ Lexical analysis. See program code further down this file.
  ------------------------
 "
             , "lex.txt"
-            , APP
+            , APP BIN
             )
-        & lst$(notreffunc,"lex.txt",APP)
+        & lst$(notreffunc,"lex.txt",APP BIN)
         &   put
           $ ( "
  ----------------------
@@ -345,9 +401,9 @@ Lexical analysis. See program code further down this file.
  ----------------------
 "
             , "lex.txt"
-            , APP
+            , APP BIN
             )
-        & lst$(reffunc,"lex.txt",APP)
+        & lst$(reffunc,"lex.txt",APP BIN)
         &   put
           $ ( "
  ------------------
@@ -355,9 +411,9 @@ Lexical analysis. See program code further down this file.
  ------------------
 "
             , "lex.txt"
-            , APP
+            , APP BIN
             )
-        & lst$(globalvars,"lex.txt",APP)
+        & lst$(globalvars,"lex.txt",APP BIN)
         &   put
           $ ( "
  ------------------
@@ -365,16 +421,20 @@ Lexical analysis. See program code further down this file.
  ------------------
 "
             , "lex.txt"
-            , APP
+            , APP BIN
             )
-        & lst$(globalfuncs,"lex.txt",APP)
-        & put$("
+        & lst$(globalfuncs,"lex.txt",APP BIN)
+        &   put
+          $ ( "
 
 ============
 Program code
 ============
-","lex.txt",APP)
-        & lst$(!arg,"lex.txt",APP)
+"
+            , "lex.txt"
+            , APP BIN
+            )
+        & lst$(!arg,"lex.txt",APP BIN)
         & "
 ===========
 See lex.txt
@@ -387,6 +447,7 @@ rr=
 & ren$("lex.bra".str$(lex ".bak"))
 &   put
   $ ( "{lex.bra
+𝕌𝕋𝔽-𝟠
 
 analyse bracmat code for lexicality
 
@@ -396,13 +457,13 @@ Usage:
 
 "
     , "lex.bra"
-    , NEW
+    , NEW BIN
     )
-& lst'("sOme wEiRdN→ame","lex.bra",APP)
-& put'(\n,"lex.bra",APP)
-& lst'(rr,"lex.bra",APP)
+& lst'("sOme wEiRdN→ame","lex.bra",APP BIN)
+& put'(\n,"lex.bra",APP BIN)
+& lst'(rr,"lex.bra",APP BIN)
 & put$("
 new'\"sOme wEiRdN→ame\";
-","lex.bra",APP);
+","lex.bra",APP BIN);
 
 new'"sOme wEiRdN→ame";

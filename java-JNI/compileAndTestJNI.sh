@@ -13,17 +13,17 @@ rm libbracmat.*
 rm bracmattest
 rm bracmat
 rm dk_cst_bracmat.h
+rm ../singlesource/bracmat.c
 
 # Create bracmat.c from multiple source files.
 pushd ../src && make && popd
 # Create stand-alone bracmat.
-gcc -std=c99 -pedantic -Wall -O2 -DNDEBUG ../singlesource/bracmat.c -lm
-mv a.out bracmat
+pushd ../singlesource && make && popd 
 # Test the stand-alone version of Bracmat.
 # Expect a line only saying 'bracmat alife and kicking'.
 ./bracmat 'put$"bracmat alife and kicking\n"'
 
-cd java
+pushd java
 JDK_DIRS="/usr/lib/jvm/java /usr/lib/jvm/default-java ${OPENJDKS} /usr/lib/jvm/java-6-openjdk /usr/lib/jvm/java-6-sun /usr/lib/jvm/java-7-oracle /usr/lib/jvm/java-11-openjdk-amd64/"
 echo "JDK_DIRS $JDK_DIRS"
 # Look for the right JVM to use
@@ -42,13 +42,13 @@ echo "JAVA_HOME= $JAVA_HOME"
 export JAVA_HOME
 # Compile java class that loads shared object libbracmat.so.
 javac ./dk/cst/*.java -h .. -Xlint
-cd ..
+popd
 
 # Compile bracmat.c as relocatable code for shared object
 # Create bracmatso.o, 
 gcc -std=c99 -pedantic -Wall -O2 -c -fPIC -DNDEBUG ../safe/bracmatso.c -lm
 
-cd java
+pushd java
 
 # Make header file for C code that exposes methods to Java, 
 # store header file between C code one level up.
@@ -56,7 +56,7 @@ cd java
 # Jar the java class that interfaces the native code.
 jar cfv bracmat.jar dk/cst/bracmat.class
 
-cd ..
+popd
 # Compile the C code that exposes methods to Java.
 gcc -std=c99 -pedantic -Wall -pthread -c -fPIC -DNDEBUG -I$JAVA_HOME/include -I$JAVA_HOME/include/linux/ dk_cst_bracmat.c -o dk_cst_bracmat.o -lm
 # Link the two object files into a shared library (REALNAME).
@@ -97,7 +97,7 @@ gcc -std=c99 -pedantic -Wall -DNDEBUG bracmattest.c -lbracmat -o bracmattest -lm
 # (Uncomment line below if you don't 'source' this script, but copy it block-wise)
 #./bracmattest
 
-cd java
+pushd java
 #compile java test app
 javac -classpath bracmat.jar ./bracmattest.java
 
@@ -136,6 +136,7 @@ else
 	echo "did not copy bracmat.jar to tomcat lib folder. Where is it?" 
     fi
 fi
+popd
 
 # OBSOLETE!
 # Windows, Visual Studio C++ (2008, 2010 Express):
