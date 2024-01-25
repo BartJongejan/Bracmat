@@ -5,7 +5,8 @@
 
 int numbercheck(const char* begin)
     {
-    int op_or_0, check;
+    size_t op_or_0;
+    int check;
     int needNonZeroDigit = FALSE;
     int signseen = FALSE;
     char* endptr;
