@@ -696,10 +696,22 @@ int startProc(
                                 "~<>XML (? encoding ? \275 ? (\242 ?N \242|\247 ?N \247) ?|?&"
                                 "utf\255\270:?D))) ?&!D:|? (~<>html.(?,!J)|?&~`) ?|? (~<>html.?) !J)|)&(!N"
                                 ":~|!arg:? (\241DOCTYPE.@(?:? html ?)) ?&utf\255\270|!D)),",
-                                "(nestML=a L B s e x.:?L&whl'(!arg:%?a ?arg&!a !L:?L)&!L:?arg&:?L:?B:"
+                                "(nestML=a L B s e x HT5.:?L&whl'(!arg:%?a ?arg&!a !L:?L)&!L:?arg&:?L:?B:"
                                 "?s&whl'(!arg:%?a ?arg&(!a:(.?e.)&(!L.) !B:?B&:?L&!e !s:?s|(!a:(?e.?,?"
                                 ")&!a|!a:(?e.?x)&(!s:!e ?s&(!e.!x,!L) (!B:(%?L.) ?B&)|!a)|!a) !L:?L))&"
-                                "(low$!s:html&!L:?B ((?.?,?) ?:?L)&!B (!s.,!L)|!L)),",
+//                                "(low$!s:html&!L:?B ((?.?,?) ?:?L)&!B (!s.,!L)|!L)),",
+                                "(low$!s:html&!L:?B ((?.?,?) ?:?L)&!B (!s.,!L):?L|)&(!L:(? (\241DOCTYPE."
+                                "@(?:? ~<>html ?)) ?|? (~<>html.?) ?)&(HT5=L M e x a C p g A.(p=li&(g=li)"
+                                "|(dt|dd)&(g=dt|dd)|p&(g=address|article|aside|blockquote|details|div|dl|"
+                                "fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hgroup|"
+                                "hr|main|menu|nav|ol|p|pre|search|section|table|ul)|(rt|rp)&(g=rt|rp)|"
+                                "optgroup&(g=optgroup|hr)|option&(g=option|optgroup|hr)|(thead|tbody)&"
+                                "(g=tbody|tfoot)|tfoot&(g=)|tr&(g=tr)|(td|th)&(g=td|th))&:?L:?M&whl'(!arg"
+                                ":%?x ?arg&(!x:(?e.?a,?C)&(!e.!a,HT5$!C):?x|)&(!x:(!p:?e.~(?,?):?C)&("
+                                "!arg:?A ((!g.?) ?:?arg)&(!e.!C,HT5$!A):?x|(!e.!C,HT5$!arg):?x&:?arg)|!x:"
+                                "((area|base|br|col|command|embed|hr|img|input|keygen|link|meta|param|"
+                                "source|track|wbr):?e.~(?,?):?A)&(!e.!A,):?x|)&!x !L:?L)&whl'(!L:%?x ?L"
+                                "&!x !M:?M)&!M)&HT5$!L|!L)),",
                                 "(toML=O d t g l \246 w \242 \247 H G S D E F I U x Q.:?O&0:?x&chr$\261\262\267"
                                 ":?D&(d=a.whl'(!arg:%?a ?arg&!a !O:?O))&'(a c n.@(!arg:?a (>%@($D) ?:"
                                 "?arg))&(@(!arg:(%?c&utf$!c:?n) ?arg)|@(!arg:(%?c&asc$!c:?n) ?arg))&!a"
