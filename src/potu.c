@@ -21,8 +21,8 @@ email: bartj@hum.ku.dk
 */
 
 #define DATUM "7 Januari 2024"
-#define VERSION "6.20.6"
-#define BUILD "298"
+#define VERSION "6.21.0"
+#define BUILD "299"
 /*
 COMPILATION
 -----------
@@ -719,7 +719,7 @@ int startProc(
                                 "\275\242 \247$!v \242 t$!arg|)&(!arg:? (html|HTML.?) ?&(Q=!C:&low$!A:"
                                 "(area|base|br|col|command|embed|hr|img|input|keygen|link|meta|param|"
                                 "source|track|wbr))|(Q=!C:))&'(r A B C T.whl'(!arg:%?r ?arg&(!r:(?A."
-                                "?B)&(!B:(?T,?C)&($Q&d$(\274 !A t$!T \240\257\276)|d$(\274 !A t$!T "
+                                "?B)&(!B:(?T,?C)&($Q&d$(\274 !A t$!T \257\276)|d$(\274 !A t$!T "
                                 "\276)&(!A:(~<>script|~<>style)&d$!C|w$!C)&d$(\274\257 !A \276))|!A:(&"
                                 "!B:(?B.)&d$(\274\257 g$!B \276)|\241&d$(\274\241 !F$!B \276)|"
                                 "\241\255\255&d$(\274\241\255\255 !F$!B \255\255\276)|\277&d$(\274\277"

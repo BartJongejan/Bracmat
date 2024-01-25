@@ -1,3 +1,6 @@
+25 January 2024
+toML function: Removed the space before the slash in empty tags (void elements).
+
 14 November 2023
 Improved error messages when something is wrong in function call in UFP object.
 
