@@ -16,11 +16,11 @@ Bracmat is a good choice for tasks that require dynamic programming.
 Since 2023, Bracmat can do floating point calculations. The motivation for
 implementing the 'UFP' object is the long fancied ability to create
 illustrations in e.g. SVG or PGM format from within Bracmat code. Therefore
-its name: 'UnIfancyfied Floating Point'.
+its name: 'Unfancyfied Floating Point'.
       
 The only data type in UFP objects is the 64 bit double. UFP objects support
-multidimensional arrays, do not allow recursion allowed and do not support
-pattern matching.
+multidimensional arrays, do not allow recursion and do not support pattern
+matching. In short, it is all that regular Bracmat isn't.
 
 [More than three hundred examples of Bracmat code](http://rosettacode.org/wiki/Category:Bracmat) can be found at
 [Rosetta Code](http://rosettacode.org/wiki/Rosetta_Code)
