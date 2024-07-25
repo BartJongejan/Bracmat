@@ -193,7 +193,8 @@ static char* ActionAsWord[] =
 struct forthMemory;
 
 typedef psk(*exportfunct)(double x);
-exportfunct xprtfnc;
+static exportfunct xprtfnc;
+static const char* spec;
 
 typedef union forthvalue /* a number. either integer or 'real' */
     {
@@ -2198,18 +2199,20 @@ static Boolean print(struct typedObjectnode* This, ppsk arg)
     return printmem(mem);
     }
 
-enum formt { floating, integer, fraction, hexadecimal };
+enum formt { floating /* %e */, hexadecimal /* %a */, fixed /* %f */, integer, fraction };
 
 static enum formt getFormat(char* psobj)
     {
     if(!strcmp(psobj, "R"))
         return floating;
+    else if(!strcmp(psobj, "%a"))
+        return hexadecimal;
+    else if(!strcmp(psobj, "F"))
+        return fixed;
     else if(!strcmp(psobj, "N"))
         return integer;
     else if(!strcmp(psobj, "Q"))
         return fraction;
-    else if(!strcmp(psobj, "%a"))
-        return hexadecimal;
     return floating;
     }
 
@@ -2230,22 +2233,7 @@ static psk FloatNode(double val)
     {
     char jotter[500];
     size_t bytes = offsetof(sk, u.obj) + 1;
-    bytes += sprintf(jotter, "%e", val);
-    psk res = (psk)bmalloc(bytes);
-    if(res)
-        {
-        strcpy((char*)(res)+offsetof(sk, u.sobj), jotter);
-        res->v.fl = READY | SUCCESS BITWISE_OR_SELFMATCHING;
-        res->v.fl &= COPYFILTER;
-        }
-    return res;
-    }
-
-static psk HexNode(double val)
-    {
-    char jotter[500];
-    size_t bytes = offsetof(sk, u.obj) + 1;
-    bytes += sprintf(jotter, "%a", val);
+    bytes += sprintf(jotter, spec, val);
     psk res = (psk)bmalloc(bytes);
     if(res)
         {
@@ -2454,15 +2442,21 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                 {
                     case floating:
                         xprtfnc = FloatNode;
+                        spec = "%e";
+                        break;
+                    case hexadecimal:
+                        xprtfnc = FloatNode;
+                        spec = "%a";
+                        break;
+                    case fixed:
+                        xprtfnc = FloatNode;
+                        spec = "%f";
                         break;
                     case integer:
                         xprtfnc = IntegerNode;
                         break;
                     case fraction:
                         xprtfnc = FractionNode;
-                        break;
-                    case hexadecimal:
-                        xprtfnc = HexNode;
                         break;
                 }
             if(!is_op(rhs))
@@ -2518,13 +2512,13 @@ static Boolean shortcutJumpChains(forthword* wordp)
                 }
             wordp->offset = (unsigned int)(label - wstart);
             }
-            }
-        //#define SHOWOPTIMIZATIONS
+        }
+    //#define SHOWOPTIMIZATIONS
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("shortcutJumpChains\n");
 #endif
     return res;
-        }
+    }
 
 static Boolean combinePopBranch(forthword* wordp)
     {
@@ -2539,13 +2533,13 @@ static Boolean combinePopBranch(forthword* wordp)
                 wordp->offset = wordp[1].offset;
                 res = TRUE;
                 }
-                }
             }
+        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("combinePopBranch\n");
 #endif
     return res;
-        }
+    }
 
 static Boolean combineBranchPopBranch(forthword* wstart)
     {
@@ -2563,13 +2557,13 @@ static Boolean combineBranchPopBranch(forthword* wstart)
                 wordp->u.logic = label->u.logic;
                 res = TRUE;
                 }
-                }
             }
+        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("combineBranchPopBranch\n");
 #endif
     return res;
-        }
+    }
 
 static void markReachable(forthword* wordp, forthword* wstart, char* marks)
     {
@@ -3246,13 +3240,13 @@ Labels [119 - 129) decremented by 1
                         }
                     }
                 }
-                    }
-                }
+            }
+        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("eliminateBranch\n");
 #endif
     return res;
-            }
+    }
 
 
 static int removeNoOp(forthMemory* mem, int length)
@@ -3415,13 +3409,13 @@ static Boolean combinePopThenPop(forthword* wstart, char* marks)
                     default:
                         ;
                 }
-                }
             }
+        }
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("combinePopThenPop\n");
 #endif
     return res;
-        }
+    }
 
 #define VARCOMP (NOT|GREATER_THAN|SMALLER_THAN|INDIRECT)
 
@@ -3942,7 +3936,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                     }
                 return wordp;
                 }
-            case FUU: 
+            case FUU:
                 {
                 if(!strcmp(&code->LEFT->u.sobj, "eval")) /* eval'(normal Bracmat code) */
                     {
@@ -4131,7 +4125,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                                 {
                                 if(!is_op(rhs) && parms > func->parameters)
                                     {
-                                    errorprintf("Too few parameters when calling \"%s\".\n",name);
+                                    errorprintf("Too few parameters when calling \"%s\".\n", name);
                                     //    return 0;
                                     }
                                 psk parm;
@@ -4143,14 +4137,14 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                                     {
                                     if(is_op(parm))
                                         {
-                                        errorprintf("Array name expected in call to \"%s\".\n",name);
+                                        errorprintf("Array name expected in call to \"%s\".\n", name);
                                         return 0;
                                         }
                                     else
                                         {
                                         if(HAS_VISIBLE_FLAGS_OR_MINUS(parm))
                                             {
-                                            errorprintf("Parameter \"%s\", while calling \"%s\": You seem to pass a scalar where an array is expected.\n",&(parm->u.sobj),name);
+                                            errorprintf("Parameter \"%s\", while calling \"%s\": You seem to pass a scalar where an array is expected.\n", &(parm->u.sobj), name);
                                             return 0;
                                             }
                                         }
@@ -4679,13 +4673,13 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
                                 printf("\nOptimization loop %d\n", ++loop);
 #endif
                                 Boolean somethingdone = FALSE;
-                                
+
                                 somethingdone |= shortcutJumpChains(forthstuff->word);
                                 somethingdone |= combinePopBranch(forthstuff->word);
                                 somethingdone |= combineBranchPopBranch(forthstuff->word);
                                 memset(marks, 0, length * sizeof(char));
                                 somethingdone |= markUnReachable(forthstuff->word, marks);
-                                
+
                                 if(somethingdone)
                                     {
                                     length = removeNoOp(forthstuff, length);
@@ -4701,7 +4695,7 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
                                 somethingdone |= stack2var_var2stack(forthstuff->word);
                                 somethingdone |= removeIdempotentActions(forthstuff->word);
                                 somethingdone |= combinePushAndOperation(forthstuff->word);
-                                
+
                                 if(somethingdone)
                                     {
                                     length = removeNoOp(forthstuff, length);
