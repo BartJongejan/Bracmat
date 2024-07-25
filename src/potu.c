@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "7 Januari 2024"
-#define VERSION "6.21.0"
-#define BUILD "299"
+#define DATUM "25 July 2024"
+#define VERSION "6.22.0"
+#define BUILD "300"
 /*
 COMPILATION
 -----------

@@ -1,3 +1,6 @@
+25 July 2024
+UFP export function accepts more formats: "%f" or F, %a or H, N, Q and %e or R. 
+
 25 January 2024
 toML function: Removed the space before the slash in empty tags (void elements).
 nestML function: If a </html> tag is present, make sure there also is a <html> tag

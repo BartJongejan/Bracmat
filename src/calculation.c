@@ -2199,21 +2199,21 @@ static Boolean print(struct typedObjectnode* This, ppsk arg)
     return printmem(mem);
     }
 
-enum formt { floating /* %e */, hexadecimal /* %a */, fixed /* %f */, integer, fraction };
+enum formt { scientific /* %e */, hexadecimal /* %a */, floatingPoint /* %f */, integer, fraction };
 
 static enum formt getFormat(char* psobj)
     {
-    if(!strcmp(psobj, "R"))
-        return floating;
-    else if(!strcmp(psobj, "%a"))
+    if(!strcmp(psobj, "%e") || !strcmp(psobj, "R"))
+        return scientific;
+    else if(!strcmp(psobj, "%a") || !strcmp(psobj, "H"))
         return hexadecimal;
-    else if(!strcmp(psobj, "F"))
-        return fixed;
+    else if(!strcmp(psobj, "%f") || !strcmp(psobj, "F"))
+        return floatingPoint;
     else if(!strcmp(psobj, "N"))
         return integer;
     else if(!strcmp(psobj, "Q"))
         return fraction;
-    return floating;
+    return scientific;
     }
 
 static psk createOperatorNode(int operator)
@@ -2433,14 +2433,14 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
             {
             psk lhs = Arg->LEFT;
             psk rhs = Arg->RIGHT;
-            enum formt format = floating;
+            enum formt format = scientific;
             if(!is_op(lhs))
                 {
                 format = getFormat(&lhs->u.sobj);
                 }
             switch(format)
                 {
-                    case floating:
+                    case scientific:
                         xprtfnc = FloatNode;
                         spec = "%e";
                         break;
@@ -2448,7 +2448,7 @@ static Boolean eksport(struct typedObjectnode* This, ppsk arg)
                         xprtfnc = FloatNode;
                         spec = "%a";
                         break;
-                    case fixed:
+                    case floatingPoint:
                         xprtfnc = FloatNode;
                         spec = "%f";
                         break;

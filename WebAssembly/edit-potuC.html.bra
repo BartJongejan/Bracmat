@@ -142,11 +142,12 @@ outline: ridge;
            <a href=\"http://rosettacode.org/wiki/Category:Bracmat\">rosettacode.org</a>.
            <br />
            For this demo version the C source code in which Bracmat is
-           written, is translated to JavaScript, so the demo runs within
-           the confines of your browser, with all the limitations that follow, 
-           such as the inability to read and write files.
+           written, is translated to WebAssembly (or JavaScript, if the emcc
+           option <strong>-sWASM=0</strong> was present), so the demo runs within the confines
+           of your browser, with all the limitations that follow, such as the
+           inability to read and write files.
            <br />
-           Full, ten times faster versions of Bracmat compiled and
+           Full, more than ten times faster versions of Bracmat compiled and
            linked for Windows, macOS and Linux, together with the C source
            code, can be found on 
            <a href=\"https://github.com/BartJongejan/Bracmat\">GitHub</a>.<br>

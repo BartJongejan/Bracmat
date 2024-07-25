@@ -2244,34 +2244,57 @@ native Bracmat expressions. The |_export_| method can export one variable at a
 time. Only variables in the main source code can be exported, variables in user
 defined functions cannot be exported. The variables that are declared as the
 parameters of the UFP object can also be exported.
-{?} ( new$(UFP,(=(s.a) (s.b).!a+!b:?b&2*!b:?c)):?calc
-    & (calc..go)$(10,11):?Y
-    & out$(Y !Y)
-    & (calc..export)$(N,b):?b
-    & out$(b !b)
-    & (calc..export)$(N,c):?c
-    & out$(c !c)
+{?} (      new
+        $ ( UFP
+          , (
+            =   (s.a) (s.b)
+              .   divide$(!a,!b):?c
+                & acos$-1:?pi
+            )
+          )
+      : ?calc
+    & out$(output (calc..go)$(22,7))
+    & out$(\"b \" (calc..export)$(N,b))
+    & out$(\"%f\" (calc..export)$(F,c))
+    & out$(\"%a\" (calc..export)$(H,c))
+    & out$(\"N \" (calc..export)$(N,c))
+    & out$(\"Q \" (calc..export)$(Q,c))
+    & out$(\"%e\" (calc..export)$(R,c))
+    & out$(pi (calc..export)$(R,pi))
+    & out$(pi (calc..export)$(\"%a\",pi))
+    & out$(pi (calc..export)$(Q,pi))
     )
 
-    Y 4.2000000000000000E+01
-    b 21
-    c 42
+    output 3.1415926535897931E+00
+    b  7
+    %f 3.142857
+    %a 0x1.9249249249249p+1
+    N  3
+    Q  884635641090633/281474976710656
+    %e 3.142857e+00
+    pi 3.141593e+00
+    pi 0x1.921fb54442d18p+1
+    pi 884279719003555/281474976710656
 
 The first argument to the |_export_| method tells wich notation is expected in the output:
 
+F or \"%f\"
+    A signed value that has the form <[-]dddd.dddddd> is expected. The number of
+    digits before the decimal point depends on the magnitude of the number.
+    There are six digits after the decimal point.
+H or \"%a\"
+    A hexadecimal notation. This notation preserves all bits of a |_double_|.
 N
     An integer is expected. Only digits are allowed, the first digit not being
     a |_0_|. The digits can be preceded by a |_-_| to indicate that the number
     is negative.
-R
+R or \"%e\"
     A floating point expression is expected: a signed value that has the form
     <[-]d.dddddde[+|-]dd[d]>, where <d> is one decimal digit, <dddddd> is six
     decimal digits, and <dd[d]> is two or three decimal digits.
 Q
     A rational number is expected. Similar to |_N_|, but a single slash |_/_|
     is allowed between to digits, the digit following the |_/_| not being a |_0_|.
-\"%a\"
-    A hexadecimal notation. This notation preserves all bits of a |_double_|.
 "
     )
   & ( prostutxt1

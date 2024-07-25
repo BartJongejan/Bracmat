@@ -259,8 +259,12 @@ matching. In short, it is all that regular Bracmat isn't.
     * bracmatJS.html _(deleted, executable uploaded to latest release)_
     
       Bracmat compiled to WebAssembly and Javascript using emscripten, embedded
-      in a single HTML-page. Nice for toy scripts, slow.
-      
+      in a single HTML-page. Nice for toy scripts.
+      You can choose between pure JavaScript and JavaScript+WebAssembly.
+      The latter produces smaller and faster, compiled code, but you probably
+      will not be able to run bracmatJS.html straight from the filesystem in your
+      browser. Instead run it in a (local) webserver. See emscriptenHowToHTML.sh
+      for more details.
       
     * edit-potuC.html.bra
     
@@ -272,8 +276,9 @@ matching. In short, it is all that regular Bracmat isn't.
     
       Linux batch file that runs emscripten and does some postprocessing,
       creating a Javascript version of Bracmat, bracmatJS.html.
-      Requirement: emscripten 1.38.0
+      Requirement: emscripten 1.39.0
       emcc and bracmat must be in PATH to run this script.
+      Add the -sWASM=0 option to produce pure JavaScript code.
 
    * pre.js
 

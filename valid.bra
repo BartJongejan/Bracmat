@@ -6188,8 +6188,13 @@ string line 2\"
           & "prepare for reading all bytes"
           & (fil$(,STR)|Out$847)
           & "read all bytes"
+          & (fil$(,TEL):255|Out$847b)
           & (fil$(,SET,0)|Out$848)
-          & ( fil$:(@(?:? [255).)
+          & (fil$(,TEL):0|Out$848b)
+          & (     fil$
+                : (@(?:? [255).)
+                : ?TEXT
+              & out$(str$(TEXT[ !TEXT "]"))
             | Out$849
             )
           & "prepare for reading all as DEC"
@@ -6227,7 +6232,7 @@ string line 2\"
                    )
                 & @( toML$(nestML$!xml)
                    :   ?a
-                       "<tr><td bgcolor=\"&cellback;\" rowspan=\"2\" colspan=\"1\" />"
+                       "<tr><td bgcolor=\"&cellback;\" rowspan=\"2\" colspan=\"1\"/>"
                        ?b
                    )
                 & (!y:!b|Out$848bA)
@@ -6792,7 +6797,7 @@ string line 2\"
                   , HT ML
                   )
                 )
-            : "<html><head><meta content=\"text/html; charset=UTF-8\" /></head><body>≩︀</body></html>"
+            : "<html><head><meta content=\"text/html; charset=UTF-8\"/></head><body>≩︀</body></html>"
           | Out$931
           )
           (     toML
@@ -6892,7 +6897,7 @@ string line 2\"
                     )
                   )
                 )
-            : "<:text lix=\"45.61\" :ovix=\"70.39\" _nk=\"1.09\" i:d=\"aa01a\"><_sentence i-d=\"e248e955-e24865ce\" _geo.context=\"|\" /></:text>"
+            : "<:text lix=\"45.61\" :ovix=\"70.39\" _nk=\"1.09\" i:d=\"aa01a\"><_sentence i-d=\"e248e955-e24865ce\" _geo.context=\"|\"/></:text>"
           | Out$944
           )
           (     toML
@@ -6904,7 +6909,7 @@ string line 2\"
                     )
                   )
                 )
-            : "<:text lix=\"45.61\" :ovix=\"70.39\" _nk=\"1.09\" i:d=\"aa01a\"><_sentence i-d=\"e248e955-e24865ce\" _geo.context=\"|\" /></:text>"
+            : "<:text lix=\"45.61\" :ovix=\"70.39\" _nk=\"1.09\" i:d=\"aa01a\"><_sentence i-d=\"e248e955-e24865ce\" _geo.context=\"|\"/></:text>"
           | Out$945
           )
           (     toML
@@ -6916,7 +6921,7 @@ string line 2\"
                     )
                   )
                 )
-            : "<:text lix=\"45.61\" :ovix=\"70.39\" _nk=\"1.09\" i:d=\"aa01a\"><_sentence i-d=\"e248e955-e24865ce\" _geo.context=\"|\" /></:text>"
+            : "<:text lix=\"45.61\" :ovix=\"70.39\" _nk=\"1.09\" i:d=\"aa01a\"><_sentence i-d=\"e248e955-e24865ce\" _geo.context=\"|\"/></:text>"
           | Out$946
           )
           (     map
@@ -7326,7 +7331,7 @@ string line 2\"
                   : ("0x1.0000000000000p+8"|"0x1p+8")
                 &   (myCalc..go)$"0.015625"
                   : "1.5625000000000000E-02"
-                &   (myCalc..export)$("%a",myParm)
+                &   (myCalc..export)$(H,myParm)
                   : ("0x1.0000000000000p-6"|0x1p-6)
                 &   (myCalc..go)$0xCAP-007
                   : "1.5781250000000000E+00"
@@ -7334,13 +7339,17 @@ string line 2\"
                   : ("0x1.9400000000000p+0"|"0x1.94p+0")
                 &   (myCalc..go)$"0.857421875"
                   : "8.5742187500000000E-01"
-                &   (myCalc..export)$("%a",myParm)
+                &   (myCalc..export)$(H,myParm)
                   : ("0x1.b700000000000p-1"|"0x1.b7p-1")
                 &   (myCalc..export)$(Q,myParm)
                   : 439/512
                 & (myCalc..go)$9007199254740991
                 &   (myCalc..export)$(R,myParm)
                   : "9.007199e+15"
+                &   (myCalc..export)$("%e",myParm)
+                  : "9.007199e+15"
+                &   (myCalc..export)$("%f",myParm)
+                  : "9007199254740991.000000"
                 &   (myCalc..export)$(N,myParm)
                   : 9007199254740991
                 &   (myCalc..go)$0x1p-1074
@@ -7352,7 +7361,7 @@ string line 2\"
                 &   (myCalc..export)$("%a",myParm)
                   : "0x1.921fb4d12d84ap+1"
                 & (myCalc..go)$5:"5.0000000000000000E+00"
-                &   (myCalc..export)$("%a",myParm)
+                &   (myCalc..export)$(H,myParm)
                   : ("0x1.4000000000000p+2"|"0x1.4p+2")
                 &   (myCalc..go)$"0x1.999999999999ap-4"
                   : "1.0000000000000001E-01"
@@ -7360,7 +7369,7 @@ string line 2\"
                   : "0x1.999999999999ap-4"
                 &   (myCalc..go)$"0x3.3333333333334p-5"
                   : "1.0000000000000001E-01"
-                &   (myCalc..export)$("%a",myParm)
+                &   (myCalc..export)$(H,myParm)
                   : "0x1.999999999999ap-4"
                 &   (myCalc..go)$"0xcc.ccccccccccdp-11"
                   : "1.0000000000000001E-01"
@@ -7370,7 +7379,7 @@ string line 2\"
                   : "1.0000000000000001E-01"
                 &   flt$(x2d$1999999999999a*2^-56,80)
                   : "1.00000000000000005551115123125782702118158340454101562500000000000000000000000000E-1"
-                &   (myCalc..export)$("%a",myParm)
+                &   (myCalc..export)$(H,myParm)
                   : "0x1.999999999999ap-4"
               | Out$"Something amiss with very simple UFP object."
               )
