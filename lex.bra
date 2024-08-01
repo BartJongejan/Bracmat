@@ -31,7 +31,6 @@ Usage:
           notdeclfuncs
           notdeclvars
           referencedfuncs
-          reffunc
           undefinedfuncs
           unrefs
           unusedLocals
@@ -148,7 +147,7 @@ Usage:
                         :   ?aaF
                             (CONTXT$!context.?Af+#*!name+?Zf)
                             ?zzF
-                      &   !aaF (!CONTXT.!Af+!Zf) !zzF
+                      &   !aaF (!context.!Af+!Zf) !zzF
                         : ?definedfuncs
                     | 
                     )
@@ -336,13 +335,13 @@ Lexical analysis. See program code further down this file.
             , APP BIN
             )
         & lst$(notdeclvars,"lex.txt",APP BIN)
-        & !definedfuncs:?reffunc
+        & !definedfuncs:?referencedfuncs
         & 0:?notreffunc
         &   whl
-          ' (   !reffunc
+          ' (   !referencedfuncs
               : ?A (?M.?AA+#?N*(?jj.0)+?ZZ) ?Z
             & !notreffunc+(!M !jj):?notreffunc
-            & !A (!M.!AA+!ZZ) !Z:?reffunc
+            & !A (!M.!AA+!ZZ) !Z:?referencedfuncs
             )
         &   put
           $ ( "
@@ -403,7 +402,7 @@ Lexical analysis. See program code further down this file.
             , "lex.txt"
             , APP BIN
             )
-        & lst$(reffunc,"lex.txt",APP BIN)
+        & lst$(referencedfuncs,"lex.txt",APP BIN)
         &   put
           $ ( "
  ------------------
