@@ -6,7 +6,7 @@
 #include "globals.h"
 #include "branch.h"
 #include "variables.h"
-#include "input.h"
+//#include "input.h"
 #include "wipecopy.h"
 #include "eval.h"
 #include "filewrite.h"
@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 
 #define LONGCASE
 
@@ -104,22 +105,23 @@ static psk swi(psk Pnode, psk rlnode, psk rrightnode)
             return functionFail(Pnode);
         u.i[i++] = (unsigned int)
             strtoul((char*)POBJ(rlnode), (char**)NULL, 10);
-        } while(is_op(rrightnode) && i < 10);
+        }
+    while(is_op(rrightnode) && i < 10);
 #ifdef __TURBOC__
-    intr(u.s.swicode, (struct REGPACK*)&u.s.regs);
-    sprintf(pc, "0.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
-            u.i[1], u.i[2], u.i[3], u.i[4], u.i[5],
-            u.i[6], u.i[7], u.i[8], u.i[9], u.i[10]);
+        intr(u.s.swicode, (struct REGPACK*)&u.s.regs);
+        sprintf(pc, "0.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
+                u.i[1], u.i[2], u.i[3], u.i[4], u.i[5],
+                u.i[6], u.i[7], u.i[8], u.i[9], u.i[10]);
 #else
 #if defined ARM
-    i = (int)os_swix(u.s.swicode, &u.s.regs);
-    sprintf(pc, "%u.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
-            i,
-            u.i[1], u.i[2], u.i[3], u.i[4], u.i[5],
-            u.i[6], u.i[7], u.i[8], u.i[9], u.i[10]);
+        i = (int)os_swix(u.s.swicode, &u.s.regs);
+        sprintf(pc, "%u.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
+                i,
+                u.i[1], u.i[2], u.i[3], u.i[4], u.i[5],
+                u.i[6], u.i[7], u.i[8], u.i[9], u.i[10]);
 #endif
 #endif
-    return build_up(Pnode, pc, NULL);
+        return build_up(Pnode, pc, NULL);
     }
 #endif
 
@@ -178,217 +180,217 @@ function_return_type execFnc(psk Pnode)
         {
         switch(Op(lnode))
             {
-            case EQUALS: /* Anonymous function: (=.out$!arg)$HELLO -> lnode == (=.out$!arg) */
-                lnode->RIGHT = Head(lnode->RIGHT);
-                lnode = same_as_w(lnode->RIGHT);
-                if(lnode) /* lnode is null if either the function wasn't found or it is a built-in member function of an object. */
-                    {
-                    if(Op(lnode) == DOT) /* The dot separating local variables from the function body. */
+                case EQUALS: /* Anonymous function: (=.out$!arg)$HELLO -> lnode == (=.out$!arg) */
+                    lnode->RIGHT = Head(lnode->RIGHT);
+                    lnode = same_as_w(lnode->RIGHT);
+                    if(lnode) /* lnode is null if either the function wasn't found or it is a built-in member function of an object. */
                         {
-                        psh(&argNode, Pnode->RIGHT, NULL);
-                        Pnode = dopb(Pnode, lnode);
-                        wipe(lnode);
-                        if(Op(Pnode) == DOT)
+                        if(Op(lnode) == DOT) /* The dot separating local variables from the function body. */
                             {
-                            psh(Pnode->LEFT, &zeroNode, NULL);
-                            Pnode = eval(Pnode);
-                            /**** Evaluate anonymous function.
-
-                                     (=.!arg)$XYZ
-                            ****/
-                            pop(Pnode->LEFT);
-                            Pnode = dopb(Pnode, Pnode->RIGHT);
-                            }
-                        deleteNode(&argNode);
-                        return functionOk(Pnode);
-                        }
-                    else
-                        {
-#if defined NO_EXIT_ON_NON_SEVERE_ERRORS
-                        return functionFail(Pnode);
-#else
-                        errorprintf("(Syntax error) The following is not a function:\n\n  ");
-                        writeError(Pnode->LEFT);
-                        exit(116);
-#endif
-                        }
-                    }
-                break;
-            case DOT: /* Method. Dot separating object name (or anonymous definition) from method name */
-                lnode = findMethod(lnode, &Object);
-                if(lnode)
-                    {
-                    if(Op(lnode) == DOT) /* The dot separating local variables from the function body. */
-                        {
-                        psh(&argNode, Pnode->RIGHT, NULL);
-
-                        if(Object.self)
-                            {
-                            psh(&selfNode, Object.self, NULL); /* its */
+                            psh(&argNode, Pnode->RIGHT, NULL);
                             Pnode = dopb(Pnode, lnode);
                             wipe(lnode);
-                            /*
-                            psh(&selfNode,self,NULL); Must precede dopb(...).
-                            Example where this is relevant:
-
-                            {?} ((==.lst$its).)'
-                            (its=
-                            =.lst$its);
-                            {!} its
-
-                            */
-                            if(Object.object)
+                            if(Op(Pnode) == DOT)
                                 {
-                                psh(&SelfNode, Object.object, NULL); /* Its */
-                                if(Op(Pnode) == DOT)
-                                    {
-                                    psh(Pnode->LEFT, &zeroNode, NULL);
-                                    Pnode = eval(Pnode);
-                                    /**** Evaluate member function of built-in
-                                          object from within an enveloping
-                                          object. -----------------
-                                                                   |
-                                    ( new$hash:?myhash             |
-                                    &   (                          |
-                                        = ( myInsert               |
-                                          = . (Its..insert)$!arg <-
-                                          )
-                                        )
-                                      : (=?(myhash.))
-                                    & (myhash..myInsert)$(X.12)
-                                    )
-                                    ****/
-                                    pop(Pnode->LEFT);
-                                    Pnode = dopb(Pnode, Pnode->RIGHT);
-                                    }
-                                deleteNode(&SelfNode);
+                                psh(Pnode->LEFT, &zeroNode, NULL);
+                                Pnode = eval(Pnode);
+                                /**** Evaluate anonymous function.
+
+                                         (=.!arg)$XYZ
+                                ****/
+                                pop(Pnode->LEFT);
+                                Pnode = dopb(Pnode, Pnode->RIGHT);
                                 }
-                            else
-                                {
-                                if(Op(Pnode) == DOT)
-                                    {
-                                    psh(Pnode->LEFT, &zeroNode, NULL);
-                                    Pnode = eval(Pnode);
-                                    /**** Evaluate member function from
-                                          within an other member function
-                                        ( ( Object                    |
-                                          =   (do=.out$!arg)          |
-                                              ( A                     |
-                                              =                       |
-                                                . (its.do)$!arg <-----
-                                              )
-                                          )
-                                        & (Object.A)$XYZ
-                                        )
-                                    ****/
-                                    pop(Pnode->LEFT);
-                                    Pnode = dopb(Pnode, Pnode->RIGHT);
-                                    }
-                                }
-                            deleteNode(&selfNode);
                             deleteNode(&argNode);
                             return functionOk(Pnode);
                             }
                         else
-                            { /* Unreachable? */
-                            deleteNode(&argNode);
-                            }
-                        }
-                    else if(Object.theMethod)
-                        {
-                        if(Object.theMethod((struct typedObjectnode*)Object.object, &Pnode))
                             {
-                            /**** Evaluate a built-in method of an anonymous object.
-
-                                    (new$hash.insert)$(a.2)
-                            ****/
-                            wipe(lnode); /* This is the built-in object, which got increased refcount to evade untimely wiping. */
-                            return functionOk(Pnode);
-                            }
-                        else
-                            { /* method failed. E.g. (new$hash.insert)$(a) */
-                            wipe(lnode);
-                            }
-                        }
-                    else
-                        {
 #if defined NO_EXIT_ON_NON_SEVERE_ERRORS
-                        return functionFail(Pnode);
+                            return functionFail(Pnode);
 #else
-                        errorprintf("(Syntax error) The following is not a function:\n\n  ");
-                        writeError(Pnode->LEFT);
-                        exit(116);
+                            errorprintf("(Syntax error) The following is not a function:\n\n  ");
+                            writeError(Pnode->LEFT);
+                            exit(116);
 #endif
-                        }
-                    }
-                else
-                    {
-                    if(Object.theMethod)
-                        {
-                        if(Object.theMethod((struct typedObjectnode*)Object.object, &Pnode))
-                            {
-                            /**** Evaluate a built-in method of a named object.
-                                                            |
-                                      new$hash:?H           |
-                                    & (H..insert)$(XYZ.2) <-
-                            ****/
-                            return functionOk(Pnode);
                             }
                         }
-                    }
-                break;
-            default:
-                {
-                /* /('(x.$x^2)) when evaluating /('(x.$x^2))$3 */
-                if((Op(lnode) == FUU)
-                   && (lnode->v.fl & FRACTION)
-                   && (Op(lnode->RIGHT) == DOT)
-                   && (!is_op(lnode->RIGHT->LEFT))
-                   )
-                    {
-                    lnode = lambda(lnode->RIGHT->RIGHT, lnode->RIGHT->LEFT, Pnode->RIGHT);
-                    /**** Evaluate a lambda expression
-
-                            /('(x.$x^2))$3
-                    ****/
+                    break;
+                case DOT: /* Method. Dot separating object name (or anonymous definition) from method name */
+                    lnode = findMethod(lnode, &Object);
                     if(lnode)
                         {
-                        /*
-                              /(
-                               ' ( g
-                                 .   /('(x.$g'($x'$x)))
-                                   $ /('(x.$g'($x'$x)))
-                                 )
-                               )
-                            $ /(
-                               ' ( r
-                                 . /(
-                                    ' ( n
-                                      .   $n:~>0&1
-                                        | $n*($r)$($n+-1)
-                                      )
-                                    )
-                                 )
-                               )
-                        */
-                        wipe(Pnode);
-                        Pnode = lnode;
+                        if(Op(lnode) == DOT) /* The dot separating local variables from the function body. */
+                            {
+                            psh(&argNode, Pnode->RIGHT, NULL);
+
+                            if(Object.self)
+                                {
+                                psh(&selfNode, Object.self, NULL); /* its */
+                                Pnode = dopb(Pnode, lnode);
+                                wipe(lnode);
+                                /*
+                                psh(&selfNode,self,NULL); Must precede dopb(...).
+                                Example where this is relevant:
+
+                                {?} ((==.lst$its).)'
+                                (its=
+                                =.lst$its);
+                                {!} its
+
+                                */
+                                if(Object.object)
+                                    {
+                                    psh(&SelfNode, Object.object, NULL); /* Its */
+                                    if(Op(Pnode) == DOT)
+                                        {
+                                        psh(Pnode->LEFT, &zeroNode, NULL);
+                                        Pnode = eval(Pnode);
+                                        /**** Evaluate member function of built-in
+                                              object from within an enveloping
+                                              object. -----------------
+                                                                       |
+                                        ( new$hash:?myhash             |
+                                        &   (                          |
+                                            = ( myInsert               |
+                                              = . (Its..insert)$!arg <-
+                                              )
+                                            )
+                                          : (=?(myhash.))
+                                        & (myhash..myInsert)$(X.12)
+                                        )
+                                        ****/
+                                        pop(Pnode->LEFT);
+                                        Pnode = dopb(Pnode, Pnode->RIGHT);
+                                        }
+                                    deleteNode(&SelfNode);
+                                    }
+                                else
+                                    {
+                                    if(Op(Pnode) == DOT)
+                                        {
+                                        psh(Pnode->LEFT, &zeroNode, NULL);
+                                        Pnode = eval(Pnode);
+                                        /**** Evaluate member function from
+                                              within an other member function
+                                            ( ( Object                    |
+                                              =   (do=.out$!arg)          |
+                                                  ( A                     |
+                                                  =                       |
+                                                    . (its.do)$!arg <-----
+                                                  )
+                                              )
+                                            & (Object.A)$XYZ
+                                            )
+                                        ****/
+                                        pop(Pnode->LEFT);
+                                        Pnode = dopb(Pnode, Pnode->RIGHT);
+                                        }
+                                    }
+                                deleteNode(&selfNode);
+                                deleteNode(&argNode);
+                                return functionOk(Pnode);
+                                }
+                            else
+                                { /* Unreachable? */
+                                deleteNode(&argNode);
+                                }
+                            }
+                        else if(Object.theMethod)
+                            {
+                            if(Object.theMethod((struct typedObjectnode*)Object.object, &Pnode))
+                                {
+                                /**** Evaluate a built-in method of an anonymous object.
+
+                                        (new$hash.insert)$(a.2)
+                                ****/
+                                wipe(lnode); /* This is the built-in object, which got increased refcount to evade untimely wiping. */
+                                return functionOk(Pnode);
+                                }
+                            else
+                                { /* method failed. E.g. (new$hash.insert)$(a) */
+                                wipe(lnode);
+                                }
+                            }
+                        else
+                            {
+#if defined NO_EXIT_ON_NON_SEVERE_ERRORS
+                            return functionFail(Pnode);
+#else
+                            errorprintf("(Syntax error) The following is not a function:\n\n  ");
+                            writeError(Pnode->LEFT);
+                            exit(116);
+#endif
+                            }
                         }
                     else
                         {
-                        /*
-                            /('(x./('(x.$x ()$x))$aap))$noot
-                        */
-                        lnode = subtreecopy(Pnode->LEFT->RIGHT->RIGHT);
-                        wipe(Pnode);
-                        Pnode = lnode;
-                        if(!is_op(Pnode) && !(Pnode->v.fl & INDIRECT))
-                            Pnode->v.fl |= READY;  /*  /('(x.u))$7  */
+                        if(Object.theMethod)
+                            {
+                            if(Object.theMethod((struct typedObjectnode*)Object.object, &Pnode))
+                                {
+                                /**** Evaluate a built-in method of a named object.
+                                                                |
+                                          new$hash:?H           |
+                                        & (H..insert)$(XYZ.2) <-
+                                ****/
+                                return functionOk(Pnode);
+                                }
+                            }
                         }
-                    return functionOk(Pnode);
+                    break;
+                default:
+                    {
+                    /* /('(x.$x^2)) when evaluating /('(x.$x^2))$3 */
+                    if((Op(lnode) == FUU)
+                       && (lnode->v.fl & FRACTION)
+                       && (Op(lnode->RIGHT) == DOT)
+                       && (!is_op(lnode->RIGHT->LEFT))
+                       )
+                        {
+                        lnode = lambda(lnode->RIGHT->RIGHT, lnode->RIGHT->LEFT, Pnode->RIGHT);
+                        /**** Evaluate a lambda expression
+
+                                /('(x.$x^2))$3
+                        ****/
+                        if(lnode)
+                            {
+                            /*
+                                  /(
+                                   ' ( g
+                                     .   /('(x.$g'($x'$x)))
+                                       $ /('(x.$g'($x'$x)))
+                                     )
+                                   )
+                                $ /(
+                                   ' ( r
+                                     . /(
+                                        ' ( n
+                                          .   $n:~>0&1
+                                            | $n*($r)$($n+-1)
+                                          )
+                                        )
+                                     )
+                                   )
+                            */
+                            wipe(Pnode);
+                            Pnode = lnode;
+                            }
+                        else
+                            {
+                            /*
+                                /('(x./('(x.$x ()$x))$aap))$noot
+                            */
+                            lnode = subtreecopy(Pnode->LEFT->RIGHT->RIGHT);
+                            wipe(Pnode);
+                            Pnode = lnode;
+                            if(!is_op(Pnode) && !(Pnode->v.fl & INDIRECT))
+                                Pnode->v.fl |= READY;  /*  /('(x.u))$7  */
+                            }
+                        return functionOk(Pnode);
+                        }
+                    return functionFail(Pnode);/* completely wrong expression, e.g. (+(x.$x^2))$3 */
                     }
-                return functionFail(Pnode);/* completely wrong expression, e.g. (+(x.$x^2))$3 */
-                }
             }
         }
     else
@@ -453,9 +455,10 @@ function_return_type execFnc(psk Pnode)
 
 function_return_type functions(psk Pnode)
     {
-    static char draft[22];
+    static char draft[112];
     psk lnode, rightnode, rrightnode, rlnode;
-    union {
+    union
+        {
         int i;
         ULONG ul;
         } intVal;
@@ -564,12 +567,12 @@ function_return_type functions(psk Pnode)
                     {
                     switch(rrightnode->u.obj)
                         {
-                        case '2':
-                            intVal.i = 2;
-                            break;
-                        case '4':
-                            intVal.i = 4;
-                            break;
+                            case '2':
+                                intVal.i = 2;
+                                break;
+                            case '4':
+                                intVal.i = 4;
+                                break;
                         }
                     }
                 }
@@ -581,23 +584,23 @@ function_return_type functions(psk Pnode)
             p = (void*)((char*)p - (ptrdiff_t)((size_t)p % intVal.i));
             switch(intVal.i)
                 {
-                case 2:
-                    sprintf(draft, "%hu", *(short unsigned int*)p);
-                    break;
-                case 4:
-                    sprintf(draft, "%lu", (unsigned long)*(UINT32_T*)p);
-                    break;
+                    case 2:
+                        sprintf(draft, "%hu", *(short unsigned int*)p);
+                        break;
+                    case 4:
+                        sprintf(draft, "%lu", (unsigned long)*(UINT32_T*)p);
+                        break;
 #ifndef __BORLANDC__
 #if (!defined ARM || defined __SYMBIAN32__)
-                case 8:
-                    sprintf(draft, "%llu", *(unsigned long long*)p);
-                    break;
+                    case 8:
+                        sprintf(draft, "%llu", *(unsigned long long*)p);
+                        break;
 #endif
 #endif                    
-                case 1:
-                default:
-                    sprintf(draft, "%u", (unsigned int)*(unsigned char*)p);
-                    break;
+                    case 1:
+                    default:
+                        sprintf(draft, "%u", (unsigned int)*(unsigned char*)p);
+                        break;
                 }
             wipe(Pnode);
             Pnode = scopy((const char*)draft);
@@ -622,17 +625,17 @@ function_return_type functions(psk Pnode)
                     {
                     switch(rrrightnode->u.obj)
                         {
-                        case '2':
-                            intVal.i = 2;
-                            break;
-                        case '4':
-                            intVal.i = 4;
-                            break;
-                        case '8':
-                            intVal.i = 8;
-                            break;
-                        default:
-                            ;
+                            case '2':
+                                intVal.i = 2;
+                                break;
+                            case '4':
+                                intVal.i = 4;
+                                break;
+                            case '8':
+                                intVal.i = 8;
+                                break;
+                            default:
+                                ;
                         }
                     }
                 }
@@ -646,21 +649,21 @@ function_return_type functions(psk Pnode)
             val = toLong(rrlnode);
             switch(intVal.i)
                 {
-                case 2:
-                    *(unsigned short int*)p = (unsigned short int)val;
-                    break;
-                case 4:
-                    *(UINT32_T*)p = (UINT32_T)val;
-                    break;
+                    case 2:
+                        *(unsigned short int*)p = (unsigned short int)val;
+                        break;
+                    case 4:
+                        *(UINT32_T*)p = (UINT32_T)val;
+                        break;
 #ifndef __BORLANDC__
-                case 8:
-                    *(ULONG*)p = (ULONG)val;
-                    break;
+                    case 8:
+                        *(ULONG*)p = (ULONG)val;
+                        break;
 #endif
-                case 1:
-                default:
-                    *(unsigned char*)p = (unsigned char)val;
-                    break;
+                    case 1:
+                    default:
+                        *(unsigned char*)p = (unsigned char)val;
+                        break;
                 }
             return functionOk(Pnode);
             }
@@ -1402,29 +1405,29 @@ function_return_type functions(psk Pnode)
 #else
                     switch(errno)
                         {
-                        case EACCES:
-                            /*
-                            File or directory specified by newname already exists or
-                            could not be created (invalid path); or oldname is a directory
-                            and newname specifies a different path.
-                            */
-                            strcpy(draft, "EACCES");
-                            break;
-                        case ENOENT:
-                            /*
-                            File or path specified by oldname not found.
-                            */
-                            strcpy(draft, "ENOENT");
-                            break;
-                        case EINVAL:
-                            /*
-                            Name contains invalid characters.
-                            */
-                            strcpy(draft, "EINVAL");
-                            break;
-                        default:
-                            sprintf(draft, "%d", errno);
-                            break;
+                            case EACCES:
+                                /*
+                                File or directory specified by newname already exists or
+                                could not be created (invalid path); or oldname is a directory
+                                and newname specifies a different path.
+                                */
+                                strcpy(draft, "EACCES");
+                                break;
+                            case ENOENT:
+                                /*
+                                File or path specified by oldname not found.
+                                */
+                                strcpy(draft, "ENOENT");
+                                break;
+                            case EINVAL:
+                                /*
+                                Name contains invalid characters.
+                                */
+                                strcpy(draft, "EINVAL");
+                                break;
+                            default:
+                                sprintf(draft, "%d", errno);
+                                break;
                         }
 #endif
                     }
@@ -1455,38 +1458,38 @@ function_return_type functions(psk Pnode)
 #else
                     switch(errno)
                         {
-                        case EACCES:
-                            /*
-                            File or directory specified by newname already exists or
-                            could not be created (invalid path); or oldname is a directory
-                            and newname specifies a different path.
-                            */
-                            strcpy(draft, "EACCES");
-                            break;
-                        case ENOENT:
-                            /*
-                            File or path specified by oldname not found.
-                            */
-                            strcpy(draft, "ENOENT");
-                            break;
-                        default:
-                            {
-#ifdef __VMS
-                            if(!strcmp("file currently locked by another user", (const char*)strerror(errno)))
-                                {  /* OpenVMS */
+                            case EACCES:
+                                /*
+                                File or directory specified by newname already exists or
+                                could not be created (invalid path); or oldname is a directory
+                                and newname specifies a different path.
+                                */
                                 strcpy(draft, "EACCES");
                                 break;
-                                }
-                            else
-#endif
+                            case ENOENT:
+                                /*
+                                File or path specified by oldname not found.
+                                */
+                                strcpy(draft, "ENOENT");
+                                break;
+                            default:
                                 {
-                                wipe(Pnode);
-                                Pnode = scopy((const char*)strerror(errno));
-                                return functionOk(Pnode);
+#ifdef __VMS
+                                if(!strcmp("file currently locked by another user", (const char*)strerror(errno)))
+                                    {  /* OpenVMS */
+                                    strcpy(draft, "EACCES");
+                                    break;
+                                    }
+                                else
+#endif
+                                    {
+                                    wipe(Pnode);
+                                    Pnode = scopy((const char*)strerror(errno));
+                                    return functionOk(Pnode);
+                                    }
+                                /* sprintf(draft,"%d",errno);
+                                    break;*/
                                 }
-                            /* sprintf(draft,"%d",errno);
-                                break;*/
-                            }
                         }
 #endif
                     }
@@ -1628,35 +1631,35 @@ function_return_type functions(psk Pnode)
 #else
                     switch(errno)
                         {
-                        case E2BIG:
-                            /*
-                            Argument list (which is system-dependent) is too big.
-                            */
-                            strcpy(draft, "E2BIG");
-                            break;
-                        case ENOENT:
-                            /*
-                            Command interpreter cannot be found.
-                            */
-                            strcpy(draft, "ENOENT");
-                            break;
-                        case ENOEXEC:
-                            /*
-                            Command-interpreter file has invalid format and is not executable.
-                            */
-                            strcpy(draft, "ENOEXEC");
-                            break;
-                        case ENOMEM:
-                            /*
-                            Not enough memory is available to execute command; or available
-                            memory has been corrupted; or invalid block exists, indicating
-                            that process making call was not allocated properly.
-                            */
-                            strcpy(draft, "ENOMEM");
-                            break;
-                        default:
-                            sprintf(draft, "%d", errno);
-                            break;
+                            case E2BIG:
+                                /*
+                                Argument list (which is system-dependent) is too big.
+                                */
+                                strcpy(draft, "E2BIG");
+                                break;
+                            case ENOENT:
+                                /*
+                                Command interpreter cannot be found.
+                                */
+                                strcpy(draft, "ENOENT");
+                                break;
+                            case ENOEXEC:
+                                /*
+                                Command-interpreter file has invalid format and is not executable.
+                                */
+                                strcpy(draft, "ENOEXEC");
+                                break;
+                            case ENOMEM:
+                                /*
+                                Not enough memory is available to execute command; or available
+                                memory has been corrupted; or invalid block exists, indicating
+                                that process making call was not allocated properly.
+                                */
+                                strcpy(draft, "ENOMEM");
+                                break;
+                            default:
+                                sprintf(draft, "%d", errno);
+                                break;
                         }
 #endif
                     }
@@ -1726,6 +1729,39 @@ function_return_type functions(psk Pnode)
             return functionOk(Pnode);
             }
 #endif
+        CASE(TME)
+            {
+            time_t seconds;
+            struct tm* f;
+            time(&seconds);
+            if(search_opt(Pnode->RIGHT, GMT))
+                {
+                f = gmtime(&seconds);
+                }
+            else /* local time */
+                {
+                f = localtime(&seconds);
+                }
+#if 0
+            struct tm
+                {
+                int tm_sec;         /* seconds,  range 0 to 59          */
+                int tm_min;         /* minutes, range 0 to 59           */
+                int tm_hour;        /* hours, range 0 to 23             */
+                int tm_mday;        /* day of the month, range 1 to 31  */
+                int tm_mon;         /* month, range 0 to 11             */
+                int tm_year;        /* The number of years since 1900   */
+                int tm_wday;        /* day of the week, range 0 to 6    */
+                int tm_yday;        /* day in the year, range 0 to 365  */
+                int tm_isdst;       /* daylight saving time             */
+                };
+#endif
+            sprintf(draft, "%d.%d.%d.%d.%d.%d.%d.%d.%d",
+                    f->tm_sec, f->tm_min, f->tm_hour, f->tm_mday, 1 + f->tm_mon,
+                    1900 + f->tm_year, 1 + f->tm_wday, 1 + f->tm_yday, f->tm_isdst);
+            Pnode = build_up(Pnode, draft, NULL);
+            return functionOk(Pnode);
+            }
         CASE(WHL)
             {
             while(isSUCCESSorFENCE(rightnode = eval(same_as_w(Pnode->RIGHT))))
@@ -1797,7 +1833,7 @@ function_return_type functions(psk Pnode)
                         if(rightnode)
                             {
                             rrightnode->RIGHT = rightnode;
-                            }
+                        }
                         else
                             {
                             rrightnode->RIGHT = same_as_w(Pnode->RIGHT);
@@ -1805,15 +1841,15 @@ function_return_type functions(psk Pnode)
                         wipe(Pnode);
                         Pnode = rrightnode;
                         Pnode->v.fl |= intVal.ul; /* (a=b)&!('$a)*/
-                        }
                     }
+                }
                 else
                     {
                     combiflags(Pnode);
                     Pnode = rightbranch(Pnode);
                     }
                 return functionOk(Pnode);
-                }
+            }
             else
                 {
                 return functionFail(Pnode);

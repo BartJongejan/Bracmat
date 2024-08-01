@@ -22,7 +22,7 @@ help=
   . fixdtxt modetxt positiontxt readtxt varitxt writetxt nonlinpat
   . CalcFunctxt,Calculatetxt,CalcTrctxt,CalcPrinttxt,CalcExporttxt
   . CalcParmtxt,CalcVartxt,CalcArraytxt,CaltItertxt,CalcMethodtxt
-  . CalcConsttxt
+  . CalcConsttxt,tmetxt
   )
 .   ( lusmenu
     =   M
@@ -179,7 +179,7 @@ lex lexical analysis of help file"
     get input (from file,keyboard or memory)
 19 |_low_|
     convert to lower case
-10 |_lst_|
+20 |_lst_|
     list un-evaluated expression(s) or value(s) of variable(s)
 21 |_map_|
     apply function to each member of a list
@@ -199,7 +199,7 @@ lex lexical analysis of help file"
     write output
 29 |_ren_|
     rename file or directory or move file
-20 |_rev_|
+30 |_rev_|
     string reverse
 31 |_rmv_|
     remove file
@@ -213,17 +213,19 @@ lex lexical analysis of help file"
     command line shell
 36 |_tbl_|
     create array, remove array/variable
-37 |_ugc_|
+37 |_tme_|
+    return current time
+38 |_ugc_|
     determine the Unicode General Category of a character
-38 |_upp_|
+39 |_upp_|
     convert to upper case
-39 |_utf_|
+40 |_utf_|
     convert UTF-8 character to Unicode codepoint
-30 |_vap_|
+41 |_vap_|
     deconstruct a string character-wise or according to specified separator
-41 |_whl_|
+42 |_whl_|
    while loop
-42 |_x2d_|
+43 |_x2d_|
     convert hexadecimal number to decimal number x2d$BABEFACE:3133078222
 "
       ,   (1,seltxt)
@@ -245,7 +247,7 @@ lex lexical analysis of help file"
           (17,fretxt)
           (18,gettxt)
           (19,lowtxt)
-          (10,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt)
+          (20,lsttxt1 humtxt lsttxt2 lsttxt3 newtxt)
           (21,maptxt)
           (22,memtxt)
           (23,modtxt)
@@ -255,19 +257,20 @@ lex lexical analysis of help file"
           (27,poktxt)
           (28,puttxt1 humtxt puttxt2 puttxt3 newtxt)
           (29,rentxt)
-          (20,rmvtxt)
+          (30,rmvtxt)
           (31,revtxt)
           (32,simtxt)
           (33,strtxt)
           (34,switxt)
           (35,systxt)
           (36,tbltxt)
-          (37,ugctxt)
-          (38,upptxt)
-          (39,utftxt)
-          (30,vaptxt)
-          (41,whltxt)
-          (42,x2dtxt)
+          (37,tmetxt)
+          (38,ugctxt)
+          (39,upptxt)
+          (40,utftxt)
+          (41,vaptxt)
+          (42,whltxt)
+          (43,x2dtxt)
     )
   & ( intro
     =   M
@@ -1231,6 +1234,29 @@ argument is not a single character that is a letter."
 The characters 'A'-'Z' are converted to 'a'-'z'. Other characters are handled
 as UTF-8 encoded Unicode characters, but default to ISO 8859 (Latin 1) if
 the argument is not valid UTF-8."
+    )
+  & (tmetxt
+    = T
+    , "tme$ or tme$GMT"
+    , "The first form returns local time, the second UTC (Coordinated Universal Time).
+The output has the same structure as C's tm struct and the ranges are the same,
+except for month, year (western calendar year), day of the week and day of the
+year.
+                       range
+    seconds           0 to 59
+    minutes           0 to 59
+    hours             0 to 23
+    day of the month  1 to 31
+    month             1 to 12
+    the current year
+    day of the week   1 to 7
+    day in the year   1 to 366
+    daylight saving time 0:no 1:yes
+
+{?} tme$:(#:~<1:~>59.#:~<1:~>59.#:~<0:~>23.#:~<1:~>31.
+          #:~<1:~>12.#:~<2024.#:~<1:~>7.#:~<1:~>366.(0|1))
+{?} tme$GMT
+"
     )
   & ( ugctxt
     =   T

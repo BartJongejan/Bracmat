@@ -1,3 +1,9 @@
+1 August 2024
+tme$ function gives local time. tme$GMT gives UTC (Coordinated Universal Time).
+Output contains all fields in C's tm struct, but with month, year, day of the
+week day and day of the year given in conventional ranges instead of starting
+from 0. 
+
 25 July 2024
 UFP export function accepts more formats: "%f" or F, %a or H, N, Q and %e or R. 
 

@@ -333,6 +333,7 @@ typedef struct
 #define FLG O('f','l','g')
 #define GET O('g','e','t')
 #define GLF O('g','l','f') /* The opposite of flg */
+#define GMT O('G','M','T') /* Greenwich Mean Time */
 #define HT  O('H','T', 0 )
 #define IM  O('i', 0 , 0 )
 #define JSN O('J','S','N')
@@ -351,13 +352,16 @@ typedef struct
 #define ONE O('1', 0 , 0 )
 #define PI  O('p','i', 0 )
 #define PUT O('p','u','t')
+#if 0
 #define PRV O('?', 0 , 0 )
+#endif
 #define RAW O('R','A','W')
 #define REV O('r','e','v') /* strrev */
 #define SIM O('s','i','m')
 #define STG O('S','T','R')
 #define STR O('s','t','r')
 #define TBL O('t','b','l')
+#define TME O('t','m','e') /* (time().gmtime().localtime()) */
 #define TRM O('T','R','M')
 #define TWO O('2', 0 , 0 )
 #define TXT O('T','X','T')
