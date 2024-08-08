@@ -188,7 +188,7 @@ lex lexical analysis of help file"
 23 |_mod_|
     remainder
 24 |_mop_|
-    map expression to space separated list
+    map expression to space separated list (option: another separator operator)
 25 |_new_|
     create new object as a copy of another object
 26 |_pee_|
@@ -4267,7 +4267,7 @@ separated by the space operator.
     )
   & ( moptxt
     =   T
-      , "mop$(<fnc>.<expression>.(=<non-leaf expression>))"
+      , "mop$(<fnc>.<expression>.(=<non-leaf expression>)) or mop$(<fnc>.<expression>.(=<non-leaf expression>).(=<non-leaf expression>))"
       , "mop$ traverses a list-like expression element by element and outputs a space
 operator separated list. For that to work, mop$ needs an extra argument that
 tells which operator to use. That argument is always headed by |_=_|, the
@@ -4289,6 +4289,20 @@ Another way to do this is to use the map$ function
 
 {?} map'((=.!arg).a b c)
 {!} a b c
+
+The second form creates a list with a separator operator of your choice.
+
+WARNING. If the output separator is |_+_| or |_*_|, the outpur will be bubble
+sorted. Do this only for short expressions or if you know that no sorting is
+needed.
+
+{?} (a.b)+(c.d)+(e.a):?s
+
+{?} mop$((=.!arg:(?.?arg)&!arg).!s.(=+).(=,))
+{!} b,d,a
+
+{?} mop$((=.!arg:(?.?arg)&!arg).!s.(=+).(=*))
+{!} a*b*d
 "
     )
   & ( vaptxt

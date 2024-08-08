@@ -1,3 +1,7 @@
+8 August 2024
+The mop$ function can take an extra argument that indicates the operator to be
+used to separate the elements in the output.
+
 1 August 2024
 tme$ function gives local time. tme$GMT gives UTC (Coordinated Universal Time).
 Output contains all fields in C's tm struct, but with month, year, day of the

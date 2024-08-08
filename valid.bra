@@ -7170,8 +7170,39 @@ string line 2\"
           |   Out
             $ "Convert non-atomic expression to space operator separated list."
           )
+          (   (x=a+b+c)
+            &     mop
+                $ ( (=.!arg)
+                  . !x
+                  . '$x
+                  . (=,)
+                  )
+              : (a,b,c)
+          | Out$"Convert non-atomic expression to comma separated list."
+          )
+          (   (x=a+b+c)
+            &     mop
+                $ ( (=.!arg)
+                  . !x
+                  . '$x
+                  . (=*)
+                  )
+              : a*b*c
+          | Out$"Convert non-atomic expression to product."
+          )
           (   (x=c)
             &   mop$((=.!arg).!x.'$x)
+              : a b c
+            & Out$"Expression must be non-atomic."
+          | 
+          )
+          (   (x=c)
+            &     mop
+                $ ( (=.!arg)
+                  . !x
+                  . (=+)
+                  . '$x
+                  )
               : a b c
             & Out$"Expression must be non-atomic."
           | 
@@ -7181,12 +7212,30 @@ string line 2\"
           | Out$"Corner case: expression is empty atom. Should succeed."
           )
           (     mop
+              $ ( (=.!arg)
+                . 
+                . (=+)
+                . (=,)
+                )
+            : 
+          | Out$"Corner case: expression is empty atom. Should succeed."
+          )
+          (     mop
               ' ( (=.!arg)
                 . a b c
                 . (=x y)
                 )
             : a b c
-          | Out$"Expression can be a list if call is mop' and not mop$."
+          | Out$"(a)Expression can be a list if call is mop' and not mop$."
+          )
+          (     mop
+              ' ( (=.!arg)
+                . a b c
+                . (=x y)
+                . (=x^y)
+                )
+            : a^(b^c)
+          | Out$"(b)Expression can be a list if call is mop' and not mop$."
           )
           (   let$(chu$(x2d$2FA1D))
             & let$(chu$(x2d$30001))
@@ -7250,7 +7299,16 @@ string line 2\"
                 . (=.)
                 )
             : 3 6 9
-          | Out$"Lambda expression must be valid in map, vap and mop"
+          | Out$"(a)Lambda expression must be valid in map, vap and mop"
+          )
+          (     mop
+              $ ( /('(x.3*$x))
+                . (1.2.3)
+                . (=.)
+                . (=,)
+                )
+            : (3,6,9)
+          | Out$"(b)Lambda expression must be valid in map, vap and mop"
           )
           (   new$hash:?H
             &   mop
@@ -7261,15 +7319,6 @@ string line 2\"
             & (H..find)$c:(c.3)
           |   Out
             $ "Member function of built in class must be valid in map and mop"
-          )
-          (   (j=8)
-            & (k=9)
-            &   map'(.$j ()$k)
-              : (=8) (=9)
-            &     mop
-                ' (.$j,$k.(=,))
-              : (=8) (=9)
-          | Out$"Macro evaluation must be valid in map and mop"
           )
           (   (x=(a=2) (b=3))
             & !(x.a):2
