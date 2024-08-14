@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "8 August 2024"
-#define VERSION "6.24.0"
-#define BUILD "302"
+#define DATUM "14 August 2024"
+#define VERSION "6.24.2"
+#define BUILD "304"
 /*
 COMPILATION
 -----------
@@ -209,7 +209,7 @@ blank " ", the comma "," and the full stop ".". (The interpunction symbols
 #define FILESTATUS_H
 #define SIMIL_H
 #define OBJECTDEF_H
-#define FUNCTIONS_H
+//#define FUNCTIONS_H
 #define CANONIZATION_C
 #define EVALUATE_H
 

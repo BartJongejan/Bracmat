@@ -1,4 +1,5 @@
-{valid.bra}
+{valid.bra
+𝕌𝕋𝔽-𝟠}
 Xobject=
   (donit=.)
   ( doit
@@ -6862,12 +6863,28 @@ string line 2\"
             : (.ab c) (.d ef) (.)
           | Out$937
           )
+          ( 
+          | vap$(.ab\tc\nd\tef\n.\n):ab\tc d\tef
+          | Out$"937bis w/o function"
+          )
           (     vap
               $ ( (=.asc$!arg)
                 . str$(chr$200 chu$200)
                 )
             : 200 195 136
           | Out$938
+          )
+          (   vap$(.𝕌𝕋𝔽-𝟠)
+            : 𝕌 𝕋 𝔽 "-" 𝟠
+          | Out$938
+          )
+          (   vap$(.𝕌𝕋𝔽-𝟠."-")
+            : 𝕌𝕋𝔽 𝟠
+          | Out$938b
+          )
+          (   vap$((=.utf$!arg).𝕌𝕋𝔽-𝟠)
+            : 𝕌𝕋𝔽 𝟠
+          | Out$938b
           )
           (   vap$((=.!arg).abc.)
             & Out$939
@@ -7189,6 +7206,12 @@ string line 2\"
                   )
               : a*b*c
           | Out$"Convert non-atomic expression to product."
+          )
+          (   (x=a+b+c+d+e)
+            &   mop$(.!x.'$x.(=*))
+              : e*a*b*c*d
+          |   Out
+            $ "Convert non-atomic expression to product. No function specified."
           )
           (   (x=c)
             &   mop$((=.!arg).!x.'$x)
@@ -7934,7 +7957,8 @@ r=
   get$("valid.bra",TXT)
 & rmv$"valid.bak"
 & ren$("valid.bra","valid.bak")
-& put$("{valid.bra}
+& put$("{valid.bra
+𝕌𝕋𝔽-𝟠}
 ","valid.bra",NEW,BIN)
 & lst$(Xobject,"valid.bra",APP)
 & put$(\n,"valid.bra",APP,BIN)

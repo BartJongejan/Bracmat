@@ -80,7 +80,7 @@ static void pointerToStr(char* pc, void* p)
 #endif
 
 #if O_S
-static psk swi(psk Pnode, psk rlnode, psk rrightnode)
+static psk swi(psk Pnode, psk rlnode, psk rrnode)
     {
     int i;
     union
@@ -95,18 +95,18 @@ static psk swi(psk Pnode, psk rlnode, psk rrightnode)
     char pc[121];
     for(i = 0; i < sizeof(os_regset) / sizeof(int); i++)
         u.s.regs.r[i] = 0;
-    rrightnode = Pnode;
+    rrnode = Pnode;
     i = 0;
     do
         {
-        rrightnode = rrightnode->RIGHT;
-        rlnode = is_op(rrightnode) ? rrightnode->LEFT : rrightnode;
+        rrnode = rrnode->RIGHT;
+        rlnode = is_op(rrnode) ? rrnode->LEFT : rrnode;
         if(is_op(rlnode) || !INTEGER_NOT_NEG(rlnode))
             return functionFail(Pnode);
         u.i[i++] = (unsigned int)
             strtoul((char*)POBJ(rlnode), (char**)NULL, 10);
         }
-    while(is_op(rrightnode) && i < 10);
+    while(is_op(rrnode) && i < 10);
 #ifdef __TURBOC__
         intr(u.s.swicode, (struct REGPACK*)&u.s.regs);
         sprintf(pc, "0.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
@@ -453,16 +453,240 @@ function_return_type execFnc(psk Pnode)
         return functionFail(Pnode);
     }
 
+static psk applyFncToElem(psk fnc, psk elm, ULONG fl)
+    {
+    if(!fnc)
+        return eval(same_as_w(elm)); /* combine or sort elm */
+    else if(IS_NIL(fnc))
+        return same_as_w(elm); /* Do absolutely nothing */
+    else
+        {
+        psk nnode;
+        psk rlnode;
+        nnode = (psk)bmalloc(sizeof(knode));
+        nnode->v.fl = fl;
+        nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+        nnode->LEFT = same_as_w(fnc);
+        nnode->RIGHT = same_as_w(elm);
+        rlnode = setIndex(nnode);
+        if(rlnode)
+            {
+            nnode = rlnode;
+            }
+        else
+            {
+            if(not_built_in(nnode->LEFT)) /* Do not use ternary operator! That eats stack! */
+                {
+                nnode = execFnc(nnode);
+                }
+            else
+                {
+                rlnode = functions(nnode);
+                if(rlnode)
+                    nnode = rlnode;
+                else
+                    nnode = execFnc(nnode);
+                }
+            }
+        return nnode;
+        }
+    }
+
+static psk applyFncToString(psk fnc, psk elm, ULONG fl)
+    {
+    if(IS_NIL(fnc))
+        {
+        return elm;
+        }
+    else
+        {
+        psk nnode;
+        nnode = (psk)bmalloc(sizeof(knode));
+        nnode->v.fl = fl;
+        nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+        nnode->LEFT = same_as_w(fnc);
+        nnode->RIGHT = elm;// charcopy(oldsubject, subject);
+        psk rlnode = setIndex(nnode);
+        if(rlnode)
+            nnode = rlnode;
+        else
+            {
+            if(not_built_in(nnode->LEFT)) /* Do not use ternary operator! That eats stack! */
+                nnode = execFnc(nnode);
+            else
+                {
+                rlnode = functions(nnode);
+                if(rlnode)
+                    nnode = rlnode;
+                else
+                    nnode = execFnc(nnode);
+                }
+            }
+        return nnode;
+        }
+    }
+
+static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, ppsk pPnode)
+    {
+    ULONG outop;
+    if(outopnode)
+        outop = Op(outopnode->RIGHT) | SUCCESS; // specific out-operator
+    else
+        outop = WHITE | SUCCESS; // default out-operator
+    fun = same_as_w(fun);
+    datanode = same_as_w(datanode);
+    wipe(*pPnode);
+    *pPnode = datanode;
+    ULONG outopsh;
+    outopsh = outop >> OPSH;
+    psk hasnil = knil[outopsh];
+    LONG theNil;
+    if(hasnil)
+        theNil = hasnil->u.lobj;
+    else
+        theNil = 0;
+    if((outop & OPERATOR) == PLUS || (outop & OPERATOR) == TIMES)
+        {
+        psk resultnode = datanode;
+
+        int odd = 0;
+        int nods = 0; // Counts number of times odd was false
+        psk fnc = fun;
+        int repeat = 0;   // Merge sort: make every second op an inop instead of '+' or '*', then rearrange, then repeat
+        do
+            {
+            int inopsseen = 0;
+            psk evaluatedNode;
+            ppsk presultnode = &resultnode;
+#if 1
+            if((repeat > 1) && ((inopsseen % 2) == 0)) /* There are an even number of input operators, so an odd number of elements.
+                                        When making pairs of elements, one element at the start or the end will not belong to a pair. */
+                repeat = 1 + (nods % 2); /* nods is increased each time a list has an even number of input operators.
+                         If the isolated element was at one end of the list the previous time, it will be at the other end this time.
+                         By the way, this balancing does not seem to make a significant difference in CPU time needed. */
+            else
+#endif
+                repeat = 1;
+            while(Op(datanode) == inop)
+                {
+                evaluatedNode = applyFncToElem(fnc, datanode->LEFT, fl);
+                psk nxt = datanode->RIGHT;
+                if(!is_op(evaluatedNode) && hasnil && evaluatedNode->u.lobj == theNil)
+                    {
+                    wipe(evaluatedNode);
+                    }
+                else
+                    {
+                    psk newnode;
+                    if(fnc) /* Only true in first iteration! */
+                        newnode = (psk)bmalloc(sizeof(knode));
+                    else
+                        { /* Reuse cell that was allocated in first iteration. */
+                        wipe(datanode->LEFT); /* Do not wipe the rhs. We do need that one. (Except if it is the last one.) */
+                        newnode = datanode;
+                        }
+
+                    newnode->LEFT = evaluatedNode;
+                    newnode->RIGHT = nxt;
+                    if(repeat % 2)
+                        newnode->v.fl = outop;
+                    else
+                        {
+                        ++inopsseen;
+                        newnode->v.fl = inop;
+                        }
+                    ++repeat;
+                    *presultnode = newnode;
+                    presultnode = &(newnode->RIGHT);
+                    }
+                datanode = nxt;
+                }
+
+            *presultnode = applyFncToElem(fnc, datanode, fl); /* If the evaluation of the last (or only) datanode results
+                                     in a neutral element, we still have to put that at the end of the list. What else?*/
+
+            if(fnc) /* if fnc == 0 than all previously allocated operators can be reused. So we do not wipe them all. */
+                wipe(*pPnode);
+            else
+                wipe(datanode); /* Only the last element in the data list must still be deleted. */
+
+            fnc = 0;
+
+            datanode = resultnode;
+            repeat = 0;
+
+            ppsk A;
+            psk B;
+
+            A = &resultnode;
+
+            for(; is_op(*A) && is_op(B = (*A)->RIGHT);)
+                {
+                if(Op(B) == inop)
+                    {
+                    repeat = 1;
+                    (*A)->RIGHT = B->LEFT;
+                    B->LEFT = *A;
+                    *A = B;
+                    A = &(B->RIGHT);
+                    }
+                else
+                    A = &((*A)->RIGHT);
+                }
+            datanode = resultnode;
+            *pPnode = resultnode;
+            odd = inopsseen % 2;
+            if(!odd)
+                ++nods;
+//            printf("%d\t%d\t%d\n", odd, nods % 2, inopsseen);
+            }
+        while(repeat);
+        }
+    else
+        {
+        psk resultnode;
+        ppsk presultnode = &resultnode;
+        while(Op(datanode) == inop)
+            {
+            psk evaluatedNode = applyFncToElem(fun, datanode->LEFT, fl);
+            if(!is_op(evaluatedNode) && hasnil && evaluatedNode->u.lobj == theNil)
+                {
+                wipe(evaluatedNode);
+                }
+            else
+                {
+                psk newnode = (psk)bmalloc(sizeof(knode));
+                newnode->LEFT = evaluatedNode;
+                newnode->v.fl = outop;
+                *presultnode = newnode;
+                presultnode = &(newnode->RIGHT);
+                }
+            datanode = datanode->RIGHT;
+            }
+        if(!is_op(datanode) && knil[outopsh] && datanode->u.lobj == theNil)
+            {
+            *presultnode = same_as_w(datanode);
+            }
+        else
+            {
+            *presultnode = applyFncToElem(fun, datanode, fl);
+            }
+        datanode = resultnode;
+        wipe(*pPnode);
+        *pPnode = resultnode;
+        }
+    wipe(fun);
+    }
+
 function_return_type functions(psk Pnode)
     {
     static char draft[112];
-    psk lnode, rnode, rrnode, rlnode;
+    psk lnode, rnode, rlnode, rrnode;
     union
         {
         int i;
         ULONG ul;
         } intVal;
-    ULONG ul2;
     lnode = Pnode->LEFT;
     rnode = Pnode->RIGHT;
     {
@@ -490,7 +714,7 @@ function_return_type functions(psk Pnode)
 #if O_S
         CASE(SWI) /* swi$(<interrupt number>.(input regs)) */
             {
-            Pnode = swi(Pnode, rlnode, rrightnode);
+            Pnode = swi(Pnode, rlnode, rrnode);
             return functionOk(Pnode);
             }
 #endif
@@ -619,12 +843,12 @@ function_return_type functions(psk Pnode)
             rrnode = rnode->RIGHT;
             if(is_op(rrnode))
                 {
-                psk rrrightnode;
-                rrrightnode = rrnode->RIGHT;
+                psk rrrnode;
+                rrrnode = rrnode->RIGHT;
                 rrlnode = rrnode->LEFT;
-                if(!is_op(rrrightnode))
+                if(!is_op(rrrnode))
                     {
-                    switch(rrrightnode->u.obj)
+                    switch(rrrnode->u.obj)
                         {
                             case '2':
                                 intVal.i = 2;
@@ -719,10 +943,10 @@ function_return_type functions(psk Pnode)
 #endif
             errno = 0;
             val = STRTOUL((char*)POBJ(rnode), &endptr, 10);
-            if(errno == ERANGE
-               || (endptr && *endptr)
-               )
-                return functionFail(Pnode); /*not all characters scanned*/
+                if(errno == ERANGE
+                   || (endptr && *endptr)
+                   )
+                    return functionFail(Pnode); /*not all characters scanned*/
             sprintf(draft, "%" PRIX64, val);
             wipe(Pnode);
             Pnode = scopy((const char*)draft);
@@ -1009,8 +1233,11 @@ function_return_type functions(psk Pnode)
                 psk nPnode;
                 ppsk ppnode = &nPnode;
                 rrnode = rnode->RIGHT;
-                while(is_op(rrnode) && Op(rrnode) == WHITE)
+                while(Op(rrnode) == WHITE)
                     {
+#if 1
+                    nnode = applyFncToElem(rnode->LEFT, rrnode->LEFT, Pnode->v.fl);
+#else
                     nnode = (psk)bmalloc(sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
                     nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
@@ -1027,12 +1254,20 @@ function_return_type functions(psk Pnode)
                             {
                             rlnode = functions(nnode);
                             if(rlnode)
+                                {
+                                /*
+                                if(!isSUCCESS(rlnode))
+                                    {
+                                    wipe(nnode);
+                                    return functionFail(Pnode);
+                                    }*/
                                 nnode = rlnode;
+                                }
                             else
                                 nnode = execFnc(nnode);
                             }
                         }
-
+#endif
                     if(!is_op(nnode) && IS_NIL(nnode))
                         {
                         wipe(nnode);
@@ -1050,6 +1285,9 @@ function_return_type functions(psk Pnode)
                     }
                 if(is_op(rrnode) || !IS_NIL(rrnode))
                     {
+#if 1
+                    nnode = applyFncToElem(rnode->LEFT, rrnode, Pnode->v.fl);
+#else
                     nnode = (psk)bmalloc(sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
                     nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
@@ -1071,6 +1309,7 @@ function_return_type functions(psk Pnode)
                                 nnode = execFnc(nnode);
                             }
                         }
+#endif
                     *ppnode = nnode;
                     }
                 else
@@ -1099,75 +1338,47 @@ function_return_type functions(psk Pnode)
             if(is_op(rnode))
                 {/*XXX*/
                 psk nnode;
-                psk nPnode;
-                ppsk ppnode = &nPnode;
+                //psk fun = rnode->LEFT; // mop$(fun. ...)
                 rrnode = rnode->RIGHT;
+                ULONG fl = Pnode->v.fl;
                 if(Op(rnode) == DOT)
                     {
                     if(Op(rrnode) == DOT)
                         {
-                        lnode = rrnode->RIGHT;
-                        rrnode = rrnode->LEFT;
-                        if(Op(lnode) == DOT)
+                        rlnode = rrnode->LEFT; // mop$(fun.rlnode.rrnode ...)
+                        rrnode = rrnode->RIGHT;
+                        if(Op(rrnode) == DOT)
                             {
-                            nnode = lnode->RIGHT;
-                            lnode = lnode->LEFT;
-                            if(Op(nnode) == EQUALS)
-                                {
-                                ul2 = Op(nnode->RIGHT);
-                                if(!ul2)
-                                    /* No operator specified */
-                                    return functionFail(Pnode);
-                                }
-                            else
-                                /* The last argument must have heading = operator */
-                                return functionFail(Pnode);
+                            nnode = rrnode->RIGHT; // mop$(fun.rlnode.rrnode.nnode) : rlnode is data, rrnode is in-operator, nnode is out-operator 
+                            rrnode = rrnode->LEFT;
                             }
                         else
-                            ul2 = WHITE;
-                        if(Op(lnode) == EQUALS)
                             {
-                            intVal.ul = Op(lnode->RIGHT);
+                            nnode = 0;
+                            }
+                        if(Op(rrnode) == EQUALS)
+                            {
+                            intVal.ul = Op(rrnode->RIGHT); // in-operator
                             if(intVal.ul)
                                 {
-                                while(is_op(rrnode) && Op(rrnode) == intVal.ul)
+                                if(nnode)
                                     {
-                                    nnode = (psk)bmalloc(sizeof(knode));
-                                    nnode->v.fl = Pnode->v.fl;
-                                    nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
-                                    nnode->LEFT = same_as_w(rnode->LEFT);
-                                    nnode->RIGHT = same_as_w(rrnode->LEFT);
-                                    rlnode = setIndex(nnode);
-                                    if(rlnode)
-                                        nnode = rlnode;
-                                    else
+                                    if(Op(nnode) == EQUALS)
                                         {
-                                        if(not_built_in(nnode->LEFT)) /* Do not use ternary operator! That eats stack! */
-                                            nnode = execFnc(nnode);
-                                        else
+                                        if(Op(nnode->RIGHT))
                                             {
-                                            rlnode = functions(nnode);
-                                            if(rlnode)
-                                                nnode = rlnode;
-                                            else
-                                                nnode = execFnc(nnode);
+                                            SortMOP(rnode->LEFT, rlnode, intVal.ul, nnode, fl, &Pnode);
                                             }
-                                        }
-
-                                    if(!is_op(nnode) && IS_NIL(nnode))
-                                        {
-                                        wipe(nnode);
+                                        else
+                                            /* No operator specified */
+                                            return functionFail(Pnode);
                                         }
                                     else
-                                        {
-                                        rlnode = (psk)bmalloc(sizeof(knode));
-                                        rlnode->v.fl = ul2 | SUCCESS;
-                                        *ppnode = rlnode;
-                                        ppnode = &(rlnode->RIGHT);
-                                        rlnode->LEFT = nnode;
-                                        }
-                                    rrnode = rrnode->RIGHT;
+                                        /* The last argument must have heading = operator */
+                                        return functionFail(Pnode);
                                     }
+                                else
+                                    SortMOP(rnode->LEFT, rlnode, intVal.ul, 0, fl, &Pnode);
                                 }
                             else
                                 {
@@ -1192,38 +1403,6 @@ function_return_type functions(psk Pnode)
                     /* Expecting a dot */
                     return functionFail(Pnode);
                     }
-                if(is_op(rrnode) || !IS_NIL(rrnode))
-                    {
-                    nnode = (psk)bmalloc(sizeof(knode));
-                    nnode->v.fl = Pnode->v.fl;
-                    nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
-                    nnode->LEFT = same_as_w(rnode->LEFT);
-                    nnode->RIGHT = same_as_w(rrnode);
-                    rlnode = setIndex(nnode);
-                    if(rlnode)
-                        nnode = rlnode;
-                    else
-                        {
-                        if(not_built_in(nnode->LEFT)) /* Do not use ternary operator! That eats stack! */
-                            nnode = execFnc(nnode);
-                        else
-                            {
-                            rlnode = functions(nnode);
-                            if(rlnode)
-                                nnode = rlnode;
-                            else
-                                nnode = execFnc(nnode);
-                            }
-                        }
-
-                    *ppnode = nnode;
-                    }
-                else
-                    {
-                    *ppnode = same_as_w(rrnode);
-                    }
-                wipe(Pnode);
-                Pnode = nPnode;
                 return functionOk(Pnode);
                 }
             else
@@ -1259,42 +1438,22 @@ function_return_type functions(psk Pnode)
                             char* oldsubject = subject;
                             while(subject)
                                 {
-                                psk nnode;
-                                nnode = (psk)bmalloc(sizeof(knode));
-                                nnode->v.fl = Pnode->v.fl;
-                                nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
-                                nnode->LEFT = same_as_w(rnode->LEFT);
+                                psk elm;
                                 subject = strstr(oldsubject, separator);
                                 if(subject)
                                     {
                                     *subject = '\0';
-                                    nnode->RIGHT = scopy(oldsubject);
+                                    elm = scopy(oldsubject);
                                     *subject = separator[0];
                                     oldsubject = subject + strlen(separator);
                                     }
                                 else
                                     {
-                                    nnode->RIGHT = scopy(oldsubject);
+                                    elm = scopy(oldsubject);
                                     }
-                                rlnode = setIndex(nnode);
-                                if(rlnode)
-                                    nnode = rlnode;
-                                else
-                                    {
-                                    if(not_built_in(nnode->LEFT)) /* Do not use ternary operator! That eats stack! */
-                                        nnode = execFnc(nnode);
-                                    else
-                                        {
-                                        rlnode = functions(nnode);
-                                        if(rlnode)
-                                            nnode = rlnode;
-                                        else
-                                            nnode = execFnc(nnode);
-                                        }
-                                    }
-
+                                psk nnode = applyFncToString(rnode->LEFT, elm, Pnode->v.fl);
                                 if(subject)
-                                    {
+                                    { /* strstr did find a separator. So this is not the last element yet. */
                                     rlnode = (psk)bmalloc(sizeof(knode));
                                     rlnode->v.fl = WHITE | SUCCESS;
                                     *ppnode = rlnode;
@@ -1302,7 +1461,7 @@ function_return_type functions(psk Pnode)
                                     rlnode->LEFT = nnode;
                                     }
                                 else
-                                    {
+                                    { /* This is the last (or only) element */
                                     *ppnode = nnode;
                                     }
                                 }
@@ -1324,31 +1483,9 @@ function_return_type functions(psk Pnode)
                         {
                         for(; (k = getCodePoint(&subject)) > 0; oldsubject = subject)
                             {
-                            psk nnode;
-                            nnode = (psk)bmalloc(sizeof(knode));
-                            nnode->v.fl = Pnode->v.fl;
-                            nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
-                            nnode->LEFT = same_as_w(rnode->LEFT);
-                            nnode->RIGHT = charcopy(oldsubject, subject);
-                            rlnode = setIndex(nnode);
-                            if(rlnode)
-                                nnode = rlnode;
-                            else
-                                {
-                                if(not_built_in(nnode->LEFT)) /* Do not use ternary operator! That eats stack! */
-                                    nnode = execFnc(nnode);
-                                else
-                                    {
-                                    rlnode = functions(nnode);
-                                    if(rlnode)
-                                        nnode = rlnode;
-                                    else
-                                        nnode = execFnc(nnode);
-                                    }
-                                }
-
+                            psk nnode = applyFncToString(rnode->LEFT, charcopy(oldsubject, subject), Pnode->v.fl);
                             if(*subject)
-                                {
+                                { /* This is not the last character in the subject. */
                                 rlnode = (psk)bmalloc(sizeof(knode));
                                 rlnode->v.fl = WHITE | SUCCESS;
                                 *ppnode = rlnode;
@@ -1356,7 +1493,7 @@ function_return_type functions(psk Pnode)
                                 rlnode->LEFT = nnode;
                                 }
                             else
-                                {
+                                { /* This was the last character in the subject */
                                 *ppnode = nnode;
                                 }
                             }
@@ -1365,29 +1502,7 @@ function_return_type functions(psk Pnode)
                         {
                         for(; (k = *subject++) != 0; oldsubject = subject)
                             {
-                            psk nnode;
-                            nnode = (psk)bmalloc(sizeof(knode));
-                            nnode->v.fl = Pnode->v.fl;
-                            nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
-                            nnode->LEFT = same_as_w(rnode->LEFT);
-                            nnode->RIGHT = charcopy(oldsubject, subject);
-                            rlnode = setIndex(nnode);
-                            if(rlnode)
-                                nnode = rlnode;
-                            else
-                                {
-                                if(not_built_in(nnode->LEFT)) /* Do not use ternary operator! That eats stack! */
-                                    nnode = execFnc(nnode);
-                                else
-                                    {
-                                    rlnode = functions(nnode);
-                                    if(rlnode)
-                                        nnode = rlnode;
-                                    else
-                                        nnode = execFnc(nnode);
-                                    }
-                                }
-
+                            psk nnode = applyFncToString(rnode->LEFT, charcopy(oldsubject, subject), Pnode->v.fl);
                             if(*subject)
                                 {
                                 rlnode = (psk)bmalloc(sizeof(knode));
@@ -1507,22 +1622,22 @@ function_return_type functions(psk Pnode)
                                     wipe(Pnode);
                                     Pnode = scopy((const char*)strerror(errno));
                                     return functionOk(Pnode);
-                                    }
-                                /* sprintf(draft,"%d",errno);
-                                    break;*/
                                 }
+                            /* sprintf(draft,"%d",errno);
+                                break;*/
                         }
-#endif
                     }
+#endif
+                }
                 else
                     strcpy(draft, "0");
                 wipe(Pnode);
                 Pnode = scopy((const char*)draft);
                 return functionOk(Pnode);
-                }
+            }
             else
                 return functionFail(Pnode);
-            }
+        }
 #endif
         CASE(ARG) /* arg$ or arg$N  (N == 0,1,... and N < argc) */
             {
@@ -1629,9 +1744,9 @@ function_return_type functions(psk Pnode)
                         }
 #endif
                     }
-                }
+                    }
             return err ? functionFail(Pnode) : functionOk(Pnode);
-            }
+                }
         CASE(PUT) /* put$(file,mode,node) of put$node */
             {
             return output(&Pnode, result) ? functionOk(Pnode) : functionFail(Pnode);
@@ -1845,7 +1960,7 @@ function_return_type functions(psk Pnode)
                         rnode = evalmacro(Pnode->RIGHT);
                         rrnode = (psk)bmalloc(sizeof(objectnode));
 #if WORD32
-                        ((typedObjectnode*)rrightnode)->u.Int = 0;
+                        ((typedObjectnode*)rrnode)->u.Int = 0;
 #else
                         ((typedObjectnode*)rrnode)->v.fl &= ~(BUILT_IN | CREATEDWITHNEW);
 #endif
@@ -1854,7 +1969,7 @@ function_return_type functions(psk Pnode)
                         if(rnode)
                             {
                             rrnode->RIGHT = rnode;
-                        }
+                            }
                         else
                             {
                             rrnode->RIGHT = same_as_w(Pnode->RIGHT);
@@ -1862,15 +1977,15 @@ function_return_type functions(psk Pnode)
                         wipe(Pnode);
                         Pnode = rrnode;
                         Pnode->v.fl |= intVal.ul; /* (a=b)&!('$a)*/
+                        }
                     }
-                }
                 else
                     {
                     combiflags(Pnode);
                     Pnode = rightbranch(Pnode);
                     }
                 return functionOk(Pnode);
-            }
+                }
             else
                 {
                 return functionFail(Pnode);
@@ -1880,7 +1995,7 @@ function_return_type functions(psk Pnode)
             {
             return 0;
             }
-        }
+            }
     }
     /*return functionOk(Pnode); 20 Dec 1995, unreachable code in Borland C */
     }

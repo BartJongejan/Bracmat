@@ -1,3 +1,12 @@
+14 August 2024
+map$, mop$ and vap$ functions can take empty string as `map function'. Result:
+elements passed on unchanged.
+mop$ does (merge) sort output if the separating operator in the output list
+is + or *.
+
+9 August 2024
+(minor change) Moved binary | (OR) operation out of loop in mop$ function.
+
 8 August 2024
 The mop$ function can take an extra argument that indicates the operator to be
 used to separate the elements in the output.

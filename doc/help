@@ -4241,7 +4241,11 @@ Code that has been saved with lst$ can be reloaded with get$.
       ,   "map$ produces a list containing the results of applying <fnc> to each member
 in <list>. <fnc> can be the name of a function, a function definition
 (`anonymous function') or a lambda abstraction. <fnc> can also be the name of
-a built-in function. (See the first example.) The members in <list> must be
+a built-in function. (See the first example.) It is not necessary to specify a
+mapping function at all. An empty string instead of a function name or function
+definition has the effect of passing the the input to the output, unchanged.
+
+The members in <list> must be
 separated by the space operator.
 {?} map$(rev.aap noot mies)
 {!} paa toon seim
@@ -4292,9 +4296,8 @@ Another way to do this is to use the map$ function
 
 The second form creates a list with a separator operator of your choice.
 
-WARNING. If the output separator is |_+_| or |_*_|, the outpur will be bubble
-sorted. Do this only for short expressions or if you know that no sorting is
-needed.
+If the output separator is |_+_| or |_*_|, the output is sorted using the
+merge sort algorithm.
 
 {?} (a.b)+(c.d)+(e.a):?s
 
@@ -4303,6 +4306,10 @@ needed.
 
 {?} mop$((=.!arg:(?.?arg)&!arg).!s.(=+).(=*))
 {!} a*b*d
+
+It is not necessary to specify a mapping function. An empty string instead of
+a function name or function definition has the effect of passing the elements
+in the input to the output without any changes.
 "
     )
   & ( vaptxt
@@ -4321,6 +4328,10 @@ character of the input string is a separator, the last call to fnc$ is with
 a zero-length string. This will often happen if a newline character terminates
 every line in the input string and the newline character is specified as a
 separator.
+
+It is not necessary to specify a mapping function. An empty string instead of
+a function name or function definition has the effect of passing the characters
+in the input to the output.
 "
     )
   & ( memtxt

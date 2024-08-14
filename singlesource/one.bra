@@ -28,6 +28,7 @@ X=
           | eval
           | cmp
           | result
+          | functions
         )
       & chu$(128+10):?escapednl
       &   0
