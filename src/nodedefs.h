@@ -40,6 +40,7 @@
 
 #define OPERATOR ((0xF<<OPSH) + IS_OPERATOR)
 
+/* Before using Op(pn) it is not necessary to first test with is_op(pn). IS_OPERATOR bit is part of the OPERATOR bits. */
 #define Op(pn) ((pn)->v.fl & OPERATOR)
 #define kopo(pn) ((pn).v.fl & OPERATOR)
 #define is_op(pn) ((pn)->v.fl & IS_OPERATOR)
