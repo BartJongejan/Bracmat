@@ -1,3 +1,6 @@
+15 August 2024
+Fixed bug in yesterday's new code (mop$ function).
+
 14 August 2024
 map$, mop$ and vap$ functions can take empty string as `map function'. Result:
 elements passed on unchanged.

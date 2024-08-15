@@ -6883,8 +6883,8 @@ string line 2\"
           | Out$938b
           )
           (   vap$((=.utf$!arg).𝕌𝕋𝔽-𝟠)
-            : 𝕌𝕋𝔽 𝟠
-          | Out$938b
+            : 120140 120139 120125 45 120800
+          | Out$938c
           )
           (   vap$((=.!arg).abc.)
             & Out$939
@@ -7940,6 +7940,37 @@ string line 2\"
                 . 0|1
                 )
           | Out$"tme$ does not return valid data"
+          )
+          (   ( set
+              =   
+                . !( 
+                   '   mop
+                     $ ( ( 
+                         =   
+                           .   !arg:#*(.?arg)
+                             & !arg
+                         )
+                       .   mop
+                         $ ( (=..!arg)
+                           . $arg
+                           . (=a b)
+                           . (=+)
+                           )
+                       . (=+)
+                       )
+                   )
+              )
+            &     set
+                $ ( a
+                    b
+                    (.x y)
+                    x
+                    (.x y)
+                    c
+                    c
+                  )
+              : a b c x (.x y)
+          | out$"Something wrong with set."
           )
       &   out
         $ ( str

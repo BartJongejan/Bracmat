@@ -619,8 +619,7 @@ static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, 
             psk B;
 
             A = &resultnode;
-
-            for(; is_op(*A) && is_op(B = (*A)->RIGHT);)
+            for(; (Op(*A) == (outop & OPERATOR)) && is_op(B = (*A)->RIGHT);)
                 {
                 if(Op(B) == inop)
                     {
@@ -943,10 +942,10 @@ function_return_type functions(psk Pnode)
 #endif
             errno = 0;
             val = STRTOUL((char*)POBJ(rnode), &endptr, 10);
-                if(errno == ERANGE
-                   || (endptr && *endptr)
-                   )
-                    return functionFail(Pnode); /*not all characters scanned*/
+            if(errno == ERANGE
+               || (endptr && *endptr)
+               )
+                return functionFail(Pnode); /*not all characters scanned*/
             sprintf(draft, "%" PRIX64, val);
             wipe(Pnode);
             Pnode = scopy((const char*)draft);
@@ -1310,7 +1309,7 @@ function_return_type functions(psk Pnode)
                             }
                         }
 #endif
-                    *ppnode = nnode;
+                    * ppnode = nnode;
                     }
                 else
                     {
@@ -1622,22 +1621,22 @@ function_return_type functions(psk Pnode)
                                     wipe(Pnode);
                                     Pnode = scopy((const char*)strerror(errno));
                                     return functionOk(Pnode);
+                                    }
+                                /* sprintf(draft,"%d",errno);
+                                    break;*/
                                 }
-                            /* sprintf(draft,"%d",errno);
-                                break;*/
                         }
-                    }
 #endif
-                }
+                    }
                 else
                     strcpy(draft, "0");
                 wipe(Pnode);
                 Pnode = scopy((const char*)draft);
                 return functionOk(Pnode);
-            }
+                }
             else
                 return functionFail(Pnode);
-        }
+            }
 #endif
         CASE(ARG) /* arg$ or arg$N  (N == 0,1,... and N < argc) */
             {
@@ -1744,9 +1743,9 @@ function_return_type functions(psk Pnode)
                         }
 #endif
                     }
-                    }
-            return err ? functionFail(Pnode) : functionOk(Pnode);
                 }
+            return err ? functionFail(Pnode) : functionOk(Pnode);
+            }
         CASE(PUT) /* put$(file,mode,node) of put$node */
             {
             return output(&Pnode, result) ? functionOk(Pnode) : functionFail(Pnode);
@@ -1995,7 +1994,7 @@ function_return_type functions(psk Pnode)
             {
             return 0;
             }
-            }
+        }
     }
     /*return functionOk(Pnode); 20 Dec 1995, unreachable code in Borland C */
     }
