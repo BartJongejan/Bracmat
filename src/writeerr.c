@@ -9,7 +9,7 @@
 void writeError(psk Pnode)
     {
     FILE* saveFpo;
-    int saveNice;
+    Boolean saveNice;
     saveNice = beNice;
     beNice = FALSE;
     saveFpo = global_fpo;
