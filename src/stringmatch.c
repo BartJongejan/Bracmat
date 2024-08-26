@@ -184,7 +184,7 @@ char stringmatch
         suggestedCutOff = NULL;
         }
 #endif
-    DBGSRC(int saveNice; int redhum; saveNice = beNice; redhum = hum; beNice = FALSE; \
+    DBGSRC(Boolean saveNice; int redhum; saveNice = beNice; redhum = hum; beNice = FALSE; \
            hum = FALSE; Printf("%d  %.*s|%s", ind, (int)(cutoff - sub), sub, cutoff); \
            Printf(":"); result(pat); \
            Printf(",pos=" LONGD ",sLen=%ld,sugCut=%s,mayMoveStart=%s)"\
@@ -697,7 +697,7 @@ char stringmatch
     if(stringOncePattern(pat) || /* @("abXk":(|? b|`) X ?id) must fail*/ (s.c.rmr & (TRUE | FENCE | ONCE)) == FENCE)
         {
         s.c.rmr |= ONCE;
-        DBGSRC(int saveNice; int redhum; saveNice = beNice; redhum = hum; \
+        DBGSRC(Boolean saveNice; int redhum; saveNice = beNice; redhum = hum; \
                beNice = FALSE; hum = FALSE; \
                Printf("%d%*sstringmatch(%.*s", ind, ind, "", (int)(cutoff - sub), sub); \
                Printf(":"); result(pat); \
