@@ -7390,6 +7390,34 @@ string line 2\"
             & Out$"Hash insert: Missing value"
           | 
           )
+          (     ( 
+                =   (die=.1+!dead:?dead)
+                    (set=.(Its..insert)$!arg)
+                    (get=.(Its..find)$!arg)
+                    ( test
+                    =   
+                      .   (Its..set)$(a.13)
+                        & (its.set)$(a.14)
+                        &   (Its..get)$a
+                          : ? (a.14) ?
+                          : ? (a.13) ?
+                    )
+                )
+              : ?F
+            & new$hash:?g
+            & !F:(=?(g.))
+            & new$hash:?h
+            & !F:(=?!h)
+            & !F:(=?(new$hash:?k))
+            & (g..test)$
+            & (h..test)$
+            & (k..test)$
+            & 0:?dead
+            & :?g:?h:?k
+            & !dead:3
+          |   Out
+            $ "Issue with adding user defined functions to built-in object."
+          )
           (   (       new
                     $ (UFP,(=(s.myParm).!myParm))
                   : ?myCalc
