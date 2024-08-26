@@ -76,7 +76,7 @@ FILE* errorStream = NULL;
 
 int hum = 1;
 int listWithName = 1;
-int beNice = TRUE;
+Boolean beNice = TRUE;
 psk global_anchor;
 size_t telling = 0;
 unsigned char* source;

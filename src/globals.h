@@ -45,7 +45,7 @@ extern int optab[256];
 
 extern int hum;
 extern int listWithName;
-extern int beNice;
+extern Boolean beNice;
 
 extern unsigned char* source;
 extern const psk knil[16];
