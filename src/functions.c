@@ -721,9 +721,9 @@ function_return_type functions(psk Pnode)
 #if defined PYTHONINTERFACE
         CASE(NI) /* Ni$"Statements to be executed by Python" */
             {
-            if(Ni && !is_op(rightnode) && !HAS_VISIBLE_FLAGS_OR_MINUS(rightnode))
+            if(Ni && !is_op(rnode) && !HAS_VISIBLE_FLAGS_OR_MINUS(rnode))
                 {
-                Ni((const char*)POBJ(rightnode));
+                Ni((const char*)POBJ(rnode));
                 return functionOk(Pnode);
                 }
             else
@@ -731,10 +731,10 @@ function_return_type functions(psk Pnode)
             }
         CASE(NII) /* Ni!$"Expression to be evaluated by Python" */
             {
-            if(Nii && !is_op(rightnode) && !HAS_VISIBLE_FLAGS_OR_MINUS(rightnode))
+            if(Nii && !is_op(rnode) && !HAS_VISIBLE_FLAGS_OR_MINUS(rnode))
                 {
                 const char* val;
-                val = Nii((const char*)POBJ(rightnode));
+                val = Nii((const char*)POBJ(rnode));
                 wipe(Pnode);
                 Pnode = scopy((const char*)val);
                 return functionOk(Pnode);
@@ -934,9 +934,9 @@ function_return_type functions(psk Pnode)
             if(is_op(rnode) || !INTEGER_NOT_NEG(rnode))
                 return functionFail(Pnode);
 #ifdef __BORLANDC__
-            if(strlen((char*)POBJ(rightnode)) > 10
-               || strlen((char*)POBJ(rightnode)) == 10
-               && strcmp((char*)POBJ(rightnode), "4294967295") > 0
+            if(strlen((char*)POBJ(rnode)) > 10
+               || strlen((char*)POBJ(rnode)) == 10
+               && strcmp((char*)POBJ(rnode), "4294967295") > 0
                )
                 return functionFail(Pnode); /*not all characters scanned*/
 #endif
@@ -1167,7 +1167,7 @@ function_return_type functions(psk Pnode)
             else if(!is_op(rlnode = rnode->LEFT))
                 pnode = changeCase(rlnode
 #if CODEPAGE850
-                                   , search_opt(rightnode->RIGHT, DOS)
+                                   , search_opt(rnode->RIGHT, DOS)
 #endif
                                    , TRUE);
             else
@@ -1188,7 +1188,7 @@ function_return_type functions(psk Pnode)
             else if(!is_op(rlnode = rnode->LEFT))
                 pnode = changeCase(rlnode
 #if CODEPAGE850
-                                   , search_opt(rightnode->RIGHT, DOS)
+                                   , search_opt(rnode->RIGHT, DOS)
 #endif
                                    , FALSE);
             else
@@ -1222,7 +1222,7 @@ function_return_type functions(psk Pnode)
             }
         CASE(LST)
             {
-            return output(&Pnode, lst) ? functionOk(Pnode) : functionFail(Pnode);
+            return (output(&Pnode, lst) && GoodLST) ? functionOk(Pnode) : functionFail(Pnode);
             }
         CASE(MAP) /* map $ (<function>.<list>) */
             {
@@ -1582,7 +1582,7 @@ function_return_type functions(psk Pnode)
             if(!is_op(rnode))
                 {
 #if defined __SYMBIAN32__
-                intVal.i = unlink((const char*)POBJ(rightnode));
+                intVal.i = unlink((const char*)POBJ(rnode));
 #else
                 intVal.i = remove((const char*)POBJ(rnode));
 #endif
@@ -1820,9 +1820,9 @@ function_return_type functions(psk Pnode)
         */
         CASE(PRV) /* "?"$<expr> */
             {
-            if((rightnode->v.fl & SUCCESS)
-               && (is_op(rightnode) || rightnode->u.obj || HAS_UNOPS(rightnode)))
-                insert(&nilNode, rightnode);
+            if((rnode->v.fl & SUCCESS)
+               && (is_op(rnode) || rnode->u.obj || HAS_UNOPS(rnode)))
+                insert(&nilNode, rnode);
             Pnode = rightbranch(Pnode);
             return functionOk(Pnode);
             }

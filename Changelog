@@ -1,3 +1,6 @@
+26 August 2024
+lst$ function fails if given a symbol without a binding.
+
 15 August 2024
 Fixed bug in yesterday's new code (mop$ function).
 

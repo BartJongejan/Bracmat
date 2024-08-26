@@ -837,11 +837,12 @@ void mmf(ppsk PPnode)
     *pgoal = same_as_w(&nilNode);
     }
 
-static void lstsub(psk pnode)
+static Boolean lstsub(psk pnode)
     {
     vars* nxtvar;
     unsigned char* name;
     int alphabet, n;
+    Boolean found = FALSE;
     beNice = FALSE;
     name = POBJ(pnode);
     for(alphabet = 0; alphabet < 256; alphabet++)
@@ -852,6 +853,7 @@ static void lstsub(psk pnode)
             {
             if((pnode->u.obj == 0 && alphabet < 0x80) || !STRCMP(VARNAME(nxtvar), name))
                 {
+                found = TRUE;
                 for(n = nxtvar->n; n >= 0; n--)
                     {
                     ppsk tmp;
@@ -887,11 +889,15 @@ static void lstsub(psk pnode)
             }
         }
     beNice = TRUE;
+    return found;
     }
+
+Boolean GoodLST;
 
 void lst(psk pnode)
     {
-    while(is_op(pnode))
+    GoodLST = TRUE;
+    while(GoodLST && is_op(pnode))
         {
         if(Op(pnode) == EQUALS)
             {
@@ -919,7 +925,8 @@ void lst(psk pnode)
             pnode = pnode->RIGHT;
             }
         }
-    lstsub(pnode);
+    if(GoodLST)
+        GoodLST &= lstsub(pnode);
     }
 
 function_return_type setIndex(psk Pnode)
@@ -1012,7 +1019,7 @@ int string_copy_insert(psk name, psk pnode, char* str, char* cutoff)
             psnode->str = str;
             psnode->length = cutoff - str;
             }
-        DBGSRC(int saveNice; int redhum; saveNice = beNice; \
+        DBGSRC(Boolean saveNice; int redhum; saveNice = beNice; \
                redhum = hum; beNice = FALSE; hum = FALSE; \
                Printf("str [%s] length " LONGU "\n", psnode->str, (ULONG int)psnode->length); \
                beNice = saveNice; hum = redhum;)

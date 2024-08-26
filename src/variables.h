@@ -4,6 +4,8 @@
 #include "platformdependentdefs.h"
 #include "typedobjectnode.h"
 
+extern Boolean GoodLST;
+
 void lst(psk pnode);
 psk Head(psk pnode);
 int insert(psk name, psk pnode);
