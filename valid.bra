@@ -8000,6 +8000,10 @@ string line 2\"
               : a b c x (.x y)
           | out$"Something wrong with set."
           )
+          (   lst$hgjkgj
+            & Out$"Undefined variable cannot be listed."
+          | 
+          )
       &   out
         $ ( str
           $ ( "Done. "
