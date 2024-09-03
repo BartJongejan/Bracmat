@@ -1,0 +1,4 @@
+emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.65 (7f8a05dd4e37cbd7ffde6d624f91fd545f7b52e3)
+clang version 20.0.0git (https:/github.com/llvm/llvm-project 547917aebd1e79a8929b53f0ddf3b5185ee4df74)
+Target: wasm32-unknown-emscripten
+Thread model: posix

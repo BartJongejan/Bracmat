@@ -11,7 +11,7 @@ X=
   ( removeStyle
   =   html stl a z
     .   !arg:(?html.?stl)
-      & @(!html:?a !stl ? " }" ?z)
+      & @(!html:?a !stl ? "}" ?z)
       & out$(removed !stl)
       & str$(!a !z)
   )
@@ -205,7 +205,7 @@ final result. }
     <script>
     function execute(text) {
       var out;
-      var cstyle_ptr = allocate(intArrayFromString(text), ALLOC_NORMAL);
+      var cstyle_ptr = stringToNewUTF8(text);
       Module['print'](\"{?} \"+text+\"\\n{!} \");
       out = _oneShot(cstyle_ptr);
     }
