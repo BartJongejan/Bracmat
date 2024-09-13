@@ -1,3 +1,9 @@
+13 September 2024
+Fixed bug in mop$: If function called by mop$ returned an expression with the
+operator that is specified as input operator, this expression was transformed
+as well (only the last returned value, though). This could lead to erratic
+behaviour.
+
 26 August 2024
 lst$ function fails if given a symbol without a binding.
 

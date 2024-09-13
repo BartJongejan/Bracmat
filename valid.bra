@@ -7957,8 +7957,8 @@ string line 2\"
                 . 0|1
                 )
             &   tme$GMT
-              : ( #:~<1:~>59
-                . #:~<1:~>59
+              : ( #:~<0:~>59
+                . #:~<0:~>59
                 . #:~<0:~>23
                 . #:~<1:~>31
                 . #:~<1:~>12
@@ -8003,6 +8003,47 @@ string line 2\"
           (   lst$hgjkgj
             & Out$"Undefined variable cannot be listed."
           | 
+          )
+          (   -1+asc$a:?k
+            &     mop
+                $ ( ( 
+                    =   
+                      .   chr$(1+!k:?k)
+                          chr$(1+!k:?k)
+                    )
+                  . L M N
+                  . (=a b)
+                  . (=a+b)
+                  )
+              : (a b)+(c d)+(e f)
+          |   Out
+            $ "Input operator can occur in output from mop function and shall not be converted to output operator."
+          )
+          (   (A.) (B.(C.) D):?xml
+            & (E.):?xm2
+            & ( rekur
+              =   path xml
+                .   !arg:(?path.?xml)
+                  &   mop
+                    $ ( ( 
+                        =   e c
+                          .     !arg:(?e.?c)
+                              & rekur$(!path !e.!c)
+                            | !path:~
+                            | 0
+                        )
+                      . !xml
+                      . (=a b)
+                      . (=+)
+                      )
+              )
+            &   rekur$((.R).!xml)
+              :   ((.R) A)
+                + ((.R) B)
+                + ((.R) B C)
+            &   rekur$((.S).!xm2)
+              : (.S) E
+          | Out$"Recursive mop application goes wrong."
           )
       &   out
         $ ( str

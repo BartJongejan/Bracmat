@@ -453,7 +453,7 @@ function_return_type execFnc(psk Pnode)
         return functionFail(Pnode);
     }
 
-static psk applyFncToElem(psk fnc, psk elm, ULONG fl)
+static psk applyFncToElem_w(psk fnc, psk elm, ULONG fl)
     {
     if(!fnc)
         return eval(same_as_w(elm)); /* combine or sort elm */
@@ -548,28 +548,26 @@ static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, 
     if((outop & OPERATOR) == PLUS || (outop & OPERATOR) == TIMES)
         {
         psk resultnode = datanode;
-
-        int odd = 0;
-        int nods = 0; // Counts number of times odd was false
         psk fnc = fun;
         int repeat = 0;   // Merge sort: make every second op an inop instead of '+' or '*', then rearrange, then repeat
+        int inops = 0;
+        while(Op(datanode) == inop)
+            {
+            ++inops;
+            datanode = datanode->RIGHT;
+            }
+
         do
             {
-            int inopsseen = 0;
             psk evaluatedNode;
             ppsk presultnode = &resultnode;
-#if 1
-            if((repeat > 1) && ((inopsseen % 2) == 0)) /* There are an even number of input operators, so an odd number of elements.
-                                        When making pairs of elements, one element at the start or the end will not belong to a pair. */
-                repeat = 1 + (nods % 2); /* nods is increased each time a list has an even number of input operators.
-                         If the isolated element was at one end of the list the previous time, it will be at the other end this time.
-                         By the way, this balancing does not seem to make a significant difference in CPU time needed. */
-            else
-#endif
-                repeat = 1;
-            while(Op(datanode) == inop)
+            datanode = resultnode;
+            repeat = 0;
+            while(repeat < inops)
                 {
-                evaluatedNode = applyFncToElem(fnc, datanode->LEFT, fl);
+                assert(Op(datanode) == inop);
+                ++repeat;
+                evaluatedNode = applyFncToElem_w(fnc, datanode->LEFT, fl);
                 psk nxt = datanode->RIGHT;
                 if(!is_op(evaluatedNode) && hasnil && evaluatedNode->u.lobj == theNil)
                     {
@@ -588,42 +586,45 @@ static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, 
 
                     newnode->LEFT = evaluatedNode;
                     newnode->RIGHT = nxt;
-                    if(repeat % 2)
+                    if(repeat % 2) // ODD
                         newnode->v.fl = outop;
                     else
-                        {
-                        ++inopsseen;
+                        { // EVEN
                         newnode->v.fl = inop;
                         }
-                    ++repeat;
                     *presultnode = newnode;
                     presultnode = &(newnode->RIGHT);
                     }
                 datanode = nxt;
                 }
 
-            *presultnode = applyFncToElem(fnc, datanode, fl); /* If the evaluation of the last (or only) datanode results
+            *presultnode = applyFncToElem_w(fnc, datanode, fl); /* If the evaluation of the last (or only) datanode results
                                      in a neutral element, we still have to put that at the end of the list. What else?*/
 
-            if(fnc) /* if fnc == 0 than all previously allocated operators can be reused. So we do not wipe them all. */
+            if(fnc) /* if fnc == 0 then all previously allocated operators can be reused. So we do not wipe them all. */
+                {
                 wipe(*pPnode);
+                }
             else
+                {
                 wipe(datanode); /* Only the last element in the data list must still be deleted. */
+                }
 
             fnc = 0;
-
-            datanode = resultnode;
-            repeat = 0;
 
             ppsk A;
             psk B;
 
             A = &resultnode;
-            for(; (Op(*A) == (outop & OPERATOR)) && is_op(B = (*A)->RIGHT);)
+            repeat = 0;
+            inops /= 2;
+            for(; ++repeat <= inops;)
                 {
+                assert(Op(*A) == (outop & OPERATOR));
+                B = (*A)->RIGHT;
+                assert(is_op(B));
                 if(Op(B) == inop)
                     {
-                    repeat = 1;
                     (*A)->RIGHT = B->LEFT;
                     B->LEFT = *A;
                     *A = B;
@@ -632,14 +633,9 @@ static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, 
                 else
                     A = &((*A)->RIGHT);
                 }
-            datanode = resultnode;
             *pPnode = resultnode;
-            odd = inopsseen % 2;
-            if(!odd)
-                ++nods;
-//            printf("%d\t%d\t%d\n", odd, nods % 2, inopsseen);
             }
-        while(repeat);
+        while(inops);
         }
     else
         {
@@ -647,7 +643,7 @@ static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, 
         ppsk presultnode = &resultnode;
         while(Op(datanode) == inop)
             {
-            psk evaluatedNode = applyFncToElem(fun, datanode->LEFT, fl);
+            psk evaluatedNode = applyFncToElem_w(fun, datanode->LEFT, fl);
             if(!is_op(evaluatedNode) && hasnil && evaluatedNode->u.lobj == theNil)
                 {
                 wipe(evaluatedNode);
@@ -668,7 +664,7 @@ static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, 
             }
         else
             {
-            *presultnode = applyFncToElem(fun, datanode, fl);
+            *presultnode = applyFncToElem_w(fun, datanode, fl);
             }
         datanode = resultnode;
         wipe(*pPnode);
@@ -1235,7 +1231,7 @@ function_return_type functions(psk Pnode)
                 while(Op(rrnode) == WHITE)
                     {
 #if 1
-                    nnode = applyFncToElem(rnode->LEFT, rrnode->LEFT, Pnode->v.fl);
+                    nnode = applyFncToElem_w(rnode->LEFT, rrnode->LEFT, Pnode->v.fl);
 #else
                     nnode = (psk)bmalloc(sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
@@ -1285,7 +1281,7 @@ function_return_type functions(psk Pnode)
                 if(is_op(rrnode) || !IS_NIL(rrnode))
                     {
 #if 1
-                    nnode = applyFncToElem(rnode->LEFT, rrnode, Pnode->v.fl);
+                    nnode = applyFncToElem_w(rnode->LEFT, rrnode, Pnode->v.fl);
 #else
                     nnode = (psk)bmalloc(sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
