@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "13 September 2024"
-#define VERSION "6.25.2"
-#define BUILD "307"
+#define DATUM "1 November 2024"
+#define VERSION "6.25.3"
+#define BUILD "308"
 /*
 COMPILATION
 -----------
@@ -727,7 +727,7 @@ int startProc(
                                 "?arg)&E$!a \246lt\273 l$!arg|E$!arg):(=?l)&(g=a.@(!arg:?a \276 ?arg)&"
                                 "l$!a \246gt\273 g$!arg|l$!arg)&(\242=a.@(!arg:?a \242 ?arg)&g$!a "
                                 "\246quot\273 \242$!arg|g$!arg)&(\247=a.@(!arg:?a \247 ?arg)&\242$!a "
-                                "\246apos\273 \247$!arg|\242$!arg)&(t=a v.!arg:(?a.?v) ?arg&\240 g$!a "
+                                "\246#39\273 \247$!arg|\242$!arg)&(t=a v.!arg:(?a.?v) ?arg&\240 g$!a "
                                 "\275\242 \247$!v \242 t$!arg|)&(!arg:? (html|HTML.?) ?&(Q=!C:&low$!A:"
                                 "(area|base|br|col|command|embed|hr|img|input|keygen|link|meta|param|"
                                 "source|track|wbr))|(Q=!C:))&'(r A B C T.whl'(!arg:%?r ?arg&(!r:(?A."

@@ -1,3 +1,7 @@
+1 November 2024
+Changed &apos; to &#39; in toML function, since &apos; is not a valid HTML
+entity.
+
 13 September 2024
 Fixed bug in mop$: If function called by mop$ returned an expression with the
 operator that is specified as input operator, this expression was transformed

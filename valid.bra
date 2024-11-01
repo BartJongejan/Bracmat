@@ -8045,6 +8045,10 @@ string line 2\"
               : (.S) E
           | Out$"Recursive mop application goes wrong."
           )
+          (   toML$(e.(a."don't"),blah)
+            : "<e a=\"don&#39;t\">blah</e>"
+          | Out$"apostrophe not correctly coded"
+          )
       &   out
         $ ( str
           $ ( "Done. "
