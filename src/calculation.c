@@ -1865,7 +1865,7 @@ static Boolean StaticArray(psk declaration)
     {
     if(is_op(declaration))
         {
-        for(psk extents = declaration->RIGHT;; extents = extents->RIGHT)
+        for(psk extents = declaration->RIGHT; extents; extents = extents->RIGHT)
             {
             if(is_op(extents))
                 {
@@ -4809,7 +4809,7 @@ static Boolean calculationdie(struct typedObjectnode* This, ppsk arg)
 method calculation[] = {
     {"calculate",calculate},
     {"run",calculate}, /*Alternative to `calculate' and `go'*/
-    {"go",calculate}, /*Alternative to calculate and `run'*/
+    {"go",calculate}, /*Alternative to `calculate' and `run'*/
     {"trc",trc},
     {"print",print},
     {"export",eksport},
