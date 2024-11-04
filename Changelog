@@ -1,3 +1,6 @@
+4 November 2024
+Allow / in unquoted HTML(5) attribute, even if followed by >
+
 3 November 2024
 Added test in `for' loop.
 

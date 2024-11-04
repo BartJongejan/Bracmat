@@ -3000,7 +3000,8 @@ static estate valuex(const unsigned char * pkar)
     switch(*pkar)
         {
         case '>':
-        case '/':
+        /*case '/': Allowed in HTML5 as first character of attriute value, without surrounding apostrophes or quotes! 
+        E.g. <link rel=stylesheet href=/styles.css crossorigin=""> */
         case '=':
             tagState = defx;
             return notag;
@@ -3112,6 +3113,7 @@ static estate invalue(const unsigned char * pkar)
         /* Unsafe to end valuex at first /
            See fx get$("<a href=http://www.cst.dk/esslli2010/resources.html>",HT ML MEM)
            */
+            /*
         case '/':
             if (*(pkar + 1) == '>')
                 {
@@ -3121,7 +3123,7 @@ static estate invalue(const unsigned char * pkar)
                 putOperatorChar(')');
                 tagState = emptytag;
                 return tag;
-                }
+                }*/
             /* fall through */
         default:
             return tag;

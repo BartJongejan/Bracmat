@@ -6605,9 +6605,10 @@ string line 2\"
           | Out$897
           )
           (     get$("<pap color=blue/>",MEM,HT,ML)
-              : (pap.(color.blue),)
-            & "Not conforming, but forgiving!"
-          | Out$898
+              : (pap.color.blue/)
+            & "This is allowed in HTML5."
+          |   Out
+            $ "898 HTML5 allows / in unquoted attribute value. Sorry for that."
           )
           (     get
               $ (   str
@@ -8048,6 +8049,26 @@ string line 2\"
           (   toML$(e.(a."don't"),blah)
             : "<e a=\"don&#39;t\">blah</e>"
           | Out$"apostrophe not correctly coded"
+          )
+          (   "<a href=./>Table of Contents</a>":?htm
+            & get$(!htm,MEM HT ML):?link
+            & nestML$!link:?link
+            &   !link
+              : (a.(href."./"),"Table of Contents")
+          | Out$"HTML5 allows unquoted attribute value that ends with /."
+          )
+          (     "<link rel=stylesheet href=/styles.css crossorigin=\"\">"
+              : ?htm
+            & get$(!htm,MEM HT ML):?link
+            & nestML$!link:?link
+            & lst$link
+            &   !link
+              : ( link
+                .   (rel.stylesheet)
+                    (href."/styles.css")
+                    (crossorigin.)
+                )
+          | Out$"HTML5 allows unquoted attribute value that starts with /."
           )
       &   out
         $ ( str
