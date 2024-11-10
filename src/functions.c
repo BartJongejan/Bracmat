@@ -108,20 +108,20 @@ static psk swi(psk Pnode, psk rlnode, psk rrnode)
         }
     while(is_op(rrnode) && i < 10);
 #ifdef __TURBOC__
-        intr(u.s.swicode, (struct REGPACK*)&u.s.regs);
-        sprintf(pc, "0.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
-                u.i[1], u.i[2], u.i[3], u.i[4], u.i[5],
-                u.i[6], u.i[7], u.i[8], u.i[9], u.i[10]);
+    intr(u.s.swicode, (struct REGPACK*)&u.s.regs);
+    sprintf(pc, "0.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
+            u.i[1], u.i[2], u.i[3], u.i[4], u.i[5],
+            u.i[6], u.i[7], u.i[8], u.i[9], u.i[10]);
 #else
 #if defined ARM
-        i = (int)os_swix(u.s.swicode, &u.s.regs);
-        sprintf(pc, "%u.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
-                i,
-                u.i[1], u.i[2], u.i[3], u.i[4], u.i[5],
-                u.i[6], u.i[7], u.i[8], u.i[9], u.i[10]);
+    i = (int)os_swix(u.s.swicode, &u.s.regs);
+    sprintf(pc, "%u.%u,%u,%u,%u,%u,%u,%u,%u,%u,%u",
+            i,
+            u.i[1], u.i[2], u.i[3], u.i[4], u.i[5],
+            u.i[6], u.i[7], u.i[8], u.i[9], u.i[10]);
 #endif
 #endif
-        return build_up(Pnode, pc, NULL);
+    return build_up(Pnode, pc, NULL);
     }
 #endif
 
@@ -529,6 +529,11 @@ static psk applyFncToString(psk fnc, psk elm, ULONG fl)
 static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, ppsk pPnode)
     {
     ULONG outop;
+    /*
+    printf("datanode:\n");
+    result(datanode);
+    printf("\n");
+    */
     if(outopnode)
         outop = Op(outopnode->RIGHT) | SUCCESS; // specific out-operator
     else
@@ -556,6 +561,7 @@ static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, 
             ++inops;
             datanode = datanode->RIGHT;
             }
+        //printf("inops %d\n", inops);
 
         do
             {
@@ -563,23 +569,39 @@ static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, 
             ppsk presultnode = &resultnode;
             datanode = resultnode;
             repeat = 0;
+            //printf("\ndo loop inops %d\n", inops);
             while(repeat < inops)
                 {
+                /*
+                printf("datanode in loop:\n");
+                result(datanode);
+                printf("\nrepeat %d\n", repeat);
+                */
                 assert(Op(datanode) == inop);
-                ++repeat;
                 evaluatedNode = applyFncToElem_w(fnc, datanode->LEFT, fl);
+                /*
+                printf("evaluatedNode:\n");
+                result(evaluatedNode);
+                */
                 psk nxt = datanode->RIGHT;
                 if(!is_op(evaluatedNode) && hasnil && evaluatedNode->u.lobj == theNil)
                     {
+                    //printf("\nwipe\n");
                     wipe(evaluatedNode);
+                    --inops;
                     }
                 else
                     {
                     psk newnode;
+                    ++repeat;
                     if(fnc) /* Only true in first iteration! */
+                        {
+                        //printf("\nbmalloc\n");
                         newnode = (psk)bmalloc(sizeof(knode));
+                        }
                     else
                         { /* Reuse cell that was allocated in first iteration. */
+                        //printf("\nreuse\n");
                         wipe(datanode->LEFT); /* Do not wipe the rhs. We do need that one. (Except if it is the last one.) */
                         newnode = datanode;
                         }
@@ -595,12 +617,22 @@ static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, 
                     *presultnode = newnode;
                     presultnode = &(newnode->RIGHT);
                     }
+                /*
+                printf("resultnode:\n");
+                result(resultnode);
+                */
                 datanode = nxt;
                 }
-
+            /*
+            printf("\nAAA\n");
+            result(datanode);
+            */
             *presultnode = applyFncToElem_w(fnc, datanode, fl); /* If the evaluation of the last (or only) datanode results
                                      in a neutral element, we still have to put that at the end of the list. What else?*/
-
+            /*
+            printf("\nBBB\n");
+            result(datanode);
+            */
             if(fnc) /* if fnc == 0 then all previously allocated operators can be reused. So we do not wipe them all. */
                 {
                 wipe(*pPnode);
@@ -609,17 +641,35 @@ static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, 
                 {
                 wipe(datanode); /* Only the last element in the data list must still be deleted. */
                 }
-
+            /*
+            printf("\nCCC\n");
+            result(datanode);
+            */
             fnc = 0;
 
             ppsk A;
             psk B;
 
+            /*
+            printf("\nresultnodeA\n");
+            result(resultnode);
+            printf("\nDatWasresultnodeA\n");
+            */
             A = &resultnode;
             repeat = 0;
             inops /= 2;
+            //printf("inopsIsNu %d\n", inops);
+
             for(; ++repeat <= inops;)
                 {
+                /*printf("repeat %d\n", repeat);
+                if(Op(*A) != (outop & OPERATOR))
+                    {
+                    printf("OEPS\n");
+                    result(*A);
+                    printf("\n");
+                    }
+                    */
                 assert(Op(*A) == (outop & OPERATOR));
                 B = (*A)->RIGHT;
                 assert(is_op(B));
@@ -634,8 +684,14 @@ static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, 
                     A = &((*A)->RIGHT);
                 }
             *pPnode = resultnode;
+            /*
+            printf("resultnodeB\n");
+            result(resultnode);
+            printf("\nDatWasresultnodeB inops=%d\n\n", inops);
+            */
             }
         while(inops);
+        //printf("Done!\n");
         }
     else
         {

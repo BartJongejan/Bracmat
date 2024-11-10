@@ -7946,18 +7946,10 @@ string line 2\"
               )
           | Out$"No support for UFP objects."
           )
-          (     tme$
-              : ( #:~<1:~>59
-                . #:~<1:~>59
-                . #:~<0:~>23
-                . #:~<1:~>31
-                . #:~<1:~>12
-                . #:~<2024
-                . #:~<1:~>7
-                . #:~<1:~>366
-                . 0|1
-                )
-            &   tme$GMT
+          "51.35.14.10.11.2024.1.315.0"
+          (   :?T1:?T2
+            &   tme$
+              : ?T1
               : ( #:~<0:~>59
                 . #:~<0:~>59
                 . #:~<0:~>23
@@ -7968,7 +7960,20 @@ string line 2\"
                 . #:~<1:~>366
                 . 0|1
                 )
-          | Out$"tme$ does not return valid data"
+            &   tme$GMT
+              : ?T2
+              : ( #:~<0:~>59
+                . #:~<0:~>59
+                . #:~<0:~>23
+                . #:~<1:~>31
+                . #:~<1:~>12
+                . #:~<2024
+                . #:~<1:~>7
+                . #:~<1:~>366
+                . 0|1
+                )
+          |   Out
+            $ ("tme$ does not return valid data" T !T1 GMT !T2)
           )
           (   ( set
               =   
@@ -8069,6 +8074,36 @@ string line 2\"
                     (crossorigin.)
                 )
           | Out$"HTML5 allows unquoted attribute value that starts with /."
+          )
+          (       mop
+                $ ( (=.1)
+                  . a*b*c*x*y*z
+                  . (=*)
+                  . (=*)
+                  )
+              : 1
+            &     mop
+                $ ( (=.0)
+                  . a*b*c*x*y*z
+                  . (=*)
+                  . (=*)
+                  )
+              : 0
+            &     mop
+                $ ( (=.)
+                  . a b c x y z
+                  . (=a b)
+                  . (=a b)
+                  )
+              : 
+            &     mop
+                $ ( (=.0)
+                  . a+b+c+x+y+z
+                  . (=*)
+                  . (=*)
+                  )
+              : 0
+          | Out$"Nil elements or zero not treated correctly"
           )
       &   out
         $ ( str

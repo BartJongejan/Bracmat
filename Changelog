@@ -1,3 +1,11 @@
+10 November
+Fixed bug in SortMOP. Neutral elements:  
+   neutral element   associative operator
+           0                +
+           1                *
+     empty string       white space
+were not handled correctly.
+
 4 November 2024
 Allow / in unquoted HTML(5) attribute, even if followed by >
 
