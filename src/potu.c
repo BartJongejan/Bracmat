@@ -20,8 +20,8 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "10 November 2024"
-#define VERSION "6.26.1"
+#define DATUM "11 November 2024"
+#define VERSION "6.26.2"
 #define BUILD "310"
 /*
 COMPILATION
@@ -171,7 +171,6 @@ blank " ", the comma "," and the full stop ".". (The interpunction symbols
 #include "charput.h"
 
 #if defined SINGLESOURCE
-//#define NODESTRUCT_H
 #define UNICASECONV_H
 #define UNICHARTYPES_H
 #define GLOBALS_H                  
@@ -209,7 +208,6 @@ blank " ", the comma "," and the full stop ".". (The interpunction symbols
 #define FILESTATUS_H
 #define SIMIL_H
 #define OBJECTDEF_H
-//#define FUNCTIONS_H
 #define CANONIZATION_C
 #define EVALUATE_H
 
@@ -699,7 +697,6 @@ int startProc(
                                 "(nestML=a L B s e x HT5.:?L&whl'(!arg:%?a ?arg&!a !L:?L)&!L:?arg&:?L:?B:"
                                 "?s&whl'(!arg:%?a ?arg&(!a:(.?e.)&(!L.) !B:?B&:?L&!e !s:?s|(!a:(?e.?,?"
                                 ")&!a|!a:(?e.?x)&(!s:!e ?s&(!e.!x,!L) (!B:(%?L.) ?B&)|!a)|!a) !L:?L))&"
-//                                "(low$!s:html&!L:?B ((?.?,?) ?:?L)&!B (!s.,!L)|!L)),",
                                 "(low$!s:html&!L:?B ((?.?,?) ?:?L)&!B (!s.,!L):?L|)&(!L:(? (\241DOCTYPE."
                                 "@(?:? ~<>html ?)) ?|? (~<>html.?) ?)&(HT5=L M e x a C p g A.(p=li&(g=li)"
                                 "|(dt|dd)&(g=dt|dd)|p&(g=address|article|aside|blockquote|details|div|dl|"

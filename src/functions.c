@@ -6,7 +6,6 @@
 #include "globals.h"
 #include "branch.h"
 #include "variables.h"
-//#include "input.h"
 #include "wipecopy.h"
 #include "eval.h"
 #include "filewrite.h"
@@ -505,7 +504,7 @@ static psk applyFncToString(psk fnc, psk elm, ULONG fl)
         nnode->v.fl = fl;
         nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
         nnode->LEFT = same_as_w(fnc);
-        nnode->RIGHT = elm;// charcopy(oldsubject, subject);
+        nnode->RIGHT = elm;
         psk rlnode = setIndex(nnode);
         if(rlnode)
             nnode = rlnode;
@@ -529,15 +528,10 @@ static psk applyFncToString(psk fnc, psk elm, ULONG fl)
 static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, ppsk pPnode)
     {
     ULONG outop;
-    /*
-    printf("datanode:\n");
-    result(datanode);
-    printf("\n");
-    */
     if(outopnode)
-        outop = Op(outopnode->RIGHT) | SUCCESS; // specific out-operator
+        outop = Op(outopnode->RIGHT) | SUCCESS; /* specific out - operator */
     else
-        outop = WHITE | SUCCESS; // default out-operator
+        outop = WHITE | SUCCESS; /* default out-operator*/
     fun = same_as_w(fun);
     datanode = same_as_w(datanode);
     wipe(*pPnode);
@@ -554,39 +548,27 @@ static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, 
         {
         psk resultnode = datanode;
         psk fnc = fun;
-        int repeat = 0;   // Merge sort: make every second op an inop instead of '+' or '*', then rearrange, then repeat
+        int repeat = 0;   /* Merge sort : make every second op an inop instead of '+' or '*', then rearrange, then repeat*/
         int inops = 0;
         while(Op(datanode) == inop)
             {
             ++inops;
             datanode = datanode->RIGHT;
             }
-        //printf("inops %d\n", inops);
-
+        
         do
             {
             psk evaluatedNode;
             ppsk presultnode = &resultnode;
             datanode = resultnode;
             repeat = 0;
-            //printf("\ndo loop inops %d\n", inops);
             while(repeat < inops)
                 {
-                /*
-                printf("datanode in loop:\n");
-                result(datanode);
-                printf("\nrepeat %d\n", repeat);
-                */
                 assert(Op(datanode) == inop);
                 evaluatedNode = applyFncToElem_w(fnc, datanode->LEFT, fl);
-                /*
-                printf("evaluatedNode:\n");
-                result(evaluatedNode);
-                */
                 psk nxt = datanode->RIGHT;
                 if(!is_op(evaluatedNode) && hasnil && evaluatedNode->u.lobj == theNil)
                     {
-                    //printf("\nwipe\n");
                     wipe(evaluatedNode);
                     --inops;
                     }
@@ -596,43 +578,29 @@ static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, 
                     ++repeat;
                     if(fnc) /* Only true in first iteration! */
                         {
-                        //printf("\nbmalloc\n");
                         newnode = (psk)bmalloc(sizeof(knode));
                         }
                     else
                         { /* Reuse cell that was allocated in first iteration. */
-                        //printf("\nreuse\n");
                         wipe(datanode->LEFT); /* Do not wipe the rhs. We do need that one. (Except if it is the last one.) */
                         newnode = datanode;
                         }
 
                     newnode->LEFT = evaluatedNode;
                     newnode->RIGHT = nxt;
-                    if(repeat % 2) // ODD
+                    if(repeat % 2) /* ODD */
                         newnode->v.fl = outop;
                     else
-                        { // EVEN
+                        { /* EVEN */
                         newnode->v.fl = inop;
                         }
                     *presultnode = newnode;
                     presultnode = &(newnode->RIGHT);
                     }
-                /*
-                printf("resultnode:\n");
-                result(resultnode);
-                */
                 datanode = nxt;
                 }
-            /*
-            printf("\nAAA\n");
-            result(datanode);
-            */
             *presultnode = applyFncToElem_w(fnc, datanode, fl); /* If the evaluation of the last (or only) datanode results
                                      in a neutral element, we still have to put that at the end of the list. What else?*/
-            /*
-            printf("\nBBB\n");
-            result(datanode);
-            */
             if(fnc) /* if fnc == 0 then all previously allocated operators can be reused. So we do not wipe them all. */
                 {
                 wipe(*pPnode);
@@ -641,35 +609,18 @@ static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, 
                 {
                 wipe(datanode); /* Only the last element in the data list must still be deleted. */
                 }
-            /*
-            printf("\nCCC\n");
-            result(datanode);
-            */
+            
             fnc = 0;
 
             ppsk A;
             psk B;
 
-            /*
-            printf("\nresultnodeA\n");
-            result(resultnode);
-            printf("\nDatWasresultnodeA\n");
-            */
             A = &resultnode;
             repeat = 0;
             inops /= 2;
-            //printf("inopsIsNu %d\n", inops);
-
+            
             for(; ++repeat <= inops;)
                 {
-                /*printf("repeat %d\n", repeat);
-                if(Op(*A) != (outop & OPERATOR))
-                    {
-                    printf("OEPS\n");
-                    result(*A);
-                    printf("\n");
-                    }
-                    */
                 assert(Op(*A) == (outop & OPERATOR));
                 B = (*A)->RIGHT;
                 assert(is_op(B));
@@ -684,14 +635,8 @@ static void SortMOP(psk fun, psk datanode, ULONG inop, psk outopnode, ULONG fl, 
                     A = &((*A)->RIGHT);
                 }
             *pPnode = resultnode;
-            /*
-            printf("resultnodeB\n");
-            result(resultnode);
-            printf("\nDatWasresultnodeB inops=%d\n\n", inops);
-            */
             }
         while(inops);
-        //printf("Done!\n");
         }
     else
         {
@@ -1279,7 +1224,7 @@ function_return_type functions(psk Pnode)
         CASE(MAP) /* map $ (<function>.<list>) */
             {
             if(is_op(rnode))
-                {/*XXX*/
+                {
                 psk nnode;
                 psk nPnode;
                 ppsk ppnode = &nPnode;
@@ -1291,7 +1236,7 @@ function_return_type functions(psk Pnode)
 #else
                     nnode = (psk)bmalloc(sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
-                    nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+                    nnode->v.fl &= COPYFILTER;
                     nnode->LEFT = same_as_w(rnode->LEFT);
                     nnode->RIGHT = same_as_w(rrnode->LEFT);
                     rlnode = setIndex(nnode);
@@ -1306,12 +1251,6 @@ function_return_type functions(psk Pnode)
                             rlnode = functions(nnode);
                             if(rlnode)
                                 {
-                                /*
-                                if(!isSUCCESS(rlnode))
-                                    {
-                                    wipe(nnode);
-                                    return functionFail(Pnode);
-                                    }*/
                                 nnode = rlnode;
                                 }
                             else
@@ -1341,7 +1280,7 @@ function_return_type functions(psk Pnode)
 #else
                     nnode = (psk)bmalloc(sizeof(knode));
                     nnode->v.fl = Pnode->v.fl;
-                    nnode->v.fl &= COPYFILTER;/* ~ALL_REFCOUNT_BITS_SET;*/
+                    nnode->v.fl &= COPYFILTER;
                     nnode->LEFT = same_as_w(rnode->LEFT);
                     nnode->RIGHT = same_as_w(rrnode);
                     rlnode = setIndex(nnode);
@@ -1387,20 +1326,19 @@ function_return_type functions(psk Pnode)
             */
             {
             if(is_op(rnode))
-                {/*XXX*/
-                psk nnode;
-                //psk fun = rnode->LEFT; // mop$(fun. ...)
+                {/* mop$(fun. ...)*/
+                psk nnode;                
                 rrnode = rnode->RIGHT;
                 ULONG fl = Pnode->v.fl;
                 if(Op(rnode) == DOT)
                     {
                     if(Op(rrnode) == DOT)
                         {
-                        rlnode = rrnode->LEFT; // mop$(fun.rlnode.rrnode ...)
+                        rlnode = rrnode->LEFT; /* mop$(fun.rlnode.rrnode ...) */
                         rrnode = rrnode->RIGHT;
                         if(Op(rrnode) == DOT)
                             {
-                            nnode = rrnode->RIGHT; // mop$(fun.rlnode.rrnode.nnode) : rlnode is data, rrnode is in-operator, nnode is out-operator 
+                            nnode = rrnode->RIGHT; /* mop$(fun.rlnode.rrnode.nnode) : rlnode is data, rrnode is in-operator, nnode is out-operator */
                             rrnode = rrnode->LEFT;
                             }
                         else
@@ -1409,7 +1347,7 @@ function_return_type functions(psk Pnode)
                             }
                         if(Op(rrnode) == EQUALS)
                             {
-                            intVal.ul = Op(rrnode->RIGHT); // in-operator
+                            intVal.ul = Op(rrnode->RIGHT); /* in-operator */
                             if(intVal.ul)
                                 {
                                 if(nnode)
@@ -1464,7 +1402,7 @@ function_return_type functions(psk Pnode)
                         Second form splits in characters. */
             {
             if(is_op(rnode))
-                {/*XXX*/
+                {
                 rrnode = rnode->RIGHT;
                 if(is_op(rrnode))
                     { /* first form */
@@ -1674,8 +1612,6 @@ function_return_type functions(psk Pnode)
                                     Pnode = scopy((const char*)strerror(errno));
                                     return functionOk(Pnode);
                                     }
-                                /* sprintf(draft,"%d",errno);
-                                    break;*/
                                 }
                         }
 #endif

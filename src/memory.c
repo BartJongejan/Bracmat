@@ -509,7 +509,7 @@ static void checkBounds(void* p)
         {
 #ifndef NDEBUG
         size_t stepSize = (*q)->sizeOfElement / sizeof(struct memoryElement);
-#endif // !NDEBUG
+#endif
         if((*q)->lowestAddress <= (struct memoryElement*)p && (struct memoryElement*)p < (*q)->highestAddress)
             {
             assert(lp[stepSize - 1] == ('t' << 24) + ('e' << 16) + ('n' << 8) + ('d'));

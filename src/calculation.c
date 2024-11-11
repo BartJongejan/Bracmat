@@ -25,16 +25,16 @@ typedef enum
     {
     TheEnd
     , varPush
-    , var2stack // copy variable to stack w/o incrementing stack
-    , var2stackBranch // same, then jump
-    , stack2var // copy stack to variable w/o decrementing stack
-    , stack2varBranch // same, then jump
-    , ArrElmValPush // push value of array alement
+    , var2stack         /* copy variable to stack w/o incrementing stack    */
+    , var2stackBranch   /* same, then jump                                  */
+    , stack2var         /* copy stack to variable w/o decrementing stack    */
+    , stack2varBranch   /* same, then jump                                  */
+    , ArrElmValPush     /* push value of array alement                      */
     , stack2ArrElm
-    , val2stack // copy value to stack w/o incrementing stack
+    , val2stack         /* copy value to stack w/o incrementing stack       */
     , valPush
     , Afunction
-    , Pop // decrement stack
+    , Pop               /* decrement stack                                  */
     , Branch
     , PopBranch
     , valPushBranch
@@ -211,7 +211,7 @@ typedef struct fortharray
     size_t index;
     size_t rank;
     size_t* extent;
-    size_t* stride; // Product of extents
+    size_t* stride; /* Product of extents*/
     } fortharray;
 
 typedef union stackvalue
@@ -392,7 +392,6 @@ static fortharray* getArrayPointer(fortharray** arrp, char* name)
 Boolean initialise(fortharray* curarrp, size_t size)
     {
     curarrp->index = 0;
-    //assert(curarrp->pval == 0);
     assert(curarrp->pval == 0 || curarrp->size == size);
     if(curarrp->pval == 0)
         curarrp->pval = (forthvalue*)bmalloc(size * sizeof(forthvalue));
@@ -426,7 +425,6 @@ static fortharray* getOrCreateArrayPointer(fortharray** arrp, char* name, size_t
     if(curarrp == 0)
         {
         curarrp = *arrp;
-        //assert(*arrp == 0);
         *arrp = (fortharray*)bmalloc(sizeof(fortharray));
         if(*arrp)
             {
@@ -1461,7 +1459,7 @@ static stackvalue* trcBody(forthMemory* mem)
                     double ret = 0;
                     naam = wordp->u.that->name;
                     printf("%s\n", naam);
-                    stackvalue* res = ftrc(sp, wordp, &ret); // May fail!
+                    stackvalue* res = ftrc(sp, wordp, &ret); /* May fail! */
                     printf("%s DONE\n", naam);
                     if(!res)
                         return 0;
@@ -1914,7 +1912,7 @@ static int polish1(psk code, Boolean commentsAllowed)
                 C = polish1(code->RIGHT, TRUE);
                 if(C == -1)
                     return -1;
-                if(C == 0) // This results in a NoOp
+                if(C == 0) /* This results in a NoOp */
                     return 7 + R + C;
                 if(R == 0 || C == 0)
                     return R + C; /* Function definition on the left and/or right side. */
@@ -2249,12 +2247,7 @@ static psk IntegerNode(double val)
     char jotter[512];
     if(val <= (double)INT64_MIN || val > (double)INT64_MAX)
         {
-#if defined __EMSCRIPTEN__
-//    long long long1 = (long long)1;
         int64_t long1 = (int64_t)1;
-#else
-        int64_t long1 = (int64_t)1;
-#endif
         double fcac = (double)(long1 << 52);
         int exponent;
         ULONG flg = 0;
@@ -2513,7 +2506,7 @@ static Boolean shortcutJumpChains(forthword* wordp)
             wordp->offset = (unsigned int)(label - wstart);
             }
         }
-    //#define SHOWOPTIMIZATIONS
+/*#define SHOWOPTIMIZATIONS*/
 #ifdef SHOWOPTIMIZATIONS
     if(res) printf("shortcutJumpChains\n");
 #endif
@@ -3102,20 +3095,20 @@ static Boolean eliminateBranch(forthword* wstart)
     125 Pop times
     126 floor
     127 stack2ArrElm                     T
-    128 var2stackBranch            131   j           // This must be some unconditional branch
+    128 var2stackBranch            131   j              This must be some unconditional branch
     129 stack2ArrElm                     T
 
-    118 NoOp                             fand        // Branch -> NoOp
+    118 NoOp                             fand           Branch -> NoOp
     119 varPush                          J
     120 valPush                          10.000000
-    121 PopB < 128                                   // 119 -> 129 -> 128
+    121 PopB < 128                                      119 -> 129 -> 128
     122 var2stack                        J
     123 valPush                          25.600000
     124 Pop times
     125 floor
     126 stack2ArrElm                     T
     127 var2stackBranch            131   j
-    128 val2stack                        0.000000    //val2stackBranch -> val2stack
+    128 val2stack                        0.000000       val2stackBranch -> val2stack
     129 stack2ArrElm                     T
 
 Label 119 replaced by (label of 119)
@@ -3321,7 +3314,7 @@ static Boolean combinePopThenPop(forthword* wstart, char* marks)
     for(forthword* wordp = wstart; wordp->action != TheEnd; ++wordp)
         {
         forthword* label;
-        if(marks[(wordp + 1) - wstart] != 1) // Nobody is jumping to the next word
+        if(marks[(wordp + 1) - wstart] != 1) /* Nobody is jumping to the next word */
             {
             switch(wordp->action)
                 {
@@ -3742,7 +3735,6 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                     wordp = polish2(mem, jumps, code->RIGHT, wordp, TRUE);
                     if(!wordp)
                         {
-                        //showProblematicNode("wordp==0", code->RIGHT);
                         return 0;
                         }
                     if(wordp == saveword)
@@ -4036,9 +4028,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                         size_t rank = arr->rank;
                         if(rank == 0)
                             {
-                            //                                    errorprintf( "idx: Array \"%s\" has unknown rank and extent(s). Assuming %zu, based on idx.\n", arrname, h);
                             rank = arr->rank = h;
-                            //                                    return 0;
                             }
                         if(h != rank)
                             {
@@ -4108,7 +4098,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                         {
                         for(func = currentMem->functions; func; func = func->nextFnc)
                             {
-                            if(func != childMem // No recursion! (Has to be tested during compilation)
+                            if(func != childMem /* No recursion! (Has to be tested during compilation)*/
                                && func->name
                                && !strcmp(func->name, name)
                                )
@@ -4126,7 +4116,6 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                                 if(!is_op(rhs) && parms > func->parameters)
                                     {
                                     errorprintf("Too few parameters when calling \"%s\".\n", name);
-                                    //    return 0;
                                     }
                                 psk parm;
                                 if(Op(rhs) == COMMA)
@@ -4231,7 +4220,7 @@ static forthword* polish2(forthMemory* mem, jumpblock* jumps, psk code, forthwor
                     {
                     for(func = currentMem->functions; func; func = func->nextFnc)
                         {
-                        if(func != childMem // No recursion! (Has to be tested during compilation)
+                        if(func != childMem /* No recursion! (Has to be tested during compilation)*/
                            && func->name
                            && !strcmp(func->name, name)
                            )
@@ -4383,7 +4372,7 @@ static Boolean setparm(size_t Ndecl, forthMemory* forthstuff, psk declaration, B
         return FALSE;
         }
 
-    if(declaration->LEFT->u.sobj == 's') // scalar
+    if(declaration->LEFT->u.sobj == 's') /* scalar */
         {
         if(is_op(declaration->RIGHT))
             {
@@ -4404,7 +4393,7 @@ static Boolean setparm(size_t Ndecl, forthMemory* forthstuff, psk declaration, B
             npar->u.v = var;
             }
         }
-    else // array
+    else /* array */
         {
         fortharray* a = haveArray(forthstuff, declaration->RIGHT, in_function);
         if(a)
@@ -4634,15 +4623,9 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
                 jumpblock* j5 = (jumpblock*)(forthstuff->word);
                 j5->j[estart].offset = (unsigned int)((&(j5->j[0]) + sizeof(jumpblock) / sizeof(forthword)) - forthstuff->word);
                 j5->j[estart].action = Branch;
-                //j5->j[epopS].offset = 1;
-                //j5->j[epopS].action = Pop;
-                //j5->j[eS].offset = 0;
-                //j5->j[eS].action = TheEnd;
                 j5->j[epopF].offset = 1;
                 j5->j[epopF].action = Pop;
-                //j5->j[eF].offset = 0;
-                //j5->j[eF].action = TheEnd;
-
+                
                 mustpop = enopop;
 
                 lastword = polish2(forthstuff, j5, code, forthstuff->word + sizeof(jumpblock) / sizeof(forthword), FALSE);
@@ -4688,7 +4671,7 @@ static forthMemory* calcnew(psk arg, forthMemory* parent, Boolean in_function)
                                 somethingdone |= dissolveNextWordBranches(forthstuff->word);
                                 somethingdone |= combineUnconditionalBranchTovalPush(forthstuff->word);
                                 memset(marks, 0, length * sizeof(char));
-                                somethingdone |= combineval2stack(forthstuff->word, marks); // FAULTY!
+                                somethingdone |= combineval2stack(forthstuff->word, marks); /* FAULTY! */
                                 memset(marks, 0, length * sizeof(char));
                                 somethingdone |= combinePopThenPop(forthstuff->word, marks);
                                 somethingdone |= eliminateBranch(forthstuff->word);

@@ -186,12 +186,7 @@ static int printflags(psk Root)
 #define LHS 1
 #define RHS 2
 
-#if DATAMATCHESITSELF
-//#define SM(Root) {if((Root)->v.fl & SELFMATCHING) (*process)(';');}
 #define SM(Root)
-#else
-#define SM(Root)
-#endif
 
 static void endnode(psk Root, int space)
     {
