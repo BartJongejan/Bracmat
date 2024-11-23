@@ -487,12 +487,13 @@ and |_pi_|. Examples:
 
 {?} y\\D(x\\D((x+y)^-2))
 {!} 6*(x+y)^-4"
-          "Whereas Bracmat lacks floating point arithmetic, it can perform arithmetic
-operations with integer and rational numbers and happily adds and multiplies
-numbers with thousands of digits. Only available computer memory and address
-size impose a limit to the size of numerical operands, but before you decide to
-multiply two ten-million digit numbers you should realize that Bracmat is not
-optimised for number crunching on that scale.
+          "Whereas Bracmat can do floating point arithmetic, it is more at home with 
+bignum arithmetic, performimg arithmetic operations with integer and rational
+numbers. Bracmat happily adds and multiplies numbers with thousands of digits.
+Only available computer memory and address size impose a limit to the size of
+numerical operands, but before you decide to multiply two ten-million digit
+numbers you should realize that Bracmat is not time optimised for number
+crunching on that scale.
 
 Bracmat handles non-integer powers of positive rational numbers (square root,
 for example) provided that the number (if it is an integer) or the numerator
@@ -500,9 +501,16 @@ and the denominator (if the number is a fraction) are less than 2^32 (or 2^64,
 if Bracmat is compiled for a 64-bit platform).
 
 A predefined function, flt$, represents rational numbers in a
-scientific floating point notation, but Bracmat cannot do calculations with
-these floating point numbers, unless you write a function to convert them back
-to rational numbers."
+scientific floating point notation.
+
+Bracmat has a module for floating point arithmetic. When you write an algorithm
+to be executed by this module - an UFP object - you write code that looks like
+all other Bracmat code. Below the surface, however, the code is treated very
+differently: it is compiled to efficient byte code before being executed. Many
+things that you can do outside the UFP module, such as pattern matching,
+symbolic computations, recursion and string operations are not available in the
+floating point module, but because the surface language is the same,
+communication between the two worlds is easy and elegant."
     )
   & ( usecases
     =   T
@@ -952,17 +960,14 @@ it is all about tree branches."
       , "There are a few download options. Get the last revision from
 https://github.com/BartJongejan/Bracmat.
 
-At http://cst.dk/download/bracmat/ you can follow the history of Bracmat from
+At https://cst.dk/download/bracmat/ you can follow the history of Bracmat from
 its inception somewhere in the eighties up to the last version. At this site
-you can also find compiled versions for some platforms.
-
-Alternatively, you can obtain a copy of Bracmat by sending an e-mail to me
-(Bart Jongejan) at bart[AT]cst.dk. Please state your hardware/OS."
+you can also find compiled versions for some platforms."
     )
   & ( morexmlps
     =   T
       , "Where to find example code on the internet"
-      , "At http://rosettacode.org/wiki/Category:Bracmat over 300 tasks are solved
+      , "At https://rosettacode.org/wiki/Category:Bracmat over 300 tasks are solved
 using Bracmat. The site is an excellent way to compare how the same task is
 solved in numerous programming languages."
     )
@@ -4279,8 +4284,8 @@ right hand side of which is a non-leaf expression. The top operator of that
 expression is used as the separating operator.
 {?} mop$((=.!arg).aap+noot+mies.(=+))
 {!} aap mies noot
-{?} (x=2*a+i*b+e\Lc) & mop$((=.!arg).!x.()'($x))
-{!} 2*a e\Lc i*b
+{?} (x=2*a+i*b+e\\Lc) & mop$((=.!arg).!x.()'($x))
+{!} 2*a e\\Lc i*b
 {?} mop$((=.!arg)..(=*))
 {!}
 
