@@ -25,7 +25,7 @@
     & rev$(str$!K):?K
     & whl'@(!K:(\n|" "|\t) ?K)
     & rev$!K:?K
-    & str$("{" !n (!K:|\n !K) "}\n\n"):?K
+    & str$("{" !n \n??????-?? (!K:|\n !K) "}\n\n"):?K
     & put$(str$!K,!n,NEW,BIN)
     & ( G
       =   L v
