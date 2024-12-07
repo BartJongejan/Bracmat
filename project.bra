@@ -25,7 +25,7 @@
     & rev$(str$!K):?K
     & whl'@(!K:(\n|" "|\t) ?K)
     & rev$!K:?K
-    & str$("{" !n \n??????-?? (!K:|\n !K) "}\n\n"):?K
+    & str$("{" !n \n𝕌𝕋𝔽-𝟠 (!K:|\n !K) "}\n\n"):?K
     & put$(str$!K,!n,NEW,BIN)
     & ( G
       =   L v
@@ -60,7 +60,7 @@
                   : (=?S)
                 )
             & '$($S):(=?!x)
-            & lst$($c,$n,APP)
+            & lst$($c,$n,APP,BIN,WYD)
           )
       : (=?l)
     & l$
@@ -69,15 +69,15 @@
           & rmv$(str$($B ".bak"))
           & ren$($n.str$($B ".bak"))
           & put$($K,$n,NEW,BIN)
-          & lst'($c,$n,APP)
+          & lst'($c,$n,APP,BIN,WYD)
           & put'(\n,$n,APP,BIN)
-          & lst'(r,$n,APP)
+          & lst'(r,$n,APP,BIN,WYD)
           & put$(str$("\nnew'" ()$c ";\n"),$n,APP,BIN)
           &
           )
       : (=?r)
     & put$(\n,!n,APP,BIN)
-    & lst$(r,!n,APP)
+    & lst$(r,!n,APP,BIN,WYD)
     & put$(str$("\nnew$" !c "&|failure!;\n"),!n,APP,BIN)
     & out$done
 );
