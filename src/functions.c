@@ -1781,7 +1781,7 @@ function_return_type functions(psk Pnode)
                                 strcpy(draft, "ENOMEM");
                                 break;
                             default:
-                                sprintf(draft, "%d", errno);
+                                sprintf(draft, "%d", errno ? errno : intVal.i);
                                 break;
                         }
 #endif

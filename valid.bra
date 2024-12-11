@@ -8105,6 +8105,10 @@ string line 2\"
               : 0
           | Out$"Nil elements or zero not treated correctly"
           )
+          (   sys$"/\\":0
+            & Out$"sys$ must only return 0 if command is executable."
+          | 
+          )
       &   out
         $ ( str
           $ ( "Done. "

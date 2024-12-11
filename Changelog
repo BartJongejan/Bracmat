@@ -1,3 +1,6 @@
+11 December
+sys$ only returns 0 if successful.
+
 10 November
 Fixed bug in SortMOP. Neutral elements:  
    neutral element   associative operator
