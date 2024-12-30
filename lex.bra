@@ -35,10 +35,11 @@ Usage:
           unrefs
           unusedLocals
           use
-      .       ^
-            + alc
+      .       ^     
+            + alc  
             + arg
             + asc
+            + bez
             + chr
             + chu
             + clk
@@ -46,6 +47,7 @@ Usage:
             + dbg
             + den
             + div
+            + err
             + fil
             + flg
             + glf
@@ -69,21 +71,27 @@ Usage:
             + swi
             + sys
             + tbl
+            + tme
+            + ugc
             + upp
             + utf
             + vap
             + whl
             + x2d
-            + "?"
           : ?builtins
-        &     cat
+        &     abs
+            + cat
             + cos
             + fct
             + flt
             + jsn
+            + let
+            + MLencoding
             + nestML
             + out
+            + sgn
             + sin
+            + sub
             + tay
             + toML
           : ?predefs
