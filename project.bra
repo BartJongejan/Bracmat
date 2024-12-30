@@ -1,6 +1,6 @@
 (project=
   new
-=   N c C K E B K v V f F l r L G
+=   N c C K E B K v V f F l r L G g
   .   prog:?B
     & str$(!B ".bra"):?N
     & X:?C
@@ -12,7 +12,7 @@
          )
        )
     & put$(str$("Enter name for class [" !C "]:"))
-    & (get':~|!C):?c
+    & (get':~:~r|!C):?c
     & out$"Enter description of program (finish with two empty lines):"
     & :?K
     & 0:?E
@@ -45,10 +45,11 @@
       )
     & G$"member variables":?V
     & G$methods:?F
+    & (!F:(|% %)&(=)|'(~|((its.$F))$)):(=?g)
     &     
         ' ( $c x S
           .   $c:?x
-            & (S=new=.)
+            & (S=new=$c r.$g)
             &   whl
               ' ( !F:%?f ?F
                 &   '(($($f)=.) ()$($S))
