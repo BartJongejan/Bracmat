@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "11 December 2024"
-#define VERSION "6.27.0"
-#define BUILD "311"
+#define DATUM "27 February 2025"
+#define VERSION "6.28.0"
+#define BUILD "312"
 /*
 COMPILATION
 -----------
@@ -419,7 +419,7 @@ NEWMULT
 
 #if DEBUGBRACMAT
 #ifndef NDEBUG
-static void printMatchState(const char* msg, matchstate s, int pos, int len)
+void printMatchState(const char* msg, matchstate s, int pos, int len)
     {
     Printf("\n%s pos %d len %d once %d", msg, pos, len, s.b.bonce);
     Printf("\n     t o p m f i");

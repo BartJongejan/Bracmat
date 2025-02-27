@@ -177,8 +177,7 @@ char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk expr, unsi
     psk loc;
     ULONG Flgs;
     psk name = NULL;
-    DBGSRC(Printf("%d%*smatch(", ind, ind, ""); results(sub, cutoff); Printf(":"); \
-           result(pat); Printf(")"); Printf("\n");)
+    DBGSRC(Printf("%d%*smatch(", ind, ind, ""); results(sub, cutoff); Printf(":"); result(pat); Printf(")"); if(cutoff == 0) { Printf("cutoff == 0"); } else { Printf("cutoff=="); result(cutoff); } Printf("\n");)
         if(is_op(sub))
             {
             if(Op(sub) == EQUALS)
@@ -400,14 +399,16 @@ char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk expr, unsi
                     else
                         loc = NULL;
                     /* B    leftResult=0(P):car(P) */
+                    //Printf("voor while\n");
                     s.c.lmr = (char)match(ind + 1, nil(pat), pat->LEFT  /* a*b+c*d:?+[1+?*[1*%@?q*?+?            (q = c) */
-                                          , NULL, pposition, expr       /* a b c d:? [1 (? [1 %@?q ?) ?          (q = b) */
+                                          , cutoff, pposition, expr       /* a b c d:? [1 (? [1 %@?q ?) ?          (q = b) */
                                           , Op(pat));                /* a b c d:? [1  ? [1 %@?q ?  ?          (q = b) */
                     s.c.lmr &= ~ONCE;
                     while(loc)                                      /* C    while divisionPoint */
                         {
                         if(s.c.lmr & TRUE)                          /* D        if leftResult.success */
                             {                                       /* E            rightResult=SR:cdr(P) */
+                            //Printf("in   while\n");
                             s.c.rmr = match(ind + 1, loc, pat->RIGHT, cutoff, locpos, expr, op);
                             if(!(s.c.lmr & ONCE))
                                 s.c.rmr &= ~ONCE;
@@ -461,13 +462,14 @@ char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk expr, unsi
                         */
                         ++locpos;
                         /* I        leftResult=SL:car(P) */
-                        s.c.lmr = match(ind + 1, sub, pat->LEFT, loc, pposition, sub, Op(pat));
+                        //Printf("na   while\n");
+                        s.c.lmr = match(ind + 1, sub, pat->LEFT, loc == 0 ? cutoff : loc , pposition, sub, Op(pat));
                         }
                     /* J    if leftResult.success */
                     if(s.c.lmr & TRUE)
                         /* K        rightResult=0(P):cdr(pat) */
                         {
-                        s.c.rmr = match(ind + 1, nil(pat), pat->RIGHT, NULL, locpos, expr, Op(pat));
+                        s.c.rmr = match(ind + 1, nil(pat), pat->RIGHT, cutoff, locpos, expr, Op(pat));
                         s.c.rmr &= ~ONCE;
                         }
                     /* L    return */
@@ -771,7 +773,7 @@ char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk expr, unsi
                         {
                         if(Op(sub) == Op(pat))
                             {
-                            if((s.c.lmr = match(ind + 1, sub->LEFT, pat->LEFT, NULL, 0, sub->LEFT, 4432)) & TRUE)
+                            if((s.c.lmr = match(ind + 1, sub->LEFT, pat->LEFT, cutoff, 0, sub->LEFT, 4432)) & TRUE)
                                 {
                                 if(Op(sub) == EQUALS)
                                     {
