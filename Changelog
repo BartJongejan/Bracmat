@@ -1,7 +1,11 @@
-11 December
+28 February 2025
+Bug fixed: a*b*c:(a*b*c ?)*?z&!z:1
+Before the fix, z would contain c and this expression would fail.
+
+11 December 2024
 sys$ only returns 0 if successful.
 
-10 November
+10 November 2024
 Fixed bug in SortMOP. Neutral elements:  
    neutral element   associative operator
            0                +
