@@ -8109,6 +8109,10 @@ string line 2\"
             & Out$"sys$ must only return 0 if command is executable."
           | 
           )
+          (   a*b*c:(a*b*c ?)*?z
+            & !z:1
+          | Out$"Bug fixed 20250227"
+          )
       &   out
         $ ( str
           $ ( "Done. "
