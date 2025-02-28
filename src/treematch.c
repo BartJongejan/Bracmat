@@ -177,7 +177,8 @@ char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk expr, unsi
     psk loc;
     ULONG Flgs;
     psk name = NULL;
-    DBGSRC(Printf("%d%*smatch(", ind, ind, ""); results(sub, cutoff); Printf(":"); result(pat); Printf(")"); if(cutoff == 0) { Printf("cutoff == 0"); } else { Printf("cutoff=="); result(cutoff); } Printf("\n");)
+    DBGSRC(Printf("%d%*smatch(", ind, ind, ""); results(sub, cutoff); Printf(":"); result(pat); Printf(")"); if(cutoff == 0) { Printf("cutoff == 0"); }
+    else { Printf("cutoff=="); result(cutoff); } Printf("\n");)
         if(is_op(sub))
             {
             if(Op(sub) == EQUALS)
@@ -339,67 +340,57 @@ char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk expr, unsi
                     L       return
 
                     0(P)=nil(pat): nil(WHITE)="", nil(+)=0,nil(*)=1
-                    In stringmatch, there is no need for L0; the empty string ""
-                    is part of the string.
-                    */
-                    /* A    divisionPoint=S */
-                    /* B    leftResult=0(P):car(P) */
-                    /* C    while divisionPoint */
-                    /* D        if leftResult.success */
-                    /* E            rightResult=SR:cdr(P) */
-                    /* F        if(done) */
-                        /* done =  (1) full success */
-                        /*      or (2) may not be shifted.
-                           ad (2): In the first pass, a position
-                           flag on car(P) counts as criterion for being done. */
-                           /* In all but the first pass, the left and right
-                              results can indicate that the loop is done. */
-                              /* In all passes a position_max_reached on the
-                                 rightResult indicates that the loop is done. */
-                                 /* G            return */
-                                     /* Return true if full success.
-                                        Also return whether lhs experienced max position
-                                        being reached. */
-                                        /* Also return whether the pattern as a whole doesn't
-                                           want longer subjects, which can be found out by
-                                           looking at the pattern */
-                                           /* or by looking at whether both lhs and rhs results
-                                              indicated this, in which case both sides must be
-                                              non-zero size subjects. */
-                                              /* POSITION_ONCE, on the other hand, requires zero size
-                                                 subjects. */
-                                                 /* Also return the fence flag, if present in rmr.
-                                                    (This flag in lmr has no influence.)
-                                                 */
-                                                 /* H        SL,SR=shift_right divisionPoint */
-                                                     /* SL = lhs divisionPoint S, SR = rhs divisionPoint S
-                                                     */
-                                                     /* I        leftResult=SL:car(P) */
-                                                     /* J    if leftResult.success */
-                                                     /* K        rightResult=0(P):cdr(pat) */
-                                                     /* L    return */
-                                                         /* Return true if full success.
+                    In stringmatch, there is no need for L0; the empty string "" is part of the string.
 
-                                                            Also return whether lhs experienced max position
-                                                            being reached. */
-                                                            /* Also return whether the pattern as a whole doesn't
-                                                               want longer subjects, which can be found out by
-                                                               looking at the pattern or by looking at whether */
-                                                               /* both lhs and rhs results indicated this.
-                                                                  These come in two sorts: POSITION_ONCE requires */
-                                                                  /* zero size subjects, ONCE requires non-zero size
-                                                                     subjects. */
-                                                                     /* Also return the fence flag, which can be found on
-                                                                        the pattern or in the result of the lhs or the rhs.
-                                                                        (Not necessary that both have this flag.)
-                                                                     */
-                                                                     /* end */
+                    A    divisionPoint=S
+                    B    leftResult=0(P):car(P)
+                    C    while divisionPoint
+                    D        if leftResult.success
+                    E            rightResult=SR:cdr(P)
+                    F        if(done)
+                                done =  (1) full success
+                                     or (2) may not be shifted.
+
+                    ad (2): In the first pass, a position flag on car(P) counts as criterion for being done.
+                    In all but the first pass, the left and right results can indicate that the loop is done.
+                    In all passes a position_max_reached on the rightResult indicates that the loop is done.
+
+                    G           return
+
+                    Return true if full success.
+                    Also return whether lhs experienced max position being reached.
+                    Also return whether the pattern as a whole doesn't want longer subjects,
+                    which can be found out by looking at the pattern or by looking at whether both lhs and rhs results indicated this,
+                    in which case both sides must be non-zero size subjects.
+                    POSITION_ONCE, on the other hand, requires zero size subjects.
+                    Also return the fence flag, if present in rmr.
+                       (This flag in lmr has no influence.)
+
+                    H        SL,SR=shift_right divisionPoint
+
+                    SL = lhs divisionPoint S, SR = rhs divisionPoint S
+
+                    I        leftResult=SL:car(P)
+                    J    if leftResult.success
+                    K        rightResult=0(P):cdr(pat)
+                    L    return
+
+                    Return true if full success.
+
+                    Also return whether lhs experienced max position being reached.
+                    Also return whether the pattern as a whole doesn't want longer subjects,
+                    which can be found out by looking at the pattern or by looking at whether both lhs and rhs results indicated this.
+                    These come in two sorts: POSITION_ONCE requires zero size subjects, ONCE requires non-zero size subjects.
+                    Also return the fence flag, which can be found on the pattern or in the result of the lhs or the rhs.
+                    (Not necessary that both have this flag.)
+
+                    end
+                    */
                     if(SUBJECTNOTNIL(sub, pat))                      /* A    divisionPoint=S */
                         loc = sub;
                     else
                         loc = NULL;
                     /* B    leftResult=0(P):car(P) */
-                    //Printf("voor while\n");
                     s.c.lmr = (char)match(ind + 1, nil(pat), pat->LEFT  /* a*b+c*d:?+[1+?*[1*%@?q*?+?            (q = c) */
                                           , cutoff, pposition, expr       /* a b c d:? [1 (? [1 %@?q ?) ?          (q = b) */
                                           , Op(pat));                /* a b c d:? [1  ? [1 %@?q ?  ?          (q = b) */
@@ -408,7 +399,6 @@ char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk expr, unsi
                         {
                         if(s.c.lmr & TRUE)                          /* D        if leftResult.success */
                             {                                       /* E            rightResult=SR:cdr(P) */
-                            //Printf("in   while\n");
                             s.c.rmr = match(ind + 1, loc, pat->RIGHT, cutoff, locpos, expr, op);
                             if(!(s.c.lmr & ONCE))
                                 s.c.rmr &= ~ONCE;
@@ -434,21 +424,11 @@ char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk expr, unsi
                                 }
                             else if(!(s.c.lmr & ONCE))
                                 s.c.rmr &= ~ONCE;
-                            DBGSRC(Printf("%d%*smatch(", ind, ind, ""); \
-                                   results(sub, cutoff); Printf(":"); result(pat);)
+                            DBGSRC(Printf("%d%*smatch(", ind, ind, ""); results(sub, cutoff); Printf(":"); result(pat);)
 #ifndef NDEBUG
                                 DBGSRC(printMatchState("EXIT-MID", s, pposition, 0);)
 #endif
-                                DBGSRC(if(pat->v.fl & FRACTION) Printf("FRACTION "); \
-                                       if(pat->v.fl & NUMBER) Printf("NUMBER "); \
-                                           if(pat->v.fl & SMALLER_THAN)\
-                                               Printf("SMALLER_THAN "); \
-                                               if(pat->v.fl & GREATER_THAN)\
-                                                   Printf("GREATER_THAN "); \
-                                                   if(pat->v.fl & ATOM) Printf("ATOM "); \
-                                                       if(pat->v.fl & FENCE) Printf("FENCE "); \
-                                                           if(pat->v.fl & IDENT) Printf("IDENT"); \
-                                                               Printf("\n");)
+                                DBGSRC(if(pat->v.fl & FRACTION) Printf("FRACTION "); if(pat->v.fl & NUMBER) Printf("NUMBER "); if(pat->v.fl & SMALLER_THAN) Printf("SMALLER_THAN "); if(pat->v.fl & GREATER_THAN) Printf("GREATER_THAN "); if(pat->v.fl & ATOM) Printf("ATOM "); if(pat->v.fl & FENCE) Printf("FENCE "); if(pat->v.fl & IDENT) Printf("IDENT"); Printf("\n");)
                                 return s.c.rmr ^ (char)NOTHING(pat);
                             }
                         /* H        SL,SR=shift_right divisionPoint */
@@ -457,13 +437,12 @@ char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk expr, unsi
                            )
                             loc = loc->RIGHT;
                         else
-                            loc = NULL;
+                            loc = 0;
                         /* SL = lhs divisionPoint S, SR = rhs divisionPoint S
                         */
                         ++locpos;
                         /* I        leftResult=SL:car(P) */
-                        //Printf("na   while\n");
-                        s.c.lmr = match(ind + 1, sub, pat->LEFT, loc == 0 ? cutoff : loc , pposition, sub, Op(pat));
+                        s.c.lmr = match(ind + 1, sub, pat->LEFT, loc == 0 ? cutoff : loc, pposition, sub, Op(pat));
                         }
                     /* J    if leftResult.success */
                     if(s.c.lmr & TRUE)
@@ -474,17 +453,13 @@ char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk expr, unsi
                         }
                     /* L    return */
                         /* Return true if full success.
-
-                           Also return whether lhs experienced max position
-                           being reached. */
+                           Also return whether lhs experienced max position  being reached. */
                     if(!(s.c.rmr & POSITION_MAX_REACHED))
                         s.c.rmr &= ~POSITION_ONCE;
-                    /* Also return whether the pattern as a whole doesn't
-                       want longer subjects, which can be found out by
-                       looking at the pattern. */
+                    /* Also return whether the pattern as a whole doesn't want longer subjects,
+                       which can be found out by looking at the pattern. */
                     if(/*cutoff &&*/ oncePattern(pat))
-                        /* The test cutoff != NULL merely avoids that
-                        oncePattern is called when it is useless. */
+                        /* The test cutoff != NULL merely avoids that oncePattern is called when it is useless. */
                         { /* Test:
                           a b c d e:`(a ?x) (?z:d) ?
                           x=
@@ -494,8 +469,7 @@ char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk expr, unsi
                         s.c.rmr |= (char)(pat->v.fl & FENCE);
                         }
                     /* POSITION_ONCE requires zero size subjects. */
-                    /* Also return the fence flag, which can be found on
-                       the pattern or in the result of the lhs or the rhs.
+                    /* Also return the fence flag, which can be found on the pattern or in the result of the lhs or the rhs.
                        (Not necessary that both have this flag.)
                     */
                     s.c.rmr ^= (char)NOTHING(pat);
