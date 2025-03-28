@@ -8113,6 +8113,10 @@ string line 2\"
             & !z:1
           | Out$"Bug fixed 20250227"
           )
+          ( @("a 54. z":? ~<>"54." ?)
+          |   Out
+            $ "Error: number containing a dot is not properly string matched."
+          )
       &   out
         $ ( str
           $ ( "Done. "
@@ -8137,8 +8141,8 @@ r=
 & lst$(r,"valid.bra",APP)
 & put$(\n,"valid.bra",APP,BIN)
 & (   666:?aaa
-    & slow:?speed
     & fast:?speed
+    & slow:?speed
     & "Don't write error messages to screen"
     & err$0
     & "LL keeps the '0' alife if 'lost' is incremented"

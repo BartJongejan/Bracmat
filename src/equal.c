@@ -1,5 +1,6 @@
 #include "equal.h"
 
+#include "copy.h"
 #include "flags.h"
 #include "nodedefs.h"
 #include "rational.h"
@@ -290,7 +291,7 @@ int scompare(char* s, char* cutoff, psk p
             psk n = NULL;
             sav = *cutoff;
             *cutoff = '\0';
-            n = build_up(n, s, NULL);
+            n = scopy((const char*)s);
             *cutoff = sav;
 
             if(RAT_RAT(n))
