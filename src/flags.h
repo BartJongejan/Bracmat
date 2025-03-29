@@ -70,12 +70,12 @@ Flgs 0                   NOT
     18          "                 MINUS
     19          "                 QNUL
     20          "                 QFRACTION
-    21                LATEBIND                        NOOP
-    22               SELFMATCHING                                Toggles with DATAMATCHESITSELF
-    23                 BUILT_IN                                  ONLY for 64 bit platform
-    24              CREATEDWITHNEW                               ONLY for 64 bit platform
-    25             (reference count)                             NON_REF_COUNT_BITS 25 or 23
-    26                    "
+    21                            QDOUBLE
+    22                LATEBIND                        NOOP
+    23               SELFMATCHING                                Toggles with DATAMATCHESITSELF
+    24                 BUILT_IN                                  ONLY for 64 bit platform
+    25              CREATEDWITHNEW                               ONLY for 64 bit platform
+    26             (reference count)                             NON_REF_COUNT_BITS 25 or 23
     27                    "
     28                    "
     29                    "
@@ -161,10 +161,10 @@ Objects (nodes with = ('EQUALS') have refcounters that are at least word-size.
 #define VISIBLE_FLAGS                   (INDIRECT|DOUBLY_INDIRECT|ATOM|NONIDENT|NUMBER|FRACTION|UNIFY|NOT|GREATER_THAN|SMALLER_THAN|FENCE|POSITION)
 
 #define HAS_VISIBLE_FLAGS_OR_MINUS(psk) ((psk)->v.fl & (VISIBLE_FLAGS|MINUS))
-#define RATIONAL(psk)                   (((psk)->v.fl & (QNUMBER|IS_OPERATOR|VISIBLE_FLAGS)) == QNUMBER)
+#define RATIONAL(psk)                   (((psk)->v.fl & (QNUMBER|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS)) == QNUMBER)
 #define RATIONAL_COMP(psk)              (((psk)->v.fl & (QNUMBER|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
-#define RATIONAL_COMP_NOT_NUL(psk)      (((psk)->v.fl & (QNUMBER|QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
-#define RATIONAL_WEAK(psk)              (((psk)->v.fl & (QNUMBER|IS_OPERATOR|INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)) == QNUMBER)/* allows < > ~< and ~> as flags on numbers */
+#define RATIONAL_COMP_NOT_NUL(psk)      (((psk)->v.fl & (QNUMBER|QDOUBLE|QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUMBER)
+#define RATIONAL_WEAK(psk)              (((psk)->v.fl & (QNUMBER|QDOUBLE|IS_OPERATOR|INDIRECT|DOUBLY_INDIRECT|FENCE|UNIFY)) == QNUMBER)/* allows < > ~< and ~> as flags on numbers */
 #define          LESS(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|SMALLER_THAN))
 #define    LESS_EQUAL(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|GREATER_THAN))
 #define    MORE_EQUAL(psk)              (((psk)->v.fl & (VISIBLE_FLAGS_POS)) == (QNUMBER|NOT|SMALLER_THAN))
@@ -205,10 +205,10 @@ Objects (nodes with = ('EQUALS') have refcounters that are at least word-size.
 #define INTEGER_NOT_NUL_COMP(pn)        (((pn)->v.fl & (QNUMBER|QNUL|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP))        == QNUMBER)
 #define HAS_MINUS_SIGN(pn)              (((pn)->v.fl & (MINUS|IS_OPERATOR)) == MINUS)
 
-#define RAT_NUL(pn)                     (((pn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS)) == QNUL)
-#define RAT_NUL_COMP(pn)                (((pn)->v.fl & (QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUL)
-#define RAT_NEG(pn)                     (((pn)->v.fl & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS)) == (QNUMBER|MINUS))
-#define RAT_NEG_COMP(pn)                (((pn)->v.fl & (QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == (QNUMBER|MINUS))
+#define RAT_NUL(pn)                     (((pn)->v.fl & (QDOUBLE|QNUL|IS_OPERATOR|VISIBLE_FLAGS)) == QNUL)
+#define RAT_NUL_COMP(pn)                (((pn)->v.fl & (QDOUBLE|QNUL|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == QNUL)
+#define RAT_NEG(pn)                     (((pn)->v.fl & (QDOUBLE|QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS)) == (QNUMBER|MINUS))
+#define RAT_NEG_COMP(pn)                (((pn)->v.fl & (QDOUBLE|QNUMBER|MINUS|IS_OPERATOR|VISIBLE_FLAGS_NON_COMP)) == (QNUMBER|MINUS))
 
 #define RAT_RAT(pn)                     (((pn)->v.fl & (QNUMBER|QFRACTION|QDOUBLE|IS_OPERATOR|VISIBLE_FLAGS)) == (QNUMBER|QFRACTION))
 

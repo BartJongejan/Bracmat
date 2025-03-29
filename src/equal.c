@@ -1,11 +1,10 @@
 #include "equal.h"
 
-#include "copy.h"
 #include "flags.h"
 #include "nodedefs.h"
 #include "rational.h"
 #include "globals.h"
-#include "input.h"
+#include "copy.h"
 #include "eval.h"
 #include "wipecopy.h"
 #include "encoding.h"
@@ -285,7 +284,7 @@ int scompare(char* s, char* cutoff, psk p
        )
         {
         int check = sfullnumbercheck(s, cutoff);
-        if(check & QNUMBER)
+        if((check & (QNUMBER | QDOUBLE)) == QNUMBER)
             {
             int anythingGoes = 0;
             psk n = NULL;

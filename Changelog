@@ -1,3 +1,6 @@
+29 March 2025
+Made application of QDOUBLE flag consistent throughout source code
+
 28 March 2025
 Fixed: Numbers containing dot (new since UFP objects) were not properly matched
 during string match.
