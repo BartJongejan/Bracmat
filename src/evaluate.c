@@ -47,6 +47,9 @@ psk eval(psk Pnode)
                 there is no need to allocate space for an evaluated version of such
                 operators on the stack. Instead the local variable lkn is used.
                 */
+#if SHOWWHETHERNEVERVISISTED
+                Pnode->v.fl |= VISITED;
+#endif
                 switch(Op(Pnode))
                     {
                     case MATCH:

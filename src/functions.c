@@ -1350,12 +1350,18 @@ function_return_type functions(psk Pnode)
                             intVal.ul = Op(rrnode->RIGHT); /* in-operator */
                             if(intVal.ul)
                                 {
+#if SHOWWHETHERNEVERVISISTED
+                                rrnode->RIGHT->v.fl |= VISITED;
+#endif
                                 if(nnode)
                                     {
                                     if(Op(nnode) == EQUALS)
                                         {
                                         if(Op(nnode->RIGHT))
                                             {
+#if SHOWWHETHERNEVERVISISTED
+                                            nnode->RIGHT->v.fl |= VISITED;
+#endif
                                             SortMOP(rnode->LEFT, rlnode, intVal.ul, nnode, fl, &Pnode);
                                             }
                                         else

@@ -46,6 +46,14 @@ little bit slower, not faster.
 #define SHOWMAXALLOCATED  1 /* Show the maximum number of allocated nodes. */
 #define SHOWCURRENTLYALLOCATED 0 /* Same, plus current number of allocated nodes, in groups of
                        4,8,12 and >12 bytes */
+#ifdef UNVISITED /* set in Makefile */
+#define SHOWWHETHERNEVERVISISTED 1 /* If set, operator nodes that were never
+                       visited during running a Bracmat program are marked
+                       with an affixed pair of curly brackets {} when
+                       the program is lst$ed*/
+#else
+#define SHOWWHETHERNEVERVISISTED 0
+#endif
 
 #define EXPAND 0
 

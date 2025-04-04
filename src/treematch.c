@@ -177,6 +177,10 @@ char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk expr, unsi
     psk loc;
     ULONG Flgs;
     psk name = NULL;
+#if SHOWWHETHERNEVERVISISTED
+    if(is_op(pat))
+        pat->v.fl |= VISITED;
+#endif
     DBGSRC(Printf("%d%*smatch(", ind, ind, ""); results(sub, cutoff); Printf(":"); result(pat); Printf(")"); if(cutoff == 0) { Printf("cutoff == 0"); }
     else { Printf("cutoff=="); result(cutoff); } Printf("\n");)
         if(is_op(sub))

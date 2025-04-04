@@ -186,7 +186,12 @@ static int printflags(psk Root)
 #define LHS 1
 #define RHS 2
 
+#if SHOWWHETHERNEVERVISISTED
+Boolean vis = FALSE;
+#define SM(Root) if(vis && !(Root->v.fl & VISITED)) { (*process)('{'); (*process)('}'); }
+#else
 #define SM(Root)
+#endif
 
 static void endnode(psk Root, int space)
     {
@@ -196,16 +201,14 @@ static void endnode(psk Root, int space)
     if(POINT)
         printf("\n[%p %lld]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
 #endif
-    SM(Root)
-
-        if(!Root->u.obj
-           && !HAS_UNOPS(Root)
-           && space)
-            {
-            (*process)('(');
-            (*process)(')');
-            return;
-            }
+    if(!Root->u.obj
+       && !HAS_UNOPS(Root)
+       && space)
+        {
+        (*process)('(');
+        (*process)(')');
+        return;
+        }
     printflags(Root);
     if(Root->v.fl & MINUS)
         (*process)('-');
@@ -311,9 +314,10 @@ static void reslt(psk Root, int level, int ind, int space)
         if(POINT)
             printf("\n[%p %lld]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
 #endif
+        do_something(opchar[klopcode(Root)]);
+
         SM(Root)
-            do_something(opchar[klopcode(Root)]);
-        Parent = Op(Root);
+            Parent = Op(Root);
         Child = is_op(Root->RIGHT) ? Op(Root->RIGHT) : 0;
         if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))
             {
@@ -381,7 +385,8 @@ static void reslts(psk Root, int level, int ind, int space, psk cutoff)
                 return;
                 }
             Root = Root->RIGHT;
-            } while(is_op(Root));
+            }
+        while(is_op(Root));
         }
     else
         {
@@ -420,9 +425,9 @@ static void parenthesised_result(psk Root, int level, int ind, int space)
         if(POINT)
             printf("\n[%p %lld]", Root, (Root->v.fl & ALL_REFCOUNT_BITS_SET) / ONEREF);
 #endif
+        do_something(opchar[klopcode(Root)]);
         SM(Root)
-            do_something(opchar[klopcode(Root)]);
-        Parent = Op(Root);
+            Parent = Op(Root);
 
         Child = is_op(Root->RIGHT) ? Op(Root->RIGHT) : 0;
         if(HAS__UNOPS(Root->RIGHT) || Parent > Child || (Parent == Child && Parent > TIMES))

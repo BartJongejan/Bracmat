@@ -5,5 +5,8 @@
 
 void result(psk Root);
 void results(psk Root, psk cutoff);
+#if (1 && SHOWWHETHERNEVERVISISTED)
+extern Boolean vis = FALSE;
+#endif
 
 #endif

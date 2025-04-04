@@ -903,7 +903,7 @@ int output(ppsk PPnode, void(*how)(psk k))
     FILE* saveFpo;
     psk rightnode, rlnode, rrightnode, rrrightnode;
     static LONG opts[] =
-        { APP,BIN,CON,EXT,MEM,LIN,NEW,RAW,TXT,VAP,WYD,0L };
+        { APP,BIN,CON,EXT,MEM,LIN,NEW,RAW,TXT,VAP,VIS,WYD,0L };
     if(Op(rightnode = (*PPnode)->RIGHT) == COMMA)
         {
         int wide;
@@ -913,6 +913,9 @@ int output(ppsk PPnode, void(*how)(psk k))
         wide = search_opt(rrightnode, WYD);
         if(wide)
             LineLength = WIDELINELENGTH;
+#if SHOWWHETHERNEVERVISISTED
+        vis = search_opt(rrightnode, VIS);
+#endif
         hum = !search_opt(rrightnode, LIN);
         listWithName = !search_opt(rrightnode, RAW);
         if(allopts(rrightnode, opts))
@@ -934,6 +937,9 @@ int output(ppsk PPnode, void(*how)(psk k))
                 wipe(*PPnode);
                 *PPnode = ret;
                 global_fpo = saveFpo;
+#if SHOWWHETHERNEVERVISISTED
+                vis = FALSE;
+#endif
                 return TRUE;
                 }
             else
@@ -969,6 +975,9 @@ int output(ppsk PPnode, void(*how)(psk k))
                 errorprintf("cannot open %s\n", POBJ(rrightnode->LEFT));
                 global_fpo = saveFpo;
                 hum = 1;
+#if SHOWWHETHERNEVERVISISTED
+                vis = FALSE;
+#endif
                 return FALSE;
                 }
             else
@@ -981,6 +990,9 @@ int output(ppsk PPnode, void(*how)(psk k))
                 }
 #else
             hum = 1;
+#if SHOWWHETHERNEVERVISISTED
+            vis = FALSE;
+#endif
             return FALSE;
 #endif
             }
@@ -1002,6 +1014,9 @@ int output(ppsk PPnode, void(*how)(psk k))
         }
     hum = 1;
     listWithName = 1;
+#if SHOWWHETHERNEVERVISISTED
+    vis = FALSE;
+#endif
     return TRUE;
     }
 

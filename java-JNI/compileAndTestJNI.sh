@@ -46,7 +46,7 @@ popd
 
 # Compile bracmat.c as relocatable code for shared object
 # Create bracmatso.o, 
-gcc -std=c99 -pedantic -Wall -O2 -c -fPIC -DNDEBUG ../safe/bracmatso.c -lm
+gcc -std=c99 -pedantic -Wall -O2 -c -fPIC -DNDEBUG -DUNVISITED ../safe/bracmatso.c -lm
 
 pushd java
 

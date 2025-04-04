@@ -338,6 +338,9 @@ int psh(psk name, psk pnode, psk dim)
     while(is_op(name))
         {
         /* return psh(name->LEFT,pnode,dim) && psh(name->RIGHT,pnode,dim); */
+#if SHOWWHETHERNEVERVISISTED
+        name->v.fl |= VISITED;
+#endif
         if(!psh(name->LEFT, pnode, dim))
             return FALSE;
         name = name->RIGHT;

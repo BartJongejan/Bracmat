@@ -370,6 +370,7 @@ typedef struct
 #define UTF O('u','t','f')
 #define VAP O('V','A','P')
 #define Vap O('v','a','p') /* map for string instead of list */
+#define VIS O('V','I','S') /* Show {} after unvisited operator nodes in lst$ing. Compile with -DUNVISITED, otherwise ignored. */
 #define WHL O('w','h','l')
 #define WYD O('W','Y','D') /* lst option for wider lines */
 #define X   O('X', 0 , 0 )

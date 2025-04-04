@@ -60,8 +60,14 @@ psk handleExponents(psk Pnode)
     {
     psk lnode;
     Boolean done = FALSE;
+#if SHOWWHETHERNEVERVISISTED
+    Pnode->v.fl |= VISITED;
+#endif
     for(; ((lnode = Pnode->LEFT)->v.fl & READY) && Op(lnode) == EXP;)
         {
+#if SHOWWHETHERNEVERVISISTED
+        lnode->v.fl |= VISITED;
+#endif
         done = TRUE;
         Pnode->LEFT = lnode = isolated(lnode);
         lnode->v.fl &= ~READY & ~OPERATOR;/* turn off READY flag */
@@ -102,7 +108,7 @@ psk handleExponents(psk Pnode)
                 return leftbranch(Pnode);
                 }
 
-            if(!is_op(rightnode)) 
+            if(!is_op(rightnode))
                 {
                 if(RATIONAL_COMP(rightnode))
                     {
@@ -1213,12 +1219,11 @@ int cmptimes(psk kn1, psk kn2)
         }
     }
 
-psk merge
-(psk Pnode
- , int(*comp)(psk, psk)
- , psk(*combine)(psk)
+psk merge(psk Pnode
+          , int(*comp)(psk, psk)
+          , psk(*combine)(psk)
 #if EXPAND
- , psk(*expand)(psk, int*)
+          , psk(*expand)(psk, int*)
 #endif
 )
     {
@@ -1230,6 +1235,9 @@ psk merge
 #if EXPAND
         Boolean ok;
 #endif
+#if SHOWWHETHERNEVERVISISTED
+        Pnode->v.fl |= VISITED;
+#endif
         Pnode = isolated(Pnode);
         assert(!shared(Pnode));
         Pnode->v.fl |= READY;
@@ -1238,7 +1246,8 @@ psk merge
             {
             Pnode->LEFT = eval(Pnode->LEFT);
             Pnode->LEFT = expand(Pnode->LEFT, &ok);
-            } while(ok);
+            }
+        while(ok);
 #else
         Pnode->LEFT = eval(Pnode->LEFT);
 #endif
@@ -1256,7 +1265,8 @@ psk merge
                 {
                 tmp = eval(tmp);
                 tmp = expand(tmp, &ok);
-                } while(ok);
+                }
+            while(ok);
             Pnode->RIGHT = tmp;
 #else
             Pnode->RIGHT = eval(tmp);
@@ -1583,6 +1593,10 @@ psk handleWhitespace(psk Pnode)
     ppsk prevpwhitespacenode = NULL;
     for(;;)
         {
+#if SHOWWHETHERNEVERVISISTED
+        if(is_op(*pwhitespacenode))
+            (*pwhitespacenode)->v.fl |= VISITED;
+#endif
         whitespacenode = *pwhitespacenode;
         whitespacenode->LEFT = eval(whitespacenode->LEFT);
         if(!is_op(apnode = whitespacenode->LEFT)
@@ -1591,11 +1605,19 @@ psk handleWhitespace(psk Pnode)
            )
             {
             *pwhitespacenode = rightbranch(whitespacenode);
+#if SHOWWHETHERNEVERVISISTED
+            if(is_op(*pwhitespacenode))
+                (*pwhitespacenode)->v.fl |= VISITED;
+#endif
             }
         else
             {
             prevpwhitespacenode = pwhitespacenode;
             pwhitespacenode = &(whitespacenode->RIGHT);
+#if SHOWWHETHERNEVERVISISTED
+            if(is_op(*pwhitespacenode))
+                (*pwhitespacenode)->v.fl |= VISITED;
+#endif
             }
         if(Op(whitespacenode = *pwhitespacenode) == WHITE && !(whitespacenode->v.fl & READY))
             {
@@ -1618,6 +1640,9 @@ psk handleWhitespace(psk Pnode)
     whitespacenode = Pnode;
     while(Op(whitespacenode) == WHITE)
         {
+#if SHOWWHETHERNEVERVISISTED
+        whitespacenode->v.fl |= VISITED;
+#endif
         next = whitespacenode->RIGHT;
         bringright(whitespacenode);
         if(next->v.fl & READY)
@@ -1636,8 +1661,14 @@ psk handleComma(psk Pnode)
     psk commanode = Pnode;
     psk next;
     ppsk pcommanode;
+#if SHOWWHETHERNEVERVISISTED
+    Pnode->v.fl |= VISITED;
+#endif
     while(Op(commanode->RIGHT) == COMMA && !(commanode->RIGHT->v.fl & READY))
         {
+#if SHOWWHETHERNEVERVISISTED
+        commanode->v.fl |= VISITED;
+#endif
         commanode->LEFT = eval(commanode->LEFT);
         pcommanode = &(commanode->RIGHT);
         commanode = commanode->RIGHT;
@@ -1651,6 +1682,9 @@ psk handleComma(psk Pnode)
     commanode = Pnode;
     while(Op(commanode) == COMMA)
         {
+#if SHOWWHETHERNEVERVISISTED
+        commanode->v.fl |= VISITED;
+#endif
         next = commanode->RIGHT;
         bringright(commanode);
         if(next->v.fl & READY)

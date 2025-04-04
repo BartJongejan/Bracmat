@@ -1,3 +1,7 @@
+4 April 2025
+VIS option on call to lst$ affixes all unvisited binary nodes with {}.
+(Compile with -DUNVISITED.)
+
 29 March 2025
 Made application of QDOUBLE flag consistent throughout source code
 

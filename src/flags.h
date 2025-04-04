@@ -6,7 +6,7 @@
 
 /* flags (prefixes) in node */
 #define NOT              1      /* ~ */
-     /* Keep definition of NOT like this because of mixing of logical and bit
+     /* Do not change definition of NOT because of mixing of logical and bit
         operators && || | ^ & */
 #define SUCCESS         (1<< 1)
 #define READY           (1<< 2)
@@ -28,7 +28,8 @@
            1<<18 operator
            1<<19 operator
            1<<20 operator
-           1<<21 latebind
+          (1<<21 (un)visited operator) 
+           1<<22 latebind
         */
 #if DATAMATCHESITSELF
 #define SELFMATCHING    (1<<23) /* 20210801 */
@@ -70,7 +71,7 @@ Flgs 0                   NOT
     18          "                 MINUS
     19          "                 QNUL
     20          "                 QFRACTION
-    21                            QDOUBLE
+    21      (un)visited           QDOUBLE
     22                LATEBIND                        NOOP
     23               SELFMATCHING                                Toggles with DATAMATCHESITSELF
     24                 BUILT_IN                                  ONLY for 64 bit platform
@@ -141,7 +142,10 @@ Objects (nodes with = ('EQUALS') have refcounters that are at least word-size.
 #define MINUS               (1 << (SHL+2))
 #define QNUL                (1 << (SHL+3))
 #define QFRACTION           (1 << (SHL+4))
-#define QDOUBLE             (1 << (SHL+5))
+#define QDOUBLE             (1 << (SHL+5)) /* if atom */
+#if SHOWWHETHERNEVERVISISTED
+#define VISITED             (1 << (SHL+5)) /* if operator node */
+#endif
 #define LATEBIND            (1 << (SHL+6))
 #define DEFINITELYNONUMBER  (1 << (SHL+7)) /* this is not stored in a node! */
 #define ONEREF   (ULONG)(1 << NON_REF_COUNT_BITS)
