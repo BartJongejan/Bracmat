@@ -302,31 +302,31 @@ This chapter may give you an impression of what Bracmat can do for you.
   & ( whatIsBracmat
     =   T
       , "What is Bracmat?"
-      , "Bracmat is a computer programming language designed for analysis and
-manipulation of complex data, be it evaluation of algebraic
-expressions, parsing natural language, validation of HTML or automatic
-chaining of multifaceted webservices into a workflow. In several
-projects, Bracmat has been combined with other programming languages
-to take care of high level activities that otherwise would be
-time-consuming to implement.
+      , "Bracmat is a computer programming language designed for the analysis and
+manipulation of complex data, including the evaluation of algebraic
+expressions, parsing natural language, validation of HTML, and the
+automatic chaining of multifaceted web services into a workflow. In
+several projects, Bracmat has been combined with other programming
+languages to take care of high level activities that otherwise would
+be time-consuming to implement.
 
 Bracmat was originally developed as a calculator for symbolic
-algebra. Like a table calculator, Bracmat ran a Read Eval Print
-Loop (REPL). It added, multiplied, took powers and logarithms and
+algebra. Like a table calculator, Bracmat ran a Read-Eval-Print-Loop
+(REPL). It added, multiplied, took powers and logarithms, and
 differentiated algebraic expressions.
 
 Later additions transformed the calculator into a programming
 language. The subject matter, algebraic expressions, had often to be
-dismantled and recombined differently, e.g. to find terms
+dismantled and recombined differently, e.g., to find terms
 with like factors and recombining these into a group of new terms with
 a common factor. What was needed was advanced pattern matching with a
 notation that requires little more than your intuition to understand,
 because the algebraic transformations to be implemented were already
-hard enough to grasp. Envisioning that pattern matching also would be
+hard enough to grasp. Envisioning that pattern matching would also be
 useful in natural language related problems, the subject domain
 was extended to cover almost any kind of data.
 
-True to its roots, Bracmat still has an important feature in common
+True to its roots, Bracmat has still an important feature in common
 with calculators: as long as the input data are simple enough, the
 user does (and can) not specify how these data have to be
 processed. Calculators handle basic calculations in a predictable,
@@ -336,7 +336,7 @@ manufacturer had good reasons to think that |_11_| is what the user
 expects and nothing else.
 
 In the same way, Bracmat handles basic calculations with a much
-wider variety of data: rational numbers, symbols, words and
+wider variety of data: rational numbers, symbols, words, and
 collections thereof. For example, a+b+a becomes 2*a+b
 and not, say, |_x.a_| or |_b+2*a_|. Again, Bracmat takes
 decisions that you can't easily circumvent. However, the more complex
@@ -568,7 +568,7 @@ in the same order. If you do not want to see the result of a calculation, you
 may write a semicolon after the last instruction. Instructions in a text file
 must be separated by semicolons.
 
-You may freely surround binary operators with whitespace characters (e.g.
+You may freely surround binary operators with whitespace characters (e.g.,
 space, tab, line feed). Take care not to put spaces between the characters
 that make up a fraction or negative number, |_- 1234 / 5678_| is different
 from |_-1234/5678_|."
@@ -996,7 +996,7 @@ does in (some) cases where a <nil> leaf without prefixes is adjacent to the whit
 operator. For example : |_get' out$now_|. Bracmat interprets this as :
 |_get'(out$now)_|. |_\"\"_| or |_()_| fixes the problem : |_get'() out$now_|.
 Quotation marks are not part of the string they surround. They should be used
-if necessary, e.g. |_\"in this case\"_| or |_\"he{this is not a comment}re\"_|.
+if necessary, e.g., |_\"in this case\"_| or |_\"he{this is not a comment}re\"_|.
 Comments can be written everywhere, except in the middle of a string in
 quotation marks. Comments are enclosed in {} and may be nested."
     )
@@ -1495,7 +1495,7 @@ operations, as in:
     =   T
       , "The = operator"
       ,   "This operator ensures that the right hand operator stays unevaluated. It is
-mainly used in the definition of pieces of code (e.g. functions). The code
+mainly used in the definition of pieces of code (e.g., functions). The code
 on the right is bound to the name on the left.
 
 <atom>=<expression>
@@ -3080,7 +3080,7 @@ the first of them. The most useful combinations are:
     the match succeeds and vice versa. The subject can be a neutral element of
     the subject list.
 
-Many of these combinations can be combined further, e.g. ~/#?!! accepts only
+Many of these combinations can be combined further, e.g., ~/#?!! accepts only
 an integer number and binds it to the indirect binding of the atom following
 the prefixes."
           "
@@ -3291,10 +3291,10 @@ abs$<expression> is defined as |_sgn$<expression>*<expression>_|.
       , "cat$ is like the built-in function mem$, but offers the possibility to exclude
 names that are not in the first parameter and/or to exclude names that are in
 the second parameter. The optional third parameter adds information about array
-size and current index value, e.g. (arg,5,5). If the first parameter is
+size and current index value, e.g., (arg,5,5). If the first parameter is
 missing, this is taken to mean that no names are excluded (unless by virtue of
 the second parameter). You can use cat$ to save the state of the variable space
-for later use, e.g. removing all variables that have been created since.
+for later use, e.g., removing all variables that have been created since.
 
 {?} cat$(,,EXT):?save-state  { mem$EXT is also OK. }
 {?} newvar1=12345            { create new variables }
@@ -3873,7 +3873,7 @@ The context of a symbol determines whether it is a variable or not :
 2 the atom following the ! and !! prefixes
 3 within a pattern, a non-zero length atom following the ? prefix
 4 the left operand of the $ and ' operators
-5 the right operand of the $ operator in macro constructs (e.g. '(1+$a) )."
+5 the right operand of the $ operator in macro constructs (e.g., '(1+$a) )."
     )
   & ( alctxt
     =   T
@@ -3961,7 +3961,7 @@ results in the following output being written to the terminal:
     =   T
       , "asc$<character>"
       , "asc$ returns the integer value that corresponds to the character according to
-the current table used by the operating system (e.g. an extended ASCII table).
+the current table used by the operating system (e.g., an extended ASCII table).
 {?} asc$\"+\" {return ASCII value of character +}
 {!} 43"
     )
@@ -3974,7 +3974,7 @@ is an invalid UTF-8 string.
 
 It is safe to use utf$ in a pattern:
 @(!txt:(?%c & utf$!c) ?)
-If the value of |_txt_| starts with an valid UTF-8 sequence, Bracmat backtracks
+If the value of |_txt_| starts with a valid UTF-8 sequence, Bracmat backtracks
 until the value of |_c_| matches the UTF-8 sequence.
 If |_txt_| starts with a sequence that is not UTF-8, Bracmat stops backtracking
 when that fact has been established."
@@ -4003,7 +4003,7 @@ and (3) the result of calling bez$ after each non-empty evaluation result.
     =   T
       , "chr$<value>"
       , "chr$ returns the character at location <value> in the current table of
-characters used by the operating system. (e.g. an extended ASCII table).
+characters used by the operating system. (e.g., an extended ASCII table).
 chr$ fails if <value> equals 0.
 {?} chr$255 {return the last character from the current table of characters
              (assuming a machine with 8-bit characters)}
