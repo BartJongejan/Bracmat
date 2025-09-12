@@ -19,7 +19,7 @@ unsigned char* putCodePoint(ULONG val, unsigned char* s);
 int getCodePoint(const char** ps);
 int hasUTF8MultiByteCharacters(const char* s);
 int getCodePoint2(const char** ps, int* isutf);
-int strcasecompu(char** S, char** P, char* cutoff);
+int strcasecompu(const char* S, const char* P, const char* cutoff);
 int strcasecomp(const char* s, const char* p);
 
 #endif

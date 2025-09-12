@@ -1,3 +1,6 @@
+12 September 2025
+Fixed error in strcasecompu. (Case insensitive string compare)
+
 4 April 2025
 VIS option on call to lst$ affixes all unvisited binary nodes with {}.
 (Compile with -DUNVISITED.)

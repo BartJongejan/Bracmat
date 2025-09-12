@@ -548,7 +548,7 @@ int scompare(char* s, char* cutoff, psk p
 
     if((Flgs & (NOT | FRACTION | NUMBER | GREATER_THAN | SMALLER_THAN)) == (NOT | GREATER_THAN | SMALLER_THAN))
         { /* Case insensitive match: ~<> means "not different" */
-        Sign = strcasecompu(&s, &P, cutoff); /* Additional argument cutoff */
+        return strcasecompu(s, P, cutoff); /* Additional argument cutoff */
         }
     else
         {

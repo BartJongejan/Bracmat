@@ -8117,6 +8117,9 @@ string line 2\"
           |   Out
             $ "Error: number containing a dot is not properly string matched."
           )
+          ( @(👨:~<>👨 ?c)&!c:
+          | Out$"Error in case-insensitive matching of UTF8"
+          )
       &   out
         $ ( str
           $ ( "Done. "

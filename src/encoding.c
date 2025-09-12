@@ -302,34 +302,37 @@ int hasUTF8MultiByteCharacters(const char* s)
     return ret == 0 ? multiByteCharSeen : 0;
     }
 
-int strcasecompu(char** S, char** P, char* cutoff)
+int strcasecompu(const char* s, const char* p, const char* cutoff)
 /* Additional argument cutoff */
     {
     int sutf = 1;
     int putf = 1;
-    char* s = *S;
-    char* p = *P;
     while(s < cutoff && *s && *p)
         {
         int diff;
-        char* ns = s;
-        char* np = p;
+        const char* ns = s;
+        const char* np = p;
         int ks = getCodePoint2((const char**)&ns, &sutf);
         int kp = getCodePoint2((const char**)&np, &putf);
         assert(ks >= 0 && kp >= 0);
         diff = toLowerUnicode(ks) - toLowerUnicode(kp);
         if(diff)
             {
-            *S = s;
-            *P = p;
-            return diff;
+            return ONCE;
             }
         s = ns;
         p = np;
         }
-    *S = s;
-    *P = p;
-    return (s < cutoff ? (int)(unsigned char)*s : 0) - (int)(unsigned char)*p;
+    if(*p == 0)
+        if(s == cutoff)
+            return TRUE | ONCE;
+        else
+            return FALSE;
+    else
+        if(*s == 0)
+            return ONCE;
+        else
+            return FALSE;
     }
 
 int strcasecomp(const char* s, const char* p)
