@@ -1,4 +1,4 @@
-/* Based on http://unicode.org/Public/UNIDATA/UnicodeData.txt 2022-08-03 17:00 ,
+/* Based on http://unicode.org/Public/UNIDATA/UnicodeData.txt 2025-08-15 19:45 ,
    structures created with UnicodeData.bra
 */
 
@@ -25,6 +25,7 @@ struct ccaseconv l2u[]={
 {0x195,0,0,97},
 {0x199,0,0,-1},
 {0x19A,0,0,163},
+{0x19B,0,0,42561},
 {0x19E,0,0,130},
 {0x1A1,4,2,-1},
 {0x1A8,0,0,-1},
@@ -64,6 +65,7 @@ struct ccaseconv l2u[]={
 {0x260,0,0,-205},
 {0x261,0,0,42315},
 {0x263,0,0,-207},
+{0x264,0,0,42343},
 {0x265,0,0,42280},
 {0x266,0,0,42308},
 {0x268,0,0,-209},
@@ -130,6 +132,7 @@ struct ccaseconv l2u[]={
 {0x1C86,0,0,-6236},
 {0x1C87,0,0,-6181},
 {0x1C88,0,0,35266},
+{0x1C8A,0,0,-1},
 {0x1D79,0,0,35332},
 {0x1D7D,0,0,3814},
 {0x1D8E,0,0,35384},
@@ -189,8 +192,7 @@ struct ccaseconv l2u[]={
 {0xA797,18,2,-1},
 {0xA7B5,14,2,-1},
 {0xA7C8,2,2,-1},
-{0xA7D1,0,0,-1},
-{0xA7D7,2,2,-1},
+{0xA7CD,14,2,-1},
 {0xA7F6,0,0,-1},
 {0xAB53,0,0,-928},
 {0xAB70,79,1,-38864},
@@ -202,8 +204,10 @@ struct ccaseconv l2u[]={
 {0x105B3,6,1,-39},
 {0x105BB,1,1,-39},
 {0x10CC0,50,1,-64},
+{0x10D70,21,1,-32},
 {0x118C0,31,1,-32},
 {0x16E60,31,1,-32},
+{0x16EBB,24,1,-27},
 {0x1E922,33,1,-34},
 {0x1FFFFF,0,0,0}};
 
@@ -300,6 +304,7 @@ struct ccaseconv u2l[]={
 {0x10CD,0,0,7264},
 {0x13A0,79,1,38864},
 {0x13F0,5,1,8},
+{0x1C89,0,0,1},
 {0x1C90,42,1,-3008},
 {0x1CBD,2,1,-3008},
 {0x1E00,148,2,1},
@@ -376,8 +381,9 @@ struct ccaseconv u2l[]={
 {0xA7C5,0,0,-42307},
 {0xA7C6,0,0,-35384},
 {0xA7C7,2,2,1},
-{0xA7D0,0,0,1},
-{0xA7D6,2,2,1},
+{0xA7CB,0,0,-42343},
+{0xA7CC,14,2,1},
+{0xA7DC,0,0,-42561},
 {0xA7F5,0,0,1},
 {0xFF21,25,1,32},
 {0x10400,39,1,40},
@@ -387,22 +393,22 @@ struct ccaseconv u2l[]={
 {0x1058C,6,1,39},
 {0x10594,1,1,39},
 {0x10C80,50,1,64},
+{0x10D50,21,1,32},
 {0x118A0,31,1,32},
 {0x16E40,31,1,32},
+{0x16EA0,24,1,27},
 {0x1E900,33,1,34},
 {0x1FFFFF,0,0,0}};
 
 int convertLetter(int a, struct ccaseconv * T)
     {
     int i;
-    if (a > 0x10FFFF)
+    if ((unsigned int)a < T[0].L || a > 0x10FFFF)
         return a;
-    for (i = 0;; ++i)
+    for (i = 1;; ++i)
         {
         if ((unsigned int)a < T[i].L)
             {
-            if (i == 0)
-                return a;
             --i;
             if (  (unsigned int)a <= (unsigned int)(T[i].L + T[i].range)
                && (  T[i].inc < 2

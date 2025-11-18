@@ -25,7 +25,7 @@ https://unicode.org/Public/UNIDATA/UnicodeData.txt
 
 X=
   (UnicodeDataFileName="UnicodeData.txt")
-  (UnicodeDataDate="2022-08-03 17:00")
+  (UnicodeDataDate="2025-08-15 19:45")
   (Upper=)
   (Lower=)
   ( do
@@ -284,14 +284,6 @@ C 	Other 	                Cc | Cf | Cs | Co | Cn
             . \n
             )
         : ?CGC
-      & lst$(whs,whs,NEW BIN)
-      & lst$(ML,ML,NEW)
-      & lst$(Mdecomposed,ML,NEW)
-      & lst$(ALLL,ML,NEW)
-      & lst$(largest d2x$!largest,ML,NEW)
-      & put$(d2x$!largest \n,ML,NEW)
-      & lst$(CGC,CGC,NEW,BIN)
-      & lst$(dec,dec,NEW BIN)
       & 0:?periods
       &   !CGC
         :   ?CGC0
@@ -300,9 +292,6 @@ C 	Other 	                Cc | Cf | Cs | Co | Cn
       & !CGC0 STOP:?CGC0
       & !CGC1 STOP:?CGC1
       & !CGC2 STOP:?CGC2
-      & lst$(CGC0,CGC0,NEW BIN)
-      & lst$(CGC1,CGC1,NEW BIN)
-      & lst$(CGC2,CGC2,NEW BIN)
       & ( statistics
         =   periods cat I i prI ign
           .   0:?periods
@@ -367,30 +356,12 @@ C 	Other 	                Cc | Cf | Cs | Co | Cn
             + ?
         | out$(def1 !def1 default1 !default1)
         )
-      & lst$(periods0,periods0,NEW BIN)
-      & lst$(periods1,periods1,NEW BIN)
-      & lst$(periods2,periods2,NEW BIN)
       & statistics$(!CGC0.!def0):(?.?Groups0)
       & statistics$(!CGC1.!def1):(?.?Groups1)
       & statistics$(!CGC2.):(?.?Groups2)
-      & lst$(Groups0,Groups0,NEW BIN)
-      & lst$(Groups1,Groups1,NEW BIN)
-      & lst$(Groups2,Groups2,NEW BIN)
       & !Groups0:? [?lastindex0
       & !Groups1:? [?lastindex1
       & !Groups2:? [?lastindex2
-      & (lst$(K,K,NEW BIN)|)
-      & (lst$(let,let,NEW BIN)|)
-      & (lst$(u2l,u2l,NEW BIN)|)
-      & (lst$(l2u,l2u,NEW BIN)|)
-      & (lst$(mark,mark,NEW BIN)|)
-      & (lst$(number,number,NEW BIN)|)
-      & ( lst$(punctuation,punctuation,NEW BIN)
-        | 
-        )
-      & (lst$(symbol,symbol,NEW BIN)|)
-      & (lst$(separator,separator,NEW BIN)|)
-      & (lst$(other,other,NEW BIN)|)
       & 9:?crd
       & ( theMarks
         =   m1 m2
@@ -525,7 +496,7 @@ const char * gencat(int a)
     unsigned int offset;
     cletter *Cletters;
     const char *def;
-    static char returnVal[3] = { '0','0','0' };
+    static char returnVal[3] = { '\\0','\\0','\\0' };
     
     if(a <= 0)
         return 0;
@@ -553,7 +524,7 @@ const char * gencat(int a)
             !lastindex2
             ";++i)
             {
-            if(Cletters2[i].L <= (unsigned short)a && (unsigned short)a <= Cletters2[i].L + Cletters2[i].range)
+            if(Cletters2[i].L <= (unsigned int)a && (unsigned int)a <= Cletters2[i].L + Cletters2[i].range)
                 {
                 tmark mrk = Mark[i + "
             !lastindex0
@@ -562,7 +533,7 @@ const char * gencat(int a)
             "];
                 returnVal[0] = firstMark[mrk.m1];
                 returnVal[1] = secondMark[mrk.m2];
-                returnVal[2] = '0';
+                returnVal[2] = '\\0';
                 break;
                 }
             }
@@ -603,7 +574,7 @@ const char * gencat(int a)
             tmark mrk = Mark[pivot + offset];
             returnVal[0] = firstMark[mrk.m1];
             returnVal[1] = secondMark[mrk.m2];
-            returnVal[2] = '0';
+            returnVal[2] = '\\0';
             return returnVal;
             }
         else if(pivot + 1 == hi)
@@ -871,22 +842,12 @@ int convertLetter(int a, struct ccaseconv * T)
     return a;
     }
 
-int toUpperUnicode(int a)
-    {
-    return convertLetter(a,l2u);
-    }
-
-int toLowerUnicode(int a)
-    {
-    return convertLetter(a, u2l);
-    }
 "
               , "unicaseconv.c"
               , APP BIN
               )
         )
       & comp$(!l2u.l2u):?l2us
-      & lst$(l2us,l2us,NEW BIN)
       & comp$(!u2l.u2l):?u2ls
       & writeCaseconvFunctions$
       & out$"unicaseconv.c written"
@@ -906,9 +867,9 @@ int toLowerUnicode(int a)
                 \n\n
                 "int convertLetter(int a, struct ccaseconv * T);"
                 \n
-                "int toUpperUnicode(int a);"
+                "#define toUpperUnicode(a) convertLetter(a,l2u)"
                 \n
-                "int toLowerUnicode(int a);"
+                "#define toLowerUnicode(a) convertLetter(a,u2l)"
                 \n\n
                 "#endif"
                 \n
@@ -917,11 +878,6 @@ int toLowerUnicode(int a)
           , NEW BIN
           )
       & out$"unicaseconv.h written"
-      & lst$(u2ls,u2ls,NEW BIN)
-      &   whl
-        ' ( !K:%?k ?K
-          & lst$(!k,!k,NEW BIN)
-          )
   )
   ( new
   =   
