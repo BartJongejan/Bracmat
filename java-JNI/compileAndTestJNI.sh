@@ -42,6 +42,9 @@ echo "JAVA_HOME= $JAVA_HOME"
 export JAVA_HOME
 # Compile java class that loads shared object libbracmat.so.
 javac ./dk/cst/*.java -h .. -Xlint
+# If javac version is higher than java version, add --release <java version number> . E.g.:
+# javac --release 11 ./dk/cst/*.java -h .. -Xlint
+
 popd
 
 # Compile bracmat.c as relocatable code for shared object
@@ -100,6 +103,8 @@ gcc -std=c99 -pedantic -Wall -DNDEBUG bracmattest.c -lbracmat -o bracmattest -lm
 pushd java
 #compile java test app
 javac -classpath bracmat.jar ./bracmattest.java
+# If javac version is higher than java version, add --release <java version number> . E.g.:
+# javac --release 11 -classpath bracmat.jar ./bracmattest.java
 
 #run the test app
 #sudo, because bracmat may want to write /var/log/clarin/tools.log
