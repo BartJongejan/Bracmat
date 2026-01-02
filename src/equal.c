@@ -191,8 +191,8 @@ int compare(psk s, psk p)
             int R = !ee && (Njet ^ ul ^ !TMP);
             return R;
             }
-        if((p->v.fl & (NOT | FRACTION | NUMBER | GREATER_THAN | SMALLER_THAN)) == (NOT | GREATER_THAN | SMALLER_THAN))
-            { /* Case insensitive match: ~<> means "not different" */
+        if((p->v.fl & (/*NOT |*/ FRACTION | NUMBER | GREATER_THAN | SMALLER_THAN)) == (/*NOT |*/ GREATER_THAN | SMALLER_THAN))
+            { /* Case insensitive match: ~<> means "not different", <> means "different, even if case differences don't count" */
             Sign = strcasecomp((char*)POBJ(s), (char*)POBJ(p));
             }
         else
@@ -547,8 +547,21 @@ int scompare(char* s, char* cutoff, psk p
     P = (char*)SPOBJ(p);
 
     if((Flgs & (NOT | FRACTION | NUMBER | GREATER_THAN | SMALLER_THAN)) == (NOT | GREATER_THAN | SMALLER_THAN))
-        { /* Case insensitive match: ~<> means "not different" */
+        { /* Case insensitive match: ~<> means "not different, <> means "different, even if case differences don't count"" */
         return strcasecompu(s, P, cutoff); /* Additional argument cutoff */
+        }
+    else if((Flgs & (/*NOT |*/ FRACTION | NUMBER | GREATER_THAN | SMALLER_THAN)) == (/*NOT |*/ GREATER_THAN | SMALLER_THAN))
+        { /* Case insensitive match: ~<> means "not different, <> means "different, even if case differences don't count"" */
+        int Ret = strcasecompu(s, P, cutoff); /* Additional argument cutoff */
+        if(Ret & ONCE)
+            {
+            if(Ret & TRUE)
+                return FALSE;
+            else
+                return TRUE | ONCE;
+            }
+        else
+            return ~Ret;
         }
     else
         {

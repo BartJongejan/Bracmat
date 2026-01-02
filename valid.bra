@@ -8120,6 +8120,14 @@ string line 2\"
           ( @(👨:~<>👨 ?c)&!c:
           | Out$"Error in case-insensitive matching of UTF8"
           )
+          (   @(aap:<>AAP)
+            &   Out
+              $ "Error in negated case-insensitive string matching. Strings are equal, apart from case."
+          | 
+          )
+          ( @(aap:<>AAPJES)
+          | Out$"Error in negated case-insensitive string matching"
+          )
       &   out
         $ ( str
           $ ( "Done. "

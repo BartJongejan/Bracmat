@@ -1,3 +1,7 @@
+2 January 2026
+Before we had ~<> for case insensitive matching. Now we also have <> for negated case insensitive matching.
+aap:<>AAP fails, because aap and AAP match, if we ignore case differences. <> is negation.
+
 18 November 2025
 Updated with http://unicode.org/Public/UNIDATA/UnicodeData.txt (2025-08-15 19:45)
 Fixed issues with UnicodeData.bra
