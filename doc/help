@@ -3129,7 +3129,8 @@ the first of them. The most useful combinations are:
     is like ?!, but expands two levels deep (with an evaluation of the
     first level expansion), instead of one.
 |_<>_|
-    is like a solitary ~.
+    is like a solitary ~, but uses case insensitive matching. See also |_~<>_| below.
+    |_<>_| is for negated case insensitive matching.
 |_/<>5/6_|
     unifies only with non-integer rational numbers unequal to 5/6.
 |_~<_|
