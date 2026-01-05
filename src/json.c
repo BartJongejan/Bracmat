@@ -631,8 +631,8 @@ int JSONtext(FILE * fpi,char * bron)
             }
         else
             {
-            fseek(fpi,0,SEEK_END);
-            filesize = ftell(fpi);
+            FSEEK(fpi,0,SEEK_END);
+            filesize = FTELL(fpi);
             rewind(fpi);
             }
         }

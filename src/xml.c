@@ -3654,8 +3654,8 @@ void XMLtext(FILE * fpi,unsigned char * bron,int trim,int html,int xml)
             }
         else
             {
-            fseek(fpi,0,SEEK_END);
-            filesize = ftell(fpi);
+            FSEEK(fpi,0,SEEK_END);
+            filesize = FTELL(fpi);
             rewind(fpi);
             }
         }
