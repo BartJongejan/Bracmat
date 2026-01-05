@@ -57,11 +57,11 @@ attributes can be empty (no =[valuex])
 #define TRUE 1
 #define FALSE 0
 
-typedef enum {notag,tag,endoftag,endoftag_startoftag} estate;
-static estate (*tagState)(const unsigned char * pkar);
+typedef enum { notag, tag, endoftag, endoftag_startoftag } estate;
+static estate(*tagState)(const unsigned char* pkar);
 
-static int Put(const unsigned char * c);
-static int (*xput)(const unsigned char * c) = Put;
+static int Put(const unsigned char* c);
+static int (*xput)(const unsigned char* c) = Put;
 
 static int assumeUTF8 = 1; /* Turned off when a non-UTF-8 sequence is seen. */
 
@@ -71,7 +71,7 @@ static int rawput(int c)
     return TRUE;
     }
 
-static int nrawput(const unsigned char * c)
+static int nrawput(const unsigned char* c)
     {
     while(*c)
         if(!rawput(*c++))
@@ -87,15 +87,15 @@ struct lowup
     };
 
 struct lowup lu[] =
-    {     {'-','-',FALSE}
+    { {'-','-',FALSE}
         , {'.','.',FALSE}
         , {'0','9',FALSE}
         , {':',':',TRUE}
         , {'A','Z',TRUE}
         , {'_','_',TRUE}
-        , {'a','z',TRUE} 
+        , {'a','z',TRUE}
         , {0xB7,0xB7,FALSE}
-        , {0xC0,0xD6,TRUE} 
+        , {0xC0,0xD6,TRUE}
         , {0xD8,0xF6,TRUE}
         , {0xF8,0x2FF,TRUE}
         , {0x300,0x36F,FALSE}
@@ -114,8 +114,8 @@ struct lowup lu[] =
 
 #define BUFSIZE 35000
 
-static unsigned char * bufx;
-static unsigned char * glob_p;
+static unsigned char* bufx;
+static unsigned char* glob_p;
 static int anychar = FALSE;
 
 static int (*namechar)(int c);
@@ -123,12 +123,12 @@ static int (*namechar)(int c);
 static int NameChar(int c)
     {
     int i;
-    for( i = 0
-       ; c > lu[i].u
-       ; ++i
-       )
-       ;
-    return c >= lu[i].l && (anychar || lu[i].s);        
+    for(i = 0
+        ; c > lu[i].u
+        ; ++i
+        )
+        ;
+    return c >= lu[i].l && (anychar || lu[i].s);
     }
 
 static int decimalx(int c)
@@ -140,10 +140,10 @@ static int decimalx(int c)
 
 static int hex(int c)
     {
-    if(  ('0' <= c && c <= '9')
-      || ('A' <= c && c <= 'F')
-      || ('a' <= c && c <= 'f')
-      )
+    if(('0' <= c && c <= '9')
+       || ('A' <= c && c <= 'F')
+       || ('a' <= c && c <= 'f')
+       )
         return TRUE;
     return FALSE;
     }
@@ -183,7 +183,7 @@ static int entity(int c)
     return FALSE;
     }
 
-typedef struct Entity { const char * ent; int code; int morecode; } Entity;
+typedef struct Entity { const char* ent; int code; int morecode; } Entity;
 static Entity entities[] = {
         { "AElig", 198, 0 },	/* latin capital letter AE = latin capital ligature AE, U+00C6 ISOlat1 */
         { "AMP", 38, 0 },
@@ -2312,41 +2312,41 @@ static Entity entities[] = {
         { "zwj", 8205, 0 },	/* zero width joiner, U+200D NEW RFC 2070 */
         { "zwnj", 8204, 0 } };	/* zero width non-joiner, U+200C NEW RFC 2070 */
 
-int compareEntities(const void * a, const void * b)
+int compareEntities(const void* a, const void* b)
     {
-    return strcmp(((Entity*)a)->ent,((Entity*)b)->ent);
+    return strcmp(((Entity*)a)->ent, ((Entity*)b)->ent);
     }
 
 static int HTvar = 0;
 static int Xvar = 0;
-static int charref(const unsigned char * c)
+static int charref(const unsigned char* c)
     {
     if(*c == ';')
         {
         *glob_p = '\0';
-        if(  !strcmp((const char *)bufx,"amp")
-          || !strcmp((const char*)bufx,"#38")
-          || !strcmp((const char*)bufx,"#x26")
-          )
+        if(!strcmp((const char*)bufx, "amp")
+           || !strcmp((const char*)bufx, "#38")
+           || !strcmp((const char*)bufx, "#x26")
+           )
             rawput('&');
-        else if(!strcmp((const char*)bufx,"apos"))
+        else if(!strcmp((const char*)bufx, "apos"))
             rawput('\'');
-        else if(!strcmp((const char*)bufx,"quot"))
+        else if(!strcmp((const char*)bufx, "quot"))
             {
             rawput('\"');
             }
-        else if(!strcmp((const char*)bufx,"lt"))
+        else if(!strcmp((const char*)bufx, "lt"))
             rawput('<');
-        else if(!strcmp((const char*)bufx,"gt"))
+        else if(!strcmp((const char*)bufx, "gt"))
             rawput('>');
         else if(bufx[0] == '#')
             {
             unsigned long N;
             unsigned char tmp[22];
-            N = (bufx[1] == 'x') ? strtoul((const char*)(bufx+2),NULL,16) : strtoul((const char*)(bufx+1),NULL,10);
+            N = (bufx[1] == 'x') ? strtoul((const char*)(bufx + 2), NULL, 16) : strtoul((const char*)(bufx + 1), NULL, 10);
             glob_p = bufx;
             xput = Put;
-            if(putCodePoint(N,tmp))
+            if(putCodePoint(N, tmp))
                 {
                 return nrawput(tmp);
                 }
@@ -2357,28 +2357,28 @@ static int charref(const unsigned char * c)
             {
             if(HTvar)
                 {
-                Entity * pItem;
+                Entity* pItem;
                 Entity key;
                 key.ent = (const char*)bufx;
-                pItem = (Entity*)bsearch( &key
-                                        , entities
-                                        , sizeof(entities)/sizeof(entities[0])
-                                        , sizeof(entities[0])
-                                        , compareEntities
-                                        );
-                if (pItem!=NULL)
+                pItem = (Entity*)bsearch(&key
+                                         , entities
+                                         , sizeof(entities) / sizeof(entities[0])
+                                         , sizeof(entities[0])
+                                         , compareEntities
+                );
+                if(pItem != NULL)
                     {
                     unsigned char tmp[100];
-                    unsigned char * endp;
+                    unsigned char* endp;
                     glob_p = bufx;
                     xput = Put;
                     endp = putCodePoint(pItem->code, tmp);
                     if(endp)
                         {
-                        if (pItem->morecode)
+                        if(pItem->morecode)
                             {
                             endp = putCodePoint(pItem->morecode, endp);
-                            if (endp)
+                            if(endp)
                                 return nrawput(tmp);
                             }
                         else
@@ -2408,14 +2408,14 @@ static int charref(const unsigned char * c)
         xput = Put;
         return FALSE;
         }
-    else if(glob_p < bufx+BUFSIZE-1)
+    else if(glob_p < bufx + BUFSIZE - 1)
         {
         *glob_p++ = *c;
         }
     return TRUE;
     }
 
-static int Put(const unsigned char * c)
+static int Put(const unsigned char* c)
     {
     if(*c == '&')
         {
@@ -2467,43 +2467,43 @@ static void flushx(void)
         xput((const unsigned char*)"");
     }
 
-static void nxput(unsigned char * start,unsigned char *end)
+static void nxput(unsigned char* start, unsigned char* end)
     {
-    for(;start < end;++start)
+    for(; start < end; ++start)
         xput(start);
     flushx();
     }
 
-static void nxputWithoutEntityUnfolding(unsigned char * start,unsigned char *end)
+static void nxputWithoutEntityUnfolding(unsigned char* start, unsigned char* end)
     {
-    for(;start < end;++start)
+    for(; start < end; ++start)
         rawput(*start);
     }
 
-static void nonTagWithoutEntityUnfolding(const char * kind,unsigned char * start,unsigned char * end)
+static void nonTagWithoutEntityUnfolding(const char* kind, unsigned char* start, unsigned char* end)
     {
     nrawput((const unsigned char*)kind);
     putOperatorChar('.');
-    nxputWithoutEntityUnfolding(start,end);
+    nxputWithoutEntityUnfolding(start, end);
     putOperatorChar(')');
     }
 
-static void nonTag(const char * kind,unsigned char * start,unsigned char * end)
+static void nonTag(const char* kind, unsigned char* start, unsigned char* end)
     {
     nrawput((const unsigned char*)kind);
     putOperatorChar('.');
-    nxput(start,end);
+    nxput(start, end);
     putOperatorChar(')');
     }
 
-static unsigned char * ch;
-static unsigned char * StaRt = 0;
+static unsigned char* ch;
+static unsigned char* StaRt = 0;
 static int isMarkup = 0;
 
 static void cbStartMarkUp(void)
     {
     flushx();
-    StaRt = ch+2;
+    StaRt = ch + 2;
     isMarkup = 1;
     putOperatorChar(' ');
     putOperatorChar('(');
@@ -2512,26 +2512,26 @@ static void cbStartMarkUp(void)
 static void cbEndMarkUp(void)/* called when > has been read */
     {
     if(isMarkup)
-        nonTag("!",StaRt,ch);
+        nonTag("!", StaRt, ch);
     }
 
 static void cbEndDOCTYPE(void)/* called when > has been read */
     {
     isMarkup = 0;
-    nonTagWithoutEntityUnfolding("!DOCTYPE",StaRt,ch);
+    nonTagWithoutEntityUnfolding("!DOCTYPE", StaRt, ch);
     }
 
-static unsigned char * endElementName;
+static unsigned char* endElementName;
 static void cbEndElementName(void)
     {
-    nxput(StaRt,endElementName ? endElementName : ch);
+    nxput(StaRt, endElementName ? endElementName : ch);
     putOperatorChar('.');
     endElementName = NULL;
     }
 
 static void cbEndAttributeName(void)
     {
-    nxput(StaRt,ch);
+    nxput(StaRt, ch);
     putOperatorChar('.');
     }
 
@@ -2541,49 +2541,49 @@ static void cbEndAttribute(void)
     putOperatorChar(' ');
     }
 
-static estate def_pcdata(const unsigned char * pkar);
-static estate (*defx)(const unsigned char * pkar) = def_pcdata;
-static estate def_cdata(const unsigned char * pkar);
-static estate lt(const unsigned char * pkar);
-static estate lt_cdata(const unsigned char * pkar);
-static estate lts_cdata(const unsigned char * pkar);
-static estate element(const unsigned char * pkar);
-static estate elementonly(const unsigned char * pkar);
-static estate gt(const unsigned char * pkar);
-static estate emptytag(const unsigned char * pkar);
-static estate atts(const unsigned char * pkar);
-static estate namex(const unsigned char * pkar);
-static estate valuex(const unsigned char * pkar);
-static estate atts_or_value(const unsigned char * pkar);
-static estate invalue(const unsigned char * pkar);
-static estate singlequotes(const unsigned char * pkar);
-static estate doublequotes(const unsigned char * pkar);
-static estate insinglequotedvalue(const unsigned char * pkar);
-static estate indoublequotedvalue(const unsigned char * pkar);
-static estate endvalue(const unsigned char * pkar);
-static estate markup(const unsigned char * pkar); /* <! */
-static estate perhapsScriptOrStyle(const unsigned char * pkar); /* <s or <S */
-static estate scriptOrStyleElement(const unsigned char * pkar); /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
-static estate scriptOrStyleEndElement(const unsigned char * pkar); /* </s or </S */
-static estate scriptOrStyleEndElementL(const unsigned char * pkar); /* </script or </SCRIPT or </style or </STYLE */
-static estate unknownmarkup(const unsigned char * pkar);
-static estate PrInstr(const unsigned char * pkar);       /* processing instruction <?...?> (XML) or <?...> (non-XML) */
-static estate endPI(const unsigned char * pkar);
-static estate DOCTYPE1(const unsigned char * pkar); /* <!D */
-static estate DOCTYPE7(const unsigned char * pkar); /* <!DOCTYPE */
-static estate DOCTYPE8(const unsigned char * pkar); /* <!DOCTYPE S */
-static estate DOCTYPE9(const unsigned char * pkar); /* <!DOCTYPE S [ */
-static estate DOCTYPE10(const unsigned char * pkar); /* <!DOCTYPE S [ ] */
-static estate CDATA1(const unsigned char * pkar); /* <![ */
-static estate CDATA7(const unsigned char * pkar); /* <![CDATA[ */
-static estate CDATA8(const unsigned char * pkar); /* <![CDATA[ ] */
-static estate CDATA9(const unsigned char * pkar); /* <![CDATA[ ]] */
-static estate h1(const unsigned char * pkar); /* <!- */
-static estate h2(const unsigned char * pkar); /* <!-- */
-static estate h3(const unsigned char * pkar); /* <!--  - */
-static estate endtag(const unsigned char * pkar);
+static estate def_pcdata(const unsigned char* pkar);
+static estate(*defx)(const unsigned char* pkar) = def_pcdata;
+static estate def_cdata(const unsigned char* pkar);
+static estate lt(const unsigned char* pkar);
+static estate lt_cdata(const unsigned char* pkar);
+static estate lts_cdata(const unsigned char* pkar);
+static estate element(const unsigned char* pkar);
+static estate elementonly(const unsigned char* pkar);
+static estate gt(const unsigned char* pkar);
+static estate emptytag(const unsigned char* pkar);
+static estate atts(const unsigned char* pkar);
+static estate namex(const unsigned char* pkar);
+static estate valuex(const unsigned char* pkar);
+static estate atts_or_value(const unsigned char* pkar);
+static estate invalue(const unsigned char* pkar);
+static estate singlequotes(const unsigned char* pkar);
+static estate doublequotes(const unsigned char* pkar);
+static estate insinglequotedvalue(const unsigned char* pkar);
+static estate indoublequotedvalue(const unsigned char* pkar);
+static estate endvalue(const unsigned char* pkar);
+static estate markup(const unsigned char* pkar); /* <! */
+static estate perhapsScriptOrStyle(const unsigned char* pkar); /* <s or <S */
+static estate scriptOrStyleElement(const unsigned char* pkar); /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
+static estate scriptOrStyleEndElement(const unsigned char* pkar); /* </s or </S */
+static estate scriptOrStyleEndElementL(const unsigned char* pkar); /* </script or </SCRIPT or </style or </STYLE */
+static estate unknownmarkup(const unsigned char* pkar);
+static estate PrInstr(const unsigned char* pkar);       /* processing instruction <?...?> (XML) or <?...> (non-XML) */
+static estate endPI(const unsigned char* pkar);
+static estate DOCTYPE1(const unsigned char* pkar); /* <!D */
+static estate DOCTYPE7(const unsigned char* pkar); /* <!DOCTYPE */
+static estate DOCTYPE8(const unsigned char* pkar); /* <!DOCTYPE S */
+static estate DOCTYPE9(const unsigned char* pkar); /* <!DOCTYPE S [ */
+static estate DOCTYPE10(const unsigned char* pkar); /* <!DOCTYPE S [ ] */
+static estate CDATA1(const unsigned char* pkar); /* <![ */
+static estate CDATA7(const unsigned char* pkar); /* <![CDATA[ */
+static estate CDATA8(const unsigned char* pkar); /* <![CDATA[ ] */
+static estate CDATA9(const unsigned char* pkar); /* <![CDATA[ ]] */
+static estate h1(const unsigned char* pkar); /* <!- */
+static estate h2(const unsigned char* pkar); /* <!-- */
+static estate h3(const unsigned char* pkar); /* <!--  - */
+static estate endtag(const unsigned char* pkar);
 
-static estate def_pcdata(const unsigned char * pkar)
+static estate def_pcdata(const unsigned char* pkar)
     {
     switch(*pkar)
         {
@@ -2595,8 +2595,8 @@ static estate def_pcdata(const unsigned char * pkar)
             return notag;
         }
     }
-    
-static estate def_cdata(const unsigned char * pkar)
+
+static estate def_cdata(const unsigned char* pkar)
     {
     switch(*pkar)
         {
@@ -2607,8 +2607,8 @@ static estate def_cdata(const unsigned char * pkar)
             return notag;
         }
     }
-    
-static estate lt(const unsigned char * pkar)
+
+static estate lt(const unsigned char* pkar)
     {
     const int kar = *pkar;
     endElementName = NULL;
@@ -2652,7 +2652,7 @@ static estate lt(const unsigned char * pkar)
         }
     }
 
-static estate lt_cdata(const unsigned char * pkar)
+static estate lt_cdata(const unsigned char* pkar)
     {
     switch(*pkar)
         {
@@ -2661,7 +2661,7 @@ static estate lt_cdata(const unsigned char * pkar)
             return tag;
         default:
             tagState = def_cdata;
-            return notag;            
+            return notag;
         }
     }
 
@@ -2669,9 +2669,9 @@ static int ScriptStyleiMax = 0;
 static int scriptstylei = 0;
 static int scriptstylei2 = 0;
 static int scriptstyleimax = 0;
-static unsigned char * elementEndNameLower;
-static unsigned char * elementEndNameUpper;
-static estate scriptOrStyleEndElement(const unsigned char * pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
+static unsigned char* elementEndNameLower;
+static unsigned char* elementEndNameUpper;
+static estate scriptOrStyleEndElement(const unsigned char* pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
     {
     const int kar = *pkar;
     if(kar == elementEndNameLower[scriptstylei2] || kar == elementEndNameUpper[scriptstylei2])
@@ -2696,7 +2696,7 @@ static estate scriptOrStyleEndElement(const unsigned char * pkar) /* <sc or <SC 
         }
     }
 
-static estate scriptOrStyleEndElementL(const unsigned char * pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
+static estate scriptOrStyleEndElementL(const unsigned char* pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
     {
     switch(*pkar)
         {
@@ -2710,7 +2710,7 @@ static estate scriptOrStyleEndElementL(const unsigned char * pkar) /* <sc or <SC
             putOperatorChar(')');
             defx = def_pcdata;
             tagState = defx;
-            StaRt = ch+1;
+            StaRt = ch + 1;
             return endoftag;
         case ' ':
         case '\f':
@@ -2719,7 +2719,7 @@ static estate scriptOrStyleEndElementL(const unsigned char * pkar) /* <sc or <SC
         case '\t':
             if(endElementName == NULL)
                 endElementName = ch;
-            return tag;           
+            return tag;
         default:
             endElementName = NULL;
             scriptstylei2 = 0;
@@ -2728,19 +2728,19 @@ static estate scriptOrStyleEndElementL(const unsigned char * pkar) /* <sc or <SC
         }
     }
 
-static estate lts_cdata(const unsigned char * pkar)
+static estate lts_cdata(const unsigned char* pkar)
     {
     const int kar = *pkar;
     scriptstyleimax = ScriptStyleiMax;
     scriptstylei2 = 0;
-    if(  kar == elementEndNameLower[scriptstylei2]
-      || kar == elementEndNameUpper[scriptstylei2]
-      )
+    if(kar == elementEndNameLower[scriptstylei2]
+       || kar == elementEndNameUpper[scriptstylei2]
+       )
         {
         StaRt = ch;
         ++scriptstylei2;
         tagState = scriptOrStyleEndElement;
-        return tag;            
+        return tag;
         }
     tagState = def_cdata;
     return notag;
@@ -2756,7 +2756,7 @@ static void stillCdata(void)
         }
     }
 
-static estate element(const unsigned char * pkar)
+static estate element(const unsigned char* pkar)
     {
     const int kar = *pkar;
     switch(kar)
@@ -2808,7 +2808,7 @@ static estate element(const unsigned char * pkar)
         }
     }
 
-static estate elementonly(const unsigned char * pkar)
+static estate elementonly(const unsigned char* pkar)
     {
     const int kar = *pkar;
     switch(kar)
@@ -2852,7 +2852,7 @@ static estate elementonly(const unsigned char * pkar)
         }
     }
 
-static estate gt(const unsigned char * pkar)
+static estate gt(const unsigned char* pkar)
     {
     switch(*pkar)
         {
@@ -2882,7 +2882,7 @@ static estate gt(const unsigned char * pkar)
         }
     }
 
-static estate emptytag(const unsigned char * pkar)
+static estate emptytag(const unsigned char* pkar)
     {
     switch(*pkar)
         {
@@ -2899,7 +2899,7 @@ static estate emptytag(const unsigned char * pkar)
         }
     }
 
-static estate atts(const unsigned char * pkar)
+static estate atts(const unsigned char* pkar)
     {
     const int kar = *pkar;
     switch(kar)
@@ -2941,7 +2941,7 @@ static estate atts(const unsigned char * pkar)
         }
     }
 
-static estate namex(const unsigned char * pkar)
+static estate namex(const unsigned char* pkar)
     {
     const int kar = *pkar;
     switch(kar)
@@ -2995,12 +2995,12 @@ static estate namex(const unsigned char * pkar)
         }
     }
 
-static estate valuex(const unsigned char * pkar)
+static estate valuex(const unsigned char* pkar)
     {
     switch(*pkar)
         {
         case '>':
-        /*case '/': Allowed in HTML5 as first character of attriute value, without surrounding apostrophes or quotes! 
+        /*case '/': Allowed in HTML5 as first character of attriute value, without surrounding apostrophes or quotes!
         E.g. <link rel=stylesheet href=/styles.css crossorigin=""> */
         case '=':
             tagState = defx;
@@ -3019,13 +3019,13 @@ static estate valuex(const unsigned char * pkar)
             tagState = doublequotes;
             return tag;
         default:
-                StaRt = ch;
-                tagState = invalue;
-                return tag;
+            StaRt = ch;
+            tagState = invalue;
+            return tag;
         }
     }
 
-static estate atts_or_value(const unsigned char * pkar)
+static estate atts_or_value(const unsigned char* pkar)
     {
     const int kar = *pkar;
     switch(kar)
@@ -3080,23 +3080,23 @@ static estate atts_or_value(const unsigned char * pkar)
         }
     }
 
-/* This is far from conforming to and more forgiving than 
+/* This is far from conforming to and more forgiving than
 https://html.spec.whatwg.org/multipage/syntax.html#unquoted
 */
-static estate invalue(const unsigned char * pkar)
+static estate invalue(const unsigned char* pkar)
     {
     switch(*pkar)
         {
         case '<':
             tagState = lt;
-            nxput(StaRt,ch);
+            nxput(StaRt, ch);
             cbEndAttribute();
             putOperatorChar(')');
             cbStartMarkUp();
             return endoftag_startoftag;
         case '>':
             tagState = defx;
-            nxput(StaRt,ch);
+            nxput(StaRt, ch);
             cbEndAttribute();
             putOperatorChar(')');
             return endoftag;
@@ -3106,7 +3106,7 @@ static estate invalue(const unsigned char * pkar)
         case '\n':
         case '\r':
         case '\t':
-            nxput(StaRt,ch);
+            nxput(StaRt, ch);
             cbEndAttribute();
             tagState = atts;
             return tag;
@@ -3130,13 +3130,13 @@ static estate invalue(const unsigned char * pkar)
         }
     }
 
-static estate singlequotes(const unsigned char * pkar)
+static estate singlequotes(const unsigned char* pkar)
     {
     StaRt = ch;
     switch(*pkar)
         {
         case '\'':
-            nxput(StaRt,ch);
+            nxput(StaRt, ch);
             cbEndAttribute();
             tagState = endvalue;
             return tag;
@@ -3146,13 +3146,13 @@ static estate singlequotes(const unsigned char * pkar)
         }
     }
 
-static estate doublequotes(const unsigned char * pkar)
+static estate doublequotes(const unsigned char* pkar)
     {
     StaRt = ch;
     switch(*pkar)
         {
         case '\"':
-            nxput(StaRt,ch);
+            nxput(StaRt, ch);
             cbEndAttribute();
             tagState = endvalue;
             return tag;
@@ -3162,12 +3162,12 @@ static estate doublequotes(const unsigned char * pkar)
         }
     }
 
-static estate insinglequotedvalue(const unsigned char * pkar)
+static estate insinglequotedvalue(const unsigned char* pkar)
     {
     switch(*pkar)
         {
         case '\'':
-            nxput(StaRt,ch);
+            nxput(StaRt, ch);
             cbEndAttribute();
             tagState = endvalue;
             return tag;
@@ -3176,12 +3176,12 @@ static estate insinglequotedvalue(const unsigned char * pkar)
         }
     }
 
-static estate indoublequotedvalue(const unsigned char * pkar)
+static estate indoublequotedvalue(const unsigned char* pkar)
     {
     switch(*pkar)
         {
         case '\"':
-            nxput(StaRt,ch);
+            nxput(StaRt, ch);
             cbEndAttribute();
             tagState = endvalue;
             return tag;
@@ -3191,7 +3191,7 @@ static estate indoublequotedvalue(const unsigned char * pkar)
     }
 
 
-static estate endvalue(const unsigned char * pkar)
+static estate endvalue(const unsigned char* pkar)
     {
     switch(*pkar)
         {
@@ -3224,9 +3224,9 @@ static estate endvalue(const unsigned char * pkar)
     }
 
 
-static unsigned char * elementNameLower;
-static unsigned char * elementNameUpper;
-static estate scriptOrStyleElement(const unsigned char * pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
+static unsigned char* elementNameLower;
+static unsigned char* elementNameUpper;
+static estate scriptOrStyleElement(const unsigned char* pkar) /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
     {
     const int kar = *pkar;
     if(kar == elementNameLower[scriptstylei] || kar == elementNameUpper[scriptstylei])
@@ -3255,15 +3255,15 @@ static unsigned char script[] = "script";
 static unsigned char SCRIPT[] = "SCRIPT";
 static unsigned char style[] = "style";
 static unsigned char STYLE[] = "STYLE";
-static estate perhapsScriptOrStyle(const unsigned char * pkar) /* <s or <S */
+static estate perhapsScriptOrStyle(const unsigned char* pkar) /* <s or <S */
     {
     estate ret;
     switch(*pkar)
         {
         case 'C':
         case 'c':
-            elementNameLower = script+2;
-            elementNameUpper = SCRIPT+2;
+            elementNameLower = script + 2;
+            elementNameUpper = SCRIPT + 2;
             elementEndNameLower = script;
             elementEndNameUpper = SCRIPT;
             scriptstyleimax = sizeof(script) - 4;
@@ -3273,8 +3273,8 @@ static estate perhapsScriptOrStyle(const unsigned char * pkar) /* <s or <S */
             return ret;
         case 'T':
         case 't':
-            elementNameLower = style+2;
-            elementNameUpper = STYLE+2;
+            elementNameLower = style + 2;
+            elementNameUpper = STYLE + 2;
             elementEndNameLower = style;
             elementEndNameUpper = STYLE;
             scriptstyleimax = sizeof(style) - 4;
@@ -3289,7 +3289,7 @@ static estate perhapsScriptOrStyle(const unsigned char * pkar) /* <s or <S */
     }
 
 
-static estate markup(const unsigned char * pkar) /* <! */
+static estate markup(const unsigned char* pkar) /* <! */
     {
     switch(*pkar)
         {
@@ -3317,7 +3317,7 @@ static estate markup(const unsigned char * pkar) /* <! */
         }
     }
 
-static estate unknownmarkup(const unsigned char * pkar) /* <! */
+static estate unknownmarkup(const unsigned char* pkar) /* <! */
     {
     switch(*pkar)
         {
@@ -3335,7 +3335,7 @@ static estate unknownmarkup(const unsigned char * pkar) /* <! */
         }
     }
 
-static estate PrInstr(const unsigned char * pkar)
+static estate PrInstr(const unsigned char* pkar)
     {
     if(Xvar)
         switch(*pkar)
@@ -3351,20 +3351,20 @@ static estate PrInstr(const unsigned char * pkar)
             {
             case '>':
                 tagState = defx;
-                nonTagWithoutEntityUnfolding("?",StaRt+1,ch);
+                nonTagWithoutEntityUnfolding("?", StaRt + 1, ch);
                 return endoftag;
             default:
                 return tag;
             }
     }
 
-static estate endPI(const unsigned char * pkar)
+static estate endPI(const unsigned char* pkar)
     {
     switch(*pkar)
         {
         case '>':
             tagState = defx;
-            nonTagWithoutEntityUnfolding("?",StaRt+1,ch-1);
+            nonTagWithoutEntityUnfolding("?", StaRt + 1, ch - 1);
             return endoftag;
         case '?':
             return tag;
@@ -3375,7 +3375,7 @@ static estate endPI(const unsigned char * pkar)
     }
 
 static int doctypei = 0;
-static estate DOCTYPE1(const unsigned char * pkar) /* <!D */
+static estate DOCTYPE1(const unsigned char* pkar) /* <!D */
     {
     const int kar = *pkar;
     static unsigned char octype[] = "OCTYPE";
@@ -3411,7 +3411,7 @@ static estate DOCTYPE1(const unsigned char * pkar) /* <!D */
     }
 
 
-static estate DOCTYPE7(const unsigned char * pkar) /* <!DOCTYPE */
+static estate DOCTYPE7(const unsigned char* pkar) /* <!DOCTYPE */
     {
     switch(*pkar)
         {
@@ -3437,7 +3437,7 @@ static estate DOCTYPE7(const unsigned char * pkar) /* <!DOCTYPE */
         }
     }
 
-static estate DOCTYPE8(const unsigned char * pkar) /* <!DOCTYPE S */
+static estate DOCTYPE8(const unsigned char* pkar) /* <!DOCTYPE S */
     {
     switch(*pkar)
         {
@@ -3457,7 +3457,7 @@ static estate DOCTYPE8(const unsigned char * pkar) /* <!DOCTYPE S */
         }
     }
 
-static estate DOCTYPE9(const unsigned char * pkar)  /* <!DOCTYPE S [ */
+static estate DOCTYPE9(const unsigned char* pkar)  /* <!DOCTYPE S [ */
     {
     switch(*pkar)
         {
@@ -3470,7 +3470,7 @@ static estate DOCTYPE9(const unsigned char * pkar)  /* <!DOCTYPE S [ */
         }
     }
 
-static estate DOCTYPE10(const unsigned char * pkar)  /* <!DOCTYPE S [ ] */
+static estate DOCTYPE10(const unsigned char* pkar)  /* <!DOCTYPE S [ ] */
     {
     switch(*pkar)
         {
@@ -3497,7 +3497,7 @@ static estate DOCTYPE10(const unsigned char * pkar)  /* <!DOCTYPE S [ ] */
 
 
 static int cdatai = 0;
-static estate CDATA1(const unsigned char * pkar) /* <![ */
+static estate CDATA1(const unsigned char* pkar) /* <![ */
     {
     const int kar = *pkar;
     static unsigned char cdata[] = "CDATA[";
@@ -3518,7 +3518,7 @@ static estate CDATA1(const unsigned char * pkar) /* <![ */
                 if(cdatai == sizeof(cdata) - 2)
                     {
                     tagState = CDATA7;
-                    StaRt = ch+1;
+                    StaRt = ch + 1;
                     cdatai = 0;
                     }
                 else
@@ -3534,7 +3534,7 @@ static estate CDATA1(const unsigned char * pkar) /* <![ */
         }
     }
 
-static estate CDATA7(const unsigned char * pkar) /* <![CDATA[ */
+static estate CDATA7(const unsigned char* pkar) /* <![CDATA[ */
     {
     switch(*pkar)
         {
@@ -3546,7 +3546,7 @@ static estate CDATA7(const unsigned char * pkar) /* <![CDATA[ */
         }
     }
 
-static estate CDATA8(const unsigned char * pkar) /* <![CDATA[ ] */
+static estate CDATA8(const unsigned char* pkar) /* <![CDATA[ ] */
     {
     switch(*pkar)
         {
@@ -3559,14 +3559,14 @@ static estate CDATA8(const unsigned char * pkar) /* <![CDATA[ ] */
         }
     }
 
-static estate CDATA9(const unsigned char * pkar) /* <![CDATA[ ]] */
+static estate CDATA9(const unsigned char* pkar) /* <![CDATA[ ]] */
     {
     switch(*pkar)
         {
         case '>':  /* <![CDATA[ ]]> */
             tagState = defx;
             isMarkup = 0;
-            nonTagWithoutEntityUnfolding("![CDATA[",StaRt,ch-2);
+            nonTagWithoutEntityUnfolding("![CDATA[", StaRt, ch - 2);
             return endoftag;
         default:
             tagState = CDATA7;
@@ -3575,7 +3575,7 @@ static estate CDATA9(const unsigned char * pkar) /* <![CDATA[ ]] */
     }
 
 
-static estate h1(const unsigned char * pkar) /* <!- */
+static estate h1(const unsigned char* pkar) /* <!- */
     {
     switch(*pkar)
         {
@@ -3588,7 +3588,7 @@ static estate h1(const unsigned char * pkar) /* <!- */
             return notag;
         case '-':
             tagState = h2;
-            StaRt = ch+1;
+            StaRt = ch + 1;
             return tag;
         default:
             tagState = unknownmarkup;
@@ -3596,7 +3596,7 @@ static estate h1(const unsigned char * pkar) /* <!- */
         }
     }
 
-static estate h2(const unsigned char * pkar) /* <!-- */
+static estate h2(const unsigned char* pkar) /* <!-- */
     {
     switch(*pkar)
         {
@@ -3608,14 +3608,14 @@ static estate h2(const unsigned char * pkar) /* <!-- */
         }
     }
 
-static estate h3(const unsigned char * pkar) /* <!--  - */
+static estate h3(const unsigned char* pkar) /* <!--  - */
     {
     switch(*pkar)
         {
         case '-': /* <!-- -- */
             tagState = markup;
             isMarkup = 0;
-            nonTagWithoutEntityUnfolding("!--",StaRt,ch-1);
+            nonTagWithoutEntityUnfolding("!--", StaRt, ch - 1);
             return tag;
         default:
             tagState = h2;
@@ -3623,7 +3623,7 @@ static estate h3(const unsigned char * pkar) /* <!--  - */
         }
     }
 
-static estate endtag(const unsigned char * pkar)
+static estate endtag(const unsigned char* pkar)
     {
     const int kar = *pkar;
     if(':' == kar || ('A' <= kar && kar <= 'Z') || '_' == kar || ('a' <= kar && kar <= 'z') || (kar & 0x80))
@@ -3640,7 +3640,7 @@ static estate endtag(const unsigned char * pkar)
         }
     }
 
-void XMLtext(FILE * fpi,unsigned char * bron,int trim,int html,int xml)
+void XMLtext(FILE* fpi, unsigned char* bron, int trim, int html, int xml)
     {
     int kar;
     int inc = 0x10000;
@@ -3654,115 +3654,95 @@ void XMLtext(FILE * fpi,unsigned char * bron,int trim,int html,int xml)
             }
         else
             {
-            FSEEK(fpi,0,SEEK_END);
+            FSEEK(fpi, 0, SEEK_END);
             filesize = FTELL(fpi);
             rewind(fpi);
             }
         }
     else if(bron)
         {
-        filesize = strlen((const char *)bron);
+        filesize = strlen((const char*)bron);
         }
     else
         return;
     defx = def_pcdata;
     if(filesize > 0)
         {
-        unsigned char * alltext;
+        unsigned char* alltext;
         assumeUTF8 = TRUE;
         doctypei = 0;
         cdatai = 0;
         bufx = (unsigned char*)malloc(BUFSIZE);
         glob_p = bufx;
-        alltext = (fpi || trim) ? (unsigned char*)malloc(filesize+1) : (unsigned char *)bron;
+        alltext = (fpi || trim) ? (unsigned char*)malloc(filesize + 1) : (unsigned char*)bron;
         HTvar = html;
         Xvar = xml;
         if(bufx && alltext)
             {
-            unsigned char * curr_pos;
-            unsigned char * endpos;
+            unsigned char* curr_pos;
+            unsigned char* endpos;
             estate Seq = notag;
             if(trim)
                 {
-                unsigned char * p = alltext;
+                unsigned char* p = alltext;
+                unsigned char* q = 0;
                 int whitespace = FALSE;
                 if(fpi)
                     {
-                    while((kar = getc(fpi)) != EOF)
-                        {
-                        switch(kar)
-                            {
-                            case ' ':
-                            case '\f':
-                            case '\n':
-                            case '\r':
-                            case '\t':
-                                {
-                                if(!whitespace)
-                                    {
-                                    whitespace = TRUE;
-                                    *p++ = ' ';
-                                    }
-                                break;
-                                }
-                            default:
-                                {
-                                whitespace = FALSE;
-                                *p++ = (unsigned char)kar;
-                                }
-                            }
-                        if(p >= alltext + incs * inc)
-                            {
-                            size_t dif = p - alltext; 
-                            ++incs;                            
-                            alltext = (unsigned char*)realloc(alltext,incs * inc);
-                            p = alltext + dif;
-                            }
-                        }
+                    LONG result = fread(alltext, 1, filesize, fpi);
+                    assert(result <= filesize);
+                    /* The file is perhaps not opened
+                    in binary mode, but in text mode. In that case the number of
+                    bytes read can be smaller than the number of bytes in the file.
+                    */
+                    alltext[result] = '\0';
+                    q = alltext;
                     }
                 else
                     {
-                    while((kar = *bron++) != 0)
+                    q = bron;
+                    }
+                while((kar = *q++) != 0)
+                    {
+                    switch(kar)
                         {
-                        switch(kar)
+                        case ' ':
+                        case '\f':
+                        case '\n':
+                        case '\r':
+                        case '\t':
                             {
-                            case ' ':
-                            case '\f':
-                            case '\n':
-                            case '\r':
-                            case '\t':
+                            if(!whitespace)
                                 {
-                                if(!whitespace)
-                                    {
-                                    whitespace = TRUE;
-                                    *p++ = ' ';
-                                    }
-                                break;
+                                whitespace = TRUE;
+                                *p++ = ' ';
                                 }
-                            default:
-                                {
-                                whitespace = FALSE;
-                                *p++ = (unsigned char)kar;
-                                }
+                            break;
+                            }
+                        default:
+                            {
+                            whitespace = FALSE;
+                            *p++ = (unsigned char)kar;
                             }
                         }
                     }
-                *p = '\0';
+                *p++ = '\0';
+                alltext = (unsigned char*)realloc(alltext, p - alltext);
                 }
             else if(fpi)
                 {
                 if(fpi == stdin)
                     {
-                    unsigned char * endp = alltext + incs * inc;
-                    unsigned char * p = alltext;
+                    unsigned char* endp = alltext + incs * inc;
+                    unsigned char* p = alltext;
                     while((kar = getc(fpi)) != EOF)
                         {
                         *p++ = (unsigned char)kar;
                         if(p >= endp)
                             {
-                            size_t dif = p - alltext; 
-                            ++incs;                            
-                            alltext = (unsigned char*)realloc(alltext,incs * inc);
+                            size_t dif = p - alltext;
+                            ++incs;
+                            alltext = (unsigned char*)realloc(alltext, incs * inc);
                             p = alltext + dif;
                             endp = alltext + incs * inc;
                             }
@@ -3771,8 +3751,8 @@ void XMLtext(FILE * fpi,unsigned char * bron,int trim,int html,int xml)
                     }
                 else
                     {
-                    LONG result = fread(alltext,1,filesize,fpi);
-                    assert(result <= filesize); 
+                    LONG result = fread(alltext, 1, filesize, fpi);
+                    assert(result <= filesize);
                     /* The file is perhaps not opened
                     in binary mode, but in text mode. In that case the number of
                     bytes read can be smaller than the number of bytes in the file.
@@ -3787,11 +3767,11 @@ void XMLtext(FILE * fpi,unsigned char * bron,int trim,int html,int xml)
             curr_pos = alltext;
             while(*ch)
                 {
-                while(  *ch 
-                     && (( Seq = (*tagState)(ch)) == tag 
-                        || Seq == endoftag_startoftag
-                        )
-                     )
+                while(*ch
+                      && ((Seq = (*tagState)(ch)) == tag
+                          || Seq == endoftag_startoftag
+                          )
+                      )
                     {
                     ch++;
                     }
@@ -3812,9 +3792,9 @@ void XMLtext(FILE * fpi,unsigned char * bron,int trim,int html,int xml)
                     }
                 if(*ch)
                     {
-                    while(  *ch 
-                         && (Seq = (*tagState)(ch)) == notag
-                         )
+                    while(*ch
+                          && (Seq = (*tagState)(ch)) == notag
+                          )
                         {
                         xput(ch);
                         ++ch;
@@ -3827,25 +3807,25 @@ void XMLtext(FILE * fpi,unsigned char * bron,int trim,int html,int xml)
                 }
             if(Seq == tag)
                 {
-                Seq = (*tagState)((const unsigned char *)" ");
+                Seq = (*tagState)((const unsigned char*)" ");
                 if(Seq == tag)
                     putOperatorChar(')');
                 }
 #if 0
-                { /* Incomplete SGML tag. Backtrack. */
-                endpos = ch;
-                ch = curr_pos;
-                while(ch < endpos)
-                    {
-                    rawput(*ch);
-                    ch++;
-                    }
+            { /* Incomplete SGML tag. Backtrack. */
+            endpos = ch;
+            ch = curr_pos;
+            while(ch < endpos)
+                {
+                rawput(*ch);
+                ch++;
                 }
+            }
 #endif
             }
         if(bufx)
             free(bufx);
-        if(alltext && alltext != (unsigned char *)bron)
+        if(alltext && alltext != (unsigned char*)bron)
             free(alltext);
         }
     }

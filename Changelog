@@ -1,5 +1,6 @@
 5 January 2026
-fseek, ftell -> FSEEK, FTELL (Windows: > 2 GB file size)
+fseek, ftell -> FSEEK, FTELL (Windows: > 2 GB file size).
+More efficient reading of large XML file with TRM option: fread instead of fgetc.
 
 2 January 2026
 Before we had ~<> for case insensitive matching. Now we also have <> for negated case insensitive matching.
