@@ -60,12 +60,12 @@ psk handleExponents(psk Pnode)
     {
     psk lnode;
     Boolean done = FALSE;
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
     Pnode->v.fl |= VISITED;
 #endif
     for(; ((lnode = Pnode->LEFT)->v.fl & READY) && Op(lnode) == EXP;)
         {
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
         lnode->v.fl |= VISITED;
 #endif
         done = TRUE;
@@ -1235,7 +1235,7 @@ psk merge(psk Pnode
 #if EXPAND
         Boolean ok;
 #endif
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
         Pnode->v.fl |= VISITED;
 #endif
         Pnode = isolated(Pnode);
@@ -1593,7 +1593,7 @@ psk handleWhitespace(psk Pnode)
     ppsk prevpwhitespacenode = NULL;
     for(;;)
         {
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
         if(is_op(*pwhitespacenode))
             (*pwhitespacenode)->v.fl |= VISITED;
 #endif
@@ -1605,7 +1605,7 @@ psk handleWhitespace(psk Pnode)
            )
             {
             *pwhitespacenode = rightbranch(whitespacenode);
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
             if(is_op(*pwhitespacenode))
                 (*pwhitespacenode)->v.fl |= VISITED;
 #endif
@@ -1614,7 +1614,7 @@ psk handleWhitespace(psk Pnode)
             {
             prevpwhitespacenode = pwhitespacenode;
             pwhitespacenode = &(whitespacenode->RIGHT);
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
             if(is_op(*pwhitespacenode))
                 (*pwhitespacenode)->v.fl |= VISITED;
 #endif
@@ -1640,7 +1640,7 @@ psk handleWhitespace(psk Pnode)
     whitespacenode = Pnode;
     while(Op(whitespacenode) == WHITE)
         {
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
         whitespacenode->v.fl |= VISITED;
 #endif
         next = whitespacenode->RIGHT;
@@ -1661,12 +1661,12 @@ psk handleComma(psk Pnode)
     psk commanode = Pnode;
     psk next;
     ppsk pcommanode;
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
     Pnode->v.fl |= VISITED;
 #endif
     while(Op(commanode->RIGHT) == COMMA && !(commanode->RIGHT->v.fl & READY))
         {
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
         commanode->v.fl |= VISITED;
 #endif
         commanode->LEFT = eval(commanode->LEFT);
@@ -1682,7 +1682,7 @@ psk handleComma(psk Pnode)
     commanode = Pnode;
     while(Op(commanode) == COMMA)
         {
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
         commanode->v.fl |= VISITED;
 #endif
         next = commanode->RIGHT;

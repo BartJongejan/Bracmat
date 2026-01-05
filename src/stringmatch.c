@@ -171,7 +171,7 @@ char stringmatch
     int ci;
     psk name = NULL;
     assert(sizeof(s) == 4);
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
     if(is_op(pat))
         pat->v.fl |= VISITED;
 #endif

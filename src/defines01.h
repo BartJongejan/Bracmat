@@ -52,7 +52,7 @@ little bit slower, not faster.
                        with an affixed pair of curly brackets {} when
                        the program is lst$ed*/
 #else
-#define SHOWWHETHERNEVERVISISTED 0
+#define SHOWWHETHERNEVERVISITED 0
 #endif
 
 #define EXPAND 0

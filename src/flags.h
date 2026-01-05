@@ -143,7 +143,7 @@ Objects (nodes with = ('EQUALS') have refcounters that are at least word-size.
 #define QNUL                (1 << (SHL+3))
 #define QFRACTION           (1 << (SHL+4))
 #define QDOUBLE             (1 << (SHL+5)) /* if atom */
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
 #define VISITED             (1 << (SHL+5)) /* if operator node */
 #endif
 #define LATEBIND            (1 << (SHL+6))

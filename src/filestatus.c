@@ -913,7 +913,7 @@ int output(ppsk PPnode, void(*how)(psk k))
         wide = search_opt(rrightnode, WYD);
         if(wide)
             LineLength = WIDELINELENGTH;
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
         vis = search_opt(rrightnode, VIS);
 #endif
         hum = !search_opt(rrightnode, LIN);
@@ -937,7 +937,7 @@ int output(ppsk PPnode, void(*how)(psk k))
                 wipe(*PPnode);
                 *PPnode = ret;
                 global_fpo = saveFpo;
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
                 vis = FALSE;
 #endif
                 return TRUE;
@@ -975,7 +975,7 @@ int output(ppsk PPnode, void(*how)(psk k))
                 errorprintf("cannot open %s\n", POBJ(rrightnode->LEFT));
                 global_fpo = saveFpo;
                 hum = 1;
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
                 vis = FALSE;
 #endif
                 return FALSE;
@@ -990,7 +990,7 @@ int output(ppsk PPnode, void(*how)(psk k))
                 }
 #else
             hum = 1;
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
             vis = FALSE;
 #endif
             return FALSE;
@@ -1014,7 +1014,7 @@ int output(ppsk PPnode, void(*how)(psk k))
         }
     hum = 1;
     listWithName = 1;
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
     vis = FALSE;
 #endif
     return TRUE;

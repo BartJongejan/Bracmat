@@ -186,7 +186,7 @@ static int printflags(psk Root)
 #define LHS 1
 #define RHS 2
 
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
 Boolean vis = FALSE;
 #define SM(Root) if(vis && !(Root->v.fl & VISITED)) { (*process)('{'); (*process)('}'); }
 #else

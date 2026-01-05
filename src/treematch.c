@@ -177,7 +177,7 @@ char match(int ind, psk sub, psk pat, psk cutoff, LONG pposition, psk expr, unsi
     psk loc;
     ULONG Flgs;
     psk name = NULL;
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
     if(is_op(pat))
         pat->v.fl |= VISITED;
 #endif

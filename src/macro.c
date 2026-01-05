@@ -24,7 +24,7 @@ psk evalmacro(psk Pnode)
             {
             if(atomtest(Pnode->LEFT) != 0)
                 {
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
                 Pnode->v.fl |= VISITED;
 #endif
                 psk left = evalmacro(Pnode->LEFT);
@@ -64,7 +64,7 @@ psk evalmacro(psk Pnode)
                 }
             else if(Op(Pnode) == FUN)
                 {
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
                 Pnode->v.fl |= VISITED;
 #endif
                 if(Op(Pnode->RIGHT) == UNDERSCORE)
@@ -75,7 +75,7 @@ psk evalmacro(psk Pnode)
                     psk first = NULL;
                     psk* last;
                     Flgs = Pnode->v.fl & (UNOPS | SUCCESS);
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
                     Pnode->RIGHT->v.fl |= VISITED;
 #endif
                     h = subtreecopy(Pnode->RIGHT);
@@ -120,7 +120,7 @@ psk evalmacro(psk Pnode)
                     psk first = NULL;
                     psk* last;
                     Flgs = Pnode->v.fl & UNOPS;
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
                     Pnode->RIGHT->v.fl |= VISITED;
 #endif
                     h = subtreecopy(Pnode->RIGHT);
@@ -148,7 +148,7 @@ psk evalmacro(psk Pnode)
                     int newval = 0;
                     psk tmp = same_as_w(Pnode->RIGHT);
                     psk h;
-#if SHOWWHETHERNEVERVISISTED
+#if SHOWWHETHERNEVERVISITED
                     if(is_op(Pnode->RIGHT))
                         Pnode->RIGHT->v.fl |= VISITED;
 #endif
