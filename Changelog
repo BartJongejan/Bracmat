@@ -1,3 +1,7 @@
+3 February 2026
+Result from calling a method of a built-in object (hash, calculation a.k.a. UFP) can now be negated with ~ flag
+This is especially useful with the `find' method of a hash object.
+
 5 January 2026
 fseek, ftell -> FSEEK, FTELL (Windows: > 2 GB file size).
 More efficient reading of large XML file with TRM option: fread instead of fgetc.

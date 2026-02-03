@@ -8128,6 +8128,22 @@ string line 2\"
           ( @(aap:<>AAPJES)
           | Out$"Error in negated case-insensitive string matching"
           )
+          ( new$hash:?J
+          & (   (J..find)$a
+              &   Out
+                $ "Hash find succeeds while the sought for element isn't there."
+            |   ~((J..find)$a)
+              & (J..insert)$(a.b)
+              & (   (J..find)$a
+                  & (   ~((J..find)$a)
+                      & Out$"Negation flag ~ ignored on successful find."
+                    | 
+                    )
+                | Out$"Hash find must succeed but doesn't."
+                )
+            | Out$"Hash find fails, but result is not negated by ~ flag."
+            )
+          )
       &   out
         $ ( str
           $ ( "Done. "
