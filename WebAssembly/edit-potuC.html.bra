@@ -1,6 +1,6 @@
-{editbracmatjs.bra
+{edit-potuC.html.bra
 
-Perform the edits in bracmat html, as described in emscripten-bracmat-readme.txt}
+Perform the edits in bracmat html}
 
 X=
   ( correctPadding
@@ -15,10 +15,15 @@ X=
       & out$(removed !stl)
       & str$(!a !z)
   )
-  ( replaceStyle =.
-  @(!arg:?A "<style>" ? "</style>" ?Z)
-  & str$(!A "<style>
-body {
+  ( replaceStyle
+  =   
+    .   @(!arg:?A "<style>" ? "</style>" ?Z)
+      &   str
+        $ ( !A
+              toML
+            $ ( style
+              .   
+                , "body {
 font-family: arial;
 margin: 0;
 padding: 10px;
@@ -38,9 +43,10 @@ background-color: white;
 color: black;
 font-family: 'Lucida Console', Monaco, monospace;
 outline: ridge;
-}
-</style>
-" !Z)
+}"
+              )
+            !Z
+          )
   )
   ( removeElement
   =   html elstart elend a z
@@ -53,11 +59,12 @@ outline: ridge;
   =   html a z
     .   !arg:?html
       & @(!html:?a "<title>" ? "</title>" ?z)
-      & str$(!a "<title>Bracmat</title>" !z)
+      & str$(!a toML$(title.,Bracmat) !z)
   )
   ( removeSVG
   =   a z
-    . @(!arg:?a "<svg" ? "</svg>" ?z)&str$(!a !z)
+    .   @(!arg:?a "<svg" ? "</svg>" ?z)
+      & str$(!a !z)
   )
   ( includeJS
   =   a z html js
@@ -67,17 +74,26 @@ outline: ridge;
              "<script async type=\"text/javascript\" src=\"potuC.js\"></script>"
              ?z
          )
-      & str$(!a "<script async type=\"text/javascript\">" !js "</script>" !z)
+      &   str
+        $ ( !a
+              toML
+            $ ( script
+              .   (async.) (type.text/javascript)
+                , !js
+              )
+            !z
+          )
   )
   ( insertBeforeTextArea
   =   a z
     .   !arg:(?html.?toInsert)
       & @(!html:?a "<textarea" ?z)
-      & str$(!a !toInsert "<textarea" !z)
+      & str$(!a toML$!toInsert "<textarea" !z)
   )
   ( doit
   =   
-    .     ( "The text in the file 'safereadme', as constructed by the next
+    .     !arg:?WASM
+        & ( "The text in the file 'safereadme', as constructed by the next
              lines, can be cut and pasted directly into this script."
           |     get$("emscripten-bracmat-readme.txt",STR,TXT)
               : ?readme
@@ -91,18 +107,22 @@ outline: ridge;
         & out$"potuC.js read"
         & (its.correctPadding)$!html:?html
         & out$"corrected padding"
-        & (its.removeStyle)$(!html."#emscripten_logo"):?html
+        &   (its.removeStyle)$(!html."#emscripten_logo")
+          : ?html
         & (its.removeStyle)$(!html.".spinner"):?html
         &   (its.removeStyle)$(!html."@-webkit-keyframes rotation")
           : ?html
         &   (its.removeStyle)$(!html."@-moz-keyframes rotation")
           : ?html
-        & (its.removeStyle)$(!html."@-o-keyframes rotation"):?html
-        & (its.removeStyle)$(!html."@keyframes rotation"):?html
+        &   (its.removeStyle)$(!html."@-o-keyframes rotation")
+          : ?html
+        &   (its.removeStyle)$(!html."@keyframes rotation")
+          : ?html
         & (its.removeStyle)$(!html."#status"):?html
         & (its.removeStyle)$(!html."#progress"):?html
         & (its.removeStyle)$(!html."#controls"):?html
-        & (its.removeStyle)$(!html."canvas.emscripten"):?html
+        &   (its.removeStyle)$(!html."canvas.emscripten")
+          : ?html
         & (its.replaceStyle)$!html:?html
         &     (its.removeElement)
             $ (!html."<a href=\"http://emscripten.org\">"."</a>")
@@ -113,12 +133,17 @@ outline: ridge;
         &     (its.removeElement)
             $ (!html."<div class=\"emscripten\" id=\"status\">"."</div>")
           : ?html
-        &   (its.removeElement)$(!html."<div class=\"emscripten\">"."</div>")
+        &     (its.removeElement)
+            $ (!html."<div class=\"emscripten\">"."</div>")
           : ?html
-        & ( (its.removeElement)$(!html."<span>"."</span>"):?html
-          & (its.removeElement)$(!html."<span>"."</span>"):?html
-          & (its.removeElement)$(!html."<span>"."</span>"):?html
-          &   (its.removeElement)$(!html."<span id='controls'>"."</span>")
+        & (   (its.removeElement)$(!html."<span>"."</span>")
+            : ?html
+          &   (its.removeElement)$(!html."<span>"."</span>")
+            : ?html
+          &   (its.removeElement)$(!html."<span>"."</span>")
+            : ?html
+          &     (its.removeElement)
+              $ (!html."<span id='controls'>"."</span>")
             : ?html
           )
         &     (its.removeElement)
@@ -129,38 +154,58 @@ outline: ridge;
             & out$"removed SVG"
           | 
           )
-        &   "<h1>Bracmat ... in your browser ...</h1>
-           <p>Write Bracmat expressions in the upper text box.
-           After pressing the <strong>evaluate</strong> button,
-           the result of the evaluation of your expressions
-           will eventually appear in the lower text box.<br />
-           Bracmat is a programming language for symbolic computation with
-           an exquisite programming construct for pattern matching.
-           Read the 
-           <a href=\"http://jongejan.dk/bracmat.html\">documentation</a>, and
-           see many more examples on
-           <a href=\"http://rosettacode.org/wiki/Category:Bracmat\">rosettacode.org</a>.
-           <br />
-           For this demo version the C source code in which Bracmat is
-           written, is translated to WebAssembly (or JavaScript, if the emcc
-           option <strong>-sWASM=0</strong> was present), so the demo runs within the confines
-           of your browser, with all the limitations that follow, such as the
-           inability to read and write files.
-           <br />
-           Full, more than ten times faster versions of Bracmat compiled and
-           linked for Windows, macOS and Linux, together with the C source
-           code, can be found on 
-           <a href=\"https://github.com/BartJongejan/Bracmat\">GitHub</a>.<br>
-           </p>"
+        & ( what
+          =   !WASM:0&JavaScript
+            | "Web Assembly"
+          )
+        &     (h3.,str$(!v ", transpiled to " !what))
+              ( p
+              .   
+                ,   "Write Bracmat expressions in the upper text box. After pressing the "
+                    (strong.,evaluate)
+                    " button, the result of the evaluation of your expressions  will eventually appear in the lower text box."
+                    (br.,)
+                    "Bracmat is a programming language for symbolic computation with an exquisite programming construct for pattern matching. Read the "
+                    ( a
+                    .   ( href
+                        . "https://github.com/BartJongejan/Bracmat/releases/latest/download/bracmat.html"
+                        )
+                      , documentation
+                    )
+                    ", and see many more examples on "
+                    ( a
+                    .   (href."http://rosettacode.org/wiki/Category:Bracmat")
+                      , "rosettacode.org"
+                    )
+                    "."
+                    (br.,)
+                    "For this demo version, the C source code in which Bracmat is written is translated to "
+                    !what
+                    ". The demo runs within the confines of your browser, with all the limitations that follow, such as the inability to read and write files."
+                    (br.,)
+                    "Full, more than ten times faster versions of Bracmat compiled and linked for Windows, macOS and Linux, together with the C source code, can be found on "
+                    ( a
+                    .   (href."https://github.com/BartJongejan/Bracmat")
+                      , GitHub
+                    )
+                    "."
+                    (br.,)
+              )
           : ?introduction
-        & (its.insertBeforeTextArea)$(!html.!introduction):?html
+        &   (its.insertBeforeTextArea)$(!html.!introduction)
+          : ?html
         & out$"inserted intro"
-        &   "
-<textarea class=\"emscripten\" id=\"input\" value=\"\" cols=\"80\" rows=\"20\">({Dinesman's multiple-dwelling problem. See 
+        &   ( textarea
+            .     (class.emscripten)
+                  (id.input)
+                  (value.)
+                  (cols.80)
+                  (rows.20)
+              , "({Dinesman's multiple-dwelling problem. See 
 http://rosettacode.org/wiki/Dinesman's_multiple-dwelling_problem#Bracmat}
     
     Baker Cooper Fletcher Miller Smith:?people
-  &amp; ( constraints
+  & ( constraints
     =   
       .   !arg
         : ~(? Baker)
@@ -170,30 +215,35 @@ http://rosettacode.org/wiki/Dinesman's_multiple-dwelling_problem#Bracmat}
         : ~(? Smith Fletcher ?|? Fletcher Smith ?)
         : ~(? Cooper Fletcher ?|? Fletcher Cooper ?)
     )
-  &amp; ( solution
+  & ( solution
     =   floors persons A Z person
       .   !arg:(?floors.?persons)
-        &amp; (   !persons:
-            &amp; constraints$!floors
-            &amp; out$(\"Inhabitants, from bottom to top:\" !floors)
-            &amp; ~     { The ~ always fails on evaluation. Here, 
-failure forces Bracmat to backtrack and find all solutions, not just the
- first one. }
+        & (   !persons:
+            & constraints$!floors
+            & out$(\"Inhabitants, from bottom to top:\" !floors)
+            & ~     { The ~ always fails on evaluation. Here, failure forces Bracmat
+                      to backtrack and find all solutions, not just the first one. }                      
           |   !persons
             :   ?A
                 %?`person
-                (?Z&amp;solution$(!floors !person.!A !Z))
+                (?Z&solution$(!floors !person.!A !Z))
           )
     )
-  &amp; solution$(.!people)
-|                   { After outputting all solutions, the lhs of the | 
-operator fails. The rhs of the | operator, here an empty string, is the 
-final result. }
-);</textarea>"
+  & solution$(.!people)
+|                   { After outputting all solutions, the lhs of the | operator fails.
+                      The rhs of the | operator, here an empty string, is the final result. }
+);"
+            )
           : ?inputField
-        &   "<input value=\"evaluate\" onclick=\"takeinput()\" type=\"button\">"
+        &   ( input
+            .     (value.evaluate)
+                  (onclick."takeinput()")
+                  (type.button)
+              , 
+            )
           : ?submitButton
-        &   (its.insertBeforeTextArea)$(!html.!inputField !submitButton)
+        &     (its.insertBeforeTextArea)
+            $ (!html.!inputField !submitButton)
           : ?html
         & out$"inserted input field and submit button"
         & put$(!js,"potuC.js",TXT,NEW)
@@ -201,9 +251,10 @@ final result. }
         & out$"found body close tag"
         &     str
             $ ( !a
-                "
-    <script>
-    function execute(text) {
+                  toML
+                $ ( script
+                  .   
+                    , "function execute(text) {
       var out;
       var cstyle_ptr = stringToNewUTF8(text);
       Module['print'](\"{?} \"+text+\"\\n{!} \");
@@ -214,39 +265,51 @@ final result. }
     execute(text);
     }
 //    _startProc();
-//    execute(\"4:?a;!a^2+1;\");
-    </script>
- </body>"
+//    execute(\"4:?a;!a^2+1;\");"
+                  )
+                "</body>"
                 !z
               )
           : ?html
         & (its.includeJS)$(!html.!js):?html
         & (its.replaceTitle)$!html:?html
         & out$"all replacements done"
-        & put$(!html,"bracmatJS.html",TXT,NEW)
+        &   put
+          $ ( !html
+            ,   !WASM:1&"bracmatWASM.html"
+              | "bracmatJS.html"
+            , TXT
+            , NEW
+            )
         & out$"edit succeeded"
       | out$"something went wrong"
   )
-  (new=.~|(its.doit)$);
+  ( new
+  =   
+    .   ~
+      |   (arg$|0):?WASM
+        & (its.doit)$!WASM
+  );
 
 r=
-  get'("editbracmatjs.bra",TXT)
-& rmv$(str$(editbracmatjs ".bak"))
-& ren$("editbracmatjs.bra".str$(editbracmatjs ".bak"))
+  get'("edit-potuC.html.bra",TXT)
+& rmv$"edit-potuC.html.bak"
+& ren$("edit-potuC.html.bra"."edit-potuC.html.bak")
 &   put
-  $ ( "{editbracmatjs.bra
+  $ ( "{edit-potuC.html.bra
 
-Perform the edits in bracmat html, as described in emscripten-bracmat-readme.txt}
+Perform the edits in bracmat html}
 
 "
-    , "editbracmatjs.bra"
+    , "edit-potuC.html.bra"
     , NEW
     , BIN
     )
-& lst'(X,"editbracmatjs.bra",APP)
-& put'(\n,"editbracmatjs.bra",APP,BIN)
-& lst'(r,"editbracmatjs.bra",APP)
-& put$(str$("\nnew'" X ";\n"),"editbracmatjs.bra",APP,BIN)
+& lst'(X,"edit-potuC.html.bra",APP,BIN)
+& put'(\n,"edit-potuC.html.bra",APP,BIN)
+& lst'(r,"edit-potuC.html.bra",APP,BIN)
+&   put
+  $ (str$("\nnew'" X ";\n"),"edit-potuC.html.bra",APP,BIN)
 & ;
 
 new'X;
