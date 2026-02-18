@@ -5,9 +5,17 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <assert.h>
+#ifdef __GNUC__
+/* On Linux, install readline library with
+sudo apt-get install libreadline-dev
+*/
+#include <stdio.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+#endif
 
 #if _BRACMATEMBEDDED
-
 static int(*WinIn)(void) = NULL;
 static void(*WinOut)(int c) = NULL;
 static void(*WinFlush)(void) = NULL;
@@ -82,6 +90,31 @@ int mygetc(FILE* fpi)
             }
         return *out++;
         }
+#else
+#ifdef __GNUC__
+    if(fpi == stdin)
+        {
+        static unsigned char* inputbuffer = 0;
+        static unsigned char* out = 0;
+        if(!out)
+            {
+            char * line = readline("");
+            inputbuffer = (unsigned char*)line;
+            if(line && *line)
+                add_history(line);
+            out = inputbuffer;
+            }
+        else if(!*out)
+            {
+            assert(inputbuffer != 0);
+            free(inputbuffer);
+            inputbuffer = 0;
+            out = 0;
+            return '\n';
+            }
+        return *out++;
+        }
+#endif
 #endif
     return fgetc(fpi);
     }
