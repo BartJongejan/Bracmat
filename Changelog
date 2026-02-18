@@ -1,3 +1,11 @@
+18 February 2026
+The Linux and Apple versions are now per default linked with the readline library.
+The readline library makes it possible to use the backspace and arrow keys in the way one
+would expect. Also, `arrow up/down' scrolls through earlier input lines.
+The new behaviour mimicks that under Windows.
+(This is the first time Bracmat includes a non-standard C-library!
+ Luckily, this is restricted to Linux and Apple.)
+
 3 February 2026
 Result from calling a method of a built-in object (hash, calculation a.k.a. UFP) can now be negated with ~ flag
 This is especially useful with the `find' method of a hash object.
