@@ -41,22 +41,36 @@ SRC = binding.c \
       writeerr.c \
       xml.c
 
-potu: $(SRC) 
-	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -o $(EXECUTABLE) $(SRC) -lm
+CC = gcc 
+CFLAGS = -std=c99 -pedantic -Wall -O2 
+UNAME_S := $(shell uname -s) 
+ifeq ($(UNAME_S),Linux)
+    STATIC = -static 
+else 
+#    ifeq ($(UNAME_S),Darwin) 
+    STATIC =
+#    endif 
+endif
 
+# To use GNU readline() on Linux, you need to install the readline-dev library
+# sudo apt-get install libreadline-dev
+# sudo yum install readline-devel
+potu: $(SRC) 
+	$(CC) $(CFLAGS)           -DNDEBUG -o $(EXECUTABLE) $(SRC) -lm -DREADLINE -lreadline
+#	gcc -std=c99 -pedantic -Wall -O2 $(STATIC) -DNDEBUG -o $(EXECUTABLE) $(SRC) -lm
 
 potu1: potu.c 
-	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DSINGLESOURCE -o $(EXECUTABLE)1 potu.c -lm
+	$(CC) $(CFLAGS) $(STATIC) -DNDEBUG -DSINGLESOURCE -o $(EXECUTABLE)1 potu.c -lm
 
 potusafe: $(SRC)
-	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DNO_C_INTERFACE -DNO_FILE_RENAME -DNO_FILE_REMOVE -DNO_SYSTEM_CALL -DNO_LOW_LEVEL_FILE_HANDLING -o $(EXECUTABLE)safe $(SRC) -lm
+	$(CC) $(CFLAGS) $(STATIC) -DNDEBUG -DNO_C_INTERFACE -DNO_FILE_RENAME -DNO_FILE_REMOVE -DNO_SYSTEM_CALL -DNO_LOW_LEVEL_FILE_HANDLING -o $(EXECUTABLE)safe $(SRC) -lm
 
 potu1safe: potu.c
-	gcc -std=c99 -pedantic -Wall -O2 -static -DNDEBUG -DNO_C_INTERFACE -DNO_FILE_RENAME -DNO_FILE_REMOVE -DNO_SYSTEM_CALL -DNO_LOW_LEVEL_FILE_HANDLING -DSINGLESOURCE -o $(EXECUTABLE)1safe potu.c -lm
+	$(CC) $(CFLAGS) $(STATIC) -DNDEBUG -DNO_C_INTERFACE -DNO_FILE_RENAME -DNO_FILE_REMOVE -DNO_SYSTEM_CALL -DNO_LOW_LEVEL_FILE_HANDLING -DSINGLESOURCE -o $(EXECUTABLE)1safe potu.c -lm
 
 profiling:
-	gcc -std=c99 -pedantic -Wall -O2 -static -c -pg -DNDEBUG -DSINGLESOURCE potu.c -lm
-	gcc -std=c99 -pedantic -Wall -O2 -static -pg potu.o -lm
+	$(CC) $(CFLAGS) $(STATIC) -c -pg -DNDEBUG -DSINGLESOURCE potu.c -lm
+	$(CC) $(CFLAGS) $(STATIC) -pg potu.o -lm
 	cp ../valid.bra .
 	cp ../pr-xml-utf-8.xml .
 	./a.out "get'\"valid.bra\";!r" 
@@ -68,15 +82,17 @@ coverage:
 	cp ../valid.bra .
 	cp ../pr-xml-utf-8.xml .
 	./a.out "get'\"../valid.bra\";!r"
-	gcov potu.c
+	gcov a-potu.c
 	rm a.out
 
-all: potu potu1 potusafe potu1safe profiling coverage
-
 clean:
-	rm $(EXECUTABLE)
-	rm $(EXECUTABLE)1
-	rm $(EXECUTABLE)safe
-	rm $(EXECUTABLE)1safe
-	rm *.gcov
-	rm *.o
+	rm -f $(EXECUTABLE)
+	rm -f $(EXECUTABLE)1
+	rm -f $(EXECUTABLE)safe
+	rm -f $(EXECUTABLE)1safe
+	rm -f *.gcov
+	rm -f *.gcda
+	rm -f *.gcno
+	rm -f *.o
+
+all: clean potu potu1 potusafe potu1safe profiling coverage
