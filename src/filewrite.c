@@ -6,9 +6,10 @@
 #include <stdarg.h>
 #include <string.h>
 #include <assert.h>
-#ifdef __GNUC__
+#if defined __GNUC__ && defined READLINE
 /* On Linux, install readline library with
 sudo apt-get install libreadline-dev
+link with -DREADLINE -lreadline
 */
 #include <stdio.h>
 #include <readline/readline.h>
@@ -91,7 +92,7 @@ int mygetc(FILE* fpi)
         return *out++;
         }
 #else
-#ifdef __GNUC__
+#if defined __GNUC__ && defined READLINE
     if(fpi == stdin)
         {
         static unsigned char* inputbuffer = 0;
