@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "3 February 2026"
-#define VERSION "6.32.0"
-#define BUILD "322"
+#define DATUM "18 February 2026"
+#define VERSION "6.32.1"
+#define BUILD "323"
 /*
 COMPILATION
 -----------
@@ -823,7 +823,7 @@ int mainLoop(int argc, char* argv[])
                 "OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED\\n"
                 "TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY\\n"
                 "YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER\\n"
-                "PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BONE ADVISED OF THE\\n"
+                "PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE\\n"
                 "POSSIBILITY OF SUCH DAMAGES.\\n\")&"
                 "out$!v&"
                 "out$\"Copyright (C) 2002 Bart Jongejan\\n"
