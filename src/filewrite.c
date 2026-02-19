@@ -99,13 +99,17 @@ int mygetc(FILE* fpi)
         static unsigned char* out = 0;
         if(!out)
             {
-            char * line = readline("");
+            char* line = readline("");
+            if(line == 0)
+                {
+                return '\n';
+                }
             inputbuffer = (unsigned char*)line;
             if(line && *line)
                 add_history(line);
             out = inputbuffer;
             }
-        else if(!*out)
+        if(!*out)
             {
             assert(inputbuffer != 0);
             free(inputbuffer);
