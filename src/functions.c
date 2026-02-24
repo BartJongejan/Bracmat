@@ -30,6 +30,36 @@
 #include <assert.h>
 #include <time.h>
 
+#ifdef HAVE_LIBCURL
+#include <curl/curl.h>
+#include <stdlib.h>
+typedef struct { char* data; size_t size; } urlBuf;
+static size_t urlWrite(void* ptr, size_t size, size_t nmemb, void* ud) {
+    size_t n = size * nmemb;
+    urlBuf* b = (urlBuf*)ud;
+    char* p = realloc(b->data, b->size + n + 1);
+    if(!p) return 0;
+    b->data = p;
+    memcpy(b->data + b->size, ptr, n);
+    b->size += n;
+    b->data[b->size] = '\0';
+    return n;
+}
+static char* fetchUrl(const char* url) {
+    CURL* c = curl_easy_init();
+    if(!c) return NULL;
+    urlBuf b = {NULL, 0};
+    curl_easy_setopt(c, CURLOPT_URL, url);
+    curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, urlWrite);
+    curl_easy_setopt(c, CURLOPT_WRITEDATA, &b);
+    curl_easy_setopt(c, CURLOPT_FOLLOWLOCATION, 1L);
+    CURLcode res = curl_easy_perform(c);
+    curl_easy_cleanup(c);
+    if(res != CURLE_OK) { free(b.data); return NULL; }
+    return b.data;
+}
+#endif
+
 #define LONGCASE
 
 #ifdef LONGCASE
@@ -1028,7 +1058,7 @@ function_return_type functions(psk Pnode)
         CASE(UTF)
             {
             /*
-            @(abcædef:? (%@>"~" ?:?a & utf$!a) ?)
+            @(abcï¿½def:? (%@>"~" ?:?a & utf$!a) ?)
             @(str$(abc chu$200 def):? (%@>"~" ?:?a & utf$!a) ?)
             */
             if(is_op(rnode))
@@ -1712,6 +1742,25 @@ function_return_type functions(psk Pnode)
                     }
                 wipe(addr[1]);
                 }
+#ifdef HAVE_LIBCURL
+            else if(   !is_op(rlnode)
+                    && (   !strncmp((char*)POBJ(rlnode), "http://",  7)
+                        || !strncmp((char*)POBJ(rlnode), "https://", 8)))
+                {
+                char* buf = fetchUrl((char*)POBJ(rlnode));
+                if(!buf)
+                    return functionFail(Pnode);
+                source = (unsigned char*)buf;
+                for(;;)
+                    {
+                    Pnode = input(NULL, Pnode, intVal.i, &err, &GoOn);
+                    if(!GoOn || err)
+                        break;
+                    Pnode = eval(Pnode);
+                    }
+                free(buf);
+                }
+#endif
             else
                 {
                 if(rlnode->u.obj && strcmp((char*)POBJ(rlnode), "stdin"))

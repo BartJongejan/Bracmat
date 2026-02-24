@@ -59,7 +59,10 @@ potu: $(SRC)
 	$(CC) $(CFLAGS)           -DNDEBUG -o $(EXECUTABLE) $(SRC) -lm -DREADLINE -lreadline
 #	gcc -std=c99 -pedantic -Wall -O2 $(STATIC) -DNDEBUG -o $(EXECUTABLE) $(SRC) -lm
 
-potu1: potu.c 
+potuurl: $(SRC)
+	$(CC) $(CFLAGS) -DNDEBUG -DHAVE_LIBCURL $(shell curl-config --cflags 2>/dev/null || echo -I/usr/include/x86_64-linux-gnu) -o $(EXECUTABLE)url $(SRC) -lm -DREADLINE -lreadline -lcurl
+
+potu1: potu.c
 	$(CC) $(CFLAGS) $(STATIC) -DNDEBUG -DSINGLESOURCE -o $(EXECUTABLE)1 potu.c -lm
 
 potusafe: $(SRC)
@@ -90,9 +93,10 @@ clean:
 	rm -f $(EXECUTABLE)1
 	rm -f $(EXECUTABLE)safe
 	rm -f $(EXECUTABLE)1safe
+	rm -f $(EXECUTABLE)url
 	rm -f *.gcov
 	rm -f *.gcda
 	rm -f *.gcno
 	rm -f *.o
 
-all: clean potu potu1 potusafe potu1safe profiling coverage
+all: clean potu potu1 potusafe potu1safe potuurl profiling coverage
