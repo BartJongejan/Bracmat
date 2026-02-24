@@ -295,10 +295,11 @@ int insert(psk name, psk pnode)
 #endif
             }
 #else
-        if(len < 4)
+        if(len < sizeof(struct vars) - offsetof(struct vars, u))
             newvar = (vars*)bmalloc(sizeof(vars));
         else
-            newvar = (vars*)bmalloc(sizeof(vars) - 3 + len);
+            newvar = (vars*)bmalloc((offsetof(struct vars, u) + 1) + len);
+
         if(*strng)
             {
 #if ICPY
