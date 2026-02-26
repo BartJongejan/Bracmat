@@ -324,6 +324,10 @@ blank " ", the comma "," and the full stop ".". (The interpunction symbols
 #include "json.h"
 #endif
 
+#ifdef HAVE_LIBCURL
+#include <curl/curl.h>
+#endif
+
 
 
 /*
@@ -921,10 +925,16 @@ int main(int argc, char* argv[])
 #endif
 
     errorStream = stderr;
+#ifdef HAVE_LIBCURL
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+#endif
     if(!startProc())
         return -1;
     ret = mainLoop(argc, argv);
     endProc();/* to get here, eg: {?} main=out$bye! */
+#ifdef HAVE_LIBCURL
+    curl_global_cleanup();
+#endif
 #if !defined NO_FOPEN
     if(targetPath)
         free(targetPath);
