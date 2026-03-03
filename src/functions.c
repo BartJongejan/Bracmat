@@ -356,7 +356,6 @@ function_return_type execFnc(psk Pnode)
                     {
                     if(Object.theMethod)
                         {
-
                         if(NOTHINGF(Pnode->v.fl))
                             {
                             if(Object.theMethod((struct typedObjectnode*)Object.object, &Pnode))
@@ -366,6 +365,9 @@ function_return_type execFnc(psk Pnode)
                                           new$hash:?H           |
                                         & (H..insert)$(XYZ.2) <-
                                 ****/
+                                lnode = Pnode;
+                                Pnode = subtreecopy(Pnode);
+                                wipe(lnode);
                                 return functionFail(Pnode);
                                 }
                             }

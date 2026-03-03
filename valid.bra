@@ -8144,6 +8144,17 @@ string line 2\"
             | Out$"Hash find fails, but result is not negated by ~ flag."
             )
           )
+          ( new$hash:?H
+          & (H..insert)$(77.)
+          & (   ~((H..find)$77)
+              & Out$"Negated Successful find must fail"
+            | 
+            )
+          & (   ~((H..find)$77)
+              & Out$"Negated Successful find must also fail the second time"
+            | 
+            )
+          )
       &   out
         $ ( str
           $ ( "Done. "

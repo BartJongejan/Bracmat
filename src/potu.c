@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "24 February 2026"
-#define VERSION "6.32.3"
-#define BUILD "325"
+#define DATUM "3 March 2026"
+#define VERSION "6.33.1"
+#define BUILD "326"
 /*
 COMPILATION
 -----------
@@ -322,10 +322,6 @@ blank " ", the comma "," and the full stop ".". (The interpunction symbols
 
 #if READJSON
 #include "json.h"
-#endif
-
-#ifdef HAVE_LIBCURL
-#include <curl/curl.h>
 #endif
 
 
@@ -925,16 +921,10 @@ int main(int argc, char* argv[])
 #endif
 
     errorStream = stderr;
-#ifdef HAVE_LIBCURL
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-#endif
     if(!startProc())
         return -1;
     ret = mainLoop(argc, argv);
     endProc();/* to get here, eg: {?} main=out$bye! */
-#ifdef HAVE_LIBCURL
-    curl_global_cleanup();
-#endif
 #if !defined NO_FOPEN
     if(targetPath)
         free(targetPath);

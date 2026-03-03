@@ -1,3 +1,12 @@
+3 March 2026
+Fixed an error that occurred every second time when negating the call to a built-in method (see 3 February 2026).
+
+24 Febryary 2026
+Added reading a page from the internet.
+This works for Linux and requires yet another non-standard library.
+In Ubuntu, `sudo apt install libcurl4-openssl-dev', then `make potuurl`
+
+
 18 February 2026
 The Linux and Apple versions are now per default linked with the readline library.
 The readline library makes it possible to use the backspace and arrow keys in the way one

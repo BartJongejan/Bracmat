@@ -55,6 +55,12 @@ endif
 # To use GNU readline() on Linux, you need to install the readline-dev library
 # sudo apt-get install libreadline-dev
 # sudo yum install readline-devel
+
+# To enable reading a web page, make sure to have libcurl for development
+#   sudo apt install libcurl4-openssl-dev      (Ubuntu)
+# Then:
+#   make potuurl
+
 potu: $(SRC) 
 	$(CC) $(CFLAGS)           -DNDEBUG -o $(EXECUTABLE) $(SRC) -lm -DREADLINE -lreadline
 #	gcc -std=c99 -pedantic -Wall -O2 $(STATIC) -DNDEBUG -o $(EXECUTABLE) $(SRC) -lm
