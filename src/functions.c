@@ -58,6 +58,22 @@ static char* fetchUrl(const char* url) {
     if(res != CURLE_OK) { free(b.data); return NULL; }
     return b.data;
 }
+static char* postUrl(const char* url, const char* body, struct curl_slist* headers) {
+    CURL* c = curl_easy_init();
+    if(!c) return NULL;
+    urlBuf b = {NULL, 0};
+    curl_easy_setopt(c, CURLOPT_URL, url);
+    curl_easy_setopt(c, CURLOPT_POSTFIELDS, body);
+    curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, urlWrite);
+    curl_easy_setopt(c, CURLOPT_WRITEDATA, &b);
+    curl_easy_setopt(c, CURLOPT_FOLLOWLOCATION, 1L);
+    if(headers)
+        curl_easy_setopt(c, CURLOPT_HTTPHEADER, headers);
+    CURLcode res = curl_easy_perform(c);
+    curl_easy_cleanup(c);
+    if(res != CURLE_OK) { free(b.data); return NULL; }
+    return b.data;
+}
 #endif
 
 #define LONGCASE
@@ -1803,6 +1819,81 @@ function_return_type functions(psk Pnode)
                     }
                 }
             return err ? functionFail(Pnode) : functionOk(Pnode);
+            }
+        CASE(PST) /* pst$(url.body) or pst$(url.body.(key.val,...)) - HTTP POST, returns response as string */
+            {
+#ifdef HAVE_LIBCURL
+            if(   !is_op(rnode)
+               || Op(rnode) != DOT
+               || is_op(rnode->LEFT)
+               || (   strncmp((char*)POBJ(rnode->LEFT), "http://",  7)
+                   && strncmp((char*)POBJ(rnode->LEFT), "https://", 8)))
+                return functionFail(Pnode);
+            const char* pst_url = (char*)POBJ(rnode->LEFT);
+            const char* pst_body;
+            psk pst_hdrs_node = NULL;
+            if(!is_op(rnode->RIGHT))
+                { /* pst$(url.body) */
+                pst_body = (char*)POBJ(rnode->RIGHT);
+                }
+            else if(   Op(rnode->RIGHT) == DOT
+                    && !is_op(rnode->RIGHT->LEFT))
+                { /* pst$(url.body.(key.val,...)) */
+                pst_body = (char*)POBJ(rnode->RIGHT->LEFT);
+                pst_hdrs_node = rnode->RIGHT->RIGHT;
+                }
+            else
+                return functionFail(Pnode);
+            struct curl_slist* hdrs = NULL;
+            if(pst_hdrs_node)
+                {
+                psk node = pst_hdrs_node;
+                for(;;)
+                    {
+                    psk pair = (is_op(node) && Op(node) == COMMA) ? node->LEFT : node;
+                    if(   !is_op(pair)
+                       || Op(pair) != DOT
+                       || is_op(pair->LEFT)
+                       || is_op(pair->RIGHT))
+                        {
+                        curl_slist_free_all(hdrs);
+                        return functionFail(Pnode);
+                        }
+                    const char* hk = (char*)POBJ(pair->LEFT);
+                    const char* hv = (char*)POBJ(pair->RIGHT);
+                    size_t hlen = strlen(hk) + 2 + strlen(hv) + 1;
+                    char* hstr = (char*)malloc(hlen);
+                    if(!hstr)
+                        {
+                        curl_slist_free_all(hdrs);
+                        return functionFail(Pnode);
+                        }
+                    sprintf(hstr, "%s: %s", hk, hv);
+                    struct curl_slist* new_hdrs = curl_slist_append(hdrs, hstr);
+                    free(hstr);
+                    if(!new_hdrs)
+                        {
+                        curl_slist_free_all(hdrs);
+                        return functionFail(Pnode);
+                        }
+                    hdrs = new_hdrs;
+                    if(is_op(node) && Op(node) == COMMA)
+                        node = node->RIGHT;
+                    else
+                        break;
+                    }
+                }
+            char* buf = postUrl(pst_url, pst_body, hdrs);
+            if(hdrs) curl_slist_free_all(hdrs);
+            if(!buf)
+                return functionFail(Pnode);
+            wipe(Pnode);
+            Pnode = scopy(buf);
+            free(buf);
+            return functionOk(Pnode);
+#else
+            return functionFail(Pnode);
+#endif
             }
         CASE(PUT) /* put$(file,mode,node) of put$node */
             {

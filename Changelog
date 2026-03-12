@@ -1,3 +1,8 @@
+12 March 2026
+Added pst$ for POSTing. Added variable HAVE-LIBCURL if HAVE_LIBCURL is #defined.
+So, support for HTTP requests can be tested with !HAVE-LIBCURL,
+which fails if there is no support and which returns HAVE-LIBCURL if there is.
+
 3 March 2026
 Fixed an error that occurred every second time when negating the call to a built-in method (see 3 February 2026).
 

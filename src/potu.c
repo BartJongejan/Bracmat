@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "3 March 2026"
-#define VERSION "6.33.1"
-#define BUILD "326"
+#define DATUM "12 March 2026"
+#define VERSION "6.34.0"
+#define BUILD "327"
 /*
 COMPILATION
 -----------
@@ -661,7 +661,9 @@ int startProc(
                                 "(sin=(.i*(-1/2*e^(i*!arg)+1/2*e^(-i*!arg)))),",
 
                                 "(cos=(.1/2*(e^(i*!arg)+e^(-i*!arg)))),",
-
+#ifdef HAVE_LIBCURL
+                                "(HAVE-LIBCURL=HAVE-LIBCURL),",
+#endif
                                 "(jsn=Q R O C T H I X Y.(Q=.!arg:(,?arg)&R$!arg|!arg:(.@?arg)&I$!arg|"
                                 "!arg:(0|(?.?)+?,)&O$!arg|!arg:(true|false|null)|!arg:/&(X$!arg|Y$("
                                 "!arg,20))|!arg)&(R=J S L.\333:?S&whl'(!arg:%?J ?arg&\254 Q$!J !S:?S)&"

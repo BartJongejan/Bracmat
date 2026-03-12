@@ -8155,6 +8155,76 @@ string line 2\"
             | 
             )
           )
+          (   !HAVE-LIBCURL:HAVE-LIBCURL
+            &   ( ~(pst$(not-a-url.body))
+                | Out$"pst$ must fail for non-URL argument"
+                )
+                ( ~(pst$not-a-dot-pair)
+                | Out$"pst$ must fail without dot-pair argument"
+                )
+                ( ~(pst$(not-a-url.body.Accept.text/plain))
+                | Out$"pst$ must fail for non-URL argument with headers"
+                )
+                ( ~( pst
+                   $ ( http:/example
+                     . invalid
+                     . body
+                     . not-a-pair,other
+                     )
+                   )
+                |   Out
+                  $ "pst$ must fail when header list element is not a dot pair"
+                )
+                (       pst
+                      $ ( "https://postman-echo.com/post"
+                        .   jsn
+                          $ ((text.."Das ist ein Test"),)
+                        .   (Content-Type.application/json)
+                          , (Accept.application/json)
+                        )
+                    : ?json
+                  & get$(!json,MEM,JSN):?json
+                  &   !json
+                    : (   (args.0,)
+                        + ( data
+                          . (text.."Das ist ein Test"),
+                          )
+                        + (files.0,)
+                        + (form.0,)
+                        + ( headers
+                          .     (accept..application/json)
+                              + (accept-encoding.."gzip, br")
+                              + (content-length..27)
+                              + (content-type..application/json)
+                              + (host.."postman-echo.com")
+                              + (x-forwarded-proto..https)
+                            , 
+                          )
+                        + ( json
+                          . (text.."Das ist ein Test"),
+                          )
+                        + (url.."https://postman-echo.com/post")
+                      , 
+                      )
+                | Out$"pst$ does not work."
+                )
+                (     get$("https://info.cern.ch/",HT ML)
+                    : ?html
+                  &   nestML$!html
+                    :   ?
+                        ( html
+                        .   
+                          ,   ?
+                              (head.,)
+                              ?
+                              (body.,?)
+                              ?
+                        )
+                        ?
+                | Out$"Cannot get URL https://info.cern.ch/"
+                )
+          | 
+          )
       &   out
         $ ( str
           $ ( "Done. "

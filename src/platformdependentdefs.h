@@ -351,6 +351,7 @@ typedef struct
 #define New O('n','e','w')
 #define ONE O('1', 0 , 0 )
 #define PI  O('p','i', 0 )
+#define PST O('p','s','t') /* HTTP POST */
 #define PUT O('p','u','t')
 #if 0
 #define PRV O('?', 0 , 0 )
