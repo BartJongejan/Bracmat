@@ -1,3 +1,11 @@
+14 April 2026
+Moved download from the internet away from get$ to a new built-in function wgt$.
+The wgt$ function handles binary data by escaping zero-bytes. If escaping is needed,
+the escape character is the first byte of the escaped string. The escape character
+is the byte value with the lowest number of occurrences in the data, so the increase of
+data size is limited to 1/255 or less. When writing escaped data to file, adding 
+BLB ("blob") to the list of put$ parameters ensures that the escape process is reversed.
+
 12 March 2026
 Added pst$ for POSTing. Added variable HAVE-LIBCURL if HAVE_LIBCURL is #defined.
 So, support for HTTP requests can be tested with !HAVE-LIBCURL,

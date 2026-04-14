@@ -898,18 +898,86 @@ static int flush(void)
 #endif
     }
 
+//#ifdef HAVE_LIBCURL
+static void writeblob(FILE* fp, psk node)
+    {
+    unsigned char* t = (unsigned char*)POBJ(node);
+    unsigned char escape = *t++;
+    for(; *t;)
+        {
+        if(*t == escape)
+            {
+            if(*++t == escape)
+                fputc(escape, fp);
+            else
+                fputc('\0', fp);
+            }
+        else
+            fputc(*t, fp);
+        ++t;
+        }
+    }
+//#endif
+
 int output(ppsk PPnode, void(*how)(psk k))
     {
     FILE* saveFpo;
     psk rightnode, rlnode, rrightnode, rrrightnode;
     static LONG opts[] =
-        { APP,BIN,CON,EXT,MEM,LIN,NEW,RAW,TXT,VAP,VIS,WYD,0L };
+        { APP,BIN,
+//#ifdef HAVE_LIBCURL
+        BLB,
+//#endif
+        CON,EXT,MEM,LIN,NEW,RAW,TXT,VAP,VIS,WYD,0L };
     if(Op(rightnode = (*PPnode)->RIGHT) == COMMA)
         {
         int wide;
         saveFpo = global_fpo;
         rlnode = rightnode->LEFT;
         rrightnode = rightnode->RIGHT;
+//#ifdef HAVE_LIBCURL
+        if(search_opt(rrightnode, BLB))
+            {
+            if(Op(rrightnode) == COMMA && search_opt(rrightnode->RIGHT, BLB))
+                {
+                if(is_op(rlnode))
+                    {
+                    return FALSE;
+                    }
+                if(is_op(rrightnode->LEFT))
+                    return FALSE;
+                const char* mode = search_opt(rrightnode->RIGHT, APP) ? APPENDBIN : search_opt(rrightnode->RIGHT, NEW) ? WRITEBIN : 0;
+                if(mode == 0)
+                    {
+                    return FALSE;
+                    }
+                fileStatus* fs =
+                    myfopen((char*)POBJ(rrightnode->LEFT),
+                            mode
+#if !defined NO_LOW_LEVEL_FILE_HANDLING
+                            , TRUE
+#endif
+                    );
+                if(fs == NULL)
+                    {
+                    errorprintf("cannot open %s\n", POBJ(rrightnode->LEFT));
+                    global_fpo = saveFpo;
+                    hum = 1;
+#if SHOWWHETHERNEVERVISITED
+                    vis = FALSE;
+#endif
+                    return FALSE;
+                    }
+                else
+                    {
+                    writeblob(fs->fp, rlnode);
+                    deallocateFileStatus(fs);
+                    addr[2] = rlnode;
+                    }
+                return TRUE;
+                }
+            }
+//#endif
         wide = search_opt(rrightnode, WYD);
         if(wide)
             LineLength = WIDELINELENGTH;

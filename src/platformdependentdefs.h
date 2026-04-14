@@ -306,6 +306,9 @@ typedef struct
 #define APP O('A','P','P')
 #define ASC O('a','s','c')
 #define BIN O('B','I','N')
+//#ifdef HAVE_LIBCURL
+#define BLB O('B','L','B') /* When put-ting strings with escaped zero bytes. First byte is escape char. */
+//#endif
 #define CLK O('c','l','k')
 #define CON O('C','O','N')
 #if DEBUGBRACMAT
@@ -372,6 +375,9 @@ typedef struct
 #define VAP O('V','A','P')
 #define Vap O('v','a','p') /* map for string instead of list */
 #define VIS O('V','I','S') /* Show {} after unvisited operator nodes in lst$ing. Compile with -DUNVISITED, otherwise ignored. */
+#ifdef HAVE_LIBCURL
+#define WGT O('w','g','t') /* wgt$URL */
+#endif
 #define WHL O('w','h','l')
 #define WYD O('W','Y','D') /* lst option for wider lines */
 #define X   O('X', 0 , 0 )

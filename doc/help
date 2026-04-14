@@ -22,7 +22,7 @@ help=
   . fixdtxt modetxt positiontxt readtxt varitxt writetxt nonlinpat
   . CalcFunctxt,Calculatetxt,CalcTrctxt,CalcPrinttxt,CalcExporttxt
   . CalcParmtxt,CalcVartxt,CalcArraytxt,CaltItertxt,CalcMethodtxt
-  . CalcConsttxt,tmetxt
+  . CalcConsttxt,tmetxt,wgttxt,psttxt
   )
 .   ( lusmenu
     =   M
@@ -195,37 +195,41 @@ lex       lexical analysis of help file"
     get value from address (peek) (low level)
 27 |_pok_|
     put value at address (poke) (low level)
-28 |_put_|
+28 |_pst_|
+    HTTP POST data (requires libcurl)
+29 |_put_|
     write output
-29 |_ren_|
+30 |_ren_|
     rename file or directory or move file
-30 |_rev_|
+31 |_rev_|
     string reverse
-31 |_rmv_|
+32 |_rmv_|
     remove file
-32 |_sim_|
+33 |_sim_|
     similarity between two atoms
-33 |_str_|
+34 |_str_|
     stringize expression into atom
-34 |_swi_|
+35 |_swi_|
     software interrupt (low level)
-35 |_sys_|
+36 |_sys_|
     command line shell
-36 |_tbl_|
+37 |_tbl_|
     create array, remove array/variable
-37 |_tme_|
+38 |_tme_|
     return current time
-38 |_ugc_|
+39 |_ugc_|
     determine the Unicode General Category of a character
-39 |_upp_|
+40 |_upp_|
     convert to upper case
-40 |_utf_|
+41 |_utf_|
     convert UTF-8 character to Unicode codepoint
-41 |_vap_|
+42 |_vap_|
     deconstruct a string character-wise or according to specified separator
-42 |_whl_|
-   while loop
-43 |_x2d_|
+43 |_wgt_|
+    HTTP GET data (requires libcurl)
+44 |_whl_|
+    while loop
+45 |_x2d_|
     convert hexadecimal number to decimal number x2d$BABEFACE:3133078222
 "
       ,   (1,seltxt)
@@ -255,22 +259,24 @@ lex       lexical analysis of help file"
           (25,newobjecttxt)
           (26,peetxt)
           (27,poktxt)
-          (28,puttxt1 humtxt puttxt2 puttxt3 newtxt)
-          (29,rentxt)
-          (30,rmvtxt)
-          (31,revtxt)
-          (32,simtxt)
-          (33,strtxt)
-          (34,switxt)
-          (35,systxt)
-          (36,tbltxt)
-          (37,tmetxt)
-          (38,ugctxt)
-          (39,upptxt)
-          (40,utftxt)
-          (41,vaptxt)
-          (42,whltxt)
-          (43,x2dtxt)
+          (28,psttxt)
+          (29,puttxt1 humtxt puttxt2 puttxt3 newtxt)
+          (30,rentxt)
+          (31,rmvtxt)
+          (32,revtxt)
+          (33,simtxt)
+          (34,strtxt)
+          (35,switxt)
+          (36,systxt)
+          (37,tbltxt)
+          (38,tmetxt)
+          (39,ugctxt)
+          (40,upptxt)
+          (41,utftxt)
+          (42,vaptxt)
+          (43,wgttxt)
+          (44,whltxt)
+          (45,x2dtxt)
     )
   & ( intro
     =   M
@@ -957,11 +963,11 @@ it is all about tree branches."
   & ( colofon
     =   T
       , "How to obtain Bracmat"
-      , "There are a few download options. Get the last revision from
+      , "There are a few download options. Get the latest revision from
 https://github.com/BartJongejan/Bracmat.
 
 At https://cst.dk/download/bracmat/ you can follow the history of Bracmat from
-its inception somewhere in the eighties up to the last version. At this site
+its inception somewhere in the eighties up to the latest version. At this site
 you can also find compiled versions for some platforms."
     )
   & ( morexmlps
@@ -1322,6 +1328,19 @@ The characters 'a'-'z' are converted to 'A'-'Z'. Other characters are handled
 as UTF-8 encoded Unicode characters, but default to ISO 8859 (Latin 1) if
 the argument is not valid UTF-8."
     )
+    & ( wgttxt
+    =   T
+      , "wgt$(<URL>)"
+      , "wgt$ reads textual or binary data from the internet. The URL must start with
+|_http_| or |_https_|. The returned value has the pattern
+|_(?numberoOfDownloadedBytes,?NumberOfZeroBytes.?data)_|.
+Any zerobytes are escaped. The escape character is the first byte of the data.
+If there are no zerobytes, there is no escape character either.
+A data string with escaped zerobytes can be written to file with
+|_put$(!data,filename,BLB,NEW)_|. The |_BLB_| parameter ensures that the escape
+process is undone in the file."
+    )
+
   & ( whltxt
     =   T
       , "|_whl'(<expression>)_|"
@@ -3515,6 +3534,40 @@ ab{!} b
     b
 {!} b"
     )
+  & (psttxt= T
+      , "pst$(<URL>.<data string>.<header>[,<header>[, ...]])"
+      , "pst$ uses libcurl to POST a string to an URL.
+The URL must start with |_http_| or |_https_|. The returned value is a string
+with JSON data.
+      
+{?} pst$( \"https://postman-echo.com/post\"
+         . jsn$((text..\"Das ist ein Test\"),)
+         .   (Content-Type.application/json)
+           , (Accept.application/json)
+         ):?jsonData
+{!} {\"args\":{},\"data\":{\"text\":\"Das ist ein Test\"},\"files\":{},\"form\":{},\"headers\":{\"host\":\"postman-echo.com\",\"content-length\":\"27\",\"accept\":\"application/json\",\"content-type\":\"application/json\",\"x-forwarded-proto\":\"https\",\"accept-encoding\":\"gzip, br\"},\"json\":{\"text\":\"Das ist ein Test\"},\"url\":\"https://postman-echo.com/post\"}
+{?} get$(!jsonData,MEM,JSN)
+{!} (   (args.0,)
+      + ( data
+        . (text..\"Das ist ein Test\"),
+        )
+      + (files.0,)
+      + (form.0,)
+      + ( headers
+        .     (accept..application/json)
+            + (accept-encoding..\"gzip, br\")
+            + (content-length..27)
+            + (content-type..application/json)
+            + (host..\"postman-echo.com\")
+            + (x-forwarded-proto..https)
+          , 
+        )
+      + ( json
+        . (text..\"Das ist ein Test\"),
+        )
+      + (url..\"https://postman-echo.com/post\")
+    , 
+    )")
   & ( taytxt
     =   T
       , "tay$(<expression>,<variable>,<number-of-terms>)"
@@ -6101,13 +6154,15 @@ Topic:")
                   )
                 &   map
                   $ ( ( 
-                      =   
+                      =   s
                         .     !arg:@
                             & :?R
                             &   whl
                               ' ( @( !arg
                                    :   ?a
                                        http
+                                       ((|s):?s)
+                                       "://"
                                        ?m
                                        ( (   ( " "
                                              | \n
@@ -6121,7 +6176,7 @@ Topic:")
                                        )
                                    )
                                 & @(rev$!m:?Z (%@?L:!lastchar) ?M)
-                                & http rev$(str$(!L !M)):?m
+                                & http !s "://" rev$(str$(!L !M)):?m
                                 & str$(rev$!Z !arg):?arg
                                 & !R !a (a.(href.!m),!m):?R
                                 )

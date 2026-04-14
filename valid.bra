@@ -8208,8 +8208,8 @@ string line 2\"
                       )
                 | Out$"pst$ does not work."
                 )
-                (     get$("https://info.cern.ch/",HT ML)
-                    : ?html
+                (     wgt$("https://info.cern.ch/",HT ML)
+                    : (?downloadedBytes,?numberOfZeroBytes.?html)
                   &   nestML$!html
                     :   ?
                         ( html
@@ -8221,7 +8221,26 @@ string line 2\"
                               ?
                         )
                         ?
-                | Out$"Cannot get URL https://info.cern.ch/"
+                | Out$"Cannot wgt URL https://info.cern.ch/"
+                )
+                (       wgt
+                      $ "https://framework.web.cern.ch/framework/3.0/images/loader.gif"
+                    : (?downloadedBytes,?numberOfZeroBytes.?blob)
+                  & (   !numberOfZeroBytes:>0
+                      & put$(!blob,"cern.gif",NEW,BLB)
+                    | put$(!blob,"cern.gif",NEW,BIN)
+                    )
+                  & rmv$"cern.gif"
+                | Out$"Cannot wgt URL https://info.cern.ch/"
+                )
+                (       wgt
+                      $ ( "https://framework.web.cern.ch/framework/3.0/images/loader.gif"
+                        , HT ML
+                        )
+                    : (?downloadedBytes,?numberOfZeroBytes.?blob)
+                  &   Out
+                    $ "Trying to interpret string containing zero bytes as HTML"
+                | 
                 )
           | 
           )

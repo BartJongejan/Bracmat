@@ -34,34 +34,123 @@
 #include <curl/curl.h>
 #include <stdlib.h>
 typedef struct { char* data; size_t size; } urlBuf;
-static size_t urlWrite(void* ptr, size_t size, size_t nmemb, void* ud) {
+
+static char* handleZeroBytes(char* buf, size_t bufsize, size_t* zerobytes)
+    {
+    unsigned char* q = (unsigned char*)buf;
+    size_t bytecount[256] = { 0 };
+    size_t i;
+    size_t j;
+    size_t rarecount = 0;
+    int rarebyte = 0;
+    int dummy = 2;
+    for(i = 0; i < bufsize; ++i)
+        ++bytecount[(size_t)q[i]];
+
+    if(bytecount[0] > 0)
+        {
+        /* File contains zero byte(s) */
+
+        rarebyte = 1;
+        rarecount = bytecount[rarebyte];
+        for(j = 2; j < 256; ++j)
+            if(bytecount[j] < rarecount)
+                {
+                rarebyte = j;
+                rarecount = bytecount[rarebyte];
+                }
+
+        dummy = rarebyte + 1;
+        if(dummy > 255)
+            dummy = 1;
+
+        size_t size2 = bufsize
+            + 1             /* first byte is escape byte */
+            + rarecount     /* each escape byte is doubled */
+            + bytecount[0]  /* Each zero byte is converted to an escape byte followed by the dummy character */
+            + 1;            /* final \0 */
+
+        char* dest = (char*)malloc(size2);
+
+        if(!dest)
+            return 0;
+
+        char* p = dest;
+        *p++ = rarebyte;
+        *p = 0;
+
+        q = (unsigned char*)buf;
+        for(i = 0; i < bufsize; ++i)
+            {
+            if(q[i] == 0)
+                {
+                *p++ = rarebyte;
+                *p++ = dummy;
+                }
+            else
+                {
+                if(q[i] == rarebyte)
+                    {
+                    *p++ = rarebyte;
+                    }
+                *p++ = q[i];
+                }
+            }
+        *p = '\0';
+
+        if(zerobytes)
+            *zerobytes = bytecount[0];
+        free(buf);
+
+        return dest;
+        }
+    return buf;
+    }
+
+static size_t urlWrite(void* ptr, size_t size, size_t nmemb, void* ud)
+    {
     size_t n = size * nmemb;
     urlBuf* b = (urlBuf*)ud;
     char* p = realloc(b->data, b->size + n + 1);
-    if(!p) return 0;
+    if(!p)
+        return 0;
     b->data = p;
     memcpy(b->data + b->size, ptr, n);
     b->size += n;
     b->data[b->size] = '\0';
     return n;
-}
-static char* fetchUrl(const char* url) {
+    }
+
+static char* fetchUrl(const char* url, size_t* bufsize)
+    {
     CURL* c = curl_easy_init();
-    if(!c) return NULL;
-    urlBuf b = {NULL, 0};
+    if(!c)
+        {
+        return NULL;
+        }
+    urlBuf b = { NULL, 0 };
     curl_easy_setopt(c, CURLOPT_URL, url);
     curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, urlWrite);
     curl_easy_setopt(c, CURLOPT_WRITEDATA, &b);
     curl_easy_setopt(c, CURLOPT_FOLLOWLOCATION, 1L);
+
     CURLcode res = curl_easy_perform(c);
+
     curl_easy_cleanup(c);
-    if(res != CURLE_OK) { free(b.data); return NULL; }
+    if(res != CURLE_OK)
+        {
+        free(b.data);
+        return NULL;
+        }
+    if(bufsize)
+        *bufsize = b.size;
     return b.data;
-}
-static char* postUrl(const char* url, const char* body, struct curl_slist* headers) {
+    }
+static char* postUrl(const char* url, const char* body, struct curl_slist* headers)
+    {
     CURL* c = curl_easy_init();
     if(!c) return NULL;
-    urlBuf b = {NULL, 0};
+    urlBuf b = { NULL, 0 };
     curl_easy_setopt(c, CURLOPT_URL, url);
     curl_easy_setopt(c, CURLOPT_POSTFIELDS, body);
     curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, urlWrite);
@@ -73,7 +162,7 @@ static char* postUrl(const char* url, const char* body, struct curl_slist* heade
     curl_easy_cleanup(c);
     if(res != CURLE_OK) { free(b.data); return NULL; }
     return b.data;
-}
+    }
 #endif
 
 #define LONGCASE
@@ -388,14 +477,14 @@ function_return_type execFnc(psk Pnode)
                                 }
                             }
                         else if(Object.theMethod((struct typedObjectnode*)Object.object, &Pnode))
-                                {
-                                /**** Evaluate a built-in method of a named object.
-                                                                |
-                                          new$hash:?H           |
-                                        & (H..insert)$(XYZ.2) <-
-                                ****/
-                                return functionOk(Pnode);
-                                }
+                            {
+                            /**** Evaluate a built-in method of a named object.
+                                                            |
+                                      new$hash:?H           |
+                                    & (H..insert)$(XYZ.2) <-
+                            ****/
+                            return functionOk(Pnode);
+                            }
                         }
                     }
                 break;
@@ -1760,25 +1849,6 @@ function_return_type functions(psk Pnode)
                     }
                 wipe(addr[1]);
                 }
-#ifdef HAVE_LIBCURL
-            else if(   !is_op(rlnode)
-                    && (   !strncmp((char*)POBJ(rlnode), "http://",  7)
-                        || !strncmp((char*)POBJ(rlnode), "https://", 8)))
-                {
-                char* buf = fetchUrl((char*)POBJ(rlnode));
-                if(!buf)
-                    return functionFail(Pnode);
-                source = (unsigned char*)buf;
-                for(;;)
-                    {
-                    Pnode = input(NULL, Pnode, intVal.i, &err, &GoOn);
-                    if(!GoOn || err)
-                        break;
-                    Pnode = eval(Pnode);
-                    }
-                free(buf);
-                }
-#endif
             else
                 {
                 if(rlnode->u.obj && strcmp((char*)POBJ(rlnode), "stdin"))
@@ -1820,13 +1890,76 @@ function_return_type functions(psk Pnode)
                 }
             return err ? functionFail(Pnode) : functionOk(Pnode);
             }
+#ifdef HAVE_LIBCURL
+        CASE(WGT) /* wgt$URL */
+            {
+            Boolean GoOn;
+            int err = 0;
+            if(is_op(rnode))
+                {
+                if(is_op(rlnode = rnode->LEFT))
+                    return functionFail(Pnode);
+                rrnode = rnode->RIGHT;
+                intVal.i = (search_opt(rrnode, STG) << SHIFT_STR)
+                    + (search_opt(rrnode, ML) << SHIFT_ML)
+                    + (search_opt(rrnode, TRM) << SHIFT_TRM)
+                    + (search_opt(rrnode, HT) << SHIFT_HT)
+                    + (search_opt(rrnode, X) << SHIFT_X)
+                    + (search_opt(rrnode, JSN) << SHIFT_JSN);
+                }
+            else
+                {
+                intVal.i = 1 << SHIFT_STR;
+                rlnode = rnode;
+                }
+            if(!is_op(rlnode)
+               && (!strncmp((char*)POBJ(rlnode), "http://", 7)
+                   || !strncmp((char*)POBJ(rlnode), "https://", 8)))
+                {
+                size_t bufsize = 0;
+                char* buf = fetchUrl((char*)POBJ(rlnode), &bufsize);
+
+                if(!buf)
+                    return functionFail(Pnode);
+                size_t zerobytes = 0;
+                buf = handleZeroBytes(buf, bufsize, &zerobytes);
+                if(zerobytes)
+                    {
+                    /* Binary file that contains zero bytes. */
+                    int forbid = (1 << SHIFT_ML)
+                        + (1 << SHIFT_TRM)
+                        + (1 << SHIFT_HT)
+                        + (1 << SHIFT_X)
+                        + (1 << SHIFT_JSN);
+                    if(intVal.i & forbid)
+                        return functionFail(Pnode);
+                    }
+                source = (unsigned char*)buf;
+
+                Pnode = input(NULL, Pnode, intVal.i, &err, &GoOn);
+                if(err)
+                    return functionFail(Pnode);
+
+                free(buf);
+
+                addr[3] = same_as_w(Pnode);
+
+                sprintf(draft, "%ld,%ld.\3", bufsize, zerobytes);
+                Pnode = build_up(Pnode, draft, NULL);
+                wipe(addr[3]);
+
+                return functionOk(Pnode);
+                }
+            return functionFail(Pnode);
+            }
+#endif
         CASE(PST) /* pst$(url.body) or pst$(url.body.(key.val,...)) - HTTP POST, returns response as string */
             {
 #ifdef HAVE_LIBCURL
-            if(   !is_op(rnode)
+            if(!is_op(rnode)
                || Op(rnode) != DOT
                || is_op(rnode->LEFT)
-               || (   strncmp((char*)POBJ(rnode->LEFT), "http://",  7)
+               || (strncmp((char*)POBJ(rnode->LEFT), "http://", 7)
                    && strncmp((char*)POBJ(rnode->LEFT), "https://", 8)))
                 return functionFail(Pnode);
             const char* pst_url = (char*)POBJ(rnode->LEFT);
@@ -1836,7 +1969,7 @@ function_return_type functions(psk Pnode)
                 { /* pst$(url.body) */
                 pst_body = (char*)POBJ(rnode->RIGHT);
                 }
-            else if(   Op(rnode->RIGHT) == DOT
+            else if(Op(rnode->RIGHT) == DOT
                     && !is_op(rnode->RIGHT->LEFT))
                 { /* pst$(url.body.(key.val,...)) */
                 pst_body = (char*)POBJ(rnode->RIGHT->LEFT);
@@ -1851,7 +1984,7 @@ function_return_type functions(psk Pnode)
                 for(;;)
                     {
                     psk pair = (is_op(node) && Op(node) == COMMA) ? node->LEFT : node;
-                    if(   !is_op(pair)
+                    if(!is_op(pair)
                        || Op(pair) != DOT
                        || is_op(pair->LEFT)
                        || is_op(pair->RIGHT))
