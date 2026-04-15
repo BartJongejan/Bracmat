@@ -20,9 +20,9 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "14 April 2026"
-#define VERSION "6.35.0"
-#define BUILD "328"
+#define DATUM "15 April 2026"
+#define VERSION "6.35.1"
+#define BUILD "330"
 /*
 COMPILATION
 -----------
@@ -833,21 +833,15 @@ int mainLoop(int argc, char* argv[])
                 "This is free software, and you are welcome to redistribute it\\n"
                 "under certain conditions; type `!c' for details.\\n\\n"
                 "\\n\\n{?} get$help { tutorial }\\n{?} )        { stop }\"&"
-                "(main=put$\"{?} \"&clk$():?SEC&((get':?!(=):(|?&clk$+-1*!SEC:?SEC&"
+                "(main=clk$():?SEC&((get'(stdin,ECH):?!(=):(|?&clk$+-1*!SEC:?SEC&"
                 "put$\"{!} \"&put$!&put$(\"\\n    S  \" str$(div$(!SEC,1) \",\" (div$(mod$("
                 "!SEC*100,100),1):?SEC&!SEC:<10&0|) !SEC) sec))|put$\"\\n    F\")|"
                 "put$\"\\n    I\")&"
-
-
-
-
 #if SHOWMAXALLOCATED
-
                 "out$str$(\"  \" bez')&"
 #else
                 "out$&"
 #endif
-
                 "!main)&!main";
             stringEval(mainLoopExpression, NULL, &err);
             }

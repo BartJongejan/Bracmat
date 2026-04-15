@@ -21,6 +21,10 @@ int mygetc(FILE* fpi);
 
 extern void(*process)(int c);
 
+#if defined __GNUC__ && defined READLINE
+extern char prompt[256];
+#endif
+
 void myprintf(const char* strng, ...);
 
 #if _BRACMATEMBEDDED && !defined _MT

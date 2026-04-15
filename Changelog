@@ -1,3 +1,6 @@
+15 April 2026
+Improved interaction in REPL, esp. non-Windows.
+
 14 April 2026
 Moved download from the internet away from get$ to a new built-in function wgt$.
 The wgt$ function handles binary data by escaping zero-bytes. If escaping is needed,

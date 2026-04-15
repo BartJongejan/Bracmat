@@ -1836,6 +1836,13 @@ function_return_type functions(psk Pnode)
                 intVal.i = 0;
                 rlnode = rnode;
                 }
+
+#if defined __GNUC__ && defined READLINE            
+            if(intVal.i & OPT_ECH)
+                {
+                strcpy(prompt, "{?} ");
+                }
+#endif
             if(intVal.i & OPT_MEM)
                 {
                 addr[1] = same_as_w(rlnode);
@@ -1865,7 +1872,7 @@ function_return_type functions(psk Pnode)
                     }
                 else
                     {
-                    intVal.i |= OPT_ECH;
+                  //  intVal.i |= OPT_ECH;
 #ifdef DELAY_DUE_TO_INPUT
                     for(;;)
                         {

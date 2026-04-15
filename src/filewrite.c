@@ -54,6 +54,10 @@ void myputc(int c)
 #endif
     }
 
+#if defined __GNUC__ && defined READLINE
+char prompt[256] = { 0 };
+#endif
+
 int mygetc(FILE* fpi)
     {
 #ifdef __SYMBIAN32__
@@ -99,7 +103,7 @@ int mygetc(FILE* fpi)
         static unsigned char* out = 0;
         if(!out)
             {
-            char* line = readline("");
+            char* line = readline(prompt);
             if(line == 0)
                 {
                 return '\n';

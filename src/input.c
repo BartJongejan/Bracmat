@@ -564,7 +564,8 @@ static psk lex(unsigned int* nxt, int priority, int Flags, va_list* pargptr)
                         op_or_0 = child_op_or_0;
                         }
                     }
-                } while(op_or_0 != 0);
+                }
+            while(op_or_0 != 0);
             }
         Pnode->v.fl ^= Flags; /*19970821*/
 #if DATAMATCHESITSELF
@@ -745,6 +746,17 @@ psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrmtxt, Boolean* err, Boolean*
                     *GoOn = FALSE;
                 return Pnode;
                 }
+#if defined __GNUC__ && defined READLINE
+    if(!(echmemvapstrmltrmtxt & OPT_ECH))
+        {
+        prompt[0] = 0;
+        }
+#else
+    if(echmemvapstrmltrmtxt & OPT_ECH)
+        {
+        Printf("{?} ");
+        }
+#endif
     for(inputBufferPointer = input_buffer
         ;
 #if _BRACMATEMBEDDED
@@ -763,6 +775,28 @@ psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrmtxt, Boolean* err, Boolean*
                 Printf("%c", ikar);
             if(ikar == '\n')
                 {
+#if defined __GNUC__ && defined READLINE
+                if(braces)
+                    {
+                    strcpy(prompt, "{com} ");
+                    }
+                else if(inString)
+                    {
+                    strcpy(prompt, "{str} ");
+                    }
+                else if(parentheses > 0 || fpi != stdin)
+                    {
+                    sprintf(prompt, "{%d} ", parentheses);
+                    if(fpi == stdin)
+                        {
+                        int tel = parentheses;
+                        if(parentheses > 100)
+                            tel = 100;
+                        for(; tel; tel--)
+                            strcat(prompt, "  ");
+                        }
+                    }
+#else
                 if(braces)
                     Printf("{com} ");
                 else if(inString)
@@ -775,8 +809,10 @@ psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrmtxt, Boolean* err, Boolean*
                         for(tel = parentheses; tel; tel--)
                             Printf("  ");
                     }
+#endif
                 }
             }
+        
         if(braces)
             {
             if(ikar == '{')
