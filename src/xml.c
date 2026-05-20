@@ -2497,7 +2497,9 @@ static void nonTag(const char* kind, unsigned char* start, unsigned char* end)
     }
 
 static unsigned char* ch;
+static int StaRtInitialized = 0;
 static unsigned char* StaRt = 0;
+static const unsigned char* EnD = 0;
 static int isMarkup = 0;
 
 static void cbStartMarkUp(void)
@@ -2512,7 +2514,7 @@ static void cbStartMarkUp(void)
 static void cbEndMarkUp(void)/* called when > has been read */
     {
     if(isMarkup)
-        nonTag("!", StaRt, ch);
+        nonTag("!", StaRt, EnD);
     }
 
 static void cbEndDOCTYPE(void)/* called when > has been read */
@@ -2562,6 +2564,7 @@ static estate insinglequotedvalue(const unsigned char* pkar);
 static estate indoublequotedvalue(const unsigned char* pkar);
 static estate endvalue(const unsigned char* pkar);
 static estate markup(const unsigned char* pkar); /* <! */
+static estate inmarkup(const unsigned char* pkar); /* <!-- h2 -- inmarkup -- h2  --> */
 static estate perhapsScriptOrStyle(const unsigned char* pkar); /* <s or <S */
 static estate scriptOrStyleElement(const unsigned char* pkar); /* <sc or <SC or <Sc or <sC or <st or <ST or <St or <sT */
 static estate scriptOrStyleEndElement(const unsigned char* pkar); /* </s or </S */
@@ -3304,6 +3307,7 @@ static estate markup(const unsigned char* pkar) /* <! */
             return endoftag;
         case '-':
             tagState = h1;
+            StaRtInitialized = 0;
             return tag;
         case '[':
             tagState = CDATA1;
@@ -3313,6 +3317,35 @@ static estate markup(const unsigned char* pkar) /* <! */
             return tag;
         default:
             tagState = unknownmarkup;
+            return tag;
+        }
+    }
+
+static estate inmarkup(const unsigned char* pkar)
+    {
+    switch(*pkar)
+        {
+        case '<':
+            tagState = lt;
+            cbEndMarkUp();
+            cbStartMarkUp();
+            return endoftag_startoftag;
+        case '>':
+            tagState = defx;
+            cbEndMarkUp();
+            return endoftag;
+        case '-':
+            tagState = h1;
+            //StaRtInitialized = 0;
+            return tag;
+        case '[':
+            tagState = CDATA1;
+            return tag;
+        case 'D':
+            tagState = DOCTYPE1;
+            return tag;
+        default:
+            tagState = inmarkup;
             return tag;
         }
     }
@@ -3588,7 +3621,11 @@ static estate h1(const unsigned char* pkar) /* <!- */
             return notag;
         case '-':
             tagState = h2;
-            StaRt = ch + 1;
+            if(!StaRtInitialized)
+                {
+                StaRtInitialized = 1;
+                StaRt = ch + 1;
+                }
             return tag;
         default:
             tagState = unknownmarkup;
@@ -3613,9 +3650,10 @@ static estate h3(const unsigned char* pkar) /* <!--  - */
     switch(*pkar)
         {
         case '-': /* <!-- -- */
-            tagState = markup;
-            isMarkup = 0;
-            nonTagWithoutEntityUnfolding("!--", StaRt, ch - 1);
+            tagState = inmarkup;
+            //isMarkup = 0;
+            //nonTagWithoutEntityUnfolding("!--", StaRt, ch - 1);
+            EnD = pkar - 1;
             return tag;
         default:
             tagState = h2;

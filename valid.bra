@@ -8244,6 +8244,20 @@ string line 2\"
                 )
           | 
           )
+          (
+          get$("<!-- -------- -- >",MEM,ML):("!"." -------- ")
+          | Out$"A) Not counting comments correctly"
+          )
+          (
+          get$("<!-- -- ---- ---- -- ><p>--</p><p>--</p>",MEM,ML):(
+  ("!"." -- ---- ---- -- ><p>")
+  (.p.)
+  (p.)
+  "--"
+  (.p.)
+)
+          | Out$"B) Not counting comments correctly"
+          )
       &   out
         $ ( str
           $ ( "Done. "
