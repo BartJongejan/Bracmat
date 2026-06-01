@@ -2467,7 +2467,7 @@ static void flushx(void)
         xput((const unsigned char*)"");
     }
 
-static void nxput(unsigned char* start, unsigned char* end)
+static void nxput(unsigned char* start, const unsigned char* end)
     {
     for(; start < end; ++start)
         xput(start);
@@ -2488,7 +2488,7 @@ static void nonTagWithoutEntityUnfolding(const char* kind, unsigned char* start,
     putOperatorChar(')');
     }
 
-static void nonTag(const char* kind, unsigned char* start, unsigned char* end)
+static void nonTag(const char* kind, unsigned char* start, const unsigned char* end)
     {
     nrawput((const unsigned char*)kind);
     putOperatorChar('.');
