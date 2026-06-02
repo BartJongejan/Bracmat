@@ -936,6 +936,7 @@ int output(ppsk PPnode, void(*how)(psk k))
         rlnode = rightnode->LEFT;
         rrightnode = rightnode->RIGHT;
 //#ifdef HAVE_LIBCURL
+#if !defined NO_FOPEN
         if(search_opt(rrightnode, BLB))
             {
             if(Op(rrightnode) == COMMA && search_opt(rrightnode->RIGHT, BLB))
@@ -977,6 +978,7 @@ int output(ppsk PPnode, void(*how)(psk k))
                 return TRUE;
                 }
             }
+#endif
 //#endif
         wide = search_opt(rrightnode, WYD);
         if(wide)
