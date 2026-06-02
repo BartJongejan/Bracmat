@@ -397,6 +397,13 @@ Link flags:
 
     -DREADLINE -lreadline
 
+If you want to be able to fetch web pages from within Bracmat (currently only Linux and MacOS), you need the libcurl library. In Ubuntu:
+
+    sudo apt-get install libcurl4-openssl-dev
+    
+Then:
+
+    make potuurl
 
 **Installation**
 
