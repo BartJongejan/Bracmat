@@ -21,7 +21,7 @@ pushd ../src && make && popd
 pushd ../singlesource && make && popd 
 # Test the stand-alone version of Bracmat.
 # Expect a line only saying 'bracmat alife and kicking'.
-./bracmat 'put$"bracmat alife and kicking\n"'
+../singlesource/bracmat 'put$"bracmat alife and kicking\n"'
 
 pushd java
 JDK_DIRS="/usr/lib/jvm/java /usr/lib/jvm/default-java ${OPENJDKS} /usr/lib/jvm/java-6-openjdk /usr/lib/jvm/java-6-sun /usr/lib/jvm/java-7-oracle /usr/lib/jvm/java-11-openjdk-amd64/"
