@@ -174,7 +174,7 @@ outline: ridge;
                     )
                     ", and see many more examples on "
                     ( a
-                    .   (href."http://rosettacode.org/wiki/Category:Bracmat")
+                    .   (href."https://rosettacode.org/wiki/Category:Bracmat")
                       , "rosettacode.org"
                     )
                     "."
@@ -202,7 +202,7 @@ outline: ridge;
                   (cols.80)
                   (rows.20)
               , "({Dinesman's multiple-dwelling problem. See 
-http://rosettacode.org/wiki/Dinesman's_multiple-dwelling_problem#Bracmat}
+https://rosettacode.org/wiki/Dinesman's_multiple-dwelling_problem#Bracmat}
     
     Baker Cooper Fletcher Miller Smith:?people
   & ( constraints
