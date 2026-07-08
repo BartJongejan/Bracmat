@@ -1,3 +1,9 @@
+8 July 2026
+The !! and ! flags are now regarded as distinct by the glf$ function. This is a change in behaviour.
+So now glf$('(!!.!a)) returns !!a, while previously it just failed. On the other hand,
+glf$('(!.!a)) and glf$('(!.!!a)) still fail. With this change, it is possible to test for the
+presence of the !! flag.
+
 20 May 2026
 Fixed interpreting SGML comments with multiple start/stop, as in <!-- -------- -->
 

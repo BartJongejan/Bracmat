@@ -1234,7 +1234,10 @@ function_return_type functions(psk Pnode)
                )
                 {
                 intVal.ul = rnode->RIGHT->LEFT->v.fl & VISIBLE_FLAGS;
-                if(intVal.ul && (rnode->RIGHT->RIGHT->v.fl & intVal.ul))
+                if(intVal.ul
+                   && (rnode->RIGHT->RIGHT->v.fl & intVal.ul)
+                   && (!(intVal.ul & DOUBLY_INDIRECT) || (rnode->RIGHT->RIGHT->v.fl & DOUBLY_INDIRECT))
+                   )
                     return functionFail(Pnode);
                 addr[3] = same_as_w(rnode->RIGHT->RIGHT);
                 addr[3] = isolated(addr[3]);

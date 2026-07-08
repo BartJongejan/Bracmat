@@ -8257,6 +8257,24 @@ string line 2\"
                 (.p.)
           | Out$"B) Not counting comments correctly"
           )
+          (   glf$('(!!.!x)):?zzz
+            & lst$(zzz,LIN,RAW,MEM):"=!!x"
+          |   Out
+            $ "DOUBLY_INDIRECT and INDIRECT are to be regarded as different flags"
+          )
+          (   glf$('(!.!!x):?z)
+            & Out$"INDIRECT flag can not be added to DOUBLY_INDIRECT flag"
+          | 
+          )
+          (   glf$('(!!.!!x):?z)
+            &   Out
+              $ "DOUBLY_INDIRECT flag can not be added to DOUBLY_INDIRECT flag"
+          | 
+          )
+          (   glf$('(!.!x):?z)
+            & Out$"INDIRECT flag can not be added to INDIRECT flag"
+          | 
+          )
       &   out
         $ ( str
           $ ( "Done. "

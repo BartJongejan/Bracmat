@@ -1328,7 +1328,7 @@ The characters 'a'-'z' are converted to 'A'-'Z'. Other characters are handled
 as UTF-8 encoded Unicode characters, but default to ISO 8859 (Latin 1) if
 the argument is not valid UTF-8."
     )
-    & ( wgttxt
+  & ( wgttxt
     =   T
       , "wgt$(<URL>)"
       , "wgt$ reads textual or binary data from the internet. The URL must start with
@@ -1340,7 +1340,6 @@ A data string with escaped zerobytes can be written to file with
 |_put$(!data,filename,BLB,NEW)_|. The |_BLB_| parameter ensures that the escape
 process is undone in the file."
     )
-
   & ( whltxt
     =   T
       , "|_whl'(<expression>)_|"
@@ -3534,7 +3533,8 @@ ab{!} b
     b
 {!} b"
     )
-  & (psttxt= T
+  & ( psttxt
+    =   T
       , "pst$(<URL>.<data string>.<header>[,<header>[, ...]])"
       , "pst$ uses libcurl to POST a string to an URL.
 The URL must start with |_http_| or |_https_|. The returned value is a string
@@ -3567,7 +3567,8 @@ with JSON data.
         )
       + (url..\"https://postman-echo.com/post\")
     , 
-    )")
+    )"
+    )
   & ( taytxt
     =   T
       , "tay$(<expression>,<variable>,<number-of-terms>)"
@@ -4855,6 +4856,17 @@ If <expression> has one or more prefixes also present in <prefixes>, then glf
 fails. Therefore, glf can be used to test for the presence of one or more
 prefixes. The result is protected against evaluation by a = operator.
 The function glf has an effect that is the opposite of flg.
+
+A special case is when <prefixes> contains |_!!_|. If <expression> has
+no or only a single |_!_|, then glf ensures that the resulting expression has
+|_!!_|. If <expression> already has two |_!_| prefixes, then glf fails.
+
+{?} glf$(=#?.x)
+{!} =#?x
+
+{?} var=z
+{?} glf$('(#?.$var)):(=?exp) & lst$(exp,RAW) & out$
+#?z
 
 {?} glf$flg$(=?a)
 {!} =?a
