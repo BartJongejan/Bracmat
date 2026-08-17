@@ -20,9 +20,10 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "8 July 2026"
-#define VERSION "6.37.0"
-#define BUILD "332"
+#define DATUM "17 August 2026"
+#define VERSION "6.37.1"
+
+
 /*
 COMPILATION
 -----------
@@ -748,7 +749,26 @@ int startProc(
         return;
 #endif
     global_anchor = eval(global_anchor);
-    stringEval("(v=\"Bracmat version " VERSION ", build " BUILD " (" DATUM ")\")", NULL, &err);
+
+#if defined __EMSCRIPTEN__
+#define OS "Browser"
+#elif defined _WIN32
+#define OS "Windows"
+#elif defined __linux__
+#define OS "Linux"
+#elif defined __APPLE__
+#define OS "macOS"
+#else
+#define OS "Unknown OS"
+#endif
+
+#if WORD32
+#define BITS "32"
+#else
+#define BITS "64"
+#endif
+
+    stringEval("(v=\"Bracmat version " VERSION " (" OS ", " BITS " bits, " DATUM ")\")", NULL, &err);
     return 1;
     }
 

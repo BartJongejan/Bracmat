@@ -1,3 +1,9 @@
+17 August
+Changed the version string !v: left out the build number, 
+added OS (Windows, Linux, macOS, Browser, or "Unknown OS") and 32 or 64 bits.
+Examples: Bracmat version 6.37.1 (Linux, 64 bits, 17 August 2026)
+          Bracmat version 6.37.1 (Windows, 32 bits, 17 August 2026)
+
 8 July 2026
 The !! and ! flags are now regarded as distinct by the glf$ function. This is a change in behaviour.
 So now glf$('(!!.!a)) returns !!a, while previously it just failed. On the other hand,

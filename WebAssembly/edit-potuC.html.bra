@@ -158,6 +158,10 @@ outline: ridge;
           =   !WASM:0&JavaScript
             | "Web Assembly"
           )
+        & (   @(!v:?a "(" ? "bits, " ?b)
+            & str$(!a "(" !b):?v
+          | 
+          )
         &     (h3.,str$(!v ", transpiled to " !what))
               ( p
               .   

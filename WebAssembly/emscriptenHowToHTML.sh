@@ -1,7 +1,7 @@
 # Set WASM=0 or WASM=1 in this script. Then execute it. 
 
 # Only JavaScript, without WebAssembly:
-WASM=0
+WASM=1
 # Output: bracmatJS.html
 #    This file works fine by double clicking it in the file manager.
 
@@ -18,6 +18,6 @@ WASM=0
 # clang version 21.0.0git (https:/github.com/llvm/llvm-project 148111fdcf0e807fe74274b18fcf65c4cff45d63)
 
 emcc ../src/*.c --pre-js pre.js -s EXPORTED_RUNTIME_METHODS='["stringToNewUTF8", "cwrap", "intArrayFromString","stackAlloc"]' -s "EXPORTED_FUNCTIONS=['_main','_oneShot','_malloc']" -s "MODULARIZE=0" -O0 -o potuC.html -s "WASM=$WASM"
-bracmat "get'\"edit-potuC.html.bra\"" "$WASM"
+../singlesource/bracmat "get'\"edit-potuC.html.bra\"" "$WASM"
 
 # last updated: 20260204
