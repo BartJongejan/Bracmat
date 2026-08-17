@@ -1,8 +1,8 @@
 bracmat: bracmat.c 
-	gcc -std=c99 -pedantic -Wall -O2 -DNDEBUG -o bracmat bracmat.c -lm
+	gcc -std=c99 -pedantic -Wall -O2 -DNDEBUG -o bracmat bracmat.c -lm  -DREADLINE -lreadline
 
 bracmaturl: bracmat.c
-	gcc -std=c99 -pedantic -Wall -O2 -DNDEBUG -DHAVE_LIBCURL -o bracmaturl bracmat.c -lm -lcurl
+	gcc -std=c99 -pedantic -Wall -O2 -DNDEBUG -DHAVE_LIBCURL -o bracmaturl bracmat.c -lm -lcurl  -DREADLINE -lreadline
 
 bracmat.c: ../src/bracmat | BRA
 	../src/bracmat "get'\"one.bra\""
