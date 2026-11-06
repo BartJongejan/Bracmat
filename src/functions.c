@@ -882,6 +882,8 @@ function_return_type functions(psk Pnode)
                 {
                 const char* val;
                 val = Nii((const char*)POBJ(rnode));
+                if(val == NULL) /* Python raised an exception */
+                    return functionFail(Pnode);
                 wipe(Pnode);
                 Pnode = scopy((const char*)val);
                 return functionOk(Pnode);

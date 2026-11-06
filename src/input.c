@@ -1093,6 +1093,13 @@ static jmp_buf jumper;
 
 void stringEval(const char* s, const char** out, int* err)
     {
+    /* Give *out and *err defined values, also if parsing fails or malloc
+       fails, so callers never read uninitialised memory. */
+    int error = FALSE;
+    if(out != NULL)
+        *out = "";
+    if(err != NULL)
+        *err = FALSE;
 #if _BRACMATEMBEDDED
     char* buf = (char*)malloc(strlen(s) + 11);
     if(buf)
@@ -1105,14 +1112,21 @@ void stringEval(const char* s, const char** out, int* err)
         sprintf(buf, "str$(%s)", s);
 #endif
         source = (unsigned char*)buf;
-        global_anchor = input(NULL, global_anchor, OPT_MEM, err, NULL); /* 4 -> OPT_MEM*/
-        if(err && *err)
+        global_anchor = input(NULL, global_anchor, OPT_MEM, &error, NULL); /* 4 -> OPT_MEM*/
+        if(error)
+            {
+            free(buf);
+            if(err != NULL)
+                *err = error;
             return;
+            }
 #if JMP
         if(setjmp(jumper) != 0)
             {
             free(buf);
-            return -1;
+            if(err != NULL)
+                *err = -1;
+            return;
             }
 #endif
         global_anchor = eval(global_anchor);
@@ -1120,6 +1134,8 @@ void stringEval(const char* s, const char** out, int* err)
             *out = is_op(global_anchor) ? (const char*)"" : (const char*)POBJ(global_anchor);
         free(buf);
         }
+    else if(err != NULL)
+        *err = TRUE;
     return;
     }
 
