@@ -85,6 +85,42 @@ def test_nii_returns_non_ascii_unescaped():
     assert prythat.HolyGrail('Ni!$"\'Ωμέγα\'"') == '"Ωμέγα"'
 
 
+def test_ni_variable_persists_between_calls():
+    # exec used a throwaway locals() dict, so 'a' was lost after the call.
+    prythat.HolyGrail('Ni$"a = \'ebbenhout\'"')
+    assert prythat.HolyGrail('Ni!$"a"') == '"ebbenhout"'
+    prythat.HolyGrail('Ni$"a = a.upper()"')
+    assert prythat.namespace()["a"] == "EBBENHOUT"
+
+
+def test_ni_function_definition_persists():
+    prythat.HolyGrail('Ni$"def sq(x):\n    return x * x\n"')
+    assert prythat.HolyGrail('Ni!$"sq(7)"') == "49"
+
+
+def test_ni_does_not_see_prythat_internals():
+    # The namespace used to be prythat's own module globals.
+    assert prythat.HolyGrail('Ni!$"json.__name__"&yes|no') == "no"
+
+
+def test_init_with_caller_namespace():
+    ns = {"b": 41}
+    prythat.final()
+    try:
+        prythat.init(ns)
+        assert prythat.HolyGrail('Ni!$"b+1"') == "42"
+        prythat.HolyGrail('Ni$"c = b * 2"')
+        assert ns["c"] == 82
+    finally:
+        prythat.final()
+        prythat.init()
+
+
+def test_init_rejects_non_dict_namespace():
+    with pytest.raises(TypeError):
+        prythat.init([])
+
+
 def test_bracmat_usable_after_parse_error():
     with pytest.raises(ValueError):
         prythat.HolyGrail("(")

@@ -57,11 +57,16 @@ cdef void WinFlushFunc() noexcept:
     except BaseException:
         traceback.print_exc()
 
+# The namespace in which Ni$ executes statements and Ni!$ evaluates
+# expressions. It persists between calls, so a variable set by Ni$ can be
+# read by a later Ni$ or Ni!$. Set by init().
+_namespace = {}
+
 # Call back function Ni$"<stmnt>;<stmnt>;.." for executing one or more Python statements
 cdef void NiFunc(const char * strng) noexcept:
     try:
         py = (<bytes>strng).decode('UTF-8')
-        exec(py, globals(),locals())
+        exec(py, _namespace)
     except BaseException:
         traceback.print_exc()
 
@@ -75,7 +80,7 @@ cdef const char * NiiFunc(const char * strng) noexcept:
     global _nii_result
     try:
         py = (<bytes>strng).decode('UTF-8')
-        val = eval(py,globals(),locals())
+        val = eval(py, _namespace)
         _nii_result = json.dumps(val, ensure_ascii=False).encode('UTF-8')
         return _nii_result
     except BaseException:
@@ -95,7 +100,16 @@ cdef extern from "bracmat.h":
     cdef extern void endProc()
 
 # Function to be called once, before the first call to HolyGrail()
-def init():
+# The optional 'namespace' is the dict in which Ni$ and Ni!$ run Python code,
+# for example globals() of the calling module. Without it, a new empty dict
+# is used.
+def init(namespace=None):
+    global _namespace
+    if namespace is None:
+        namespace = {}
+    elif not isinstance(namespace, dict):
+        raise TypeError("namespace must be a dict")
+    _namespace = namespace
     cdef startStruct Init
     Init.WinIn = WinInFunc
     Init.WinOut = WinOutFunc
@@ -103,6 +117,10 @@ def init():
     Init.Ni = NiFunc
     Init.Nii = NiiFunc
     startProc(&Init)
+
+# Returns the dict in which Ni$ and Ni!$ run Python code.
+def namespace():
+    return _namespace
 
 # Function to evaluate a Bracmat expression.
 # Raises ValueError if the expression cannot be parsed.
