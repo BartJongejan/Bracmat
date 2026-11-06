@@ -1,37 +1,13 @@
-# prythat.pyx - Python Module, this code will be translated to C by Cython.
-"""Call the Bracmat evaluator from Python, and Python from Bracmat.
-
-Basic use::
-
-    import prythat
-    with prythat.Bracmat() as b:
-        print(b.evaluate("1+1"))          # '2'
-
-or, without the context manager::
-
-    prythat.init()
-    print(prythat.evaluate("1+1"))        # '2'
-    prythat.final()
-
-Bracmat code can call back into Python:
-
-* ``Ni$"<statements>"`` executes Python statements.
-* ``Ni!$"<expression>"`` evaluates a Python expression and returns the
-  result as JSON text.
-
-Both run in one persistent namespace dict, see init() and namespace().
-
-Bracmat has global state: only one Bracmat session exists per process, and
-it cannot be used from two threads at the same time. Bracmat's C state is
-initialised only once per process: init() after final() continues the
-earlier session.
-"""
+# bracmat/_core.pyx - the compiled part of the 'bracmat' Python package.
+# This code is translated to C by Cython. See bracmat/__init__.py for the
+# public interface and documentation.
+"""Compiled core of the 'bracmat' package. Use 'import bracmat' instead."""
 import sys
 import json
 import codecs
 import traceback
 
-__all__ = ["init", "final", "evaluate", "HolyGrail", "namespace", "Bracmat"]
+__all__ = ["init", "final", "evaluate", "HolyGrail", "namespace", "Session"]
 
 # The callbacks are called from Bracmat while the GIL is released, so they
 # are declared 'with gil' and the function pointer types 'nogil'.
@@ -123,7 +99,7 @@ cdef const char * NiiFunc(const char * strng) noexcept with gil:
 cdef extern from *:
     """
     #ifndef PYTHONINTERFACE
-    #error "prythat must be compiled with PYTHONINTERFACE defined (see setup.py)"
+    #error "bracmat._core must be compiled with PYTHONINTERFACE defined (see setup.py)"
     #endif
     """
 
@@ -149,7 +125,7 @@ cdef bint _busy = False
 
 cdef _check_not_busy(name):
     if _busy:
-        raise RuntimeError("prythat.%s() cannot be called while Bracmat is evaluating "
+        raise RuntimeError("bracmat.%s() cannot be called while Bracmat is evaluating "
                            "(from code run by Ni$ or Ni!$, or from another thread)" % name)
 
 def init(namespace=None):
@@ -170,7 +146,7 @@ def init(namespace=None):
     global _namespace, _initialised
     _check_not_busy("init")
     if _initialised:
-        raise RuntimeError("prythat is already initialised; call prythat.final() first")
+        raise RuntimeError("Bracmat is already initialised; call bracmat.final() first")
     if namespace is None:
         namespace = {}
     elif not isinstance(namespace, dict):
@@ -212,7 +188,7 @@ def HolyGrail(Str):
     cdef int Err = 0
     _check_not_busy("HolyGrail")
     if not _initialised:
-        raise RuntimeError("prythat is not initialised; call prythat.init() first")
+        raise RuntimeError("Bracmat is not initialised; call bracmat.init() first")
     cdef bytes s = Str.encode('UTF-8', 'surrogateescape')
     cs = s
     _busy = True
@@ -250,12 +226,12 @@ def final():
     finally:
         _busy = False
 
-class Bracmat:
+class Session:
     """Context manager for a Bracmat session.
 
     ::
 
-        with prythat.Bracmat() as b:
+        with bracmat.Session() as b:
             b.evaluate("Ni$\\"x = 6 * 7\\"")
             print(b.namespace["x"])          # 42
 
@@ -275,7 +251,7 @@ class Bracmat:
         return False
 
     def evaluate(self, expr):
-        """Evaluate a Bracmat expression; see prythat.evaluate()."""
+        """Evaluate a Bracmat expression; see bracmat.evaluate()."""
         return HolyGrail(expr)
 
     @property

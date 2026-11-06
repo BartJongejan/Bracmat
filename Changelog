@@ -1,3 +1,20 @@
+6 November 2026
+The Python module 'prythat' is renamed to 'bracmat': use 'import bracmat'.
+This is a change in behaviour: 'import prythat' no longer works.
+    bracmat.init(namespace=None), bracmat.evaluate(expr), bracmat.final()
+    with bracmat.Session() as b: b.evaluate(expr)
+HolyGrail is still available as another name for evaluate.
+Other changes to the Python module:
+- Fixed memory-safety bugs: Ni!$ returned a pointer to freed memory, a Python
+  exception in Ni$ or Ni!$ could crash, and evaluate() read an uninitialised
+  pointer on parse errors (now raises ValueError).
+- UTF-8 is used consistently for input and output.
+- Ni$ and Ni!$ share one persistent namespace, so variables set by Ni$ survive.
+- Misuse (evaluate before init, nested calls, calls from other threads while
+  busy) raises RuntimeError instead of crashing.
+- Other Python threads can run while Bracmat evaluates.
+- Install with 'python -m pip install ./Python-module'.
+
 17 August
 Changed the version string !v: left out the build number, 
 added OS (Windows, Linux, macOS, Browser, or "Unknown OS") and 32 or 64 bits.

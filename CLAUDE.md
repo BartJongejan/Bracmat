@@ -97,7 +97,7 @@ All data is a binary tree of `sk` nodes (defined in `nodestruct.h`). Node flags 
 
 ### External Integrations
 
-- **Python**: `Python-module/prythat.pyx` (Cython wrapper)
+- **Python**: `Python-module/bracmat/` package (`import bracmat`); Cython wrapper in `bracmat/_core.pyx`, tests in `test_bracmat.py`
 - **Java**: `java-JNI/dk_cst_bracmat.c` (JNI wrapper)
 - **WebAssembly**: `WebAssembly/` (emscripten; see `emscriptenHowToHTML.sh`)
 

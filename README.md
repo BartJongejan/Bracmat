@@ -141,32 +141,42 @@ matching. In short, it is all that regular Bracmat isn't.
 
 * Python-module
 
-    Python and Cython source code for creating a Python module 'prythat' so
-    the Bracmat evaluator can be called from the Python programming language
+    Python and Cython source code for creating a Python package 'bracmat' so
+    the Bracmat evaluator can be called from the Python programming language:
+
+        import bracmat
+        with bracmat.Session() as b:
+            print(b.evaluate("1+1"))
 
     Build requirements: a C compiler, the Python development headers, and
-    Cython (`python -m pip install cython`). The module is compiled directly
+    Cython (`python -m pip install cython`). The package is compiled directly
     from the sources in `src/`. Either run one of the build-launch scripts, or
-    install the module into the current Python environment with
+    install the package into the current Python environment with
     `python -m pip install ./Python-module`.
+
+    (Until November 2026 this module was called 'prythat'.)
 
     * build-launch.bat
 
-      Windows batch file that builds the module in place, runs the tests
+      Windows batch file that builds the package in place, runs the tests
       (if pytest is installed) and then runs launch.py.
 
     * build-launch.sh
 
-      Linux/macOS bash script that builds the module in place, runs the tests
+      Linux/macOS bash script that builds the package in place, runs the tests
       (if pytest is installed) and then runs launch.py. Set the PYTHON
       environment variable to choose another interpreter than python3.
 
     * launch.py
 
       Python program that demonstrates evaluation of Bracmat expressions, also call back to Python. 
-      Tests the prythat module.  
+      Tests the bracmat package.  
 
-    * prythat.pyx
+    * bracmat/\_\_init\_\_.py
+
+      The package's public interface and documentation.
+
+    * bracmat/\_core.pyx
 
       Cython source code that interfaces Python with Bracmat and vv.
 
@@ -176,12 +186,12 @@ matching. In short, it is all that regular Bracmat isn't.
 
     * setup.py
 
-      Build script for the module. Compiles Bracmat from `src/` in
+      Build script for the package. Compiles Bracmat from `src/` in
       single-source mode with the same restrictions as `safe/bracmatso.c`.
 
-    * test_prythat.py
+    * test_bracmat.py
 
-      Tests for the module. Run with `python -m pytest` in this folder.
+      Tests for the package. Run with `python -m pytest` in this folder.
 
 * safe
 
