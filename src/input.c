@@ -639,8 +639,14 @@ psk input(FILE* fpi, psk Pnode, int echmemvapstrmltrmtxt, Boolean* err, Boolean*
 #else
     unsigned char input_buffer[DEFAULT_INPUT_BUFFER_SIZE];
 #endif
+#if !_BRACMATEMBEDDED
+    /* Interactive use: reading stdin again after EOF (e.g. Ctrl-D) ends the
+       session. Not when embedded: then the host program owns the process and
+       stdin, so a read after EOF just returns empty input, and new input that
+       arrives later (e.g. a replaced stdin in Python) can still be read. */
     if((fpi == stdin) && (stdinEOF == TRUE))
         exit(0);
+#endif
     maxInputBufferPointer = input_buffer + (DEFAULT_INPUT_BUFFER_SIZE - 1);/* there must be room  for terminating 0 */
     /* Array of pointers to inputbuffers. Initially 2 elements,
        large enough for small inputs (< DEFAULT_INPUT_BUFFER_SIZE)*/

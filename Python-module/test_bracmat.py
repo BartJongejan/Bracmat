@@ -5,6 +5,9 @@
 # from this directory.
 
 import io
+import os
+import subprocess
+import sys
 import threading
 import time
 
@@ -80,6 +83,29 @@ def test_put_writes_utf8_as_text(capsys):
 def test_get_reads_utf8_from_stdin(monkeypatch):
     monkeypatch.setattr("sys.stdin", io.StringIO("Ëlvis\n"))
     assert bracmat.HolyGrail("get'") == "Ëlvis"
+
+
+def test_get_after_eof_does_not_exit():
+    # A read from stdin after EOF used to call exit(0), silently ending
+    # Python with status 0. Run in a subprocess, so that a regression shows
+    # up as a failure instead of ending the test run as if all was well.
+    code = (
+        "import io, sys, bracmat\n"
+        "bracmat.init()\n"
+        "sys.stdin = io.StringIO('')\n"
+        "print(repr(bracmat.evaluate(\"get'\")))\n"
+        "print(repr(bracmat.evaluate(\"get'\")))\n"
+        "sys.stdin = io.StringIO('Kater\\n')\n"  # EOF is not sticky
+        "print(repr(bracmat.evaluate(\"get'\")))\n"
+        "print('still alive')\n"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        capture_output=True, text=True, timeout=60,
+        cwd=os.path.dirname(os.path.dirname(os.path.abspath(bracmat.__file__))),
+    )
+    assert result.stdout.splitlines() == ["''", "''", "'Kater'", "still alive"], result.stderr
+    assert result.returncode == 0
 
 
 def test_nii_returns_non_ascii_unescaped():
