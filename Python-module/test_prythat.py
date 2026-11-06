@@ -4,6 +4,8 @@
 #     python -m pytest test_prythat.py
 # from this directory.
 
+import io
+
 import pytest
 
 prythat = pytest.importorskip("prythat")
@@ -53,6 +55,34 @@ def test_ni_exception_does_not_stop_evaluation(capsys):
 def test_parse_error_raises_value_error():
     with pytest.raises(ValueError):
         prythat.HolyGrail("(")
+
+
+def test_non_latin1_input_and_output():
+    # Input used to be encoded as ISO 8859-1, so this raised UnicodeEncodeError.
+    assert prythat.HolyGrail('"Ωμέγα ∑ 日本"') == "Ωμέγα ∑ 日本"
+    assert prythat.HolyGrail("upp$ωμέγα") == "ΩΜΈΓΑ"
+
+
+def test_invalid_utf8_round_trips():
+    # chr$200 is a lone byte 0xC8, not valid UTF-8.
+    s = prythat.HolyGrail("chr$200")
+    assert s == "\udcc8"
+    assert prythat.HolyGrail('"' + s + '"') == s
+
+
+def test_put_writes_utf8_as_text(capsys):
+    prythat.HolyGrail('put$"Ëlvis 日本\n"')
+    assert capsys.readouterr().out == "Ëlvis 日本\n"
+
+
+def test_get_reads_utf8_from_stdin(monkeypatch):
+    monkeypatch.setattr("sys.stdin", io.StringIO("Ëlvis\n"))
+    assert prythat.HolyGrail("get'") == "Ëlvis"
+
+
+def test_nii_returns_non_ascii_unescaped():
+    # json.dumps escaped non-ASCII as \uXXXX.
+    assert prythat.HolyGrail('Ni!$"\'Ωμέγα\'"') == '"Ωμέγα"'
 
 
 def test_bracmat_usable_after_parse_error():
