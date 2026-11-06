@@ -14,6 +14,11 @@ Other changes to the Python module:
   busy) raises RuntimeError instead of crashing.
 - Other Python threads can run while Bracmat evaluates.
 - Install with 'python -m pip install ./Python-module'.
+Embedded Bracmat (Python, JNI, WebAssembly): reading from stdin after end of
+input, e.g. a second get', no longer ends the host process. Such a read now
+returns empty input, and input that arrives later can still be read.
+The interactive program is unchanged: reading stdin after EOF (Ctrl-D) ends
+the session.
 
 17 August
 Changed the version string !v: left out the build number, 
