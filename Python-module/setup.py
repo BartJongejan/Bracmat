@@ -1,13 +1,72 @@
-# setup.py
-# 
+# setup.py - builds the 'prythat' Python extension module.
+#
+# Build in place (for launch.py and the tests):
+#     python setup.py build_ext --inplace
+# or install into the current Python environment:
+#     python -m pip install .
+#
+# Bracmat is compiled directly from the sources in ../src in single-source
+# mode (src/potu.c #includes all other .c files), so there is no need to
+# regenerate singlesource/bracmat.c first.
+
+import os
+import re
+import sys
+
 from setuptools import setup
-from Cython.Build import cythonize
 from setuptools.extension import Extension
+from Cython.Build import cythonize
 
-sourcefiles = ['../safe/bracmatso.c', 'prythat.pyx']
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+SRC = os.path.join(ROOT, "src")
 
-extensions = [Extension("prythat", sourcefiles, extra_compile_args=["-I../singlesource/","-lm","-D_CRT_SECURE_NO_WARNINGS","-DPYTHONINTERFACE"])]
+
+def rel(path):
+    # setuptools wants source paths relative to the directory of setup.py.
+    return os.path.relpath(path, HERE).replace(os.sep, "/")
+
+
+def bracmat_version():
+    with open(os.path.join(SRC, "potu.c"), encoding="utf-8") as f:
+        m = re.search(r'#define\s+VERSION\s+"([^"]+)"', f.read())
+    if not m:
+        raise RuntimeError("Could not find VERSION in src/potu.c")
+    return m.group(1)
+
+
+define_macros = [
+    ("SINGLESOURCE", None),
+    ("PYTHONINTERFACE", None),
+    # Embedded, sandboxed Bracmat: the same settings as safe/bracmatso.c.
+    ("BRACMATEMBEDDED", None),
+    ("NO_C_INTERFACE", None),
+    ("NO_FILE_RENAME", None),
+    ("NO_FILE_REMOVE", None),
+    ("NO_SYSTEM_CALL", None),
+    ("NO_LOW_LEVEL_FILE_HANDLING", None),
+    ("NO_EXIT_ON_NON_SEVERE_ERRORS", None),
+]
+if sys.platform == "win32":
+    define_macros.append(("_CRT_SECURE_NO_WARNINGS", None))
+
+extensions = [
+    Extension(
+        "prythat",
+        sources=["prythat.pyx", rel(os.path.join(SRC, "potu.c"))],
+        # bracmat.h (startStruct, startProc, stringEval, endProc) lives in
+        # singlesource/; the other headers are in src/.
+        include_dirs=[os.path.join(ROOT, "singlesource"), SRC],
+        define_macros=define_macros,
+        libraries=[] if sys.platform == "win32" else ["m"],
+    )
+]
 
 setup(
-    ext_modules = cythonize(extensions, emit_linenums=True, compiler_directives={'language_level': 3})
+    version=bracmat_version(),
+    ext_modules=cythonize(
+        extensions,
+        emit_linenums=True,
+        compiler_directives={"language_level": 3},
+    ),
 )

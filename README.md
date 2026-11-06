@@ -144,15 +144,22 @@ matching. In short, it is all that regular Bracmat isn't.
     Python and Cython source code for creating a Python module 'prythat' so
     the Bracmat evaluator can be called from the Python programming language
 
+    Build requirements: a C compiler, the Python development headers, and
+    Cython (`python -m pip install cython`). The module is compiled directly
+    from the sources in `src/`. Either run one of the build-launch scripts, or
+    install the module into the current Python environment with
+    `python -m pip install ./Python-module`.
+
     * build-launch.bat
 
-      Windows batch file for creating a Bracmat module that can be included in Python programs.
-      Contains two Python commands. The first compiles and links the module, the second tests the result.
+      Windows batch file that builds the module in place, runs the tests
+      (if pytest is installed) and then runs launch.py.
 
     * build-launch.sh
 
-      Linux bash script for creating a Bracmat module that can be included in Python programs.
-      Contains two Python commands. The first compiles and links the module, the second tests the result.
+      Linux/macOS bash script that builds the module in place, runs the tests
+      (if pytest is installed) and then runs launch.py. Set the PYTHON
+      environment variable to choose another interpreter than python3.
 
     * launch.py
 
@@ -163,9 +170,18 @@ matching. In short, it is all that regular Bracmat isn't.
 
       Cython source code that interfaces Python with Bracmat and vv.
 
+    * pyproject.toml
+
+      Package metadata and build requirements, used by pip.
+
     * setup.py
 
-      Makefile for building the module.
+      Build script for the module. Compiles Bracmat from `src/` in
+      single-source mode with the same restrictions as `safe/bracmatso.c`.
+
+    * test_prythat.py
+
+      Tests for the module. Run with `python -m pytest` in this folder.
 
 * safe
 

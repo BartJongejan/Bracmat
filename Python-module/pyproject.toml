@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61", "Cython>=3.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prythat"
+description = "Call the Bracmat evaluator from Python, and Python from Bracmat"
+requires-python = ">=3.8"
+dynamic = ["version"]  # taken from VERSION in src/potu.c by setup.py
+
+[project.urls]
+Homepage = "https://github.com/BartJongejan/Bracmat"
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.setuptools]
+py-modules = []
+
+[tool.pytest.ini_options]
+testpaths = ["test_prythat.py"]
