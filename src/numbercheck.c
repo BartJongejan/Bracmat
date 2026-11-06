@@ -41,7 +41,7 @@ int numbercheck(const char* begin)
                    integer or fractional numbers.
                    Format as the printf() "%a" format specifier. The 'p'
                    (exponent) specification is optional. */
-                return check;
+                return check|QDOUBLE;
                 }
             else
                 check |= QNUL;

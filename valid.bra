@@ -8275,6 +8275,10 @@ string line 2\"
             & Out$"INDIRECT flag can not be added to INDIRECT flag"
           | 
           )
+          ( "0.48"*2:2*"0.48"
+          |   Out
+            $ "0.48 is a double, not an integer or fraction written with digits and max one slash"
+          )
       &   out
         $ ( str
           $ ( "Done. "
