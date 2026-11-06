@@ -117,8 +117,48 @@ def test_init_with_caller_namespace():
 
 
 def test_init_rejects_non_dict_namespace():
-    with pytest.raises(TypeError):
-        prythat.init([])
+    prythat.final()
+    try:
+        with pytest.raises(TypeError):
+            prythat.init([])
+    finally:
+        prythat.init()
+
+
+def test_holygrail_after_final_raises():
+    prythat.final()
+    try:
+        with pytest.raises(RuntimeError, match="not initialised"):
+            prythat.HolyGrail("1+1")
+    finally:
+        prythat.init()
+    assert prythat.HolyGrail("1+1") == "2"
+
+
+def test_init_twice_raises():
+    with pytest.raises(RuntimeError, match="already initialised"):
+        prythat.init()
+    assert prythat.HolyGrail("1+1") == "2"
+
+
+def test_final_twice_is_harmless():
+    prythat.final()
+    prythat.final()
+    prythat.init()
+    assert prythat.HolyGrail("1+1") == "2"
+
+
+def test_reentrant_holygrail_is_refused(capsys):
+    assert prythat.HolyGrail(
+        'Ni!$"__import__(\'prythat\').HolyGrail(\'1+1\')"&yes|refused') == "refused"
+    assert "cannot be called while Bracmat is evaluating" in capsys.readouterr().err
+    assert prythat.HolyGrail("1+1") == "2"
+
+
+def test_final_from_ni_is_refused(capsys):
+    assert prythat.HolyGrail('Ni$"__import__(\'prythat\').final()"&after') == "after"
+    assert "cannot be called while Bracmat is evaluating" in capsys.readouterr().err
+    assert prythat.HolyGrail("1+1") == "2"
 
 
 def test_bracmat_usable_after_parse_error():

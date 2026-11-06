@@ -99,24 +99,46 @@ cdef extern from "bracmat.h":
     cdef extern void stringEval(const char * s,const char ** out,int * err)
     cdef extern void endProc()
 
+# Bracmat has global state and is not reentrant. These flags guard against
+# calling HolyGrail() before init() or after final(), calling init() twice,
+# and calling HolyGrail(), init() or final() from Python code that Bracmat is
+# running via Ni$ or Ni!$.
+cdef bint _initialised = False
+cdef bint _busy = False
+
+cdef _check_not_busy(name):
+    if _busy:
+        raise RuntimeError("prythat.%s() cannot be called while Bracmat is evaluating "
+                           "(e.g. from code run by Ni$ or Ni!$)" % name)
+
 # Function to be called once, before the first call to HolyGrail()
 # The optional 'namespace' is the dict in which Ni$ and Ni!$ run Python code,
 # for example globals() of the calling module. Without it, a new empty dict
 # is used.
+# Note: Bracmat's C state can be initialised only once per process. Calling
+# init() again after final() makes HolyGrail() usable again, but Bracmat's
+# variables and memory are those of the earlier session.
 def init(namespace=None):
-    global _namespace
+    global _namespace, _initialised
+    _check_not_busy("init")
+    if _initialised:
+        raise RuntimeError("prythat is already initialised; call prythat.final() first")
     if namespace is None:
         namespace = {}
     elif not isinstance(namespace, dict):
         raise TypeError("namespace must be a dict")
-    _namespace = namespace
     cdef startStruct Init
     Init.WinIn = WinInFunc
     Init.WinOut = WinOutFunc
     Init.WinFlush = WinFlushFunc
     Init.Ni = NiFunc
     Init.Nii = NiiFunc
-    startProc(&Init)
+    # startProc returns 1 on first initialisation, 2 if Bracmat was already
+    # initialised earlier in this process, and 0 on failure.
+    if startProc(&Init) == 0:
+        raise MemoryError("Bracmat could not be initialised")
+    _namespace = namespace
+    _initialised = True
 
 # Returns the dict in which Ni$ and Ni!$ run Python code.
 def namespace():
@@ -128,9 +150,18 @@ def namespace():
 # UTF-8 are mapped to lone surrogates and back ('surrogateescape'), so that a
 # result can be passed to HolyGrail again without loss.
 def HolyGrail(Str):
+    global _busy
     cdef const char * Sout = NULL
     cdef int Err = 0
-    stringEval(Str.encode('UTF-8', 'surrogateescape'),&Sout,&Err)
+    _check_not_busy("HolyGrail")
+    if not _initialised:
+        raise RuntimeError("prythat is not initialised; call prythat.init() first")
+    s = Str.encode('UTF-8', 'surrogateescape')
+    _busy = True
+    try:
+        stringEval(s,&Sout,&Err)
+    finally:
+        _busy = False
     if Err != 0:
         raise ValueError("Bracmat could not evaluate the expression (error code %d)" % Err)
     if Sout == NULL:
@@ -138,7 +169,17 @@ def HolyGrail(Str):
     cdef bytes py_string = Sout
     return py_string.decode('UTF-8', 'surrogateescape')
 
-# Function to be called after the last call to HolyGrail()
+# Function to be called after the last call to HolyGrail().
+# Does nothing if prythat is not initialised.
 def final():
-    endProc()
+    global _busy, _initialised
+    _check_not_busy("final")
+    if not _initialised:
+        return
+    _initialised = False
+    _busy = True
+    try:
+        endProc()
+    finally:
+        _busy = False
 
