@@ -5,6 +5,8 @@
 # from this directory.
 
 import io
+import threading
+import time
 
 import pytest
 
@@ -159,6 +161,82 @@ def test_final_from_ni_is_refused(capsys):
     assert prythat.HolyGrail('Ni$"__import__(\'prythat\').final()"&after') == "after"
     assert "cannot be called while Bracmat is evaluating" in capsys.readouterr().err
     assert prythat.HolyGrail("1+1") == "2"
+
+
+def test_evaluate_is_alias_of_holygrail():
+    assert prythat.evaluate is prythat.HolyGrail
+    assert prythat.evaluate("3*4") == "12"
+
+
+def test_non_atom_result_is_printed_form():
+    assert prythat.evaluate("a+b+a") == "2*a+b"
+
+
+def test_context_manager():
+    ns = {}
+    prythat.final()
+    try:
+        with prythat.Bracmat(ns) as b:
+            assert b.evaluate('Ni$"x = 6 * 7"&Ni!$"x"') == "42"
+            assert b.namespace is ns and ns["x"] == 42
+        with pytest.raises(RuntimeError, match="not initialised"):
+            prythat.evaluate("1")
+    finally:
+        prythat.init()
+
+
+def test_context_manager_calls_final_on_exception():
+    prythat.final()
+    try:
+        with pytest.raises(KeyError):
+            with prythat.Bracmat():
+                raise KeyError("x")
+        with pytest.raises(RuntimeError, match="not initialised"):
+            prythat.evaluate("1")
+    finally:
+        prythat.init()
+
+
+def test_gil_released_during_evaluation():
+    # A pure Bracmat loop (no callbacks) that takes a few tenths of a second.
+    results = {}
+
+    def worker():
+        results["value"] = prythat.evaluate("0:?i&whl'(!i+1:?i:<3000000)&!i")
+
+    t = threading.Thread(target=worker)
+    t.start()
+    # If evaluate() held the GIL, this thread could not run until it ended.
+    ticks = 0
+    while t.is_alive():
+        ticks += 1
+        time.sleep(0.001)
+    t.join()
+    assert results["value"] == "3000000"
+    assert ticks > 5
+
+
+def test_second_thread_refused_while_busy():
+    # The worker's evaluation blocks inside Ni$ until 'go' is set, so the
+    # main thread's call is certain to happen while Bracmat is busy.
+    ns = prythat.namespace()
+    ns["started"] = threading.Event()
+    ns["go"] = threading.Event()
+    results = {}
+
+    def worker():
+        results["value"] = prythat.evaluate('Ni$"started.set(); go.wait(10)"&done')
+
+    t = threading.Thread(target=worker)
+    t.start()
+    try:
+        assert ns["started"].wait(10)
+        with pytest.raises(RuntimeError, match="another thread"):
+            prythat.evaluate("1")
+    finally:
+        ns["go"].set()
+        t.join()
+    assert results["value"] == "done"
 
 
 def test_bracmat_usable_after_parse_error():
