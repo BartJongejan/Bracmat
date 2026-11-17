@@ -415,9 +415,14 @@ You can download Bracmat from GitHub.
     cd ..
 
 If you want to run Bracmat interactively in Linux or MacOS, it is advised to have the readline library installed.
-In Ubuntu:
+In Debian or Ubuntu:
 
     sudo apt-get install libreadline-dev
+
+In Redhat, CentOS, or Fedora:
+
+    sudo dnf check-update
+    sudo dnf install readline-devel
 
 Link flags:
 
