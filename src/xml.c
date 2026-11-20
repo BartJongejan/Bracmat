@@ -87,29 +87,29 @@ struct lowup
     };
 
 struct lowup lu[] =
-    { {'-','-',FALSE}
-        , {'.','.',FALSE}
-        , {'0','9',FALSE}
-        , {':',':',TRUE}
-        , {'A','Z',TRUE}
-        , {'_','_',TRUE}
-        , {'a','z',TRUE}
-        , {0xB7,0xB7,FALSE}
-        , {0xC0,0xD6,TRUE}
-        , {0xD8,0xF6,TRUE}
-        , {0xF8,0x2FF,TRUE}
-        , {0x300,0x36F,FALSE}
-        , {0x370,0x37D,TRUE}
-        , {0x37F,0x1FFF,TRUE}
-        , {0x200C,0x200D,TRUE}
-        , {0x203F,0x2040,FALSE}
-        , {0x2070,0x218F,TRUE}
-        , {0x2C00,0x2FEF,TRUE}
-        , {0x3001,0xD7FF,TRUE}
-        , {0xF900,0xFDCF,TRUE}
-        , {0xFDF0,0xFFFD,TRUE}
-        , {0x10000,0xEFFFF,TRUE}
-        , {0x7FFFFFFF,0x7FFFFFFF,TRUE}
+    { { '-','-',FALSE }
+        ,{ '.','.',FALSE }
+        ,{ '0','9',FALSE }
+        ,{ ':',':',TRUE }
+        ,{ 'A','Z',TRUE }
+        ,{ '_','_',TRUE }
+        ,{ 'a','z',TRUE }
+        ,{ 0xB7,0xB7,FALSE }
+        ,{ 0xC0,0xD6,TRUE }
+        ,{ 0xD8,0xF6,TRUE }
+        ,{ 0xF8,0x2FF,TRUE }
+        ,{ 0x300,0x36F,FALSE }
+        ,{ 0x370,0x37D,TRUE }
+        ,{ 0x37F,0x1FFF,TRUE }
+        ,{ 0x200C,0x200D,TRUE }
+        ,{ 0x203F,0x2040,FALSE }
+        ,{ 0x2070,0x218F,TRUE }
+        ,{ 0x2C00,0x2FEF,TRUE }
+        ,{ 0x3001,0xD7FF,TRUE }
+        ,{ 0xF900,0xFDCF,TRUE }
+        ,{ 0xFDF0,0xFFFD,TRUE }
+        ,{ 0x10000,0xEFFFF,TRUE }
+        ,{ 0x7FFFFFFF,0x7FFFFFFF,TRUE }
     };
 
 #define BUFSIZE 35000
@@ -2492,7 +2492,8 @@ static void nonTag(const char* kind, unsigned char* start, const unsigned char* 
     {
     nrawput((const unsigned char*)kind);
     putOperatorChar('.');
-    nxput(start, end);
+    if(end)
+        nxput(start, end);
     putOperatorChar(')');
     }
 
@@ -2511,10 +2512,25 @@ static void cbStartMarkUp(void)
     putOperatorChar('(');
     }
 
+static char unknownmarkupString[100] = { '\0' };
+static int unknownmarkupIndex = -1;
+
 static void cbEndMarkUp(void)/* called when > has been read */
     {
     if(isMarkup)
-        nonTag("!", StaRt, EnD);
+        {
+        if(unknownmarkupString[0])
+            {
+            nonTag(unknownmarkupString, StaRt, EnD);
+            unknownmarkupString[0] = '\0';
+            unknownmarkupIndex = -1;
+            }
+        else if(StaRtInitialized)
+            nonTag("!--", StaRt, EnD);
+        else
+            nonTag("!", 0, 0);
+        }
+    EnD = 0;
     }
 
 static void cbEndDOCTYPE(void)/* called when > has been read */
@@ -3291,9 +3307,9 @@ static estate perhapsScriptOrStyle(const unsigned char* pkar) /* <s or <S */
     return element(pkar);
     }
 
-
 static estate markup(const unsigned char* pkar) /* <! */
     {
+    StaRtInitialized = 0;
     switch(*pkar)
         {
         case '<':
@@ -3307,16 +3323,33 @@ static estate markup(const unsigned char* pkar) /* <! */
             return endoftag;
         case '-':
             tagState = h1;
-            StaRtInitialized = 0;
             return tag;
         case '[':
             tagState = CDATA1;
             return tag;
         case 'D':
             tagState = DOCTYPE1;
+            StaRt = ch + 1;
             return tag;
         default:
             tagState = unknownmarkup;
+            if(unknownmarkupIndex < 0)
+                {
+                unknownmarkupIndex = 0;
+                unknownmarkupString[unknownmarkupIndex++] = '!';
+                switch(*pkar)
+                    {
+                    case ' ':
+                    case '\f':
+                    case '\n':
+                    case '\r':
+                    case '\t':
+                        break;
+                    default:
+                        unknownmarkupString[unknownmarkupIndex++] = *pkar;
+                    }
+                unknownmarkupString[unknownmarkupIndex] = '\0';
+                }
             return tag;
         }
     }
@@ -3361,9 +3394,29 @@ static estate unknownmarkup(const unsigned char* pkar) /* <! */
             return endoftag_startoftag;
         case '>':
             tagState = defx;
+            EnD = pkar;
             cbEndMarkUp();
             return endoftag;
         default:
+            if(unknownmarkupIndex > 0)
+                {
+                switch(*pkar)
+                    {
+                    case ' ':
+                    case '\f':
+                    case '\n':
+                    case '\r':
+                    case '\t':
+                        unknownmarkupIndex = -1;
+                    default:;
+                    }
+                }
+            if(unknownmarkupIndex > 0 && (unknownmarkupIndex < (int)(sizeof(unknownmarkupString) - 1)))
+                {
+                unknownmarkupString[unknownmarkupIndex++] = *pkar;
+                unknownmarkupString[unknownmarkupIndex] = '\0';
+                StaRt = ch + 1;
+                }
             return tag;
         }
     }
@@ -3426,6 +3479,7 @@ static estate DOCTYPE1(const unsigned char* pkar) /* <!D */
         default:
             if(kar == octype[doctypei])
                 {
+                StaRt = ch + 1;
                 if(doctypei == sizeof(octype) - 2)
                     {
                     tagState = DOCTYPE7;
@@ -3446,6 +3500,7 @@ static estate DOCTYPE1(const unsigned char* pkar) /* <!D */
 
 static estate DOCTYPE7(const unsigned char* pkar) /* <!DOCTYPE */
     {
+    StaRt = ch;
     switch(*pkar)
         {
         case '<':
@@ -3461,7 +3516,6 @@ static estate DOCTYPE7(const unsigned char* pkar) /* <!DOCTYPE */
         case '\n':
         case '\r':
         case '\t':
-            StaRt = ch;
             tagState = DOCTYPE8;
             return tag;
         default:

@@ -1,3 +1,15 @@
+20 November 2026
+Fixed error introduced 20 May 2026. <!-- This is a comment --> was transformed to
+("!"." This is a comment "), instead of ("!--"." This is a comment ").
+!DOCTYPE, !ENTITY and ![CDATA[ ]] are treated as before. All other "elements"
+starting with exclamation mark are treated as 
+<!XYZ ABC>  ("!XYZ"." ABC")
+<!XYZ >     ("!XYZ"." ")
+<!XYZ>      ("!XYZ".)
+<! ABC>     ("!"." ABC")
+<! >        ("!"." ")
+<!>         ("!".)
+
 6 November 2026
 The Python module 'prythat' is renamed to 'bracmat': use 'import bracmat'.
 This is a change in behaviour: 'import prythat' no longer works.

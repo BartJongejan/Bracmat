@@ -20,8 +20,8 @@
 email: bartj@hum.ku.dk
 */
 
-#define DATUM "6 November 2026"
-#define VERSION "6.38.0"
+#define DATUM "20 November 2026"
+#define VERSION "6.39.0"
 
 
 /*

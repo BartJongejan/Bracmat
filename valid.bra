@@ -8245,12 +8245,12 @@ string line 2\"
           | 
           )
           (   get$("<!-- -------- -- >",MEM,ML)
-            : ("!"." -------- ")
+            : ("!--"." -------- ")
           | Out$"A) Not counting comments correctly"
           )
           (     get
               $ ("<!-- -- ---- ---- -- ><p>--</p><p>--</p>",MEM,ML)
-            :   ("!"." -- ---- ---- -- ><p>")
+            :   ("!--"." -- ---- ---- -- ><p>")
                 (.p.)
                 (p.)
                 "--"
@@ -8278,6 +8278,64 @@ string line 2\"
           ( "0.48"*2:2*"0.48"
           |   Out
             $ "0.48 is a double, not an integer or fraction written with digits and max one slash"
+          )
+          ( get$("<!>",MEM X ML):("!".)
+          | Out$"<!>"
+          )
+          ( get$("<! >",MEM X ML):("!"." ")
+          | Out$"<!>"
+          )
+          ( get$("<!\n>",MEM X ML):("!".\n)
+          | Out$"<!\n>"
+          )
+          ( get$("<!->",MEM X ML):"<!->"
+          | Out$"<!->"
+          )
+          ( get$("<!--x-->",MEM X ML):("!--".x)
+          | Out$"<!--x-->"
+          )
+          ( get$("<!ELE>",MEM X ML):("!ELE".)
+          | Out$"<!ELE>"
+          )
+          ( get$("<!ELE >",MEM X ML):("!ELE"." ")
+          | Out$"<!ELE >"
+          )
+          (   get$("<!ELE x -- abc -->",MEM X ML)
+            : ("!ELE"." x -- abc --")
+          | Out$"<!ELE x -- abc -->"
+          )
+          (   get$("<!DOCTYPE>",MEM X ML)
+            : ("!DOCTYPE".)
+          | Out$"<!DOCTYPE>"
+          )
+          (   get$("<!DOCTYPE >",MEM X ML)
+            : ("!DOCTYPE"." ")
+          | Out$"<!DOCTYPE >"
+          )
+          (   get$("<!DOCTYPE x -- abc -->",MEM X ML)
+            : ("!DOCTYPE"." x -- abc --")
+          | Out$"<!DOCTYPE x -- abc -->"
+          )
+          (   get$("<!DOCTYPE T [aap]>",MEM X ML)
+            : ("!DOCTYPE"." T [aap]")
+          | Out$"<!DOCTYPE T [aap]>"
+          )
+          ( get$("<!DOCTYPE T [aap>",MEM X ML):
+          | Out$"<!DOCTYPE T [aap>"
+          )
+          (   get$("<![CDATA[ This is cdata ]]>",MEM X ML)
+            : ("![CDATA["." This is cdata ")
+          | Out$"<![CDATA[ This is cdata ]]>"
+          )
+          (   get$("<![CDATA[ This is not cdata>",MEM X ML)
+            : 
+          | Out$"<![CDATA[ This is not cdata>"
+          )
+          ( get$("<![CDATA[>",MEM X ML):
+          | Out$"<![CDATA[ This is not cdata>"
+          )
+          ( get$("<!-- Illegal -- XML -->",MEM X ML):
+          | Out$"<!-- Illegal -- XML -->"
           )
       &   out
         $ ( str
